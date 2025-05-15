@@ -1,0 +1,20 @@
+quarkus:
+  application:
+    name: hermes-api
+  banner:
+    path: banner.txt
+  config:
+    locations:
+      - config/cache.yaml
+      - config/database.yaml
+      - config/telemetry.yaml
+      - config/security.yaml
+      - config/oauth.yaml
+      - META-INF/native-image/config.yaml
+  http:
+    host: ${APP_HOST:0.0.0.0}
+    port: ${APP_PORT:8090}
+  management:
+    enabled: true
+    host: ${MANAGEMENT_HOST:0.0.0.0}
+    port: ${MANAGEMENT_PORT:8090}

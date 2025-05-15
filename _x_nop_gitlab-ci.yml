@@ -1,0 +1,18 @@
+# image: docker:latest
+# 
+# variables:
+#   DOCKER_HOST: "tcp://docker:2375"
+#   DOCKER_DRIVER: overlay2
+#   DOCKER_TLS_CERTDIR: ""
+
+# services:
+#   - docker:dind
+
+# stages:
+#   - build
+
+# build-image:
+#   stage: build
+#   script:
+#     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+#     - docker build --platform linux/amd64 --build-arg BUILDKIT_INLINE_CACHE=1 --progress=plain -f src/main/docker/Dockerfile.native-micro.multistage -t "registry.gitlab.com/phylax2/phylax-api:0.1.0-ard64" --push .

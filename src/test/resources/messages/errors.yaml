@@ -1,0 +1,19 @@
+ERR003:
+  code: FR Localized Error Code
+  description: FR Localized description
+  field:
+    email: FR Invalid email format
+c1:
+  code: "001"
+  description: El campo {0} no puede contener el valor {1}
+c4:
+  code: "004"
+  description: El campo {0} no puede contener el valor {1}
+c5:
+  code: "005"
+  description: El campo {0} no puede contener el valor {1}
+c6:
+  code: "006"
+  description: El campo {0} no puede contener el valor {1}
+  show-violation: false
+  
