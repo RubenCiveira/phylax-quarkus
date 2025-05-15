@@ -3,7 +3,6 @@ package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.List;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.relyingparty.gateway.RelyingPartyReadRepositoryGateway;
@@ -12,9 +11,9 @@ import net.civeira.phylax.features.access.securityscope.SecurityScope;
 import net.civeira.phylax.features.access.securityscope.SecurityScopeFacade;
 import net.civeira.phylax.features.access.securityscope.SecurityScopeKindOptions;
 import net.civeira.phylax.features.access.securityscope.SecurityScopeVisibilityOptions;
+import net.civeira.phylax.features.access.securityscope.command.SecurityScopeChangeProposal;
 import net.civeira.phylax.features.access.securityscope.gateway.SecurityScopeWriteRepositoryGateway;
 import net.civeira.phylax.features.access.securityscope.query.SecurityScopeFilter;
-import net.civeira.phylax.features.access.securityscope.transition.SecurityScopeChangeProposal;
 import net.civeira.phylax.features.oauth.rbac.domain.PropertyList;
 import net.civeira.phylax.features.oauth.rbac.domain.Resource;
 import net.civeira.phylax.features.oauth.rbac.domain.ScopeKind;

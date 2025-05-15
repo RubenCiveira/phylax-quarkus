@@ -9,9 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +30,9 @@ import net.civeira.phylax.features.access.user.UserFacade;
 import net.civeira.phylax.features.access.user.gateway.UserWriteRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCodeFacade;
+import net.civeira.phylax.features.access.useraccesstemporalcode.command.UserAccessTemporalCodeChangeProposal;
 import net.civeira.phylax.features.access.useraccesstemporalcode.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.query.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.useraccesstemporalcode.transition.UserAccessTemporalCodeChangeProposal;
 import net.civeira.phylax.features.access.useridentity.UserIdentity;
 import net.civeira.phylax.features.access.useridentity.gateway.UserIdentityReadRepositoryGateway;
 import net.civeira.phylax.features.access.useridentity.query.UserIdentityFilter;

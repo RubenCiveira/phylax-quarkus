@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
@@ -14,9 +13,9 @@ import net.civeira.phylax.features.access.user.UserFacade;
 import net.civeira.phylax.features.access.user.gateway.UserWriteRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCodeFacade;
+import net.civeira.phylax.features.access.useraccesstemporalcode.command.UserAccessTemporalCodeChangeProposal;
 import net.civeira.phylax.features.access.useraccesstemporalcode.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.query.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.useraccesstemporalcode.transition.UserAccessTemporalCodeChangeProposal;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 
 @ApplicationScoped

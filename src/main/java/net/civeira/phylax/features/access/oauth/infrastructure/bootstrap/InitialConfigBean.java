@@ -2,14 +2,13 @@
 package net.civeira.phylax.features.access.oauth.infrastructure.bootstrap;
 
 import java.util.List;
-
 import lombok.Getter;
-import net.civeira.phylax.features.access.relyingparty.transition.RelyingPartyChangeProposal;
+import net.civeira.phylax.features.access.relyingparty.command.RelyingPartyChangeProposal;
 import net.civeira.phylax.features.access.role.Domains;
-import net.civeira.phylax.features.access.role.transition.RoleChangeProposal;
-import net.civeira.phylax.features.access.securitydomain.transition.SecurityDomainChangeProposal;
-import net.civeira.phylax.features.access.trustedclient.transition.TrustedClientChangeProposal;
-import net.civeira.phylax.features.access.user.transition.UserChangeProposal;
+import net.civeira.phylax.features.access.role.command.RoleChangeProposal;
+import net.civeira.phylax.features.access.securitydomain.command.SecurityDomainChangeProposal;
+import net.civeira.phylax.features.access.trustedclient.command.TrustedClientChangeProposal;
+import net.civeira.phylax.features.access.user.command.UserChangeProposal;
 import net.civeira.phylax.features.access.useridentity.Roles;
 import net.civeira.phylax.features.access.useridentity.transition.UserIdentityChangeProposal;
 

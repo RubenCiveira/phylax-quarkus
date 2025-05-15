@@ -3,7 +3,6 @@ package net.civeira.phylax.features.access.oauth.application.service;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.TenantRef;
@@ -14,10 +13,10 @@ import net.civeira.phylax.features.access.tenanttermsofuse.query.TenantTermsOfUs
 import net.civeira.phylax.features.access.user.User;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.UserAcceptedTermnsOfUse;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.UserAcceptedTermnsOfUseFacade;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.command.UserAcceptedTermnsOfUseChangeProposal;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.gateway.UserAcceptedTermnsOfUseReadRepositoryGateway;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.gateway.UserAcceptedTermnsOfUseWriteRepositoryGateway;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.query.UserAcceptedTermnsOfUseFilter;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.transition.UserAcceptedTermnsOfUseChangeProposal;
 
 @ApplicationScoped
 @RequiredArgsConstructor
