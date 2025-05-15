@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.access.oauth.infrastructure.bootstrap;
 
 import java.util.List;
+
 import lombok.Getter;
 import net.civeira.phylax.features.access.relyingparty.command.RelyingPartyChangeProposal;
 import net.civeira.phylax.features.access.role.Domains;
