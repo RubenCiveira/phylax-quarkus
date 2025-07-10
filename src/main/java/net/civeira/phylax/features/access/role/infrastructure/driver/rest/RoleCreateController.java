@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.access.role.infrastructure.driver.rest;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import net.civeira.phylax.generated.openapi.model.SecurityDomainApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class RoleCreateController {
 
   /**

@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;

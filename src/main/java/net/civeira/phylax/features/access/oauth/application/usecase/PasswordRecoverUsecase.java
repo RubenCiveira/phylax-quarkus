@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
@@ -67,8 +68,8 @@ public class PasswordRecoverUsecase {
             userCode = codes.create(UserAccessTemporalCode
                 .create(UserAccessTemporalCodeChangeSet.builder().newUid().build()));
           }
-          codes.update(userCode, userCode.generatePasswordRecover(code,
-              OffsetDateTime.now().plus(RECOVER_TIME)));
+          codes.update(userCode,
+              userCode.generatePasswordRecover(code, OffsetDateTime.now().plus(RECOVER_TIME)));
         });
   }
 }

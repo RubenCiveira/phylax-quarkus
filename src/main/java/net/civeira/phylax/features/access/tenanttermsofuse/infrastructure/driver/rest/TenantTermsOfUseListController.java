@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -19,6 +20,7 @@ import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDtoList;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class TenantTermsOfUseListController {
 
   /**

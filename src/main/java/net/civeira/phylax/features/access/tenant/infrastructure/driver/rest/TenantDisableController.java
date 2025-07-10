@@ -3,6 +3,7 @@ package net.civeira.phylax.features.access.tenant.infrastructure.driver.rest;
 import java.util.List;
 import java.util.stream.Stream;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import net.civeira.phylax.generated.openapi.model.TrustedClientApiRef;
 import net.civeira.phylax.generated.openapi.model.TrustedClientsApiDto;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class TenantDisableController {
 
   /**

@@ -3,6 +3,7 @@ package net.civeira.phylax.features.access.loginprovider.infrastructure.driver.r
 import java.util.List;
 import java.util.stream.Stream;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import net.civeira.phylax.generated.openapi.model.LoginProviderApiDto.SourceEnum
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class LoginProviderDisableController {
 
   /**

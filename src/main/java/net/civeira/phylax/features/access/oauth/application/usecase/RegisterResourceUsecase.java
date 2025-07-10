@@ -3,6 +3,7 @@ package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.List;
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
@@ -32,14 +33,14 @@ public class RegisterResourceUsecase {
             SecurityScopeFilter.builder().relyingParty(party).resource(resource.getName()).build());
         scopeList.getScopes().forEach(scope -> {
           Optional<SecurityScope> prev = list.stream()
-              .filter(existing -> existing.getScopeValue().equals(scope.getName())).findFirst();
+              .filter(existing -> existing.getScope().equals(scope.getName())).findFirst();
           if (!prev.isPresent()) {
-            scopes.create(SecurityScope.create(
-                SecurityScopeChangeSet.builder().newUid().relyingParty(party).enabled(true)
+            scopes.create(SecurityScope
+                .create(SecurityScopeChangeSet.builder().newUid().relyingParty(party).enabled(true)
                     .resource(resource.getName()).scope(scope.getName()).kind(kind(scope.getKind()))
                     .visibility(SecurityScopeVisibilityOptions.EXPLICIT).build()));
           } else {
-            list.removeIf(existing -> existing.getScopeValue().equals(scope.getName()));
+            list.removeIf(existing -> existing.getScope().equals(scope.getName()));
           }
         });
         list.forEach(prev -> {

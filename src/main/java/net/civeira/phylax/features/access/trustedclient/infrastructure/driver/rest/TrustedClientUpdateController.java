@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.access.trustedclient.infrastructure.driver.rest;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientRefe
 import net.civeira.phylax.generated.openapi.model.TrustedClientApiDto;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class TrustedClientUpdateController {
 
   /**

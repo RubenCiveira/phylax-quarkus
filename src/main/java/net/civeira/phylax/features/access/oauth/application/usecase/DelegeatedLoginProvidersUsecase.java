@@ -4,6 +4,7 @@ package net.civeira.phylax.features.access.oauth.application.usecase;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.loginprovider.domain.LoginProvider;
@@ -44,9 +45,9 @@ public class DelegeatedLoginProvidersUsecase {
     if (one.isPresent()) {
       return actives.checkEnabled(one.get()) ? one : Optional.empty();
     } else {
-      return provider(tenant, provider).map(loginProvider -> usersWriter
-          .create(User.create(UserChangeSet.builder().newUid().name(codeInfo.getName())
-              .password("").email(codeInfo.getEmail()).provider(provider)
+      return provider(tenant, provider)
+          .map(loginProvider -> usersWriter.create(User.create(UserChangeSet.builder().newUid()
+              .name(codeInfo.getName()).password("").email(codeInfo.getEmail()).provider(provider)
               .enabled(loginProvider.isUsersEnabledByDefault()).tenant(tenant).build())));
     }
   }
@@ -58,7 +59,7 @@ public class DelegeatedLoginProvidersUsecase {
 
   private Optional<LoginProvider> provider(Tenant tenant, String name) {
     return providers.list(LoginProviderFilter.builder().tenant(tenant).build()).stream()
-        .filter(lp -> name.equals(lp.getNameValue())).findFirst();
+        .filter(lp -> name.equals(lp.getName())).findFirst();
   }
 
   private DelegatedAccessExternalProvider map(LoginProvider provider) {
@@ -75,9 +76,9 @@ public class DelegeatedLoginProvidersUsecase {
   }
 
   private DelegatedAccessExternalProvider mapSaml(LoginProvider provider) {
-    return new SamlDelegatedAccessProvider(provider.getName(),
-        provider.getPrivateKey().orElse("."), provider.getPublicKey().orElse("."),
-        provider.getCertificate().orElse("-"), provider.isDirectAccess());
+    return new SamlDelegatedAccessProvider(provider.getName(), provider.getPrivateKey().orElse("."),
+        provider.getPublicKey().orElse("."), provider.getCertificate().orElse("-"),
+        provider.isDirectAccess());
   }
 
   private DelegatedAccessExternalProvider mapGoogle(LoginProvider provider) {

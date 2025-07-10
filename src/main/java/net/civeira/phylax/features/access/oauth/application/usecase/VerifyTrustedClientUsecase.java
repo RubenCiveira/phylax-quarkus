@@ -3,6 +3,7 @@ package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.List;
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

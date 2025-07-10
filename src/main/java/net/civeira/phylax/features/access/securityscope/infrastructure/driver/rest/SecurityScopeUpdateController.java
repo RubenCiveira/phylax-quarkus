@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.access.securityscope.infrastructure.driver.rest;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import net.civeira.phylax.generated.openapi.model.SecurityScopeApiDto.Visibility
 import net.civeira.phylax.generated.openapi.model.TrustedClientApiRef;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class SecurityScopeUpdateController {
 
   /**

@@ -3,6 +3,7 @@ package net.civeira.phylax.features.access.securitydomain.infrastructure.driver.
 import java.util.List;
 import java.util.stream.Stream;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomainRe
 import net.civeira.phylax.generated.openapi.model.SecurityDomainApiDto;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class SecurityDomainDisableController {
 
   /**

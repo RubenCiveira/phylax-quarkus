@@ -7,6 +7,7 @@ import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
 import jakarta.activation.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,9 @@ public class MfaConfigUsecase {
 
   private final OtpMfaService otp;
   private final ActiveUserFindService finder;
-//  private final UserFacade userFacade;
+  // private final UserFacade userFacade;
   private final UserWriteRepositoryGateway users;
-//  private final UserAccessTemporalCodeFacade codeFacade;
+  // private final UserAccessTemporalCodeFacade codeFacade;
   private final UserAccessTemporalCodeWriteRepositoryGateway codes;
   private final AesCipherService cypher;
 
@@ -56,11 +57,11 @@ public class MfaConfigUsecase {
               if (find.isPresent()) {
                 code = find.get();
               } else {
-                code = codes.create(UserAccessTemporalCode.create(
-                    UserAccessTemporalCodeChangeSet.builder().newUid().user(user).build()));
+                code = codes.create(UserAccessTemporalCode
+                    .create(UserAccessTemporalCodeChangeSet.builder().newUid().user(user).build()));
               }
-              codes.update(code, code.generateMfaTemporalCode(secret,
-                  OffsetDateTime.now().plus(EXPIRATION_TIME)));
+              codes.update(code,
+                  code.generateMfaTemporalCode(secret, OffsetDateTime.now().plus(EXPIRATION_TIME)));
             });
       }
     });
@@ -95,8 +96,8 @@ public class MfaConfigUsecase {
           if (find.isPresent()) {
             UserAccessTemporalCode temps = find.get();
             codes.update(temps, temps.resetMfaTemporalCode());
-            users.update(user, user.setMfaSeed(
-                temps.getPlainTempSecondFactorSeed(cypher).orElseThrow()));
+            users.update(user,
+                user.setMfaSeed(temps.getPlainTempSecondFactorSeed(cypher).orElseThrow()));
           } else {
             log.error("We have a part but not the hole item");
             throw new IllegalStateException("");

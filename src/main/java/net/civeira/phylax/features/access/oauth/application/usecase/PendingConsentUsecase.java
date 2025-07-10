@@ -20,8 +20,8 @@ public class PendingConsentUsecase {
   public Optional<Consent> userRequiredConsent(AuthRequest request, Locale locale,
       String username) {
     return activeUser.findEnabledUser(request.getTenant(), username, request.getAudiences())
-        .flatMap(user -> terms.findPendingTerms(user)).map(terms -> Consent.builder()
-            .version(terms.getUid()).fullText(terms.getText()).build());
+        .flatMap(user -> terms.findPendingTerms(user))
+        .map(terms -> Consent.builder().version(terms.getUid()).fullText(terms.getText()).build());
   }
 
   public boolean confirmConsent(AuthRequest request, String username, String version) {

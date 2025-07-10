@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.access.securitydomain.infrastructure.driver.rest;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -9,6 +10,7 @@ import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomainRe
 import net.civeira.phylax.generated.openapi.model.SecurityDomainApiDto;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class SecurityDomainRetrieveController {
 
   /**

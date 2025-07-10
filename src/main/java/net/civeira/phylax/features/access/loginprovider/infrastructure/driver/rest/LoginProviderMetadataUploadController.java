@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -13,6 +14,7 @@ import net.civeira.phylax.features.access.loginprovider.application.usecase.meta
 import net.civeira.phylax.features.access.loginprovider.domain.LoginProviderReference;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class LoginProviderMetadataUploadController {
 
   /**

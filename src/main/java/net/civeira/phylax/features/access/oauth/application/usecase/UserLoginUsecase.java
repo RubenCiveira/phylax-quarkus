@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -150,25 +152,20 @@ public class UserLoginUsecase {
             if (isParty.isPresent()) {
               RelyingParty relyingParty = isParty.get();
               hisIdentities.stream()
-                  .filter(identity -> relyingParty.getUidValue().equals(
-                      identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse("")))
-                  .findFirst()
-                  .ifPresent(identity -> ud.addRolesTo(aud,
-                      identities.resolveRoles(identity.getRoles()).stream()
-                          .map(Role::getName).toList()));
+                  .filter(identity -> relyingParty.getUid()
+                      .equals(identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse("")))
+                  .findFirst().ifPresent(identity -> ud.addRolesTo(aud, identities
+                      .resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
             } else {
               Optional<TrustedClient> isClient =
                   clients.find(TrustedClientFilter.builder().code(aud).build());
               if (isClient.isPresent()) {
                 TrustedClient trustedClient = isClient.get();
                 hisIdentities.stream()
-                    .filter(identity -> trustedClient.getUidValue()
-                        .equals(identity
-                            .getTrustedClient().map(TrustedClientRef::getUid).orElse("")))
-                    .findFirst()
-                    .ifPresent(identity -> ud.addRolesTo(aud,
-                        identities.resolveRoles(identity.getRoles()).stream()
-                            .map(Role::getName).toList()));
+                    .filter(identity -> trustedClient.getUid().equals(
+                        identity.getTrustedClient().map(TrustedClientRef::getUid).orElse("")))
+                    .findFirst().ifPresent(identity -> ud.addRolesTo(aud, identities
+                        .resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
               }
             }
           });
@@ -186,8 +183,7 @@ public class UserLoginUsecase {
         return Optional
             .of(AuthenticationResult.newMfaRequired(request.getTenant(), user.getName()));
       } else {
-        return Optional
-            .of(AuthenticationResult.mfaRequired(request.getTenant(), user.getName()));
+        return Optional.of(AuthenticationResult.mfaRequired(request.getTenant(), user.getName()));
       }
     } else {
       return Optional.empty();
@@ -204,18 +200,17 @@ public class UserLoginUsecase {
   }
 
   private Optional<AuthenticationResult> checkTerms(AuthRequest request, User user) {
-    return terms.findPendingTerms(user).map(
-        ignore -> AuthenticationResult.consentRequired(request.getTenant(), user.getName()));
+    return terms.findPendingTerms(user)
+        .map(ignore -> AuthenticationResult.consentRequired(request.getTenant(), user.getName()));
   }
 
   private Optional<AuthenticationResult> checkPassword(AuthRequest request, User user,
       String password) {
-    if (null != password && !password
-        .equals(cypher.decryptForAll(user.getCypheredPassword(cypher)).orElse(""))) {
+    if (null != password
+        && !password.equals(cypher.decryptForAll(user.getCypheredPassword(cypher)).orElse(""))) {
       log.error("The provided password for {} is invalid", user.getName());
       markLoginFails(user, true);
-      return Optional
-          .of(AuthenticationResult.wrongCredential(request.getTenant(), user.getName()));
+      return Optional.of(AuthenticationResult.wrongCredential(request.getTenant(), user.getName()));
     } else {
       markLoginFails(user, false);
       return Optional.empty();

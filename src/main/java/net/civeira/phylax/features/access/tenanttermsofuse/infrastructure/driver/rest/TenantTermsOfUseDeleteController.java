@@ -3,6 +3,7 @@ package net.civeira.phylax.features.access.tenanttermsofuse.infrastructure.drive
 import java.util.List;
 import java.util.stream.Stream;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.d
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
 
 @RequiredArgsConstructor
+@RequestScoped
 public class TenantTermsOfUseDeleteController {
 
   /**
