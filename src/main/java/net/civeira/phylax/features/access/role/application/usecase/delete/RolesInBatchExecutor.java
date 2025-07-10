@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.role.Role;
-import net.civeira.phylax.features.access.role.application.service.visibility.RolesVisibility;
-import net.civeira.phylax.features.access.role.query.RoleCursor;
+import net.civeira.phylax.features.access.role.application.visibility.RolesVisibility;
+import net.civeira.phylax.features.access.role.domain.Role;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -98,7 +98,7 @@ class RolesInBatchExecutor
   @Override
   public String itemDescription(final Role item,
       final StepContext<RoleDeleteAllInBatchCommand, RolePaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -128,7 +128,7 @@ class RolesInBatchExecutor
     List<Role> page = visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
         context.getParams().getFilter(),
         RoleCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

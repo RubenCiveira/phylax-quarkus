@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.tenant.Tenant;
-import net.civeira.phylax.features.access.tenant.query.TenantCursor;
-import net.civeira.phylax.features.access.tenant.query.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantCursor;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 
 class TenantSlider extends Slider<Tenant> {
 
@@ -52,7 +52,7 @@ class TenantSlider extends Slider<Tenant> {
   @Override
   public Iterator<Tenant> next(List<Tenant> tenants, int limit) {
     Tenant last = tenants.get(tenants.size() - 1);
-    TenantCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    TenantCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.securityscope.SecurityScope;
-import net.civeira.phylax.features.access.securityscope.query.SecurityScopeCursor;
-import net.civeira.phylax.features.access.securityscope.query.SecurityScopeFilter;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScope;
+import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeCursor;
+import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeFilter;
 
 class SecurityScopeSlider extends Slider<SecurityScope> {
 
@@ -52,7 +52,7 @@ class SecurityScopeSlider extends Slider<SecurityScope> {
   @Override
   public Iterator<SecurityScope> next(List<SecurityScope> securityScopes, int limit) {
     SecurityScope last = securityScopes.get(securityScopes.size() - 1);
-    SecurityScopeCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    SecurityScopeCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

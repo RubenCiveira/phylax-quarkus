@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.tenant.infrastructure.event;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.tenant.Tenant;
-import net.civeira.phylax.features.access.tenant.event.TenantEvent;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.event.TenantEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

@@ -7,24 +7,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.relyingparty.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.gateway.RelyingPartyReadRepositoryGateway;
-import net.civeira.phylax.features.access.relyingparty.query.RelyingPartyFilter;
-import net.civeira.phylax.features.access.role.Domains;
-import net.civeira.phylax.features.access.role.Role;
-import net.civeira.phylax.features.access.role.gateway.RoleReadRepositoryGateway;
-import net.civeira.phylax.features.access.role.query.RoleFilter;
-import net.civeira.phylax.features.access.securitydomain.SecurityDomain;
-import net.civeira.phylax.features.access.securitydomain.gateway.SecurityDomainReadRepositoryGateway;
-import net.civeira.phylax.features.access.securitydomain.query.SecurityDomainFilter;
-import net.civeira.phylax.features.access.securityscope.SecurityScope;
-import net.civeira.phylax.features.access.securityscope.SecurityScopeKindOptions;
-import net.civeira.phylax.features.access.securityscope.SecurityScopeVisibilityOptions;
-import net.civeira.phylax.features.access.securityscope.gateway.SecurityScopeReadRepositoryGateway;
-import net.civeira.phylax.features.access.securityscope.query.SecurityScopeFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
+import net.civeira.phylax.features.access.role.domain.Domains;
+import net.civeira.phylax.features.access.role.domain.Role;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleFilter;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleReadRepositoryGateway;
+import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomain;
+import net.civeira.phylax.features.access.securitydomain.domain.gateway.SecurityDomainFilter;
+import net.civeira.phylax.features.access.securitydomain.domain.gateway.SecurityDomainReadRepositoryGateway;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScope;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeKindOptions;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeVisibilityOptions;
+import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeFilter;
+import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.rbac.domain.RoleGrant;
 
 @ApplicationScoped
@@ -52,9 +51,9 @@ public class ExportResourceScopesUsecase {
     Map<String, List<String>> roleSecs = new HashMap<>();
 
     for (Role role : secRoles) {
-      for (Domains roleDomain : role.getDomainsValue()) {
-        String ref = roleDomain.getSecurityDomainReferenceValue();
-        append(role.getNameValue(), ref, roleSecs);
+      for (Domains roleDomain : role.getDomains()) {
+        String ref = roleDomain.getSecurityDomainUid();
+        append(role.getName(), ref, roleSecs);
       }
     }
     Map<String, List<String>> byRole = new HashMap<>();
@@ -65,13 +64,13 @@ public class ExportResourceScopesUsecase {
         append("-", securityScope, byRole);
       }
       for (SecurityDomain securityDomain : secDomains) {
-        securityScope.getKindValue().ifPresent(kind -> {
+        securityScope.getKind().ifPresent(kind -> {
           boolean allowed = checkReadAll(kind, securityDomain, securityScope)
               || checkWriteAll(kind, securityDomain, securityScope)
               || checkManageAll(kind, securityDomain, securityScope) || checkPublic(securityScope)
               || checkAuthorized(securityScope) || checkExplicit();
           if (allowed) {
-            append(securityDomain.getUidValue(), securityScope, bySec);
+            append(securityDomain.getUid(), securityScope, bySec);
           }
         });
       }
@@ -102,12 +101,12 @@ public class ExportResourceScopesUsecase {
   }
 
   private boolean checkPublic(SecurityScope securityScope) {
-    return securityScope.getVisibilityValue()
+    return securityScope.getVisibility()
         .orElse(SecurityScopeVisibilityOptions.EXPLICIT) == SecurityScopeVisibilityOptions.PUBLIC;
   }
 
   private boolean checkAuthorized(SecurityScope securityScope) {
-    return securityScope.getVisibilityValue().orElse(
+    return securityScope.getVisibility().orElse(
         SecurityScopeVisibilityOptions.EXPLICIT) == SecurityScopeVisibilityOptions.AUTHORIZED;
   }
 

@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Allow;
 import net.civeira.phylax.common.security.Interaction;
-import net.civeira.phylax.features.access.loginprovider.application.service.visibility.LoginProvidersVisibility;
 import net.civeira.phylax.features.access.loginprovider.application.usecase.create.LoginProviderCreateUsecase;
 import net.civeira.phylax.features.access.loginprovider.application.usecase.delete.LoginProviderDeleteUsecase;
 import net.civeira.phylax.features.access.loginprovider.application.usecase.disable.LoginProviderDisableUsecase;
@@ -16,6 +15,7 @@ import net.civeira.phylax.features.access.loginprovider.application.usecase.list
 import net.civeira.phylax.features.access.loginprovider.application.usecase.metadataupload.LoginProviderMetadataTemporalUploadUsecase;
 import net.civeira.phylax.features.access.loginprovider.application.usecase.retrieve.LoginProviderRetrieveUsecase;
 import net.civeira.phylax.features.access.loginprovider.application.usecase.update.LoginProviderUpdateUsecase;
+import net.civeira.phylax.features.access.loginprovider.application.visibility.LoginProvidersVisibility;
 import net.civeira.phylax.generated.openapi.api.LoginProviderAclApi;
 import net.civeira.phylax.generated.openapi.model.CommonAllow;
 import net.civeira.phylax.generated.openapi.model.LoginProviderAclFields;

@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.store.BinaryContent;
 import net.civeira.phylax.common.infrastructure.store.FileStore;
 import net.civeira.phylax.common.infrastructure.store.RepositoryLink;
-import net.civeira.phylax.features.access.tenanttermsofuse.TenantTermsOfUse;
-import net.civeira.phylax.features.access.tenanttermsofuse.gateway.TenantTermsOfUseAttachedUploadGateway;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseAttachedUploadGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -29,8 +29,8 @@ public class TenantTermsOfUseAttachedUploadGatewayAdapter
   @Override
   public Optional<String> commitAttached(final TenantTermsOfUse key,
       final Optional<TenantTermsOfUse> orignal) {
-    String theNew = key.getAttachedValue().orElse(null);
-    String theOld = orignal.flatMap(TenantTermsOfUse::getAttachedValue).orElse(null);
+    String theNew = key.getAttached().orElse(null);
+    String theOld = orignal.flatMap(TenantTermsOfUse::getAttached).orElse(null);
     boolean wasRemoved = theNew == null && theOld != null;
     boolean wasAppend = theNew != null && theOld == null;
     boolean wasModified = theOld != null && theNew != null && !theNew.equals(theOld);
@@ -53,7 +53,7 @@ public class TenantTermsOfUseAttachedUploadGatewayAdapter
    */
   @Override
   public void deleteAttached(final TenantTermsOfUse key) {
-    key.getAttachedValue().ifPresent(store::deleteFile);
+    key.getAttached().ifPresent(store::deleteFile);
   }
 
   /**
@@ -63,7 +63,7 @@ public class TenantTermsOfUseAttachedUploadGatewayAdapter
    */
   @Override
   public Optional<BinaryContent> readAttached(final TenantTermsOfUse entity) {
-    return entity.getAttachedValue().map(store::retrieveFile).orElseThrow();
+    return entity.getAttached().map(store::retrieveFile).orElseThrow();
   }
 
   /**

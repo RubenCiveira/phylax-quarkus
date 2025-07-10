@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.useracceptedtermnsofuse.infrastructur
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.UserAcceptedTermnsOfUse;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.event.UserAcceptedTermnsOfUseEvent;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.event.UserAcceptedTermnsOfUseEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

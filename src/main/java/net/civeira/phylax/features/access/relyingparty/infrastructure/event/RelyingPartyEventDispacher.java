@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.relyingparty.infrastructure.event;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.relyingparty.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.event.RelyingPartyEvent;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
+import net.civeira.phylax.features.access.relyingparty.domain.event.RelyingPartyEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.scopeassignation.ScopeAssignation;
-import net.civeira.phylax.features.access.scopeassignation.query.ScopeAssignationCursor;
-import net.civeira.phylax.features.access.scopeassignation.query.ScopeAssignationFilter;
+import net.civeira.phylax.features.access.scopeassignation.domain.ScopeAssignation;
+import net.civeira.phylax.features.access.scopeassignation.domain.gateway.ScopeAssignationCursor;
+import net.civeira.phylax.features.access.scopeassignation.domain.gateway.ScopeAssignationFilter;
 
 class ScopeAssignationSlider extends Slider<ScopeAssignation> {
 
@@ -52,7 +52,7 @@ class ScopeAssignationSlider extends Slider<ScopeAssignation> {
   @Override
   public Iterator<ScopeAssignation> next(List<ScopeAssignation> scopeAssignations, int limit) {
     ScopeAssignation last = scopeAssignations.get(scopeAssignations.size() - 1);
-    ScopeAssignationCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    ScopeAssignationCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

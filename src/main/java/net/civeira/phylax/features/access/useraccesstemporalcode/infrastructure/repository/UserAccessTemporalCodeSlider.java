@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.query.UserAccessTemporalCodeCursor;
-import net.civeira.phylax.features.access.useraccesstemporalcode.query.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCursor;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
 
 class UserAccessTemporalCodeSlider extends Slider<UserAccessTemporalCode> {
 
@@ -53,8 +53,7 @@ class UserAccessTemporalCodeSlider extends Slider<UserAccessTemporalCode> {
   public Iterator<UserAccessTemporalCode> next(List<UserAccessTemporalCode> userAccessTemporalCodes,
       int limit) {
     UserAccessTemporalCode last = userAccessTemporalCodes.get(userAccessTemporalCodes.size() - 1);
-    UserAccessTemporalCodeCursor cr =
-        this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    UserAccessTemporalCodeCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

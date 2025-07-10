@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.tenantconfig.TenantConfig;
-import net.civeira.phylax.features.access.tenantconfig.application.service.visibility.TenantConfigsVisibility;
-import net.civeira.phylax.features.access.tenantconfig.query.TenantConfigCursor;
+import net.civeira.phylax.features.access.tenantconfig.application.visibility.TenantConfigsVisibility;
+import net.civeira.phylax.features.access.tenantconfig.domain.TenantConfig;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class TenantConfigsInBatchExecutor implements
   @Override
   public String itemDescription(final TenantConfig item,
       final StepContext<TenantConfigDeleteAllInBatchCommand, TenantConfigPaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -130,7 +130,7 @@ class TenantConfigsInBatchExecutor implements
     List<TenantConfig> page = visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
         context.getParams().getFilter(),
         TenantConfigCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

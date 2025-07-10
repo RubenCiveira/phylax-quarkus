@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Allow;
 import net.civeira.phylax.common.security.Interaction;
-import net.civeira.phylax.features.access.relyingparty.application.service.visibility.RelyingPartysVisibility;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.create.RelyingPartyCreateUsecase;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.delete.RelyingPartyDeleteUsecase;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.disable.RelyingPartyDisableUsecase;
@@ -15,6 +14,7 @@ import net.civeira.phylax.features.access.relyingparty.application.usecase.enabl
 import net.civeira.phylax.features.access.relyingparty.application.usecase.list.RelyingPartyListUsecase;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.retrieve.RelyingPartyRetrieveUsecase;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.update.RelyingPartyUpdateUsecase;
+import net.civeira.phylax.features.access.relyingparty.application.visibility.RelyingPartysVisibility;
 import net.civeira.phylax.generated.openapi.api.RelyingPartyAclApi;
 import net.civeira.phylax.generated.openapi.model.CommonAllow;
 import net.civeira.phylax.generated.openapi.model.RelyingPartyAclFields;

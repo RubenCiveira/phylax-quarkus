@@ -9,11 +9,11 @@ import io.quarkus.cache.CacheName;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.access.scopeassignation.ScopeAssignation;
-import net.civeira.phylax.features.access.scopeassignation.gateway.ScopeAssignationCacheGateway;
-import net.civeira.phylax.features.access.scopeassignation.gateway.ScopeAssignationCached;
-import net.civeira.phylax.features.access.scopeassignation.query.ScopeAssignationCursor;
-import net.civeira.phylax.features.access.scopeassignation.query.ScopeAssignationFilter;
+import net.civeira.phylax.features.access.scopeassignation.domain.ScopeAssignation;
+import net.civeira.phylax.features.access.scopeassignation.domain.gateway.ScopeAssignationCacheGateway;
+import net.civeira.phylax.features.access.scopeassignation.domain.gateway.ScopeAssignationCached;
+import net.civeira.phylax.features.access.scopeassignation.domain.gateway.ScopeAssignationCursor;
+import net.civeira.phylax.features.access.scopeassignation.domain.gateway.ScopeAssignationFilter;
 
 @ApplicationScoped
 @Slf4j

@@ -10,6 +10,7 @@ quarkus:
       - config/telemetry.yaml
       - config/security.yaml
       - config/oauth.yaml
+      - config/mail.yaml
       - META-INF/native-image/config.yaml
   http:
     host: ${APP_HOST:0.0.0.0}

@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.securitydomain.SecurityDomain;
-import net.civeira.phylax.features.access.securitydomain.application.service.visibility.SecurityDomainsVisibility;
-import net.civeira.phylax.features.access.securitydomain.query.SecurityDomainCursor;
+import net.civeira.phylax.features.access.securitydomain.application.visibility.SecurityDomainsVisibility;
+import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomain;
+import net.civeira.phylax.features.access.securitydomain.domain.gateway.SecurityDomainCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class SecurityDomainDisablesInBatchExecutor implements
   @Override
   public String itemDescription(final SecurityDomain item,
       final StepContext<SecurityDomainDisableAllInBatchCommand, SecurityDomainPaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -130,7 +130,7 @@ class SecurityDomainDisablesInBatchExecutor implements
     List<SecurityDomain> page = visibility.listVisiblesForUpdate(
         context.getParams().getInteraction(), context.getParams().getFilter(),
         SecurityDomainCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

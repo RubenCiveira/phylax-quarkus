@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public class RbacAllowListener {
   private final Rbac rbac;
 
-  public void checkAllow(@Observes AllowProposal event) {
+  public void checkAllow(@Observes AllowDecision event) {
     event.map(allow -> {
       if (allow.isAllowed()) {
         return rbac.checkAllow(event.getQuery().getActor(), event.resourceName(),

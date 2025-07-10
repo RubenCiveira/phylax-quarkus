@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.securityscope.SecurityScope;
-import net.civeira.phylax.features.access.securityscope.application.service.visibility.SecurityScopesVisibility;
-import net.civeira.phylax.features.access.securityscope.query.SecurityScopeCursor;
+import net.civeira.phylax.features.access.securityscope.application.visibility.SecurityScopesVisibility;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScope;
+import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class SecurityScopeDisablesInBatchExecutor implements
   @Override
   public String itemDescription(final SecurityScope item,
       final StepContext<SecurityScopeDisableAllInBatchCommand, SecurityScopePaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -130,7 +130,7 @@ class SecurityScopeDisablesInBatchExecutor implements
     List<SecurityScope> page = visibility.listVisiblesForUpdate(
         context.getParams().getInteraction(), context.getParams().getFilter(),
         SecurityScopeCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

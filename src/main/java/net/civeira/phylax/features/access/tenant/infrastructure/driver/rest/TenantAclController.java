@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Allow;
 import net.civeira.phylax.common.security.Interaction;
-import net.civeira.phylax.features.access.tenant.application.service.visibility.TenantsVisibility;
 import net.civeira.phylax.features.access.tenant.application.usecase.create.TenantCreateUsecase;
 import net.civeira.phylax.features.access.tenant.application.usecase.delete.TenantDeleteUsecase;
 import net.civeira.phylax.features.access.tenant.application.usecase.disable.TenantDisableUsecase;
@@ -15,6 +14,7 @@ import net.civeira.phylax.features.access.tenant.application.usecase.enable.Tena
 import net.civeira.phylax.features.access.tenant.application.usecase.list.TenantListUsecase;
 import net.civeira.phylax.features.access.tenant.application.usecase.retrieve.TenantRetrieveUsecase;
 import net.civeira.phylax.features.access.tenant.application.usecase.update.TenantUpdateUsecase;
+import net.civeira.phylax.features.access.tenant.application.visibility.TenantsVisibility;
 import net.civeira.phylax.generated.openapi.api.TenantAclApi;
 import net.civeira.phylax.generated.openapi.model.CommonAllow;
 import net.civeira.phylax.generated.openapi.model.TenantAclFields;

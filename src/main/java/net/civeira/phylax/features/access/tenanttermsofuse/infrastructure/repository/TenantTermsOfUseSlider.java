@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.tenanttermsofuse.TenantTermsOfUse;
-import net.civeira.phylax.features.access.tenanttermsofuse.query.TenantTermsOfUseCursor;
-import net.civeira.phylax.features.access.tenanttermsofuse.query.TenantTermsOfUseFilter;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseCursor;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseFilter;
 
 class TenantTermsOfUseSlider extends Slider<TenantTermsOfUse> {
 
@@ -52,7 +52,7 @@ class TenantTermsOfUseSlider extends Slider<TenantTermsOfUse> {
   @Override
   public Iterator<TenantTermsOfUse> next(List<TenantTermsOfUse> tenantTermsOfUses, int limit) {
     TenantTermsOfUse last = tenantTermsOfUses.get(tenantTermsOfUses.size() - 1);
-    TenantTermsOfUseCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    TenantTermsOfUseCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

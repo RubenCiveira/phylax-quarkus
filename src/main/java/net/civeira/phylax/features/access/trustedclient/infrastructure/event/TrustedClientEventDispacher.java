@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.trustedclient.infrastructure.event;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.trustedclient.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.event.TrustedClientEvent;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.event.TrustedClientEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

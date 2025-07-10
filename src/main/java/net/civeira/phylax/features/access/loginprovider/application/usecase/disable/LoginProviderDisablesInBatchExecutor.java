@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.loginprovider.LoginProvider;
-import net.civeira.phylax.features.access.loginprovider.application.service.visibility.LoginProvidersVisibility;
-import net.civeira.phylax.features.access.loginprovider.query.LoginProviderCursor;
+import net.civeira.phylax.features.access.loginprovider.application.visibility.LoginProvidersVisibility;
+import net.civeira.phylax.features.access.loginprovider.domain.LoginProvider;
+import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class LoginProviderDisablesInBatchExecutor implements
   @Override
   public String itemDescription(final LoginProvider item,
       final StepContext<LoginProviderDisableAllInBatchCommand, LoginProviderPaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -130,7 +130,7 @@ class LoginProviderDisablesInBatchExecutor implements
     List<LoginProvider> page = visibility.listVisiblesForUpdate(
         context.getParams().getInteraction(), context.getParams().getFilter(),
         LoginProviderCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

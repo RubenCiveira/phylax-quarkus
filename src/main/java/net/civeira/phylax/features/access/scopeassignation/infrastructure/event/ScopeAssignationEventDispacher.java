@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.scopeassignation.infrastructure.event
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.scopeassignation.ScopeAssignation;
-import net.civeira.phylax.features.access.scopeassignation.event.ScopeAssignationEvent;
+import net.civeira.phylax.features.access.scopeassignation.domain.ScopeAssignation;
+import net.civeira.phylax.features.access.scopeassignation.domain.event.ScopeAssignationEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

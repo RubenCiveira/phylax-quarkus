@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.securitydomain.SecurityDomain;
-import net.civeira.phylax.features.access.securitydomain.query.SecurityDomainCursor;
-import net.civeira.phylax.features.access.securitydomain.query.SecurityDomainFilter;
+import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomain;
+import net.civeira.phylax.features.access.securitydomain.domain.gateway.SecurityDomainCursor;
+import net.civeira.phylax.features.access.securitydomain.domain.gateway.SecurityDomainFilter;
 
 class SecurityDomainSlider extends Slider<SecurityDomain> {
 
@@ -52,7 +52,7 @@ class SecurityDomainSlider extends Slider<SecurityDomain> {
   @Override
   public Iterator<SecurityDomain> next(List<SecurityDomain> securityDomains, int limit) {
     SecurityDomain last = securityDomains.get(securityDomains.size() - 1);
-    SecurityDomainCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    SecurityDomainCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

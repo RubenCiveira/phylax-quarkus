@@ -9,11 +9,11 @@ import io.quarkus.cache.CacheName;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.access.trustedclient.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.gateway.TrustedClientCacheGateway;
-import net.civeira.phylax.features.access.trustedclient.gateway.TrustedClientCached;
-import net.civeira.phylax.features.access.trustedclient.query.TrustedClientCursor;
-import net.civeira.phylax.features.access.trustedclient.query.TrustedClientFilter;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCacheGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCached;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCursor;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 
 @ApplicationScoped
 @Slf4j

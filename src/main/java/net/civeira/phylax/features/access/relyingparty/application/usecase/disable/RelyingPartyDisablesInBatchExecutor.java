@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.relyingparty.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.application.service.visibility.RelyingPartysVisibility;
-import net.civeira.phylax.features.access.relyingparty.query.RelyingPartyCursor;
+import net.civeira.phylax.features.access.relyingparty.application.visibility.RelyingPartysVisibility;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class RelyingPartyDisablesInBatchExecutor implements
   @Override
   public String itemDescription(final RelyingParty item,
       final StepContext<RelyingPartyDisableAllInBatchCommand, RelyingPartyPaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -130,7 +130,7 @@ class RelyingPartyDisablesInBatchExecutor implements
     List<RelyingParty> page = visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
         context.getParams().getFilter(),
         RelyingPartyCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.role.infrastructure.event;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.role.Role;
-import net.civeira.phylax.features.access.role.event.RoleEvent;
+import net.civeira.phylax.features.access.role.domain.Role;
+import net.civeira.phylax.features.access.role.domain.event.RoleEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.securitydomain.infrastructure.event;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.securitydomain.SecurityDomain;
-import net.civeira.phylax.features.access.securitydomain.event.SecurityDomainEvent;
+import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomain;
+import net.civeira.phylax.features.access.securitydomain.domain.event.SecurityDomainEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

@@ -5,17 +5,16 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.access.tenant.Tenant;
-import net.civeira.phylax.features.access.tenant.TenantReference;
-import net.civeira.phylax.features.access.tenant.gateway.TenantReadRepositoryGateway;
-import net.civeira.phylax.features.access.tenant.query.TenantFilter;
-import net.civeira.phylax.features.access.user.User;
-import net.civeira.phylax.features.access.user.gateway.UserReadRepositoryGateway;
-import net.civeira.phylax.features.access.user.query.UserFilter;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
 
 @Slf4j
 @ApplicationScoped
@@ -71,7 +70,7 @@ public class ActiveUserFindService {
 
   public boolean checkEnabled(User user) {
     if (user.isEnabled()) {
-      Optional<OffsetDateTime> blockedUntilValue = user.getBlockedUntilValue();
+      Optional<OffsetDateTime> blockedUntilValue = user.getBlockedUntil();
       if (blockedUntilValue.isPresent() && blockedUntilValue.get().isBefore(OffsetDateTime.now())) {
         return false;
       }
@@ -92,13 +91,13 @@ public class ActiveUserFindService {
         log.error("The tenant {} is disabled", tenant);
         return new Object[] {null, tenant, false};
       }
-      tenantForData = tenant.getUidValue();
+      tenantForData = tenant.getUid();
       if (!tenant.isAccessToAllApplications()) {
         List<String> unverified = new ArrayList<>(audiences);
-        tenants.enrichRelingParties(tenant.getRelingPartiesValue())
-            .forEach(rely -> unverified.remove(rely.getCodeValue()));
-        tenants.enrichTrustedClients(tenant.getTrustedClientsValue())
-            .forEach(client -> unverified.remove(client.getCodeValue()));
+        tenants.resolveRelingParties(tenant.getRelingParties())
+            .forEach(rely -> unverified.remove(rely.getCode()));
+        tenants.resolveTrustedClients(tenant.getTrustedClients())
+            .forEach(client -> unverified.remove(client.getCode()));
         if (!unverified.isEmpty()) {
           log.error("The tenant {} cant access to all the audiences {}", tenant, unverified);
           return new Object[] {null, tenant, false};

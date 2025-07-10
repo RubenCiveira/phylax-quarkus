@@ -4,20 +4,18 @@ package net.civeira.phylax.features.access.oauth.application.usecase;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.loginprovider.LoginProvider;
-import net.civeira.phylax.features.access.loginprovider.LoginProviderSourceOptions;
-import net.civeira.phylax.features.access.loginprovider.gateway.LoginProviderReadRepositoryGateway;
-import net.civeira.phylax.features.access.loginprovider.query.LoginProviderFilter;
+import net.civeira.phylax.features.access.loginprovider.domain.LoginProvider;
+import net.civeira.phylax.features.access.loginprovider.domain.LoginProviderSourceOptions;
+import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderFilter;
+import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderReadRepositoryGateway;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
-import net.civeira.phylax.features.access.tenant.Tenant;
-import net.civeira.phylax.features.access.user.User;
-import net.civeira.phylax.features.access.user.UserFacade;
-import net.civeira.phylax.features.access.user.command.UserChangeProposal;
-import net.civeira.phylax.features.access.user.gateway.UserWriteRepositoryGateway;
-import net.civeira.phylax.features.access.user.query.UserFilter;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.UserChangeSet;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.UserData;
 import net.civeira.phylax.features.oauth.delegated.domain.provider.GoogleDelegatedAccessProvider;
@@ -27,7 +25,6 @@ import net.civeira.phylax.features.oauth.delegated.domain.provider.SamlDelegated
 @RequiredArgsConstructor
 public class DelegeatedLoginProvidersUsecase {
   private final ActiveUserFindService actives;
-  private final UserFacade usersFactory;
   private final UserWriteRepositoryGateway usersWriter;
   private final LoginProviderReadRepositoryGateway providers;
 
@@ -38,7 +35,7 @@ public class DelegeatedLoginProvidersUsecase {
   public Optional<String> retrieveUsername(String tenantName, List<String> audiences,
       String provider, UserData codeInfo) {
     return actives.findEnabledTenant(tenantName, audiences)
-        .flatMap(tenant -> findOrCreate(tenant, codeInfo, provider)).map(User::getNameValue);
+        .flatMap(tenant -> findOrCreate(tenant, codeInfo, provider)).map(User::getName);
   }
 
   private Optional<User> findOrCreate(Tenant tenant, UserData codeInfo, String provider) {
@@ -48,7 +45,7 @@ public class DelegeatedLoginProvidersUsecase {
       return actives.checkEnabled(one.get()) ? one : Optional.empty();
     } else {
       return provider(tenant, provider).map(loginProvider -> usersWriter
-          .create(usersFactory.create(UserChangeProposal.builder().newUid().name(codeInfo.getName())
+          .create(User.create(UserChangeSet.builder().newUid().name(codeInfo.getName())
               .password("").email(codeInfo.getEmail()).provider(provider)
               .enabled(loginProvider.isUsersEnabledByDefault()).tenant(tenant).build())));
     }
@@ -68,24 +65,24 @@ public class DelegeatedLoginProvidersUsecase {
     if (provider.isDisabled()) {
       return null;
     }
-    if (provider.getSourceValue() == LoginProviderSourceOptions.GOOGLE) {
+    if (provider.getSource() == LoginProviderSourceOptions.GOOGLE) {
       return mapGoogle(provider);
     }
-    if (provider.getSourceValue() == LoginProviderSourceOptions.SAML) {
+    if (provider.getSource() == LoginProviderSourceOptions.SAML) {
       return mapSaml(provider);
     }
     return null;
   }
 
   private DelegatedAccessExternalProvider mapSaml(LoginProvider provider) {
-    return new SamlDelegatedAccessProvider(provider.getNameValue(),
-        provider.getPrivateKeyValue().orElse("."), provider.getPublicKeyValue().orElse("."),
-        provider.getCertificateValue().orElse("-"), provider.isDirectAccess());
+    return new SamlDelegatedAccessProvider(provider.getName(),
+        provider.getPrivateKey().orElse("."), provider.getPublicKey().orElse("."),
+        provider.getCertificate().orElse("-"), provider.isDirectAccess());
   }
 
   private DelegatedAccessExternalProvider mapGoogle(LoginProvider provider) {
-    return new GoogleDelegatedAccessProvider(provider.getNameValue(),
-        provider.getPublicKeyValue().orElse("-"), provider.getPrivateKeyValue().orElse("-"),
+    return new GoogleDelegatedAccessProvider(provider.getName(),
+        provider.getPublicKey().orElse("-"), provider.getPrivateKey().orElse("-"),
         provider.isDirectAccess());
   }
 }

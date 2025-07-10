@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.role.Role;
-import net.civeira.phylax.features.access.role.query.RoleCursor;
-import net.civeira.phylax.features.access.role.query.RoleFilter;
+import net.civeira.phylax.features.access.role.domain.Role;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleCursor;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleFilter;
 
 class RoleSlider extends Slider<Role> {
 
@@ -52,7 +52,7 @@ class RoleSlider extends Slider<Role> {
   @Override
   public Iterator<Role> next(List<Role> roles, int limit) {
     Role last = roles.get(roles.size() - 1);
-    RoleCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    RoleCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

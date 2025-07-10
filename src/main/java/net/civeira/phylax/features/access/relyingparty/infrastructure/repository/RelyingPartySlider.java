@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.relyingparty.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.query.RelyingPartyCursor;
-import net.civeira.phylax.features.access.relyingparty.query.RelyingPartyFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyCursor;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
 
 class RelyingPartySlider extends Slider<RelyingParty> {
 
@@ -52,7 +52,7 @@ class RelyingPartySlider extends Slider<RelyingParty> {
   @Override
   public Iterator<RelyingParty> next(List<RelyingParty> relyingPartys, int limit) {
     RelyingParty last = relyingPartys.get(relyingPartys.size() - 1);
-    RelyingPartyCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    RelyingPartyCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

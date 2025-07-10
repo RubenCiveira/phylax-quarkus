@@ -9,11 +9,11 @@ import io.quarkus.cache.CacheName;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.access.role.Role;
-import net.civeira.phylax.features.access.role.gateway.RoleCacheGateway;
-import net.civeira.phylax.features.access.role.gateway.RoleCached;
-import net.civeira.phylax.features.access.role.query.RoleCursor;
-import net.civeira.phylax.features.access.role.query.RoleFilter;
+import net.civeira.phylax.features.access.role.domain.Role;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleCacheGateway;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleCached;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleCursor;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleFilter;
 
 @ApplicationScoped
 @Slf4j

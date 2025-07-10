@@ -9,35 +9,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.access.oauth.application.service.RequiredConsentService;
-import net.civeira.phylax.features.access.relyingparty.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.RelyingPartyRef;
-import net.civeira.phylax.features.access.relyingparty.gateway.RelyingPartyReadRepositoryGateway;
-import net.civeira.phylax.features.access.relyingparty.query.RelyingPartyFilter;
-import net.civeira.phylax.features.access.role.Role;
-import net.civeira.phylax.features.access.trustedclient.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.TrustedClientRef;
-import net.civeira.phylax.features.access.trustedclient.gateway.TrustedClientReadRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.query.TrustedClientFilter;
-import net.civeira.phylax.features.access.user.User;
-import net.civeira.phylax.features.access.user.UserFacade;
-import net.civeira.phylax.features.access.user.gateway.UserWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCodeFacade;
-import net.civeira.phylax.features.access.useraccesstemporalcode.command.UserAccessTemporalCodeChangeProposal;
-import net.civeira.phylax.features.access.useraccesstemporalcode.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.query.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.useridentity.UserIdentity;
-import net.civeira.phylax.features.access.useridentity.gateway.UserIdentityReadRepositoryGateway;
-import net.civeira.phylax.features.access.useridentity.query.UserIdentityFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyRef;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
+import net.civeira.phylax.features.access.role.domain.Role;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientRef;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
+import net.civeira.phylax.features.access.useridentity.domain.UserIdentity;
+import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdentityFilter;
+import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdentityReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.EventNotifierGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
@@ -62,13 +58,9 @@ public class UserLoginUsecase {
 
   private final EventNotifierGateway eventNotifier;
 
-  private final UserFacade userFacade;
-
   private final UserWriteRepositoryGateway users;
 
   private final UserIdentityReadRepositoryGateway identities;
-
-  private final UserAccessTemporalCodeFacade codeFacade;
 
   private final UserAccessTemporalCodeWriteRepositoryGateway codes;
 
@@ -109,8 +101,8 @@ public class UserLoginUsecase {
       String newPassword) {
     return activeUser.findEnabledUser(request.getTenant(), username, request.getAudiences())
         .map(user -> {
-          if (oldPassword.equals(user.getPasswordPlainValue(cypher))) {
-            users.update(user, userFacade.changePassword(user, newPassword));
+          if (oldPassword.equals(user.getPlainPassword(cypher))) {
+            users.update(user, user.changePassword(newPassword));
             return true;
           } else {
             return false;
@@ -146,7 +138,7 @@ public class UserLoginUsecase {
           ud.setUid("" + name.hashCode());
           ud.setUsername(name);
           ud.setUsername(name);
-          ud.setTenant(user.getTenantReferenceValue().orElse(null));
+          ud.setTenant(user.getTenantUid().orElse(null));
           ud.setMode(mode);
           ud.setTime(Instant.now());
 
@@ -159,11 +151,11 @@ public class UserLoginUsecase {
               RelyingParty relyingParty = isParty.get();
               hisIdentities.stream()
                   .filter(identity -> relyingParty.getUidValue().equals(
-                      identity.getRelyingPartyValue().map(RelyingPartyRef::getUidValue).orElse("")))
+                      identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse("")))
                   .findFirst()
                   .ifPresent(identity -> ud.addRolesTo(aud,
-                      identities.enrichRoles(identity.getRolesValue()).stream()
-                          .map(Role::getNameValue).toList()));
+                      identities.resolveRoles(identity.getRoles()).stream()
+                          .map(Role::getName).toList()));
             } else {
               Optional<TrustedClient> isClient =
                   clients.find(TrustedClientFilter.builder().code(aud).build());
@@ -172,15 +164,15 @@ public class UserLoginUsecase {
                 hisIdentities.stream()
                     .filter(identity -> trustedClient.getUidValue()
                         .equals(identity
-                            .getTrustedClientValue().map(TrustedClientRef::getUidValue).orElse("")))
+                            .getTrustedClient().map(TrustedClientRef::getUid).orElse("")))
                     .findFirst()
                     .ifPresent(identity -> ud.addRolesTo(aud,
-                        identities.enrichRoles(identity.getRolesValue()).stream()
-                            .map(Role::getNameValue).toList()));
+                        identities.resolveRoles(identity.getRoles()).stream()
+                            .map(Role::getName).toList()));
               }
             }
           });
-          if (user.getTenantValue().isEmpty()) {
+          if (user.getTenant().isEmpty()) {
             ud.getDetails().put("root", true);
           }
           return AuthenticationResult.right(ud);
@@ -190,12 +182,12 @@ public class UserLoginUsecase {
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,
       AuthenticationMode mode) {
     if (AuthenticationMode.PASSWORD == mode && user.isUseSecondFactors()) {
-      if (!user.getSecondFactorSeedCypheredValue(cypher).isPresent()) {
+      if (!user.getCypheredSecondFactorSeed(cypher).isPresent()) {
         return Optional
-            .of(AuthenticationResult.newMfaRequired(request.getTenant(), user.getNameValue()));
+            .of(AuthenticationResult.newMfaRequired(request.getTenant(), user.getName()));
       } else {
         return Optional
-            .of(AuthenticationResult.mfaRequired(request.getTenant(), user.getNameValue()));
+            .of(AuthenticationResult.mfaRequired(request.getTenant(), user.getName()));
       }
     } else {
       return Optional.empty();
@@ -205,7 +197,7 @@ public class UserLoginUsecase {
   private Optional<AuthenticationResult> checkFirstPass(AuthRequest request, User user) {
     if (user.isTemporalPassword()) {
       return Optional
-          .of(AuthenticationResult.newPasswordRequired(request.getTenant(), user.getNameValue()));
+          .of(AuthenticationResult.newPasswordRequired(request.getTenant(), user.getName()));
     } else {
       return Optional.empty();
     }
@@ -213,17 +205,17 @@ public class UserLoginUsecase {
 
   private Optional<AuthenticationResult> checkTerms(AuthRequest request, User user) {
     return terms.findPendingTerms(user).map(
-        ignore -> AuthenticationResult.consentRequired(request.getTenant(), user.getNameValue()));
+        ignore -> AuthenticationResult.consentRequired(request.getTenant(), user.getName()));
   }
 
   private Optional<AuthenticationResult> checkPassword(AuthRequest request, User user,
       String password) {
     if (null != password && !password
-        .equals(cypher.decryptForAll(user.getPasswordCypheredValue(cypher)).orElse(""))) {
-      log.error("The provided password for {} is invalid", user.getNameValue());
+        .equals(cypher.decryptForAll(user.getCypheredPassword(cypher)).orElse(""))) {
+      log.error("The provided password for {} is invalid", user.getName());
       markLoginFails(user, true);
       return Optional
-          .of(AuthenticationResult.wrongCredential(request.getTenant(), user.getNameValue()));
+          .of(AuthenticationResult.wrongCredential(request.getTenant(), user.getName()));
     } else {
       markLoginFails(user, false);
       return Optional.empty();
@@ -237,19 +229,19 @@ public class UserLoginUsecase {
     if (find.isPresent()) {
       code = find.get();
     } else {
-      code = codes.create(codeFacade
-          .create(UserAccessTemporalCodeChangeProposal.builder().newUid().user(user).build()));
+      code = codes.create(UserAccessTemporalCode
+          .create(UserAccessTemporalCodeChangeSet.builder().newUid().user(user).build()));
     }
     if (fail) {
-      int val = code.getFailedLoginAttemptsValue().orElse(Integer.valueOf(0)).intValue() + 1;
+      int val = code.getFailedLoginAttempts().orElse(Integer.valueOf(0)).intValue() + 1;
       if (val > LIMIT) {
-        users.update(user, userFacade.block(user, OffsetDateTime.now().plus(BLOCK_TIME)));
-        codes.update(code, codeFacade.markLoginBlock(code));
+        users.update(user, user.block(OffsetDateTime.now().plus(BLOCK_TIME)));
+        codes.update(code, code.markLoginBlock());
       } else {
-        codes.update(code, codeFacade.markLoginFail(code));
+        codes.update(code, code.markLoginFail());
       }
-    } else if (0 != code.getFailedLoginAttemptsValue().orElse(Integer.valueOf(0)).intValue()) {
-      codes.update(code, codeFacade.markLoginOk(code));
+    } else if (0 != code.getFailedLoginAttempts().orElse(Integer.valueOf(0)).intValue()) {
+      codes.update(code, code.markLoginOk());
     }
   }
 }

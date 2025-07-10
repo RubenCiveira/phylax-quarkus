@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.tenanttermsofuse.TenantTermsOfUse;
-import net.civeira.phylax.features.access.tenanttermsofuse.application.service.visibility.TenantTermsOfUsesVisibility;
-import net.civeira.phylax.features.access.tenanttermsofuse.query.TenantTermsOfUseCursor;
+import net.civeira.phylax.features.access.tenanttermsofuse.application.visibility.TenantTermsOfUsesVisibility;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class TenantTermsOfUsesInBatchExecutor implements
   @Override
   public String itemDescription(final TenantTermsOfUse item,
       final StepContext<TenantTermsOfUseDeleteAllInBatchCommand, TenantTermsOfUsePaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -131,7 +131,7 @@ class TenantTermsOfUsesInBatchExecutor implements
         visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
             context.getParams().getFilter(), TenantTermsOfUseCursor.builder().limit(size)
                 .sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

@@ -3,18 +3,16 @@ package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.List;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.relyingparty.gateway.RelyingPartyReadRepositoryGateway;
-import net.civeira.phylax.features.access.relyingparty.query.RelyingPartyFilter;
-import net.civeira.phylax.features.access.securityscope.SecurityScope;
-import net.civeira.phylax.features.access.securityscope.SecurityScopeFacade;
-import net.civeira.phylax.features.access.securityscope.SecurityScopeKindOptions;
-import net.civeira.phylax.features.access.securityscope.SecurityScopeVisibilityOptions;
-import net.civeira.phylax.features.access.securityscope.command.SecurityScopeChangeProposal;
-import net.civeira.phylax.features.access.securityscope.gateway.SecurityScopeWriteRepositoryGateway;
-import net.civeira.phylax.features.access.securityscope.query.SecurityScopeFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScope;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeChangeSet;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeKindOptions;
+import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeVisibilityOptions;
+import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeFilter;
+import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.rbac.domain.PropertyList;
 import net.civeira.phylax.features.oauth.rbac.domain.Resource;
 import net.civeira.phylax.features.oauth.rbac.domain.ScopeKind;
@@ -24,7 +22,6 @@ import net.civeira.phylax.features.oauth.rbac.domain.ScopeList;
 @RequiredArgsConstructor
 public class RegisterResourceUsecase {
   private final RelyingPartyReadRepositoryGateway parties;
-  private final SecurityScopeFacade scopeFacade;
   private final SecurityScopeWriteRepositoryGateway scopes;
 
   public void registerScopes(String relayParty, List<ScopeList> paramMap) {
@@ -37,8 +34,8 @@ public class RegisterResourceUsecase {
           Optional<SecurityScope> prev = list.stream()
               .filter(existing -> existing.getScopeValue().equals(scope.getName())).findFirst();
           if (!prev.isPresent()) {
-            scopes.create(scopeFacade.create(
-                SecurityScopeChangeProposal.builder().newUid().relyingParty(party).enabled(true)
+            scopes.create(SecurityScope.create(
+                SecurityScopeChangeSet.builder().newUid().relyingParty(party).enabled(true)
                     .resource(resource.getName()).scope(scope.getName()).kind(kind(scope.getKind()))
                     .visibility(SecurityScopeVisibilityOptions.EXPLICIT).build()));
           } else {
@@ -46,7 +43,7 @@ public class RegisterResourceUsecase {
           }
         });
         list.forEach(prev -> {
-          scopes.update(prev, scopeFacade.enable(prev));
+          scopes.update(prev, prev.enable());
         });
       });
     });

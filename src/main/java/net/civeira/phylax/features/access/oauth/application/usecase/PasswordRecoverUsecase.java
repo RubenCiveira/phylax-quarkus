@@ -5,18 +5,15 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.access.oauth.application.service.SecureCodeGenerator;
-import net.civeira.phylax.features.access.user.UserFacade;
-import net.civeira.phylax.features.access.user.gateway.UserWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCodeFacade;
-import net.civeira.phylax.features.access.useraccesstemporalcode.command.UserAccessTemporalCodeChangeProposal;
-import net.civeira.phylax.features.access.useraccesstemporalcode.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.query.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 
 @ApplicationScoped
@@ -25,9 +22,7 @@ public class PasswordRecoverUsecase {
   private final static TemporalAmount RECOVER_TIME = Duration.ofHours(12);
 
   private final ActiveUserFindService activeUser;
-  private final UserFacade userFacade;
   private final UserWriteRepositoryGateway users;
-  private final UserAccessTemporalCodeFacade codesFacade;
   private final UserAccessTemporalCodeWriteRepositoryGateway codes;
 
   public boolean checkRecoverCode(AuthRequest request, String email, String code,
@@ -35,7 +30,7 @@ public class PasswordRecoverUsecase {
     return activeUser
         .findEnabledUserByNameOrEmail(request.getTenant(), email, request.getAudiences())
         .map(user -> {
-          if (user.getProviderValue().isPresent()) {
+          if (user.getProvider().isPresent()) {
             return false;
           }
           Optional<UserAccessTemporalCode> find =
@@ -44,10 +39,10 @@ public class PasswordRecoverUsecase {
             return false;
           }
           UserAccessTemporalCode tempCode = find.get();
-          if (!"".equals(code) && code.equals(tempCode.getRecoveryCodeValue().orElse(""))) {
-            codes.update(tempCode, codesFacade.resetPasswordRecover(tempCode));
+          if (!"".equals(code) && code.equals(tempCode.getRecoveryCode().orElse(""))) {
+            codes.update(tempCode, tempCode.resetPasswordRecover());
             // codes.update(tempCode, tempCode.withNullRecoveryCode());
-            users.update(user, userFacade.changePassword(user, newPassoword));
+            users.update(user, user.changePassword(newPassoword));
             // users.update(user, user.withPlainPassword(newPassoword));
             return true;
           } else {
@@ -59,7 +54,7 @@ public class PasswordRecoverUsecase {
   public void recover(AuthRequest request, String email, String urlWithParams) {
     activeUser.findEnabledUserByNameOrEmail(request.getTenant(), email, request.getAudiences())
         .ifPresent(user -> {
-          if (user.getProviderValue().isPresent()) {
+          if (user.getProvider().isPresent()) {
             return;
           }
           String code = SecureCodeGenerator.generate();
@@ -69,20 +64,11 @@ public class PasswordRecoverUsecase {
           if (find.isPresent()) {
             userCode = find.get();
           } else {
-            userCode = codes.create(codesFacade
-                .create(UserAccessTemporalCodeChangeProposal.builder().newUid().build()));
+            userCode = codes.create(UserAccessTemporalCode
+                .create(UserAccessTemporalCodeChangeSet.builder().newUid().build()));
           }
-          // if (find.isPresent()) {
-          // UserAccessTemporalCode userCode = find.get();
-          // codes.update(userCode, userCode.toBuilder().recoveryCode(code)
-          // .recoveryCodeExpiration(OffsetDateTime.now().plus(RECOVER_TIME)).build());
-          // } else {
-          // codes.create(UserAccessTemporalCode.builder().newUid().user(user).recoveryCode(code)
-          // .recoveryCodeExpiration(OffsetDateTime.now().plus(RECOVER_TIME)).build());
-          // }
-          codes.update(userCode, codesFacade.generatePasswordRecover(userCode, code,
+          codes.update(userCode, userCode.generatePasswordRecover(code,
               OffsetDateTime.now().plus(RECOVER_TIME)));
-          // users.update(user, user.toBuilder().build());
         });
   }
 }

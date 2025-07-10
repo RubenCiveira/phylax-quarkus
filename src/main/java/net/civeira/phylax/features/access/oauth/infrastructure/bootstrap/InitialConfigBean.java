@@ -2,54 +2,61 @@
 package net.civeira.phylax.features.access.oauth.infrastructure.bootstrap;
 
 import java.util.List;
-
 import lombok.Getter;
-import net.civeira.phylax.features.access.relyingparty.command.RelyingPartyChangeProposal;
-import net.civeira.phylax.features.access.role.Domains;
-import net.civeira.phylax.features.access.role.command.RoleChangeProposal;
-import net.civeira.phylax.features.access.securitydomain.command.SecurityDomainChangeProposal;
-import net.civeira.phylax.features.access.trustedclient.command.TrustedClientChangeProposal;
-import net.civeira.phylax.features.access.user.command.UserChangeProposal;
-import net.civeira.phylax.features.access.useridentity.Roles;
-import net.civeira.phylax.features.access.useridentity.transition.UserIdentityChangeProposal;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.role.domain.Domains;
+import net.civeira.phylax.features.access.role.domain.RoleChangeSet;
+import net.civeira.phylax.features.access.role.domain.RoleReference;
+import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomainChangeSet;
+import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomainReference;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
+import net.civeira.phylax.features.access.user.domain.UserChangeSet;
+import net.civeira.phylax.features.access.user.domain.UserReference;
+import net.civeira.phylax.features.access.useridentity.domain.Roles;
+import net.civeira.phylax.features.access.useridentity.domain.UserIdentityChangeSet;
 
 @Getter
 public class InitialConfigBean {
-  private final List<RelyingPartyChangeProposal> parties;
-  private final List<TrustedClientChangeProposal> clients;
-  private final List<UserChangeProposal> users;
-  private final List<SecurityDomainChangeProposal> domains;
-  private final List<RoleChangeProposal> roles;
-  private final List<UserIdentityChangeProposal> identities;
+  private final List<RelyingPartyChangeSet> parties;
+  private final List<TrustedClientChangeSet> clients;
+  private final List<UserChangeSet> users;
+  private final List<SecurityDomainChangeSet> domains;
+  private final List<RoleChangeSet> roles;
+  private final List<UserIdentityChangeSet> identities;
 
   public InitialConfigBean(String password) {
-    RelyingPartyChangeProposal party = RelyingPartyChangeProposal.builder().newUid()
-        .code("phylax-api").apiKey("1111").enabled(Boolean.TRUE).build();
+    RelyingPartyChangeSet party = RelyingPartyChangeSet.builder().newUid().code("phylax-api")
+        .apiKey("1111").enabled(Boolean.TRUE).build();
 
-    TrustedClientChangeProposal client =
-        TrustedClientChangeProposal.builder().newUid().code("phylax-ui").allowedRedirects("*")
-            .publicAllow(Boolean.TRUE).enabled(Boolean.TRUE).build();
+    TrustedClientChangeSet client = TrustedClientChangeSet.builder().newUid().code("phylax-ui")
+        .allowedRedirects("*").publicAllow(Boolean.TRUE).enabled(Boolean.TRUE).build();
 
-    SecurityDomainChangeProposal domain =
-        SecurityDomainChangeProposal.builder().newUid().name("ADMIN").readAll(true).writeAll(true)
-            .manageAll(true).enabled(true).level(100).build();
+    SecurityDomainChangeSet domain = SecurityDomainChangeSet.builder().newUid().name("ADMIN")
+        .readAll(true).writeAll(true).manageAll(true).enabled(true).level(100).build();
 
-    Domains roleDomain = Domains.builder().newUid().securityDomain(domain.asReference()).build();
-    RoleChangeProposal role =
-        RoleChangeProposal.builder().newUid().name("ADMIN").domains(List.of(roleDomain)).build();
+    Domains roleDomain = Domains.builder().newUid()
+        .securityDomain(SecurityDomainReference.of(domain.getUid().orElseThrow().getUid())).build();
+    RoleChangeSet role =
+        RoleChangeSet.builder().newUid().name("ADMIN").domains(List.of(roleDomain)).build();
 
-    UserChangeProposal root = UserChangeProposal.builder().newUid().name("ROOT").password(password)
+    UserChangeSet root = UserChangeSet.builder().newUid().name("ROOT").password(password)
         .enabled(true).useSecondFactors(false).build();
 
-    Roles userRoleRely = Roles.builder().newUid().role(role.asReference()).build();
-    UserIdentityChangeProposal userRelyIdentity =
-        UserIdentityChangeProposal.builder().newUid().user(root.asReference())
-            .relyingParty(party.asReference()).roles(List.of(userRoleRely)).build();
+    Roles userRoleRely = Roles.builder().newUid()
+        .role(RoleReference.of(role.getUid().orElseThrow().getUid())).build();
+    UserIdentityChangeSet userRelyIdentity = UserIdentityChangeSet.builder().newUid()
+        .user(UserReference.of(root.getUid().orElseThrow().getUid()))
+        .relyingParty(RelyingPartyReference.of(party.getUid().orElseThrow().getUid()))
+        .roles(List.of(userRoleRely)).build();
 
-    Roles userRoleClient = Roles.builder().newUid().role(role.asReference()).build();
-    UserIdentityChangeProposal userClientIdentity =
-        UserIdentityChangeProposal.builder().newUid().user(root.asReference())
-            .trustedClient(client.asReference()).roles(List.of(userRoleClient)).build();
+    Roles userRoleClient = Roles.builder().newUid()
+        .role(RoleReference.of(role.getUid().orElseThrow().getUid())).build();
+    UserIdentityChangeSet userClientIdentity = UserIdentityChangeSet.builder().newUid()
+        .user(UserReference.of(root.getUid().orElseThrow().getUid()))
+        .trustedClient(TrustedClientReference.of(client.getUid().orElseThrow().getUid()))
+        .roles(List.of(userRoleClient)).build();
 
     parties = List.of(party);
     clients = List.of(client);

@@ -1,0 +1,9 @@
+mailer:
+  thread-pool: 5
+  auth-methods: "DIGEST-MD5 CRAM-SHA256 CRAM-SHA1 CRAM-MD5 PLAIN LOGIN"
+  host: ""
+  port: 857
+  start-tls: "REQUIRED"
+  from: ""
+  username: ""
+  password: ""

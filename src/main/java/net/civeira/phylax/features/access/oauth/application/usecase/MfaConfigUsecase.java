@@ -7,7 +7,6 @@ import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
 import jakarta.activation.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +15,11 @@ import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.access.oauth.application.service.OtpMfaService;
 import net.civeira.phylax.features.access.oauth.application.service.OtpMfaService.ApplicationInfo;
-import net.civeira.phylax.features.access.user.UserFacade;
-import net.civeira.phylax.features.access.user.gateway.UserWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCodeFacade;
-import net.civeira.phylax.features.access.useraccesstemporalcode.command.UserAccessTemporalCodeChangeProposal;
-import net.civeira.phylax.features.access.useraccesstemporalcode.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.query.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 
 @Slf4j
 @ApplicationScoped
@@ -32,9 +29,9 @@ public class MfaConfigUsecase {
 
   private final OtpMfaService otp;
   private final ActiveUserFindService finder;
-  private final UserFacade userFacade;
+//  private final UserFacade userFacade;
   private final UserWriteRepositoryGateway users;
-  private final UserAccessTemporalCodeFacade codeFacade;
+//  private final UserAccessTemporalCodeFacade codeFacade;
   private final UserAccessTemporalCodeWriteRepositoryGateway codes;
   private final AesCipherService cypher;
 
@@ -44,9 +41,9 @@ public class MfaConfigUsecase {
       Optional<UserAccessTemporalCode> find =
           codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
       Optional<String> prev = find
-          .filter(code -> code.getTempSecondFactorSeedExpirationValue()
+          .filter(code -> code.getTempSecondFactorSeedExpiration()
               .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(code -> code.getTempSecondFactorSeedCypheredValue(cypher));
+          .flatMap(code -> code.getCypheredTempSecondFactorSeed(cypher));
       if (prev.isPresent()) {
         return otp.getQr(
             ApplicationInfo.builder().label(user.getName() + " at ").issuer("no").build(),
@@ -59,23 +56,11 @@ public class MfaConfigUsecase {
               if (find.isPresent()) {
                 code = find.get();
               } else {
-                code = codes.create(codeFacade.create(
-                    UserAccessTemporalCodeChangeProposal.builder().newUid().user(user).build()));
+                code = codes.create(UserAccessTemporalCode.create(
+                    UserAccessTemporalCodeChangeSet.builder().newUid().user(user).build()));
               }
-              codes.update(code, codeFacade.generateMfaTemporalCode(code, secret,
+              codes.update(code, code.generateMfaTemporalCode(secret,
                   OffsetDateTime.now().plus(EXPIRATION_TIME)));
-              // if (find.isPresent()) {
-              // UserAccessTemporalCode code = find.get();
-              // codes.update(code,
-              // code.toBuilder().cypheredTempSecondFactorSeed(cypher.encryptForAll(secret))
-              // .tempSecondFactorSeedExpiration(OffsetDateTime.now().plus(EXPIRATION_TIME))
-              // .build());
-              // } else {
-              // codes.create(UserAccessTemporalCode.builder().newUid().user(user)
-              // .cypheredTempSecondFactorSeed(cypher.encryptForAll(secret))
-              // .tempSecondFactorSeedExpiration(OffsetDateTime.now().plus(EXPIRATION_TIME))
-              // .build());
-              // }
             });
       }
     });
@@ -83,7 +68,7 @@ public class MfaConfigUsecase {
 
   public boolean validateOtp(String tenant, String username, List<String> audiences, String code) {
     return finder.findEnabledUser(tenant, username, audiences).map(user -> {
-      Optional<String> find = user.getSecondFactorSeedCypheredValue(cypher);
+      Optional<String> find = user.getCypheredSecondFactorSeed(cypher);
       if (find.isPresent()) {
         String seed = find.get();
         return otp.validateOtp(code, seed);
@@ -100,26 +85,18 @@ public class MfaConfigUsecase {
       Optional<UserAccessTemporalCode> find =
           codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
       Optional<String> prev = find
-          .filter(temps -> temps.getTempSecondFactorSeedExpirationValue()
+          .filter(temps -> temps.getTempSecondFactorSeedExpiration()
               .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(second -> second.getTempSecondFactorSeedCypheredValue(cypher));
+          .flatMap(second -> second.getCypheredTempSecondFactorSeed(cypher));
       if (prev.isPresent()) {
         String seed = prev.get();
         boolean valid = otp.validateOtp(code, seed);
         if (valid) {
           if (find.isPresent()) {
             UserAccessTemporalCode temps = find.get();
-            codes.update(temps, codeFacade.resetMfaTemporalCode(temps));
-            // codes.update(temps, temps.toBuilder().nullTempSecondFactorSeed()
-            // .nullTempSecondFactorSeedExpiration().build());
-            users.update(user, userFacade.setMfaSeed(user,
-                temps.getTempSecondFactorSeedPlainValue(cypher).orElseThrow()));
-            // users
-            // .update(user,
-            // user.toBuilder().useSecondFactors(Boolean.TRUE)
-            // .cypheredSecondFactorSeed(
-            // temps.getTempSecondFactorSeedCypheredValue(cypher).orElseThrow())
-            // .build());
+            codes.update(temps, temps.resetMfaTemporalCode());
+            users.update(user, user.setMfaSeed(
+                temps.getPlainTempSecondFactorSeed(cypher).orElseThrow()));
           } else {
             log.error("We have a part but not the hole item");
             throw new IllegalStateException("");

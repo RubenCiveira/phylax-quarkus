@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.UserAcceptedTermnsOfUse;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.query.UserAcceptedTermnsOfUseCursor;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.query.UserAcceptedTermnsOfUseFilter;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseCursor;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
 
 class UserAcceptedTermnsOfUseSlider extends Slider<UserAcceptedTermnsOfUse> {
 
@@ -54,8 +54,7 @@ class UserAcceptedTermnsOfUseSlider extends Slider<UserAcceptedTermnsOfUse> {
       List<UserAcceptedTermnsOfUse> userAcceptedTermnsOfUses, int limit) {
     UserAcceptedTermnsOfUse last =
         userAcceptedTermnsOfUses.get(userAcceptedTermnsOfUses.size() - 1);
-    UserAcceptedTermnsOfUseCursor cr =
-        this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    UserAcceptedTermnsOfUseCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

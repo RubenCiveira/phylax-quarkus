@@ -3,18 +3,17 @@ package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.List;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.AesCipherService;
-import net.civeira.phylax.features.access.tenant.Tenant;
-import net.civeira.phylax.features.access.tenant.gateway.TenantReadRepositoryGateway;
-import net.civeira.phylax.features.access.tenant.query.TenantFilter;
-import net.civeira.phylax.features.access.trustedclient.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.gateway.TrustedClientReadRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.query.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.valueobject.SecretOauthVO;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 
 @Slf4j
@@ -49,7 +48,7 @@ public class VerifyTrustedClientUsecase {
   private Optional<String> tenant(String name) {
     return "main".equals(name) ? Optional.of(name)
         : tenants.find(TenantFilter.builder().name(name).build()).filter(this::tenantEnabled)
-            .map(Tenant::getNameValue);
+            .map(Tenant::getName);
   }
 
   private boolean tenantEnabled(Tenant tenant) {
@@ -79,13 +78,13 @@ public class VerifyTrustedClientUsecase {
   }
 
   private boolean redirectAllowed(TrustedClient app, String redirect) {
-    String redirects = app.getAllowedRedirectsValue().orElse("");
+    String redirects = app.getAllowedRedirects().orElse("");
     return redirects.equals("*") || redirects.contains(redirect);
   }
 
   private Optional<ClientDetails> privateClient(TrustedClient app, String clientId, String secret) {
-    SecretOauthVO secretOauth = app.getSecretOauth();
-    Optional<String> pass = secretOauth.getPlainValue(cypher);
+    SecretOauthVO secretOauth = app.getSecretOauthValue();
+    Optional<String> pass = secretOauth.getPlainSecretOauth(cypher);
     if (pass.isPresent() && secret.equals(pass.get())) {
       return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(true)
           .allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES).build());

@@ -3,8 +3,8 @@ package net.civeira.phylax.features.access.useraccesstemporalcode.infrastructure
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.useraccesstemporalcode.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.event.UserAccessTemporalCodeEvent;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.event.UserAccessTemporalCodeEvent;
 
 @ApplicationScoped
 @RequiredArgsConstructor

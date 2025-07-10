@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.user.User;
-import net.civeira.phylax.features.access.user.application.service.visibility.UsersVisibility;
-import net.civeira.phylax.features.access.user.query.UserCursor;
+import net.civeira.phylax.features.access.user.application.visibility.UsersVisibility;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -98,7 +98,7 @@ class UserEnablesInBatchExecutor implements
   @Override
   public String itemDescription(final User item,
       final StepContext<UserEnableAllInBatchCommand, UserPaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -128,7 +128,7 @@ class UserEnablesInBatchExecutor implements
     List<User> page = visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
         context.getParams().getFilter(),
         UserCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

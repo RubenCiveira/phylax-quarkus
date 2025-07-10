@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.trustedclient.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.application.service.visibility.TrustedClientsVisibility;
-import net.civeira.phylax.features.access.trustedclient.query.TrustedClientCursor;
+import net.civeira.phylax.features.access.trustedclient.application.visibility.TrustedClientsVisibility;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class TrustedClientEnablesInBatchExecutor implements
   @Override
   public String itemDescription(final TrustedClient item,
       final StepContext<TrustedClientEnableAllInBatchCommand, TrustedClientPaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -130,7 +130,7 @@ class TrustedClientEnablesInBatchExecutor implements
     List<TrustedClient> page = visibility.listVisiblesForUpdate(
         context.getParams().getInteraction(), context.getParams().getFilter(),
         TrustedClientCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 

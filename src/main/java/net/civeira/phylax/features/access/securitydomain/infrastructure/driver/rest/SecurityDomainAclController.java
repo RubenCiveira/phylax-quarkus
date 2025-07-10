@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Allow;
 import net.civeira.phylax.common.security.Interaction;
-import net.civeira.phylax.features.access.securitydomain.application.service.visibility.SecurityDomainsVisibility;
 import net.civeira.phylax.features.access.securitydomain.application.usecase.create.SecurityDomainCreateUsecase;
 import net.civeira.phylax.features.access.securitydomain.application.usecase.delete.SecurityDomainDeleteUsecase;
 import net.civeira.phylax.features.access.securitydomain.application.usecase.disable.SecurityDomainDisableUsecase;
@@ -15,6 +14,7 @@ import net.civeira.phylax.features.access.securitydomain.application.usecase.ena
 import net.civeira.phylax.features.access.securitydomain.application.usecase.list.SecurityDomainListUsecase;
 import net.civeira.phylax.features.access.securitydomain.application.usecase.retrieve.SecurityDomainRetrieveUsecase;
 import net.civeira.phylax.features.access.securitydomain.application.usecase.update.SecurityDomainUpdateUsecase;
+import net.civeira.phylax.features.access.securitydomain.application.visibility.SecurityDomainsVisibility;
 import net.civeira.phylax.generated.openapi.api.SecurityDomainAclApi;
 import net.civeira.phylax.generated.openapi.model.CommonAllow;
 import net.civeira.phylax.generated.openapi.model.SecurityDomainAclFields;

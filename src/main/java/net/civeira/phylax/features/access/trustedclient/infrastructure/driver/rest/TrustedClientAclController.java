@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Allow;
 import net.civeira.phylax.common.security.Interaction;
-import net.civeira.phylax.features.access.trustedclient.application.service.visibility.TrustedClientsVisibility;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.create.TrustedClientCreateUsecase;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.delete.TrustedClientDeleteUsecase;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.disable.TrustedClientDisableUsecase;
@@ -15,6 +14,7 @@ import net.civeira.phylax.features.access.trustedclient.application.usecase.enab
 import net.civeira.phylax.features.access.trustedclient.application.usecase.list.TrustedClientListUsecase;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.retrieve.TrustedClientRetrieveUsecase;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.update.TrustedClientUpdateUsecase;
+import net.civeira.phylax.features.access.trustedclient.application.visibility.TrustedClientsVisibility;
 import net.civeira.phylax.generated.openapi.api.TrustedClientAclApi;
 import net.civeira.phylax.generated.openapi.model.CommonAllow;
 import net.civeira.phylax.generated.openapi.model.TrustedClientAclFields;

@@ -102,6 +102,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -186,6 +192,12 @@ paths:
         - name: name
           in: query
           description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
           required: false
           schema:
             type: string
@@ -1168,6 +1180,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
         - name: users
           in: query
           description: users
@@ -1178,6 +1196,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
         - name: relying-partys
           in: query
           description: relying partys
@@ -1188,6 +1212,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
         - name: trusted-clients
           in: query
           description: trusted clients
@@ -1257,6 +1287,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
         - name: users
           in: query
           description: users
@@ -1267,6 +1303,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
         - name: relying-partys
           in: query
           description: relying partys
@@ -1277,6 +1319,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
         - name: trusted-clients
           in: query
           description: trusted clients
@@ -1440,6 +1488,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -1506,6 +1560,12 @@ paths:
         - name: search
           in: query
           description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
           required: false
           schema:
             type: string
@@ -2098,6 +2158,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -2182,6 +2248,12 @@ paths:
         - name: name
           in: query
           description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
           required: false
           schema:
             type: string
@@ -2472,6 +2544,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -2540,6 +2618,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -2599,6 +2683,12 @@ paths:
         - name: search
           in: query
           description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
           required: false
           schema:
             type: string
@@ -2668,6 +2758,12 @@ paths:
         - name: search
           in: query
           description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
           required: false
           schema:
             type: string
@@ -2908,6 +3004,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: security-domain
+          in: query
+          description: security domain
+          required: false
+          schema:
+            type: string
         - name: security-domains
           in: query
           description: security domains
@@ -2918,6 +3020,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: security-scope
+          in: query
+          description: security scope
+          required: false
+          schema:
+            type: string
         - name: security-scopes
           in: query
           description: security scopes
@@ -2987,6 +3095,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: security-domain
+          in: query
+          description: security domain
+          required: false
+          schema:
+            type: string
         - name: security-domains
           in: query
           description: security domains
@@ -2997,6 +3111,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: security-scope
+          in: query
+          description: security scope
+          required: false
+          schema:
+            type: string
         - name: security-scopes
           in: query
           description: security scopes
@@ -3172,6 +3292,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -3262,6 +3388,12 @@ paths:
         - name: name
           in: query
           description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
           required: false
           schema:
             type: string
@@ -3506,6 +3638,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -3580,6 +3718,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
         - name: tenants
           in: query
           description: tenants
@@ -3651,6 +3795,12 @@ paths:
         - name: name
           in: query
           description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
           required: false
           schema:
             type: string
@@ -4118,6 +4268,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
         - name: trusted-clients
           in: query
           description: trusted clients
@@ -4128,6 +4284,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
         - name: relying-partys
           in: query
           description: relying partys
@@ -4203,6 +4365,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
         - name: trusted-clients
           in: query
           description: trusted clients
@@ -4213,6 +4381,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
         - name: relying-partys
           in: query
           description: relying partys
@@ -4426,6 +4600,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
         - name: trusted-clients
           in: query
           description: trusted clients
@@ -4436,6 +4616,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
         - name: relying-partys
           in: query
           description: relying partys
@@ -4504,6 +4690,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
         - name: trusted-clients
           in: query
           description: trusted clients
@@ -4514,6 +4706,12 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
         - name: relying-partys
           in: query
           description: relying partys

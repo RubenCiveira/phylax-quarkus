@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.store.BinaryContent;
 import net.civeira.phylax.common.infrastructure.store.FileStore;
 import net.civeira.phylax.common.infrastructure.store.RepositoryLink;
-import net.civeira.phylax.features.access.loginprovider.LoginProvider;
-import net.civeira.phylax.features.access.loginprovider.gateway.LoginProviderMetadataUploadGateway;
+import net.civeira.phylax.features.access.loginprovider.domain.LoginProvider;
+import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderMetadataUploadGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -29,8 +29,8 @@ public class LoginProviderMetadataUploadGatewayAdapter
   @Override
   public Optional<String> commitMetadata(final LoginProvider key,
       final Optional<LoginProvider> orignal) {
-    String theNew = key.getMetadataValue().orElse(null);
-    String theOld = orignal.flatMap(LoginProvider::getMetadataValue).orElse(null);
+    String theNew = key.getMetadata().orElse(null);
+    String theOld = orignal.flatMap(LoginProvider::getMetadata).orElse(null);
     boolean wasRemoved = theNew == null && theOld != null;
     boolean wasAppend = theNew != null && theOld == null;
     boolean wasModified = theOld != null && theNew != null && !theNew.equals(theOld);
@@ -53,7 +53,7 @@ public class LoginProviderMetadataUploadGatewayAdapter
    */
   @Override
   public void deleteMetadata(final LoginProvider key) {
-    key.getMetadataValue().ifPresent(store::deleteFile);
+    key.getMetadata().ifPresent(store::deleteFile);
   }
 
   /**
@@ -63,7 +63,7 @@ public class LoginProviderMetadataUploadGatewayAdapter
    */
   @Override
   public Optional<BinaryContent> readMetadata(final LoginProvider entity) {
-    return entity.getMetadataValue().map(store::retrieveFile).orElseThrow();
+    return entity.getMetadata().map(store::retrieveFile).orElseThrow();
   }
 
   /**

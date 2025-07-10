@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.loginprovider.LoginProvider;
-import net.civeira.phylax.features.access.loginprovider.query.LoginProviderCursor;
-import net.civeira.phylax.features.access.loginprovider.query.LoginProviderFilter;
+import net.civeira.phylax.features.access.loginprovider.domain.LoginProvider;
+import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderCursor;
+import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderFilter;
 
 class LoginProviderSlider extends Slider<LoginProvider> {
 
@@ -52,7 +52,7 @@ class LoginProviderSlider extends Slider<LoginProvider> {
   @Override
   public Iterator<LoginProvider> next(List<LoginProvider> loginProviders, int limit) {
     LoginProvider last = loginProviders.get(loginProviders.size() - 1);
-    LoginProviderCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    LoginProviderCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

@@ -3,21 +3,19 @@ package net.civeira.phylax.features.access.oauth.application.service;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.tenant.TenantRef;
-import net.civeira.phylax.features.access.tenanttermsofuse.TenantTermsOfUse;
-import net.civeira.phylax.features.access.tenanttermsofuse.TenantTermsOfUseReference;
-import net.civeira.phylax.features.access.tenanttermsofuse.gateway.TenantTermsOfUseReadRepositoryGateway;
-import net.civeira.phylax.features.access.tenanttermsofuse.query.TenantTermsOfUseFilter;
-import net.civeira.phylax.features.access.user.User;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.UserAcceptedTermnsOfUse;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.UserAcceptedTermnsOfUseFacade;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.command.UserAcceptedTermnsOfUseChangeProposal;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.gateway.UserAcceptedTermnsOfUseReadRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.gateway.UserAcceptedTermnsOfUseWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.query.UserAcceptedTermnsOfUseFilter;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseFilter;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUseChangeSet;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseReadRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseWriteRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -27,24 +25,22 @@ public class RequiredConsentService {
 
   private final UserAcceptedTermnsOfUseReadRepositoryGateway userTerms;
 
-  private final UserAcceptedTermnsOfUseFacade termsFacade;
-
   private final UserAcceptedTermnsOfUseWriteRepositoryGateway userTermsWriter;
 
   public Optional<TenantTermsOfUse> findPendingTerms(User user) {
-    Optional<TenantRef> optionalTenant = user.getTenantValue();
+    Optional<TenantRef> optionalTenant = user.getTenant();
     if (optionalTenant.isPresent()) {
       TenantRef tenantRef = optionalTenant.get();
       Optional<TenantTermsOfUse> find =
           terms.list(TenantTermsOfUseFilter.builder().tenant(tenantRef).build()).stream()
-              .filter(term -> term.getActivationDateValue()
-                  .map(d -> d.isBefore(OffsetDateTime.now())).orElse(false))
-              .sorted((a, b) -> a.getActivationDateValue().orElseThrow()
-                  .compareTo(b.getActivationDateValue().orElseThrow()))
+              .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
+                  .orElse(false))
+              .sorted((a, b) -> a.getActivationDate().orElseThrow()
+                  .compareTo(b.getActivationDate().orElseThrow()))
               .findFirst();
       if (find.isPresent()) {
         TenantTermsOfUse conditions = find.get();
-        Optional<OffsetDateTime> activationDateValue = conditions.getActivationDateValue();
+        Optional<OffsetDateTime> activationDateValue = conditions.getActivationDate();
         if (activationDateValue.isPresent()
             && activationDateValue.get().isBefore(OffsetDateTime.now())) {
           Optional<UserAcceptedTermnsOfUse> accepted = userTerms.find(
@@ -59,7 +55,7 @@ public class RequiredConsentService {
   }
 
   public void acceptPendingTerms(User user, String conditionsUid) {
-    userTermsWriter.create(termsFacade.create(UserAcceptedTermnsOfUseChangeProposal.builder()
+    userTermsWriter.create(UserAcceptedTermnsOfUse.create(UserAcceptedTermnsOfUseChangeSet.builder()
         .newUid().user(user).conditions(TenantTermsOfUseReference.of(conditionsUid))
         .acceptDate(OffsetDateTime.now()).build()));
   }

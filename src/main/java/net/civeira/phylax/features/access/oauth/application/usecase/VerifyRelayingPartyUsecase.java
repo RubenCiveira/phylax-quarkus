@@ -2,12 +2,11 @@
 package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.relyingparty.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.gateway.RelyingPartyReadRepositoryGateway;
-import net.civeira.phylax.features.access.relyingparty.query.RelyingPartyFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -16,6 +15,6 @@ public class VerifyRelayingPartyUsecase {
 
   public Optional<String> findOptional(String apiKey) {
     return parties.find(RelyingPartyFilter.builder().apiKey(apiKey).build())
-        .map(RelyingParty::getCodeValue);
+        .map(RelyingParty::getCode);
   }
 }

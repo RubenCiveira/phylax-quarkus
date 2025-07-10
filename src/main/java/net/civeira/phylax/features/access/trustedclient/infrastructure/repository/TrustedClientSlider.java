@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.features.access.trustedclient.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.query.TrustedClientCursor;
-import net.civeira.phylax.features.access.trustedclient.query.TrustedClientFilter;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCursor;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 
 class TrustedClientSlider extends Slider<TrustedClient> {
 
@@ -52,7 +52,7 @@ class TrustedClientSlider extends Slider<TrustedClient> {
   @Override
   public Iterator<TrustedClient> next(List<TrustedClient> trustedClients, int limit) {
     TrustedClient last = trustedClients.get(trustedClients.size() - 1);
-    TrustedClientCursor cr = this.cursor.withSinceUid(last.getUid().getValue()).withLimit(limit);
+    TrustedClientCursor cr = this.cursor.withSinceUid(last.getUid()).withLimit(limit);
     return gateway.apply(this.filter, cr);
   }
 }

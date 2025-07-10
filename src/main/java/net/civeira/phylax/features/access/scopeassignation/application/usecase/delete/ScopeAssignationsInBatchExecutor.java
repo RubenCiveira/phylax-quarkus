@@ -16,9 +16,9 @@ import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.security.Allow;
-import net.civeira.phylax.features.access.scopeassignation.ScopeAssignation;
-import net.civeira.phylax.features.access.scopeassignation.application.service.visibility.ScopeAssignationsVisibility;
-import net.civeira.phylax.features.access.scopeassignation.query.ScopeAssignationCursor;
+import net.civeira.phylax.features.access.scopeassignation.application.visibility.ScopeAssignationsVisibility;
+import net.civeira.phylax.features.access.scopeassignation.domain.ScopeAssignation;
+import net.civeira.phylax.features.access.scopeassignation.domain.gateway.ScopeAssignationCursor;
 
 @Unremovable
 @ApplicationScoped
@@ -100,7 +100,7 @@ class ScopeAssignationsInBatchExecutor implements
   @Override
   public String itemDescription(final ScopeAssignation item,
       final StepContext<ScopeAssignationDeleteAllInBatchCommand, ScopeAssignationPaginableBatch> context) {
-    return item.getUidValue();
+    return item.getUid();
   }
 
   /**
@@ -131,7 +131,7 @@ class ScopeAssignationsInBatchExecutor implements
         visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
             context.getParams().getFilter(), ScopeAssignationCursor.builder().limit(size)
                 .sinceUid(context.getState().getSince()).build());
-    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUidValue());
+    context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
     return page;
   }
 
