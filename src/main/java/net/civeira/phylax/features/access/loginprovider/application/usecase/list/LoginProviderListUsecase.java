@@ -64,6 +64,7 @@ public class LoginProviderListUsecase {
         .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
         .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     LoginProviderCursor gatewayCursor = LoginProviderCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(LoginProviderOrder::valueOf)
             .toList())
         .sinceName(cursor.getSinceName().orElse(null)).sinceName(cursor.getSinceName().orElse(null))

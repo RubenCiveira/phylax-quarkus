@@ -62,7 +62,8 @@ public class TenantConfigListUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
             .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
-    TenantConfigCursor gatewayCursor = TenantConfigCursor.builder().build();
+    TenantConfigCursor gatewayCursor = TenantConfigCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     TenantConfigCached values = visibility.listCachedVisibles(query, visibleFilter, gatewayCursor);
     List<TenantConfigListProjection> list =
         values.getValue().stream().map(value -> visibility.copyWithHidden(query, value))

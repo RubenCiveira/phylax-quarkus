@@ -65,7 +65,8 @@ public class UserIdentityListUsecase {
         .trustedClient(filter.getTrustedClient().orElse(null))
         .trustedClients(filter.getTrustedClients())
         .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
-    UserIdentityCursor gatewayCursor = UserIdentityCursor.builder().build();
+    UserIdentityCursor gatewayCursor = UserIdentityCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     UserIdentityCached values = visibility.listCachedVisibles(query, visibleFilter, gatewayCursor);
     List<UserIdentityListProjection> list =
         values.getValue().stream().map(value -> visibility.copyWithHidden(query, value))

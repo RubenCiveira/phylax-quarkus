@@ -62,6 +62,7 @@ public class TrustedClientListUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null)).build();
     TrustedClientCursor gatewayCursor = TrustedClientCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(TrustedClientOrder::valueOf)
             .toList())
         .sinceCode(cursor.getSinceCode().orElse(null)).sinceCode(cursor.getSinceCode().orElse(null))

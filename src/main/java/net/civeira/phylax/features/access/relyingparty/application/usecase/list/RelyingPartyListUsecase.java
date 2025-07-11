@@ -63,6 +63,7 @@ public class RelyingPartyListUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .apiKey(filter.getApiKey().orElse(null)).code(filter.getCode().orElse(null)).build();
     RelyingPartyCursor gatewayCursor = RelyingPartyCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(RelyingPartyOrder::valueOf)
             .toList())
         .sinceCode(cursor.getSinceCode().orElse(null)).sinceCode(cursor.getSinceCode().orElse(null))

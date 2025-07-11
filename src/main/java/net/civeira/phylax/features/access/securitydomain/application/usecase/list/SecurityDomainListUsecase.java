@@ -63,6 +63,7 @@ public class SecurityDomainListUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .enabled(filter.getEnabled().orElse(null)).name(filter.getName().orElse(null)).build();
     SecurityDomainCursor gatewayCursor = SecurityDomainCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(SecurityDomainOrder::valueOf)
             .toList())
         .sinceName(cursor.getSinceName().orElse(null)).sinceName(cursor.getSinceName().orElse(null))

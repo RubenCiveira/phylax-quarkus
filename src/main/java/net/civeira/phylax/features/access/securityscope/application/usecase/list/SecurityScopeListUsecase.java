@@ -64,7 +64,8 @@ public class SecurityScopeListUsecase {
         .trustedClients(filter.getTrustedClients())
         .relyingParty(filter.getRelyingParty().orElse(null))
         .relyingPartys(filter.getRelyingPartys()).build();
-    SecurityScopeCursor gatewayCursor = SecurityScopeCursor.builder().build();
+    SecurityScopeCursor gatewayCursor = SecurityScopeCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     SecurityScopeCached values = visibility.listCachedVisibles(query, visibleFilter, gatewayCursor);
     List<SecurityScopeListProjection> list =
         values.getValue().stream().map(value -> visibility.copyWithHidden(query, value))

@@ -62,7 +62,8 @@ public class TenantTermsOfUseListUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
             .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
-    TenantTermsOfUseCursor gatewayCursor = TenantTermsOfUseCursor.builder().build();
+    TenantTermsOfUseCursor gatewayCursor = TenantTermsOfUseCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     TenantTermsOfUseCached values =
         visibility.listCachedVisibles(query, visibleFilter, gatewayCursor);
     List<TenantTermsOfUseListProjection> list =

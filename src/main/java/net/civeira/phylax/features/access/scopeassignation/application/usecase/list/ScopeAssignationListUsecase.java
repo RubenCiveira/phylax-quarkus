@@ -64,7 +64,8 @@ public class ScopeAssignationListUsecase {
             .securityDomains(filter.getSecurityDomains())
             .securityScope(filter.getSecurityScope().orElse(null))
             .securityScopes(filter.getSecurityScopes()).build();
-    ScopeAssignationCursor gatewayCursor = ScopeAssignationCursor.builder().build();
+    ScopeAssignationCursor gatewayCursor = ScopeAssignationCursor.builder()
+        .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     ScopeAssignationCached values =
         visibility.listCachedVisibles(query, visibleFilter, gatewayCursor);
     List<ScopeAssignationListProjection> list =

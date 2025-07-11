@@ -62,7 +62,8 @@ public class TenantListUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).name(filter.getName().orElse(null))
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
-    TenantCursor gatewayCursor = TenantCursor.builder()
+    TenantCursor gatewayCursor = TenantCursor.builder().limit(cursor.getLimit().orElse(null))
+        .sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(TenantOrder::valueOf).toList())
         .sinceName(cursor.getSinceName().orElse(null)).sinceName(cursor.getSinceName().orElse(null))
         .build();
