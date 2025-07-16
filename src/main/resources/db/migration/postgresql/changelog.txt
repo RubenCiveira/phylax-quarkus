@@ -1,1 +1,2 @@
-/db/migrations/000.001.001/000.001.001-model.changelog.postgresql.sql
+/db/migration/postgresql/000.001.001/20250716122020-model.changelog.postgresql.sql
+/db/migration/postgresql/000.001.001/20250716122430-model.changelog.postgresql.sql

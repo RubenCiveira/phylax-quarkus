@@ -1,2 +1,0 @@
-/db/migration/pgsql/000.000.001/001.000.000-model.changelog.pgsql.sql
-/db/migration/pgsql/000.000.001/001.000.001-model.changelog.pgsql.sql
