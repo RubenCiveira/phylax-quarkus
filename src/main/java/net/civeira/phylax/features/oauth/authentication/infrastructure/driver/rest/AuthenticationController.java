@@ -6,11 +6,16 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import io.quarkus.cache.Cache;
+import io.quarkus.cache.CacheName;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.GET;
@@ -61,6 +66,8 @@ public class AuthenticationController {
   private final JwtTokenBuilder tokenBuilder;
   private final ClientRetrieveSpi clientRetriever;
   private final TemporalKeysGateway temporalStore;
+  @CacheName("jwk")
+  private final Cache cache;
 
   @POST
   @Path("oauth/openid/{tenant}/token")
@@ -132,9 +139,28 @@ public class AuthenticationController {
   @Path("oauth/openid/{tenant}/certs")
   public Response certs(final @PathParam("tenant") String tenant)
       throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-    Map<String, Object> map = new HashMap<>();
-    map.put("keys", tokenManager.getJks());
-    return Response.status(200).entity(map).build();
+    String key = "self-cert";
+
+    Uni<Map<String, Object>> uni = cache.get(key, cacheKey -> {
+      try {
+        System.err.println("======================================");
+        OffsetDateTime scopesExpiration = OffsetDateTime.now().plus(2, ChronoUnit.HOURS);
+        Map<String, Object> map = new HashMap<>();
+        map.put("keys", tokenManager.getJks());
+        return Map.of("data", map, "ttl", scopesExpiration);
+      } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
+        e.printStackTrace();
+        throw new RuntimeException(e);
+      }
+    });
+    Map<String, Object> map = uni.await().indefinitely();
+    OffsetDateTime ttl = (OffsetDateTime) map.get("ttl");
+    if (ttl.isBefore(OffsetDateTime.now())) {
+      cache.invalidate(key);
+      return certs(tenant);
+    } else {
+      return Response.status(200).entity(map.get("data")).build();
+    }
   }
 
   private Response processGranterHandler(final String tenant, UriInfo req, HttpHeaders headers,

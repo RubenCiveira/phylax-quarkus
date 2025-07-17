@@ -131,7 +131,7 @@ public class ExportResourceScopesUsecase {
   }
 
   private void append(String name, SecurityScope securityScope, Map<String, List<String>> map) {
-    append(name, securityScope.getResourceValue() + ":" + securityScope.getScopeValue(), map);
+    append(name, securityScope.getResource() + ":" + securityScope.getScope(), map);
   }
 
   private void append(String name, String scope, Map<String, List<String>> map) {

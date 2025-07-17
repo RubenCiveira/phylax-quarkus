@@ -23,7 +23,7 @@ app:
     username: test_write # test_read luego, por ahora test_write
     password: test
     group: pgsql
-    location: db/migration/pgsql/changelog.txt
+    location: db/migration/postgresql/changelog.txt
     jdbc:
       url: jdbc:postgresql://${datasource.host:localhost}:${datasource.port:5432}/${datasource.path:5432}?currentSchema=${datasource.schema:public}
   
