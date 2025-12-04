@@ -8,7 +8,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a uid string to identify the entity of user.
+ * Value Object representing a number to identify the db record of user.
  * <p>
  * This class ensures that the uid is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -7,12 +7,12 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.loginprovider.domain.LoginProvider;
-import net.civeira.phylax.features.access.loginprovider.domain.LoginProviderSourceOptions;
-import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderFilter;
-import net.civeira.phylax.features.access.loginprovider.domain.gateway.LoginProviderReadRepositoryGateway;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProvider;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderSourceOptions;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderFilter;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderReadRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
@@ -27,7 +27,7 @@ import net.civeira.phylax.features.oauth.delegated.domain.provider.SamlDelegated
 public class DelegeatedLoginProvidersUsecase {
   private final ActiveUserFindService actives;
   private final UserWriteRepositoryGateway usersWriter;
-  private final LoginProviderReadRepositoryGateway providers;
+  private final TenantLoginProviderReadRepositoryGateway providers;
 
   public List<DelegatedAccessExternalProvider> providers(String tenant, List<String> audiences) {
     return actives.findEnabledTenant(tenant, audiences).map(this::providers).orElseGet(List::of);
@@ -53,35 +53,35 @@ public class DelegeatedLoginProvidersUsecase {
   }
 
   private List<DelegatedAccessExternalProvider> providers(Tenant tenant) {
-    return providers.list(LoginProviderFilter.builder().tenant(tenant).build()).stream()
+    return providers.list(TenantLoginProviderFilter.builder().tenant(tenant).build()).stream()
         .map(this::map).filter(Objects::nonNull).toList();
   }
 
-  private Optional<LoginProvider> provider(Tenant tenant, String name) {
-    return providers.list(LoginProviderFilter.builder().tenant(tenant).build()).stream()
+  private Optional<TenantLoginProvider> provider(Tenant tenant, String name) {
+    return providers.list(TenantLoginProviderFilter.builder().tenant(tenant).build()).stream()
         .filter(lp -> name.equals(lp.getName())).findFirst();
   }
 
-  private DelegatedAccessExternalProvider map(LoginProvider provider) {
+  private DelegatedAccessExternalProvider map(TenantLoginProvider provider) {
     if (provider.isDisabled()) {
       return null;
     }
-    if (provider.getSource() == LoginProviderSourceOptions.GOOGLE) {
+    if (provider.getSource() == TenantLoginProviderSourceOptions.GOOGLE) {
       return mapGoogle(provider);
     }
-    if (provider.getSource() == LoginProviderSourceOptions.SAML) {
+    if (provider.getSource() == TenantLoginProviderSourceOptions.SAML) {
       return mapSaml(provider);
     }
     return null;
   }
 
-  private DelegatedAccessExternalProvider mapSaml(LoginProvider provider) {
+  private DelegatedAccessExternalProvider mapSaml(TenantLoginProvider provider) {
     return new SamlDelegatedAccessProvider(provider.getName(), provider.getPrivateKey().orElse("."),
         provider.getPublicKey().orElse("."), provider.getCertificate().orElse("-"),
         provider.isDirectAccess());
   }
 
-  private DelegatedAccessExternalProvider mapGoogle(LoginProvider provider) {
+  private DelegatedAccessExternalProvider mapGoogle(TenantLoginProvider provider) {
     return new GoogleDelegatedAccessProvider(provider.getName(),
         provider.getPublicKey().orElse("-"), provider.getPrivateKey().orElse("-"),
         provider.isDirectAccess());

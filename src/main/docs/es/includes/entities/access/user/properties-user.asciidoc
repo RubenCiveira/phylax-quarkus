@@ -11,6 +11,10 @@ Email (string)::
 An optional email used to send notifications to the user
 Enabled (boolean)::
 A disabled user cant login on the system. On his login attempts, he will recive a specific warn of his disabled account.
+Approved (boolean)::
+El approved de user
+Rejected (boolean)::
+El rejected de user
 Temporal password (boolean)::
 El temporal password de user
 Use second factors (boolean)::

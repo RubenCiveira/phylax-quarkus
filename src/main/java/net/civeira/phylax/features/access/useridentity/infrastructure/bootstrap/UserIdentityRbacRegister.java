@@ -44,7 +44,7 @@ public class UserIdentityRbacRegister {
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("delete")
         .description("list").required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
-        .description("A uid string to identify the entity").build());
+        .description("El identificador de la aplicacion").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("user").description("El user de user identity").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("relyingParty")

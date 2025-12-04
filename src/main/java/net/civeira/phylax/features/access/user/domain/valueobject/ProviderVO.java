@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
  * Value Object representing si se identificó con un proveedor, se marca con cual (aunque el
- * provedor cambie luego) of user.
+ * provvedor cambie luego) of user.
  * <p>
  * This class ensures that the provider is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

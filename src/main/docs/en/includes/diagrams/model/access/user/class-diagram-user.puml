@@ -23,6 +23,8 @@ name:string
 password:string
 email:string
 enabled:boolean
+approved:boolean
+rejected:boolean
 temporalPassword:boolean
 useSecondFactors:boolean
 secondFactorSeed:string
@@ -35,6 +37,10 @@ retrieve()
 create()
 update()
 delete()
+registerAccepted()
+registerPending()
+accept()
+reject()
 disable()
 enable()
 unlock()

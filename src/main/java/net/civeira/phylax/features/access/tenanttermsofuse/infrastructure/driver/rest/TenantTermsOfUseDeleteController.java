@@ -45,14 +45,14 @@ public class TenantTermsOfUseDeleteController {
     filterBuilder =
         filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.uids(
+        null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     if (null != tenant) {
       filterBuilder = filterBuilder.tenant(TenantReference.of(tenant));
     }
-    filterBuilder = filterBuilder
-        .tenants(tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.tenants(null == tenants ? null
+        : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TenantTermsOfUseDeleteFilter filter = filterBuilder.build();
     BatchIdentificator task = delete.delete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */

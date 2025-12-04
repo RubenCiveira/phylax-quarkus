@@ -42,8 +42,8 @@ public class TenantDeleteController {
     filterBuilder =
         filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.uids(
+        null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.name(name);
     TenantDeleteFilter filter = filterBuilder.build();

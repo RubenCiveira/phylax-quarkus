@@ -8,6 +8,9 @@ import lombok.ToString;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.features.access.role.domain.valueobject.UidVO;
 
+/**
+ * A simple implementación for a reference to a entity, that only holds the id.
+ */
 @Getter
 @AllArgsConstructor
 @ToString

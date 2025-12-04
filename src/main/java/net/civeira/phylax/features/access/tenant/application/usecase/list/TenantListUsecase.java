@@ -66,7 +66,8 @@ public class TenantListUsecase {
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(TenantOrder::valueOf).toList())
         .sinceName(cursor.getSinceName().orElse(null)).sinceName(cursor.getSinceName().orElse(null))
-        .build();
+        .sinceDomain(cursor.getSinceDomain().orElse(null))
+        .sinceDomain(cursor.getSinceDomain().orElse(null)).build();
     TenantCached values = visibility.listCachedVisibles(query, visibleFilter, gatewayCursor);
     List<TenantListProjection> list =
         values.getValue().stream().map(value -> visibility.copyWithHidden(query, value))

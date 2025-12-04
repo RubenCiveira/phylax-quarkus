@@ -53,24 +53,24 @@ public class UserIdentityDeleteController {
     filterBuilder =
         filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.uids(
+        null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     if (null != user) {
       filterBuilder = filterBuilder.user(UserReference.of(user));
     }
-    filterBuilder =
-        filterBuilder.users(users.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.users(
+        null == users ? null : users.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     if (null != relyingParty) {
       filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
     }
-    filterBuilder = filterBuilder
-        .relyingPartys(relyingPartys.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.relyingPartys(null == relyingPartys ? null
+        : relyingPartys.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     if (null != trustedClient) {
       filterBuilder = filterBuilder.trustedClient(TrustedClientReference.of(trustedClient));
     }
-    filterBuilder = filterBuilder.trustedClients(
-        trustedClients.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.trustedClients(null == trustedClients ? null
+        : trustedClients.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     UserIdentityDeleteFilter filter = filterBuilder.build();
     BatchIdentificator task = delete.delete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */

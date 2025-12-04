@@ -58,11 +58,11 @@ public class RoleListUsecase {
     if (!detail.isAllowed()) {
       throw new NotAllowedException(detail.getDescription());
     }
-    RoleVisibilityFilter visibleFilter = RoleVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).name(filter.getName().orElse(null))
-        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    RoleVisibilityFilter visibleFilter =
+        RoleVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .name(filter.getName().orElse(null)).relyingParty(filter.getRelyingParty().orElse(null))
+            .relyingPartys(filter.getRelyingPartys()).build();
     RoleCursor gatewayCursor = RoleCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(RoleOrder::valueOf).toList())

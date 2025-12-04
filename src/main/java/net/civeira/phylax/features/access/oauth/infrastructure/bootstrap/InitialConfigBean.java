@@ -6,11 +6,11 @@ import java.util.List;
 import lombok.Getter;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
-import net.civeira.phylax.features.access.role.domain.Domains;
 import net.civeira.phylax.features.access.role.domain.RoleChangeSet;
 import net.civeira.phylax.features.access.role.domain.RoleReference;
-import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomainChangeSet;
-import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomainReference;
+import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
@@ -22,8 +22,8 @@ import net.civeira.phylax.features.access.useridentity.domain.UserIdentityChange
 public class InitialConfigBean {
   private final List<RelyingPartyChangeSet> parties;
   private final List<TrustedClientChangeSet> clients;
+  private final List<TenantChangeSet> tenants;
   private final List<UserChangeSet> users;
-  private final List<SecurityDomainChangeSet> domains;
   private final List<RoleChangeSet> roles;
   private final List<UserIdentityChangeSet> identities;
 
@@ -31,19 +31,20 @@ public class InitialConfigBean {
     RelyingPartyChangeSet party = RelyingPartyChangeSet.builder().newUid().code("phylax-api")
         .apiKey("1111").enabled(Boolean.TRUE).build();
 
+    AllowedRedirects local = AllowedRedirects.builder().newUid().url("*").build();
+
     TrustedClientChangeSet client = TrustedClientChangeSet.builder().newUid().code("phylax-ui")
-        .allowedRedirects("*").publicAllow(Boolean.TRUE).enabled(Boolean.TRUE).build();
+        .allowedRedirects(List.of(local)).publicAllow(Boolean.TRUE).enabled(Boolean.TRUE).build();
 
-    SecurityDomainChangeSet domain = SecurityDomainChangeSet.builder().newUid().name("ADMIN")
-        .readAll(true).writeAll(true).manageAll(true).enabled(true).level(100).build();
+    RoleChangeSet role = RoleChangeSet.builder().newUid().name("ADMIN")
+        .relyingParty(RelyingPartyReference.of(party.getUid().orElseThrow().getUid())).build();
 
-    Domains roleDomain = Domains.builder().newUid()
-        .securityDomain(SecurityDomainReference.of(domain.getUid().orElseThrow().getUid())).build();
-    RoleChangeSet role =
-        RoleChangeSet.builder().newUid().name("ADMIN").domains(List.of(roleDomain)).build();
+    TenantChangeSet tenant =
+        TenantChangeSet.builder().newUid().name("main").root(Boolean.TRUE).build();
 
     UserChangeSet root = UserChangeSet.builder().newUid().name("ROOT").password(password)
-        .enabled(true).useSecondFactors(false).build();
+        .tenant(TenantReference.of(tenant.getUid().orElseThrow().getUid())).enabled(true)
+        .useSecondFactors(false).build();
 
     Roles userRoleRely = Roles.builder().newUid()
         .role(RoleReference.of(role.getUid().orElseThrow().getUid())).build();
@@ -59,9 +60,9 @@ public class InitialConfigBean {
         .trustedClient(TrustedClientReference.of(client.getUid().orElseThrow().getUid()))
         .roles(List.of(userRoleClient)).build();
 
+    tenants = List.of(tenant);
     parties = List.of(party);
     clients = List.of(client);
-    domains = List.of(domain);
     users = List.of(root);
     roles = List.of(role);
     identities = List.of(userRelyIdentity, userClientIdentity);

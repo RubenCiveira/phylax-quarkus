@@ -10,11 +10,15 @@ actor :Autorizado: as a0
 (Create) as creacion
 (Delete) as actualizacion
 (Delete) as borrado
+(Register accepted) as registerAccepted
+(Other use cases) as p0
+(Register pending) as registerPending
+(Accept) as accept
+(Reject) as reject
 (Disable) as disable
 (Enable) as enable
 (Unlock) as unlock
 (Block) as block
-(Other use cases) as p0
 (Set mfa seed) as setMfaSeed
 (Change password) as changePassword
 
@@ -23,6 +27,10 @@ a0 --> consulta
 a0 --> creacion
 a0 --> actualizacion
 a0 --> borrado
+p0 --> registerAccepted
+p0 --> registerPending
+a0 --> accept
+a0 --> reject
 a0 --> disable
 a0 --> enable
 a0 --> unlock

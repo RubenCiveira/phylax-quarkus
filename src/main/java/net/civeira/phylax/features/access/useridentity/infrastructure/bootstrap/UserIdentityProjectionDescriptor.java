@@ -253,9 +253,9 @@ public class UserIdentityProjectionDescriptor implements ProjectionDescriptor {
   public List<ExecutionNode> baseNodes(final String baseServer) {
     Map<String, RelationshipDefinition> relations = relations(baseServer);
     return List.of(
-        ExecutionNode.builder().server(baseServer).endpoint("/api/access/user-identities")
-            .method("GET").list(true).params(Map.of()).relations(relations).build(),
-        ExecutionNode.builder().server(baseServer).endpoint("/api/access/user-identities/{uid}")
+        ExecutionNode.builder().server(baseServer).endpoint("/api/access/identity").method("GET")
+            .list(true).params(Map.of()).relations(relations).build(),
+        ExecutionNode.builder().server(baseServer).endpoint("/api/access/identity/{uid}")
             .method("GET").list(false).params(Map.of("uid", ParamKind.PATH)).relations(relations)
             .build());
   }

@@ -15,11 +15,15 @@ TIP: Accedemos al menú de Maestros - Administradores
 | UX-ADM-2 | Consulta para user | Cualquier usuarios | Ve y ejecuta la accion
 | UX-ADM-3 | Edición para user | Cualquier usuarios | Ve y ejecuta la accion
 | UX-ADM-4 | Borrado para user | Cualquier usuarios | Ve y ejecuta la accion
-| UX-ADM-5 | Disable | Cualquier usuarios | Ve y ejecuta la accion
-| UX-ADM-6 | Enable | Cualquier usuarios | Ve y ejecuta la accion
-| UX-ADM-7 | Unlock | Cualquier usuarios | Ve y ejecuta la accion
-| UX-ADM-8 | Block | Cualquier usuarios | Ve y ejecuta la accion
-| UX-ADM-9 | Set mfa seed | Cualquier usuarios | Ve y ejecuta la accion
-| UX-ADM-10 | Change password | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-5 | Register accepted | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-6 | Register pending | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-7 | Accept | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-8 | Reject | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-9 | Disable | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-10 | Enable | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-11 | Unlock | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-12 | Block | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-13 | Set mfa seed | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-14 | Change password | Cualquier usuarios | Ve y ejecuta la accion
 |===
 

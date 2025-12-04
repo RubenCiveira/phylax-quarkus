@@ -50,14 +50,14 @@ public class RoleController implements RoleApi {
    * @param uids
    * @param search
    * @param name
-   * @param tenant
-   * @param tenants
+   * @param relyingParty
+   * @param relyingPartys
    * @return
    */
   @Override
   public Response roleApiBatchDelete(final List<String> uids, final String search,
-      final String name, final String tenant, final List<String> tenants) {
-    return deleteController.roleApiBatchDelete(uids, search, name, tenant, tenants);
+      final String name, final String relyingParty, final List<String> relyingPartys) {
+    return deleteController.roleApiBatchDelete(uids, search, name, relyingParty, relyingPartys);
   }
 
   /**
@@ -95,8 +95,8 @@ public class RoleController implements RoleApi {
    * @param uids
    * @param search
    * @param name
-   * @param tenant
-   * @param tenants
+   * @param relyingParty
+   * @param relyingPartys
    * @param limit
    * @param sinceUid
    * @param sinceName
@@ -105,10 +105,10 @@ public class RoleController implements RoleApi {
    */
   @Override
   public Response roleApiList(final List<String> uids, final String search, final String name,
-      final String tenant, final List<String> tenants, final Integer limit, final String sinceUid,
-      final String sinceName, final String order) {
-    return listController.roleApiList(uids, search, name, tenant, tenants, limit, sinceUid,
-        sinceName, order);
+      final String relyingParty, final List<String> relyingPartys, final Integer limit,
+      final String sinceUid, final String sinceName, final String order) {
+    return listController.roleApiList(uids, search, name, relyingParty, relyingPartys, limit,
+        sinceUid, sinceName, order);
   }
 
   /**

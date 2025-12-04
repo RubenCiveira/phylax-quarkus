@@ -14,7 +14,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-    <quarkus.platform.version>3.21.1</quarkus.platform.version>
+    <quarkus.platform.version>3.30.2</quarkus.platform.version>
+    <lombok.version>1.18.42</lombok.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.5.0</surefire-plugin.version>
   </properties>
@@ -33,7 +34,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.36</version>
+      <version>${lombok.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -164,7 +165,7 @@
             <path>
               <groupId>org.projectlombok</groupId>
               <artifactId>lombok</artifactId>
-              <version>1.18.36</version>
+              <version>${lombok.version}</version>
             </path>
           </annotationProcessorPaths>
         </configuration>
@@ -396,6 +397,16 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <argLine>${surefire.argLine}</argLine>
+            </configuration>
+          </plugin>
+          <plugin>
             <groupId>org.pitest</groupId>
             <artifactId>pitest-maven</artifactId>
             <version>1.14.3</version>
@@ -421,6 +432,10 @@
           </plugin>
         </plugins>
       </build>
+      <properties>
+        <jacoco.skip>true</jacoco.skip>
+        <surefire.argLine></surefire.argLine>
+      </properties>
     </profile>
   </profiles>
 </project>

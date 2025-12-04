@@ -57,14 +57,16 @@ public class UserIdentityListUsecase {
     if (!detail.isAllowed()) {
       throw new NotAllowedException(detail.getDescription());
     }
-    UserIdentityVisibilityFilter visibleFilter = UserIdentityVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).user(filter.getUser().orElse(null))
-        .users(filter.getUsers()).relyingParty(filter.getRelyingParty().orElse(null))
-        .relyingPartys(filter.getRelyingPartys())
-        .trustedClient(filter.getTrustedClient().orElse(null))
-        .trustedClients(filter.getTrustedClients())
-        .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
+    UserIdentityVisibilityFilter visibleFilter =
+        UserIdentityVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .forAllAudiences(filter.getForAllAudiences().orElse(null))
+            .user(filter.getUser().orElse(null)).users(filter.getUsers())
+            .relyingParty(filter.getRelyingParty().orElse(null))
+            .relyingPartys(filter.getRelyingPartys())
+            .trustedClient(filter.getTrustedClient().orElse(null))
+            .trustedClients(filter.getTrustedClients())
+            .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
     UserIdentityCursor gatewayCursor = UserIdentityCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     UserIdentityCached values = visibility.listCachedVisibles(query, visibleFilter, gatewayCursor);

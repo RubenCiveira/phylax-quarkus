@@ -49,6 +49,14 @@ public class TenantConfigCreateController {
     tenantConfigApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantConfigApiDto.setInnerLabel(dto.getInnerLabel());
     tenantConfigApiDto.setForceMfa(dto.getForceMfa());
+    tenantConfigApiDto.setAllowRegister(dto.getAllowRegister());
+    tenantConfigApiDto.setEnableRegisterUsers(dto.getEnableRegisterUsers());
+    tenantConfigApiDto.setWellcomeEmail(dto.getWellcomeEmail());
+    tenantConfigApiDto.setRegisterdEmail(dto.getRegisterdEmail());
+    tenantConfigApiDto.setDisabledUserEmail(dto.getDisabledUserEmail());
+    tenantConfigApiDto.setEnabledUserEmail(dto.getEnabledUserEmail());
+    tenantConfigApiDto.setAllowRecoverPass(dto.getAllowRecoverPass());
+    tenantConfigApiDto.setRecoverPassEmail(dto.getRecoverPassEmail());
     tenantConfigApiDto.setVersion(dto.getVersion());
     return tenantConfigApiDto;
   }
@@ -71,6 +79,30 @@ public class TenantConfigCreateController {
     }
     if (null != tenantConfigApiDto.getForceMfa()) {
       dto.setForceMfa(tenantConfigApiDto.getForceMfa());
+    }
+    if (null != tenantConfigApiDto.getAllowRegister()) {
+      dto.setAllowRegister(tenantConfigApiDto.getAllowRegister());
+    }
+    if (null != tenantConfigApiDto.getEnableRegisterUsers()) {
+      dto.setEnableRegisterUsers(tenantConfigApiDto.getEnableRegisterUsers());
+    }
+    if (null != tenantConfigApiDto.getWellcomeEmail()) {
+      dto.setWellcomeEmail(tenantConfigApiDto.getWellcomeEmail());
+    }
+    if (null != tenantConfigApiDto.getRegisterdEmail()) {
+      dto.setRegisterdEmail(tenantConfigApiDto.getRegisterdEmail());
+    }
+    if (null != tenantConfigApiDto.getDisabledUserEmail()) {
+      dto.setDisabledUserEmail(tenantConfigApiDto.getDisabledUserEmail());
+    }
+    if (null != tenantConfigApiDto.getEnabledUserEmail()) {
+      dto.setEnabledUserEmail(tenantConfigApiDto.getEnabledUserEmail());
+    }
+    if (null != tenantConfigApiDto.getAllowRecoverPass()) {
+      dto.setAllowRecoverPass(tenantConfigApiDto.getAllowRecoverPass());
+    }
+    if (null != tenantConfigApiDto.getRecoverPassEmail()) {
+      dto.setRecoverPassEmail(tenantConfigApiDto.getRecoverPassEmail());
     }
     if (null != tenantConfigApiDto.getVersion()) {
       dto.setVersion(tenantConfigApiDto.getVersion());

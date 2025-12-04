@@ -81,14 +81,14 @@ public class TenantTermsOfUseListController {
         TenantTermsOfUseListFilter.builder();
     TenantTermsOfUseListCursor.TenantTermsOfUseListCursorBuilder cursorBuilder =
         TenantTermsOfUseListCursor.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.uids(
+        null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     if (null != tenant) {
       filterBuilder = filterBuilder.tenant(TenantReference.of(tenant));
     }
-    filterBuilder = filterBuilder
-        .tenants(tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.tenants(null == tenants ? null
+        : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     cursorBuilder = cursorBuilder.limit(limit);
     cursorBuilder = cursorBuilder.sinceUid(sinceUid);
     TenantTermsOfUseListFilter filter = filterBuilder.build();
@@ -109,6 +109,7 @@ public class TenantTermsOfUseListController {
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
+    tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String attached = dto.getAttached();
     if (null != attached) {
       tenantTermsOfUseApiDto.setAttached(currentRequest.getPublicHost()

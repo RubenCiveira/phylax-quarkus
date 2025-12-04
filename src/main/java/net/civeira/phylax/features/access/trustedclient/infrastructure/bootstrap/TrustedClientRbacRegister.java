@@ -60,12 +60,10 @@ public class TrustedClientRbacRegister {
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
         .description("If the user is not delegated, the phrasse to identify").build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("allowedRedirects")
-            .description("Si permitimos login directo de la app, obligamos a indicar un secreto.")
-            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
-        .description("Una marca que permite quitar el acceso a una cuenta sin borrarla").build());
+        .description("The indicator to allow the account be used without deleting it").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedRedirects")
+        .description("El allowed redirects de trusted client").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version").description(
             "Campo con el número de version de trusted client para controlar bloqueos optimistas")

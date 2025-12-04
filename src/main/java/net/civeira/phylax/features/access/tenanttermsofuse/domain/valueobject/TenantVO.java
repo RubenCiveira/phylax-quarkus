@@ -10,7 +10,7 @@ import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 /**
- * Value Object representing the tenant this Terms of Use document belongs to. of tenantTermsOfUse.
+ * Value Object representing la cuenta a la que pertenece of tenantTermsOfUse.
  * <p>
  * This class ensures that the tenant is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

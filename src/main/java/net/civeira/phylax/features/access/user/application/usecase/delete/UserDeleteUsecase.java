@@ -126,12 +126,12 @@ public class UserDeleteUsecase {
     if (!detail.isAllowed()) {
       throw new NotAllowedException(detail.getDescription());
     }
-    UserVisibilityFilter filterOnVisibles = UserVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).root(filter.getRoot().orElse(null))
-        .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
-        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    UserVisibilityFilter filterOnVisibles =
+        UserVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
+            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
+            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     UserDeleteAllInBatchCommand command =
         UserDeleteAllInBatchCommand.builder().interaction(query).filter(filterOnVisibles).build();
     return batch.start(query.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

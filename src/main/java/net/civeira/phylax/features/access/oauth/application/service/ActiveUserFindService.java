@@ -2,7 +2,6 @@
 package net.civeira.phylax.features.access.oauth.application.service;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,13 +42,17 @@ public class ActiveUserFindService {
     } else {
       String tenantForData = (String) res[0];
       UserFilter.UserFilterBuilder filter = UserFilter.builder().nameOrEmail(name);
-      if (null == tenantForData) {
-        filter = filter.root(true);
-      } else {
+      Tenant tenant = (Tenant) res[1];
+      if (!tenant.isRoot()) {
         filter = filter.tenant(TenantReference.of(tenantForData));
       }
       return users.find(filter.build()).filter(this::checkEnabled);
     }
+  }
+
+  public Optional<User> findEnabledUser(Tenant tenant, String name) {
+    UserFilter.UserFilterBuilder filter = UserFilter.builder().tenant(tenant).name(name);
+    return users.find(filter.build()).filter(this::checkEnabled);
   }
 
   public Optional<User> findEnabledUser(String tenantName, String name, List<String> audiences) {
@@ -58,11 +61,9 @@ public class ActiveUserFindService {
       return Optional.empty();
     } else {
       String tenantForData = (String) res[0];
-
       UserFilter.UserFilterBuilder filter = UserFilter.builder().name(name);
-      if (null == tenantForData) {
-        filter = filter.root(true);
-      } else {
+      Tenant tenant = (Tenant) res[1];
+      if (!tenant.isRoot()) {
         filter = filter.tenant(TenantReference.of(tenantForData));
       }
       return users.find(filter.build()).filter(this::checkEnabled);
@@ -84,27 +85,14 @@ public class ActiveUserFindService {
   private Object[] checkTenant(String tenantName, List<String> audiences) {
     String tenantForData = null;
     Tenant tenant = null;
-    if (!"main".equals(tenantName)) {
-      // el tenant main es siempre master
-      tenant = tenants.find(TenantFilter.builder().name(tenantName).build()).orElseThrow(
-          () -> new IllegalStateException("The tenant " + tenantName + " is not available"));
-      if (!tenant.isEnabled()) {
-        log.error("The tenant {} is disabled", tenant);
-        return new Object[] {null, tenant, false};
-      }
-      tenantForData = tenant.getUid();
-      if (!tenant.isAccessToAllApplications()) {
-        List<String> unverified = new ArrayList<>(audiences);
-        tenants.resolveRelingParties(tenant.getRelingParties())
-            .forEach(rely -> unverified.remove(rely.getCode()));
-        tenants.resolveTrustedClients(tenant.getTrustedClients())
-            .forEach(client -> unverified.remove(client.getCode()));
-        if (!unverified.isEmpty()) {
-          log.error("The tenant {} cant access to all the audiences {}", tenant, unverified);
-          return new Object[] {null, tenant, false};
-        }
-      }
+    // el tenant main es siempre master
+    tenant = tenants.find(TenantFilter.builder().name(tenantName).build()).orElseThrow(
+        () -> new IllegalStateException("The tenant " + tenantName + " is not available"));
+    if (!tenant.isEnabled()) {
+      log.error("The tenant {} is disabled", tenant);
+      return new Object[] {null, tenant, false};
     }
+    tenantForData = tenant.getUid();
     return new Object[] {tenantForData, tenant};
   }
 }

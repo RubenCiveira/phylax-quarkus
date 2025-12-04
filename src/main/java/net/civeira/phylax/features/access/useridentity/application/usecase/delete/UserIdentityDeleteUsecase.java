@@ -126,14 +126,16 @@ public class UserIdentityDeleteUsecase {
     if (!detail.isAllowed()) {
       throw new NotAllowedException(detail.getDescription());
     }
-    UserIdentityVisibilityFilter filterOnVisibles = UserIdentityVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).user(filter.getUser().orElse(null))
-        .users(filter.getUsers()).relyingParty(filter.getRelyingParty().orElse(null))
-        .relyingPartys(filter.getRelyingPartys())
-        .trustedClient(filter.getTrustedClient().orElse(null))
-        .trustedClients(filter.getTrustedClients())
-        .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
+    UserIdentityVisibilityFilter filterOnVisibles =
+        UserIdentityVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .forAllAudiences(filter.getForAllAudiences().orElse(null))
+            .user(filter.getUser().orElse(null)).users(filter.getUsers())
+            .relyingParty(filter.getRelyingParty().orElse(null))
+            .relyingPartys(filter.getRelyingPartys())
+            .trustedClient(filter.getTrustedClient().orElse(null))
+            .trustedClients(filter.getTrustedClients())
+            .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
     UserIdentityDeleteAllInBatchCommand command = UserIdentityDeleteAllInBatchCommand.builder()
         .interaction(query).filter(filterOnVisibles).build();
     return batch.start(query.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

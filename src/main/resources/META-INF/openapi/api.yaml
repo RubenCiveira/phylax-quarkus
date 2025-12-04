@@ -40,37 +40,29 @@ tags:
   - name: user-identity-acl
     description: Access control for user identity
   - name: tenant-config
-    description: Holds configuration options specific to a tenant. This includes visual customization and login security settings like MFA enforcement.
+    description: tenant-config
   - name: tenant-config-acl
     description: Access control for tenant config
-  - name: security-domain
-    description: A security domain is a set of allow over security scopes. Each security domain mark what an user can do over diferente applications of the stack.
-  - name: security-domain-acl
-    description: Access control for security domain
-  - name: login-provider
+  - name: api-key-client
+    description: Las diferentes aplicaciones que pueden usar el sistema a través de un api.
+  - name: api-key-client-acl
+    description: Access control for api key client
+  - name: tenant-login-provider
     description: Represents a login identity provider (e.g., Google, GitHub, SAML) configured for a tenant. Enables federated authentication integration.
-  - name: login-provider-acl
-    description: Access control for login provider
+  - name: tenant-login-provider-acl
+    description: Access control for tenant login provider
   - name: tenant-terms-of-use
-    description: Defines legal or informational documents (Terms of Use) that users must accept to use services within a tenant's scope.
+    description: tenant-terms-of-use
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
-  - name: scope-assignation
-    description: Witch scopes are assigned to the security domain
-  - name: scope-assignation-acl
-    description: Access control for scope assignation
   - name: user
     description: user
   - name: user-acl
     description: Access control for user
   - name: tenant
-    description: Represents a tenant or account in the system. Each tenant defines an isolated scope for users and applications, with optional access to global resources or restricted visibility. Tenants allow multi-tenancy features in the platform.
+    description: tenant
   - name: tenant-acl
     description: Access control for tenant
-  - name: security-scope
-    description: each of the allow scopes for the application.
-  - name: security-scope-acl
-    description: Access control for security scope
 
 paths:
   /api/access/roles:
@@ -102,15 +94,15 @@ paths:
           required: false
           schema:
             type: string
-        - name: tenant
+        - name: relying-party
           in: query
-          description: tenant
+          description: relying party
           required: false
           schema:
             type: string
-        - name: tenants
+        - name: relying-partys
           in: query
-          description: tenants
+          description: relying partys
           required: false
           schema:
             type: array
@@ -195,15 +187,15 @@ paths:
           required: false
           schema:
             type: string
-        - name: tenant
+        - name: relying-party
           in: query
-          description: tenant
+          description: relying party
           required: false
           schema:
             type: string
-        - name: tenants
+        - name: relying-partys
           in: query
-          description: tenants
+          description: relying partys
           required: false
           schema:
             type: array
@@ -633,7 +625,7 @@ paths:
                 $ref: '#/components/schemas/RelyingPartySpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/relying-parties/~/enable/:
+  /api/access/relying-parties/~/enable:
     patch:
       tags:
         - relying-party
@@ -697,7 +689,7 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/relying-parties/~/disable/:
+  /api/access/relying-parties/~/disable:
     patch:
       tags:
         - relying-party
@@ -1041,7 +1033,7 @@ paths:
                 $ref: '#/components/schemas/TrustedClientSpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/trusted-clients/~/enable/:
+  /api/access/trusted-clients/~/enable:
     patch:
       tags:
         - trusted-client
@@ -1099,7 +1091,7 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/trusted-clients/~/disable/:
+  /api/access/trusted-clients/~/disable:
     patch:
       tags:
         - trusted-client
@@ -1157,7 +1149,7 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/user-identities:
+  /api/access/identity:
     get:
       tags:
         - user-identity
@@ -1342,7 +1334,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/user-identities/{uid}:
+  /api/access/identity/{uid}:
     get:
       tags:
         - user-identity
@@ -1408,7 +1400,7 @@ paths:
           description: OK
         '404':
           description: The item dont exists
-  /api/access/user-identities/~/delete-status/{uid}:
+  /api/access/identity/~/delete-status/{uid}:
     get:
       tags:
         - user-identity
@@ -1430,7 +1422,7 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/me/acl/access/user-identities:
+  /api/me/acl/access/identity:
     get:
       tags:
         - user-identity-acl
@@ -1443,7 +1435,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserIdentityGenericAcl'
-  /api/me/acl/access/user-identities/{uid}:
+  /api/me/acl/access/identity/{uid}:
     get:
       tags:
         - user-identity-acl
@@ -1709,12 +1701,12 @@ paths:
                 $ref: '#/components/schemas/TenantConfigSpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/security-domains:
+  /api/access/api-key-clients:
     get:
       tags:
-        - security-domain
-      summary: List of security domain
-      operationId: security-domain-api-list
+        - api-key-client
+      summary: List of api key client
+      operationId: api-key-client-api-list
       parameters:
         - name: uids
           in: query
@@ -1732,15 +1724,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: enabled
+        - name: key
           in: query
-          description: enabled
-          required: false
-          schema:
-            type: boolean
-        - name: name
-          in: query
-          description: name
+          description: key
           required: false
           schema:
             type: string
@@ -1756,35 +1742,23 @@ paths:
           required: false
           schema:
             type: string
-        - name: since-name
-          in: query
-          description: Order by name asc
-          required: false
-          schema:
-            type: string
-        - name: order
-          in: query
-          description: The result order information
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainApiDtoList'
+                $ref: '#/components/schemas/ApiKeyClientApiDtoList'
     post:
       tags:
-        - security-domain
-      summary: Create a new security domain
-      operationId: security-domain-api-create
+        - api-key-client
+      summary: Create a new api key client
+      operationId: api-key-client-api-create
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SecurityDomainApiDto'
+              $ref: '#/components/schemas/ApiKeyClientApiDto'
         required: true
       responses:
         '200':
@@ -1792,12 +1766,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainApiDto'
+                $ref: '#/components/schemas/ApiKeyClientApiDto'
     delete:
       tags:
-        - security-domain
-      summary: Delete a colection of security domain by filter
-      operationId: security-domain-api-batch-delete
+        - api-key-client
+      summary: Delete a colection of api key client by filter
+      operationId: api-key-client-api-batch-delete
       parameters:
         - name: uids
           in: query
@@ -1815,15 +1789,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: enabled
+        - name: key
           in: query
-          description: enabled
-          required: false
-          schema:
-            type: boolean
-        - name: name
-          in: query
-          description: name
+          description: key
           required: false
           schema:
             type: string
@@ -1834,12 +1802,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/security-domains/{uid}:
+  /api/access/api-key-clients/{uid}:
     get:
       tags:
-        - security-domain
-      summary: Retrive on  security domain by their uid
-      operationId: security-domain-api-retrieve
+        - api-key-client
+      summary: Retrive on  api key client by their uid
+      operationId: api-key-client-api-retrieve
       parameters:
         - name: uid
           in: path
@@ -1853,14 +1821,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainApiDto'
+                $ref: '#/components/schemas/ApiKeyClientApiDto'
         '404':
           description: The item dont exists
     put:
       tags:
-        - security-domain
-      summary: Update a security domain by their uid
-      operationId: security-domain-api-update
+        - api-key-client
+      summary: Update a api key client by their uid
+      operationId: api-key-client-api-update
       parameters:
         - name: uid
           in: path
@@ -1872,7 +1840,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SecurityDomainApiDto'
+              $ref: '#/components/schemas/ApiKeyClientApiDto'
         required: true
       responses:
         '200':
@@ -1880,14 +1848,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainApiDto'
+                $ref: '#/components/schemas/ApiKeyClientApiDto'
         '404':
           description: The item dont exists
     delete:
       tags:
-        - security-domain
-      summary: Delete a  security domain by their uid
-      operationId: security-domain-api-delete
+        - api-key-client
+      summary: Delete a  api key client by their uid
+      operationId: api-key-client-api-delete
       parameters:
         - name: uid
           in: path
@@ -1900,12 +1868,12 @@ paths:
           description: OK
         '404':
           description: The item dont exists
-  /api/access/security-domains/~/delete-status/{uid}:
+  /api/access/api-key-clients/~/delete-status/{uid}:
     get:
       tags:
-        - security-domain
+        - api-key-client
       summary: Query the result of an massive delete
-      operationId: security-domain-api-batch-delete-query
+      operationId: api-key-client-api-batch-delete-query
       parameters:
         - name: uid
           in: path
@@ -1922,12 +1890,12 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/security-domains/{uid}/enable:
+  /api/access/api-key-clients/{uid}/enable:
     patch:
       tags:
-        - security-domain
-      summary: Update a security domain by their uid
-      operationId: security-domain-api-enable
+        - api-key-client
+      summary: Update a api key client by their uid
+      operationId: api-key-client-api-enable
       parameters:
         - name: uid
           in: path
@@ -1941,15 +1909,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainApiDto'
+                $ref: '#/components/schemas/ApiKeyClientApiDto'
         '404':
           description: The item dont exists
-  /api/access/security-domains/{uid}/disable:
+  /api/access/api-key-clients/{uid}/disable:
     patch:
       tags:
-        - security-domain
-      summary: Update a security domain by their uid
-      operationId: security-domain-api-disable
+        - api-key-client
+      summary: Update a api key client by their uid
+      operationId: api-key-client-api-disable
       parameters:
         - name: uid
           in: path
@@ -1963,28 +1931,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainApiDto'
+                $ref: '#/components/schemas/ApiKeyClientApiDto'
         '404':
           description: The item dont exists
-  /api/me/acl/access/security-domains:
+  /api/me/acl/access/api-key-clients:
     get:
       tags:
-        - security-domain-acl
-      summary: Check for allow permissions for the current user on security domain
-      operationId: security-domain-api-generic-acl
+        - api-key-client-acl
+      summary: Check for allow permissions for the current user on api key client
+      operationId: api-key-client-api-generic-acl
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainGenericAcl'
-  /api/me/acl/access/security-domains/{uid}:
+                $ref: '#/components/schemas/ApiKeyClientGenericAcl'
+  /api/me/acl/access/api-key-clients/{uid}:
     get:
       tags:
-        - security-domain-acl
-      summary: Check for allow permissions for the current user on security domain by their uid
-      operationId: security-domain-api-contextual-acl
+        - api-key-client-acl
+      summary: Check for allow permissions for the current user on api key client by their uid
+      operationId: api-key-client-api-contextual-acl
       parameters:
         - name: uid
           in: path
@@ -1998,15 +1966,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecurityDomainSpecificAcl'
+                $ref: '#/components/schemas/ApiKeyClientSpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/security-domains/~/enable/:
+  /api/access/api-key-clients/~/enable:
     patch:
       tags:
-        - security-domain
-      summary: enable a colection of security domain by filter
-      operationId: security-domain-api-batch-enable
+        - api-key-client
+      summary: enable a colection of api key client by filter
+      operationId: api-key-client-api-batch-enable
       parameters:
         - name: uids
           in: query
@@ -2024,15 +1992,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: enabled
+        - name: key
           in: query
-          description: enabled
-          required: false
-          schema:
-            type: boolean
-        - name: name
-          in: query
-          description: name
+          description: key
           required: false
           schema:
             type: string
@@ -2043,12 +2005,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/security-domains/~/enable-status/{uid}:
+  /api/access/api-key-clients/~/enable-status/{uid}:
     get:
       tags:
-        - security-domain
+        - api-key-client
       summary: Query the result of an massive delete
-      operationId: security-domain-api-batch-enable-query
+      operationId: api-key-client-api-batch-enable-query
       parameters:
         - name: uid
           in: path
@@ -2065,12 +2027,12 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/security-domains/~/disable/:
+  /api/access/api-key-clients/~/disable:
     patch:
       tags:
-        - security-domain
-      summary: disable a colection of security domain by filter
-      operationId: security-domain-api-batch-disable
+        - api-key-client
+      summary: disable a colection of api key client by filter
+      operationId: api-key-client-api-batch-disable
       parameters:
         - name: uids
           in: query
@@ -2088,15 +2050,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: enabled
+        - name: key
           in: query
-          description: enabled
-          required: false
-          schema:
-            type: boolean
-        - name: name
-          in: query
-          description: name
+          description: key
           required: false
           schema:
             type: string
@@ -2107,12 +2063,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/security-domains/~/disable-status/{uid}:
+  /api/access/api-key-clients/~/disable-status/{uid}:
     get:
       tags:
-        - security-domain
+        - api-key-client
       summary: Query the result of an massive delete
-      operationId: security-domain-api-batch-disable-query
+      operationId: api-key-client-api-batch-disable-query
       parameters:
         - name: uid
           in: path
@@ -2132,9 +2088,9 @@ paths:
   /api/access/login-providers:
     get:
       tags:
-        - login-provider
-      summary: List of login provider
-      operationId: login-provider-api-list
+        - tenant-login-provider
+      summary: List of tenant login provider
+      operationId: tenant-login-provider-api-list
       parameters:
         - name: uids
           in: query
@@ -2204,17 +2160,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderApiDtoList'
+                $ref: '#/components/schemas/TenantLoginProviderApiDtoList'
     post:
       tags:
-        - login-provider
-      summary: Create a new login provider
-      operationId: login-provider-api-create
+        - tenant-login-provider
+      summary: Create a new tenant login provider
+      operationId: tenant-login-provider-api-create
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginProviderApiDto'
+              $ref: '#/components/schemas/TenantLoginProviderApiDto'
         required: true
       responses:
         '200':
@@ -2222,12 +2178,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderApiDto'
+                $ref: '#/components/schemas/TenantLoginProviderApiDto'
     delete:
       tags:
-        - login-provider
-      summary: Delete a colection of login provider by filter
-      operationId: login-provider-api-batch-delete
+        - tenant-login-provider
+      summary: Delete a colection of tenant login provider by filter
+      operationId: tenant-login-provider-api-batch-delete
       parameters:
         - name: uids
           in: query
@@ -2277,9 +2233,9 @@ paths:
   /api/access/login-providers/{uid}:
     get:
       tags:
-        - login-provider
-      summary: Retrive on  login provider by their uid
-      operationId: login-provider-api-retrieve
+        - tenant-login-provider
+      summary: Retrive on  tenant login provider by their uid
+      operationId: tenant-login-provider-api-retrieve
       parameters:
         - name: uid
           in: path
@@ -2293,14 +2249,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderApiDto'
+                $ref: '#/components/schemas/TenantLoginProviderApiDto'
         '404':
           description: The item dont exists
     put:
       tags:
-        - login-provider
-      summary: Update a login provider by their uid
-      operationId: login-provider-api-update
+        - tenant-login-provider
+      summary: Update a tenant login provider by their uid
+      operationId: tenant-login-provider-api-update
       parameters:
         - name: uid
           in: path
@@ -2312,7 +2268,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginProviderApiDto'
+              $ref: '#/components/schemas/TenantLoginProviderApiDto'
         required: true
       responses:
         '200':
@@ -2320,14 +2276,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderApiDto'
+                $ref: '#/components/schemas/TenantLoginProviderApiDto'
         '404':
           description: The item dont exists
     delete:
       tags:
-        - login-provider
-      summary: Delete a  login provider by their uid
-      operationId: login-provider-api-delete
+        - tenant-login-provider
+      summary: Delete a  tenant login provider by their uid
+      operationId: tenant-login-provider-api-delete
       parameters:
         - name: uid
           in: path
@@ -2343,9 +2299,9 @@ paths:
   /api/access/login-providers/~/delete-status/{uid}:
     get:
       tags:
-        - login-provider
+        - tenant-login-provider
       summary: Query the result of an massive delete
-      operationId: login-provider-api-batch-delete-query
+      operationId: tenant-login-provider-api-batch-delete-query
       parameters:
         - name: uid
           in: path
@@ -2365,9 +2321,9 @@ paths:
   /api/access/login-providers/{uid}/enable:
     patch:
       tags:
-        - login-provider
-      summary: Update a login provider by their uid
-      operationId: login-provider-api-enable
+        - tenant-login-provider
+      summary: Update a tenant login provider by their uid
+      operationId: tenant-login-provider-api-enable
       parameters:
         - name: uid
           in: path
@@ -2381,15 +2337,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderApiDto'
+                $ref: '#/components/schemas/TenantLoginProviderApiDto'
         '404':
           description: The item dont exists
   /api/access/login-providers/{uid}/disable:
     patch:
       tags:
-        - login-provider
-      summary: Update a login provider by their uid
-      operationId: login-provider-api-disable
+        - tenant-login-provider
+      summary: Update a tenant login provider by their uid
+      operationId: tenant-login-provider-api-disable
       parameters:
         - name: uid
           in: path
@@ -2403,28 +2359,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderApiDto'
+                $ref: '#/components/schemas/TenantLoginProviderApiDto'
         '404':
           description: The item dont exists
   /api/me/acl/access/login-providers:
     get:
       tags:
-        - login-provider-acl
-      summary: Check for allow permissions for the current user on login provider
-      operationId: login-provider-api-generic-acl
+        - tenant-login-provider-acl
+      summary: Check for allow permissions for the current user on tenant login provider
+      operationId: tenant-login-provider-api-generic-acl
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderGenericAcl'
+                $ref: '#/components/schemas/TenantLoginProviderGenericAcl'
   /api/me/acl/access/login-providers/{uid}:
     get:
       tags:
-        - login-provider-acl
-      summary: Check for allow permissions for the current user on login provider by their uid
-      operationId: login-provider-api-contextual-acl
+        - tenant-login-provider-acl
+      summary: Check for allow permissions for the current user on tenant login provider by their uid
+      operationId: tenant-login-provider-api-contextual-acl
       parameters:
         - name: uid
           in: path
@@ -2438,15 +2394,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginProviderSpecificAcl'
+                $ref: '#/components/schemas/TenantLoginProviderSpecificAcl'
         '404':
           description: The item dont exists
   /api/access/login-providers/{uid}/metadata:
     get:
       tags:
-        - login-provider
-      summary: Retrieve binary content for metadata of login provider
-      operationId: login-provider-api-retrieve-metadata
+        - tenant-login-provider
+      summary: Retrieve binary content for metadata of tenant login provider
+      operationId: tenant-login-provider-api-retrieve-metadata
       parameters:
         - name: uid
           in: path
@@ -2465,9 +2421,9 @@ paths:
   /api/access/login-providers/-/temp-metadata:
     get:
       tags:
-        - login-provider
-      summary: Retrieve binary content of a temporal upload for metadata of login provider
-      operationId: login-provider-api-retrieve-temp-upload-metadata
+        - tenant-login-provider
+      summary: Retrieve binary content of a temporal upload for metadata of tenant login provider
+      operationId: tenant-login-provider-api-retrieve-temp-upload-metadata
       parameters:
         - name: temp
           in: query
@@ -2485,9 +2441,9 @@ paths:
                 format: binary
     post:
       tags:
-        - login-provider
-      summary: Retrieve binary content of a temporal upload for metadata of login provider
-      operationId: login-provider-api-upload-temp-upload-metadata
+        - tenant-login-provider
+      summary: Retrieve binary content of a temporal upload for metadata of tenant login provider
+      operationId: tenant-login-provider-api-upload-temp-upload-metadata
       requestBody:
         content:
           multipart/form-data:
@@ -2515,12 +2471,12 @@ paths:
                 type: string
         '400':
           description: Invalid input or missing file
-  /api/access/login-providers/~/enable/:
+  /api/access/login-providers/~/enable:
     patch:
       tags:
-        - login-provider
-      summary: enable a colection of login provider by filter
-      operationId: login-provider-api-batch-enable
+        - tenant-login-provider
+      summary: enable a colection of tenant login provider by filter
+      operationId: tenant-login-provider-api-batch-enable
       parameters:
         - name: uids
           in: query
@@ -2570,9 +2526,9 @@ paths:
   /api/access/login-providers/~/enable-status/{uid}:
     get:
       tags:
-        - login-provider
+        - tenant-login-provider
       summary: Query the result of an massive delete
-      operationId: login-provider-api-batch-enable-query
+      operationId: tenant-login-provider-api-batch-enable-query
       parameters:
         - name: uid
           in: path
@@ -2589,12 +2545,12 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/login-providers/~/disable/:
+  /api/access/login-providers/~/disable:
     patch:
       tags:
-        - login-provider
-      summary: disable a colection of login provider by filter
-      operationId: login-provider-api-batch-disable
+        - tenant-login-provider
+      summary: disable a colection of tenant login provider by filter
+      operationId: tenant-login-provider-api-batch-disable
       parameters:
         - name: uids
           in: query
@@ -2644,9 +2600,9 @@ paths:
   /api/access/login-providers/~/disable-status/{uid}:
     get:
       tags:
-        - login-provider
+        - tenant-login-provider
       summary: Query the result of an massive delete
-      operationId: login-provider-api-batch-disable-query
+      operationId: tenant-login-provider-api-batch-disable-query
       parameters:
         - name: uid
           in: path
@@ -2872,6 +2828,50 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/access/tenants-terms-of-use/{uid}/enable:
+    patch:
+      tags:
+        - tenant-terms-of-use
+      summary: Update a tenant terms of use by their uid
+      operationId: tenant-terms-of-use-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantTermsOfUseApiDto'
+        '404':
+          description: The item dont exists
+  /api/access/tenants-terms-of-use/{uid}/disable:
+    patch:
+      tags:
+        - tenant-terms-of-use
+      summary: Update a tenant terms of use by their uid
+      operationId: tenant-terms-of-use-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantTermsOfUseApiDto'
+        '404':
+          description: The item dont exists
   /api/me/acl/access/tenants-terms-of-use:
     get:
       tags:
@@ -2981,12 +2981,12 @@ paths:
                 type: string
         '400':
           description: Invalid input or missing file
-  /api/access/scope-assignations:
-    get:
+  /api/access/tenants-terms-of-use/~/enable:
+    patch:
       tags:
-        - scope-assignation
-      summary: List of scope assignation
-      operationId: scope-assignation-api-list
+        - tenant-terms-of-use
+      summary: enable a colection of tenant terms of use by filter
+      operationId: tenant-terms-of-use-api-batch-enable
       parameters:
         - name: uids
           in: query
@@ -3004,122 +3004,15 @@ paths:
           required: false
           schema:
             type: string
-        - name: security-domain
+        - name: tenant
           in: query
-          description: security domain
+          description: tenant
           required: false
           schema:
             type: string
-        - name: security-domains
+        - name: tenants
           in: query
-          description: security domains
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: security-scope
-          in: query
-          description: security scope
-          required: false
-          schema:
-            type: string
-        - name: security-scopes
-          in: query
-          description: security scopes
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: limit
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScopeAssignationApiDtoList'
-    post:
-      tags:
-        - scope-assignation
-      summary: Create a new scope assignation
-      operationId: scope-assignation-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ScopeAssignationApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScopeAssignationApiDto'
-    delete:
-      tags:
-        - scope-assignation
-      summary: Delete a colection of scope assignation by filter
-      operationId: scope-assignation-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: security-domain
-          in: query
-          description: security domain
-          required: false
-          schema:
-            type: string
-        - name: security-domains
-          in: query
-          description: security domains
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: security-scope
-          in: query
-          description: security scope
-          required: false
-          schema:
-            type: string
-        - name: security-scopes
-          in: query
-          description: security scopes
+          description: tenants
           required: false
           schema:
             type: array
@@ -3134,78 +3027,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/scope-assignations/{uid}:
+  /api/access/tenants-terms-of-use/~/enable-status/{uid}:
     get:
       tags:
-        - scope-assignation
-      summary: Retrive on  scope assignation by their uid
-      operationId: scope-assignation-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScopeAssignationApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - scope-assignation
-      summary: Update a scope assignation by their uid
-      operationId: scope-assignation-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ScopeAssignationApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScopeAssignationApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - scope-assignation
-      summary: Delete a  scope assignation by their uid
-      operationId: scope-assignation-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/scope-assignations/~/delete-status/{uid}:
-    get:
-      tags:
-        - scope-assignation
+        - tenant-terms-of-use
       summary: Query the result of an massive delete
-      operationId: scope-assignation-api-batch-delete-query
+      operationId: tenant-terms-of-use-api-batch-enable-query
       parameters:
         - name: uid
           in: path
@@ -3222,25 +3049,58 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/me/acl/access/scope-assignations:
-    get:
+  /api/access/tenants-terms-of-use/~/disable:
+    patch:
       tags:
-        - scope-assignation-acl
-      summary: Check for allow permissions for the current user on scope assignation
-      operationId: scope-assignation-api-generic-acl
+        - tenant-terms-of-use
+      summary: disable a colection of tenant terms of use by filter
+      operationId: tenant-terms-of-use-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScopeAssignationGenericAcl'
-  /api/me/acl/access/scope-assignations/{uid}:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/tenants-terms-of-use/~/disable-status/{uid}:
     get:
       tags:
-        - scope-assignation-acl
-      summary: Check for allow permissions for the current user on scope assignation by their uid
-      operationId: scope-assignation-api-contextual-acl
+        - tenant-terms-of-use
+      summary: Query the result of an massive delete
+      operationId: tenant-terms-of-use-api-batch-disable-query
       parameters:
         - name: uid
           in: path
@@ -3254,7 +3114,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScopeAssignationSpecificAcl'
+                $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
   /api/access/users:
@@ -3280,12 +3140,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: root
-          in: query
-          description: root
-          required: false
-          schema:
-            type: boolean
         - name: name
           in: query
           description: name
@@ -3379,12 +3233,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: root
-          in: query
-          description: root
-          required: false
-          schema:
-            type: boolean
         - name: name
           in: query
           description: name
@@ -3502,6 +3350,50 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/access/users/{uid}/accept:
+    patch:
+      tags:
+        - user
+      summary: Update a user by their uid
+      operationId: user-api-accept
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiDto'
+        '404':
+          description: The item dont exists
+  /api/access/users/{uid}/reject:
+    patch:
+      tags:
+        - user
+      summary: Update a user by their uid
+      operationId: user-api-reject
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiDto'
+        '404':
+          description: The item dont exists
   /api/access/users/{uid}/disable:
     patch:
       tags:
@@ -3603,7 +3495,155 @@ paths:
                 $ref: '#/components/schemas/UserSpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/users/~/disable/:
+  /api/access/users/~/accept:
+    patch:
+      tags:
+        - user
+      summary: accept a colection of user by filter
+      operationId: user-api-batch-accept
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/users/~/accept-status/{uid}:
+    get:
+      tags:
+        - user
+      summary: Query the result of an massive delete
+      operationId: user-api-batch-accept-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/users/~/reject:
+    patch:
+      tags:
+        - user
+      summary: reject a colection of user by filter
+      operationId: user-api-batch-reject
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/users/~/reject-status/{uid}:
+    get:
+      tags:
+        - user
+      summary: Query the result of an massive delete
+      operationId: user-api-batch-reject-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/users/~/disable:
     patch:
       tags:
         - user
@@ -3626,12 +3666,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: root
-          in: query
-          description: root
-          required: false
-          schema:
-            type: boolean
         - name: name
           in: query
           description: name
@@ -3683,7 +3717,7 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/users/~/enable/:
+  /api/access/users/~/enable:
     patch:
       tags:
         - user
@@ -3706,12 +3740,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: root
-          in: query
-          description: root
-          required: false
-          schema:
-            type: boolean
         - name: name
           in: query
           description: name
@@ -3763,7 +3791,7 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/users/~/unlock/:
+  /api/access/users/~/unlock:
     patch:
       tags:
         - user
@@ -3786,12 +3814,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: root
-          in: query
-          description: root
-          required: false
-          schema:
-            type: boolean
         - name: name
           in: query
           description: name
@@ -3887,6 +3909,12 @@ paths:
         - name: since-name
           in: query
           description: Order by name asc
+          required: false
+          schema:
+            type: string
+        - name: since-domain
+          in: query
+          description: Order by domain asc
           required: false
           schema:
             type: string
@@ -4123,7 +4151,7 @@ paths:
                 $ref: '#/components/schemas/TenantSpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/tenants/~/enable/:
+  /api/access/tenants/~/enable:
     patch:
       tags:
         - tenant
@@ -4181,7 +4209,7 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/tenants/~/disable/:
+  /api/access/tenants/~/disable:
     patch:
       tags:
         - tenant
@@ -4239,518 +4267,6 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/security-scopes:
-    get:
-      tags:
-        - security-scope
-      summary: List of security scope
-      operationId: security-scope-api-list
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: resource
-          in: query
-          description: resource
-          required: false
-          schema:
-            type: string
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: limit
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeApiDtoList'
-    post:
-      tags:
-        - security-scope
-      summary: Create a new security scope
-      operationId: security-scope-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SecurityScopeApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeApiDto'
-    delete:
-      tags:
-        - security-scope
-      summary: Delete a colection of security scope by filter
-      operationId: security-scope-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: resource
-          in: query
-          description: resource
-          required: false
-          schema:
-            type: string
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/security-scopes/{uid}:
-    get:
-      tags:
-        - security-scope
-      summary: Retrive on  security scope by their uid
-      operationId: security-scope-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - security-scope
-      summary: Update a security scope by their uid
-      operationId: security-scope-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SecurityScopeApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - security-scope
-      summary: Delete a  security scope by their uid
-      operationId: security-scope-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/security-scopes/~/delete-status/{uid}:
-    get:
-      tags:
-        - security-scope
-      summary: Query the result of an massive delete
-      operationId: security-scope-api-batch-delete-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/security-scopes/{uid}/disable:
-    patch:
-      tags:
-        - security-scope
-      summary: Update a security scope by their uid
-      operationId: security-scope-api-disable
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeApiDto'
-        '404':
-          description: The item dont exists
-  /api/access/security-scopes/{uid}/enable:
-    patch:
-      tags:
-        - security-scope
-      summary: Update a security scope by their uid
-      operationId: security-scope-api-enable
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeApiDto'
-        '404':
-          description: The item dont exists
-  /api/me/acl/access/security-scopes:
-    get:
-      tags:
-        - security-scope-acl
-      summary: Check for allow permissions for the current user on security scope
-      operationId: security-scope-api-generic-acl
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeGenericAcl'
-  /api/me/acl/access/security-scopes/{uid}:
-    get:
-      tags:
-        - security-scope-acl
-      summary: Check for allow permissions for the current user on security scope by their uid
-      operationId: security-scope-api-contextual-acl
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityScopeSpecificAcl'
-        '404':
-          description: The item dont exists
-  /api/access/security-scopes/~/disable/:
-    patch:
-      tags:
-        - security-scope
-      summary: disable a colection of security scope by filter
-      operationId: security-scope-api-batch-disable
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: resource
-          in: query
-          description: resource
-          required: false
-          schema:
-            type: string
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/security-scopes/~/disable-status/{uid}:
-    get:
-      tags:
-        - security-scope
-      summary: Query the result of an massive delete
-      operationId: security-scope-api-batch-disable-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/security-scopes/~/enable/:
-    patch:
-      tags:
-        - security-scope
-      summary: enable a colection of security scope by filter
-      operationId: security-scope-api-batch-enable
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: resource
-          in: query
-          description: resource
-          required: false
-          schema:
-            type: string
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/security-scopes/~/enable-status/{uid}:
-    get:
-      tags:
-        - security-scope
-      summary: Query the result of an massive delete
-      operationId: security-scope-api-batch-enable-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
 
 components:
   securitySchemes:
@@ -4759,14 +4275,87 @@ components:
       scheme: bearer
       bearerFormat: JWT # Opcional, para indicar que es un JWT
   schemas:
+    ConstraintFail:
+      type: object
+      properties:
+        field:
+          type: string
+        error:
+          type: string
+        wrong:
+          type: string
+    BatchResultErrorItem:
+      type: object
+      properties:
+        item:
+          type: string
+        fails:
+          type: array
+          items:
+            $ref: '#/components/schemas/MultipleErrorCodes'
+    MultipleErrorCodes:
+      type: object
+      properties:
+        code:
+          type: string
+        violation:
+          type: string
+        wrongValues:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConstraintFail'
     BatchTaskDetail:
       type: object
       properties:
         uid:
           type: string
-        status:
+        detailStatus:
           type: string
           enum: [PENDING, PROCESSING, FINISHED, FAILED]
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchStepProgress'
+    BatchStepProgress:
+      type: object
+      properties:
+        name:
+          type: string
+        stepStatus:
+          type: string
+          enum: [PENDING, PROCESSING, FINISHED, FAILED]
+        error:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        totalItems:
+          type: integer
+          format: int64
+        processedItems:
+          type: integer
+          format: int64
+        oks:
+          type: array
+          items:
+            type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchResultErrorItem'
+        warns:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchResultErrorItem'
     BatchTaskLocalizator:
       type: object
       properties:
@@ -4776,46 +4365,19 @@ components:
           type: array
           items:
             type: string
-    TenantApiRef:
+    RelyingPartyApiRef:
       type: object
       properties:
         $ref:
           type: string
           x-relationship:
-            url: "/api/access/tenants"
+            url: "/api/access/relying-parties"
             method: "GET"
             reference: "uid"
             batch-query-param: "uids"
       required:
         - uid
         - name
-    SecurityDomainApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/security-domains"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - securityDomain
-    DomainsApiDto:
-      type: object
-      description: role-domain
-      properties:
-        uid:
-          description: A uid string to identify the entity
-          type: string
-        securityDomain:
-          description: El security domain de role domain
-          $ref: '#/components/schemas/SecurityDomainApiRef'
-        version:
-          description: Campo con el número de version de role domain para controlar bloqueos optimistas
-          type: integer
-          format: int32
     RoleApiDto:
       type: object
       description: role
@@ -4826,14 +4388,9 @@ components:
         name:
           description: The user name to identify on the login screen
           type: string
-        tenant:
+        relyingParty:
           description: Domains without a tenant could be used only for admins
-          $ref: '#/components/schemas/TenantApiRef'
-        domains:
-          description: El domains de role
-          type: array
-          items:
-            $ref: '#/components/schemas/DomainsApiDto'
+          $ref: '#/components/schemas/RelyingPartyApiRef'
         version:
           description: Campo con el número de version de role para controlar bloqueos optimistas
           type: integer
@@ -5023,6 +4580,20 @@ components:
           type: array
           items:
             type: string
+    AllowedRedirectsApiDto:
+      type: object
+      description: trusted-client-allowed-redirect
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        url:
+          description: El url de trusted client allowed redirect
+          type: string
+        version:
+          description: Campo con el número de version de trusted client allowed redirect para controlar bloqueos optimistas
+          type: integer
+          format: int32
     TrustedClientApiDto:
       type: object
       description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
@@ -5039,12 +4610,14 @@ components:
         secretOauth:
           description: If the user is not delegated, the phrasse to identify
           type: string
-        allowedRedirects:
-          description: Si permitimos login directo de la app, obligamos a indicar un secreto.
-          type: string
         enabled:
-          description: Una marca que permite quitar el acceso a una cuenta sin borrarla
+          description: The indicator to allow the account be used without deleting it
           type: boolean
+        allowedRedirects:
+          description: El allowed redirects de trusted client
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedRedirectsApiDto'
         version:
           description: Campo con el número de version de trusted client para controlar bloqueos optimistas
           type: integer
@@ -5147,19 +4720,6 @@ components:
       required:
         - uid
         - user
-    RelyingPartyApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/relying-parties"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - user
     TrustedClientApiRef:
       type: object
       properties:
@@ -5205,7 +4765,7 @@ components:
       description: user-identity
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: El identificador de la aplicacion
           type: string
         user:
           description: El user de user identity
@@ -5298,22 +4858,59 @@ components:
           type: array
           items:
             type: string
+    TenantApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/tenants"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - tenant
     TenantConfigApiDto:
       type: object
-      description: Holds configuration options specific to a tenant. This includes visual customization and login security settings like MFA enforcement.
+      description: tenant-config
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: A number to identify the db record
           type: string
         tenant:
-          description: The tenant this configuration applies to.
+          description: The name to identify the account.
           $ref: '#/components/schemas/TenantApiRef'
         innerLabel:
-          description: A customizable label that tenants can use to personalize the application UI.
+          description: Tenant could use these field to label the application for the users
           type: string
         forceMfa:
-          description: Indicates if Multi-Factor Authentication (MFA) is enforced for the tenant.
+          description: El force mfa de tenant config
           type: boolean
+        allowRegister:
+          description: El allow register de tenant config
+          type: boolean
+        enableRegisterUsers:
+          description: El enable register users de tenant config
+          type: boolean
+        wellcomeEmail:
+          description: Email send to the enabled user
+          type: string
+        registerdEmail:
+          description: El registerd email de tenant config
+          type: string
+        disabledUserEmail:
+          description: Email send when a user is disabled
+          type: string
+        enabledUserEmail:
+          description: Email send when a user is enabled
+          type: string
+        allowRecoverPass:
+          description: El allow recover pass de tenant config
+          type: boolean
+        recoverPassEmail:
+          description: Email send to the user to recover the password
+          type: string
         version:
           description: Campo con el número de version de tenant config para controlar bloqueos optimistas
           type: integer
@@ -5391,37 +4988,30 @@ components:
           type: array
           items:
             type: string
-    SecurityDomainApiDto:
+    ApiKeyClientApiDto:
       type: object
-      description: A security domain is a set of allow over security scopes. Each security domain mark what an user can do over diferente applications of the stack.
+      description: Las diferentes aplicaciones que pueden usar el sistema a través de un api.
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: El identificador de la aplicacion
           type: string
-        name:
-          description: El name de security domain
+        code:
+          description: El código identificativo de la aplicación
           type: string
-        level:
-          description: The user inherit level, and can view only domain with his level or lower
-          type: integer
-          format: int32
-        readAll:
-          description: Allow to read on every scope
-          type: boolean
-        writeAll:
-          description: Allow to write on every scope
-          type: boolean
-        manageAll:
-          description: Allow to write on every scope
-          type: boolean
+        key:
+          description: The key for the api
+          type: string
         enabled:
-          description: Una marca que permite quitar el acceso a una cuenta sin borrarla
+          description: The indicator to allow the account be used without deleting it
           type: boolean
+        scopes:
+          description: A coma separated scopes for the api key
+          type: string
         version:
-          description: Campo con el número de version de security domain para controlar bloqueos optimistas
+          description: Campo con el número de version de api key client para controlar bloqueos optimistas
           type: integer
           format: int32
-    SecurityDomainApiDtoList:
+    ApiKeyClientApiDtoList:
       type: object
       properties:
         self:
@@ -5433,22 +5023,22 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/SecurityDomainApiDto'
-    SecurityDomainGenericAcl:
+            $ref: '#/components/schemas/ApiKeyClientApiDto'
+    ApiKeyClientGenericAcl:
       type: object
       properties:
         allows:
-          $ref: '#/components/schemas/SecurityDomainAclGenericAllows'
+          $ref: '#/components/schemas/ApiKeyClientAclGenericAllows'
         fields:
-          $ref: '#/components/schemas/SecurityDomainAclFields'
-    SecurityDomainSpecificAcl:
+          $ref: '#/components/schemas/ApiKeyClientAclFields'
+    ApiKeyClientSpecificAcl:
       type: object
       properties:
         allows:
-          $ref: '#/components/schemas/SecurityDomainAclSpecificAllows'
+          $ref: '#/components/schemas/ApiKeyClientAclSpecificAllows'
         fields:
-          $ref: '#/components/schemas/SecurityDomainAclFields'
-    SecurityDomainAclGenericAllows:
+          $ref: '#/components/schemas/ApiKeyClientAclFields'
+    ApiKeyClientAclGenericAllows:
       type: object
       properties:
         retrieve:
@@ -5473,7 +5063,7 @@ components:
         - enable
         - disable
         - list
-    SecurityDomainAclSpecificAllows:
+    ApiKeyClientAclSpecificAllows:
       type: object
       properties:
         retrieve:
@@ -5495,7 +5085,7 @@ components:
         - delete
         - enable
         - disable
-    SecurityDomainAclFields:
+    ApiKeyClientAclFields:
       type: object
       properties:
         noEditables:
@@ -5506,7 +5096,7 @@ components:
           type: array
           items:
             type: string
-    LoginProviderApiDto:
+    TenantLoginProviderApiDto:
       type: object
       description: Represents a login identity provider (e.g., Google, GitHub, SAML) configured for a tenant. Enables federated authentication integration.
       properties:
@@ -5545,10 +5135,10 @@ components:
           description: Defines whether the users created with this provider are enabled by default.
           type: boolean
         version:
-          description: Campo con el número de version de login provider para controlar bloqueos optimistas
+          description: Campo con el número de version de tenant login provider para controlar bloqueos optimistas
           type: integer
           format: int32
-    LoginProviderApiDtoList:
+    TenantLoginProviderApiDtoList:
       type: object
       properties:
         self:
@@ -5560,22 +5150,22 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/LoginProviderApiDto'
-    LoginProviderGenericAcl:
+            $ref: '#/components/schemas/TenantLoginProviderApiDto'
+    TenantLoginProviderGenericAcl:
       type: object
       properties:
         allows:
-          $ref: '#/components/schemas/LoginProviderAclGenericAllows'
+          $ref: '#/components/schemas/TenantLoginProviderAclGenericAllows'
         fields:
-          $ref: '#/components/schemas/LoginProviderAclFields'
-    LoginProviderSpecificAcl:
+          $ref: '#/components/schemas/TenantLoginProviderAclFields'
+    TenantLoginProviderSpecificAcl:
       type: object
       properties:
         allows:
-          $ref: '#/components/schemas/LoginProviderAclSpecificAllows'
+          $ref: '#/components/schemas/TenantLoginProviderAclSpecificAllows'
         fields:
-          $ref: '#/components/schemas/LoginProviderAclFields'
-    LoginProviderAclGenericAllows:
+          $ref: '#/components/schemas/TenantLoginProviderAclFields'
+    TenantLoginProviderAclGenericAllows:
       type: object
       properties:
         retrieve:
@@ -5603,7 +5193,7 @@ components:
         - disable
         - list
         - uploadMetadata
-    LoginProviderAclSpecificAllows:
+    TenantLoginProviderAclSpecificAllows:
       type: object
       properties:
         retrieve:
@@ -5625,7 +5215,7 @@ components:
         - delete
         - enable
         - disable
-    LoginProviderAclFields:
+    TenantLoginProviderAclFields:
       type: object
       properties:
         noEditables:
@@ -5638,22 +5228,25 @@ components:
             type: string
     TenantTermsOfUseApiDto:
       type: object
-      description: Defines legal or informational documents (Terms of Use) that users must accept to use services within a tenant's scope.
+      description: tenant-terms-of-use
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: A number to identify the db record
           type: string
         tenant:
-          description: The tenant this Terms of Use document belongs to.
+          description: La cuenta a la que pertenece
           $ref: '#/components/schemas/TenantApiRef'
         text:
-          description: The content of the Terms of Use document.
+          description: El text de tenant terms of use
           type: string
+        enabled:
+          description: The indicator to allow the account be used without deleting it
+          type: boolean
         attached:
-          description: An optional file attachment (e.g., PDF or signed document).
+          description: El attached de tenant terms of use
           type: string
         activationDate:
-          description: Date when the Terms of Use become active.
+          description: El activation date de tenant terms of use
           type: string
           format: date-time
         version:
@@ -5698,6 +5291,10 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         delete:
           $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
         list:
           $ref: '#/components/schemas/CommonAllow'
         uploadAttached:
@@ -5707,6 +5304,8 @@ components:
         - create
         - update
         - delete
+        - enable
+        - disable
         - list
         - uploadAttached
     TenantTermsOfUseAclSpecificAllows:
@@ -5720,116 +5319,18 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         delete:
           $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
       required:
         - retrieve
         - create
         - update
         - delete
+        - enable
+        - disable
     TenantTermsOfUseAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
-    SecurityScopeApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/security-scopes"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - securityDomain
-        - securityScope
-    ScopeAssignationApiDto:
-      type: object
-      description: Witch scopes are assigned to the security domain
-      properties:
-        uid:
-          description: El uid de scope assignation
-          type: string
-        securityDomain:
-          description: El security domain de scope assignation
-          $ref: '#/components/schemas/SecurityDomainApiRef'
-        securityScope:
-          description: El security scope de scope assignation
-          $ref: '#/components/schemas/SecurityScopeApiRef'
-        version:
-          description: Campo con el número de version de scope assignation para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    ScopeAssignationApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScopeAssignationApiDto'
-    ScopeAssignationGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/ScopeAssignationAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/ScopeAssignationAclFields'
-    ScopeAssignationSpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/ScopeAssignationAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/ScopeAssignationAclFields'
-    ScopeAssignationAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - list
-    ScopeAssignationAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-    ScopeAssignationAclFields:
       type: object
       properties:
         noEditables:
@@ -5845,10 +5346,10 @@ components:
       description: user
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: A number to identify the db record
           type: string
         tenant:
-          description: Los usuarios que no tienen tenant son roots del sistema
+          description: El tenant de user
           $ref: '#/components/schemas/TenantApiRef'
         name:
           description: The user name to identify on the login screen
@@ -5859,9 +5360,17 @@ components:
         email:
           description: An optional email used to send notifications to the user
           type: string
+        wellcomeAt:
+          description: The date when a wellcome email is send
+          type: string
+          format: date-time
         enabled:
           description: A disabled user cant login on the system. On his login attempts, he will recive a specific warn of his disabled account.
           type: boolean
+        approve:
+          description: El approve de user
+          type: string
+          enum: [unverified,pending,accepted,rejected]
         temporalPassword:
           description: El temporal password de user
           type: boolean
@@ -5875,11 +5384,8 @@ components:
           description: A bloqued user cant login on the system, until these date. On his login attempst, hue will recive a generic not allowed message.
           type: string
           format: date-time
-        language:
-          description: El language de user
-          type: string
         provider:
-          description: Si se identificó con un proveedor, se marca con cual (aunque el provedor cambie luego)
+          description: Si se identificó con un proveedor, se marca con cual (aunque el provvedor cambie luego)
           type: string
         version:
           description: Campo con el número de version de user para controlar bloqueos optimistas
@@ -5923,6 +5429,10 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         delete:
           $ref: '#/components/schemas/CommonAllow'
+        accept:
+          $ref: '#/components/schemas/CommonAllow'
+        reject:
+          $ref: '#/components/schemas/CommonAllow'
         disable:
           $ref: '#/components/schemas/CommonAllow'
         enable:
@@ -5936,6 +5446,8 @@ components:
         - create
         - update
         - delete
+        - accept
+        - reject
         - disable
         - enable
         - unlock
@@ -5951,6 +5463,10 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         delete:
           $ref: '#/components/schemas/CommonAllow'
+        accept:
+          $ref: '#/components/schemas/CommonAllow'
+        reject:
+          $ref: '#/components/schemas/CommonAllow'
         disable:
           $ref: '#/components/schemas/CommonAllow'
         enable:
@@ -5962,6 +5478,8 @@ components:
         - create
         - update
         - delete
+        - accept
+        - reject
         - disable
         - enable
         - unlock
@@ -5976,63 +5494,32 @@ components:
           type: array
           items:
             type: string
-    TrustedClientsApiDto:
-      type: object
-      description: Links a tenant with a trusted OAuth client application. This configuration allows the client to bypass user consent or participate in sensitive flows securely, under tenant control.
-      properties:
-        uid:
-          description: A uid string to identify the entity
-          type: string
-        trustedClient:
-          description: Reference to the OAuth client application trusted by this tenant.
-          $ref: '#/components/schemas/TrustedClientApiRef'
-        version:
-          description: Campo con el número de version de tenant trusted client para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    RelingPartiesApiDto:
-      type: object
-      description: Associates a tenant with a relying party (such as an application or service) in the access control model. This relationship defines which services are available to users within a specific tenant.
-      properties:
-        uid:
-          description: A uid string to identify the entity
-          type: string
-        relyingParty:
-          description: Reference to the external service or application (relying party) linked to the tenant.
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        version:
-          description: Campo con el número de version de tenant relying party para controlar bloqueos optimistas
-          type: integer
-          format: int32
     TenantApiDto:
       type: object
-      description: Represents a tenant or account in the system. Each tenant defines an isolated scope for users and applications, with optional access to global resources or restricted visibility. Tenants allow multi-tenancy features in the platform.
+      description: tenant
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: A number to identify the db record
           type: string
         name:
           description: The name to identify the account.
           type: string
+        root:
+          description: El root de tenant
+          type: boolean
         domain:
           description: A domain suffix to identify the account
           type: string
         enabled:
-          description: The users of a non enabled tenant could not make login on the system
+          description: The indicator to allow the account be used without deleting it
           type: boolean
-        accessToAllApplications:
-          description: Defines if users from this tenant can access all parties and clients, or only those explicitly assigned.
+        markForDelete:
+          description: a tenant mark for deleted will be
           type: boolean
-        trustedClients:
-          description: A list of OAuth clients marked as trusted for this tenant.
-          type: array
-          items:
-            $ref: '#/components/schemas/TrustedClientsApiDto'
-        relingParties:
-          description: A list of relying parties (services or applications) associated with this tenant.
-          type: array
-          items:
-            $ref: '#/components/schemas/RelingPartiesApiDto'
+        markForDeleteTime:
+          description: A tenant mark for deleted will be deleted soon
+          type: string
+          format: date-time
         version:
           description: Campo con el número de version de tenant para controlar bloqueos optimistas
           type: integer
@@ -6112,125 +5599,6 @@ components:
         - enable
         - disable
     TenantAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
-    SecurityScopeApiDto:
-      type: object
-      description: each of the allow scopes for the application.
-      properties:
-        uid:
-          description: A uid string to identify the entity
-          type: string
-        trustedClient:
-          description: El trusted client de security scope
-          $ref: '#/components/schemas/TrustedClientApiRef'
-        relyingParty:
-          description: El relying party de security scope
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        resource:
-          description: A label group key to show the scope
-          type: string
-        scope:
-          description: A label to show the scope
-          type: string
-        enabled:
-          description: El enabled de security scope
-          type: boolean
-        kind:
-          description: El kind de security scope
-          type: string
-          enum: [read,write,manage]
-        visibility:
-          description: El visibility de security scope
-          type: string
-          enum: [public,authorized,explicit]
-        version:
-          description: Campo con el número de version de security scope para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    SecurityScopeApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/SecurityScopeApiDto'
-    SecurityScopeGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/SecurityScopeAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/SecurityScopeAclFields'
-    SecurityScopeSpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/SecurityScopeAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/SecurityScopeAclFields'
-    SecurityScopeAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        disable:
-          $ref: '#/components/schemas/CommonAllow'
-        enable:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - disable
-        - enable
-        - list
-    SecurityScopeAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        disable:
-          $ref: '#/components/schemas/CommonAllow'
-        enable:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - disable
-        - enable
-    SecurityScopeAclFields:
       type: object
       properties:
         noEditables:

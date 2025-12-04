@@ -299,9 +299,8 @@ public class UsersVisibility {
     UserVisibilityFilter modified = proposal.getFilter();
     return UserFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
-        .root(modified.getRoot().orElse(null)).nameOrEmail(modified.getNameOrEmail().orElse(null))
-        .name(modified.getName().orElse(null)).tenant(modified.getTenant().orElse(null))
-        .tenants(modified.getTenants())
+        .nameOrEmail(modified.getNameOrEmail().orElse(null)).name(modified.getName().orElse(null))
+        .tenant(modified.getTenant().orElse(null)).tenants(modified.getTenants())
         .tenantTenantAccesible(modified.getTenantTenantAccesible().orElse(null)).build();
   }
 
@@ -385,10 +384,10 @@ public class UsersVisibility {
    * @return The input entity with the copy values without hidden
    */
   private UserChangeSet visiblesReferences(Interaction prev, UserChangeSet source) {
-    source.getTenant().flatMap(TenantVO::getTenantUid).ifPresent(ref -> {
-      boolean visible = tenantsVisibility.checkVisibility(prev, ref);
+    source.getTenant().map(TenantVO::getTenantUid).ifPresent(tenant -> {
+      boolean visible = tenantsVisibility.checkVisibility(prev, tenant);
       if (!visible) {
-        throw new NotFoundException("No tenant - " + ref);
+        throw new NotFoundException("No tenant - " + tenant);
       }
     });
     return source;

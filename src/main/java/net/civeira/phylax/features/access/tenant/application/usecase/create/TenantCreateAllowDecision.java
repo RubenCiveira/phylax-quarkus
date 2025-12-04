@@ -5,6 +5,10 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 import net.civeira.phylax.common.security.AllowDecision;
 
+/**
+ * Create Allow Decision event is used when a create usecase is invoked, and allow the programer to
+ * check claims of the user before accept the operation.
+ */
 @Data
 @SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)

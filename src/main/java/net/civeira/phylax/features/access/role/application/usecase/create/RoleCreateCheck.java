@@ -7,6 +7,13 @@ import lombok.NonNull;
 import lombok.With;
 import net.civeira.phylax.common.security.Interaction;
 
+/**
+ * Create Check event happen when a create usecase is invoked, and allow the programer to configure
+ * a policy to check if the provided input values are valid. It will be executed after the generic
+ * Enrichevent (witch could be used to fill the dto values send to modify on every operation over
+ * the entity), so the programer could check those genericassignation.Create enrich will be executed
+ * after the check event, so that create enrich event must append only safe values.
+ */
 @Data
 @Builder(toBuilder = true)
 @With

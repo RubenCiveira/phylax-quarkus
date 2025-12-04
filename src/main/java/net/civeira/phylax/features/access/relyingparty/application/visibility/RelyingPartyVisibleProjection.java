@@ -15,7 +15,9 @@ import net.civeira.phylax.features.access.relyingparty.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.relyingparty.domain.valueobject.VersionVO;
 
 /**
- * A dto transfer to hold relying party attribute values
+ * Visible projection events happen when a dto is filled throught an existint entity when the
+ * visibility service is preparing to send at user.The programmers could add policies to fill dto
+ * values to show to user at the application level.
  */
 @NoArgsConstructor
 @AllArgsConstructor

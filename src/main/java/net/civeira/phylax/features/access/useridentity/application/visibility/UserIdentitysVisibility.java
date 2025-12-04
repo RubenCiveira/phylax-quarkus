@@ -325,6 +325,7 @@ public class UserIdentitysVisibility {
     UserIdentityVisibilityFilter modified = proposal.getFilter();
     return UserIdentityFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
+        .forAllAudiences(modified.getForAllAudiences().orElse(null))
         .user(modified.getUser().orElse(null)).users(modified.getUsers())
         .relyingParty(modified.getRelyingParty().orElse(null))
         .relyingPartys(modified.getRelyingPartys())

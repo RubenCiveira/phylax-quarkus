@@ -143,7 +143,6 @@ public class AuthenticationController {
 
     Uni<Map<String, Object>> uni = cache.get(key, cacheKey -> {
       try {
-        System.err.println("======================================");
         OffsetDateTime scopesExpiration = OffsetDateTime.now().plus(2, ChronoUnit.HOURS);
         Map<String, Object> map = new HashMap<>();
         map.put("keys", tokenManager.getJks());

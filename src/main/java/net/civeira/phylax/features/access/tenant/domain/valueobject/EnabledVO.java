@@ -8,7 +8,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the users of a non enabled tenant could not make login on the system of
+ * Value Object representing the indicator to allow the account be used without deleting it of
  * tenant.
  * <p>
  * This class ensures that the enabled is a non-null {@code String} and encapsulates its validation

@@ -68,8 +68,8 @@ public class PasswordRecoverUsecase {
             userCode = codes.create(UserAccessTemporalCode
                 .create(UserAccessTemporalCodeChangeSet.builder().newUid().build()));
           }
-          codes.update(userCode,
-              userCode.generatePasswordRecover(code, OffsetDateTime.now().plus(RECOVER_TIME)));
+          codes.update(userCode, userCode.generatePasswordRecover(urlWithParams, code,
+              OffsetDateTime.now().plus(RECOVER_TIME)));
         });
   }
 }

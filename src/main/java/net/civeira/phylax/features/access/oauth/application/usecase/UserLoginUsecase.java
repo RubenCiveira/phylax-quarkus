@@ -23,6 +23,7 @@ import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyRef;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientRef;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
@@ -123,57 +124,61 @@ public class UserLoginUsecase {
 
   private AuthenticationResult userData(AuthRequest request, String name, String password,
       AuthenticationMode mode) {
-    return activeUser.findEnabledUser(request.getTenant(), name, request.getAudiences())
-        .map(user -> {
-          List<Supplier<Optional<AuthenticationResult>>> calls = List.of(
-              () -> checkPassword(request, user, password), () -> checkFirstPass(request, user),
-              () -> checkMfa(request, user, mode), () -> checkTerms(request, user));
+    return activeUser.findEnabledTenant(request.getTenant(), request.getAudiences())
+        .flatMap(tenant -> activeUser.findEnabledUser(tenant, name)
+            .map(user -> userToGrant(request, mode, name, password, tenant, user)))
+        .orElseGet(() -> AuthenticationResult.unknownName(request.getTenant(), name));
+  }
 
-          for (Supplier<Optional<AuthenticationResult>> call : calls) {
-            Optional<AuthenticationResult> value = call.get();
-            if (value.isPresent()) {
-              return value.get();
-            }
-          }
-          AuthenticationData ud = new AuthenticationData();
-          ud.setDetails(new HashMap<>());
-          ud.setUid("" + name.hashCode());
-          ud.setUsername(name);
-          ud.setUsername(name);
-          ud.setTenant(user.getTenantUid().orElse(null));
-          ud.setMode(mode);
-          ud.setTime(Instant.now());
+  private AuthenticationResult userToGrant(AuthRequest request, AuthenticationMode mode,
+      String name, String password, Tenant tenant, User user) {
+    List<Supplier<Optional<AuthenticationResult>>> calls =
+        List.of(() -> checkPassword(request, user, password), () -> checkFirstPass(request, user),
+            () -> checkMfa(request, user, mode), () -> checkTerms(request, user));
 
-          List<UserIdentity> hisIdentities =
-              identities.list(UserIdentityFilter.builder().user(user).build());
-          request.getAudiences().forEach(aud -> {
-            Optional<RelyingParty> isParty =
-                parties.find(RelyingPartyFilter.builder().code(aud).build());
-            if (isParty.isPresent()) {
-              RelyingParty relyingParty = isParty.get();
-              hisIdentities.stream()
-                  .filter(identity -> relyingParty.getUid()
-                      .equals(identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse("")))
-                  .findFirst().ifPresent(identity -> ud.addRolesTo(aud, identities
-                      .resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
-            } else {
-              Optional<TrustedClient> isClient =
-                  clients.find(TrustedClientFilter.builder().code(aud).build());
-              if (isClient.isPresent()) {
-                TrustedClient trustedClient = isClient.get();
-                hisIdentities.stream()
-                    .filter(identity -> trustedClient.getUid().equals(
-                        identity.getTrustedClient().map(TrustedClientRef::getUid).orElse("")))
-                    .findFirst().ifPresent(identity -> ud.addRolesTo(aud, identities
-                        .resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
-              }
-            }
-          });
-          if (user.getTenant().isEmpty()) {
-            ud.getDetails().put("root", true);
-          }
-          return AuthenticationResult.right(ud);
-        }).orElseGet(() -> AuthenticationResult.unknownName(request.getTenant(), name));
+    for (Supplier<Optional<AuthenticationResult>> call : calls) {
+      Optional<AuthenticationResult> value = call.get();
+      if (value.isPresent()) {
+        return value.get();
+      }
+    }
+    AuthenticationData ud = new AuthenticationData();
+    ud.setDetails(new HashMap<>());
+    ud.setUid("" + name.hashCode());
+    ud.setUsername(name);
+    ud.setUsername(name);
+    ud.setTenant(user.getTenantUid());
+    ud.setMode(mode);
+    ud.setTime(Instant.now());
+
+    List<UserIdentity> hisIdentities =
+        identities.list(UserIdentityFilter.builder().user(user).build());
+    request.getAudiences().forEach(aud -> {
+      Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
+      if (isParty.isPresent()) {
+        RelyingParty relyingParty = isParty.get();
+        hisIdentities.stream()
+            .filter(identity -> relyingParty.getUid()
+                .equals(identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse("")))
+            .findFirst().ifPresent(identity -> ud.addRolesTo(aud,
+                identities.resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
+      } else {
+        Optional<TrustedClient> isClient =
+            clients.find(TrustedClientFilter.builder().code(aud).build());
+        if (isClient.isPresent()) {
+          TrustedClient trustedClient = isClient.get();
+          hisIdentities.stream()
+              .filter(identity -> trustedClient.getUid()
+                  .equals(identity.getTrustedClient().map(TrustedClientRef::getUid).orElse("")))
+              .findFirst().ifPresent(identity -> ud.addRolesTo(aud, identities
+                  .resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
+        }
+      }
+    });
+    if (tenant.isRoot()) {
+      ud.getDetails().put("root", true);
+    }
+    return AuthenticationResult.right(ud);
   }
 
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,

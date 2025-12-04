@@ -128,12 +128,12 @@ public class UserUnlockUsecase {
     if (!detail.isAllowed()) {
       throw new NotAllowedException(detail.getDescription());
     }
-    UserVisibilityFilter filterWithVisibility = UserVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).root(filter.getRoot().orElse(null))
-        .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
-        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    UserVisibilityFilter filterWithVisibility =
+        UserVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
+            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
+            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     UserUnlockAllInBatchCommand command = UserUnlockAllInBatchCommand.builder().interaction(query)
         .filter(filterWithVisibility).build();
     return batch.start(command.getInteraction().getActor().getName().orElse("-"),

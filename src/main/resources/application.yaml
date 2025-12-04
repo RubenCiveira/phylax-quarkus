@@ -2,11 +2,11 @@ quarkus:
   application:
     name: hermes-api
   banner:
-    path: banner.txt
+    enabled: true
   config:
     locations:
       - config/cache.yaml
-      - config/database.yaml
+      # - config/database.yaml
       - config/telemetry.yaml
       - config/security.yaml
       - config/oauth.yaml

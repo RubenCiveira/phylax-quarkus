@@ -11,8 +11,8 @@ import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyWriteRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.role.domain.gateway.RoleWriteRepositoryGateway;
-import net.civeira.phylax.features.access.securitydomain.domain.SecurityDomain;
-import net.civeira.phylax.features.access.securitydomain.domain.gateway.SecurityDomainWriteRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantWriteRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientWriteRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
@@ -24,8 +24,8 @@ import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdenti
 @RequiredArgsConstructor
 public class InitialFillService {
   private final UserWriteRepositoryGateway users;
-  private final SecurityDomainWriteRepositoryGateway domains;
   private final RoleWriteRepositoryGateway roles;
+  private final TenantWriteRepositoryGateway tenants;
   private final TrustedClientWriteRepositoryGateway clients;
   private final RelyingPartyWriteRepositoryGateway parties;
   private final UserIdentityWriteRepositoryGateway identities;
@@ -44,13 +44,12 @@ public class InitialFillService {
         TrustedClient created = TrustedClient.create(proposal);
         clients.create(created.enable());
       });
-      bean.getDomains().forEach(proposal -> {
-        SecurityDomain created = SecurityDomain.create(proposal);
-        domains.create(created.enable());
-      });
       bean.getRoles().forEach(proposal -> {
         Role created = Role.create(proposal);
         roles.create(created);
+      });
+      bean.getTenants().forEach(proposal -> {
+        tenants.create(Tenant.create(proposal));
       });
       bean.getUsers().forEach(proposal -> {
         users.create(User.create(proposal));

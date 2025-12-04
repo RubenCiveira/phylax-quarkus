@@ -81,14 +81,14 @@ public class TenantConfigListController {
         TenantConfigListFilter.builder();
     TenantConfigListCursor.TenantConfigListCursorBuilder cursorBuilder =
         TenantConfigListCursor.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.uids(
+        null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     if (null != tenant) {
       filterBuilder = filterBuilder.tenant(TenantReference.of(tenant));
     }
-    filterBuilder = filterBuilder
-        .tenants(tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.tenants(null == tenants ? null
+        : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     cursorBuilder = cursorBuilder.limit(limit);
     cursorBuilder = cursorBuilder.sinceUid(sinceUid);
     TenantConfigListFilter filter = filterBuilder.build();
@@ -110,6 +110,14 @@ public class TenantConfigListController {
     tenantConfigApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantConfigApiDto.setInnerLabel(dto.getInnerLabel());
     tenantConfigApiDto.setForceMfa(dto.getForceMfa());
+    tenantConfigApiDto.setAllowRegister(dto.getAllowRegister());
+    tenantConfigApiDto.setEnableRegisterUsers(dto.getEnableRegisterUsers());
+    tenantConfigApiDto.setWellcomeEmail(dto.getWellcomeEmail());
+    tenantConfigApiDto.setRegisterdEmail(dto.getRegisterdEmail());
+    tenantConfigApiDto.setDisabledUserEmail(dto.getDisabledUserEmail());
+    tenantConfigApiDto.setEnabledUserEmail(dto.getEnabledUserEmail());
+    tenantConfigApiDto.setAllowRecoverPass(dto.getAllowRecoverPass());
+    tenantConfigApiDto.setRecoverPassEmail(dto.getRecoverPassEmail());
     tenantConfigApiDto.setVersion(dto.getVersion());
     return tenantConfigApiDto;
   }

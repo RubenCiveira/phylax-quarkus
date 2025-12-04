@@ -2,65 +2,60 @@
 package net.civeira.phylax.features.access.oauth.application.usecase;
 
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
-import net.civeira.phylax.features.access.securityscope.domain.SecurityScope;
-import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeChangeSet;
-import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeKindOptions;
-import net.civeira.phylax.features.access.securityscope.domain.SecurityScopeVisibilityOptions;
-import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeFilter;
-import net.civeira.phylax.features.access.securityscope.domain.gateway.SecurityScopeWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.rbac.domain.PropertyList;
-import net.civeira.phylax.features.oauth.rbac.domain.Resource;
-import net.civeira.phylax.features.oauth.rbac.domain.ScopeKind;
 import net.civeira.phylax.features.oauth.rbac.domain.ScopeList;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 public class RegisterResourceUsecase {
-  private final RelyingPartyReadRepositoryGateway parties;
-  private final SecurityScopeWriteRepositoryGateway scopes;
+  // private final RelyingPartyReadRepositoryGateway parties;
+  // private final SecurityScopeWriteRepositoryGateway scopes;
 
-  public void registerScopes(String relayParty, List<ScopeList> paramMap) {
-    parties.find(RelyingPartyFilter.builder().code(relayParty).build()).ifPresent(party -> {
-      paramMap.forEach(scopeList -> {
-        Resource resource = scopeList.getResource();
-        List<SecurityScope> list = scopes.listForUpdate(
-            SecurityScopeFilter.builder().relyingParty(party).resource(resource.getName()).build());
-        scopeList.getScopes().forEach(scope -> {
-          Optional<SecurityScope> prev = list.stream()
-              .filter(existing -> existing.getScope().equals(scope.getName())).findFirst();
-          if (!prev.isPresent()) {
-            scopes.create(SecurityScope
-                .create(SecurityScopeChangeSet.builder().newUid().relyingParty(party).enabled(true)
-                    .resource(resource.getName()).scope(scope.getName()).kind(kind(scope.getKind()))
-                    .visibility(SecurityScopeVisibilityOptions.EXPLICIT).build()));
-          } else {
-            list.removeIf(existing -> existing.getScope().equals(scope.getName()));
-          }
-        });
-        list.forEach(prev -> {
-          scopes.update(prev, prev.enable());
-        });
-      });
-    });
-  }
+  public void registerScopes(String relayParty, List<ScopeList> paramMap) {}
 
   public void registerSchema(String relayParty, List<PropertyList> paramMap) {
     /* nothing for now */
   }
 
-  private SecurityScopeKindOptions kind(ScopeKind scopeKind) {
-    if (ScopeKind.MANAGE == scopeKind) {
-      return SecurityScopeKindOptions.MANAGE;
-    } else if (ScopeKind.WRITE == scopeKind) {
-      return SecurityScopeKindOptions.WRITE;
-    } else {
-      return SecurityScopeKindOptions.READ;
-    }
-  }
+  // public void registerScopes(String relayParty, List<ScopeList> paramMap) {
+  // parties.find(RelyingPartyFilter.builder().code(relayParty).build()).ifPresent(party -> {
+  // paramMap.forEach(scopeList -> {
+  // Resource resource = scopeList.getResource();
+  // List<SecurityScope> list = scopes.listForUpdate(
+  // SecurityScopeFilter.builder().relyingParty(party).resource(resource.getName()).build());
+  // scopeList.getScopes().forEach(scope -> {
+  // Optional<SecurityScope> prev = list.stream()
+  // .filter(existing -> existing.getScope().equals(scope.getName())).findFirst();
+  // if (!prev.isPresent()) {
+  // scopes.create(SecurityScope
+  // .create(SecurityScopeChangeSet.builder().newUid().relyingParty(party).enabled(true)
+  // .resource(resource.getName()).scope(scope.getName()).kind(kind(scope.getKind()))
+  // .visibility(SecurityScopeVisibilityOptions.EXPLICIT).build()));
+  // } else {
+  // list.removeIf(existing -> existing.getScope().equals(scope.getName()));
+  // }
+  // });
+  // list.forEach(prev -> {
+  // scopes.update(prev, prev.enable());
+  // });
+  // });
+  // });
+  // }
+  //
+  // public void registerSchema(String relayParty, List<PropertyList> paramMap) {
+  // /* nothing for now */
+  // }
+  //
+  // private SecurityScopeKindOptions kind(ScopeKind scopeKind) {
+  // if (ScopeKind.MANAGE == scopeKind) {
+  // return SecurityScopeKindOptions.MANAGE;
+  // } else if (ScopeKind.WRITE == scopeKind) {
+  // return SecurityScopeKindOptions.WRITE;
+  // } else {
+  // return SecurityScopeKindOptions.READ;
+  // }
+  // }
 }

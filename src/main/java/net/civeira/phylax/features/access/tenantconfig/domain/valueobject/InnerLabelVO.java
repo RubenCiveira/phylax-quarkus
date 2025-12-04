@@ -10,8 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a customizable label that tenants can use to personalize the
- * application UI. of tenantConfig.
+ * Value Object representing tenant could use these field to label the application for the users of
+ * tenantConfig.
  * <p>
  * This class ensures that the inner label is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

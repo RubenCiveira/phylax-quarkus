@@ -126,11 +126,11 @@ public class RoleDeleteUsecase {
     if (!detail.isAllowed()) {
       throw new NotAllowedException(detail.getDescription());
     }
-    RoleVisibilityFilter filterOnVisibles = RoleVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).name(filter.getName().orElse(null))
-        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    RoleVisibilityFilter filterOnVisibles =
+        RoleVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .name(filter.getName().orElse(null)).relyingParty(filter.getRelyingParty().orElse(null))
+            .relyingPartys(filter.getRelyingPartys()).build();
     RoleDeleteAllInBatchCommand command =
         RoleDeleteAllInBatchCommand.builder().interaction(query).filter(filterOnVisibles).build();
     return batch.start(query.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

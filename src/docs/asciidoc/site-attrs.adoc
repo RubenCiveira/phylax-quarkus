@@ -1,0 +1,28 @@
+// ==== Proyecto ====
+:project-name: Phylax API
+:project-description: Plataforma de integración y control de accesos físicos
+:repo-url: https://github.com/tu-org/phylax-api
+:license: MIT
+
+// ==== Contacto ====
+:contact-email: contacto@phylax.dev
+:org-name: Phylax Technologies
+
+// ==== Repositorio ====
+:repo-issues: {repo-url}/issues
+:repo-docs: {repo-url}/tree/main/docs
+:repo-wiki: {repo-url}/wiki
+
+// ==== Equipos ====
+:team-devs: Equipo de desarrollo
+:team-leads: Liderazgo técnico
+
+// ==== Versionado ====
+:project-version: 1.0.0
+:project-date: {docdate}
+
+// ==== Estilo ====
+:icons: font
+:toc: macro
+:sectnums:
+:source-highlighter: coderay

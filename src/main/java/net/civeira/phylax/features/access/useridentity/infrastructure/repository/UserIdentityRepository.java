@@ -18,6 +18,7 @@ import net.civeira.phylax.common.exception.ConstraintException;
 import net.civeira.phylax.common.exception.NotFoundException;
 import net.civeira.phylax.common.infrastructure.sql.AbstractSqlParametrized;
 import net.civeira.phylax.common.infrastructure.sql.OptimistLockException;
+import net.civeira.phylax.common.infrastructure.sql.PartialWhere;
 import net.civeira.phylax.common.infrastructure.sql.SqlCommand;
 import net.civeira.phylax.common.infrastructure.sql.SqlConverter;
 import net.civeira.phylax.common.infrastructure.sql.SqlListParameterValue;
@@ -513,6 +514,12 @@ public class UserIdentityRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
+    sq.where(PartialWhere.or(
+        filter.getForAllAudiences()
+            .map(forAllAudiences -> PartialWhere.where("relying_party", SqlOperator.IS_NULL,
+                SqlParameterValue.ofNullString())),
+        filter.getForAllAudiences().map(forAllAudiences -> PartialWhere.where("trusted_client",
+            SqlOperator.IS_NULL, SqlParameterValue.ofNullString()))));
     filter.getUser()
         .ifPresent(user -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(user.getUid())));
     if (!filter.getUsers().isEmpty()) {

@@ -146,7 +146,7 @@ public class RelyingParty implements RelyingPartyRef {
    * @return A instance of relying party ready to be deleted
    */
   public RelyingParty delete() {
-    RelyingParty instance = this;
+    RelyingParty instance = new RelyingParty(new RelyingPartyChangeSet(), Optional.of(this));
     instance.addEvent(RelyingPartyDeleteEvent.builder().payload(instance).build());
     return instance;
   }

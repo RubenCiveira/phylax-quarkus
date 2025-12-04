@@ -9,6 +9,13 @@ import lombok.NonNull;
 import lombok.With;
 import net.civeira.phylax.common.security.Interaction;
 
+/**
+ * Create Enrich event happen when a create usecase is invoked, and allow the programer to configure
+ * a policy to modify the create input parameter. It will be executed after the generic Enrich event
+ * (witch could be used to fill the dto values send to modify on every operation over the
+ * entity).Create checks will be executed before the enrich event, so the programmer must add safe
+ * value asignations.
+ */
 @Data
 @Builder(toBuilder = true)
 @With

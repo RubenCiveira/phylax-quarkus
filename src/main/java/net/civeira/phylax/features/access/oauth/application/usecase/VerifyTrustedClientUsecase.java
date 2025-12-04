@@ -11,6 +11,7 @@ import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
@@ -79,8 +80,9 @@ public class VerifyTrustedClientUsecase {
   }
 
   private boolean redirectAllowed(TrustedClient app, String redirect) {
-    String redirects = app.getAllowedRedirects().orElse("");
-    return redirects.equals("*") || redirects.contains(redirect);
+    List<String> redirects =
+        app.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList();
+    return redirects.contains("*") || redirects.contains(redirect);
   }
 
   private Optional<ClientDetails> privateClient(TrustedClient app, String clientId, String secret) {

@@ -29,26 +29,23 @@ public class RequiredConsentService {
   private final UserAcceptedTermnsOfUseWriteRepositoryGateway userTermsWriter;
 
   public Optional<TenantTermsOfUse> findPendingTerms(User user) {
-    Optional<TenantRef> optionalTenant = user.getTenant();
-    if (optionalTenant.isPresent()) {
-      TenantRef tenantRef = optionalTenant.get();
-      Optional<TenantTermsOfUse> find =
-          terms.list(TenantTermsOfUseFilter.builder().tenant(tenantRef).build()).stream()
-              .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
-                  .orElse(false))
-              .sorted((a, b) -> a.getActivationDate().orElseThrow()
-                  .compareTo(b.getActivationDate().orElseThrow()))
-              .findFirst();
-      if (find.isPresent()) {
-        TenantTermsOfUse conditions = find.get();
-        Optional<OffsetDateTime> activationDateValue = conditions.getActivationDate();
-        if (activationDateValue.isPresent()
-            && activationDateValue.get().isBefore(OffsetDateTime.now())) {
-          Optional<UserAcceptedTermnsOfUse> accepted = userTerms.find(
-              UserAcceptedTermnsOfUseFilter.builder().conditions(conditions).user(user).build());
-          if (!accepted.isPresent()) {
-            return Optional.of(conditions);
-          }
+    TenantRef tenantRef = user.getTenant();
+    Optional<TenantTermsOfUse> find =
+        terms.list(TenantTermsOfUseFilter.builder().tenant(tenantRef).build()).stream()
+            .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
+                .orElse(false))
+            .sorted((a, b) -> a.getActivationDate().orElseThrow()
+                .compareTo(b.getActivationDate().orElseThrow()))
+            .findFirst();
+    if (find.isPresent()) {
+      TenantTermsOfUse conditions = find.get();
+      Optional<OffsetDateTime> activationDateValue = conditions.getActivationDate();
+      if (activationDateValue.isPresent()
+          && activationDateValue.get().isBefore(OffsetDateTime.now())) {
+        Optional<UserAcceptedTermnsOfUse> accepted = userTerms.find(
+            UserAcceptedTermnsOfUseFilter.builder().conditions(conditions).user(user).build());
+        if (!accepted.isPresent()) {
+          return Optional.of(conditions);
         }
       }
     }

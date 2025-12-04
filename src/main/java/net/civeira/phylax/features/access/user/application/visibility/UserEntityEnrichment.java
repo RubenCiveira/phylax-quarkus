@@ -12,6 +12,11 @@ import net.civeira.phylax.common.security.Interaction;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 
+/**
+ * Entity Enrichment events happen when a dto params is read throught the visibility service from
+ * some input parameters to store on the repository.The programmers could add policies to fill
+ * calculated values to store at the application level.
+ */
 @Data
 @Builder(toBuilder = true)
 @With

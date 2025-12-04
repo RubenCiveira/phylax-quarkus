@@ -50,6 +50,7 @@ public class TenantTermsOfUseCreateController {
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
+    tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String attached = dto.getAttached();
     if (null != attached) {
       tenantTermsOfUseApiDto.setAttached(currentRequest.getPublicHost()
@@ -75,6 +76,9 @@ public class TenantTermsOfUseCreateController {
     }
     if (null != tenantTermsOfUseApiDto.getText()) {
       dto.setText(tenantTermsOfUseApiDto.getText());
+    }
+    if (null != tenantTermsOfUseApiDto.getEnabled()) {
+      dto.setEnabled(tenantTermsOfUseApiDto.getEnabled());
     }
     if (!StringUtils.isBlank(tenantTermsOfUseApiDto.getAttached())) {
       String url = tenantTermsOfUseApiDto.getAttached();

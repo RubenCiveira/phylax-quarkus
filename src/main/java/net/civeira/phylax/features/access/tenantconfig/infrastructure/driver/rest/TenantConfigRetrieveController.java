@@ -47,6 +47,14 @@ public class TenantConfigRetrieveController {
     tenantConfigApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantConfigApiDto.setInnerLabel(dto.getInnerLabel());
     tenantConfigApiDto.setForceMfa(dto.getForceMfa());
+    tenantConfigApiDto.setAllowRegister(dto.getAllowRegister());
+    tenantConfigApiDto.setEnableRegisterUsers(dto.getEnableRegisterUsers());
+    tenantConfigApiDto.setWellcomeEmail(dto.getWellcomeEmail());
+    tenantConfigApiDto.setRegisterdEmail(dto.getRegisterdEmail());
+    tenantConfigApiDto.setDisabledUserEmail(dto.getDisabledUserEmail());
+    tenantConfigApiDto.setEnabledUserEmail(dto.getEnabledUserEmail());
+    tenantConfigApiDto.setAllowRecoverPass(dto.getAllowRecoverPass());
+    tenantConfigApiDto.setRecoverPassEmail(dto.getRecoverPassEmail());
     tenantConfigApiDto.setVersion(dto.getVersion());
     return tenantConfigApiDto;
   }

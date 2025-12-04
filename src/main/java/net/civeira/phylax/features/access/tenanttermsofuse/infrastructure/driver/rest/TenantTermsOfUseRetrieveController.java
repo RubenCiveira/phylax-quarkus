@@ -46,6 +46,7 @@ public class TenantTermsOfUseRetrieveController {
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
+    tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String attached = dto.getAttached();
     if (null != attached) {
       tenantTermsOfUseApiDto.setAttached(currentRequest.getPublicHost()

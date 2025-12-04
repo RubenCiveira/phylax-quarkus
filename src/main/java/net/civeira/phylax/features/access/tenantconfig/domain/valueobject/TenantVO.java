@@ -10,7 +10,7 @@ import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 /**
- * Value Object representing the tenant this configuration applies to. of tenantConfig.
+ * Value Object representing the name to identify the account. of tenantConfig.
  * <p>
  * This class ensures that the tenant is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

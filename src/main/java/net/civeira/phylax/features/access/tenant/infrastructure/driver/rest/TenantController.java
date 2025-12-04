@@ -176,13 +176,16 @@ public class TenantController implements TenantApi {
    * @param limit
    * @param sinceUid
    * @param sinceName
+   * @param sinceDomain
    * @param order
    * @return
    */
   @Override
   public Response tenantApiList(final List<String> uids, final String search, final String name,
-      final Integer limit, final String sinceUid, final String sinceName, final String order) {
-    return listController.tenantApiList(uids, search, name, limit, sinceUid, sinceName, order);
+      final Integer limit, final String sinceUid, final String sinceName, final String sinceDomain,
+      final String order) {
+    return listController.tenantApiList(uids, search, name, limit, sinceUid, sinceName, sinceDomain,
+        order);
   }
 
   /**

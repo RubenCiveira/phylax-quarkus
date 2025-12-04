@@ -105,7 +105,7 @@ public class VersionVO {
    * @return Value
    */
   public Integer nextVersion() {
-    return null == value ? value.intValue() + 1 : 1;
+    return null == value ? 1 : value.intValue() + 1;
   }
 
   /**
