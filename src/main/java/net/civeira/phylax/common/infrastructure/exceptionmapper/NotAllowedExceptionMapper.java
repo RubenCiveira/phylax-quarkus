@@ -28,7 +28,7 @@ public class NotAllowedExceptionMapper implements ExceptionMapper<NotAllowedExce
     }
     Map<String, String> error = new HashMap<>();
     error.put("reason", exception.getMessage());
-    boolean anom = restService.isAnonymous();
+    boolean anom = true;// restService.isAnonymous();
     return Response.status(anom ? 401 : 403).entity(error).build();
   }
 }

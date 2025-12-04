@@ -49,10 +49,10 @@ public class InitialFillService {
         roles.create(created);
       });
       bean.getTenants().forEach(proposal -> {
-        tenants.create(Tenant.create(proposal));
+        tenants.create(Tenant.create(proposal).enable());
       });
       bean.getUsers().forEach(proposal -> {
-        users.create(User.create(proposal));
+        users.create(User.create(proposal).enable());
       });
       bean.getIdentities().forEach(proposal -> {
         identities.create(UserIdentity.create(proposal));

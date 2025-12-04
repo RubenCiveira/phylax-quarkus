@@ -17,6 +17,11 @@ public class ClienteRetrieveInteractor implements ClientRetrieveSpi {
   private final VerifyTrustedClientUsecase verifier;
 
   @Override
+  public Optional<ClientDetails> loadPreautorized(String tenant, String clientId) {
+    return verifier.loadPreautorized(tenant, clientId);
+  }
+  
+  @Override
   public Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret) {
     return verifier.loadPrivate(tenant, clientId, clientSecret);
   }

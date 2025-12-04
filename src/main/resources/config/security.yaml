@@ -1,8 +1,8 @@
 mp:
   jwt:
     verify:
-      publickey:
-        location: ${security.jwt.public.key}
+      # publickey:
+      #   location: ${security.jwt.public.key}
     audiences: phylax-api
   rcab:
     model: phylax
@@ -23,7 +23,11 @@ app:
 quarkus:
   http:
     cors:
-      ~: true
+      enabled: true
       origins: /.*/
       methods: "*"
       headers: "*"
+      exposed-headers: "*"
+      access-control-max-age: 24H
+      access-control-allow-credentials: true
+      

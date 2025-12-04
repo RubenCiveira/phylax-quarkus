@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.TemporalKeysGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.TemporalKeysGateway.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.authentication.domain.granter.TokenGranter;
@@ -66,6 +68,8 @@ public class AuthenticationController {
   private final JwtTokenBuilder tokenBuilder;
   private final ClientRetrieveSpi clientRetriever;
   private final TemporalKeysGateway temporalStore;
+  private final UserLoginSpi loginApi;
+
   @CacheName("jwk")
   private final Cache cache;
 
@@ -76,6 +80,7 @@ public class AuthenticationController {
     String autho = headers.getHeaderString("Authorization");
     String clientId = null;
     String clientSecret = null;
+    // refresh token.
     if ("authorization_code".equals(paramMap.getFirst("grant_type"))) {
       Optional<TemporalAuthCode> retrieve =
           temporalStore.retrieveTemporalAuthCode(paramMap.getFirst("code"));
@@ -92,6 +97,18 @@ public class AuthenticationController {
         return Response.status(200).entity(tokenBuilder.buildToken(tenant, code.clientDetails,
             paramMap.getFirst("grant_type"), code.data, code.request)).build();
       }).orElseGet(() -> Response.status(401).build());
+    } else if ("refresh_token".equals(paramMap.getFirst("grant_type"))) {
+      String refreshToken = paramMap.getFirst("refresh_token");
+      return tokenBuilder.verifyRefreshInfo(refreshToken, tenant)
+          .flatMap(info -> loadPreautorizedClient(tenant, info.getClient()).map(client -> {
+            AuthRequest request = new AuthRequest(tenant, req, headers);
+            AuthenticationResult auth = loginApi.validatePreAuthenticated(request,
+                info.getUsername(), client, Arrays.asList());
+            return auth.isRight()
+                ? Response.status(200).entity(tokenBuilder.buildToken(tenant, client,
+                    paramMap.getFirst("grant_type"), auth.getData())).build()
+                : Response.status(401).build();
+          })).orElseGet(() -> Response.status(401).build());
     }
     if (null != autho && autho.startsWith("Basic ")) {
       String encodeToString = new String(Base64.getDecoder().decode(autho.substring(6).getBytes()),
@@ -181,6 +198,11 @@ public class AuthenticationController {
   private Optional<ClientDetails> loadClient(final String tenant, final String clientId,
       final String secretId) {
     return clientRetriever.loadPrivate(tenant, clientId, secretId);
+  }
+
+  private Optional<ClientDetails> loadPreautorizedClient(final String tenant,
+      final String clientId) {
+    return clientRetriever.loadPreautorized(tenant, clientId);
   }
 
   private String generateCodeChallenge(String codeVerifier) {

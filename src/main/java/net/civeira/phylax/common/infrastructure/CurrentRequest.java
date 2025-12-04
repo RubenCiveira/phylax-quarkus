@@ -65,7 +65,7 @@ public class CurrentRequest {
   }
 
   public boolean isAnonymous() {
-    return security.isAnonymous();
+    return false;// security.isAnonymous();
   }
 
   private Optional<String> getFirstHeader(String name) {
@@ -119,7 +119,13 @@ public class CurrentRequest {
       }
       Map<String, String> claims = new HashMap<>();
       for (String string : jwt.getClaimNames()) {
-        claims.put(string, jwt.getClaim(string).toString());
+        Object claimWithName = jwt.getClaim(string);
+        if( claimWithName == null ) {
+          System.err.println("Null value for " + string);
+        } else {
+          System.err.println("-> ADD " + string);
+          claims.put(string, claim.toString());
+        }
       }
       builder = builder.claims(claims);
     }

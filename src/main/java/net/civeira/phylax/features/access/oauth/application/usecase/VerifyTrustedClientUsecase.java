@@ -37,6 +37,14 @@ public class VerifyTrustedClientUsecase {
     return verify(tenant, clientId, Optional.empty(), Optional.of(redirect));
   }
 
+  public Optional<ClientDetails> loadPreautorized(String tenant, String clientId) {
+    return tenant(tenant)
+        .flatMap(tenantEntity -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
+        .filter(this::clientEnabled)
+        .map(client -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
+            .allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES).build());
+  }
+
   public Optional<ClientDetails> verify(final String tenant, String clientId,
       Optional<String> clientSecret, Optional<String> withRedirect) {
     return tenant(tenant)
@@ -95,4 +103,5 @@ public class VerifyTrustedClientUsecase {
       return Optional.empty();
     }
   }
+
 }

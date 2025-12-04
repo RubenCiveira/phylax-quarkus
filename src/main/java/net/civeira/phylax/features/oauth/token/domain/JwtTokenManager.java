@@ -37,7 +37,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.NotAllowedException;
@@ -48,7 +48,7 @@ import net.civeira.phylax.features.oauth.token.domain.model.KeyInformation;
 import net.civeira.phylax.features.oauth.token.domain.model.PublicKeyInformation;
 
 @Slf4j
-@RequestScoped
+@ApplicationScoped
 @RequiredArgsConstructor
 public class JwtTokenManager {
 
@@ -94,6 +94,25 @@ public class JwtTokenManager {
     try {
       return Optional.of(JWT.require(Algorithm.RSA256(readKey(key.getPublicKey())))
           .withIssuer(getIssuer(tenant)).build().verify(token));
+    } catch (TokenExpiredException ex) {
+      logError("Expired token", ex);
+      throw new NotAllowedException("");
+    } catch (JWTDecodeException de) {
+      logError("Unable to decode token", de);
+      return Optional.empty();
+    } catch (SignatureVerificationException se) {
+      logError("Wrong signature", se);
+      return Optional.empty();
+    } catch (IOException | GeneralSecurityException e) {
+      logError("General auth error", e);
+      return Optional.empty();
+    }
+  }
+
+  public Optional<DecodedJWT> decodeWithoutTenant(PublicKeyInformation key, String token) {
+    try {
+      return Optional
+          .of(JWT.require(Algorithm.RSA256(readKey(key.getPublicKey()))).build().verify(token));
     } catch (TokenExpiredException ex) {
       logError("Expired token", ex);
       throw new NotAllowedException("");

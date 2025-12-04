@@ -14,13 +14,13 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.token.domain.gateway.TokenStoreGateway;
 import net.civeira.phylax.features.oauth.token.domain.model.KeyInformation;
 import net.civeira.phylax.features.oauth.token.domain.model.PublicKeyInformation;
 
-@RequestScoped
+@ApplicationScoped
 @RequiredArgsConstructor
 public class TokenRepositoryJdbcAdapter implements TokenStoreGateway {
   private final DataSource datasource;

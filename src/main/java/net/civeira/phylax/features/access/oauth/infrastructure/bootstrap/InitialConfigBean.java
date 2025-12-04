@@ -39,8 +39,8 @@ public class InitialConfigBean {
     RoleChangeSet role = RoleChangeSet.builder().newUid().name("ADMIN")
         .relyingParty(RelyingPartyReference.of(party.getUid().orElseThrow().getUid())).build();
 
-    TenantChangeSet tenant =
-        TenantChangeSet.builder().newUid().name("main").root(Boolean.TRUE).build();
+    TenantChangeSet tenant = TenantChangeSet.builder().newUid().name("main").domain("main")
+        .enabled(Boolean.TRUE).root(Boolean.TRUE).markForDelete(Boolean.FALSE).build();
 
     UserChangeSet root = UserChangeSet.builder().newUid().name("ROOT").password(password)
         .tenant(TenantReference.of(tenant.getUid().orElseThrow().getUid())).enabled(true)

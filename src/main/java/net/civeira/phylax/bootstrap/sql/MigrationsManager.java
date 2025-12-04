@@ -11,6 +11,8 @@ import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.supplier.AgroalConnectionFactoryConfigurationSupplier;
 import io.agroal.api.configuration.supplier.AgroalConnectionPoolConfigurationSupplier;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
+import io.agroal.api.security.NamePrincipal;
+import io.agroal.api.security.SimplePassword;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.config.ConfigMapping;
 import jakarta.annotation.Priority;
@@ -67,8 +69,9 @@ public class MigrationsManager {
       // Configurar la conexión mínima
       AgroalConnectionFactoryConfigurationSupplier connectionFactoryConfiguration =
           connectionPoolConfiguration.connectionFactoryConfiguration();
-      connectionFactoryConfiguration.jdbcUrl(url).credential(config.password().orElse(""))
-          .principal(() -> config.username().orElse(""))
+      connectionFactoryConfiguration.jdbcUrl(url)
+          .principal(new NamePrincipal(config.username().orElse("")))
+          .credential(new SimplePassword(config.password().orElse("")))
           .connectionProviderClassName(driverClassName);
       try {
         return (DataSource) AgroalDataSource.from(configurationSupplier.get());

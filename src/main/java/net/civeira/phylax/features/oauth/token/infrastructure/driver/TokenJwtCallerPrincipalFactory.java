@@ -52,11 +52,15 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
   private final Duration valid = Duration.ofHours(1);
 
   private List<PublicKeyInformation> cached;
-  private LocalDateTime until;
+  private LocalDateTime until = LocalDateTime.now();
 
   @Override
   public JWTCallerPrincipal parse(String token, JWTAuthContextInfo authContextInfo)
       throws ParseException {
+    // No token => NUNCA hagas nada raro
+    if (token == null || token.isBlank()) {
+      throw new ParseException("Empty token", null);
+    }
     try {
       ParsedToken parsed = parseHeaderAndClaims(token);
       String kid = parsed.getHeader().getString("kid", null);
@@ -72,6 +76,11 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
       }
     } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
       log.error("Unable to get keys", e);
+      System.out.println("UNABLE TO PARSE");
+      e.printStackTrace();
+    } catch (RuntimeException ex) {
+      ex.printStackTrace();
+      throw ex;
     }
     throw new ParseException("Invalid JWT token", null);
   }
@@ -83,7 +92,7 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
       cached = tokenManager.getPublicKeys();
       until = now.plus(valid);
     }
-    return cached.stream().filter(jk -> kid.equals(jk.getPublicKey())).findFirst();
+    return cached.stream().filter(jk -> kid.equals(jk.getKeyId())).findFirst();
   }
 
   private static ParsedToken parseHeaderAndClaims(String token) throws ParseException {
@@ -102,6 +111,8 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
       String claimsJson =
           new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
       JwtClaims claims = JwtClaims.parse(claimsJson);
+      System.out.println("====");
+      System.out.println(" > CLAIMS " + claims);
 
       // 3) PRINCIPAL (SmallRye)
       JWTCallerPrincipal principal = new DefaultJWTCallerPrincipal(claims);
