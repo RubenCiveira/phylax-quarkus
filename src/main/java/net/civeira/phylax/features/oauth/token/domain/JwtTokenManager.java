@@ -109,25 +109,6 @@ public class JwtTokenManager {
     }
   }
 
-  public Optional<DecodedJWT> decodeWithoutTenant(PublicKeyInformation key, String token) {
-    try {
-      return Optional
-          .of(JWT.require(Algorithm.RSA256(readKey(key.getPublicKey()))).build().verify(token));
-    } catch (TokenExpiredException ex) {
-      logError("Expired token", ex);
-      throw new NotAllowedException("");
-    } catch (JWTDecodeException de) {
-      logError("Unable to decode token", de);
-      return Optional.empty();
-    } catch (SignatureVerificationException se) {
-      logError("Wrong signature", se);
-      return Optional.empty();
-    } catch (IOException | GeneralSecurityException e) {
-      logError("General auth error", e);
-      return Optional.empty();
-    }
-  }
-
   public Algorithm signAlgoritm(KeyInformation key) {
     try {
       // Tengo que obtener el token store actual.
