@@ -5,15 +5,15 @@ mp:
       #   location: ${security.jwt.public.key}
     audiences: phylax-api
   rcab:
-    model: phylax
-    phylax:
-      api-key: 1111
-      audience: phylax-api
-      register:
-        scope: ${security.rcab.host}/resource/scope
-        schema: ${security.rcab.host}/resource/schema
-      check:
-        grant: ${security.rcab.host}/grant
+    # model: phylax
+    # phylax:
+    #  api-key: 1111
+    #  audience: phylax-api
+    #  register:
+    #    scope: ${security.rcab.host}/resource/scope
+    #    schema: ${security.rcab.host}/resource/schema
+    #  check:
+    #    grant: ${security.rcab.host}/grant
 
 app:
   security:

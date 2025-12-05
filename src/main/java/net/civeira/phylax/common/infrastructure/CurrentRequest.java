@@ -65,7 +65,11 @@ public class CurrentRequest {
   }
 
   public boolean isAnonymous() {
-    return false;// security.isAnonymous();
+    try {
+      return security.isAnonymous();
+    } catch(RuntimeException re) {
+      return true;
+    }
   }
 
   private Optional<String> getFirstHeader(String name) {

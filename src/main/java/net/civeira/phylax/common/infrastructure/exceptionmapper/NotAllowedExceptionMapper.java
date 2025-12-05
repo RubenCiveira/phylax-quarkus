@@ -21,6 +21,7 @@ public class NotAllowedExceptionMapper implements ExceptionMapper<NotAllowedExce
 
   @Override
   public Response toResponse(NotAllowedException exception) {
+    exception.printStackTrace();
     if (log.isDebugEnabled()) {
       log.warn("not allowed", exception);
     } else if (log.isWarnEnabled()) {
@@ -28,7 +29,7 @@ public class NotAllowedExceptionMapper implements ExceptionMapper<NotAllowedExce
     }
     Map<String, String> error = new HashMap<>();
     error.put("reason", exception.getMessage());
-    boolean anom = true;// restService.isAnonymous();
+    boolean anom = restService.isAnonymous();
     return Response.status(anom ? 401 : 403).entity(error).build();
   }
 }
