@@ -58,7 +58,7 @@ public class BlockedUntilVO {
     ConstraintFailList list = new ConstraintFailList();
     BlockedUntilVO result = tryFrom(blockedUntil, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for BlockedUntilVO.blocked-until", list);
     }
     return result;
   }

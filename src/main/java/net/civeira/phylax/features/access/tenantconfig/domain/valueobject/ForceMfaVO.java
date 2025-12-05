@@ -45,7 +45,7 @@ public class ForceMfaVO {
     ConstraintFailList list = new ConstraintFailList();
     ForceMfaVO result = tryFrom(forceMfa, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for ForceMfaVO.force-mfa", list);
     }
     return result;
   }

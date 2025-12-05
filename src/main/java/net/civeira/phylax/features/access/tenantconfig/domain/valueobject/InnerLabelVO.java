@@ -57,7 +57,7 @@ public class InnerLabelVO {
     ConstraintFailList list = new ConstraintFailList();
     InnerLabelVO result = tryFrom(innerLabel, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for InnerLabelVO.inner-label", list);
     }
     return result;
   }

@@ -55,7 +55,7 @@ public class DisabledVO {
     ConstraintFailList list = new ConstraintFailList();
     DisabledVO result = tryFrom(disabled, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for DisabledVO.disabled", list);
     }
     return result;
   }

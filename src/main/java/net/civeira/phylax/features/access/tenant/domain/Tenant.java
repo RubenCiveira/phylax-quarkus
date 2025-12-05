@@ -176,7 +176,7 @@ public class Tenant implements TenantRef {
       list.add(new ConstraintFail("REQUIRED", "markForDelete", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on Tenant", list);
     }
     this.recordedEvents = previous.map(Tenant::getRecordedEvents).orElseGet(List::of);
   }

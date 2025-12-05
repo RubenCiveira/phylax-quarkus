@@ -46,7 +46,7 @@ public class SourceVO {
     ConstraintFailList list = new ConstraintFailList();
     SourceVO result = tryFrom(source, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for SourceVO.source", list);
     }
     return result;
   }

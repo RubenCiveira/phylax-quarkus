@@ -257,7 +257,7 @@ public class User implements UserRef {
       list.add(new ConstraintFail("REQUIRED", "password", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on User", list);
     }
     this.recordedEvents = previous.map(User::getRecordedEvents).orElseGet(List::of);
   }

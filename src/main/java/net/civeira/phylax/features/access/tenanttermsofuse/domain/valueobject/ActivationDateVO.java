@@ -57,7 +57,7 @@ public class ActivationDateVO {
     ConstraintFailList list = new ConstraintFailList();
     ActivationDateVO result = tryFrom(activationDate, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for ActivationDateVO.activation-date", list);
     }
     return result;
   }

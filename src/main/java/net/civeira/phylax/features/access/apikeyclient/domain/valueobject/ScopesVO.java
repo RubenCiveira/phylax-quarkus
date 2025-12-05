@@ -56,7 +56,7 @@ public class ScopesVO {
     ConstraintFailList list = new ConstraintFailList();
     ScopesVO result = tryFrom(scopes, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for ScopesVO.scopes", list);
     }
     return result;
   }

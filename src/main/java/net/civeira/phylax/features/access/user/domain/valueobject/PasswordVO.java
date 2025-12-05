@@ -46,7 +46,7 @@ public class PasswordVO {
     ConstraintFailList list = new ConstraintFailList();
     PasswordVO result = tryFrom(password, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for PasswordVO.password", list);
     }
     return result;
   }

@@ -59,7 +59,7 @@ public class ConditionsVO {
     ConstraintFailList list = new ConstraintFailList();
     ConditionsVO result = tryFrom(conditions, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for ConditionsVO.conditions", list);
     }
     return result;
   }

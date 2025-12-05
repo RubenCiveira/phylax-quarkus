@@ -55,7 +55,8 @@ public class AllowRecoverPassVO {
     ConstraintFailList list = new ConstraintFailList();
     AllowRecoverPassVO result = tryFrom(allowRecoverPass, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for AllowRecoverPassVO.allow-recover-pass",
+          list);
     }
     return result;
   }

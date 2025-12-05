@@ -143,7 +143,7 @@ public class UserIdentity implements UserIdentityRef {
       list.add(new ConstraintFail("REQUIRED", "roles", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on UserIdentity", list);
     }
     this.recordedEvents = previous.map(UserIdentity::getRecordedEvents).orElseGet(List::of);
   }

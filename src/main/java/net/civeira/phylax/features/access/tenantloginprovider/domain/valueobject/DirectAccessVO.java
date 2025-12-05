@@ -55,7 +55,7 @@ public class DirectAccessVO {
     ConstraintFailList list = new ConstraintFailList();
     DirectAccessVO result = tryFrom(directAccess, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for DirectAccessVO.direct-access", list);
     }
     return result;
   }

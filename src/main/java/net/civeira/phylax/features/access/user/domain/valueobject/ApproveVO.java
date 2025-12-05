@@ -57,7 +57,7 @@ public class ApproveVO {
     ConstraintFailList list = new ConstraintFailList();
     ApproveVO result = tryFrom(approve, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for ApproveVO.approve", list);
     }
     return result;
   }

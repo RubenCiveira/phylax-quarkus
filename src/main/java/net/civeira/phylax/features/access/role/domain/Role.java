@@ -114,7 +114,7 @@ public class Role implements RoleRef {
       list.add(new ConstraintFail("REQUIRED", "name", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on Role", list);
     }
     this.recordedEvents = previous.map(Role::getRecordedEvents).orElseGet(List::of);
   }

@@ -58,7 +58,8 @@ public class MarkForDeleteTimeVO {
     ConstraintFailList list = new ConstraintFailList();
     MarkForDeleteTimeVO result = tryFrom(markForDeleteTime, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for MarkForDeleteTimeVO.mark-for-delete-time",
+          list);
     }
     return result;
   }

@@ -45,7 +45,7 @@ class ExecutorByStepsUnitTest {
     DummyExecutor executor = new DummyExecutor(sleeper, List.of("a"), false, false) {
       @Override
       protected void write(String item, String param) {
-        throw new AbstractFailsException(new ExecutionFail("code", "fail")) {
+        throw new AbstractFailsException("", new ExecutionFail("code", "fail")) {
           private static final long serialVersionUID = 1L;
         };
       }
@@ -97,7 +97,7 @@ class ExecutorByStepsUnitTest {
     DummyExecutor executor = new DummyExecutor(sleeper, List.of("a"), false, false) {
       @Override
       protected String process(String item, String param) {
-        throw new AbstractFailsException(new ExecutionFail("code", "fail")) {
+        throw new AbstractFailsException("", new ExecutionFail("code", "fail")) {
           private static final long serialVersionUID = 1L;
         };
       }

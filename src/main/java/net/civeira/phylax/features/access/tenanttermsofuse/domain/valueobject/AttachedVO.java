@@ -68,7 +68,7 @@ public class AttachedVO {
     ConstraintFailList list = new ConstraintFailList();
     AttachedVO result = tryFrom(attached, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for AttachedVO.attached", list);
     }
     return result;
   }

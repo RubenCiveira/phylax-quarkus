@@ -57,7 +57,7 @@ public class UserVO {
     ConstraintFailList list = new ConstraintFailList();
     UserVO result = tryFrom(user, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for UserVO.user", list);
     }
     return result;
   }

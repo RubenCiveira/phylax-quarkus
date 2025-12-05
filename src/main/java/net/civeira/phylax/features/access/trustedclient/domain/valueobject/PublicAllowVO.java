@@ -46,7 +46,7 @@ public class PublicAllowVO {
     ConstraintFailList list = new ConstraintFailList();
     PublicAllowVO result = tryFrom(publicAllow, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for PublicAllowVO.public-allow", list);
     }
     return result;
   }

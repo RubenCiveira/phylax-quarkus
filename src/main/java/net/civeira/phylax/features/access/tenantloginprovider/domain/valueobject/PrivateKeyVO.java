@@ -57,7 +57,7 @@ public class PrivateKeyVO {
     ConstraintFailList list = new ConstraintFailList();
     PrivateKeyVO result = tryFrom(privateKey, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for PrivateKeyVO.private-key", list);
     }
     return result;
   }

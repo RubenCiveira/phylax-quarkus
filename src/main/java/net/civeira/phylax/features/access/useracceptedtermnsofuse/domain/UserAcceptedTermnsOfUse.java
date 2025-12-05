@@ -134,7 +134,7 @@ public class UserAcceptedTermnsOfUse implements UserAcceptedTermnsOfUseRef {
       list.add(new ConstraintFail("REQUIRED", "conditions", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on UserAcceptedTermnsOfUse", list);
     }
     this.recordedEvents =
         previous.map(UserAcceptedTermnsOfUse::getRecordedEvents).orElseGet(List::of);

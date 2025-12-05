@@ -44,7 +44,7 @@ public class TextVO {
     ConstraintFailList list = new ConstraintFailList();
     TextVO result = tryFrom(text, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for TextVO.text", list);
     }
     return result;
   }

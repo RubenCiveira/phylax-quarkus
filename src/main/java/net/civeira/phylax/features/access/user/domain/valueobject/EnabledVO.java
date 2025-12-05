@@ -55,7 +55,7 @@ public class EnabledVO {
     ConstraintFailList list = new ConstraintFailList();
     EnabledVO result = tryFrom(enabled, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for EnabledVO.enabled", list);
     }
     return result;
   }

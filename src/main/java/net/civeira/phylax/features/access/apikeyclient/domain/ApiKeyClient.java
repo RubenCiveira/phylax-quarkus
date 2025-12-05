@@ -146,7 +146,7 @@ public class ApiKeyClient implements ApiKeyClientRef {
       list.add(new ConstraintFail("REQUIRED", "enabled", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on ApiKeyClient", list);
     }
     this.recordedEvents = previous.map(ApiKeyClient::getRecordedEvents).orElseGet(List::of);
   }

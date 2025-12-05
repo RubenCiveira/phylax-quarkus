@@ -17,7 +17,7 @@ class ConstraintExceptionUnitTest {
   @Test
   void testConstructorWithSingleFail() {
     ConstraintFail fail = new ConstraintFail("ERR001", "field", "wrong", "Invalid value");
-    ConstraintException ex = new ConstraintException(fail);
+    ConstraintException ex = new ConstraintException("", fail);
 
     assertTrue(ex.hasErrors());
     assertFalse(ex.isEmpty());
@@ -31,7 +31,7 @@ class ConstraintExceptionUnitTest {
     ConstraintFail fail2 = new ConstraintFail("CODE2", "f2", "val2");
 
     ConstraintFailList list = new ConstraintFailList(List.of(fail1, fail2));
-    ConstraintException ex = new ConstraintException(list);
+    ConstraintException ex = new ConstraintException("", list);
 
     assertTrue(ex.hasErrors());
     assertTrue(ex.includeCode("CODE1"));
@@ -49,7 +49,7 @@ class ConstraintExceptionUnitTest {
 
   @Test
   void testConstructorWithCodeFieldValueOnly() {
-    ConstraintException ex = new ConstraintException("MISSING", "username", null);
+    ConstraintException ex = new ConstraintException("", "MISSING", "username", null);
 
     assertTrue(ex.includeCode("MISSING"));
   }
@@ -57,7 +57,7 @@ class ConstraintExceptionUnitTest {
   @Test
   void testGetFailsStreamHasCorrectContent() {
     ConstraintFail fail = new ConstraintFail("CODE", "field", "wrong", "Message");
-    ConstraintException ex = new ConstraintException(fail);
+    ConstraintException ex = new ConstraintException("", fail);
 
     assertEquals(1, ex.getFails().count());
   }
@@ -68,7 +68,7 @@ class ConstraintExceptionUnitTest {
     ConstraintFail fail2 = new ConstraintFail("CODEX", "field2", "val2");
 
     ConstraintFailList list = new ConstraintFailList(List.of(fail1, fail2));
-    ConstraintException ex = new ConstraintException(list);
+    ConstraintException ex = new ConstraintException("", list);
 
     var localized = ex.localize(Locale.ENGLISH, true);
 

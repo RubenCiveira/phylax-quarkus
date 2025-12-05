@@ -38,14 +38,14 @@ class AbstractFailsExceptionUnitTest {
     failList = spy(new AbstractFailList(List.of(mockFail1, mockFail2)));
 
     // Create anonymous subclass to test
-    exception = new AbstractFailsException(failList) {
+    exception = new AbstractFailsException("", failList) {
       private static final long serialVersionUID = 1L;
     };
   }
 
   @Test
   void testConstructorWithSingleFail() {
-    AbstractFailsException single = new AbstractFailsException(mockFail1) {
+    AbstractFailsException single = new AbstractFailsException("", mockFail1) {
       private static final long serialVersionUID = 1L;
     };
     assertTrue(single.hasErrors());
@@ -104,7 +104,7 @@ class AbstractFailsExceptionUnitTest {
     when(failB.localize(Locale.ENGLISH, true)).thenReturn(localized2);
 
     AbstractFailsException ex =
-        new AbstractFailsException(new AbstractFailList(List.of(failA, failB))) {
+        new AbstractFailsException("", new AbstractFailList(List.of(failA, failB))) {
           private static final long serialVersionUID = 1L;
         };
 

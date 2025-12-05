@@ -5,16 +5,11 @@ import java.util.List;
 
 import lombok.Getter;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.role.domain.RoleChangeSet;
-import net.civeira.phylax.features.access.role.domain.RoleReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
-import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
-import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.useridentity.domain.Roles;
 import net.civeira.phylax.features.access.useridentity.domain.UserIdentityChangeSet;
 
@@ -36,29 +31,21 @@ public class InitialConfigBean {
     TrustedClientChangeSet client = TrustedClientChangeSet.builder().newUid().code("phylax-ui")
         .allowedRedirects(List.of(local)).publicAllow(Boolean.TRUE).enabled(Boolean.TRUE).build();
 
-    RoleChangeSet role = RoleChangeSet.builder().newUid().name("ADMIN")
-        .relyingParty(RelyingPartyReference.of(party.getUid().orElseThrow().getUid())).build();
+    RoleChangeSet role = RoleChangeSet.builder().newUid().name("ADMIN").relyingParty(party).build();
 
     TenantChangeSet tenant = TenantChangeSet.builder().newUid().name("main").domain("main")
         .enabled(Boolean.TRUE).root(Boolean.TRUE).markForDelete(Boolean.FALSE).build();
 
     UserChangeSet root = UserChangeSet.builder().newUid().name("ROOT").password(password)
-        .tenant(TenantReference.of(tenant.getUid().orElseThrow().getUid())).enabled(true)
-        .useSecondFactors(false).build();
+        .tenant(tenant).enabled(true).useSecondFactors(false).build();
 
-    Roles userRoleRely = Roles.builder().newUid()
-        .role(RoleReference.of(role.getUid().orElseThrow().getUid())).build();
-    UserIdentityChangeSet userRelyIdentity = UserIdentityChangeSet.builder().newUid()
-        .user(UserReference.of(root.getUid().orElseThrow().getUid()))
-        .relyingParty(RelyingPartyReference.of(party.getUid().orElseThrow().getUid()))
-        .roles(List.of(userRoleRely)).build();
+    Roles userRoleRely = Roles.builder().newUid().role(role).build();
+    UserIdentityChangeSet userRelyIdentity = UserIdentityChangeSet.builder().newUid().user(root)
+        .relyingParty(party).roles(List.of(userRoleRely)).build();
 
-    Roles userRoleClient = Roles.builder().newUid()
-        .role(RoleReference.of(role.getUid().orElseThrow().getUid())).build();
-    UserIdentityChangeSet userClientIdentity = UserIdentityChangeSet.builder().newUid()
-        .user(UserReference.of(root.getUid().orElseThrow().getUid()))
-        .trustedClient(TrustedClientReference.of(client.getUid().orElseThrow().getUid()))
-        .roles(List.of(userRoleClient)).build();
+    Roles userRoleClient = Roles.builder().newUid().role(role).build();
+    UserIdentityChangeSet userClientIdentity = UserIdentityChangeSet.builder().newUid().user(root)
+        .trustedClient(client).roles(List.of(userRoleClient)).build();
 
     tenants = List.of(tenant);
     parties = List.of(party);

@@ -58,7 +58,8 @@ public class RecoveryCodeExpirationVO {
     ConstraintFailList list = new ConstraintFailList();
     RecoveryCodeExpirationVO result = tryFrom(recoveryCodeExpiration, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException(
+          "Invalid value for RecoveryCodeExpirationVO.recovery-code-expiration", list);
     }
     return result;
   }

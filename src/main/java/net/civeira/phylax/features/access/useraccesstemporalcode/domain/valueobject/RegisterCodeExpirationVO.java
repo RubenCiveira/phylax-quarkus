@@ -59,7 +59,8 @@ public class RegisterCodeExpirationVO {
     ConstraintFailList list = new ConstraintFailList();
     RegisterCodeExpirationVO result = tryFrom(registerCodeExpiration, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException(
+          "Invalid value for RegisterCodeExpirationVO.register-code-expiration", list);
     }
     return result;
   }

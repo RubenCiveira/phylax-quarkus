@@ -106,13 +106,6 @@ public class CurrentRequest {
     if (security.isAnonymous()) {
       builder = builder.autenticated(false).roles(List.of());
     } else {
-      // System.err.println("Principal: " + security.getPrincipal().getName());
-      // System.err.println("Roles: " + security.getRoles());
-      // System.err.println("Filtrados desde " + audiences);
-      // System.err
-      // .println("Quedan como " +
-      // security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList() );
-
       builder = builder.name(security.getPrincipal().getName()).roles(
           security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList());
       Object claim = jwt.getClaim("tid");
@@ -124,10 +117,7 @@ public class CurrentRequest {
       Map<String, String> claims = new HashMap<>();
       for (String string : jwt.getClaimNames()) {
         Object claimWithName = jwt.getClaim(string);
-        if (claimWithName == null) {
-          System.err.println("Null value for " + string);
-        } else {
-          System.err.println("-> ADD " + string);
+        if (claimWithName != null) {
           claims.put(string, claim.toString());
         }
       }

@@ -44,7 +44,7 @@ public class NameVO {
     ConstraintFailList list = new ConstraintFailList();
     NameVO result = tryFrom(name, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for NameVO.name", list);
     }
     return result;
   }

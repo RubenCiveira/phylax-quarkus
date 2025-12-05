@@ -60,7 +60,9 @@ public class TempSecondFactorSeedExpirationVO {
     ConstraintFailList list = new ConstraintFailList();
     TempSecondFactorSeedExpirationVO result = tryFrom(tempSecondFactorSeedExpiration, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException(
+          "Invalid value for TempSecondFactorSeedExpirationVO.temp-second-factor-seed-expiration",
+          list);
     }
     return result;
   }

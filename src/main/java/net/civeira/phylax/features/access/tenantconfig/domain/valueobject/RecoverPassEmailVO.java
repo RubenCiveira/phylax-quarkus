@@ -57,7 +57,8 @@ public class RecoverPassEmailVO {
     ConstraintFailList list = new ConstraintFailList();
     RecoverPassEmailVO result = tryFrom(recoverPassEmail, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RecoverPassEmailVO.recover-pass-email",
+          list);
     }
     return result;
   }

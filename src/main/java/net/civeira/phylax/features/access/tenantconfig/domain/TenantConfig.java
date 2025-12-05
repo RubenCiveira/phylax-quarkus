@@ -228,7 +228,7 @@ public class TenantConfig implements TenantConfigRef {
       list.add(new ConstraintFail("REQUIRED", "forceMfa", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on TenantConfig", list);
     }
     this.recordedEvents = previous.map(TenantConfig::getRecordedEvents).orElseGet(List::of);
   }

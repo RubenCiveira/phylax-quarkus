@@ -57,7 +57,7 @@ public class RoleVO {
     ConstraintFailList list = new ConstraintFailList();
     RoleVO result = tryFrom(role, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RoleVO.role", list);
     }
     return result;
   }

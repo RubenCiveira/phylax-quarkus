@@ -44,7 +44,7 @@ public class DomainVO {
     ConstraintFailList list = new ConstraintFailList();
     DomainVO result = tryFrom(domain, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for DomainVO.domain", list);
     }
     return result;
   }

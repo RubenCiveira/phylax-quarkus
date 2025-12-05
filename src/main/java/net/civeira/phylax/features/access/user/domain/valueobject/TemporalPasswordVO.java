@@ -54,7 +54,7 @@ public class TemporalPasswordVO {
     ConstraintFailList list = new ConstraintFailList();
     TemporalPasswordVO result = tryFrom(temporalPassword, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for TemporalPasswordVO.temporal-password", list);
     }
     return result;
   }

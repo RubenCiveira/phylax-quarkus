@@ -227,7 +227,7 @@ public class TenantLoginProvider implements TenantLoginProviderRef {
       list.add(new ConstraintFail("REQUIRED", "usersEnabledByDefault", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on TenantLoginProvider", list);
     }
     this.recordedEvents = previous.map(TenantLoginProvider::getRecordedEvents).orElseGet(List::of);
   }

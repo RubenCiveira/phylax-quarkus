@@ -57,7 +57,7 @@ public class VersionVO {
     ConstraintFailList list = new ConstraintFailList();
     VersionVO result = tryFrom(version, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for VersionVO.version", list);
     }
     return result;
   }

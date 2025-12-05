@@ -55,7 +55,8 @@ public class UseSecondFactorsVO {
     ConstraintFailList list = new ConstraintFailList();
     UseSecondFactorsVO result = tryFrom(useSecondFactors, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for UseSecondFactorsVO.use-second-factors",
+          list);
     }
     return result;
   }

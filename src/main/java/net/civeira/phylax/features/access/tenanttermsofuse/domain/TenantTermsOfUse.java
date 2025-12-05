@@ -163,7 +163,7 @@ public class TenantTermsOfUse implements TenantTermsOfUseRef {
       list.add(new ConstraintFail("REQUIRED", "enabled", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on TenantTermsOfUse", list);
     }
     this.recordedEvents = previous.map(TenantTermsOfUse::getRecordedEvents).orElseGet(List::of);
   }

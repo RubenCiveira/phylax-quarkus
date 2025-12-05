@@ -3,6 +3,7 @@ package net.civeira.phylax.common.exception;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -13,7 +14,6 @@ import net.civeira.phylax.common.value.validation.AbstractFail;
 import net.civeira.phylax.common.value.validation.AbstractFail.LocalizedFail;
 import net.civeira.phylax.common.value.validation.AbstractFail.LocalizedWrongValue;
 import net.civeira.phylax.common.value.validation.AbstractFailList;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 
 /**
  * Base class for exceptions that encapsulate one or more validation failures.
@@ -49,19 +49,22 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Constructs the exception with a full list of validation failures.
    *
+   * @param message the message
    * @param fails the list of validation failures to include
    */
-  public AbstractFailsException(AbstractFailList fails) {
+  public AbstractFailsException(String message, AbstractFailList fails) {
+    super(message(message, fails));
     this.fails = fails;
   }
 
   /**
    * Constructs the exception with a single validation failure.
    *
+   * @param message the message
    * @param fail a single validation failure to include
    */
-  public AbstractFailsException(AbstractFail fail) {
-    this(new AbstractFailList(fail));
+  public AbstractFailsException(String message, AbstractFail fail) {
+    this(message, new AbstractFailList(fail));
   }
 
   /**
@@ -89,7 +92,7 @@ public abstract class AbstractFailsException extends RuntimeException {
    * @param <T> a subtype of {@link ConstraintFail}
    * @return {@code true} if a violation of the given type exists
    */
-  public <T extends ConstraintFail> boolean includeViolation(Class<T> type) {
+  public <T extends AbstractFail> boolean includeViolation(Class<T> type) {
     return fails.includeViolation(type);
   }
 
@@ -138,5 +141,25 @@ public abstract class AbstractFailsException extends RuntimeException {
       }
     });
     return values.values();
+  }
+
+  private static String message(String on, AbstractFailList list) {
+    Map<String, StringBuilder> parts = new HashMap<>();
+    list.getFails().forEach(fail -> {
+      String key = fail.getCode();
+      if (!parts.containsKey(key)) {
+        parts.put(key, new StringBuilder());
+      }
+      parts.get(key).append(", " + fail.getViolation());
+    });
+    StringBuilder rest = new StringBuilder();
+    parts.entrySet().forEach(entry -> {
+      rest.append("; " + entry.getKey() + ": " + entry.getValue().substring(2));
+    });
+    StringBuilder label = new StringBuilder(on);
+    if (!rest.isEmpty()) {
+      label.append(rest.substring(2));
+    }
+    return label.toString();
   }
 }

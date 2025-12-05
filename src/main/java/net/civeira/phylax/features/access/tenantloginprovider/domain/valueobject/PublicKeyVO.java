@@ -57,7 +57,7 @@ public class PublicKeyVO {
     ConstraintFailList list = new ConstraintFailList();
     PublicKeyVO result = tryFrom(publicKey, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for PublicKeyVO.public-key", list);
     }
     return result;
   }

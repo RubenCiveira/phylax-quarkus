@@ -44,7 +44,7 @@ public class CodeVO {
     ConstraintFailList list = new ConstraintFailList();
     CodeVO result = tryFrom(code, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for CodeVO.code", list);
     }
     return result;
   }

@@ -57,7 +57,7 @@ public class WellcomeAtVO {
     ConstraintFailList list = new ConstraintFailList();
     WellcomeAtVO result = tryFrom(wellcomeAt, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for WellcomeAtVO.wellcome-at", list);
     }
     return result;
   }

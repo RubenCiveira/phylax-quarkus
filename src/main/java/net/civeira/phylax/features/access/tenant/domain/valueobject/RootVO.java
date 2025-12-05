@@ -54,7 +54,7 @@ public class RootVO {
     ConstraintFailList list = new ConstraintFailList();
     RootVO result = tryFrom(root, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RootVO.root", list);
     }
     return result;
   }

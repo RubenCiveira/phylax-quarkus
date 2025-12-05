@@ -57,7 +57,7 @@ public class CertificateVO {
     ConstraintFailList list = new ConstraintFailList();
     CertificateVO result = tryFrom(certificate, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for CertificateVO.certificate", list);
     }
     return result;
   }

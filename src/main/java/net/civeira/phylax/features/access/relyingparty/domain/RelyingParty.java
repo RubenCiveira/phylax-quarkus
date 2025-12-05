@@ -134,7 +134,7 @@ public class RelyingParty implements RelyingPartyRef {
       list.add(new ConstraintFail("REQUIRED", "apiKey", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on RelyingParty", list);
     }
     this.recordedEvents = previous.map(RelyingParty::getRecordedEvents).orElseGet(List::of);
   }

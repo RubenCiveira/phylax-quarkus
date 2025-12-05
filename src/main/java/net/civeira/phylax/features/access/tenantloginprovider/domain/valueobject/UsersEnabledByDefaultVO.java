@@ -46,7 +46,8 @@ public class UsersEnabledByDefaultVO {
     ConstraintFailList list = new ConstraintFailList();
     UsersEnabledByDefaultVO result = tryFrom(usersEnabledByDefault, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException(
+          "Invalid value for UsersEnabledByDefaultVO.users-enabled-by-default", list);
     }
     return result;
   }

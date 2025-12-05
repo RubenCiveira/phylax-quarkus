@@ -45,7 +45,7 @@ public class MarkForDeleteVO {
     ConstraintFailList list = new ConstraintFailList();
     MarkForDeleteVO result = tryFrom(markForDelete, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for MarkForDeleteVO.mark-for-delete", list);
     }
     return result;
   }

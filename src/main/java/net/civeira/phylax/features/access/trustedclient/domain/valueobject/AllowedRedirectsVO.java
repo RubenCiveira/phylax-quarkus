@@ -48,7 +48,7 @@ public class AllowedRedirectsVO {
     ConstraintFailList list = new ConstraintFailList();
     AllowedRedirectsVO result = tryFrom(allowedRedirects, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for AllowedRedirectsVO.allowed-redirects", list);
     }
     return result;
   }

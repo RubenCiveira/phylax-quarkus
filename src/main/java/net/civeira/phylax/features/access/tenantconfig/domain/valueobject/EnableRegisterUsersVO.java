@@ -55,7 +55,8 @@ public class EnableRegisterUsersVO {
     ConstraintFailList list = new ConstraintFailList();
     EnableRegisterUsersVO result = tryFrom(enableRegisterUsers, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for EnableRegisterUsersVO.enable-register-users",
+          list);
     }
     return result;
   }

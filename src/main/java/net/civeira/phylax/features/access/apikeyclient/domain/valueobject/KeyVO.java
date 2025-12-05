@@ -56,7 +56,7 @@ public class KeyVO {
     ConstraintFailList list = new ConstraintFailList();
     KeyVO result = tryFrom(key, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for KeyVO.key", list);
     }
     return result;
   }

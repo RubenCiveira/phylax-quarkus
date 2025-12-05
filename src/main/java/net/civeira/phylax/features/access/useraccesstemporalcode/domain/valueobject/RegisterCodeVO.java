@@ -57,7 +57,7 @@ public class RegisterCodeVO {
     ConstraintFailList list = new ConstraintFailList();
     RegisterCodeVO result = tryFrom(registerCode, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RegisterCodeVO.register-code", list);
     }
     return result;
   }

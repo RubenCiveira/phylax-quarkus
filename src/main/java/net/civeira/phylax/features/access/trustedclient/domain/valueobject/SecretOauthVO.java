@@ -58,7 +58,7 @@ public class SecretOauthVO {
     ConstraintFailList list = new ConstraintFailList();
     SecretOauthVO result = tryFrom(secretOauth, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for SecretOauthVO.secret-oauth", list);
     }
     return result;
   }

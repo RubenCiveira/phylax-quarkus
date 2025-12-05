@@ -58,7 +58,7 @@ public class TenantVO {
     ConstraintFailList list = new ConstraintFailList();
     TenantVO result = tryFrom(tenant, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for TenantVO.tenant", list);
     }
     return result;
   }

@@ -54,7 +54,7 @@ public class AllowRegisterVO {
     ConstraintFailList list = new ConstraintFailList();
     AllowRegisterVO result = tryFrom(allowRegister, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for AllowRegisterVO.allow-register", list);
     }
     return result;
   }

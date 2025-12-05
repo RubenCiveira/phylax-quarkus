@@ -433,8 +433,8 @@
         </plugins>
       </build>
       <properties>
-        <jacoco.skip>true</jacoco.skip>
         <surefire.argLine></surefire.argLine>
+        <jacoco.skip>true</jacoco.skip>
       </properties>
     </profile>
   </profiles>

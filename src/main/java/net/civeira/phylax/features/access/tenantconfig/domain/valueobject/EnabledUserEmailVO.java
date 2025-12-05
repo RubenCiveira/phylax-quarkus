@@ -57,7 +57,8 @@ public class EnabledUserEmailVO {
     ConstraintFailList list = new ConstraintFailList();
     EnabledUserEmailVO result = tryFrom(enabledUserEmail, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for EnabledUserEmailVO.enabled-user-email",
+          list);
     }
     return result;
   }

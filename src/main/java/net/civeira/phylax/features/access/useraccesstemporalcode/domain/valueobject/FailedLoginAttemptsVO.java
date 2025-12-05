@@ -58,7 +58,8 @@ public class FailedLoginAttemptsVO {
     ConstraintFailList list = new ConstraintFailList();
     FailedLoginAttemptsVO result = tryFrom(failedLoginAttempts, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for FailedLoginAttemptsVO.failed-login-attempts",
+          list);
     }
     return result;
   }

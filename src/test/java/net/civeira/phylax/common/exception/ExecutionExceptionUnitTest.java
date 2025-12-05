@@ -14,7 +14,7 @@ class ExecutionExceptionUnitTest {
   @Test
   void testConstructorWithExecutionFail() {
     ExecutionFail fail = new ExecutionFail("EXEC_ERROR", "Process failed due to unknown reason");
-    ExecutionException ex = new ExecutionException(fail);
+    ExecutionException ex = new ExecutionException("", fail);
 
     assertTrue(ex.hasErrors());
     assertFalse(ex.isEmpty());
@@ -24,7 +24,7 @@ class ExecutionExceptionUnitTest {
   @Test
   void testConstructorWithCodeAndMessage() {
     ExecutionException ex =
-        new ExecutionException("SERVICE_DOWN", "The service is currently unavailable");
+        new ExecutionException("", "SERVICE_DOWN", "The service is currently unavailable");
 
     assertTrue(ex.hasErrors());
     assertTrue(ex.includeCode("SERVICE_DOWN"));
@@ -34,7 +34,7 @@ class ExecutionExceptionUnitTest {
   @Test
   void testGetFailsReturnsCorrectStream() {
     ExecutionFail fail = new ExecutionFail("FAIL_CODE", "Something went wrong");
-    ExecutionException ex = new ExecutionException(fail);
+    ExecutionException ex = new ExecutionException("", fail);
 
     assertEquals(1, ex.getFails().count());
   }

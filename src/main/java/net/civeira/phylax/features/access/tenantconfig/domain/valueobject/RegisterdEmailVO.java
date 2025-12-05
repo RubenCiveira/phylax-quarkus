@@ -56,7 +56,7 @@ public class RegisterdEmailVO {
     ConstraintFailList list = new ConstraintFailList();
     RegisterdEmailVO result = tryFrom(registerdEmail, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RegisterdEmailVO.registerd-email", list);
     }
     return result;
   }

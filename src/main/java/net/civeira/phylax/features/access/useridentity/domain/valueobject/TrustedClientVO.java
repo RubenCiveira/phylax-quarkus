@@ -70,7 +70,7 @@ public class TrustedClientVO {
     ConstraintFailList list = new ConstraintFailList();
     TrustedClientVO result = tryFrom(trustedClient, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for TrustedClientVO.trusted-client", list);
     }
     return result;
   }

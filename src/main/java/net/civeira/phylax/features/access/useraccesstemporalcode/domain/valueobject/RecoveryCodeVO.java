@@ -56,7 +56,7 @@ public class RecoveryCodeVO {
     ConstraintFailList list = new ConstraintFailList();
     RecoveryCodeVO result = tryFrom(recoveryCode, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RecoveryCodeVO.recovery-code", list);
     }
     return result;
   }

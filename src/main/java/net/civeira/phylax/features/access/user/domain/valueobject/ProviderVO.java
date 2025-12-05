@@ -57,7 +57,7 @@ public class ProviderVO {
     ConstraintFailList list = new ConstraintFailList();
     ProviderVO result = tryFrom(provider, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for ProviderVO.provider", list);
     }
     return result;
   }

@@ -44,7 +44,7 @@ public class UidVO {
     ConstraintFailList list = new ConstraintFailList();
     UidVO result = tryFrom(uid, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for UidVO.uid", list);
     }
     return result;
   }

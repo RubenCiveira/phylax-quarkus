@@ -56,7 +56,7 @@ public class EmailVO {
     ConstraintFailList list = new ConstraintFailList();
     EmailVO result = tryFrom(email, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for EmailVO.email", list);
     }
     return result;
   }

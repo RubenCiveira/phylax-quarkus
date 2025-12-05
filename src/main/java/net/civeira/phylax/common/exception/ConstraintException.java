@@ -34,42 +34,49 @@ public class ConstraintException extends AbstractFailsException {
   /**
    * Constructs a {@code ConstraintException} with a single constraint failure.
    *
+   * @param message the message
    * @param fail the constraint failure to include in the exception
    */
-  public ConstraintException(ConstraintFail fail) {
-    super(fail);
+  public ConstraintException(String message, ConstraintFail fail) {
+    super(message, fail);
   }
 
   /**
    * Constructs a {@code ConstraintException} with a list of constraint failures.
    *
+   * @param message the message
    * @param fails a list of multiple constraint violations
    */
-  public ConstraintException(ConstraintFailList fails) {
-    super(fails);
+  public ConstraintException(String message, ConstraintFailList fails) {
+    super(message, fails);
   }
 
   /**
    * Constructs a {@code ConstraintException} with the given error metadata.
    *
+   * @param message the message
    * @param code the error code identifying the type of constraint violation
    * @param field the field or property associated with the violation
    * @param wrongValue the value that caused the failure
    * @param errorMessage a human-readable error message describing the problem
    */
-  public ConstraintException(String code, String field, Object wrongValue, String errorMessage) {
-    super(new ConstraintFail(code, field, wrongValue, errorMessage));
+  public ConstraintException(String message, String code, String field, Object wrongValue,
+      String errorMessage) {
+    super(message, new ConstraintFail(code, field, wrongValue, errorMessage));
   }
 
   /**
    * Constructs a {@code ConstraintException} with minimal violation information.
    *
+   * @param message the message
    * @param code the error code identifying the type of constraint violation
    * @param field the field or property associated with the violation
    * @param wrongValue the value that caused the failure
    */
-  public ConstraintException(String code, String field, Object wrongValue) {
-    super(new ConstraintFail(code, field, wrongValue));
+  public ConstraintException(String message, String code, String field,
+      Object wrongValue) {
+    super(message, new ConstraintFail(code, field, wrongValue));
   }
+
 
 }

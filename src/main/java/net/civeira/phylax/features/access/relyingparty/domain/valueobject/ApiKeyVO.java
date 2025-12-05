@@ -44,7 +44,7 @@ public class ApiKeyVO {
     ConstraintFailList list = new ConstraintFailList();
     ApiKeyVO result = tryFrom(apiKey, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for ApiKeyVO.api-key", list);
     }
     return result;
   }

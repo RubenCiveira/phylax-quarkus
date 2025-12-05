@@ -45,7 +45,7 @@ public class UrlVO {
     ConstraintFailList list = new ConstraintFailList();
     UrlVO result = tryFrom(url, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for UrlVO.url", list);
     }
     return result;
   }

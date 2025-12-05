@@ -57,7 +57,7 @@ public class RegisterCodeUrlVO {
     ConstraintFailList list = new ConstraintFailList();
     RegisterCodeUrlVO result = tryFrom(registerCodeUrl, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RegisterCodeUrlVO.register-code-url", list);
     }
     return result;
   }

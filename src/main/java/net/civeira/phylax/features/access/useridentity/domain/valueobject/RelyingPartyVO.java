@@ -69,7 +69,7 @@ public class RelyingPartyVO {
     ConstraintFailList list = new ConstraintFailList();
     RelyingPartyVO result = tryFrom(relyingParty, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for RelyingPartyVO.relying-party", list);
     }
     return result;
   }

@@ -58,7 +58,8 @@ public class SecondFactorSeedVO {
     ConstraintFailList list = new ConstraintFailList();
     SecondFactorSeedVO result = tryFrom(secondFactorSeed, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for SecondFactorSeedVO.second-factor-seed",
+          list);
     }
     return result;
   }

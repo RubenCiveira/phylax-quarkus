@@ -69,7 +69,7 @@ public class MetadataVO {
     ConstraintFailList list = new ConstraintFailList();
     MetadataVO result = tryFrom(metadata, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for MetadataVO.metadata", list);
     }
     return result;
   }

@@ -222,7 +222,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
       list.add(new ConstraintFail("REQUIRED", "user", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on UserAccessTemporalCode", list);
     }
     this.recordedEvents =
         previous.map(UserAccessTemporalCode::getRecordedEvents).orElseGet(List::of);

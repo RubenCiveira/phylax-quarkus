@@ -58,7 +58,7 @@ public class AcceptDateVO {
     ConstraintFailList list = new ConstraintFailList();
     AcceptDateVO result = tryFrom(acceptDate, list);
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid value for AcceptDateVO.accept-date", list);
     }
     return result;
   }

@@ -168,7 +168,7 @@ public class TrustedClient implements TrustedClientRef {
       list.add(new ConstraintFail("REQUIRED", "allowedRedirects", null));
     }
     if (list.hasErrors()) {
-      throw new ConstraintException(list);
+      throw new ConstraintException("Invalid values on TrustedClient", list);
     }
     this.recordedEvents = previous.map(TrustedClient::getRecordedEvents).orElseGet(List::of);
   }
