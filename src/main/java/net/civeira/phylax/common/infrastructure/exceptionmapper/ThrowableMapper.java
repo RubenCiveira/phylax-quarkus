@@ -15,7 +15,6 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
   @Override
   public Response toResponse(Throwable exception) {
-    exception.printStackTrace();
     if (log.isDebugEnabled()) {
       log.warn("unhandled exception", exception);
     } else if (log.isWarnEnabled()) {

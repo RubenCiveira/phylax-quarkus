@@ -67,7 +67,7 @@ public class CurrentRequest {
   public boolean isAnonymous() {
     try {
       return security.isAnonymous();
-    } catch(RuntimeException re) {
+    } catch (RuntimeException re) {
       return true;
     }
   }
@@ -124,7 +124,7 @@ public class CurrentRequest {
       Map<String, String> claims = new HashMap<>();
       for (String string : jwt.getClaimNames()) {
         Object claimWithName = jwt.getClaim(string);
-        if( claimWithName == null ) {
+        if (claimWithName == null) {
           System.err.println("Null value for " + string);
         } else {
           System.err.println("-> ADD " + string);

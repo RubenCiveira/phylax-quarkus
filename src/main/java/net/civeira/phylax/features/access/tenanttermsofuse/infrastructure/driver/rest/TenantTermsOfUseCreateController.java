@@ -2,7 +2,7 @@ package net.civeira.phylax.features.access.tenanttermsofuse.infrastructure.drive
 
 import org.apache.commons.lang3.StringUtils;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class TenantTermsOfUseCreateController {
 
   /**

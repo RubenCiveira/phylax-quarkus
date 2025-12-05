@@ -1,6 +1,6 @@
 package net.civeira.phylax.features.access.useridentity.infrastructure.driver.rest;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import net.civeira.phylax.generated.openapi.model.UserApiRef;
 import net.civeira.phylax.generated.openapi.model.UserIdentityApiDto;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class UserIdentityUpdateController {
 
   /**

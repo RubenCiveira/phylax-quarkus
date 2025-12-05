@@ -6,9 +6,8 @@ import java.util.Optional;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 
 public interface ClientRetrieveSpi {
-  
   Optional<ClientDetails> loadPreautorized(String tenant, String clientId);
-  
+
   Optional<ClientDetails> loadPublic(String tenant, String clientId, String redirect);
 
   Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret);

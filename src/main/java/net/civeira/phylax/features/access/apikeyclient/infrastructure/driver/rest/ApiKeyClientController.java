@@ -2,12 +2,14 @@ package net.civeira.phylax.features.access.apikeyclient.infrastructure.driver.re
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.ApiKeyClientApi;
 import net.civeira.phylax.generated.openapi.model.ApiKeyClientApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class ApiKeyClientController implements ApiKeyClientApi {
 
   /**

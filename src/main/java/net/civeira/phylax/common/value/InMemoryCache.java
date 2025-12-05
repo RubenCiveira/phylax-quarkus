@@ -22,7 +22,7 @@ public class InMemoryCache<K, V> {
     public V getValue() {
       return value;
     }
-    
+
     private boolean isExpired(long now) {
       return expireAtMillis < now;
     }

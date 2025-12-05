@@ -3,7 +3,7 @@ package net.civeira.phylax.features.access.relyingparty.infrastructure.driver.re
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyRefere
 import net.civeira.phylax.generated.openapi.model.RelyingPartyApiDto;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class RelyingPartyEnableController {
 
   /**

@@ -2,6 +2,7 @@ package net.civeira.phylax.features.access.relyingparty.infrastructure.driver.re
 
 import java.util.ArrayList;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -24,6 +25,7 @@ import net.civeira.phylax.generated.openapi.model.RelyingPartyGenericAcl;
 import net.civeira.phylax.generated.openapi.model.RelyingPartySpecificAcl;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class RelyingPartyAclController implements RelyingPartyAclApi {
 
   /**

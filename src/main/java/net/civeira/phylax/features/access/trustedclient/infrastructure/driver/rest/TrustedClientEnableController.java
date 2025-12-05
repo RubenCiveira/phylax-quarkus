@@ -3,7 +3,7 @@ package net.civeira.phylax.features.access.trustedclient.infrastructure.driver.r
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import net.civeira.phylax.generated.openapi.model.AllowedRedirectsApiDto;
 import net.civeira.phylax.generated.openapi.model.TrustedClientApiDto;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class TrustedClientEnableController {
 
   /**

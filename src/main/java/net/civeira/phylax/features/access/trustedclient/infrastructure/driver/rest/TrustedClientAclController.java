@@ -2,6 +2,7 @@ package net.civeira.phylax.features.access.trustedclient.infrastructure.driver.r
 
 import java.util.ArrayList;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -24,6 +25,7 @@ import net.civeira.phylax.generated.openapi.model.TrustedClientGenericAcl;
 import net.civeira.phylax.generated.openapi.model.TrustedClientSpecificAcl;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class TrustedClientAclController implements TrustedClientAclApi {
 
   /**

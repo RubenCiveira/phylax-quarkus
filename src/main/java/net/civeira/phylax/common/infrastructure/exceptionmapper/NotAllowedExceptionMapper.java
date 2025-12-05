@@ -21,7 +21,6 @@ public class NotAllowedExceptionMapper implements ExceptionMapper<NotAllowedExce
 
   @Override
   public Response toResponse(NotAllowedException exception) {
-    exception.printStackTrace();
     if (log.isDebugEnabled()) {
       log.warn("not allowed", exception);
     } else if (log.isWarnEnabled()) {

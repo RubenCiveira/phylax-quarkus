@@ -3,7 +3,7 @@ package net.civeira.phylax.features.access.tenantloginprovider.infrastructure.dr
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import net.civeira.phylax.generated.openapi.model.TenantLoginProviderApiDto;
 import net.civeira.phylax.generated.openapi.model.TenantLoginProviderApiDto.SourceEnum;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class TenantLoginProviderDisableController {
 
   /**

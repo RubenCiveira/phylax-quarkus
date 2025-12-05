@@ -2,6 +2,7 @@ package net.civeira.phylax.features.access.apikeyclient.infrastructure.driver.re
 
 import java.util.ArrayList;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -24,6 +25,7 @@ import net.civeira.phylax.generated.openapi.model.ApiKeyClientSpecificAcl;
 import net.civeira.phylax.generated.openapi.model.CommonAllow;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class ApiKeyClientAclController implements ApiKeyClientAclApi {
 
   /**

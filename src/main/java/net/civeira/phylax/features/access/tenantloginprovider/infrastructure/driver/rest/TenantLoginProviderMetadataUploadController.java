@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -14,7 +14,7 @@ import net.civeira.phylax.features.access.tenantloginprovider.application.usecas
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderReference;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class TenantLoginProviderMetadataUploadController {
 
   /**

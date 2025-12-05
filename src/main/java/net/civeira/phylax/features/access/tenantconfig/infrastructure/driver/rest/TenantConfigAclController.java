@@ -2,6 +2,7 @@ package net.civeira.phylax.features.access.tenantconfig.infrastructure.driver.re
 
 import java.util.ArrayList;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -22,6 +23,7 @@ import net.civeira.phylax.generated.openapi.model.TenantConfigGenericAcl;
 import net.civeira.phylax.generated.openapi.model.TenantConfigSpecificAcl;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class TenantConfigAclController implements TenantConfigAclApi {
 
   /**

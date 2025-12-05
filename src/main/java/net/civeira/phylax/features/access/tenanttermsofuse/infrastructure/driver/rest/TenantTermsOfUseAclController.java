@@ -2,6 +2,7 @@ package net.civeira.phylax.features.access.tenanttermsofuse.infrastructure.drive
 
 import java.util.ArrayList;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -25,6 +26,7 @@ import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseGenericAcl;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseSpecificAcl;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class TenantTermsOfUseAclController implements TenantTermsOfUseAclApi {
 
   /**

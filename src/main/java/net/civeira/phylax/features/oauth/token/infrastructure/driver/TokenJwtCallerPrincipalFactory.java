@@ -12,11 +12,13 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+
 import io.smallrye.jwt.auth.principal.DefaultJWTCallerPrincipal;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
 import io.smallrye.jwt.auth.principal.JWTCallerPrincipal;
@@ -44,9 +46,10 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
     private final JwtClaims claims;
     private final JWTCallerPrincipal principal;
   }
-  
+
   /**
    * Hold non final fields to allow caching
+   * 
    * @author ruben.civeiraiglesia
    *
    */
@@ -57,30 +60,23 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
     private final Throwable exception;
     private final JWTCallerPrincipal principal;
     private final long until;
-    
+
     public static Cacheable ok(JWTCallerPrincipal principal, Instant instant) {
-      return Cacheable.builder()
-          .principal(principal).until( instant.toEpochMilli() )
-          .build();
+      return Cacheable.builder().principal(principal).until(instant.toEpochMilli()).build();
     }
-    
+
     public static Cacheable fail(String error) {
-      return Cacheable.builder()
-          .error(error)
-          .build();
+      return Cacheable.builder().error(error).build();
     }
-    
+
     public static Cacheable fail(String error, Throwable th) {
-      return Cacheable.builder()
-          .error(error)
-          .exception(th)
-          .build();
+      return Cacheable.builder().error(error).exception(th).build();
     }
-    
+
     JWTCallerPrincipal principalLoaded() throws ParseException {
-      if( null != principal && until > Instant.now().toEpochMilli() ) {
+      if (null != principal && until > Instant.now().toEpochMilli()) {
         return principal;
-      } else if( null != principal ) {
+      } else if (null != principal) {
         throw new ParseException("Expired token");
       } else {
         System.err.println("> WRONG TOKEN");
@@ -95,14 +91,13 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
   private final JwtTokenManager tokenManager;
 
   private final Duration valid;
-  
+
   private List<PublicKeyInformation> cached;
-  
+
   private LocalDateTime until = LocalDateTime.now();
 
   public TokenJwtCallerPrincipalFactory(
-      @ConfigProperty(name = "mp.jwt.verify.memory.jks-ttl", defaultValue = "1h")
-      Duration duration,
+      @ConfigProperty(name = "mp.jwt.verify.memory.jks-ttl", defaultValue = "1h") Duration duration,
       JwtTokenManager tokenManager) {
     super();
     this.valid = duration;
@@ -117,13 +112,13 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
     }
     return this.caller(token).principalLoaded();
   }
-  
+
   private Cacheable caller(String token) {
     ParsedToken parsed;
     try {
       parsed = parseHeaderAndClaims(token);
     } catch (ParseException e) {
-      return Cacheable.fail("Unable to parse token",e );
+      return Cacheable.fail("Unable to parse token", e);
     }
     try {
       String kid = parsed.getHeader().getString("kid", null);
@@ -133,12 +128,12 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
             tokenManager.decodeWithoutTenant(jk.get(), token);
         if (decodeWithoutTenant.isPresent()) {
           DecodedJWT decodedJWT = decodeWithoutTenant.get();
-          return Cacheable.ok( parsed.getPrincipal(), decodedJWT.getExpiresAtAsInstant() );
+          return Cacheable.ok(parsed.getPrincipal(), decodedJWT.getExpiresAtAsInstant());
         } else {
           return Cacheable.fail("Invalid JWT sign");
         }
       } else {
-        return Cacheable.fail("No key for kid " + kid );
+        return Cacheable.fail("No key for kid " + kid);
       }
     } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
       return Cacheable.fail("Unable to load the keys", e);

@@ -14,12 +14,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.eclipse.microprofile.config.ConfigProvider;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator.Builder;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.enterprise.context.RequestScoped;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +60,7 @@ public class JwtTokenBuilder {
     private final List<String> audiences;
     private final String client;
   }
-  
+
   private final ObjectMapper mapper;
   private final JwtTokenManager manager;
 
@@ -215,12 +218,10 @@ public class JwtTokenBuilder {
             DecodedJWT jwt = decode.get();
             List<String> asList = jwt.getClaim(CLAIM_SCOPE).asList(String.class);
             if (asList.size() == 1 && asList.contains(scope)) {
-              response = Optional.of(
-                  RefreshTokenInfo.builder()
-                    .username(jwt.getClaim(CLAIM_USER_NAME).asString())
-                    .client(jwt.getClaim(CLAIM_CLIENT_ID).asString())
-                    .audiences(jwt.getClaim(CLAIM_AUDIENCE_ID).asList(String.class) )
-                    .build());
+              response = Optional
+                  .of(RefreshTokenInfo.builder().username(jwt.getClaim(CLAIM_USER_NAME).asString())
+                      .client(jwt.getClaim(CLAIM_CLIENT_ID).asString())
+                      .audiences(jwt.getClaim(CLAIM_AUDIENCE_ID).asList(String.class)).build());
             }
             return response;
           }
@@ -231,9 +232,9 @@ public class JwtTokenBuilder {
     }
     return response;
   }
-  
-  
-  
+
+
+
   public Optional<String> verifyToken(String token, String scope, String tenant) {
     Optional<String> response = Optional.empty();
     List<PublicKeyInformation> publicKeys = manager.getPublicKeys();

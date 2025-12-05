@@ -2,12 +2,14 @@ package net.civeira.phylax.features.access.tenant.infrastructure.driver.rest;
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.TenantApi;
 import net.civeira.phylax.generated.openapi.model.TenantApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class TenantController implements TenantApi {
 
   /**

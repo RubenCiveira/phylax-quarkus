@@ -3,7 +3,7 @@ package net.civeira.phylax.features.access.role.infrastructure.driver.rest;
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import net.civeira.phylax.features.access.role.application.usecase.delete.RoleDe
 import net.civeira.phylax.features.access.role.domain.RoleReference;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class RoleDeleteController {
 
   /**

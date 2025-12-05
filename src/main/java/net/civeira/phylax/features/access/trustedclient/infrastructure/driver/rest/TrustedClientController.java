@@ -2,12 +2,14 @@ package net.civeira.phylax.features.access.trustedclient.infrastructure.driver.r
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.TrustedClientApi;
 import net.civeira.phylax.generated.openapi.model.TrustedClientApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class TrustedClientController implements TrustedClientApi {
 
   /**

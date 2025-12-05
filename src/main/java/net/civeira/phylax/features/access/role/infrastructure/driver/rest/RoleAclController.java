@@ -2,6 +2,7 @@ package net.civeira.phylax.features.access.role.infrastructure.driver.rest;
 
 import java.util.ArrayList;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
@@ -22,6 +23,7 @@ import net.civeira.phylax.generated.openapi.model.RoleGenericAcl;
 import net.civeira.phylax.generated.openapi.model.RoleSpecificAcl;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class RoleAclController implements RoleAclApi {
 
   /**

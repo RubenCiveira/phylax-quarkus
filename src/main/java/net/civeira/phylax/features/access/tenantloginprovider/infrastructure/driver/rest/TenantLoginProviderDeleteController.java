@@ -3,7 +3,7 @@ package net.civeira.phylax.features.access.tenantloginprovider.infrastructure.dr
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import net.civeira.phylax.features.access.tenantloginprovider.application.usecas
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderReference;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class TenantLoginProviderDeleteController {
 
   /**

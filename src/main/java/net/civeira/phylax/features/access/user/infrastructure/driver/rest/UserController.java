@@ -2,12 +2,14 @@ package net.civeira.phylax.features.access.user.infrastructure.driver.rest;
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.UserApi;
 import net.civeira.phylax.generated.openapi.model.UserApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class UserController implements UserApi {
 
   /**

@@ -3,7 +3,7 @@ package net.civeira.phylax.features.access.tenantconfig.infrastructure.driver.re
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import net.civeira.phylax.features.access.tenantconfig.application.usecase.delet
 import net.civeira.phylax.features.access.tenantconfig.domain.TenantConfigReference;
 
 @RequiredArgsConstructor
-@RequestScoped
+@ApplicationScoped
 public class TenantConfigDeleteController {
 
   /**

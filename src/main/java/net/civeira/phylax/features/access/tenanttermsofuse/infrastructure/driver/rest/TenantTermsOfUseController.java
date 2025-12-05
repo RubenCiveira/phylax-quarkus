@@ -3,12 +3,14 @@ package net.civeira.phylax.features.access.tenanttermsofuse.infrastructure.drive
 import java.io.InputStream;
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.TenantTermsOfUseApi;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class TenantTermsOfUseController implements TenantTermsOfUseApi {
 
   /**

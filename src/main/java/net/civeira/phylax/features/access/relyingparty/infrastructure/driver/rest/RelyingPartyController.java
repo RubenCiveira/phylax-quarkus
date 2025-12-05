@@ -2,12 +2,14 @@ package net.civeira.phylax.features.access.relyingparty.infrastructure.driver.re
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.RelyingPartyApi;
 import net.civeira.phylax.generated.openapi.model.RelyingPartyApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class RelyingPartyController implements RelyingPartyApi {
 
   /**

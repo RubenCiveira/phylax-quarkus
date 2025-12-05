@@ -2,12 +2,14 @@ package net.civeira.phylax.features.access.useridentity.infrastructure.driver.re
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.UserIdentityApi;
 import net.civeira.phylax.generated.openapi.model.UserIdentityApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class UserIdentityController implements UserIdentityApi {
 
   /**

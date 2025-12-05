@@ -2,12 +2,14 @@ package net.civeira.phylax.features.access.role.infrastructure.driver.rest;
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.RoleApi;
 import net.civeira.phylax.generated.openapi.model.RoleApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class RoleController implements RoleApi {
 
   /**

@@ -3,12 +3,14 @@ package net.civeira.phylax.features.access.tenantloginprovider.infrastructure.dr
 import java.io.InputStream;
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.generated.openapi.api.TenantLoginProviderApi;
 import net.civeira.phylax.generated.openapi.model.TenantLoginProviderApiDto;
 
 @RequiredArgsConstructor
+@ApplicationScoped
 public class TenantLoginProviderController implements TenantLoginProviderApi {
 
   /**
