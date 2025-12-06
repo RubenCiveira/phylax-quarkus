@@ -21,8 +21,6 @@ quarkus:
           enabled: true
           path: logs/traces.jsonl
           level: INFO
-          json:
-            enabled: true
           rotation:
             max-file-size: 10M
             max-backup-index: 5
