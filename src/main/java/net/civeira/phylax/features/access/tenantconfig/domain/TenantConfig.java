@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.tenantconfig.domain.event.TenantConfigCreateEvent;
 import net.civeira.phylax.features.access.tenantconfig.domain.event.TenantConfigDeleteEvent;
@@ -192,41 +191,19 @@ public class TenantConfig implements TenantConfigRef {
   private TenantConfig(final TenantConfigChangeSet attribute,
       final Optional<TenantConfig> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue = attribute.getUid().orElse(previous.map(TenantConfig::getUidValue).orElse(null));
-    this.tenantValue =
-        attribute.getTenant().orElse(previous.map(TenantConfig::getTenantValue).orElse(null));
-    this.innerLabelValue = attribute.getInnerLabel()
-        .orElse(previous.map(TenantConfig::getInnerLabelValue).orElseGet(InnerLabelVO::nullValue));
-    this.forceMfaValue =
-        attribute.getForceMfa().orElse(previous.map(TenantConfig::getForceMfaValue).orElse(null));
-    this.allowRegisterValue = attribute.getAllowRegister().orElse(
-        previous.map(TenantConfig::getAllowRegisterValue).orElseGet(AllowRegisterVO::nullValue));
-    this.enableRegisterUsersValue = attribute.getEnableRegisterUsers()
-        .orElse(previous.map(TenantConfig::getEnableRegisterUsersValue)
-            .orElseGet(EnableRegisterUsersVO::nullValue));
-    this.wellcomeEmailValue = attribute.getWellcomeEmail().orElse(
-        previous.map(TenantConfig::getWellcomeEmailValue).orElseGet(WellcomeEmailVO::nullValue));
-    this.registerdEmailValue = attribute.getRegisterdEmail().orElse(
-        previous.map(TenantConfig::getRegisterdEmailValue).orElseGet(RegisterdEmailVO::nullValue));
-    this.disabledUserEmailValue = attribute.getDisabledUserEmail().orElse(previous
-        .map(TenantConfig::getDisabledUserEmailValue).orElseGet(DisabledUserEmailVO::nullValue));
-    this.enabledUserEmailValue = attribute.getEnabledUserEmail().orElse(previous
-        .map(TenantConfig::getEnabledUserEmailValue).orElseGet(EnabledUserEmailVO::nullValue));
-    this.allowRecoverPassValue = attribute.getAllowRecoverPass().orElse(previous
-        .map(TenantConfig::getAllowRecoverPassValue).orElseGet(AllowRecoverPassVO::nullValue));
-    this.recoverPassEmailValue = attribute.getRecoverPassEmail().orElse(previous
-        .map(TenantConfig::getRecoverPassEmailValue).orElseGet(RecoverPassEmailVO::nullValue));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(TenantConfig::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == tenantValue) {
-      list.add(new ConstraintFail("REQUIRED", "tenant", null));
-    }
-    if (null == forceMfaValue) {
-      list.add(new ConstraintFail("REQUIRED", "forceMfa", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.tenantValue = attribute.readTenant(previous, list);
+    this.innerLabelValue = attribute.readInnerLabel(previous, list);
+    this.forceMfaValue = attribute.readForceMfa(previous, list);
+    this.allowRegisterValue = attribute.readAllowRegister(previous, list);
+    this.enableRegisterUsersValue = attribute.readEnableRegisterUsers(previous, list);
+    this.wellcomeEmailValue = attribute.readWellcomeEmail(previous, list);
+    this.registerdEmailValue = attribute.readRegisterdEmail(previous, list);
+    this.disabledUserEmailValue = attribute.readDisabledUserEmail(previous, list);
+    this.enabledUserEmailValue = attribute.readEnabledUserEmail(previous, list);
+    this.allowRecoverPassValue = attribute.readAllowRecoverPass(previous, list);
+    this.recoverPassEmailValue = attribute.readRecoverPassEmail(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on TenantConfig", list);
     }

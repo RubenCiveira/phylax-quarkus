@@ -95,7 +95,7 @@ public class VerifyTrustedClientUsecase {
 
   private Optional<ClientDetails> privateClient(TrustedClient app, String clientId, String secret) {
     SecretOauthVO secretOauth = app.getSecretOauthValue();
-    Optional<String> pass = secretOauth.getPlainSecretOauth(cypher);
+    Optional<String> pass = secretOauth.getSecretOauthPlain(cypher);
     if (pass.isPresent() && secret.equals(pass.get())) {
       return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(true)
           .allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES).build());

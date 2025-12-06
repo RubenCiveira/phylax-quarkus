@@ -97,7 +97,7 @@ public class PasswordVO {
    * @param cypher
    * @return
    */
-  public String getCypheredPassword(final AesCipherService cypher) {
+  public String getPasswordCyphered(final AesCipherService cypher) {
     return cyphered ? cypheredValue : cypher.encryptForAll(plainValue);
   }
 
@@ -108,7 +108,7 @@ public class PasswordVO {
    * @param cypher
    * @return
    */
-  public String getPlainPassword(final AesCipherService cypher) {
+  public String getPasswordPlain(final AesCipherService cypher) {
     return cyphered ? cypher.decryptForAll(cypheredValue)
         .orElseThrow(() -> new IllegalStateException("Unable to decrypt")) : plainValue;
   }

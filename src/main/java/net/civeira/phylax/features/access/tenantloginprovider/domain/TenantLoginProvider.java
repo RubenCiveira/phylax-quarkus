@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.event.TenantLoginProviderCreateEvent;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.event.TenantLoginProviderDeleteEvent;
@@ -57,7 +56,7 @@ public class TenantLoginProvider implements TenantLoginProviderRef {
    */
   public static TenantLoginProvider create(final TenantLoginProviderChangeSet change)
       throws ConstraintException {
-    change.setDisabled(false);
+    change.disabled(false);
     TenantLoginProvider instance = new TenantLoginProvider(change, Optional.empty());
     instance.addEvent(TenantLoginProviderCreateEvent.builder().payload(instance).build());
     return instance;
@@ -187,45 +186,18 @@ public class TenantLoginProvider implements TenantLoginProviderRef {
   private TenantLoginProvider(final TenantLoginProviderChangeSet attribute,
       final Optional<TenantLoginProvider> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue =
-        attribute.getUid().orElse(previous.map(TenantLoginProvider::getUidValue).orElse(null));
-    this.tenantValue = attribute.getTenant()
-        .orElse(previous.map(TenantLoginProvider::getTenantValue).orElse(null));
-    this.nameValue =
-        attribute.getName().orElse(previous.map(TenantLoginProvider::getNameValue).orElse(null));
-    this.sourceValue = attribute.getSource()
-        .orElse(previous.map(TenantLoginProvider::getSourceValue).orElse(null));
-    this.disabledValue = attribute.getDisabled().orElse(
-        previous.map(TenantLoginProvider::getDisabledValue).orElseGet(DisabledVO::nullValue));
-    this.directAccessValue = attribute.getDirectAccess().orElse(previous
-        .map(TenantLoginProvider::getDirectAccessValue).orElseGet(DirectAccessVO::nullValue));
-    this.publicKeyValue = attribute.getPublicKey().orElse(
-        previous.map(TenantLoginProvider::getPublicKeyValue).orElseGet(PublicKeyVO::nullValue));
-    this.privateKeyValue = attribute.getPrivateKey().orElse(
-        previous.map(TenantLoginProvider::getPrivateKeyValue).orElseGet(PrivateKeyVO::nullValue));
-    this.certificateValue = attribute.getCertificate().orElse(
-        previous.map(TenantLoginProvider::getCertificateValue).orElseGet(CertificateVO::nullValue));
-    this.metadataValue = attribute.getMetadata().orElse(
-        previous.map(TenantLoginProvider::getMetadataValue).orElseGet(MetadataVO::nullValue));
-    this.usersEnabledByDefaultValue = attribute.getUsersEnabledByDefault()
-        .orElse(previous.map(TenantLoginProvider::getUsersEnabledByDefaultValue).orElse(null));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(TenantLoginProvider::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == tenantValue) {
-      list.add(new ConstraintFail("REQUIRED", "tenant", null));
-    }
-    if (null == nameValue) {
-      list.add(new ConstraintFail("REQUIRED", "name", null));
-    }
-    if (null == sourceValue) {
-      list.add(new ConstraintFail("REQUIRED", "source", null));
-    }
-    if (null == usersEnabledByDefaultValue) {
-      list.add(new ConstraintFail("REQUIRED", "usersEnabledByDefault", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.tenantValue = attribute.readTenant(previous, list);
+    this.nameValue = attribute.readName(previous, list);
+    this.sourceValue = attribute.readSource(previous, list);
+    this.disabledValue = attribute.readDisabled(previous, list);
+    this.directAccessValue = attribute.readDirectAccess(previous, list);
+    this.publicKeyValue = attribute.readPublicKey(previous, list);
+    this.privateKeyValue = attribute.readPrivateKey(previous, list);
+    this.certificateValue = attribute.readCertificate(previous, list);
+    this.metadataValue = attribute.readMetadata(previous, list);
+    this.usersEnabledByDefaultValue = attribute.readUsersEnabledByDefault(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on TenantLoginProvider", list);
     }
@@ -254,7 +226,7 @@ public class TenantLoginProvider implements TenantLoginProviderRef {
    */
   public TenantLoginProvider disable() {
     TenantLoginProviderChangeSet attr = new TenantLoginProviderChangeSet();
-    attr.setDisabled(true);
+    attr.disabled(true);
     TenantLoginProvider instance = new TenantLoginProvider(attr, Optional.of(this));
     instance.addEvent(TenantLoginProviderDisableEvent.builder().payload(instance).build());
     return instance;
@@ -269,7 +241,7 @@ public class TenantLoginProvider implements TenantLoginProviderRef {
    */
   public TenantLoginProvider enable() {
     TenantLoginProviderChangeSet attr = new TenantLoginProviderChangeSet();
-    attr.setDisabled(false);
+    attr.disabled(false);
     TenantLoginProvider instance = new TenantLoginProvider(attr, Optional.of(this));
     instance.addEvent(TenantLoginProviderEnableEvent.builder().payload(instance).build());
     return instance;

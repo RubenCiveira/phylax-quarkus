@@ -370,13 +370,16 @@ public class TenantConfigCreateInput {
    * @return
    */
   static TenantConfigCreateInput fromChangeSet(final TenantConfigChangeSet input) {
-    return TenantConfigCreateInput.builder().uid(input.getUid()).tenant(input.getTenant())
-        .innerLabel(input.getInnerLabel()).forceMfa(input.getForceMfa())
-        .allowRegister(input.getAllowRegister()).enableRegisterUsers(input.getEnableRegisterUsers())
-        .wellcomeEmail(input.getWellcomeEmail()).registerdEmail(input.getRegisterdEmail())
-        .disabledUserEmail(input.getDisabledUserEmail())
-        .enabledUserEmail(input.getEnabledUserEmail()).allowRecoverPass(input.getAllowRecoverPass())
-        .recoverPassEmail(input.getRecoverPassEmail()).version(input.getVersion()).build();
+    return TenantConfigCreateInput.builder().uid(input.getUidValue()).tenant(input.getTenantValue())
+        .innerLabel(input.getInnerLabelValue()).forceMfa(input.getForceMfaValue())
+        .allowRegister(input.getAllowRegisterValue())
+        .enableRegisterUsers(input.getEnableRegisterUsersValue())
+        .wellcomeEmail(input.getWellcomeEmailValue()).registerdEmail(input.getRegisterdEmailValue())
+        .disabledUserEmail(input.getDisabledUserEmailValue())
+        .enabledUserEmail(input.getEnabledUserEmailValue())
+        .allowRecoverPass(input.getAllowRecoverPassValue())
+        .recoverPassEmail(input.getRecoverPassEmailValue()).version(input.getVersionValue())
+        .build();
   }
 
   /**
@@ -782,11 +785,10 @@ public class TenantConfigCreateInput {
    * @return
    */
   TenantConfigChangeSet toChangeSet() {
-    return TenantConfigChangeSet.builder().uid(uid).tenant(tenant).innerLabel(innerLabel)
+    return new TenantConfigChangeSet().uid(uid).tenant(tenant).innerLabel(innerLabel)
         .forceMfa(forceMfa).allowRegister(allowRegister).enableRegisterUsers(enableRegisterUsers)
         .wellcomeEmail(wellcomeEmail).registerdEmail(registerdEmail)
         .disabledUserEmail(disabledUserEmail).enabledUserEmail(enabledUserEmail)
-        .allowRecoverPass(allowRecoverPass).recoverPassEmail(recoverPassEmail).version(version)
-        .build();
+        .allowRecoverPass(allowRecoverPass).recoverPassEmail(recoverPassEmail).version(version);
   }
 }

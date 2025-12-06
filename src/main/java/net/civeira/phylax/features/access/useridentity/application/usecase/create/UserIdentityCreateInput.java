@@ -193,9 +193,9 @@ public class UserIdentityCreateInput {
    * @return
    */
   static UserIdentityCreateInput fromChangeSet(final UserIdentityChangeSet input) {
-    return UserIdentityCreateInput.builder().uid(input.getUid()).user(input.getUser())
-        .relyingParty(input.getRelyingParty()).trustedClient(input.getTrustedClient())
-        .roles(input.getRoles()).version(input.getVersion()).build();
+    return UserIdentityCreateInput.builder().uid(input.getUidValue()).user(input.getUserValue())
+        .relyingParty(input.getRelyingPartyValue()).trustedClient(input.getTrustedClientValue())
+        .roles(input.getRolesValue()).version(input.getVersionValue()).build();
   }
 
   /**
@@ -385,7 +385,7 @@ public class UserIdentityCreateInput {
    * @return
    */
   UserIdentityChangeSet toChangeSet() {
-    return UserIdentityChangeSet.builder().uid(uid).user(user).relyingParty(relyingParty)
-        .trustedClient(trustedClient).roles(roles).version(version).build();
+    return new UserIdentityChangeSet().uid(uid).user(user).relyingParty(relyingParty)
+        .trustedClient(trustedClient).roles(roles).version(version);
   }
 }

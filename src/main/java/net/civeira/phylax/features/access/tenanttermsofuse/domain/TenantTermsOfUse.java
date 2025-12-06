@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.event.TenantTermsOfUseCreateEvent;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.event.TenantTermsOfUseDeleteEvent;
@@ -51,7 +50,7 @@ public class TenantTermsOfUse implements TenantTermsOfUseRef {
    */
   public static TenantTermsOfUse create(final TenantTermsOfUseChangeSet change)
       throws ConstraintException {
-    change.setEnabled(false);
+    change.enabled(false);
     TenantTermsOfUse instance = new TenantTermsOfUse(change, Optional.empty());
     instance.addEvent(TenantTermsOfUseCreateEvent.builder().payload(instance).build());
     return instance;
@@ -136,32 +135,13 @@ public class TenantTermsOfUse implements TenantTermsOfUseRef {
   private TenantTermsOfUse(final TenantTermsOfUseChangeSet attribute,
       final Optional<TenantTermsOfUse> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue =
-        attribute.getUid().orElse(previous.map(TenantTermsOfUse::getUidValue).orElse(null));
-    this.tenantValue =
-        attribute.getTenant().orElse(previous.map(TenantTermsOfUse::getTenantValue).orElse(null));
-    this.textValue =
-        attribute.getText().orElse(previous.map(TenantTermsOfUse::getTextValue).orElse(null));
-    this.enabledValue =
-        attribute.getEnabled().orElse(previous.map(TenantTermsOfUse::getEnabledValue).orElse(null));
-    this.attachedValue = attribute.getAttached()
-        .orElse(previous.map(TenantTermsOfUse::getAttachedValue).orElseGet(AttachedVO::nullValue));
-    this.activationDateValue = attribute.getActivationDate().orElse(previous
-        .map(TenantTermsOfUse::getActivationDateValue).orElseGet(ActivationDateVO::nullValue));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(TenantTermsOfUse::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == tenantValue) {
-      list.add(new ConstraintFail("REQUIRED", "tenant", null));
-    }
-    if (null == textValue) {
-      list.add(new ConstraintFail("REQUIRED", "text", null));
-    }
-    if (null == enabledValue) {
-      list.add(new ConstraintFail("REQUIRED", "enabled", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.tenantValue = attribute.readTenant(previous, list);
+    this.textValue = attribute.readText(previous, list);
+    this.enabledValue = attribute.readEnabled(previous, list);
+    this.attachedValue = attribute.readAttached(previous, list);
+    this.activationDateValue = attribute.readActivationDate(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on TenantTermsOfUse", list);
     }
@@ -189,7 +169,7 @@ public class TenantTermsOfUse implements TenantTermsOfUseRef {
    */
   public TenantTermsOfUse disable() {
     TenantTermsOfUseChangeSet attr = new TenantTermsOfUseChangeSet();
-    attr.setEnabled(false);
+    attr.enabled(false);
     TenantTermsOfUse instance = new TenantTermsOfUse(attr, Optional.of(this));
     instance.addEvent(TenantTermsOfUseDisableEvent.builder().payload(instance).build());
     return instance;
@@ -203,7 +183,7 @@ public class TenantTermsOfUse implements TenantTermsOfUseRef {
    */
   public TenantTermsOfUse enable() {
     TenantTermsOfUseChangeSet attr = new TenantTermsOfUseChangeSet();
-    attr.setEnabled(true);
+    attr.enabled(true);
     TenantTermsOfUse instance = new TenantTermsOfUse(attr, Optional.of(this));
     instance.addEvent(TenantTermsOfUseEnableEvent.builder().payload(instance).build());
     return instance;

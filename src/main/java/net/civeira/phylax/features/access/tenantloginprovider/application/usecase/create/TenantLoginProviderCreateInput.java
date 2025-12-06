@@ -345,12 +345,13 @@ public class TenantLoginProviderCreateInput {
    * @return
    */
   static TenantLoginProviderCreateInput fromChangeSet(final TenantLoginProviderChangeSet input) {
-    return TenantLoginProviderCreateInput.builder().uid(input.getUid()).tenant(input.getTenant())
-        .name(input.getName()).source(input.getSource()).disabled(input.getDisabled())
-        .directAccess(input.getDirectAccess()).publicKey(input.getPublicKey())
-        .privateKey(input.getPrivateKey()).certificate(input.getCertificate())
-        .metadata(input.getMetadata()).usersEnabledByDefault(input.getUsersEnabledByDefault())
-        .version(input.getVersion()).build();
+    return TenantLoginProviderCreateInput.builder().uid(input.getUidValue())
+        .tenant(input.getTenantValue()).name(input.getNameValue()).source(input.getSourceValue())
+        .disabled(input.getDisabledValue()).directAccess(input.getDirectAccessValue())
+        .publicKey(input.getPublicKeyValue()).privateKey(input.getPrivateKeyValue())
+        .certificate(input.getCertificateValue()).metadata(input.getMetadataValue())
+        .usersEnabledByDefault(input.getUsersEnabledByDefaultValue())
+        .version(input.getVersionValue()).build();
   }
 
   /**
@@ -721,9 +722,9 @@ public class TenantLoginProviderCreateInput {
    * @return
    */
   TenantLoginProviderChangeSet toChangeSet() {
-    return TenantLoginProviderChangeSet.builder().uid(uid).tenant(tenant).name(name).source(source)
+    return new TenantLoginProviderChangeSet().uid(uid).tenant(tenant).name(name).source(source)
         .disabled(disabled).directAccess(directAccess).publicKey(publicKey).privateKey(privateKey)
         .certificate(certificate).metadata(metadata).usersEnabledByDefault(usersEnabledByDefault)
-        .version(version).build();
+        .version(version);
   }
 }

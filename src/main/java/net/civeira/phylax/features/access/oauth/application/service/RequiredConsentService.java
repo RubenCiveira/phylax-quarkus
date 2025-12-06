@@ -53,8 +53,8 @@ public class RequiredConsentService {
   }
 
   public void acceptPendingTerms(User user, String conditionsUid) {
-    userTermsWriter.create(UserAcceptedTermnsOfUse.create(UserAcceptedTermnsOfUseChangeSet.builder()
+    userTermsWriter.create(UserAcceptedTermnsOfUse.create(new UserAcceptedTermnsOfUseChangeSet()
         .newUid().user(user).conditions(TenantTermsOfUseReference.of(conditionsUid))
-        .acceptDate(OffsetDateTime.now()).build()));
+        .acceptDate(OffsetDateTime.now())));
   }
 }

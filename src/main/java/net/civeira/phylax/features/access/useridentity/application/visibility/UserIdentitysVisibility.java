@@ -418,19 +418,19 @@ public class UserIdentitysVisibility {
    * @return The input entity with the copy values without hidden
    */
   private UserIdentityChangeSet visiblesReferences(Interaction prev, UserIdentityChangeSet source) {
-    source.getUser().map(UserVO::getUserUid).ifPresent(user -> {
+    source.getUserValue().map(UserVO::getUserUid).ifPresent(user -> {
       boolean visible = usersVisibility.checkVisibility(prev, user);
       if (!visible) {
         throw new NotFoundException("No user - " + user);
       }
     });
-    source.getRelyingParty().flatMap(RelyingPartyVO::getRelyingPartyUid).ifPresent(ref -> {
+    source.getRelyingPartyValue().flatMap(RelyingPartyVO::getRelyingPartyUid).ifPresent(ref -> {
       boolean visible = relyingPartysVisibility.checkVisibility(prev, ref);
       if (!visible) {
         throw new NotFoundException("No relying party - " + ref);
       }
     });
-    source.getTrustedClient().flatMap(TrustedClientVO::getTrustedClientUid).ifPresent(ref -> {
+    source.getTrustedClientValue().flatMap(TrustedClientVO::getTrustedClientUid).ifPresent(ref -> {
       boolean visible = trustedClientsVisibility.checkVisibility(prev, ref);
       if (!visible) {
         throw new NotFoundException("No trusted client - " + ref);
@@ -446,7 +446,7 @@ public class UserIdentitysVisibility {
    * @param source The source interaction
    */
   private void visiblesReferencesFromRoles(Interaction prev, UserIdentityChangeSet source) {
-    source.getRoles().map(RolesVO::getRoles).ifPresent(collector -> {
+    source.getRolesValue().map(RolesVO::getRoles).ifPresent(collector -> {
       List<String> collectRole = new ArrayList<>();
       collector.forEach(item -> {
         if (null != item.getRole()) {

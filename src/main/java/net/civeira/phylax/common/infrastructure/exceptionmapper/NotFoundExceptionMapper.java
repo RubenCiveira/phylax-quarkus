@@ -16,11 +16,7 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
 
   @Override
   public Response toResponse(NotFoundException exception) {
-    if (log.isDebugEnabled()) {
-      log.info("not found exception", exception);
-    } else if (log.isInfoEnabled()) {
-      log.info("not found exception");
-    }
+    log.info("not found exception", exception);
     Map<String, String> error = new HashMap<>();
     error.put("reason", exception.getMessage());
     return Response.status(404).entity(error).build();

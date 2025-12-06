@@ -25,17 +25,28 @@ import lombok.extern.jackson.Jacksonized;
 public class AuthRequest {
   @NonNull
   private final String tenant;
-  private final Optional<String> clientId;
-  private final Optional<String> prompt;
-  private final Optional<String> scope;
-  private final Optional<String> state;
-  private final Optional<String> nonce;
-  private final Optional<String> codeChallenge;
-  private final Optional<String> codeChallengeMethod;
-  private final Optional<String> redirect;
-  private final Locale locale;
-  private final Optional<String> responseType;
-  private final List<String> audiences;
+  @Builder.Default
+  private final Optional<String> clientId = Optional.empty();
+  @Builder.Default
+  private final Optional<String> prompt = Optional.empty();
+  @Builder.Default
+  private final Optional<String> scope = Optional.empty();
+  @Builder.Default
+  private final Optional<String> state = Optional.empty();
+  @Builder.Default
+  private final Optional<String> nonce = Optional.empty();
+  @Builder.Default
+  private final Optional<String> codeChallenge = Optional.empty();
+  @Builder.Default
+  private final Optional<String> codeChallengeMethod = Optional.empty();
+  @Builder.Default
+  private final Optional<String> redirect = Optional.empty();
+  @Builder.Default
+  private final Locale locale = Locale.getDefault();
+  @Builder.Default
+  private final Optional<String> responseType = Optional.empty();
+  @Builder.Default
+  private final List<String> audiences = List.of();
 
   public AuthRequest(String tenant, UriInfo req, HttpHeaders headers) {
     MultivaluedMap<String, String> params = req.getQueryParameters();

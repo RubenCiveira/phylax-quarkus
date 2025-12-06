@@ -44,7 +44,7 @@ public class MfaConfigUsecase {
       Optional<String> prev = find
           .filter(code -> code.getTempSecondFactorSeedExpiration()
               .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(code -> code.getCypheredTempSecondFactorSeed(cypher));
+          .flatMap(code -> code.getTempSecondFactorSeedCyphered(cypher));
       if (prev.isPresent()) {
         return otp.getQr(
             ApplicationInfo.builder().label(user.getName() + " at ").issuer("no").build(),
@@ -58,7 +58,7 @@ public class MfaConfigUsecase {
                 code = find.get();
               } else {
                 code = codes.create(UserAccessTemporalCode
-                    .create(UserAccessTemporalCodeChangeSet.builder().newUid().user(user).build()));
+                    .create(new UserAccessTemporalCodeChangeSet().newUid().user(user)));
               }
               codes.update(code,
                   code.generateMfaTemporalCode(secret, OffsetDateTime.now().plus(EXPIRATION_TIME)));
@@ -69,7 +69,7 @@ public class MfaConfigUsecase {
 
   public boolean validateOtp(String tenant, String username, List<String> audiences, String code) {
     return finder.findEnabledUser(tenant, username, audiences).map(user -> {
-      Optional<String> find = user.getCypheredSecondFactorSeed(cypher);
+      Optional<String> find = user.getSecondFactorSeedCyphered(cypher);
       if (find.isPresent()) {
         String seed = find.get();
         return otp.validateOtp(code, seed);
@@ -88,7 +88,7 @@ public class MfaConfigUsecase {
       Optional<String> prev = find
           .filter(temps -> temps.getTempSecondFactorSeedExpiration()
               .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(second -> second.getCypheredTempSecondFactorSeed(cypher));
+          .flatMap(second -> second.getTempSecondFactorSeedCyphered(cypher));
       if (prev.isPresent()) {
         String seed = prev.get();
         boolean valid = otp.validateOtp(code, seed);
@@ -97,7 +97,7 @@ public class MfaConfigUsecase {
             UserAccessTemporalCode temps = find.get();
             codes.update(temps, temps.resetMfaTemporalCode());
             users.update(user,
-                user.setMfaSeed(temps.getPlainTempSecondFactorSeed(cypher).orElseThrow()));
+                user.setMfaSeed(temps.getTempSecondFactorSeedPlain(cypher).orElseThrow()));
           } else {
             log.error("We have a part but not the hole item");
             throw new IllegalStateException("");

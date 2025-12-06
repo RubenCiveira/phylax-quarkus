@@ -392,12 +392,14 @@ public class UserCreateInput {
    * @return
    */
   static UserCreateInput fromChangeSet(final UserChangeSet input) {
-    return UserCreateInput.builder().uid(input.getUid()).tenant(input.getTenant())
-        .name(input.getName()).password(input.getPassword()).email(input.getEmail())
-        .wellcomeAt(input.getWellcomeAt()).enabled(input.getEnabled()).approve(input.getApprove())
-        .temporalPassword(input.getTemporalPassword()).useSecondFactors(input.getUseSecondFactors())
-        .secondFactorSeed(input.getSecondFactorSeed()).blockedUntil(input.getBlockedUntil())
-        .provider(input.getProvider()).version(input.getVersion()).build();
+    return UserCreateInput.builder().uid(input.getUidValue()).tenant(input.getTenantValue())
+        .name(input.getNameValue()).password(input.getPasswordValue()).email(input.getEmailValue())
+        .wellcomeAt(input.getWellcomeAtValue()).enabled(input.getEnabledValue())
+        .approve(input.getApproveValue()).temporalPassword(input.getTemporalPasswordValue())
+        .useSecondFactors(input.getUseSecondFactorsValue())
+        .secondFactorSeed(input.getSecondFactorSeedValue())
+        .blockedUntil(input.getBlockedUntilValue()).provider(input.getProviderValue())
+        .version(input.getVersionValue()).build();
   }
 
   /**
@@ -831,10 +833,9 @@ public class UserCreateInput {
    * @return
    */
   UserChangeSet toChangeSet() {
-    return UserChangeSet.builder().uid(uid).tenant(tenant).name(name).password(password)
-        .email(email).wellcomeAt(wellcomeAt).enabled(enabled).approve(approve)
-        .temporalPassword(temporalPassword).useSecondFactors(useSecondFactors)
-        .secondFactorSeed(secondFactorSeed).blockedUntil(blockedUntil).provider(provider)
-        .version(version).build();
+    return new UserChangeSet().uid(uid).tenant(tenant).name(name).password(password).email(email)
+        .wellcomeAt(wellcomeAt).enabled(enabled).approve(approve).temporalPassword(temporalPassword)
+        .useSecondFactors(useSecondFactors).secondFactorSeed(secondFactorSeed)
+        .blockedUntil(blockedUntil).provider(provider).version(version);
   }
 }

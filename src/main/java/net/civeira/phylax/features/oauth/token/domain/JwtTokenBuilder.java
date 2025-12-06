@@ -156,6 +156,15 @@ public class JwtTokenBuilder {
     return authorization;
   }
 
+  /**
+   * If no request is provided, no info about audiences.
+   * @param tenant
+   * @param details
+   * @param grantType
+   * @param validationData
+   * @return
+   */
+  @Deprecated
   public AutorizationToken buildToken(String tenant, ClientDetails details, String grantType,
       AuthenticationData validationData) {
     return buildToken(tenant, details, grantType, validationData, null);
@@ -218,10 +227,11 @@ public class JwtTokenBuilder {
             DecodedJWT jwt = decode.get();
             List<String> asList = jwt.getClaim(CLAIM_SCOPE).asList(String.class);
             if (asList.size() == 1 && asList.contains(scope)) {
+              List<String> aud = jwt.getClaim(CLAIM_AUDIENCE_ID).asList(String.class);
               response = Optional
                   .of(RefreshTokenInfo.builder().username(jwt.getClaim(CLAIM_USER_NAME).asString())
                       .client(jwt.getClaim(CLAIM_CLIENT_ID).asString())
-                      .audiences(jwt.getClaim(CLAIM_AUDIENCE_ID).asList(String.class)).build());
+                      .audiences(null == aud ? List.of() : aud).build());
             }
             return response;
           }
@@ -272,8 +282,8 @@ public class JwtTokenBuilder {
     if (null != authTime) {
       builder = builder.withClaim("auth_time", authTime.getEpochSecond());
     }
-    return builder.withClaim("typ", "ID").withClaim("aud", validationData.getAudiences())
-        .withClaim(CLAIM_GRANT_TYPE, grantType).withClaim(CLAIM_AUDIENCE_ID, client.getClientId())
+    return builder.withClaim("typ", "ID").withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
+        .withClaim(CLAIM_GRANT_TYPE, grantType)
         .withClaim(CLAIM_USER_NAME, validationData.getUsername())
         .withClaim(CLAIM_CLIENT_ID, client.getClientId())
         .withArrayClaim(CLAIM_AUTHORITIES, validationData.getRoles().toArray(new String[0]));
@@ -326,7 +336,8 @@ public class JwtTokenBuilder {
       accessTokenInfo = accessTokenInfo.withClaim("tid", validationData.getTenant());
     }
 
-    accessTokenInfo = accessTokenInfo.withClaim(CLAIM_CLIENT_ID, client.getClientId())
+    accessTokenInfo = accessTokenInfo
+        .withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
         .withClaim("aud", validationData.getAudiences())
         .withArrayClaim(CLAIM_AUTHORITIES, validationData.getRoles().toArray(new String[0]))
         .withArrayClaim(CLAIM_SCOPE, scopes.toArray(new String[0]));

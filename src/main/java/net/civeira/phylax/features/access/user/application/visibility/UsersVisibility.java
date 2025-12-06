@@ -384,7 +384,7 @@ public class UsersVisibility {
    * @return The input entity with the copy values without hidden
    */
   private UserChangeSet visiblesReferences(Interaction prev, UserChangeSet source) {
-    source.getTenant().map(TenantVO::getTenantUid).ifPresent(tenant -> {
+    source.getTenantValue().map(TenantVO::getTenantUid).ifPresent(tenant -> {
       boolean visible = tenantsVisibility.checkVisibility(prev, tenant);
       if (!visible) {
         throw new NotFoundException("No tenant - " + tenant);

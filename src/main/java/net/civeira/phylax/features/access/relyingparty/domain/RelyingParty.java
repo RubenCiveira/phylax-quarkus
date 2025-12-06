@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.relyingparty.domain.event.RelyingPartyCreateEvent;
 import net.civeira.phylax.features.access.relyingparty.domain.event.RelyingPartyDeleteEvent;
@@ -48,7 +47,7 @@ public class RelyingParty implements RelyingPartyRef {
    * @return A well formed relying party.
    */
   public static RelyingParty create(final RelyingPartyChangeSet change) throws ConstraintException {
-    change.setEnabled(false);
+    change.enabled(false);
     RelyingParty instance = new RelyingParty(change, Optional.empty());
     instance.addEvent(RelyingPartyCreateEvent.builder().payload(instance).build());
     return instance;
@@ -115,24 +114,11 @@ public class RelyingParty implements RelyingPartyRef {
   private RelyingParty(final RelyingPartyChangeSet attribute,
       final Optional<RelyingParty> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue = attribute.getUid().orElse(previous.map(RelyingParty::getUidValue).orElse(null));
-    this.codeValue =
-        attribute.getCode().orElse(previous.map(RelyingParty::getCodeValue).orElse(null));
-    this.apiKeyValue =
-        attribute.getApiKey().orElse(previous.map(RelyingParty::getApiKeyValue).orElse(null));
-    this.enabledValue = attribute.getEnabled()
-        .orElse(previous.map(RelyingParty::getEnabledValue).orElseGet(EnabledVO::nullValue));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(RelyingParty::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == codeValue) {
-      list.add(new ConstraintFail("REQUIRED", "code", null));
-    }
-    if (null == apiKeyValue) {
-      list.add(new ConstraintFail("REQUIRED", "apiKey", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.codeValue = attribute.readCode(previous, list);
+    this.apiKeyValue = attribute.readApiKey(previous, list);
+    this.enabledValue = attribute.readEnabled(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on RelyingParty", list);
     }
@@ -159,7 +145,7 @@ public class RelyingParty implements RelyingPartyRef {
    */
   public RelyingParty disable() {
     RelyingPartyChangeSet attr = new RelyingPartyChangeSet();
-    attr.setEnabled(false);
+    attr.enabled(false);
     RelyingParty instance = new RelyingParty(attr, Optional.of(this));
     instance.addEvent(RelyingPartyDisableEvent.builder().payload(instance).build());
     return instance;
@@ -173,7 +159,7 @@ public class RelyingParty implements RelyingPartyRef {
    */
   public RelyingParty enable() {
     RelyingPartyChangeSet attr = new RelyingPartyChangeSet();
-    attr.setEnabled(true);
+    attr.enabled(true);
     RelyingParty instance = new RelyingParty(attr, Optional.of(this));
     instance.addEvent(RelyingPartyEnableEvent.builder().payload(instance).build());
     return instance;

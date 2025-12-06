@@ -434,7 +434,7 @@ public class TrustedClientRepository {
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(CODE, SqlParameterValue.of(entity.getCode()));
       sq.with(PUBLIC_ALLOW, SqlParameterValue.of(entity.isPublicAllow()));
-      sq.with(SECRET_OAUTH, entity.getCypheredSecretOauth(cypher).map(SqlParameterValue::of)
+      sq.with(SECRET_OAUTH, entity.getSecretOauthCyphered(cypher).map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
       sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
@@ -561,7 +561,7 @@ public class TrustedClientRepository {
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(CODE, SqlParameterValue.of(entity.getCode()));
       sq.with(PUBLIC_ALLOW, SqlParameterValue.of(entity.isPublicAllow()));
-      sq.with(SECRET_OAUTH, entity.getCypheredSecretOauth(cypher).map(SqlParameterValue::of)
+      sq.with(SECRET_OAUTH, entity.getSecretOauthCyphered(cypher).map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
       sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)

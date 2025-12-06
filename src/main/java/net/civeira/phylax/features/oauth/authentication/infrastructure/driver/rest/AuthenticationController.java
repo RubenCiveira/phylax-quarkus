@@ -11,9 +11,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import io.quarkus.cache.Cache;
 import io.quarkus.cache.CacheName;
 import io.smallrye.mutiny.Uni;
@@ -101,12 +101,18 @@ public class AuthenticationController {
       String refreshToken = paramMap.getFirst("refresh_token");
       return tokenBuilder.verifyRefreshInfo(refreshToken, tenant)
           .flatMap(info -> loadPreautorizedClient(tenant, info.getClient()).map(client -> {
-            AuthRequest request = new AuthRequest(tenant, req, headers);
+            List<String> audiences = info.getAudiences();
+            System.err.println("EL TOKEN TIENE COMO AUDIENCIAS " + audiences );
+            AuthRequest request = AuthRequest.builder()
+                .audiences(audiences)
+                .tenant(tenant)
+                .clientId(Optional.of(client.getClientId()))
+                .build();
             AuthenticationResult auth = loginApi.validatePreAuthenticated(request,
                 info.getUsername(), client, Arrays.asList());
             return auth.isRight()
                 ? Response.status(200).entity(tokenBuilder.buildToken(tenant, client,
-                    paramMap.getFirst("grant_type"), auth.getData())).build()
+                    paramMap.getFirst("grant_type"), auth.getData(), request)).build()
                 : Response.status(401).build();
           })).orElseGet(() -> Response.status(401).build());
     }
@@ -190,7 +196,7 @@ public class AuthenticationController {
     return authenticate.isRight()
         ? Response.status(200)
             .entity(tokenBuilder.buildToken(tenant, clientDetails, paramMap.getFirst("grant_type"),
-                authenticate.getData()))
+                authenticate.getData(), request))
             .build()
         : Response.status(401).entity(authenticate.getFail().entity(tokenBuilder)).build();
   }

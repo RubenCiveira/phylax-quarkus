@@ -6,13 +6,13 @@ import org.jboss.resteasy.reactive.server.ServerResponseFilter;
 import org.slf4j.MDC;
 
 import io.opentelemetry.api.trace.Span;
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Actor;
 import net.civeira.phylax.common.security.Connection;
 
-@RequestScoped
+@ApplicationScoped
 @RequiredArgsConstructor
 public class MdcRegisterFilter {
 

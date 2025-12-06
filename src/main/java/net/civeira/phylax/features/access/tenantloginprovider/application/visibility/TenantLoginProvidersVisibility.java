@@ -398,7 +398,7 @@ public class TenantLoginProvidersVisibility {
    */
   private TenantLoginProviderChangeSet visiblesReferences(Interaction prev,
       TenantLoginProviderChangeSet source) {
-    source.getTenant().map(TenantVO::getTenantUid).ifPresent(tenant -> {
+    source.getTenantValue().map(TenantVO::getTenantUid).ifPresent(tenant -> {
       boolean visible = tenantsVisibility.checkVisibility(prev, tenant);
       if (!visible) {
         throw new NotFoundException("No tenant - " + tenant);

@@ -238,10 +238,11 @@ public class TenantCreateInput {
    * @return
    */
   static TenantCreateInput fromChangeSet(final TenantChangeSet input) {
-    return TenantCreateInput.builder().uid(input.getUid()).name(input.getName())
-        .root(input.getRoot()).domain(input.getDomain()).enabled(input.getEnabled())
-        .markForDelete(input.getMarkForDelete()).markForDeleteTime(input.getMarkForDeleteTime())
-        .version(input.getVersion()).build();
+    return TenantCreateInput.builder().uid(input.getUidValue()).name(input.getNameValue())
+        .root(input.getRootValue()).domain(input.getDomainValue()).enabled(input.getEnabledValue())
+        .markForDelete(input.getMarkForDeleteValue())
+        .markForDeleteTime(input.getMarkForDeleteTimeValue()).version(input.getVersionValue())
+        .build();
   }
 
   /**
@@ -491,7 +492,7 @@ public class TenantCreateInput {
    * @return
    */
   TenantChangeSet toChangeSet() {
-    return TenantChangeSet.builder().uid(uid).name(name).root(root).domain(domain).enabled(enabled)
-        .markForDelete(markForDelete).markForDeleteTime(markForDeleteTime).version(version).build();
+    return new TenantChangeSet().uid(uid).name(name).root(root).domain(domain).enabled(enabled)
+        .markForDelete(markForDelete).markForDeleteTime(markForDeleteTime).version(version);
   }
 }

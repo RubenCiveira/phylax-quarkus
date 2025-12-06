@@ -215,10 +215,10 @@ public class TrustedClientCreateInput {
    * @return
    */
   static TrustedClientCreateInput fromChangeSet(final TrustedClientChangeSet input) {
-    return TrustedClientCreateInput.builder().uid(input.getUid()).code(input.getCode())
-        .publicAllow(input.getPublicAllow()).secretOauth(input.getSecretOauth())
-        .enabled(input.getEnabled()).allowedRedirects(input.getAllowedRedirects())
-        .version(input.getVersion()).build();
+    return TrustedClientCreateInput.builder().uid(input.getUidValue()).code(input.getCodeValue())
+        .publicAllow(input.getPublicAllowValue()).secretOauth(input.getSecretOauthValue())
+        .enabled(input.getEnabledValue()).allowedRedirects(input.getAllowedRedirectsValue())
+        .version(input.getVersionValue()).build();
   }
 
   /**
@@ -439,8 +439,8 @@ public class TrustedClientCreateInput {
    * @return
    */
   TrustedClientChangeSet toChangeSet() {
-    return TrustedClientChangeSet.builder().uid(uid).code(code).publicAllow(publicAllow)
+    return new TrustedClientChangeSet().uid(uid).code(code).publicAllow(publicAllow)
         .secretOauth(secretOauth).enabled(enabled).allowedRedirects(allowedRedirects)
-        .version(version).build();
+        .version(version);
   }
 }

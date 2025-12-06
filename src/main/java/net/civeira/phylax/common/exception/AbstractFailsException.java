@@ -162,4 +162,5 @@ public abstract class AbstractFailsException extends RuntimeException {
     }
     return label.toString();
   }
+
 }

@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.apikeyclient.domain.event.ApiKeyClientCreateEvent;
 import net.civeira.phylax.features.access.apikeyclient.domain.event.ApiKeyClientDeleteEvent;
@@ -49,7 +48,7 @@ public class ApiKeyClient implements ApiKeyClientRef {
    * @return A well formed api key client.
    */
   public static ApiKeyClient create(final ApiKeyClientChangeSet change) throws ConstraintException {
-    change.setEnabled(false);
+    change.enabled(false);
     ApiKeyClient instance = new ApiKeyClient(change, Optional.empty());
     instance.addEvent(ApiKeyClientCreateEvent.builder().payload(instance).build());
     return instance;
@@ -125,26 +124,12 @@ public class ApiKeyClient implements ApiKeyClientRef {
   private ApiKeyClient(final ApiKeyClientChangeSet attribute,
       final Optional<ApiKeyClient> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue = attribute.getUid().orElse(previous.map(ApiKeyClient::getUidValue).orElse(null));
-    this.codeValue =
-        attribute.getCode().orElse(previous.map(ApiKeyClient::getCodeValue).orElse(null));
-    this.keyValue = attribute.getKey()
-        .orElse(previous.map(ApiKeyClient::getKeyValue).orElseGet(KeyVO::nullValue));
-    this.enabledValue =
-        attribute.getEnabled().orElse(previous.map(ApiKeyClient::getEnabledValue).orElse(null));
-    this.scopesValue = attribute.getScopes()
-        .orElse(previous.map(ApiKeyClient::getScopesValue).orElseGet(ScopesVO::nullValue));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(ApiKeyClient::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == codeValue) {
-      list.add(new ConstraintFail("REQUIRED", "code", null));
-    }
-    if (null == enabledValue) {
-      list.add(new ConstraintFail("REQUIRED", "enabled", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.codeValue = attribute.readCode(previous, list);
+    this.keyValue = attribute.readKey(previous, list);
+    this.enabledValue = attribute.readEnabled(previous, list);
+    this.scopesValue = attribute.readScopes(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on ApiKeyClient", list);
     }
@@ -171,7 +156,7 @@ public class ApiKeyClient implements ApiKeyClientRef {
    */
   public ApiKeyClient disable() {
     ApiKeyClientChangeSet attr = new ApiKeyClientChangeSet();
-    attr.setEnabled(false);
+    attr.enabled(false);
     ApiKeyClient instance = new ApiKeyClient(attr, Optional.of(this));
     instance.addEvent(ApiKeyClientDisableEvent.builder().payload(instance).build());
     return instance;
@@ -185,7 +170,7 @@ public class ApiKeyClient implements ApiKeyClientRef {
    */
   public ApiKeyClient enable() {
     ApiKeyClientChangeSet attr = new ApiKeyClientChangeSet();
-    attr.setEnabled(true);
+    attr.enabled(true);
     ApiKeyClient instance = new ApiKeyClient(attr, Optional.of(this));
     instance.addEvent(ApiKeyClientEnableEvent.builder().payload(instance).build());
     return instance;

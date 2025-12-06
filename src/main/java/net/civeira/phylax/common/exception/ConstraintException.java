@@ -73,8 +73,7 @@ public class ConstraintException extends AbstractFailsException {
    * @param field the field or property associated with the violation
    * @param wrongValue the value that caused the failure
    */
-  public ConstraintException(String message, String code, String field,
-      Object wrongValue) {
+  public ConstraintException(String message, String code, String field, Object wrongValue) {
     super(message, new ConstraintFail(code, field, wrongValue));
   }
 

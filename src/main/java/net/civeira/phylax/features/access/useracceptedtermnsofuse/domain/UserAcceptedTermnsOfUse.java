@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.event.UserAcceptedTermnsOfUseCreateEvent;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.event.UserAcceptedTermnsOfUseDeleteEvent;
@@ -114,25 +113,11 @@ public class UserAcceptedTermnsOfUse implements UserAcceptedTermnsOfUseRef {
   private UserAcceptedTermnsOfUse(final UserAcceptedTermnsOfUseChangeSet attribute,
       final Optional<UserAcceptedTermnsOfUse> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue =
-        attribute.getUid().orElse(previous.map(UserAcceptedTermnsOfUse::getUidValue).orElse(null));
-    this.userValue = attribute.getUser()
-        .orElse(previous.map(UserAcceptedTermnsOfUse::getUserValue).orElse(null));
-    this.conditionsValue = attribute.getConditions()
-        .orElse(previous.map(UserAcceptedTermnsOfUse::getConditionsValue).orElse(null));
-    this.acceptDateValue = attribute.getAcceptDate().orElse(previous
-        .map(UserAcceptedTermnsOfUse::getAcceptDateValue).orElseGet(AcceptDateVO::nullValue));
-    this.versionValue = attribute.getVersion().orElse(
-        previous.map(UserAcceptedTermnsOfUse::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == userValue) {
-      list.add(new ConstraintFail("REQUIRED", "user", null));
-    }
-    if (null == conditionsValue) {
-      list.add(new ConstraintFail("REQUIRED", "conditions", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.userValue = attribute.readUser(previous, list);
+    this.conditionsValue = attribute.readConditions(previous, list);
+    this.acceptDateValue = attribute.readAcceptDate(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on UserAcceptedTermnsOfUse", list);
     }

@@ -14,9 +14,10 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
+// @IfBuildProperty(name = "quarkys.otel.traces.exporter", stringValue = "cdi")
 public class LoggingSpanExporter implements SpanExporter {
 
-  private static final Logger LOGGER = Logger.getLogger(LoggingSpanExporter.class);
+  private static final Logger LOGGER = Logger.getLogger("traces");
 
   @Override
   public CompletableResultCode export(Collection<SpanData> spans) {

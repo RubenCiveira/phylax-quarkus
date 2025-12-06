@@ -396,7 +396,7 @@ public class TenantTermsOfUsesVisibility {
    */
   private TenantTermsOfUseChangeSet visiblesReferences(Interaction prev,
       TenantTermsOfUseChangeSet source) {
-    source.getTenant().map(TenantVO::getTenantUid).ifPresent(tenant -> {
+    source.getTenantValue().map(TenantVO::getTenantUid).ifPresent(tenant -> {
       boolean visible = tenantsVisibility.checkVisibility(prev, tenant);
       if (!visible) {
         throw new NotFoundException("No tenant - " + tenant);

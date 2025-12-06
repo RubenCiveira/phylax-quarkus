@@ -75,7 +75,7 @@ public class Roles {
      * @return Self instance to continue with a flow build
      */
     public RolesBuilder role(final RoleChangeSet role) {
-      return role(RoleVO.from(RoleReference.of(role.getUid().orElseThrow().getUid())));
+      return role(RoleVO.from(RoleReference.of(role.getUid().orElseThrow())));
     }
 
     /**

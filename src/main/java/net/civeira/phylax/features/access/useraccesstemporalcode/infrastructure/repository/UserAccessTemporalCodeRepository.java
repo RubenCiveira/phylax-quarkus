@@ -520,7 +520,7 @@ public class UserAccessTemporalCodeRepository {
           "update \"access_user_access_temporal_code\" set  \"user\" = :user, \"temp_second_factor_seed\" = :tempSecondFactorSeed, \"temp_second_factor_seed_expiration\" = :tempSecondFactorSeedExpiration, \"failed_login_attempts\" = :failedLoginAttempts, \"register_code\" = :registerCode, \"register_code_url\" = :registerCodeUrl, \"register_code_expiration\" = :registerCodeExpiration, \"recovery_code\" = :recoveryCode, \"recovery_code_expiration\" = :recoveryCodeExpiration, \"version\" = \"version\" + 1 where \"uid\" = :uid and \"version\" = :version");
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(USER, SqlParameterValue.of(entity.getUserUid()));
-      sq.with(TEMP_SECOND_FACTOR_SEED, entity.getCypheredTempSecondFactorSeed(cypher)
+      sq.with(TEMP_SECOND_FACTOR_SEED, entity.getTempSecondFactorSeedCyphered(cypher)
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(TEMP_SECOND_FACTOR_SEED_EXPIRATION, entity.getTempSecondFactorSeedExpiration()
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullOffsetDateTime));
@@ -662,7 +662,7 @@ public class UserAccessTemporalCodeRepository {
           "insert into \"access_user_access_temporal_code\" ( \"uid\", \"user\", \"temp_second_factor_seed\", \"temp_second_factor_seed_expiration\", \"failed_login_attempts\", \"register_code\", \"register_code_url\", \"register_code_expiration\", \"recovery_code\", \"recovery_code_expiration\", \"version\") values ( :uid, :user, :tempSecondFactorSeed, :tempSecondFactorSeedExpiration, :failedLoginAttempts, :registerCode, :registerCodeUrl, :registerCodeExpiration, :recoveryCode, :recoveryCodeExpiration, :version)");
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(USER, SqlParameterValue.of(entity.getUserUid()));
-      sq.with(TEMP_SECOND_FACTOR_SEED, entity.getCypheredTempSecondFactorSeed(cypher)
+      sq.with(TEMP_SECOND_FACTOR_SEED, entity.getTempSecondFactorSeedCyphered(cypher)
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(TEMP_SECOND_FACTOR_SEED_EXPIRATION, entity.getTempSecondFactorSeedExpiration()
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullOffsetDateTime));

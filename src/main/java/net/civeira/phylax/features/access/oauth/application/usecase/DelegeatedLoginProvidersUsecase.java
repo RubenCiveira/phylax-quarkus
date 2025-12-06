@@ -46,9 +46,9 @@ public class DelegeatedLoginProvidersUsecase {
       return actives.checkEnabled(one.get()) ? one : Optional.empty();
     } else {
       return provider(tenant, provider)
-          .map(loginProvider -> usersWriter.create(User.create(UserChangeSet.builder().newUid()
-              .name(codeInfo.getName()).password("").email(codeInfo.getEmail()).provider(provider)
-              .enabled(loginProvider.isUsersEnabledByDefault()).tenant(tenant).build())));
+          .map(loginProvider -> usersWriter.create(User.create(new UserChangeSet().newUid()
+              .name(codeInfo.getName()).passwordPlain("").email(codeInfo.getEmail()).provider(provider)
+              .enabled(loginProvider.isUsersEnabledByDefault()).tenant(tenant))));
     }
   }
 

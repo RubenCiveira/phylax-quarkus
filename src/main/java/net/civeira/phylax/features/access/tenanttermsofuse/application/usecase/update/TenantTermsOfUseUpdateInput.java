@@ -214,9 +214,10 @@ public class TenantTermsOfUseUpdateInput {
    * @return
    */
   static TenantTermsOfUseUpdateInput fromChangeSet(final TenantTermsOfUseChangeSet input) {
-    return TenantTermsOfUseUpdateInput.builder().uid(input.getUid()).tenant(input.getTenant())
-        .text(input.getText()).enabled(input.getEnabled()).attached(input.getAttached())
-        .activationDate(input.getActivationDate()).version(input.getVersion()).build();
+    return TenantTermsOfUseUpdateInput.builder().uid(input.getUidValue())
+        .tenant(input.getTenantValue()).text(input.getTextValue()).enabled(input.getEnabledValue())
+        .attached(input.getAttachedValue()).activationDate(input.getActivationDateValue())
+        .version(input.getVersionValue()).build();
   }
 
   /**
@@ -435,7 +436,7 @@ public class TenantTermsOfUseUpdateInput {
    * @return
    */
   TenantTermsOfUseChangeSet toChangeSet() {
-    return TenantTermsOfUseChangeSet.builder().uid(uid).tenant(tenant).text(text).enabled(enabled)
-        .attached(attached).activationDate(activationDate).version(version).build();
+    return new TenantTermsOfUseChangeSet().uid(uid).tenant(tenant).text(text).enabled(enabled)
+        .attached(attached).activationDate(activationDate).version(version);
   }
 }

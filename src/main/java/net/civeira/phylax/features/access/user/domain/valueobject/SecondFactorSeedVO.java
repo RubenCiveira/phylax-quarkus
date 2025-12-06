@@ -109,7 +109,7 @@ public class SecondFactorSeedVO {
    * @param cypher
    * @return
    */
-  public Optional<String> getCypheredSecondFactorSeed(final AesCipherService cypher) {
+  public Optional<String> getSecondFactorSeedCyphered(final AesCipherService cypher) {
     return cyphered ? Optional.ofNullable(cypheredValue)
         : Optional.ofNullable(plainValue).map(text -> cypher.encryptForAll(text));
   }
@@ -121,7 +121,7 @@ public class SecondFactorSeedVO {
    * @param cypher
    * @return
    */
-  public Optional<String> getPlainSecondFactorSeed(final AesCipherService cypher) {
+  public Optional<String> getSecondFactorSeedPlain(final AesCipherService cypher) {
     return cyphered
         ? Optional.ofNullable(cypheredValue)
             .map(text -> cypher.decryptForAll(text)

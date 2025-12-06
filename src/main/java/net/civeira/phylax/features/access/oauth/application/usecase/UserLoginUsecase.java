@@ -104,7 +104,7 @@ public class UserLoginUsecase {
       String newPassword) {
     return activeUser.findEnabledUser(request.getTenant(), username, request.getAudiences())
         .map(user -> {
-          if (oldPassword.equals(user.getPlainPassword(cypher))) {
+          if (oldPassword.equals(user.getPasswordPlain(cypher))) {
             users.update(user, user.changePassword(newPassword));
             return true;
           } else {
@@ -150,6 +150,7 @@ public class UserLoginUsecase {
     ud.setTenant(user.getTenantUid());
     ud.setMode(mode);
     ud.setTime(Instant.now());
+    ud.setAudiences( request.getAudiences() );
 
     List<UserIdentity> hisIdentities =
         identities.list(UserIdentityFilter.builder().user(user).build());
@@ -184,7 +185,7 @@ public class UserLoginUsecase {
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,
       AuthenticationMode mode) {
     if (AuthenticationMode.PASSWORD == mode && user.isUseSecondFactors()) {
-      if (!user.getCypheredSecondFactorSeed(cypher).isPresent()) {
+      if (!user.getSecondFactorSeedCyphered(cypher).isPresent()) {
         return Optional
             .of(AuthenticationResult.newMfaRequired(request.getTenant(), user.getName()));
       } else {
@@ -212,7 +213,7 @@ public class UserLoginUsecase {
   private Optional<AuthenticationResult> checkPassword(AuthRequest request, User user,
       String password) {
     if (null != password
-        && !password.equals(cypher.decryptForAll(user.getCypheredPassword(cypher)).orElse(""))) {
+        && !password.equals(cypher.decryptForAll(user.getPasswordCyphered(cypher)).orElse(""))) {
       log.error("The provided password for {} is invalid", user.getName());
       markLoginFails(user, true);
       return Optional.of(AuthenticationResult.wrongCredential(request.getTenant(), user.getName()));
@@ -230,7 +231,7 @@ public class UserLoginUsecase {
       code = find.get();
     } else {
       code = codes.create(UserAccessTemporalCode
-          .create(UserAccessTemporalCodeChangeSet.builder().newUid().user(user).build()));
+          .create(new UserAccessTemporalCodeChangeSet().newUid().user(user)));
     }
     if (fail) {
       int val = code.getFailedLoginAttempts().orElse(Integer.valueOf(0)).intValue() + 1;

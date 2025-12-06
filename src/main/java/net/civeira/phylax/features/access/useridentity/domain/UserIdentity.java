@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.useridentity.domain.event.UserIdentityCreateEvent;
 import net.civeira.phylax.features.access.useridentity.domain.event.UserIdentityDeleteEvent;
@@ -122,26 +121,12 @@ public class UserIdentity implements UserIdentityRef {
   private UserIdentity(final UserIdentityChangeSet attribute,
       final Optional<UserIdentity> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue = attribute.getUid().orElse(previous.map(UserIdentity::getUidValue).orElse(null));
-    this.userValue =
-        attribute.getUser().orElse(previous.map(UserIdentity::getUserValue).orElse(null));
-    this.relyingPartyValue = attribute.getRelyingParty().orElse(
-        previous.map(UserIdentity::getRelyingPartyValue).orElseGet(RelyingPartyVO::nullValue));
-    this.trustedClientValue = attribute.getTrustedClient().orElse(
-        previous.map(UserIdentity::getTrustedClientValue).orElseGet(TrustedClientVO::nullValue));
-    this.rolesValue = attribute.getRoles()
-        .orElse(previous.map(UserIdentity::getRolesValue).orElseGet(() -> RolesVO.from(List.of())));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(UserIdentity::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == userValue) {
-      list.add(new ConstraintFail("REQUIRED", "user", null));
-    }
-    if (null == rolesValue) {
-      list.add(new ConstraintFail("REQUIRED", "roles", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.userValue = attribute.readUser(previous, list);
+    this.relyingPartyValue = attribute.readRelyingParty(previous, list);
+    this.trustedClientValue = attribute.readTrustedClient(previous, list);
+    this.rolesValue = attribute.readRoles(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on UserIdentity", list);
     }

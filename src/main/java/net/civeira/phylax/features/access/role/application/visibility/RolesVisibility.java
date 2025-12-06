@@ -383,7 +383,7 @@ public class RolesVisibility {
    * @return The input entity with the copy values without hidden
    */
   private RoleChangeSet visiblesReferences(Interaction prev, RoleChangeSet source) {
-    source.getRelyingParty().flatMap(RelyingPartyVO::getRelyingPartyUid).ifPresent(ref -> {
+    source.getRelyingPartyValue().flatMap(RelyingPartyVO::getRelyingPartyUid).ifPresent(ref -> {
       boolean visible = relyingPartysVisibility.checkVisibility(prev, ref);
       if (!visible) {
         throw new NotFoundException("No relying party - " + ref);

@@ -15,7 +15,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.event.UserAccessTemporalCodeCreateEvent;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.event.UserAccessTemporalCodeDeleteEvent;
@@ -63,7 +62,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
    */
   public static UserAccessTemporalCode create(final UserAccessTemporalCodeChangeSet change)
       throws ConstraintException {
-    change.setFailedLoginAttempts(0);
+    change.failedLoginAttempts(0);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(change, Optional.empty());
     instance.addEvent(UserAccessTemporalCodeCreateEvent.builder().payload(instance).build());
     return instance;
@@ -187,40 +186,18 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
   private UserAccessTemporalCode(final UserAccessTemporalCodeChangeSet attribute,
       final Optional<UserAccessTemporalCode> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue =
-        attribute.getUid().orElse(previous.map(UserAccessTemporalCode::getUidValue).orElse(null));
-    this.userValue =
-        attribute.getUser().orElse(previous.map(UserAccessTemporalCode::getUserValue).orElse(null));
-    this.tempSecondFactorSeedValue = attribute.getTempSecondFactorSeed()
-        .orElse(previous.map(UserAccessTemporalCode::getTempSecondFactorSeedValue)
-            .orElseGet(TempSecondFactorSeedVO::nullValue));
-    this.tempSecondFactorSeedExpirationValue = attribute.getTempSecondFactorSeedExpiration()
-        .orElse(previous.map(UserAccessTemporalCode::getTempSecondFactorSeedExpirationValue)
-            .orElseGet(TempSecondFactorSeedExpirationVO::nullValue));
-    this.failedLoginAttemptsValue = attribute.getFailedLoginAttempts()
-        .orElse(previous.map(UserAccessTemporalCode::getFailedLoginAttemptsValue)
-            .orElseGet(FailedLoginAttemptsVO::nullValue));
-    this.registerCodeValue = attribute.getRegisterCode().orElse(previous
-        .map(UserAccessTemporalCode::getRegisterCodeValue).orElseGet(RegisterCodeVO::nullValue));
-    this.registerCodeUrlValue = attribute.getRegisterCodeUrl()
-        .orElse(previous.map(UserAccessTemporalCode::getRegisterCodeUrlValue)
-            .orElseGet(RegisterCodeUrlVO::nullValue));
-    this.registerCodeExpirationValue = attribute.getRegisterCodeExpiration()
-        .orElse(previous.map(UserAccessTemporalCode::getRegisterCodeExpirationValue)
-            .orElseGet(RegisterCodeExpirationVO::nullValue));
-    this.recoveryCodeValue = attribute.getRecoveryCode().orElse(previous
-        .map(UserAccessTemporalCode::getRecoveryCodeValue).orElseGet(RecoveryCodeVO::nullValue));
-    this.recoveryCodeExpirationValue = attribute.getRecoveryCodeExpiration()
-        .orElse(previous.map(UserAccessTemporalCode::getRecoveryCodeExpirationValue)
-            .orElseGet(RecoveryCodeExpirationVO::nullValue));
-    this.versionValue = attribute.getVersion().orElse(
-        previous.map(UserAccessTemporalCode::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == userValue) {
-      list.add(new ConstraintFail("REQUIRED", "user", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.userValue = attribute.readUser(previous, list);
+    this.tempSecondFactorSeedValue = attribute.readTempSecondFactorSeed(previous, list);
+    this.tempSecondFactorSeedExpirationValue =
+        attribute.readTempSecondFactorSeedExpiration(previous, list);
+    this.failedLoginAttemptsValue = attribute.readFailedLoginAttempts(previous, list);
+    this.registerCodeValue = attribute.readRegisterCode(previous, list);
+    this.registerCodeUrlValue = attribute.readRegisterCodeUrl(previous, list);
+    this.registerCodeExpirationValue = attribute.readRegisterCodeExpiration(previous, list);
+    this.recoveryCodeValue = attribute.readRecoveryCode(previous, list);
+    this.recoveryCodeExpirationValue = attribute.readRecoveryCodeExpiration(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on UserAccessTemporalCode", list);
     }
@@ -252,7 +229,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
   public UserAccessTemporalCode generateMfaTemporalCode(final String tempSecondFactorSeed,
       final OffsetDateTime tempSecondFactorSeedExpiration) {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setTempSecondFactorSeedExpiration(tempSecondFactorSeedExpiration);
+    attr.tempSecondFactorSeedExpiration(tempSecondFactorSeedExpiration);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(
         UserAccessTemporalCodeGenerateMfaTemporalCodeEvent.builder().payload(instance).build());
@@ -271,7 +248,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
   public UserAccessTemporalCode generatePasswordRecover(final String url, final String recoveryCode,
       final OffsetDateTime recoveryCodeExpiration) {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setRecoveryCodeExpiration(recoveryCodeExpiration);
+    attr.recoveryCodeExpiration(recoveryCodeExpiration);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(
         UserAccessTemporalCodeGeneratePasswordRecoverEvent.builder().payload(instance).build());
@@ -290,7 +267,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
   public UserAccessTemporalCode generatedRegisterVerification(final String registerCode,
       final String registerCodeUrl, final OffsetDateTime registerCodeExpiration) {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setRegisterCodeExpiration(registerCodeExpiration);
+    attr.registerCodeExpiration(registerCodeExpiration);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(UserAccessTemporalCodeGeneratedRegisterVerificationEvent.builder()
         .payload(instance).build());
@@ -305,7 +282,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
    */
   public UserAccessTemporalCode markLoginBlock() {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setFailedLoginAttempts(0);
+    attr.failedLoginAttempts(0);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance
         .addEvent(UserAccessTemporalCodeMarkLoginBlockEvent.builder().payload(instance).build());
@@ -320,7 +297,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
    */
   public UserAccessTemporalCode markLoginFail() {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setFailedLoginAttempts(this.getFailedLoginAttempts().orElse(0) + 1);
+    attr.failedLoginAttempts(this.getFailedLoginAttempts().orElse(0) + 1);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(UserAccessTemporalCodeMarkLoginFailEvent.builder().payload(instance).build());
     return instance;
@@ -334,7 +311,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
    */
   public UserAccessTemporalCode markLoginOk() {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setFailedLoginAttempts(0);
+    attr.failedLoginAttempts(0);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(UserAccessTemporalCodeMarkLoginOkEvent.builder().payload(instance).build());
     return instance;
@@ -348,8 +325,8 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
    */
   public UserAccessTemporalCode resetMfaTemporalCode() {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setTempSecondFactorSeed(null);
-    attr.setTempSecondFactorSeedExpiration(null);
+    attr.tempSecondFactorSeedNull();
+    attr.tempSecondFactorSeedExpirationNull();
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(
         UserAccessTemporalCodeResetMfaTemporalCodeEvent.builder().payload(instance).build());
@@ -364,8 +341,8 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
    */
   public UserAccessTemporalCode resetPasswordRecover() {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setTempSecondFactorSeed(null);
-    attr.setTempSecondFactorSeedExpiration(null);
+    attr.tempSecondFactorSeedNull();
+    attr.tempSecondFactorSeedExpirationNull();
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(
         UserAccessTemporalCodeResetPasswordRecoverEvent.builder().payload(instance).build());
@@ -380,9 +357,9 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
    */
   public UserAccessTemporalCode resetRegisterVerification() {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.setRegisterCode(null);
-    attr.setRegisterCodeUrl(null);
-    attr.setRegisterCodeExpiration(null);
+    attr.registerCodeNull();
+    attr.registerCodeUrlNull();
+    attr.registerCodeExpirationNull();
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(
         UserAccessTemporalCodeResetRegisterVerificationEvent.builder().payload(instance).build());

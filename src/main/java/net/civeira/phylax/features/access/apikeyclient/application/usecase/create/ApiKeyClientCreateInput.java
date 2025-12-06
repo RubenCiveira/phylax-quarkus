@@ -186,9 +186,9 @@ public class ApiKeyClientCreateInput {
    * @return
    */
   static ApiKeyClientCreateInput fromChangeSet(final ApiKeyClientChangeSet input) {
-    return ApiKeyClientCreateInput.builder().uid(input.getUid()).code(input.getCode())
-        .key(input.getKey()).enabled(input.getEnabled()).scopes(input.getScopes())
-        .version(input.getVersion()).build();
+    return ApiKeyClientCreateInput.builder().uid(input.getUidValue()).code(input.getCodeValue())
+        .key(input.getKeyValue()).enabled(input.getEnabledValue()).scopes(input.getScopesValue())
+        .version(input.getVersionValue()).build();
   }
 
   /**
@@ -376,7 +376,7 @@ public class ApiKeyClientCreateInput {
    * @return
    */
   ApiKeyClientChangeSet toChangeSet() {
-    return ApiKeyClientChangeSet.builder().uid(uid).code(code).key(key).enabled(enabled)
-        .scopes(scopes).version(version).build();
+    return new ApiKeyClientChangeSet().uid(uid).code(code).key(key).enabled(enabled).scopes(scopes)
+        .version(version);
   }
 }

@@ -512,7 +512,7 @@ public class UserRepository {
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(TENANT, SqlParameterValue.of(entity.getTenantUid()));
       sq.with(NAME, SqlParameterValue.of(entity.getName()));
-      sq.with(PASSWORD, SqlParameterValue.of(entity.getCypheredPassword(cypher)));
+      sq.with(PASSWORD, SqlParameterValue.of(entity.getPasswordCyphered(cypher)));
       sq.with(EMAIL,
           entity.getEmail().map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(WELLCOME_AT, entity.getWellcomeAt().map(SqlParameterValue::of)
@@ -522,7 +522,7 @@ public class UserRepository {
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(TEMPORAL_PASSWORD, SqlParameterValue.of(entity.isTemporalPassword()));
       sq.with(USE_SECOND_FACTORS, SqlParameterValue.of(entity.isUseSecondFactors()));
-      sq.with(SECOND_FACTOR_SEED, entity.getCypheredSecondFactorSeed(cypher)
+      sq.with(SECOND_FACTOR_SEED, entity.getSecondFactorSeedCyphered(cypher)
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(BLOCKED_UNTIL, entity.getBlockedUntil().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullOffsetDateTime));
@@ -664,7 +664,7 @@ public class UserRepository {
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(TENANT, SqlParameterValue.of(entity.getTenantUid()));
       sq.with(NAME, SqlParameterValue.of(entity.getName()));
-      sq.with(PASSWORD, SqlParameterValue.of(entity.getCypheredPassword(cypher)));
+      sq.with(PASSWORD, SqlParameterValue.of(entity.getPasswordCyphered(cypher)));
       sq.with(EMAIL,
           entity.getEmail().map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(WELLCOME_AT, entity.getWellcomeAt().map(SqlParameterValue::of)
@@ -674,7 +674,7 @@ public class UserRepository {
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(TEMPORAL_PASSWORD, SqlParameterValue.of(entity.isTemporalPassword()));
       sq.with(USE_SECOND_FACTORS, SqlParameterValue.of(entity.isUseSecondFactors()));
-      sq.with(SECOND_FACTOR_SEED, entity.getCypheredSecondFactorSeed(cypher)
+      sq.with(SECOND_FACTOR_SEED, entity.getSecondFactorSeedCyphered(cypher)
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(BLOCKED_UNTIL, entity.getBlockedUntil().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullOffsetDateTime));

@@ -392,7 +392,7 @@ public class TenantConfigsVisibility {
    * @return The input entity with the copy values without hidden
    */
   private TenantConfigChangeSet visiblesReferences(Interaction prev, TenantConfigChangeSet source) {
-    source.getTenant().map(TenantVO::getTenantUid).ifPresent(tenant -> {
+    source.getTenantValue().map(TenantVO::getTenantUid).ifPresent(tenant -> {
       boolean visible = tenantsVisibility.checkVisibility(prev, tenant);
       if (!visible) {
         throw new NotFoundException("No tenant - " + tenant);

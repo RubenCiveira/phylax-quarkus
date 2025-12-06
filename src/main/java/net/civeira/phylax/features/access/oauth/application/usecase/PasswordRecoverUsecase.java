@@ -66,7 +66,7 @@ public class PasswordRecoverUsecase {
             userCode = find.get();
           } else {
             userCode = codes.create(UserAccessTemporalCode
-                .create(UserAccessTemporalCodeChangeSet.builder().newUid().build()));
+                .create(new UserAccessTemporalCodeChangeSet().newUid()));
           }
           codes.update(userCode, userCode.generatePasswordRecover(urlWithParams, code,
               OffsetDateTime.now().plus(RECOVER_TIME)));

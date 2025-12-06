@@ -137,8 +137,8 @@ public class RoleUpdateInput {
    * @return
    */
   static RoleUpdateInput fromChangeSet(final RoleChangeSet input) {
-    return RoleUpdateInput.builder().uid(input.getUid()).name(input.getName())
-        .relyingParty(input.getRelyingParty()).version(input.getVersion()).build();
+    return RoleUpdateInput.builder().uid(input.getUidValue()).name(input.getNameValue())
+        .relyingParty(input.getRelyingPartyValue()).version(input.getVersionValue()).build();
   }
 
   /**
@@ -267,7 +267,6 @@ public class RoleUpdateInput {
    * @return
    */
   RoleChangeSet toChangeSet() {
-    return RoleChangeSet.builder().uid(uid).name(name).relyingParty(relyingParty).version(version)
-        .build();
+    return new RoleChangeSet().uid(uid).name(name).relyingParty(relyingParty).version(version);
   }
 }

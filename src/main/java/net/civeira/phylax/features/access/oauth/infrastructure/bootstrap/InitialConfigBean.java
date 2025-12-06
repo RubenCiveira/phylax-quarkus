@@ -23,29 +23,29 @@ public class InitialConfigBean {
   private final List<UserIdentityChangeSet> identities;
 
   public InitialConfigBean(String password) {
-    RelyingPartyChangeSet party = RelyingPartyChangeSet.builder().newUid().code("phylax-api")
-        .apiKey("1111").enabled(Boolean.TRUE).build();
+    RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("phylax-api")
+        .apiKey("1111").enabled(Boolean.TRUE);
 
     AllowedRedirects local = AllowedRedirects.builder().newUid().url("*").build();
 
-    TrustedClientChangeSet client = TrustedClientChangeSet.builder().newUid().code("phylax-ui")
-        .allowedRedirects(List.of(local)).publicAllow(Boolean.TRUE).enabled(Boolean.TRUE).build();
+    TrustedClientChangeSet client = new TrustedClientChangeSet().newUid().code("phylax-ui")
+        .allowedRedirects(List.of(local)).publicAllow(Boolean.TRUE).enabled(Boolean.TRUE);
 
-    RoleChangeSet role = RoleChangeSet.builder().newUid().name("ADMIN").relyingParty(party).build();
+    RoleChangeSet role = new RoleChangeSet().newUid().name("ADMIN").relyingParty(party);
 
-    TenantChangeSet tenant = TenantChangeSet.builder().newUid().name("main").domain("main")
-        .enabled(Boolean.TRUE).root(Boolean.TRUE).markForDelete(Boolean.FALSE).build();
+    TenantChangeSet tenant = new TenantChangeSet().newUid().name("main").domain("main")
+        .enabled(Boolean.TRUE).root(Boolean.TRUE).markForDelete(Boolean.FALSE);
 
-    UserChangeSet root = UserChangeSet.builder().newUid().name("ROOT").password(password)
-        .tenant(tenant).enabled(true).useSecondFactors(false).build();
+    UserChangeSet root = new UserChangeSet().newUid().name("ROOT").passwordPlain(password)
+        .tenant(tenant).enabled(true).useSecondFactors(false);
 
     Roles userRoleRely = Roles.builder().newUid().role(role).build();
-    UserIdentityChangeSet userRelyIdentity = UserIdentityChangeSet.builder().newUid().user(root)
-        .relyingParty(party).roles(List.of(userRoleRely)).build();
+    UserIdentityChangeSet userRelyIdentity = new UserIdentityChangeSet().newUid().user(root)
+        .relyingParty(party).roles(List.of(userRoleRely));
 
     Roles userRoleClient = Roles.builder().newUid().role(role).build();
-    UserIdentityChangeSet userClientIdentity = UserIdentityChangeSet.builder().newUid().user(root)
-        .trustedClient(client).roles(List.of(userRoleClient)).build();
+    UserIdentityChangeSet userClientIdentity = new UserIdentityChangeSet().newUid().user(root)
+        .trustedClient(client).roles(List.of(userRoleClient));
 
     tenants = List.of(tenant);
     parties = List.of(party);

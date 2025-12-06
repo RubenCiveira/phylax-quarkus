@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.role.domain.event.RoleCreateEvent;
 import net.civeira.phylax.features.access.role.domain.event.RoleDeleteEvent;
@@ -101,18 +100,10 @@ public class Role implements RoleRef {
    */
   private Role(final RoleChangeSet attribute, final Optional<Role> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue = attribute.getUid().orElse(previous.map(Role::getUidValue).orElse(null));
-    this.nameValue = attribute.getName().orElse(previous.map(Role::getNameValue).orElse(null));
-    this.relyingPartyValue = attribute.getRelyingParty()
-        .orElse(previous.map(Role::getRelyingPartyValue).orElseGet(RelyingPartyVO::nullValue));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(Role::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == nameValue) {
-      list.add(new ConstraintFail("REQUIRED", "name", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.nameValue = attribute.readName(previous, list);
+    this.relyingPartyValue = attribute.readRelyingParty(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on Role", list);
     }

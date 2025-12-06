@@ -161,8 +161,9 @@ public class RelyingPartyCreateInput {
    * @return
    */
   static RelyingPartyCreateInput fromChangeSet(final RelyingPartyChangeSet input) {
-    return RelyingPartyCreateInput.builder().uid(input.getUid()).code(input.getCode())
-        .apiKey(input.getApiKey()).enabled(input.getEnabled()).version(input.getVersion()).build();
+    return RelyingPartyCreateInput.builder().uid(input.getUidValue()).code(input.getCodeValue())
+        .apiKey(input.getApiKeyValue()).enabled(input.getEnabledValue())
+        .version(input.getVersionValue()).build();
   }
 
   /**
@@ -320,7 +321,7 @@ public class RelyingPartyCreateInput {
    * @return
    */
   RelyingPartyChangeSet toChangeSet() {
-    return RelyingPartyChangeSet.builder().uid(uid).code(code).apiKey(apiKey).enabled(enabled)
-        .version(version).build();
+    return new RelyingPartyChangeSet().uid(uid).code(code).apiKey(apiKey).enabled(enabled)
+        .version(version);
   }
 }

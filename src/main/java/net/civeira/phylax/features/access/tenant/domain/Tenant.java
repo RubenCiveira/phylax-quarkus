@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.tenant.domain.event.TenantCreateEvent;
 import net.civeira.phylax.features.access.tenant.domain.event.TenantDeleteEvent;
@@ -51,9 +50,9 @@ public class Tenant implements TenantRef {
    * @return A well formed tenant.
    */
   public static Tenant create(final TenantChangeSet change) throws ConstraintException {
-    change.setEnabled(false);
-    change.setMarkForDelete(false);
-    change.setMarkForDeleteTime(null);
+    change.enabled(false);
+    change.markForDelete(false);
+    change.markForDeleteTimeNull();
     Tenant instance = new Tenant(change, Optional.empty());
     instance.addEvent(TenantCreateEvent.builder().payload(instance).build());
     return instance;
@@ -146,35 +145,14 @@ public class Tenant implements TenantRef {
    */
   private Tenant(final TenantChangeSet attribute, final Optional<Tenant> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue = attribute.getUid().orElse(previous.map(Tenant::getUidValue).orElse(null));
-    this.nameValue = attribute.getName().orElse(previous.map(Tenant::getNameValue).orElse(null));
-    this.rootValue =
-        attribute.getRoot().orElse(previous.map(Tenant::getRootValue).orElseGet(RootVO::nullValue));
-    this.domainValue =
-        attribute.getDomain().orElse(previous.map(Tenant::getDomainValue).orElse(null));
-    this.enabledValue =
-        attribute.getEnabled().orElse(previous.map(Tenant::getEnabledValue).orElse(null));
-    this.markForDeleteValue = attribute.getMarkForDelete()
-        .orElse(previous.map(Tenant::getMarkForDeleteValue).orElse(null));
-    this.markForDeleteTimeValue = attribute.getMarkForDeleteTime().orElse(
-        previous.map(Tenant::getMarkForDeleteTimeValue).orElseGet(MarkForDeleteTimeVO::nullValue));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(Tenant::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == nameValue) {
-      list.add(new ConstraintFail("REQUIRED", "name", null));
-    }
-    if (null == domainValue) {
-      list.add(new ConstraintFail("REQUIRED", "domain", null));
-    }
-    if (null == enabledValue) {
-      list.add(new ConstraintFail("REQUIRED", "enabled", null));
-    }
-    if (null == markForDeleteValue) {
-      list.add(new ConstraintFail("REQUIRED", "markForDelete", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.nameValue = attribute.readName(previous, list);
+    this.rootValue = attribute.readRoot(previous, list);
+    this.domainValue = attribute.readDomain(previous, list);
+    this.enabledValue = attribute.readEnabled(previous, list);
+    this.markForDeleteValue = attribute.readMarkForDelete(previous, list);
+    this.markForDeleteTimeValue = attribute.readMarkForDeleteTime(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on Tenant", list);
     }
@@ -201,7 +179,7 @@ public class Tenant implements TenantRef {
    */
   public Tenant disable() {
     TenantChangeSet attr = new TenantChangeSet();
-    attr.setEnabled(false);
+    attr.enabled(false);
     Tenant instance = new Tenant(attr, Optional.of(this));
     instance.addEvent(TenantDisableEvent.builder().payload(instance).build());
     return instance;
@@ -215,7 +193,7 @@ public class Tenant implements TenantRef {
    */
   public Tenant enable() {
     TenantChangeSet attr = new TenantChangeSet();
-    attr.setEnabled(true);
+    attr.enabled(true);
     Tenant instance = new Tenant(attr, Optional.of(this));
     instance.addEvent(TenantEnableEvent.builder().payload(instance).build());
     return instance;

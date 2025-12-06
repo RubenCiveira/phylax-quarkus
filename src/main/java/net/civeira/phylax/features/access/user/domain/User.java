@@ -15,7 +15,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.user.domain.event.UserAcceptEvent;
 import net.civeira.phylax.features.access.user.domain.event.UserBlockEvent;
@@ -65,11 +64,11 @@ public class User implements UserRef {
    * @return A well formed user.
    */
   public static User create(final UserChangeSet change) throws ConstraintException {
-    change.setWellcomeAt(null);
-    change.setEnabled(true);
-    change.setApprove(UserApproveOptions.ACCEPTED);
-    change.setBlockedUntil(null);
-    change.setProvider(null);
+    change.wellcomeAtNull();
+    change.enabled(true);
+    change.approve(UserApproveOptions.ACCEPTED);
+    change.blockedUntilNull();
+    change.providerNull();
     User instance = new User(change, Optional.empty());
     instance.addEvent(UserCreateEvent.builder().payload(instance).build());
     return instance;
@@ -218,44 +217,20 @@ public class User implements UserRef {
    */
   private User(final UserChangeSet attribute, final Optional<User> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue = attribute.getUid().orElse(previous.map(User::getUidValue).orElse(null));
-    this.tenantValue =
-        attribute.getTenant().orElse(previous.map(User::getTenantValue).orElse(null));
-    this.nameValue = attribute.getName().orElse(previous.map(User::getNameValue).orElse(null));
-    this.passwordValue =
-        attribute.getPassword().orElse(previous.map(User::getPasswordValue).orElse(null));
-    this.emailValue = attribute.getEmail()
-        .orElse(previous.map(User::getEmailValue).orElseGet(EmailVO::nullValue));
-    this.wellcomeAtValue = attribute.getWellcomeAt()
-        .orElse(previous.map(User::getWellcomeAtValue).orElseGet(WellcomeAtVO::nullValue));
-    this.enabledValue = attribute.getEnabled()
-        .orElse(previous.map(User::getEnabledValue).orElseGet(EnabledVO::nullValue));
-    this.approveValue = attribute.getApprove()
-        .orElse(previous.map(User::getApproveValue).orElseGet(ApproveVO::nullValue));
-    this.temporalPasswordValue = attribute.getTemporalPassword().orElse(
-        previous.map(User::getTemporalPasswordValue).orElseGet(TemporalPasswordVO::nullValue));
-    this.useSecondFactorsValue = attribute.getUseSecondFactors().orElse(
-        previous.map(User::getUseSecondFactorsValue).orElseGet(UseSecondFactorsVO::nullValue));
-    this.secondFactorSeedValue = attribute.getSecondFactorSeed().orElse(
-        previous.map(User::getSecondFactorSeedValue).orElseGet(SecondFactorSeedVO::nullValue));
-    this.blockedUntilValue = attribute.getBlockedUntil()
-        .orElse(previous.map(User::getBlockedUntilValue).orElseGet(BlockedUntilVO::nullValue));
-    this.providerValue = attribute.getProvider()
-        .orElse(previous.map(User::getProviderValue).orElseGet(ProviderVO::nullValue));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(User::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == tenantValue) {
-      list.add(new ConstraintFail("REQUIRED", "tenant", null));
-    }
-    if (null == nameValue) {
-      list.add(new ConstraintFail("REQUIRED", "name", null));
-    }
-    if (null == passwordValue) {
-      list.add(new ConstraintFail("REQUIRED", "password", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.tenantValue = attribute.readTenant(previous, list);
+    this.nameValue = attribute.readName(previous, list);
+    this.passwordValue = attribute.readPassword(previous, list);
+    this.emailValue = attribute.readEmail(previous, list);
+    this.wellcomeAtValue = attribute.readWellcomeAt(previous, list);
+    this.enabledValue = attribute.readEnabled(previous, list);
+    this.approveValue = attribute.readApprove(previous, list);
+    this.temporalPasswordValue = attribute.readTemporalPassword(previous, list);
+    this.useSecondFactorsValue = attribute.readUseSecondFactors(previous, list);
+    this.secondFactorSeedValue = attribute.readSecondFactorSeed(previous, list);
+    this.blockedUntilValue = attribute.readBlockedUntil(previous, list);
+    this.providerValue = attribute.readProvider(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on User", list);
     }
@@ -270,7 +245,7 @@ public class User implements UserRef {
    */
   public User accept() {
     UserChangeSet attr = new UserChangeSet();
-    attr.setApprove(UserApproveOptions.ACCEPTED);
+    attr.approve(UserApproveOptions.ACCEPTED);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserAcceptEvent.builder().payload(instance).build());
     return instance;
@@ -285,7 +260,7 @@ public class User implements UserRef {
    */
   public User block(final OffsetDateTime blockedUntil) {
     UserChangeSet attr = new UserChangeSet();
-    attr.setBlockedUntil(blockedUntil);
+    attr.blockedUntil(blockedUntil);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserBlockEvent.builder().payload(instance).build());
     return instance;
@@ -300,8 +275,8 @@ public class User implements UserRef {
    */
   public User changePassword(final String password) {
     UserChangeSet attr = new UserChangeSet();
-    attr.setPassword(password);
-    attr.setTemporalPassword(false);
+    attr.passwordPlain(password);
+    attr.temporalPassword(false);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserChangePasswordEvent.builder().payload(instance).build());
     return instance;
@@ -327,7 +302,7 @@ public class User implements UserRef {
    */
   public User disable() {
     UserChangeSet attr = new UserChangeSet();
-    attr.setEnabled(false);
+    attr.enabled(false);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserDisableEvent.builder().payload(instance).build());
     return instance;
@@ -341,7 +316,7 @@ public class User implements UserRef {
    */
   public User enable() {
     UserChangeSet attr = new UserChangeSet();
-    attr.setEnabled(true);
+    attr.enabled(true);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserEnableEvent.builder().payload(instance).build());
     return instance;
@@ -355,7 +330,7 @@ public class User implements UserRef {
    */
   public User reject() {
     UserChangeSet attr = new UserChangeSet();
-    attr.setApprove(UserApproveOptions.REJECTED);
+    attr.approve(UserApproveOptions.REJECTED);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserRejectEvent.builder().payload(instance).build());
     return instance;
@@ -370,8 +345,8 @@ public class User implements UserRef {
    */
   public User setMfaSeed(final String secondFactorSeed) {
     UserChangeSet attr = new UserChangeSet();
-    attr.setSecondFactorSeed(secondFactorSeed);
-    attr.setUseSecondFactors(true);
+    attr.secondFactorSeedPlain(secondFactorSeed);
+    attr.useSecondFactors(true);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserSetMfaSeedEvent.builder().payload(instance).build());
     return instance;
@@ -385,7 +360,7 @@ public class User implements UserRef {
    */
   public User unlock() {
     UserChangeSet attr = new UserChangeSet();
-    attr.setBlockedUntil(null);
+    attr.blockedUntilNull();
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserUnlockEvent.builder().payload(instance).build());
     return instance;
@@ -419,7 +394,7 @@ public class User implements UserRef {
    */
   public User verify(final UserApproveOptions approve) {
     UserChangeSet attr = new UserChangeSet();
-    attr.setApprove(approve);
+    attr.approve(approve);
     User instance = new User(attr, Optional.of(this));
     instance.addEvent(UserVerifyEvent.builder().payload(instance).build());
     return instance;

@@ -14,7 +14,6 @@ import lombok.ToString;
 import lombok.With;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
-import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.features.access.trustedclient.domain.event.TrustedClientCreateEvent;
 import net.civeira.phylax.features.access.trustedclient.domain.event.TrustedClientDeleteEvent;
@@ -52,7 +51,7 @@ public class TrustedClient implements TrustedClientRef {
    */
   public static TrustedClient create(final TrustedClientChangeSet change)
       throws ConstraintException {
-    change.setEnabled(false);
+    change.enabled(false);
     TrustedClient instance = new TrustedClient(change, Optional.empty());
     instance.addEvent(TrustedClientCreateEvent.builder().payload(instance).build());
     return instance;
@@ -137,36 +136,13 @@ public class TrustedClient implements TrustedClientRef {
   private TrustedClient(final TrustedClientChangeSet attribute,
       final Optional<TrustedClient> previous) {
     ConstraintFailList list = new ConstraintFailList();
-    this.uidValue =
-        attribute.getUid().orElse(previous.map(TrustedClient::getUidValue).orElse(null));
-    this.codeValue =
-        attribute.getCode().orElse(previous.map(TrustedClient::getCodeValue).orElse(null));
-    this.publicAllowValue = attribute.getPublicAllow()
-        .orElse(previous.map(TrustedClient::getPublicAllowValue).orElse(null));
-    this.secretOauthValue = attribute.getSecretOauth().orElse(
-        previous.map(TrustedClient::getSecretOauthValue).orElseGet(SecretOauthVO::nullValue));
-    this.enabledValue =
-        attribute.getEnabled().orElse(previous.map(TrustedClient::getEnabledValue).orElse(null));
-    this.allowedRedirectsValue =
-        attribute.getAllowedRedirects().orElse(previous.map(TrustedClient::getAllowedRedirectsValue)
-            .orElseGet(() -> AllowedRedirectsVO.from(List.of())));
-    this.versionValue = attribute.getVersion()
-        .orElse(previous.map(TrustedClient::getVersionValue).orElseGet(VersionVO::nullValue));
-    if (null == uidValue) {
-      list.add(new ConstraintFail("REQUIRED", "uid", null));
-    }
-    if (null == codeValue) {
-      list.add(new ConstraintFail("REQUIRED", "code", null));
-    }
-    if (null == publicAllowValue) {
-      list.add(new ConstraintFail("REQUIRED", "publicAllow", null));
-    }
-    if (null == enabledValue) {
-      list.add(new ConstraintFail("REQUIRED", "enabled", null));
-    }
-    if (null == allowedRedirectsValue) {
-      list.add(new ConstraintFail("REQUIRED", "allowedRedirects", null));
-    }
+    this.uidValue = attribute.readUid(previous, list);
+    this.codeValue = attribute.readCode(previous, list);
+    this.publicAllowValue = attribute.readPublicAllow(previous, list);
+    this.secretOauthValue = attribute.readSecretOauth(previous, list);
+    this.enabledValue = attribute.readEnabled(previous, list);
+    this.allowedRedirectsValue = attribute.readAllowedRedirects(previous, list);
+    this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on TrustedClient", list);
     }
@@ -193,7 +169,7 @@ public class TrustedClient implements TrustedClientRef {
    */
   public TrustedClient disable() {
     TrustedClientChangeSet attr = new TrustedClientChangeSet();
-    attr.setEnabled(false);
+    attr.enabled(false);
     TrustedClient instance = new TrustedClient(attr, Optional.of(this));
     instance.addEvent(TrustedClientDisableEvent.builder().payload(instance).build());
     return instance;
@@ -207,7 +183,7 @@ public class TrustedClient implements TrustedClientRef {
    */
   public TrustedClient enable() {
     TrustedClientChangeSet attr = new TrustedClientChangeSet();
-    attr.setEnabled(true);
+    attr.enabled(true);
     TrustedClient instance = new TrustedClient(attr, Optional.of(this));
     instance.addEvent(TrustedClientEnableEvent.builder().payload(instance).build());
     return instance;

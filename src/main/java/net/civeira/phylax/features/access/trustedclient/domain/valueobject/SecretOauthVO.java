@@ -108,7 +108,7 @@ public class SecretOauthVO {
    * @param cypher
    * @return
    */
-  public Optional<String> getCypheredSecretOauth(final AesCipherService cypher) {
+  public Optional<String> getSecretOauthCyphered(final AesCipherService cypher) {
     return cyphered ? Optional.ofNullable(cypheredValue)
         : Optional.ofNullable(plainValue).map(text -> cypher.encryptForAll(text));
   }
@@ -120,7 +120,7 @@ public class SecretOauthVO {
    * @param cypher
    * @return
    */
-  public Optional<String> getPlainSecretOauth(final AesCipherService cypher) {
+  public Optional<String> getSecretOauthPlain(final AesCipherService cypher) {
     return cyphered
         ? Optional.ofNullable(cypheredValue)
             .map(text -> cypher.decryptForAll(text)

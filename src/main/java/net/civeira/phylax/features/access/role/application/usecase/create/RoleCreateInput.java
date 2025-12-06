@@ -137,8 +137,8 @@ public class RoleCreateInput {
    * @return
    */
   static RoleCreateInput fromChangeSet(final RoleChangeSet input) {
-    return RoleCreateInput.builder().uid(input.getUid()).name(input.getName())
-        .relyingParty(input.getRelyingParty()).version(input.getVersion()).build();
+    return RoleCreateInput.builder().uid(input.getUidValue()).name(input.getNameValue())
+        .relyingParty(input.getRelyingPartyValue()).version(input.getVersionValue()).build();
   }
 
   /**
@@ -267,7 +267,6 @@ public class RoleCreateInput {
    * @return
    */
   RoleChangeSet toChangeSet() {
-    return RoleChangeSet.builder().uid(uid).name(name).relyingParty(relyingParty).version(version)
-        .build();
+    return new RoleChangeSet().uid(uid).name(name).relyingParty(relyingParty).version(version);
   }
 }
