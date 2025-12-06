@@ -150,7 +150,7 @@ public class UserLoginUsecase {
     ud.setTenant(user.getTenantUid());
     ud.setMode(mode);
     ud.setTime(Instant.now());
-    ud.setAudiences( request.getAudiences() );
+    ud.setAudiences(request.getAudiences());
 
     List<UserIdentity> hisIdentities =
         identities.list(UserIdentityFilter.builder().user(user).build());
@@ -230,8 +230,8 @@ public class UserLoginUsecase {
     if (find.isPresent()) {
       code = find.get();
     } else {
-      code = codes.create(UserAccessTemporalCode
-          .create(new UserAccessTemporalCodeChangeSet().newUid().user(user)));
+      code = codes.create(
+          UserAccessTemporalCode.create(new UserAccessTemporalCodeChangeSet().newUid().user(user)));
     }
     if (fail) {
       int val = code.getFailedLoginAttempts().orElse(Integer.valueOf(0)).intValue() + 1;

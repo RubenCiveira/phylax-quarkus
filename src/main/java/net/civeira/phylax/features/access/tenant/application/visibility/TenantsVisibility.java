@@ -261,9 +261,6 @@ public class TenantsVisibility {
   public Optional<Tenant> retrieveVisible(Interaction prev, String uid) {
     TenantFilter filter =
         applyPreVisibilityFilter(prev, TenantVisibilityFilter.builder().uid(uid).build());
-    System.err.println("====");
-    System.err.println( filter );
-    System.err.println("====");
     return queryItem(prev, uid, filter);
   }
 
