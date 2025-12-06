@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import io.quarkus.cache.Cache;
 import io.quarkus.cache.CacheName;
 import io.smallrye.mutiny.Uni;
@@ -102,12 +103,9 @@ public class AuthenticationController {
       return tokenBuilder.verifyRefreshInfo(refreshToken, tenant)
           .flatMap(info -> loadPreautorizedClient(tenant, info.getClient()).map(client -> {
             List<String> audiences = info.getAudiences();
-            System.err.println("EL TOKEN TIENE COMO AUDIENCIAS " + audiences );
-            AuthRequest request = AuthRequest.builder()
-                .audiences(audiences)
-                .tenant(tenant)
-                .clientId(Optional.of(client.getClientId()))
-                .build();
+            System.err.println("EL TOKEN TIENE COMO AUDIENCIAS " + audiences);
+            AuthRequest request = AuthRequest.builder().audiences(audiences).tenant(tenant)
+                .clientId(Optional.of(client.getClientId())).build();
             AuthenticationResult auth = loginApi.validatePreAuthenticated(request,
                 info.getUsername(), client, Arrays.asList());
             return auth.isRight()

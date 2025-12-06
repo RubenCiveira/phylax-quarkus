@@ -158,6 +158,7 @@ public class JwtTokenBuilder {
 
   /**
    * If no request is provided, no info about audiences.
+   * 
    * @param tenant
    * @param details
    * @param grantType
@@ -282,7 +283,8 @@ public class JwtTokenBuilder {
     if (null != authTime) {
       builder = builder.withClaim("auth_time", authTime.getEpochSecond());
     }
-    return builder.withClaim("typ", "ID").withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
+    return builder.withClaim("typ", "ID")
+        .withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
         .withClaim(CLAIM_GRANT_TYPE, grantType)
         .withClaim(CLAIM_USER_NAME, validationData.getUsername())
         .withClaim(CLAIM_CLIENT_ID, client.getClientId())
@@ -336,8 +338,7 @@ public class JwtTokenBuilder {
       accessTokenInfo = accessTokenInfo.withClaim("tid", validationData.getTenant());
     }
 
-    accessTokenInfo = accessTokenInfo
-        .withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
+    accessTokenInfo = accessTokenInfo.withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
         .withClaim("aud", validationData.getAudiences())
         .withArrayClaim(CLAIM_AUTHORITIES, validationData.getRoles().toArray(new String[0]))
         .withArrayClaim(CLAIM_SCOPE, scopes.toArray(new String[0]));
