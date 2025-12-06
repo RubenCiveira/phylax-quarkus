@@ -3,6 +3,9 @@ package net.civeira.phylax.common.infrastructure.migration;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 
 public interface SQLDialect {
 
@@ -26,7 +29,7 @@ public interface SQLDialect {
    * @return La sentencia SQL para insertar un valor.
    */
   default String insertLock(String name) {
-    return "INSERT INTO " + name + "_lock (id, locked, granted) VALUES (1, 0, NULL)";
+    return "INSERT INTO " + name + " (id, locked, granted) VALUES (1, 0, NULL)";
   }
 
   /**
@@ -35,7 +38,7 @@ public interface SQLDialect {
    * @return La sentencia SQL para liberar el lock.
    */
   default String releaseLock(String name) {
-    return "UPDATE " + name + "_lock SET locked = 0, granted = NULL WHERE id = 1";
+    return "UPDATE " + name + " SET locked = 0, granted = NULL WHERE id = 1";
   }
 
   /**
@@ -89,7 +92,7 @@ public interface SQLDialect {
    * @return La sentencia SQL para consultar el estado del lock.
    */
   default String selectLock(String name) {
-    return "SELECT locked FROM " + name + " WHERE id = 1";
+    return "SELECT locked, granted FROM " + name + " WHERE id = 1 ";
   }
 
   /**
@@ -99,8 +102,19 @@ public interface SQLDialect {
    * @return true si 'locked' es activo, false en caso contrario.
    * @throws SQLException Si ocurre un error al leer el ResultSet.
    */
-  default boolean interpretLocked(ResultSet rs) throws SQLException {
-    return rs.getInt("locked") == 1;
+  default boolean interpretLocked(ResultSet rs, Duration duration) throws SQLException {
+    return rs.getInt("locked") == 1 && stillGranted(rs, duration);
+  }
+  
+  default boolean stillGranted(ResultSet rs, Duration duration) throws SQLException {
+    Timestamp ts = rs.getTimestamp("granted");
+    if( null == ts ) {
+      return false;
+    } else {
+      Instant grantedAt = ts.toInstant(); 
+      Instant expiresAt = grantedAt.plus(duration);
+      return Instant.now().isBefore(expiresAt);
+    }
   }
 
 }

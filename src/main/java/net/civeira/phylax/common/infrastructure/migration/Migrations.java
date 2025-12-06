@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -238,10 +239,11 @@ public class Migrations implements AutoCloseable {
   }
 
   private boolean lock() throws SQLException {
+    Duration duration = Duration.ofMinutes(10);
     String sql = dialect.selectLock(LOCK_TABLE);
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
       try (ResultSet rs = stmt.executeQuery()) {
-        if (rs.next() && dialect.interpretLocked(rs)) {
+        if (rs.next() && dialect.interpretLocked(rs, duration)) {
           return false;
         }
       }

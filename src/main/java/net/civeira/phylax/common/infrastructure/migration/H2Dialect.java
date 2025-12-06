@@ -3,6 +3,7 @@ package net.civeira.phylax.common.infrastructure.migration;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 
 public class H2Dialect implements SQLDialect {
 
@@ -52,7 +53,7 @@ public class H2Dialect implements SQLDialect {
   }
 
   @Override
-  public boolean interpretLocked(ResultSet rs) throws SQLException {
-    return rs.getBoolean("locked");
+  public boolean interpretLocked(ResultSet rs, Duration duration) throws SQLException {
+    return rs.getBoolean("locked") && stillGranted(rs, duration);
   }
 }
