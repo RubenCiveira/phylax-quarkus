@@ -5,10 +5,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -135,7 +135,6 @@ public class UserLoginUsecase {
     List<Supplier<Optional<AuthenticationResult>>> calls =
         List.of(() -> checkPassword(request, user, password), () -> checkFirstPass(request, user),
             () -> checkMfa(request, user, mode), () -> checkTerms(request, user));
-
     for (Supplier<Optional<AuthenticationResult>> call : calls) {
       Optional<AuthenticationResult> value = call.get();
       if (value.isPresent()) {
@@ -143,7 +142,6 @@ public class UserLoginUsecase {
       }
     }
     AuthenticationData ud = new AuthenticationData();
-    ud.setDetails(new HashMap<>());
     ud.setUid("" + name.hashCode());
     ud.setUsername(name);
     ud.setUsername(name);
@@ -154,32 +152,38 @@ public class UserLoginUsecase {
 
     List<UserIdentity> hisIdentities =
         identities.list(UserIdentityFilter.builder().user(user).build());
+    System.err.println("USER LOGIN FOR AUDIENCES....");
     request.getAudiences().forEach(aud -> {
       Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
       if (isParty.isPresent()) {
         RelyingParty relyingParty = isParty.get();
-        hisIdentities.stream()
-            .filter(identity -> relyingParty.getUid()
-                .equals(identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse("")))
-            .findFirst().ifPresent(identity -> ud.addRolesTo(aud,
-                identities.resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
+        append(ud, aud, tenant, hisIdentities.stream().filter(identity -> relyingParty.getUid()
+            .equals(identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse(""))));
       } else {
         Optional<TrustedClient> isClient =
             clients.find(TrustedClientFilter.builder().code(aud).build());
         if (isClient.isPresent()) {
           TrustedClient trustedClient = isClient.get();
-          hisIdentities.stream()
-              .filter(identity -> trustedClient.getUid()
-                  .equals(identity.getTrustedClient().map(TrustedClientRef::getUid).orElse("")))
-              .findFirst().ifPresent(identity -> ud.addRolesTo(aud, identities
-                  .resolveRoles(identity.getRoles()).stream().map(Role::getName).toList()));
+          append(ud, aud, tenant, hisIdentities.stream().filter(identity -> trustedClient.getUid()
+              .equals(identity.getTrustedClient().map(TrustedClientRef::getUid).orElse(""))));
         }
       }
     });
-    if (tenant.isRoot()) {
-      ud.getDetails().put("root", true);
-    }
     return AuthenticationResult.right(ud);
+  }
+
+  private void append(AuthenticationData ud, String aud, Tenant tenant,
+      Stream<UserIdentity> hisIdentities) {
+    hisIdentities.findFirst().ifPresent(identity -> {
+      List<String> roles =
+          identities.resolveRoles(identity.getRoles()).stream().map(Role::getName).toList();
+      ud.addRolesTo(aud, roles);
+      System.err.println("=== APPEND INTO THE VALUES");
+      if (tenant.isRoot()) {
+        System.err.println("ALSO AS ROOT");
+        ud.addRolesTo(aud, roles.stream().map(role -> "root:" + role).toList());
+      }
+    });
   }
 
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,

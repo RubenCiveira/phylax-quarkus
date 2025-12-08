@@ -8,10 +8,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -308,26 +306,8 @@ public class JwtTokenBuilder {
       AuthenticationData validationData) {
     String jti = UUID.randomUUID().toString();
 
-    final Map<String, Object> tokenMap = new HashMap<>(validationData.getDetails());
-    List<String> scopes = new ArrayList<>();
-
-    if (tokenMap.containsKey(CLAIM_SCOPE)) {
-      @SuppressWarnings("unchecked")
-      List<String> tokenScopes = (List<String>) tokenMap.get(CLAIM_SCOPE);
-      for (String scope : tokenScopes) {
-        if (client.allowedScope(scope)) {
-          scopes.add(scope);
-        }
-      }
-      tokenMap.remove(CLAIM_SCOPE);
-    }
-
     Builder accessTokenInfo = JWT.create();
-    if (!tokenMap.isEmpty()) {
-      for (Entry<String, Object> entry : tokenMap.entrySet()) {
-        accessTokenInfo.withClaim(entry.getKey(), entry.getValue().toString());
-      }
-    }
+    List<String> scopes = new ArrayList<>();
 
     accessTokenInfo = accessTokenInfo.withIssuer(manager.getIssuer(tenant)).withJWTId(jti)
         .withIssuedAt(new Date()).withSubject(validationData.getUsername())

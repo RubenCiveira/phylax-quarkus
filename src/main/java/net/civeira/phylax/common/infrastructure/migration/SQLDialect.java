@@ -105,13 +105,13 @@ public interface SQLDialect {
   default boolean interpretLocked(ResultSet rs, Duration duration) throws SQLException {
     return rs.getInt("locked") == 1 && stillGranted(rs, duration);
   }
-  
+
   default boolean stillGranted(ResultSet rs, Duration duration) throws SQLException {
     Timestamp ts = rs.getTimestamp("granted");
-    if( null == ts ) {
+    if (null == ts) {
       return false;
     } else {
-      Instant grantedAt = ts.toInstant(); 
+      Instant grantedAt = ts.toInstant();
       Instant expiresAt = grantedAt.plus(duration);
       return Instant.now().isBefore(expiresAt);
     }

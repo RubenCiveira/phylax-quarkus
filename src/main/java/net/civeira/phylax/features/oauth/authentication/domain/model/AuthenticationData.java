@@ -3,9 +3,7 @@ package net.civeira.phylax.features.oauth.authentication.domain.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
@@ -28,8 +26,6 @@ public class AuthenticationData {
   private List<String> audiences = new ArrayList<>();
 
   private String tenant;
-
-  private Map<String, Object> details = new HashMap<>();
 
   private AuthenticationMode mode;
 

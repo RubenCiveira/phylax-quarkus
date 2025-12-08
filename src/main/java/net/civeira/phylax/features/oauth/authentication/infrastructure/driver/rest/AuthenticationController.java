@@ -95,15 +95,21 @@ public class AuthenticationController {
         if (!expected.equals(code.request.getCodeChallenge().orElse(""))) {
           return Response.status(401).build();
         }
-        return Response.status(200).entity(tokenBuilder.buildToken(tenant, code.clientDetails,
-            paramMap.getFirst("grant_type"), code.data, code.request)).build();
+        AuthRequest request = code.request;
+        AuthenticationResult auth = loginApi.validatePreAuthenticated(request,
+            code.data.getUsername(), code.clientDetails, Arrays.asList());
+        return auth.isRight()
+            ? Response.status(200)
+                .entity(tokenBuilder.buildToken(tenant, code.clientDetails,
+                    paramMap.getFirst("grant_type"), auth.getData(), request))
+                .build()
+            : Response.status(401).build();
       }).orElseGet(() -> Response.status(401).build());
     } else if ("refresh_token".equals(paramMap.getFirst("grant_type"))) {
       String refreshToken = paramMap.getFirst("refresh_token");
       return tokenBuilder.verifyRefreshInfo(refreshToken, tenant)
           .flatMap(info -> loadPreautorizedClient(tenant, info.getClient()).map(client -> {
             List<String> audiences = info.getAudiences();
-            System.err.println("EL TOKEN TIENE COMO AUDIENCIAS " + audiences);
             AuthRequest request = AuthRequest.builder().audiences(audiences).tenant(tenant)
                 .clientId(Optional.of(client.getClientId())).build();
             AuthenticationResult auth = loginApi.validatePreAuthenticated(request,
