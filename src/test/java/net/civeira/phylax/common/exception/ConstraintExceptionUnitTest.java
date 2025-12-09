@@ -41,7 +41,7 @@ class ConstraintExceptionUnitTest {
   @Test
   void testConstructorWithCodeFieldValueAndMessage() {
     ConstraintException ex =
-        new ConstraintException("CODEX", "email", "not-an-email", "Invalid email format");
+        new ConstraintException("msg", "CODEX", "email", "not-an-email", "Invalid email format");
 
     assertTrue(ex.includeCode("CODEX"));
     assertTrue(ex.hasErrors());
