@@ -175,12 +175,10 @@ public class UserLoginUsecase {
   private void append(AuthenticationData ud, String aud, Tenant tenant,
       Stream<UserIdentity> hisIdentities) {
     hisIdentities.findFirst().ifPresent(identity -> {
-      List<String> roles =
-          identities.resolveRoles(identity.getRoles()).stream().map(Role::getName).toList();
+      List<String> roles = identities.resolveRoles(identity.getRoles()).stream().map(Role::getName)
+          .map(str -> str.replace(":", "/").toLowerCase()).toList();
       ud.addRolesTo(aud, roles);
-      System.err.println("=== APPEND INTO THE VALUES");
       if (tenant.isRoot()) {
-        System.err.println("ALSO AS ROOT");
         ud.addRolesTo(aud, roles.stream().map(role -> "root:" + role).toList());
       }
     });
