@@ -348,7 +348,12 @@ public abstract class AbstractSqlParametrized<T extends AbstractSqlParametrized<
   }
 
   private String limitResults(String query, int size) {
-    return query + " limit " + size;
+    String str = query.trim();
+    if (str.endsWith("FOR UPDATE")) {
+      return str.substring(0, str.length() - 10) + " limit " + size + " FOR UPDATE";
+    } else {
+      return str + " limit " + size;
+    }
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

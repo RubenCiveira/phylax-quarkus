@@ -5,6 +5,7 @@ quarkus:
     enabled: false
   banner:
     enabled: true
+    path: banner.txt
   config:
     locations:
       - config/cache.yaml

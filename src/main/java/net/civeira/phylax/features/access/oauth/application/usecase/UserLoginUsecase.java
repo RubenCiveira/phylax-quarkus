@@ -152,7 +152,6 @@ public class UserLoginUsecase {
 
     List<UserIdentity> hisIdentities =
         identities.list(UserIdentityFilter.builder().user(user).build());
-    System.err.println("USER LOGIN FOR AUDIENCES....");
     request.getAudiences().forEach(aud -> {
       Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
       if (isParty.isPresent()) {
