@@ -29,52 +29,18 @@ quarkus:
         level: INFO
         handlers: TRACES
         use-parent-handlers: false
+  otel:
+    enabled: true
+    traces:
+      enabled: true
+    logs:
+      enabled: true
 
-#     file:
-#       enable: true
-#       json: true
-#       rotation:
-#         max-file-size: 10M
-#         max-backup-index: 5
-#       path: logs/application.log
-#     # Named file handler solo para OpenTelemetry
-#     handler:
-#       file:
-#         "OTEL_TRACES":
-#           enable: true
-#           json: true
-#           rotation:
-#             max-file-size: 10M
-#             max-backup-index: 5
-#             path: logs/otel-traces.log
-#           # format: "%d{HH:mm:ss} %-5p [%c] (%t) %s%e%n"
-#           # opcionalmente:
-#           # level: INFO
-#     # Asociar la categoría del logging exporter al handler anterior
-#     category:
-#       "io.opentelemetry.exporter.logging":
-#         level: INFO
-#         handlers: OTEL_TRACES
-#         use-parent-handlers: false   # para que NO se mezclen en application.log
-#   otel:
-#     traces:
-#       exporter: ${telemetry.mode:cdi}
-#       enabled: true
-#     logs:
-#       exporter: ${telemetry.mode:cdi}
-#       enabled: true
-#     exporter:
-#       otlp:
-#         traces:
-#           protocol: ${telemetry.protocol:grpc}
-#           endpoint: http://${telemetry.host:localhost}:${telemetry.port:4317}        
-#         logs:
-#           protocol: ${telemetry.protocol:grpc}
-#           endpoint: http://${telemetry.host:localhost}:${telemetry.port:4317}
-
-# telemetry:
-#   mode: logging
-
-# mp:
-#  telemetry:
-#    procesor: log
+#    exporter:
+#      otlp:
+#        traces:
+#          protocol: grpc
+#          endpoint: http://localhost:4317
+#        logs:
+#          protocol: grpc
+#          endpoint: http://localhost:4317
