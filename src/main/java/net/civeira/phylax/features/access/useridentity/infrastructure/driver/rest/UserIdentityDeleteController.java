@@ -1,6 +1,11 @@
 package net.civeira.phylax.features.access.useridentity.infrastructure.driver.rest;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import io.opentelemetry.api.trace.Span;
@@ -13,6 +18,9 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.batch.BatchIdentificator;
 import net.civeira.phylax.common.batch.BatchProgress;
+import net.civeira.phylax.common.batch.BatchProgress.GlobalStatus;
+import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
+import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
@@ -21,6 +29,14 @@ import net.civeira.phylax.features.access.useridentity.application.usecase.delet
 import net.civeira.phylax.features.access.useridentity.application.usecase.delete.UserIdentityDeleteFilter;
 import net.civeira.phylax.features.access.useridentity.application.usecase.delete.UserIdentityDeleteUsecase;
 import net.civeira.phylax.features.access.useridentity.domain.UserIdentityReference;
+import net.civeira.phylax.generated.openapi.model.BatchResultErrorItem;
+import net.civeira.phylax.generated.openapi.model.BatchStepProgress;
+import net.civeira.phylax.generated.openapi.model.BatchStepProgress.StepStatusEnum;
+import net.civeira.phylax.generated.openapi.model.BatchTaskDetail;
+import net.civeira.phylax.generated.openapi.model.BatchTaskDetail.DetailStatusEnum;
+import net.civeira.phylax.generated.openapi.model.BatchTaskLocalizator;
+import net.civeira.phylax.generated.openapi.model.ConstraintFail;
+import net.civeira.phylax.generated.openapi.model.MultipleErrorCodes;
 
 @RequiredArgsConstructor
 @ApplicationScoped
@@ -86,7 +102,10 @@ public class UserIdentityDeleteController {
       UserIdentityDeleteFilter filter = filterBuilder.build();
       BatchIdentificator task = delete.delete(currentRequest.interaction(), filter);
       /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
-      return Response.ok(task).build();
+      BatchTaskLocalizator response = new BatchTaskLocalizator();
+      response.setUid(task.getUid());
+      response.setSteps(task.getSteps());
+      return Response.ok(response).build();
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);
       span.recordException(ex);
@@ -108,6 +127,71 @@ public class UserIdentityDeleteController {
     try {
       BatchProgress task = delete.checkProgress(UserIdentityCheckBatchDeleteStatus.builder()
           .taskId(batchId).build(currentRequest.interaction()));
+      BatchTaskDetail response = new BatchTaskDetail();
+      response.setUid(task.getUid());
+      GlobalStatus taskStatus = task.getStatus();
+      if (null != taskStatus) {
+        response.setDetailStatus(DetailStatusEnum.valueOf(taskStatus.name()));
+      }
+      Instant taskStart = task.getStartTime();
+      if (null != taskStart) {
+        response.setStartTime(OffsetDateTime.ofInstant(taskStart, ZoneId.systemDefault()));
+      }
+      Instant taskEnd = task.getEndTime();
+      if (null != taskEnd) {
+        response.setEndTime(OffsetDateTime.ofInstant(taskEnd, ZoneId.systemDefault()));
+      }
+      response.setSteps(task.getSteps().stream().map(step -> {
+        BatchStepProgress bsp = new BatchStepProgress();
+        Status stepStatus = step.getStatus();
+        if (null != stepStatus) {
+          bsp.setStepStatus(StepStatusEnum.valueOf(stepStatus.name()));
+        }
+        Instant stepStart = step.getStartTime();
+        if (null != stepStart) {
+          bsp.setStartTime(OffsetDateTime.ofInstant(stepStart, ZoneId.systemDefault()));
+        }
+        Instant stepEnd = step.getEndTime();
+        if (null != stepEnd) {
+          bsp.setEndTime(OffsetDateTime.ofInstant(stepEnd, ZoneId.systemDefault()));
+        }
+        bsp.setError(step.getError());
+        bsp.setName(step.getName());
+        bsp.setOks(step.getOks());
+        bsp.setProcessedItems(step.getProcessedItems());
+        bsp.setTotalItems(step.getTotalItems());
+        bsp.setErrors(new ArrayList<>());
+        bsp.setWarns(new ArrayList<>());
+        Map<String, ErrorInfo> stepErrors = step.getErrors();
+        if (null != stepErrors) {
+          bsp.getErrors().addAll(stepErrors.entrySet().stream()
+              .map(entry -> new BatchResultErrorItem().item(entry.getKey())
+                  .fails(entry.getValue().getFails().stream()
+                      .map(fail -> new MultipleErrorCodes().code(fail.getCode())
+                          .violation(fail.getViolation())
+                          .wrongValues(fail.getWrongValues().stream()
+                              .map(wv -> new ConstraintFail().error(wv.getErrorMessage())
+                                  .field(wv.getField()).wrong(String.valueOf(wv.getWrongValue())))
+                              .toList()))
+                      .toList()))
+              .toList());
+        }
+        Map<String, ErrorInfo> stepWarns = step.getWarns();
+        if (null != stepWarns) {
+          bsp.getWarns().addAll(stepErrors.entrySet().stream()
+              .map(entry -> new BatchResultErrorItem().item(entry.getKey())
+                  .fails(entry.getValue().getFails().stream()
+                      .map(fail -> new MultipleErrorCodes().code(fail.getCode())
+                          .violation(fail.getViolation())
+                          .wrongValues(fail.getWrongValues().stream()
+                              .map(wv -> new ConstraintFail().error(wv.getErrorMessage())
+                                  .field(wv.getField()).wrong(String.valueOf(wv.getWrongValue())))
+                              .toList()))
+                      .toList()))
+              .toList());
+        }
+        return bsp;
+      }).toList());
       return Response.ok(task).build();
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);
