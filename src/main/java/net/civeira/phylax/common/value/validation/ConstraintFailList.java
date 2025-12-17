@@ -72,4 +72,28 @@ public class ConstraintFailList extends AbstractFailList {
   public void add(ConstraintFail fail) {
     super.add(fail);
   }
+
+  /**
+   * Add a new {@code ConstraintFail} instance with a validation code, field, and invalid value.
+   *
+   * @param code The error code representing the type of constraint violation.
+   * @param field The name of the field that failed value.validation.
+   * @param wrongValue The incorrect value that caused the validation failure.
+   */
+  public void add(String code, String field, Object wrongValue) {
+    add(new ConstraintFail(code, field, wrongValue));
+  }
+
+  /**
+   * Add a new {@code ConstraintFail} instance with a validation code, field, invalid value, and a
+   * specific error message.
+   *
+   * @param code The error code representing the type of constraint violation.
+   * @param field The name of the field that failed value.validation.
+   * @param wrongValue The incorrect value that caused the validation failure.
+   * @param errorMessage A descriptive error message explaining the validation failure.
+   */
+  public void add(String code, String field, Object wrongValue, String errorMessage) {
+    add(new ConstraintFail(code, field, wrongValue, errorMessage));
+  }
 }
