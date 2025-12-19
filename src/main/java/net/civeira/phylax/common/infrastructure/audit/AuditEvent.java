@@ -2,11 +2,13 @@ package net.civeira.phylax.common.infrastructure.audit;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@RegisterForReflection
 public class AuditEvent {
   // e.g., "enable", "delete", "update"
   private final String operation;
