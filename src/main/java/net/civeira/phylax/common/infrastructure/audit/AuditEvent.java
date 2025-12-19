@@ -1,0 +1,39 @@
+package net.civeira.phylax.common.infrastructure.audit;
+
+import java.time.ZonedDateTime;
+import java.util.Map;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class AuditEvent {
+  // e.g., "enable", "delete", "update"
+  private final String operation;
+  // e.g., "enable"
+  private final String usecase;
+  // e.g., "ApiKeyClient"
+  private final String entityType;           
+  // ID of the entity affected
+  private final String entityId;
+  // Optional: previous state
+  private final Map<String, String> oldValue;
+  // Optional: new state
+  private final Map<String, String> newValue;
+  // Actor name
+  private final String performedBy;
+  // Tenant context
+  private final String tenant;
+  // Time of the operation
+  private final ZonedDateTime timestamp;
+  // Request path or command
+  private final String sourceRequest;
+  // IP
+  private final String remoteAddress;
+  // Optional client info
+  private final String remoteApplication;
+  // Optional device info
+  private final String remoteDevice;
+  // Claims from the actor (JWT, etc.)
+  private final Map<String, String> claims;
+}

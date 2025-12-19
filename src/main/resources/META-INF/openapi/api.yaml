@@ -25,42 +25,62 @@ security:
 tags:
   - name: role
     description: role
+  - name: role-batch
+    description: Massive operations for role
   - name: role-acl
     description: Access control for role
   - name: relying-party
     description: relying-party
+  - name: relying-party-batch
+    description: Massive operations for relying party
   - name: relying-party-acl
     description: Access control for relying party
   - name: trusted-client
     description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
+  - name: trusted-client-batch
+    description: Massive operations for trusted client
   - name: trusted-client-acl
     description: Access control for trusted client
   - name: user-identity
     description: user-identity
+  - name: user-identity-batch
+    description: Massive operations for user identity
   - name: user-identity-acl
     description: Access control for user identity
   - name: tenant-config
     description: tenant-config
+  - name: tenant-config-batch
+    description: Massive operations for tenant config
   - name: tenant-config-acl
     description: Access control for tenant config
   - name: api-key-client
     description: Las diferentes aplicaciones que pueden usar el sistema a través de un api.
+  - name: api-key-client-batch
+    description: Massive operations for api key client
   - name: api-key-client-acl
     description: Access control for api key client
   - name: tenant-login-provider
     description: Represents a login identity provider (e.g., Google, GitHub, SAML) configured for a tenant. Enables federated authentication integration.
+  - name: tenant-login-provider-batch
+    description: Massive operations for tenant login provider
   - name: tenant-login-provider-acl
     description: Access control for tenant login provider
   - name: tenant-terms-of-use
     description: tenant-terms-of-use
+  - name: tenant-terms-of-use-batch
+    description: Massive operations for tenant terms of use
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
   - name: user
     description: user
+  - name: user-batch
+    description: Massive operations for user
   - name: user-acl
     description: Access control for user
   - name: tenant
     description: tenant
+  - name: tenant-batch
+    description: Massive operations for tenant
   - name: tenant-acl
     description: Access control for tenant
 
@@ -161,7 +181,7 @@ paths:
                 $ref: '#/components/schemas/RoleApiDto'
     delete:
       tags:
-        - role
+        - role-batch
       summary: Delete a colection of role by filter
       operationId: role-api-batch-delete
       parameters:
@@ -279,7 +299,7 @@ paths:
   /api/access/roles/~/delete-status/{uid}:
     get:
       tags:
-        - role
+        - role-batch
       summary: Query the result of an massive delete
       operationId: role-api-batch-delete-query
       parameters:
@@ -419,7 +439,7 @@ paths:
                 $ref: '#/components/schemas/RelyingPartyApiDto'
     delete:
       tags:
-        - relying-party
+        - relying-party-batch
       summary: Delete a colection of relying party by filter
       operationId: relying-party-api-batch-delete
       parameters:
@@ -527,7 +547,7 @@ paths:
   /api/access/relying-parties/~/delete-status/{uid}:
     get:
       tags:
-        - relying-party
+        - relying-party-batch
       summary: Query the result of an massive delete
       operationId: relying-party-api-batch-delete-query
       parameters:
@@ -628,7 +648,7 @@ paths:
   /api/access/relying-parties/~/enable:
     patch:
       tags:
-        - relying-party
+        - relying-party-batch
       summary: enable a colection of relying party by filter
       operationId: relying-party-api-batch-enable
       parameters:
@@ -670,7 +690,7 @@ paths:
   /api/access/relying-parties/~/enable-status/{uid}:
     get:
       tags:
-        - relying-party
+        - relying-party-batch
       summary: Query the result of an massive delete
       operationId: relying-party-api-batch-enable-query
       parameters:
@@ -692,7 +712,7 @@ paths:
   /api/access/relying-parties/~/disable:
     patch:
       tags:
-        - relying-party
+        - relying-party-batch
       summary: disable a colection of relying party by filter
       operationId: relying-party-api-batch-disable
       parameters:
@@ -734,7 +754,7 @@ paths:
   /api/access/relying-parties/~/disable-status/{uid}:
     get:
       tags:
-        - relying-party
+        - relying-party-batch
       summary: Query the result of an massive delete
       operationId: relying-party-api-batch-disable-query
       parameters:
@@ -833,7 +853,7 @@ paths:
                 $ref: '#/components/schemas/TrustedClientApiDto'
     delete:
       tags:
-        - trusted-client
+        - trusted-client-batch
       summary: Delete a colection of trusted client by filter
       operationId: trusted-client-api-batch-delete
       parameters:
@@ -935,7 +955,7 @@ paths:
   /api/access/trusted-clients/~/delete-status/{uid}:
     get:
       tags:
-        - trusted-client
+        - trusted-client-batch
       summary: Query the result of an massive delete
       operationId: trusted-client-api-batch-delete-query
       parameters:
@@ -1036,7 +1056,7 @@ paths:
   /api/access/trusted-clients/~/enable:
     patch:
       tags:
-        - trusted-client
+        - trusted-client-batch
       summary: enable a colection of trusted client by filter
       operationId: trusted-client-api-batch-enable
       parameters:
@@ -1072,7 +1092,7 @@ paths:
   /api/access/trusted-clients/~/enable-status/{uid}:
     get:
       tags:
-        - trusted-client
+        - trusted-client-batch
       summary: Query the result of an massive delete
       operationId: trusted-client-api-batch-enable-query
       parameters:
@@ -1094,7 +1114,7 @@ paths:
   /api/access/trusted-clients/~/disable:
     patch:
       tags:
-        - trusted-client
+        - trusted-client-batch
       summary: disable a colection of trusted client by filter
       operationId: trusted-client-api-batch-disable
       parameters:
@@ -1130,7 +1150,7 @@ paths:
   /api/access/trusted-clients/~/disable-status/{uid}:
     get:
       tags:
-        - trusted-client
+        - trusted-client-batch
       summary: Query the result of an massive delete
       operationId: trusted-client-api-batch-disable-query
       parameters:
@@ -1259,7 +1279,7 @@ paths:
                 $ref: '#/components/schemas/UserIdentityApiDto'
     delete:
       tags:
-        - user-identity
+        - user-identity-batch
       summary: Delete a colection of user identity by filter
       operationId: user-identity-api-batch-delete
       parameters:
@@ -1403,7 +1423,7 @@ paths:
   /api/access/identity/~/delete-status/{uid}:
     get:
       tags:
-        - user-identity
+        - user-identity-batch
       summary: Query the result of an massive delete
       operationId: user-identity-api-batch-delete-query
       parameters:
@@ -1535,7 +1555,7 @@ paths:
                 $ref: '#/components/schemas/TenantConfigApiDto'
     delete:
       tags:
-        - tenant-config
+        - tenant-config-batch
       summary: Delete a colection of tenant config by filter
       operationId: tenant-config-api-batch-delete
       parameters:
@@ -1647,7 +1667,7 @@ paths:
   /api/access/tenants-config/~/delete-status/{uid}:
     get:
       tags:
-        - tenant-config
+        - tenant-config-batch
       summary: Query the result of an massive delete
       operationId: tenant-config-api-batch-delete-query
       parameters:
@@ -1769,7 +1789,7 @@ paths:
                 $ref: '#/components/schemas/ApiKeyClientApiDto'
     delete:
       tags:
-        - api-key-client
+        - api-key-client-batch
       summary: Delete a colection of api key client by filter
       operationId: api-key-client-api-batch-delete
       parameters:
@@ -1871,7 +1891,7 @@ paths:
   /api/access/api-key-clients/~/delete-status/{uid}:
     get:
       tags:
-        - api-key-client
+        - api-key-client-batch
       summary: Query the result of an massive delete
       operationId: api-key-client-api-batch-delete-query
       parameters:
@@ -1972,7 +1992,7 @@ paths:
   /api/access/api-key-clients/~/enable:
     patch:
       tags:
-        - api-key-client
+        - api-key-client-batch
       summary: enable a colection of api key client by filter
       operationId: api-key-client-api-batch-enable
       parameters:
@@ -2008,7 +2028,7 @@ paths:
   /api/access/api-key-clients/~/enable-status/{uid}:
     get:
       tags:
-        - api-key-client
+        - api-key-client-batch
       summary: Query the result of an massive delete
       operationId: api-key-client-api-batch-enable-query
       parameters:
@@ -2030,7 +2050,7 @@ paths:
   /api/access/api-key-clients/~/disable:
     patch:
       tags:
-        - api-key-client
+        - api-key-client-batch
       summary: disable a colection of api key client by filter
       operationId: api-key-client-api-batch-disable
       parameters:
@@ -2066,7 +2086,7 @@ paths:
   /api/access/api-key-clients/~/disable-status/{uid}:
     get:
       tags:
-        - api-key-client
+        - api-key-client-batch
       summary: Query the result of an massive delete
       operationId: api-key-client-api-batch-disable-query
       parameters:
@@ -2181,7 +2201,7 @@ paths:
                 $ref: '#/components/schemas/TenantLoginProviderApiDto'
     delete:
       tags:
-        - tenant-login-provider
+        - tenant-login-provider-batch
       summary: Delete a colection of tenant login provider by filter
       operationId: tenant-login-provider-api-batch-delete
       parameters:
@@ -2299,7 +2319,7 @@ paths:
   /api/access/login-providers/~/delete-status/{uid}:
     get:
       tags:
-        - tenant-login-provider
+        - tenant-login-provider-batch
       summary: Query the result of an massive delete
       operationId: tenant-login-provider-api-batch-delete-query
       parameters:
@@ -2474,7 +2494,7 @@ paths:
   /api/access/login-providers/~/enable:
     patch:
       tags:
-        - tenant-login-provider
+        - tenant-login-provider-batch
       summary: enable a colection of tenant login provider by filter
       operationId: tenant-login-provider-api-batch-enable
       parameters:
@@ -2526,7 +2546,7 @@ paths:
   /api/access/login-providers/~/enable-status/{uid}:
     get:
       tags:
-        - tenant-login-provider
+        - tenant-login-provider-batch
       summary: Query the result of an massive delete
       operationId: tenant-login-provider-api-batch-enable-query
       parameters:
@@ -2548,7 +2568,7 @@ paths:
   /api/access/login-providers/~/disable:
     patch:
       tags:
-        - tenant-login-provider
+        - tenant-login-provider-batch
       summary: disable a colection of tenant login provider by filter
       operationId: tenant-login-provider-api-batch-disable
       parameters:
@@ -2600,7 +2620,7 @@ paths:
   /api/access/login-providers/~/disable-status/{uid}:
     get:
       tags:
-        - tenant-login-provider
+        - tenant-login-provider-batch
       summary: Query the result of an massive delete
       operationId: tenant-login-provider-api-batch-disable-query
       parameters:
@@ -2697,7 +2717,7 @@ paths:
                 $ref: '#/components/schemas/TenantTermsOfUseApiDto'
     delete:
       tags:
-        - tenant-terms-of-use
+        - tenant-terms-of-use-batch
       summary: Delete a colection of tenant terms of use by filter
       operationId: tenant-terms-of-use-api-batch-delete
       parameters:
@@ -2809,7 +2829,7 @@ paths:
   /api/access/tenants-terms-of-use/~/delete-status/{uid}:
     get:
       tags:
-        - tenant-terms-of-use
+        - tenant-terms-of-use-batch
       summary: Query the result of an massive delete
       operationId: tenant-terms-of-use-api-batch-delete-query
       parameters:
@@ -2984,7 +3004,7 @@ paths:
   /api/access/tenants-terms-of-use/~/enable:
     patch:
       tags:
-        - tenant-terms-of-use
+        - tenant-terms-of-use-batch
       summary: enable a colection of tenant terms of use by filter
       operationId: tenant-terms-of-use-api-batch-enable
       parameters:
@@ -3030,7 +3050,7 @@ paths:
   /api/access/tenants-terms-of-use/~/enable-status/{uid}:
     get:
       tags:
-        - tenant-terms-of-use
+        - tenant-terms-of-use-batch
       summary: Query the result of an massive delete
       operationId: tenant-terms-of-use-api-batch-enable-query
       parameters:
@@ -3052,7 +3072,7 @@ paths:
   /api/access/tenants-terms-of-use/~/disable:
     patch:
       tags:
-        - tenant-terms-of-use
+        - tenant-terms-of-use-batch
       summary: disable a colection of tenant terms of use by filter
       operationId: tenant-terms-of-use-api-batch-disable
       parameters:
@@ -3098,7 +3118,7 @@ paths:
   /api/access/tenants-terms-of-use/~/disable-status/{uid}:
     get:
       tags:
-        - tenant-terms-of-use
+        - tenant-terms-of-use-batch
       summary: Query the result of an massive delete
       operationId: tenant-terms-of-use-api-batch-disable-query
       parameters:
@@ -3213,7 +3233,7 @@ paths:
                 $ref: '#/components/schemas/UserApiDto'
     delete:
       tags:
-        - user
+        - user-batch
       summary: Delete a colection of user by filter
       operationId: user-api-batch-delete
       parameters:
@@ -3331,7 +3351,7 @@ paths:
   /api/access/users/~/delete-status/{uid}:
     get:
       tags:
-        - user
+        - user-batch
       summary: Query the result of an massive delete
       operationId: user-api-batch-delete-query
       parameters:
@@ -3498,7 +3518,7 @@ paths:
   /api/access/users/~/accept:
     patch:
       tags:
-        - user
+        - user-batch
       summary: accept a colection of user by filter
       operationId: user-api-batch-accept
       parameters:
@@ -3550,7 +3570,7 @@ paths:
   /api/access/users/~/accept-status/{uid}:
     get:
       tags:
-        - user
+        - user-batch
       summary: Query the result of an massive delete
       operationId: user-api-batch-accept-query
       parameters:
@@ -3572,7 +3592,7 @@ paths:
   /api/access/users/~/reject:
     patch:
       tags:
-        - user
+        - user-batch
       summary: reject a colection of user by filter
       operationId: user-api-batch-reject
       parameters:
@@ -3624,7 +3644,7 @@ paths:
   /api/access/users/~/reject-status/{uid}:
     get:
       tags:
-        - user
+        - user-batch
       summary: Query the result of an massive delete
       operationId: user-api-batch-reject-query
       parameters:
@@ -3646,7 +3666,7 @@ paths:
   /api/access/users/~/disable:
     patch:
       tags:
-        - user
+        - user-batch
       summary: disable a colection of user by filter
       operationId: user-api-batch-disable
       parameters:
@@ -3698,7 +3718,7 @@ paths:
   /api/access/users/~/disable-status/{uid}:
     get:
       tags:
-        - user
+        - user-batch
       summary: Query the result of an massive delete
       operationId: user-api-batch-disable-query
       parameters:
@@ -3720,7 +3740,7 @@ paths:
   /api/access/users/~/enable:
     patch:
       tags:
-        - user
+        - user-batch
       summary: enable a colection of user by filter
       operationId: user-api-batch-enable
       parameters:
@@ -3772,7 +3792,7 @@ paths:
   /api/access/users/~/enable-status/{uid}:
     get:
       tags:
-        - user
+        - user-batch
       summary: Query the result of an massive delete
       operationId: user-api-batch-enable-query
       parameters:
@@ -3794,7 +3814,7 @@ paths:
   /api/access/users/~/unlock:
     patch:
       tags:
-        - user
+        - user-batch
       summary: unlock a colection of user by filter
       operationId: user-api-batch-unlock
       parameters:
@@ -3846,7 +3866,7 @@ paths:
   /api/access/users/~/unlock-status/{uid}:
     get:
       tags:
-        - user
+        - user-batch
       summary: Query the result of an massive delete
       operationId: user-api-batch-unlock-query
       parameters:
@@ -3951,7 +3971,7 @@ paths:
                 $ref: '#/components/schemas/TenantApiDto'
     delete:
       tags:
-        - tenant
+        - tenant-batch
       summary: Delete a colection of tenant by filter
       operationId: tenant-api-batch-delete
       parameters:
@@ -4053,7 +4073,7 @@ paths:
   /api/access/tenants/~/delete-status/{uid}:
     get:
       tags:
-        - tenant
+        - tenant-batch
       summary: Query the result of an massive delete
       operationId: tenant-api-batch-delete-query
       parameters:
@@ -4154,7 +4174,7 @@ paths:
   /api/access/tenants/~/enable:
     patch:
       tags:
-        - tenant
+        - tenant-batch
       summary: enable a colection of tenant by filter
       operationId: tenant-api-batch-enable
       parameters:
@@ -4190,7 +4210,7 @@ paths:
   /api/access/tenants/~/enable-status/{uid}:
     get:
       tags:
-        - tenant
+        - tenant-batch
       summary: Query the result of an massive delete
       operationId: tenant-api-batch-enable-query
       parameters:
@@ -4212,7 +4232,7 @@ paths:
   /api/access/tenants/~/disable:
     patch:
       tags:
-        - tenant
+        - tenant-batch
       summary: disable a colection of tenant by filter
       operationId: tenant-api-batch-disable
       parameters:
@@ -4248,7 +4268,7 @@ paths:
   /api/access/tenants/~/disable-status/{uid}:
     get:
       tags:
-        - tenant
+        - tenant-batch
       summary: Query the result of an massive delete
       operationId: tenant-api-batch-disable-query
       parameters:
@@ -4389,7 +4409,6 @@ components:
           description: The user name to identify on the login screen
           type: string
         relyingParty:
-          description: Domains without a tenant could be used only for admins
           $ref: '#/components/schemas/RelyingPartyApiRef'
         version:
           description: Campo con el número de version de role para controlar bloqueos optimistas
@@ -4754,7 +4773,6 @@ components:
           description: A uid string to identify the entity
           type: string
         role:
-          description: La cuenta a la que pertenece
           $ref: '#/components/schemas/RoleApiRef'
         version:
           description: Campo con el número de version de user identity role para controlar bloqueos optimistas
@@ -4768,13 +4786,10 @@ components:
           description: El identificador de la aplicacion
           type: string
         user:
-          description: El user de user identity
           $ref: '#/components/schemas/UserApiRef'
         relyingParty:
-          description: El relying party de user identity
           $ref: '#/components/schemas/RelyingPartyApiRef'
         trustedClient:
-          description: El trusted client de user identity
           $ref: '#/components/schemas/TrustedClientApiRef'
         roles:
           description: El roles de user identity
@@ -4879,7 +4894,6 @@ components:
           description: A number to identify the db record
           type: string
         tenant:
-          description: The name to identify the account.
           $ref: '#/components/schemas/TenantApiRef'
         innerLabel:
           description: Tenant could use these field to label the application for the users
@@ -5104,7 +5118,6 @@ components:
           description: A uid string to identify the entity
           type: string
         tenant:
-          description: The tenant this login provider is configured for.
           $ref: '#/components/schemas/TenantApiRef'
         name:
           description: A name that identifies this login provider within the tenant.
@@ -5234,7 +5247,6 @@ components:
           description: A number to identify the db record
           type: string
         tenant:
-          description: La cuenta a la que pertenece
           $ref: '#/components/schemas/TenantApiRef'
         text:
           description: El text de tenant terms of use
@@ -5349,7 +5361,6 @@ components:
           description: A number to identify the db record
           type: string
         tenant:
-          description: El tenant de user
           $ref: '#/components/schemas/TenantApiRef'
         name:
           description: The user name to identify on the login screen

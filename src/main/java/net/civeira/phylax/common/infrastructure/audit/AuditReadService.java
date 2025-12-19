@@ -1,0 +1,72 @@
+package net.civeira.phylax.common.infrastructure.audit;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.sql.DataSource;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@ApplicationScoped
+@RequiredArgsConstructor
+public class AuditReadService {
+
+  private final DataSource dataSource;
+
+  private final ObjectMapper mapper;
+
+  public List<AuditEvent> findByFilters(AuditQueryFilter filter, int limit, int offset) {
+
+    StringBuilder sql = new StringBuilder("SELECT * FROM audit_events WHERE 1=1 ");
+    List<Object> params = new ArrayList<>();
+
+    filter.appendToFilter(sql, params);
+
+    sql.append("ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+    params.add(limit);
+    params.add(offset);
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+      for (int i = 0; i < params.size(); i++) {
+        ps.setObject(i + 1, params.get(i));
+      }
+      ResultSet rs = ps.executeQuery();
+      List<AuditEvent> results = new ArrayList<>();
+      while (rs.next()) {
+        AuditEvent event = AuditEvent.builder().operation(rs.getString("operation"))
+            .usecase(rs.getString("usecase")).entityType(rs.getString("entity_type"))
+            .entityId(rs.getString("entity_id")).oldValue(readMap("old_values", rs))
+            .newValue(readMap("new_values", rs)).performedBy(rs.getString("performed_by"))
+            .tenant(rs.getString("tenant"))
+            .timestamp(rs.getTimestamp("timestamp").toInstant().atZone(ZoneId.systemDefault()))
+            .sourceRequest(rs.getString("source_request"))
+            .remoteAddress(rs.getString("remote_address"))
+            .remoteDevice(rs.getString("remote_device")).claims(readMap("claims", rs)).build();
+        results.add(event);
+      }
+      return results;
+    } catch (SQLException e) {
+      throw new RuntimeException("Error reading audit events", e);
+    }
+  }
+
+  private Map<String, String> readMap(String name, ResultSet rs) {
+    try {
+      return mapper.readValue(rs.getString(name), new TypeReference<>() {});
+    } catch (JsonProcessingException | SQLException e) {
+      log.error("Unable to read " + name + " json from audit", e);
+      return Map.of();
+    }
+  }
+}
