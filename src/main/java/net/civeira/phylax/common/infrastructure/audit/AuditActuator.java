@@ -2,7 +2,9 @@ package net.civeira.phylax.common.infrastructure.audit;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.quarkus.vertx.http.ManagementInterface;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,45 +15,40 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuditActuator {
 
-    private final AuditReadService auditReadService;
+  private final AuditReadService auditReadService;
 
-    private final ObjectMapper mapper;
+  private final ObjectMapper mapper;
 
-    public void registerManagementRoutes(@Observes ManagementInterface management) {
-        management.router()
-            .get("/q/audit")
-            .handler(this::handleAuditRequest);
+  public void registerManagementRoutes(@Observes ManagementInterface management) {
+    management.router().get("/q/audit").handler(this::handleAuditRequest);
+  }
+
+  private void handleAuditRequest(RoutingContext ctx) {
+    try {
+      String entity = ctx.queryParam("entity").stream().findFirst().orElse(null);
+      String tenant = ctx.queryParam("tenant").stream().findFirst().orElse(null);
+      String entityId = ctx.queryParam("id").stream().findFirst().orElse(null);
+      String user = ctx.queryParam("user").stream().findFirst().orElse(null);
+      String op = ctx.queryParam("op").stream().findFirst().orElse(null);
+      int limit = ctx.queryParam("limit").stream().findFirst().map(Integer::parseInt).orElse(50);
+      int offset = ctx.queryParam("offset").stream().findFirst().map(Integer::parseInt).orElse(0);
+
+      // For simplicity, ignore time filters for now
+      String fromStr = ctx.queryParam("from").stream().findFirst().orElse(null);
+      ZonedDateTime from = fromStr != null ? ZonedDateTime.parse(fromStr) : null;
+      String toStr = ctx.queryParam("to").stream().findFirst().orElse(null);
+      ZonedDateTime to = fromStr != null ? ZonedDateTime.parse(toStr) : null;
+
+      List<AuditEvent> results = auditReadService.findByFilters(
+          AuditQueryFilter.builder().entityId(entityId).entityType(entity).tenant(tenant)
+              .performedBy(user).operation(op).from(from).to(to).build(),
+          limit, offset);
+
+      ctx.response().putHeader("Content-Type", "application/json")
+          .end(mapper.writeValueAsString(results));
+
+    } catch (Exception e) {
+      ctx.fail(500, e);
     }
-
-    private void handleAuditRequest(RoutingContext ctx) {
-        try {
-            String entity = ctx.queryParam("entity").stream().findFirst().orElse(null);
-            String tenant = ctx.queryParam("tenant").stream().findFirst().orElse(null);
-            String entityId = ctx.queryParam("id").stream().findFirst().orElse(null);
-            String user = ctx.queryParam("user").stream().findFirst().orElse(null);
-            String op = ctx.queryParam("op").stream().findFirst().orElse(null);
-            int limit = ctx.queryParam("limit").stream().findFirst().map(Integer::parseInt).orElse(50);
-            int offset = ctx.queryParam("offset").stream().findFirst().map(Integer::parseInt).orElse(0);
-
-            // For simplicity, ignore time filters for now
-            String fromStr = ctx.queryParam("from").stream().findFirst().orElse(null);
-            ZonedDateTime from = fromStr != null ? ZonedDateTime.parse(fromStr) : null;
-            String toStr = ctx.queryParam("to").stream().findFirst().orElse(null);
-            ZonedDateTime to = fromStr != null ? ZonedDateTime.parse(toStr) : null;
-
-            List<AuditEvent> results = auditReadService.findByFilters(
-                AuditQueryFilter.builder()
-                  .entityId(entityId).entityType(entity).tenant(tenant).performedBy(user).operation(op)
-                  .from(from).to(to)
-                .build(), limit, offset
-            );
-
-            ctx.response()
-               .putHeader("Content-Type", "application/json")
-               .end(mapper.writeValueAsString(results));
-
-        } catch (Exception e) {
-            ctx.fail(500, e);
-        }
-    }
+  }
 }

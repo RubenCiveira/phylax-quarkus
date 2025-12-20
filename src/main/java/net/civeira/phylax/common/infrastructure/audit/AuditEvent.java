@@ -2,6 +2,7 @@ package net.civeira.phylax.common.infrastructure.audit;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ public class AuditEvent {
   // e.g., "enable"
   private final String usecase;
   // e.g., "ApiKeyClient"
-  private final String entityType;           
+  private final String entityType;
   // ID of the entity affected
   private final String entityId;
   // Optional: previous state

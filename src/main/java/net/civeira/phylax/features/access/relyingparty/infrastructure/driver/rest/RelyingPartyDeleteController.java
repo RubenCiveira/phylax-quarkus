@@ -78,7 +78,7 @@ public class RelyingPartyDeleteController {
       filterBuilder = filterBuilder.apiKey(apiKey);
       filterBuilder = filterBuilder.code(code);
       RelyingPartyDeleteFilter filter = filterBuilder.build();
-      BatchIdentificator task = delete.delete(currentRequest.interaction(), filter);
+      BatchIdentificator task = delete.batchDelete(currentRequest.interaction(), filter);
       /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
       BatchTaskLocalizator response = new BatchTaskLocalizator();
       response.setUid(task.getUid());

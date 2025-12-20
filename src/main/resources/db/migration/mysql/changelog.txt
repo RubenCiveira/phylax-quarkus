@@ -1,1 +1,2 @@
 /db/migration/mysql/000.001.001/20251203215450-model.changelog.mysql.sql
+/db/migration/mysql/000.001.001/20251219122708-model.changelog.mysql.sql

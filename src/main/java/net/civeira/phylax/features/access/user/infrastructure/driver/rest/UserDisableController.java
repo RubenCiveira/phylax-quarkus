@@ -88,7 +88,7 @@ public class UserDisableController {
       filterBuilder = filterBuilder.tenants(null == tenants ? null
           : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
       UserDisableFilter filter = filterBuilder.build();
-      BatchIdentificator task = disable.disable(currentRequest.interaction(), filter);
+      BatchIdentificator task = disable.batchDisable(currentRequest.interaction(), filter);
       /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
       BatchTaskLocalizator response = new BatchTaskLocalizator();
       response.setUid(task.getUid());

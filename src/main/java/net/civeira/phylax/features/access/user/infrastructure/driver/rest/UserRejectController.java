@@ -88,7 +88,7 @@ public class UserRejectController {
       filterBuilder = filterBuilder.tenants(null == tenants ? null
           : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
       UserRejectFilter filter = filterBuilder.build();
-      BatchIdentificator task = reject.reject(currentRequest.interaction(), filter);
+      BatchIdentificator task = reject.batchReject(currentRequest.interaction(), filter);
       /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
       BatchTaskLocalizator response = new BatchTaskLocalizator();
       response.setUid(task.getUid());

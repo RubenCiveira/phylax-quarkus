@@ -111,7 +111,7 @@ public class UserAcceptController {
       filterBuilder = filterBuilder.tenants(null == tenants ? null
           : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
       UserAcceptFilter filter = filterBuilder.build();
-      BatchIdentificator task = accept.accept(currentRequest.interaction(), filter);
+      BatchIdentificator task = accept.batchAccept(currentRequest.interaction(), filter);
       /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
       BatchTaskLocalizator response = new BatchTaskLocalizator();
       response.setUid(task.getUid());

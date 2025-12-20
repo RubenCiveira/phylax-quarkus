@@ -100,7 +100,7 @@ public class UserIdentityDeleteController {
       filterBuilder = filterBuilder.trustedClients(null == trustedClients ? null
           : trustedClients.stream().flatMap(part -> Stream.of(part.split(","))).toList());
       UserIdentityDeleteFilter filter = filterBuilder.build();
-      BatchIdentificator task = delete.delete(currentRequest.interaction(), filter);
+      BatchIdentificator task = delete.batchDelete(currentRequest.interaction(), filter);
       /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
       BatchTaskLocalizator response = new BatchTaskLocalizator();
       response.setUid(task.getUid());

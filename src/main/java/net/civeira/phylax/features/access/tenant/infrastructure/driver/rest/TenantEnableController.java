@@ -77,7 +77,7 @@ public class TenantEnableController {
       filterBuilder = filterBuilder.search(search);
       filterBuilder = filterBuilder.name(name);
       TenantEnableFilter filter = filterBuilder.build();
-      BatchIdentificator task = enable.enable(currentRequest.interaction(), filter);
+      BatchIdentificator task = enable.batchEnable(currentRequest.interaction(), filter);
       /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
       BatchTaskLocalizator response = new BatchTaskLocalizator();
       response.setUid(task.getUid());

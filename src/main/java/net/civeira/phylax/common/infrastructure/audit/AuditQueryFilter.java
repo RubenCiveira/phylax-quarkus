@@ -3,6 +3,7 @@ package net.civeira.phylax.common.infrastructure.audit;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.List;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ public class AuditQueryFilter {
   private final String operation;
   private final ZonedDateTime from;
   private final ZonedDateTime to;
-  
+
   void appendToFilter(StringBuilder sql, List<Object> params) {
     if (tenant != null) {
       sql.append("AND tenant = ? ");
