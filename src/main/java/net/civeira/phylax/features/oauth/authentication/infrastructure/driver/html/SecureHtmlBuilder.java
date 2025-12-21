@@ -51,7 +51,6 @@ public class SecureHtmlBuilder {
 
   public String decrypt(String value) {
     String secret = adapter.getCurrentKey();
-    System.err.println("ESTOY DESENCRIPTANDO CON " + secret);
     return cipher.decrypt(value, secret).orElse("");
   }
 
