@@ -13,29 +13,35 @@ quarkus:
       json:
         enabled: true
       rotation:
-        max-file-size: 10M
+        max-file-size: 30M
         max-backup-index: 5
-    handler:
-      file:
-        "TRACES":
-          enabled: true
-          path: logs/traces.jsonl
-          level: INFO
-          rotation:
-            max-file-size: 10M
-            max-backup-index: 5
-    category:
-      "traces":
-        level: INFO
-        handlers: TRACES
-        use-parent-handlers: false
+#    handler:
+#      file:
+#        "TRACES":
+#          enabled: true
+#          path: logs/traces.jsonl
+#          level: INFO
+#          rotation:
+#            max-file-size: 30M
+#            max-backup-index: 5
+#    category:
+#      "traces":
+#        level: INFO
+#        handlers: TRACES
+#        use-parent-handlers: false
+
   otel:
     enabled: true
-    traces:
+    file:
       enabled: true
-    logs:
-      enabled: true
-
+      path: logs/traces.jsonl
+      rotation:
+        max-file-size: 30M
+        max-backup-index: 5
+#    traces:
+#      enabled: true
+#    logs:
+#      enabled: true
 #    exporter:
 #      otlp:
 #        traces:

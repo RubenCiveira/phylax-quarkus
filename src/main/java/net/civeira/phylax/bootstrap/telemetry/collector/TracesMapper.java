@@ -1,0 +1,69 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.data.StatusData;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class TracesMapper {
+
+  private final OtelResourceMapper resourceMapper;
+
+  public Collection<SpanData> toSpanData(OtlpTracesRequest request) {
+
+    List<SpanData> result = new ArrayList<>();
+
+    for (var rs : request.resourceSpans()) {
+      var resource = resourceMapper.toResource(rs.resource());
+
+      for (var ss : rs.scopeSpans()) {
+        var scope = InstrumentationScopeInfo.builder(ss.scope().name())
+            .setVersion(ss.scope().version()).build();
+
+        for (var span : ss.spans()) {
+          result.add(toSpan(span, resource, scope));
+        }
+      }
+    }
+    return result;
+  }
+
+  private SpanData toSpan(OtlpSpan span, Resource resource, InstrumentationScopeInfo scope) {
+    return OtlpSpanData.builder().traceId(span.traceId()).spanId(span.spanId())
+        .parentSpanId(span.parentSpanId()).name(span.name()).kind(toSpanKind(span.kind()))
+        .startEpochNanos(span.startTimeUnixNano()).endEpochNanos(span.endTimeUnixNano())
+        .attributes(resourceMapper.toAttributes(span.attributes())).status(toStatus(span.status()))
+        .resource(resource).instrumentationScopeInfo(scope).build();
+  }
+
+  private SpanKind toSpanKind(int kind) {
+    return switch (kind) {
+      case 2 -> SpanKind.SERVER;
+      case 3 -> SpanKind.CLIENT;
+      case 4 -> SpanKind.PRODUCER;
+      case 5 -> SpanKind.CONSUMER;
+      case 0, 1 -> SpanKind.INTERNAL;
+      default -> SpanKind.INTERNAL;
+    };
+  }
+
+  private StatusData toStatus(OtlpStatus status) {
+    if (status == null)
+      return StatusData.unset();
+
+    return switch (status.code()) {
+      case 1 -> StatusData.ok();
+      case 2 -> StatusData.create(StatusCode.ERROR, status.message());
+      default -> StatusData.unset();
+    };
+  }
+}

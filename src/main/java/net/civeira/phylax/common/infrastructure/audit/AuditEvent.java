@@ -12,6 +12,10 @@ import lombok.Data;
 @Builder
 @RegisterForReflection
 public class AuditEvent {
+  // Traceid
+  private final String traceId;
+  // Traceid
+  private final String spanId;
   // e.g., "enable", "delete", "update"
   private final String operation;
   // e.g., "enable"

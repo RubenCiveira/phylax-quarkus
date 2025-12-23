@@ -27,60 +27,80 @@ tags:
     description: role
   - name: role-batch
     description: Massive operations for role
+  - name: role-audit
+    description: Audit operations for changes on role
   - name: role-acl
     description: Access control for role
   - name: relying-party
     description: relying-party
   - name: relying-party-batch
     description: Massive operations for relying party
+  - name: relying-party-audit
+    description: Audit operations for changes on relying party
   - name: relying-party-acl
     description: Access control for relying party
   - name: trusted-client
     description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
   - name: trusted-client-batch
     description: Massive operations for trusted client
+  - name: trusted-client-audit
+    description: Audit operations for changes on trusted client
   - name: trusted-client-acl
     description: Access control for trusted client
   - name: user-identity
     description: user-identity
   - name: user-identity-batch
     description: Massive operations for user identity
+  - name: user-identity-audit
+    description: Audit operations for changes on user identity
   - name: user-identity-acl
     description: Access control for user identity
   - name: tenant-config
     description: tenant-config
   - name: tenant-config-batch
     description: Massive operations for tenant config
+  - name: tenant-config-audit
+    description: Audit operations for changes on tenant config
   - name: tenant-config-acl
     description: Access control for tenant config
   - name: api-key-client
     description: Las diferentes aplicaciones que pueden usar el sistema a través de un api.
   - name: api-key-client-batch
     description: Massive operations for api key client
+  - name: api-key-client-audit
+    description: Audit operations for changes on api key client
   - name: api-key-client-acl
     description: Access control for api key client
   - name: tenant-login-provider
     description: Represents a login identity provider (e.g., Google, GitHub, SAML) configured for a tenant. Enables federated authentication integration.
   - name: tenant-login-provider-batch
     description: Massive operations for tenant login provider
+  - name: tenant-login-provider-audit
+    description: Audit operations for changes on tenant login provider
   - name: tenant-login-provider-acl
     description: Access control for tenant login provider
   - name: tenant-terms-of-use
     description: tenant-terms-of-use
   - name: tenant-terms-of-use-batch
     description: Massive operations for tenant terms of use
+  - name: tenant-terms-of-use-audit
+    description: Audit operations for changes on tenant terms of use
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
   - name: user
     description: user
   - name: user-batch
     description: Massive operations for user
+  - name: user-audit
+    description: Audit operations for changes on user
   - name: user-acl
     description: Access control for user
   - name: tenant
     description: tenant
   - name: tenant-batch
     description: Massive operations for tenant
+  - name: tenant-audit
+    description: Audit operations for changes on tenant
   - name: tenant-acl
     description: Access control for tenant
 
@@ -316,6 +336,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/roles/-/audit/entity/{uid}:
+    get:
+      tags:
+        - role-audit
+      summary: Update a role by their uid
+      operationId: role-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/roles/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - role-audit
+      summary: Update a role by their uid
+      operationId: role-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
   /api/me/acl/access/roles:
@@ -564,6 +646,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/relying-parties/-/audit/entity/{uid}:
+    get:
+      tags:
+        - relying-party-audit
+      summary: Update a relying party by their uid
+      operationId: relying-party-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/relying-parties/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - relying-party-audit
+      summary: Update a relying party by their uid
+      operationId: relying-party-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
   /api/access/relying-parties/{uid}/enable:
@@ -972,6 +1116,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/trusted-clients/-/audit/entity/{uid}:
+    get:
+      tags:
+        - trusted-client-audit
+      summary: Update a trusted client by their uid
+      operationId: trusted-client-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/trusted-clients/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - trusted-client-audit
+      summary: Update a trusted client by their uid
+      operationId: trusted-client-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
   /api/access/trusted-clients/{uid}/enable:
@@ -1442,6 +1648,68 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/access/identity/-/audit/entity/{uid}:
+    get:
+      tags:
+        - user-identity-audit
+      summary: Update a user identity by their uid
+      operationId: user-identity-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/identity/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - user-identity-audit
+      summary: Update a user identity by their uid
+      operationId: user-identity-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
   /api/me/acl/access/identity:
     get:
       tags:
@@ -1686,6 +1954,68 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/access/tenants-config/-/audit/entity/{uid}:
+    get:
+      tags:
+        - tenant-config-audit
+      summary: Update a tenant config by their uid
+      operationId: tenant-config-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/tenants-config/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - tenant-config-audit
+      summary: Update a tenant config by their uid
+      operationId: tenant-config-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
   /api/me/acl/access/tenants-config:
     get:
       tags:
@@ -1908,6 +2238,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/api-key-clients/-/audit/entity/{uid}:
+    get:
+      tags:
+        - api-key-client-audit
+      summary: Update a api key client by their uid
+      operationId: api-key-client-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/api-key-clients/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - api-key-client-audit
+      summary: Update a api key client by their uid
+      operationId: api-key-client-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
   /api/access/api-key-clients/{uid}/enable:
@@ -2336,6 +2728,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/login-providers/-/audit/entity/{uid}:
+    get:
+      tags:
+        - tenant-login-provider-audit
+      summary: Update a tenant login provider by their uid
+      operationId: tenant-login-provider-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/login-providers/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - tenant-login-provider-audit
+      summary: Update a tenant login provider by their uid
+      operationId: tenant-login-provider-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
   /api/access/login-providers/{uid}/enable:
@@ -2846,6 +3300,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/tenants-terms-of-use/-/audit/entity/{uid}:
+    get:
+      tags:
+        - tenant-terms-of-use-audit
+      summary: Update a tenant terms of use by their uid
+      operationId: tenant-terms-of-use-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/tenants-terms-of-use/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - tenant-terms-of-use-audit
+      summary: Update a tenant terms of use by their uid
+      operationId: tenant-terms-of-use-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
   /api/access/tenants-terms-of-use/{uid}/enable:
@@ -3368,6 +3884,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/users/-/audit/entity/{uid}:
+    get:
+      tags:
+        - user-audit
+      summary: Update a user by their uid
+      operationId: user-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/users/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - user-audit
+      summary: Update a user by their uid
+      operationId: user-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
   /api/access/users/{uid}/accept:
@@ -4092,6 +4670,68 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/access/tenants/-/audit/entity/{uid}:
+    get:
+      tags:
+        - tenant-audit
+      summary: Update a tenant by their uid
+      operationId: tenant-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/tenants/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - tenant-audit
+      summary: Update a tenant by their uid
+      operationId: tenant-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
   /api/access/tenants/{uid}/enable:
     patch:
       tags:
@@ -4385,6 +5025,79 @@ components:
           type: array
           items:
             type: string
+    AuditEventDto:
+      type: object
+      description: Event representing a tracked change in the system
+      properties:
+        operation:
+          type: string
+          description: Low-level operation type (e.g., create, update, delete)
+          example: update
+        usecase:
+          type: string
+          description: Business-level action or use case
+          example: enable
+        entityType:
+          type: string
+          description: Type of the domain entity affected
+          example: ApiKeyClient
+        entityId:
+          type: string
+          description: Identifier of the domain entity
+          example: abc-123
+        oldValues:
+          type: object
+          additionalProperties:
+            type: string
+          description: Previous state of the entity (key-value pairs)
+          example:
+            status: disabled
+            expiresAt: 2025-12-31
+        newValues:
+          type: object
+          additionalProperties:
+            type: string
+          description: New state of the entity (key-value pairs)
+          example:
+            status: enabled
+            expiresAt: 2026-12-31
+        performedBy:
+          type: string
+          description: Actor who performed the operation
+          example: juan.perez
+        tenant:
+          type: string
+          description: Tenant to which the action belongs
+          example: customer-acme
+        timestamp:
+          type: string
+          format: date-time
+          description: When the operation was performed
+          example: 2025-12-17T15:23:45.123Z
+        sourceRequest:
+          type: string
+          description: Request or command that originated the action
+          example: POST /api/v1/apikeys/enable
+        remoteAddress:
+          type: string
+          description: IP address of the client
+          example: 192.168.1.100
+        remoteApplication:
+          type: string
+          description: Name of the remote app/client
+          example: portal-admin
+        remoteDevice:
+          type: string
+          description: Name or type of the client device
+          example: web-browser
+        claims:
+          type: object
+          additionalProperties:
+            type: string
+          description: Security claims provided by the actor
+          example:
+            sub: juan.perez
+            role: ADMIN
     RelyingPartyApiRef:
       type: object
       properties:

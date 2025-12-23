@@ -1,0 +1,32 @@
+package net.civeira.phylax.bootstrap.telemetry.exporter;
+
+import java.util.Map;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
+
+@Value
+@Builder
+@Jacksonized
+public class JsonSpanRecord {
+
+  String traceId;
+  String spanId;
+  String parentSpanId;
+
+  String name;
+  String kind;
+
+  long startEpochNanos;
+  long endEpochNanos;
+
+  String status;
+
+  Map<String, Object> attributes;
+  Map<String, Object> resourceAttributes;
+
+  // Instrumentation scope
+  String scopeName;
+  String scopeVersion;
+  String scopeSchemaUrl;
+}

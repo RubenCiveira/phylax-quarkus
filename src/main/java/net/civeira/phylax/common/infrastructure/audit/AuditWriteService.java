@@ -4,6 +4,11 @@ package net.civeira.phylax.common.infrastructure.audit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -24,31 +29,65 @@ public class AuditWriteService {
   public void record(AuditEvent event) {
     String sql = """
             INSERT INTO _audit_events (
-                id, operation, usecase, entity_type, entity_id,
+                id, operation, usecase, trace_id, entity_type, entity_id,
                 old_values, new_values,
                 performed_by, tenant, timestamp,
                 source_request, remote_address, remote_application, remote_device,
-                claims
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                claims, span_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+      Map<String, String> oldValues = event.getOldValue();
+      if( null == oldValues ) {
+        oldValues = Map.of();
+      }
+      Map<String, String> newValues = event.getNewValue();
+      if( null == newValues ) {
+        newValues = Map.of();
+      }
+
+      // Detect only differences
+      Map<String, String> filteredOld = new HashMap<>();
+      Map<String, String> filteredNew = new HashMap<>();
+
+      Set<String> allKeys = new HashSet<>();
+      allKeys.addAll(oldValues.keySet());
+      allKeys.addAll(newValues.keySet());
+
+      for (String key : allKeys) {
+        String oldVal = oldValues.get(key);
+        String newVal = newValues.get(key);
+
+        if (!Objects.equals(oldVal, newVal)) {
+          if (oldVal != null) {
+            filteredOld.put(key, oldVal);
+          }
+          if (newVal != null) {
+            filteredNew.put(key, newVal);
+          }
+        }
+      }
+
       ps.setString(1, UUID.randomUUID().toString());
       ps.setString(2, event.getOperation());
       ps.setString(3, event.getUsecase());
-      ps.setString(4, event.getEntityType());
-      ps.setString(5, event.getEntityId());
-      ps.setString(6, mapper.writeValueAsString(event.getOldValue()));
-      ps.setString(7, mapper.writeValueAsString(event.getNewValue()));
-      ps.setString(8, event.getPerformedBy());
-      ps.setString(9, event.getTenant());
-      ps.setTimestamp(10, Timestamp.from(event.getTimestamp().toInstant()));
-      ps.setString(11, event.getSourceRequest());
-      ps.setString(12, event.getRemoteAddress());
-      ps.setString(13, event.getRemoteApplication());
-      ps.setString(14, event.getRemoteDevice());
-      ps.setString(15, mapper.writeValueAsString(event.getClaims()));
+      ps.setString(4, event.getTraceId());
+      ps.setString(5, event.getEntityType());
+      ps.setString(6, event.getEntityId());
+      ps.setString(7, mapper.writeValueAsString(filteredOld));
+      ps.setString(8, mapper.writeValueAsString(filteredNew));
+      ps.setString(9, event.getPerformedBy());
+      ps.setString(10, event.getTenant());
+      ps.setTimestamp(11, Timestamp.from(event.getTimestamp().toInstant()));
+      ps.setString(12, event.getSourceRequest());
+      ps.setString(13, event.getRemoteAddress());
+      ps.setString(14, event.getRemoteApplication());
+      ps.setString(15, event.getRemoteDevice());
+      ps.setString(16, mapper.writeValueAsString(event.getClaims()));
+      ps.setString(17, event.getSpanId());
       ps.executeUpdate();
     } catch (Exception e) {
       throw new RuntimeException("Error writing audit event", e);

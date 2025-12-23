@@ -11,8 +11,6 @@ import io.vertx.ext.web.RoutingContext;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.infrastructure.CurrentRequest;
-import net.civeira.phylax.common.security.Actor;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -22,17 +20,12 @@ public class AuditActuator {
 
   private final ObjectMapper mapper;
 
-  private final CurrentRequest currentRequest;
-
   public void registerManagementRoutes(@Observes ManagementInterface management) {
     management.router().get("/q/audit").handler(this::handleAuditRequest);
   }
 
   private void handleAuditRequest(RoutingContext ctx) {
     try {
-      Actor actor = currentRequest.getActor();
-      String tenant = actor.getTenant().orElse("-");
-
       String entity = ctx.queryParam("entity").stream().findFirst().orElse(null);
       String entityId = ctx.queryParam("id").stream().findFirst().orElse(null);
       String user = ctx.queryParam("user").stream().findFirst().orElse(null);
@@ -40,7 +33,6 @@ public class AuditActuator {
       int limit = ctx.queryParam("limit").stream().findFirst().map(Integer::parseInt).orElse(50);
       int offset = ctx.queryParam("offset").stream().findFirst().map(Integer::parseInt).orElse(0);
 
-      // For simplicity, ignore time filters for now
       String fromStr = ctx.queryParam("from").stream().findFirst().orElse(null);
       ZonedDateTime from = fromStr != null ? ZonedDateTime.parse(fromStr) : null;
       String toStr = ctx.queryParam("to").stream().findFirst().orElse(null);
@@ -48,7 +40,7 @@ public class AuditActuator {
 
       List<AuditEvent> results = auditReadService
           .findByFilters(AuditQueryFilter.builder().entityId(entityId).entityType(entity)
-              .performedBy(user).operation(op).from(from).to(to).build(), tenant, limit, offset);
+              .performedBy(user).operation(op).from(from).to(to).build(), null, limit, offset);
 
       ctx.response().putHeader("Content-Type", "application/json")
           .end(mapper.writeValueAsString(results));

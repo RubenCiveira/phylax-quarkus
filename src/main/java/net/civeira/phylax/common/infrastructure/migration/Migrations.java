@@ -114,6 +114,57 @@ public class Migrations implements AutoCloseable {
     return result;
   }
 
+  public List<String> getPendingMigrations() throws Exception {
+    return getPendingMigrationsSql(false);
+  }
+
+  public List<String> getPendingMigrationsAndSyncs(boolean includeMarkQueries) throws Exception {
+    return getPendingMigrationsSql(true);
+  }
+
+  private List<String> getPendingMigrationsSql(boolean includeMarkQueries) throws Exception {
+    List<String> pendingSqls = new ArrayList<>();
+
+    Map<String, Map<String, String>> previousMigrations = listExecuted(this.group);
+    List<String> files = retrieveResources(this.migrationsIndex);
+    List<String> toExecute = new ArrayList<>();
+    boolean pending = false;
+
+    for (String file : files) {
+      pending = retrieveFromFile(file, previousMigrations, new HashMap<>(), toExecute, pending);
+    }
+
+    for (String file : toExecute) {
+      InputStream resourceAsStream =
+          Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
+
+      if (resourceAsStream != null) {
+        List<String> lines = readFile(file);
+        List<String> filtered =
+            lines.stream().filter(line -> !line.trim().startsWith("--")).toList();
+
+        String sql = String.join("\n", filtered);
+        String[] statements = sql.split(";");
+        for (String statement : statements) {
+          if (!statement.trim().isEmpty()) {
+            pendingSqls.add(statement.trim() + ";");
+          }
+        }
+
+        if (includeMarkQueries) {
+          boolean alreadyExists = previousMigrations.containsKey(file);
+          String md5 = calculateSha256(
+              Thread.currentThread().getContextClassLoader().getResourceAsStream(file));
+          String markSql = dialect.markOkSql(LOG_TABLE, alreadyExists);
+          pendingSqls.add("-- MARK: would execute markOkSql");
+          pendingSqls.add(String.format("-- %s [md5: %s, file: %s]", markSql, md5, file));
+        }
+      }
+    }
+
+    return pendingSqls;
+  }
+
   private void executePending(String file, Map<String, Map<String, String>> previousMigrations,
       Map<String, Object> result) throws NoSuchAlgorithmException, IOException, SQLException {
     InputStream resourceAsStream =

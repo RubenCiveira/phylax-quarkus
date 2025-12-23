@@ -1,0 +1,8 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+import java.util.List;
+
+public record ResourceLogs(
+    OtlpResource resource,
+    List<ScopeLogs> scopeLogs
+  ) {}

@@ -1,0 +1,7 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+import java.util.List;
+
+public record OtlpTracesRequest(
+    List<ResourceSpans> resourceSpans
+  ) {}

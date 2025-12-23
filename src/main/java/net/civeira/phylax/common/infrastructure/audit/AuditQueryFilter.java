@@ -16,6 +16,8 @@ public class AuditQueryFilter {
   private final String entityType;
   private final String entityId;
   private final String operation;
+  private final String spanId;
+  private final String traceId;
   private final ZonedDateTime from;
   private final ZonedDateTime to;
 
@@ -35,6 +37,14 @@ public class AuditQueryFilter {
     if (operation != null) {
       sql.append("AND operation = ? ");
       params.add(operation);
+    }
+    if (traceId != null) {
+      sql.append("AND trace_id = ? ");
+      params.add(traceId);
+    }
+    if (spanId != null) {
+      sql.append("AND span_id = ? ");
+      params.add(spanId);
     }
     if (from != null) {
       sql.append("AND timestamp >= ? ");

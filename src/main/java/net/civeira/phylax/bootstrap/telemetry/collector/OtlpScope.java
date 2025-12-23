@@ -1,0 +1,6 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+public record OtlpScope(
+    String name,
+    String version
+  ) {}

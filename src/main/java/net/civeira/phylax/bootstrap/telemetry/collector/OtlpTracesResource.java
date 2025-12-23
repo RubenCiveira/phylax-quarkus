@@ -1,0 +1,39 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+
+@Path("/v1/traces")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@ApplicationScoped
+@RequiredArgsConstructor
+public class OtlpTracesResource {
+
+  private final TracesMapper tracesMapper;
+
+  private final Instance<SpanExporter> spanExporter;
+
+  @POST
+  public Response ingestTraces(OtlpTracesRequest request) {
+    var spans = tracesMapper.toSpanData(request);
+    var success = false;
+
+    System.err.println(">>> GO WITH EXPORTERS: " + spanExporter.stream().count());
+    for (var exporter : spanExporter) {
+      System.err.println("EXPORT: " + spans.size() );
+      var result = exporter.export(spans);
+      success |= result.isSuccess();
+    }
+    return success ? Response.accepted().entity(OtlpSuccessResponse.ok()).build()
+        : Response.serverError().entity(OtlpSuccessResponse.partial("export_failed")).build();
+  }
+}

@@ -1,0 +1,15 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+import java.util.List;
+
+public record OtlpSpan(
+    String traceId,
+    String spanId,
+    String parentSpanId,
+    String name,
+    int kind,
+    long startTimeUnixNano,
+    long endTimeUnixNano,
+    List<OtlpKeyValue> attributes,
+    OtlpStatus status
+  ) {}

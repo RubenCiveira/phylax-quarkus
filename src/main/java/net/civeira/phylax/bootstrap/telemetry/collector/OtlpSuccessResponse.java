@@ -1,0 +1,11 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+public record OtlpSuccessResponse(String status, String message) {
+  static OtlpSuccessResponse ok() {
+    return new OtlpSuccessResponse("ok", null);
+  }
+
+  static OtlpSuccessResponse partial(String msg) {
+    return new OtlpSuccessResponse("partial", msg);
+  }
+}

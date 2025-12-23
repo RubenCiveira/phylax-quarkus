@@ -1,0 +1,50 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+import java.util.List;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.data.EventData;
+import io.opentelemetry.sdk.trace.data.LinkData;
+import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.data.StatusData;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class OtlpSpanData implements SpanData {
+  private final String name;
+  private final SpanKind kind;
+  private final SpanContext spanContext;
+  private final String traceId;
+  private final String spanId;
+  private final SpanContext parentSpanContext;
+  private final String parentSpanId;
+  private final StatusData status;
+  private final long startEpochNanos;
+  @Builder.Default
+  private final Attributes attributes = Attributes.empty();
+  @Builder.Default
+  private final List<EventData> events = List.of();
+  @Builder.Default
+  private final List<LinkData> links = List.of();
+  private final long endEpochNanos;
+  private final boolean ended;
+  private final int totalRecordedEvents;
+  private final int totalRecordedLinks;
+  private final int getTotalAttributeCount;
+  @Deprecated
+  private final io.opentelemetry.sdk.common.InstrumentationLibraryInfo instrumentationLibraryInfo;
+  private final InstrumentationScopeInfo instrumentationScopeInfo;
+  private final Resource resource;
+  private final int totalAttributeCount;
+  
+  @Override
+  public boolean hasEnded() {
+    return ended;
+  }
+
+}

@@ -1,0 +1,46 @@
+package net.civeira.phylax.bootstrap.telemetry.collector;
+
+import java.util.List;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.sdk.resources.Resource;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class OtelResourceMapper {
+
+  public Resource toResource(OtlpResource otlpResource) {
+    if (otlpResource == null || otlpResource.attributes() == null) {
+      return Resource.empty();
+    }
+    Attributes attributes = toAttributes(otlpResource.attributes());
+    return Resource.create(attributes);
+  }
+
+  public Attributes toAttributes(List<OtlpKeyValue> list) {
+    var builder = Attributes.builder();
+
+    if (list == null) {
+      return builder.build();
+    }
+
+    for (var kv : list) {
+      if (kv == null || kv.key() == null || kv.value() == null)
+        continue;
+
+      var v = kv.value();
+
+      // Subconjunto mínimo: 1 valor escalar
+      if (v.stringValue() != null) {
+        builder.put(kv.key(), v.stringValue());
+      } else if (v.intValue() != null) {
+        builder.put(kv.key(), v.intValue());
+      } else if (v.doubleValue() != null) {
+        builder.put(kv.key(), v.doubleValue());
+      } else if (v.boolValue() != null) {
+        builder.put(kv.key(), v.boolValue());
+      }
+    }
+
+    return builder.build();
+  }
+}

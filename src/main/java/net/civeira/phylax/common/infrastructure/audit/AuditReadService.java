@@ -29,42 +29,58 @@ public class AuditReadService {
 
   private final ObjectMapper mapper;
 
+
+
   public List<AuditEvent> findByFilters(AuditQueryFilter filter, String tenant, int limit,
       int offset) {
+    try (Connection conn = dataSource.getConnection()) {
+      StringBuilder sql = new StringBuilder("SELECT * FROM _audit_events WHERE 1=1 ");
+      List<Object> params = new ArrayList<>();
 
-    StringBuilder sql = new StringBuilder("SELECT * FROM _audit_events WHERE 1=1 ");
-    List<Object> params = new ArrayList<>();
-
-    filter.appendToFilter(sql, params);
-    if (tenant != null) {
-      sql.append("AND tenant = ? ");
-      params.add(tenant);
-    }
-
-    sql.append("ORDER BY timestamp DESC LIMIT ? OFFSET ?");
-    params.add(limit);
-    params.add(offset);
-
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-      for (int i = 0; i < params.size(); i++) {
-        ps.setObject(i + 1, params.get(i));
+      filter.appendToFilter(sql, params);
+      if (tenant != null) {
+        sql.append("AND tenant = ? ");
+        params.add(tenant);
       }
-      ResultSet rs = ps.executeQuery();
-      List<AuditEvent> results = new ArrayList<>();
-      while (rs.next()) {
-        AuditEvent event = AuditEvent.builder().operation(rs.getString("operation"))
-            .usecase(rs.getString("usecase")).entityType(rs.getString("entity_type"))
-            .entityId(rs.getString("entity_id")).oldValue(readMap("old_values", rs))
-            .newValue(readMap("new_values", rs)).performedBy(rs.getString("performed_by"))
-            .tenant(rs.getString("tenant"))
-            .timestamp(rs.getTimestamp("timestamp").toInstant().atZone(ZoneId.systemDefault()))
-            .sourceRequest(rs.getString("source_request"))
-            .remoteAddress(rs.getString("remote_address"))
-            .remoteDevice(rs.getString("remote_device")).claims(readMap("claims", rs)).build();
-        results.add(event);
+
+      String driver = conn.getMetaData().getDriverName().toLowerCase();
+      if (driver.contains("postgresql")) {
+        sql.append("ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+      } else if (driver.contains("oracle")) {
+        sql.append("ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+      } else if (driver.contains("mariadb")) {
+        sql.append("ORDER BY timestamp DESC LIMIT ?, ?");
+      } else if (driver.contains("mysql")) {
+        sql.append("ORDER BY timestamp DESC LIMIT ?, ?");
+      } else if (driver.contains("sqlserver")) {
+        sql.append("ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+      } else {
+        sql.append("ORDER BY timestamp DESC LIMIT ? OFFSET ?");
       }
-      return results;
+      params.add(limit);
+      params.add(offset);
+
+      try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        for (int i = 0; i < params.size(); i++) {
+          ps.setObject(i + 1, params.get(i));
+        }
+        ResultSet rs = ps.executeQuery();
+        List<AuditEvent> results = new ArrayList<>();
+        while (rs.next()) {
+          AuditEvent event = AuditEvent.builder().operation(rs.getString("operation"))
+              .usecase(rs.getString("usecase")).traceId(rs.getString("trace_id"))
+              .spanId(rs.getString("span_id")).entityType(rs.getString("entity_type"))
+              .entityId(rs.getString("entity_id")).oldValue(readMap("old_values", rs))
+              .newValue(readMap("new_values", rs)).performedBy(rs.getString("performed_by"))
+              .tenant(rs.getString("tenant"))
+              .timestamp(rs.getTimestamp("timestamp").toInstant().atZone(ZoneId.systemDefault()))
+              .sourceRequest(rs.getString("source_request"))
+              .remoteAddress(rs.getString("remote_address"))
+              .remoteDevice(rs.getString("remote_device")).claims(readMap("claims", rs)).build();
+          results.add(event);
+        }
+        return results;
+      }
     } catch (SQLException e) {
       throw new RuntimeException("Error reading audit events", e);
     }
