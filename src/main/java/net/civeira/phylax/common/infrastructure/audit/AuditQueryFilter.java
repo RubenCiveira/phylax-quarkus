@@ -11,9 +11,7 @@ import lombok.Data;
 @Data
 @Builder
 public class AuditQueryFilter {
-
   private final String performedBy;
-  private final String entityType;
   private final String entityId;
   private final String operation;
   private final String spanId;
@@ -25,10 +23,6 @@ public class AuditQueryFilter {
     if (performedBy != null) {
       sql.append("AND performed_by = ? ");
       params.add(performedBy);
-    }
-    if (entityType != null) {
-      sql.append("AND entity_type = ? ");
-      params.add(entityType);
     }
     if (entityId != null) {
       sql.append("AND entity_id = ? ");

@@ -26,26 +26,25 @@ public class AuditWriteService {
 
   private final ObjectMapper mapper;
 
-  public void record(AuditEvent event) {
-    String sql = """
-            INSERT INTO _audit_events (
-                id, operation, usecase, trace_id, entity_type, entity_id,
+  public void record(String on, AuditEvent event) {
+    String sql = "INSERT INTO " + on + "_audit ( " + """
+                id, operation, usecase, trace_id, entity_id,
                 old_values, new_values,
                 performed_by, tenant, timestamp,
                 source_request, remote_address, remote_application, remote_device,
                 claims, span_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
 
       Map<String, String> oldValues = event.getOldValue();
-      if( null == oldValues ) {
+      if (null == oldValues) {
         oldValues = Map.of();
       }
       Map<String, String> newValues = event.getNewValue();
-      if( null == newValues ) {
+      if (null == newValues) {
         newValues = Map.of();
       }
 
@@ -70,24 +69,22 @@ public class AuditWriteService {
           }
         }
       }
-
       ps.setString(1, UUID.randomUUID().toString());
       ps.setString(2, event.getOperation());
       ps.setString(3, event.getUsecase());
       ps.setString(4, event.getTraceId());
-      ps.setString(5, event.getEntityType());
-      ps.setString(6, event.getEntityId());
-      ps.setString(7, mapper.writeValueAsString(filteredOld));
-      ps.setString(8, mapper.writeValueAsString(filteredNew));
-      ps.setString(9, event.getPerformedBy());
-      ps.setString(10, event.getTenant());
-      ps.setTimestamp(11, Timestamp.from(event.getTimestamp().toInstant()));
-      ps.setString(12, event.getSourceRequest());
-      ps.setString(13, event.getRemoteAddress());
-      ps.setString(14, event.getRemoteApplication());
-      ps.setString(15, event.getRemoteDevice());
-      ps.setString(16, mapper.writeValueAsString(event.getClaims()));
-      ps.setString(17, event.getSpanId());
+      ps.setString(5, event.getEntityId());
+      ps.setString(6, mapper.writeValueAsString(filteredOld));
+      ps.setString(7, mapper.writeValueAsString(filteredNew));
+      ps.setString(8, event.getPerformedBy());
+      ps.setString(9, event.getTenant());
+      ps.setTimestamp(10, Timestamp.from(event.getTimestamp().toInstant()));
+      ps.setString(11, event.getSourceRequest());
+      ps.setString(12, event.getRemoteAddress());
+      ps.setString(13, event.getRemoteApplication());
+      ps.setString(14, event.getRemoteDevice());
+      ps.setString(15, mapper.writeValueAsString(event.getClaims()));
+      ps.setString(16, event.getSpanId());
       ps.executeUpdate();
     } catch (Exception e) {
       throw new RuntimeException("Error writing audit event", e);

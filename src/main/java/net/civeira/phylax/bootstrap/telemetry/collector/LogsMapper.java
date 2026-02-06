@@ -3,6 +3,7 @@ package net.civeira.phylax.bootstrap.telemetry.collector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;

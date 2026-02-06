@@ -29,12 +29,10 @@ public class AuditReadService {
 
   private final ObjectMapper mapper;
 
-
-
-  public List<AuditEvent> findByFilters(AuditQueryFilter filter, String tenant, int limit,
-      int offset) {
+  public List<AuditEvent> findByFilters(String on, String entity, AuditQueryFilter filter,
+      String tenant, int limit, int offset) {
     try (Connection conn = dataSource.getConnection()) {
-      StringBuilder sql = new StringBuilder("SELECT * FROM _audit_events WHERE 1=1 ");
+      StringBuilder sql = new StringBuilder("SELECT * FROM " + on + " WHERE 1=1 ");
       List<Object> params = new ArrayList<>();
 
       filter.appendToFilter(sql, params);

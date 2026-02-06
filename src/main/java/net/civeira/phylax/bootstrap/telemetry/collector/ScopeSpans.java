@@ -4,3 +4,4 @@ import java.util.List;
 
 public record ScopeSpans(OtlpScope scope, List<OtlpSpan> spans) {
 }
+

@@ -1,6 +1,7 @@
 package net.civeira.phylax.bootstrap.telemetry.collector;
 
 import java.util.List;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.resources.Resource;
 import jakarta.enterprise.context.ApplicationScoped;

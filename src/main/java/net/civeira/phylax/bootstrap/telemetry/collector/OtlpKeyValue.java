@@ -4,3 +4,4 @@ public record OtlpKeyValue(
     String key,
     OtlpAnyValue value
   ) {}
+

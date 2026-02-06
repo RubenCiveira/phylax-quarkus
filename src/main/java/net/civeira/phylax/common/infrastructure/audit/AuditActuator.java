@@ -38,9 +38,9 @@ public class AuditActuator {
       String toStr = ctx.queryParam("to").stream().findFirst().orElse(null);
       ZonedDateTime to = fromStr != null ? ZonedDateTime.parse(toStr) : null;
 
-      List<AuditEvent> results = auditReadService
-          .findByFilters(AuditQueryFilter.builder().entityId(entityId).entityType(entity)
-              .performedBy(user).operation(op).from(from).to(to).build(), null, limit, offset);
+      List<AuditEvent> results = auditReadService.findByFilters(entity, entity, AuditQueryFilter
+          .builder().entityId(entityId).performedBy(user).operation(op).from(from).to(to).build(),
+          null, limit, offset);
 
       ctx.response().putHeader("Content-Type", "application/json")
           .end(mapper.writeValueAsString(results));

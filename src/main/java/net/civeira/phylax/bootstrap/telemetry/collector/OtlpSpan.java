@@ -13,3 +13,4 @@ public record OtlpSpan(
     List<OtlpKeyValue> attributes,
     OtlpStatus status
   ) {}
+

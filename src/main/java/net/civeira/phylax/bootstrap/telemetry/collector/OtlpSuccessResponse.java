@@ -9,3 +9,4 @@ public record OtlpSuccessResponse(String status, String message) {
     return new OtlpSuccessResponse("partial", msg);
   }
 }
+

@@ -4,3 +4,4 @@ public record OtlpStatus(
     int code,
     String message
   ) {}
+

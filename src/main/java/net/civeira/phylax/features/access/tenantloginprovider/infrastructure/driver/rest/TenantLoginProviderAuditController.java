@@ -39,9 +39,11 @@ public class TenantLoginProviderAuditController implements TenantLoginProviderAu
   public Response tenantLoginProviderApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
     List<AuditEvent> events =
-        reader.findByFilters(AuditQueryFilter.builder().entityType("tenantLoginProvider")
-            .performedBy(actor).from(from.atStartOfDay(ZoneId.systemDefault()))
-            .to(to.atStartOfDay(ZoneId.systemDefault())).build(), tenant(), 0, 1000);
+        reader.findByFilters("access_tenant_login_provider_audit", "tenantLoginProvider",
+            AuditQueryFilter.builder().performedBy(actor)
+                .from(from.atStartOfDay(ZoneId.systemDefault()))
+                .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
+            tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -52,9 +54,8 @@ public class TenantLoginProviderAuditController implements TenantLoginProviderAu
    */
   @Override
   public Response tenantLoginProviderApiEntityAudit(final String uid) {
-    List<AuditEvent> events = reader.findByFilters(
-        AuditQueryFilter.builder().entityType("tenantLoginProvider").entityId(uid).build(),
-        tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("access_tenant_login_provider_audit",
+        "tenantLoginProvider", AuditQueryFilter.builder().entityId(uid).build(), tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -65,8 +66,8 @@ public class TenantLoginProviderAuditController implements TenantLoginProviderAu
    */
   private AuditEventDto map(final AuditEvent event) {
     return new AuditEventDto().operation(event.getOperation()).usecase(event.getUsecase())
-        .entityType(event.getEntityType()).entityId(event.getEntityId())
-        .oldValues(event.getOldValue()).newValues(event.getNewValue())
+        .entityType("tenantLoginProvider").entityType(event.getEntityType())
+        .entityId(event.getEntityId()).oldValues(event.getOldValue()).newValues(event.getNewValue())
         .performedBy(event.getPerformedBy()).tenant(event.getTenant())
         .timestamp(event.getTimestamp().toOffsetDateTime()).sourceRequest(event.getSourceRequest())
         .remoteAddress(event.getRemoteAddress()).remoteApplication(event.getRemoteApplication())

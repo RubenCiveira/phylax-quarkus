@@ -6,3 +6,4 @@ public record OtlpAnyValue(
     Double doubleValue,
     Boolean boolValue
   ) {}
+

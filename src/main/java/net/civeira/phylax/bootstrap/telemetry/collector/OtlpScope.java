@@ -4,3 +4,4 @@ public record OtlpScope(
     String name,
     String version
   ) {}
+

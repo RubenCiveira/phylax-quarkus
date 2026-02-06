@@ -37,9 +37,11 @@ public class RoleAuditController implements RoleAuditApi {
    */
   @Override
   public Response roleApiActorAudit(final String actor, final LocalDate from, final LocalDate to) {
-    List<AuditEvent> events = reader.findByFilters(AuditQueryFilter.builder().entityType("role")
-        .performedBy(actor).from(from.atStartOfDay(ZoneId.systemDefault()))
-        .to(to.atStartOfDay(ZoneId.systemDefault())).build(), tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("access_role_audit", "role",
+        AuditQueryFilter.builder().performedBy(actor)
+            .from(from.atStartOfDay(ZoneId.systemDefault()))
+            .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
+        tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -50,8 +52,8 @@ public class RoleAuditController implements RoleAuditApi {
    */
   @Override
   public Response roleApiEntityAudit(final String uid) {
-    List<AuditEvent> events = reader.findByFilters(
-        AuditQueryFilter.builder().entityType("role").entityId(uid).build(), tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("access_role_audit", "role",
+        AuditQueryFilter.builder().entityId(uid).build(), tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -62,7 +64,7 @@ public class RoleAuditController implements RoleAuditApi {
    */
   private AuditEventDto map(final AuditEvent event) {
     return new AuditEventDto().operation(event.getOperation()).usecase(event.getUsecase())
-        .entityType(event.getEntityType()).entityId(event.getEntityId())
+        .entityType("role").entityType(event.getEntityType()).entityId(event.getEntityId())
         .oldValues(event.getOldValue()).newValues(event.getNewValue())
         .performedBy(event.getPerformedBy()).tenant(event.getTenant())
         .timestamp(event.getTimestamp().toOffsetDateTime()).sourceRequest(event.getSourceRequest())

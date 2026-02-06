@@ -28,18 +28,19 @@ public class TenantConfigAuditAdapter implements TenantConfigAuditGateway {
   @Override
   public void created(final String usecase, final TenantConfig tenantConfig,
       final Interaction interaction) {
-    writer.record(AuditEvent.builder().operation("create").usecase(usecase)
-        .traceId(currentTraceId()).spanId(currentSpanId()).entityType("tenantConfig")
-        .entityId(tenantConfig.getUid()).newValue(tenantConfig.toMap())
-        .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
-        .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(interaction.getConnection().getStartTime())
-        .sourceRequest(interaction.getConnection().getRequest())
-        .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(
-            interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(interaction.getActor().getClaims()).build());
+    writer.record("access_tenant_config_audit",
+        AuditEvent.builder().operation("create").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("tenantConfig").entityId(tenantConfig.getUid())
+            .newValue(tenantConfig.toMap())
+            .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
+            .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
+            .timestamp(interaction.getConnection().getStartTime())
+            .sourceRequest(interaction.getConnection().getRequest())
+            .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
+            .remoteApplication(
+                interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
+            .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
+            .claims(interaction.getActor().getClaims()).build());
   }
 
   /**
@@ -51,18 +52,19 @@ public class TenantConfigAuditAdapter implements TenantConfigAuditGateway {
   @Override
   public void deleted(final String usecase, final TenantConfig tenantConfig,
       final Interaction interaction) {
-    writer.record(AuditEvent.builder().operation("delete").usecase(usecase)
-        .traceId(currentTraceId()).spanId(currentSpanId()).entityType("tenantConfig")
-        .entityId(tenantConfig.getUid()).oldValue(tenantConfig.toMap())
-        .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
-        .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(interaction.getConnection().getStartTime())
-        .sourceRequest(interaction.getConnection().getRequest())
-        .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(
-            interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(interaction.getActor().getClaims()).build());
+    writer.record("access_tenant_config_audit",
+        AuditEvent.builder().operation("delete").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("tenantConfig").entityId(tenantConfig.getUid())
+            .oldValue(tenantConfig.toMap())
+            .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
+            .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
+            .timestamp(interaction.getConnection().getStartTime())
+            .sourceRequest(interaction.getConnection().getRequest())
+            .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
+            .remoteApplication(
+                interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
+            .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
+            .claims(interaction.getActor().getClaims()).build());
   }
 
   /**
@@ -75,8 +77,8 @@ public class TenantConfigAuditAdapter implements TenantConfigAuditGateway {
   @Override
   public void updated(final String usecase, final TenantConfig tenantConfig,
       final TenantConfig tenantConfigOriginal, final Interaction interaction) {
-    writer
-        .record(AuditEvent.builder().operation("update").usecase(usecase).traceId(currentTraceId())
+    writer.record("access_tenant_config_audit",
+        AuditEvent.builder().operation("update").usecase(usecase).traceId(currentTraceId())
             .spanId(currentSpanId()).entityType("tenantConfig").entityId(tenantConfig.getUid())
             .newValue(tenantConfig.toMap()).oldValue(tenantConfigOriginal.toMap())
             .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))

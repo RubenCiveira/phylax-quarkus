@@ -1,6 +1,7 @@
 package net.civeira.phylax.bootstrap.telemetry.collector;
 
 import java.util.List;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
@@ -41,7 +42,7 @@ public class OtlpSpanData implements SpanData {
   private final InstrumentationScopeInfo instrumentationScopeInfo;
   private final Resource resource;
   private final int totalAttributeCount;
-  
+
   @Override
   public boolean hasEnded() {
     return ended;

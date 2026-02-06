@@ -3,6 +3,7 @@ package net.civeira.phylax.bootstrap.telemetry.collector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;

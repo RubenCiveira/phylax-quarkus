@@ -1,6 +1,7 @@
 package net.civeira.phylax.bootstrap.telemetry.exporter;
 
 import java.util.Map;
+
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;

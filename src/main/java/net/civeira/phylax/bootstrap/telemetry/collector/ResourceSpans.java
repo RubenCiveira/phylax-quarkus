@@ -6,3 +6,4 @@ public record ResourceSpans(
     OtlpResource resource,
     List<ScopeSpans> scopeSpans
   ) {}
+

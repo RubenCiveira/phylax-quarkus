@@ -2,3 +2,4 @@
 /db/migration/mysql/000.001.001/20251219122708-model.changelog.mysql.sql
 /db/migration/mysql/000.001.001/20251221131041-model.changelog.mysql.sql
 /db/migration/mysql/000.001.001/20251222093329-model.changelog.mysql.sql
+/db/migration/mysql/000.001.001/20251228205550-model.changelog.mysql.sql

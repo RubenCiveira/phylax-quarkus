@@ -38,10 +38,11 @@ public class ApiKeyClientAuditController implements ApiKeyClientAuditApi {
   @Override
   public Response apiKeyClientApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    List<AuditEvent> events =
-        reader.findByFilters(AuditQueryFilter.builder().entityType("apiKeyClient")
-            .performedBy(actor).from(from.atStartOfDay(ZoneId.systemDefault()))
-            .to(to.atStartOfDay(ZoneId.systemDefault())).build(), tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("access_api_key_client_audit", "apiKeyClient",
+        AuditQueryFilter.builder().performedBy(actor)
+            .from(from.atStartOfDay(ZoneId.systemDefault()))
+            .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
+        tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -52,9 +53,8 @@ public class ApiKeyClientAuditController implements ApiKeyClientAuditApi {
    */
   @Override
   public Response apiKeyClientApiEntityAudit(final String uid) {
-    List<AuditEvent> events = reader.findByFilters(
-        AuditQueryFilter.builder().entityType("apiKeyClient").entityId(uid).build(), tenant(), 0,
-        1000);
+    List<AuditEvent> events = reader.findByFilters("access_api_key_client_audit", "apiKeyClient",
+        AuditQueryFilter.builder().entityId(uid).build(), tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -65,7 +65,7 @@ public class ApiKeyClientAuditController implements ApiKeyClientAuditApi {
    */
   private AuditEventDto map(final AuditEvent event) {
     return new AuditEventDto().operation(event.getOperation()).usecase(event.getUsecase())
-        .entityType(event.getEntityType()).entityId(event.getEntityId())
+        .entityType("apiKeyClient").entityType(event.getEntityType()).entityId(event.getEntityId())
         .oldValues(event.getOldValue()).newValues(event.getNewValue())
         .performedBy(event.getPerformedBy()).tenant(event.getTenant())
         .timestamp(event.getTimestamp().toOffsetDateTime()).sourceRequest(event.getSourceRequest())

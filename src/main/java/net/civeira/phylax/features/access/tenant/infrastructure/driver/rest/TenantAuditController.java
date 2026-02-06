@@ -38,9 +38,11 @@ public class TenantAuditController implements TenantAuditApi {
   @Override
   public Response tenantApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    List<AuditEvent> events = reader.findByFilters(AuditQueryFilter.builder().entityType("tenant")
-        .performedBy(actor).from(from.atStartOfDay(ZoneId.systemDefault()))
-        .to(to.atStartOfDay(ZoneId.systemDefault())).build(), tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("access_tenant_audit", "tenant",
+        AuditQueryFilter.builder().performedBy(actor)
+            .from(from.atStartOfDay(ZoneId.systemDefault()))
+            .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
+        tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -51,8 +53,8 @@ public class TenantAuditController implements TenantAuditApi {
    */
   @Override
   public Response tenantApiEntityAudit(final String uid) {
-    List<AuditEvent> events = reader.findByFilters(
-        AuditQueryFilter.builder().entityType("tenant").entityId(uid).build(), tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("access_tenant_audit", "tenant",
+        AuditQueryFilter.builder().entityId(uid).build(), tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -63,7 +65,7 @@ public class TenantAuditController implements TenantAuditApi {
    */
   private AuditEventDto map(final AuditEvent event) {
     return new AuditEventDto().operation(event.getOperation()).usecase(event.getUsecase())
-        .entityType(event.getEntityType()).entityId(event.getEntityId())
+        .entityType("tenant").entityType(event.getEntityType()).entityId(event.getEntityId())
         .oldValues(event.getOldValue()).newValues(event.getNewValue())
         .performedBy(event.getPerformedBy()).tenant(event.getTenant())
         .timestamp(event.getTimestamp().toOffsetDateTime()).sourceRequest(event.getSourceRequest())

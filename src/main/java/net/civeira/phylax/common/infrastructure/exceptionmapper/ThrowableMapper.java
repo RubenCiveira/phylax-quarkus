@@ -16,7 +16,6 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
   @Override
   public Response toResponse(Throwable exception) {
     log.warn("unhandled exception", exception);
-    exception.printStackTrace();
     Map<String, String> error = new HashMap<>();
     error.put("reason", "unknown");
     return Response.status(500).entity(error).build();

@@ -11,3 +11,4 @@ public record OtlpLogRecord(
     String traceId,
     String spanId
   ) {}
+

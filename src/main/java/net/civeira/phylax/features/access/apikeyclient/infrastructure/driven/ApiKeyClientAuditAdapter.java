@@ -28,18 +28,19 @@ public class ApiKeyClientAuditAdapter implements ApiKeyClientAuditGateway {
   @Override
   public void created(final String usecase, final ApiKeyClient apiKeyClient,
       final Interaction interaction) {
-    writer.record(AuditEvent.builder().operation("create").usecase(usecase)
-        .traceId(currentTraceId()).spanId(currentSpanId()).entityType("apiKeyClient")
-        .entityId(apiKeyClient.getUid()).newValue(apiKeyClient.toMap())
-        .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
-        .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(interaction.getConnection().getStartTime())
-        .sourceRequest(interaction.getConnection().getRequest())
-        .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(
-            interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(interaction.getActor().getClaims()).build());
+    writer.record("access_api_key_client_audit",
+        AuditEvent.builder().operation("create").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("apiKeyClient").entityId(apiKeyClient.getUid())
+            .newValue(apiKeyClient.toMap())
+            .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
+            .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
+            .timestamp(interaction.getConnection().getStartTime())
+            .sourceRequest(interaction.getConnection().getRequest())
+            .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
+            .remoteApplication(
+                interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
+            .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
+            .claims(interaction.getActor().getClaims()).build());
   }
 
   /**
@@ -51,18 +52,19 @@ public class ApiKeyClientAuditAdapter implements ApiKeyClientAuditGateway {
   @Override
   public void deleted(final String usecase, final ApiKeyClient apiKeyClient,
       final Interaction interaction) {
-    writer.record(AuditEvent.builder().operation("delete").usecase(usecase)
-        .traceId(currentTraceId()).spanId(currentSpanId()).entityType("apiKeyClient")
-        .entityId(apiKeyClient.getUid()).oldValue(apiKeyClient.toMap())
-        .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
-        .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(interaction.getConnection().getStartTime())
-        .sourceRequest(interaction.getConnection().getRequest())
-        .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(
-            interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(interaction.getActor().getClaims()).build());
+    writer.record("access_api_key_client_audit",
+        AuditEvent.builder().operation("delete").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("apiKeyClient").entityId(apiKeyClient.getUid())
+            .oldValue(apiKeyClient.toMap())
+            .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))
+            .tenant(interaction.getActor().getTenant().orElse("<<no-tenant>>"))
+            .timestamp(interaction.getConnection().getStartTime())
+            .sourceRequest(interaction.getConnection().getRequest())
+            .remoteAddress(interaction.getConnection().getRemote().orElse("<<no-device>>"))
+            .remoteApplication(
+                interaction.getConnection().getRemoteApplication().orElse("<<no-application>>"))
+            .remoteDevice(interaction.getConnection().getRemoteDevice().orElse("<<no-device>>"))
+            .claims(interaction.getActor().getClaims()).build());
   }
 
   /**
@@ -75,8 +77,8 @@ public class ApiKeyClientAuditAdapter implements ApiKeyClientAuditGateway {
   @Override
   public void updated(final String usecase, final ApiKeyClient apiKeyClient,
       final ApiKeyClient apiKeyClientOriginal, final Interaction interaction) {
-    writer
-        .record(AuditEvent.builder().operation("update").usecase(usecase).traceId(currentTraceId())
+    writer.record("access_api_key_client_audit",
+        AuditEvent.builder().operation("update").usecase(usecase).traceId(currentTraceId())
             .spanId(currentSpanId()).entityType("apiKeyClient").entityId(apiKeyClient.getUid())
             .newValue(apiKeyClient.toMap()).oldValue(apiKeyClientOriginal.toMap())
             .performedBy(interaction.getActor().getName().orElse("<<no-user>>"))

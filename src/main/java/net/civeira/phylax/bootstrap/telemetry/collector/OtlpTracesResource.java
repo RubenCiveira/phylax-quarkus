@@ -29,7 +29,7 @@ public class OtlpTracesResource {
 
     System.err.println(">>> GO WITH EXPORTERS: " + spanExporter.stream().count());
     for (var exporter : spanExporter) {
-      System.err.println("EXPORT: " + spans.size() );
+      System.err.println("EXPORT: " + spans.size());
       var result = exporter.export(spans);
       success |= result.isSuccess();
     }

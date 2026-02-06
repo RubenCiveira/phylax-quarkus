@@ -1,14 +1,15 @@
 package net.civeira.phylax.bootstrap.telemetry;
 
 import java.util.Map;
+
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * Estructura JSON "OTLP-friendly" para persistir/emitir un span en logs.
- * Pensada para salir como un objeto JSON (no como MDC plano).
+ * Estructura JSON "OTLP-friendly" para persistir/emitir un span en logs. Pensada para salir como un
+ * objeto JSON (no como MDC plano).
  */
 @Value
 @Builder
