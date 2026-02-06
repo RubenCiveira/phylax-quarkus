@@ -20,6 +20,8 @@ public class AuditEvent {
   private final String operation;
   // e.g., "enable"
   private final String usecase;
+  // e.g., "ApiKeyClient"
+  private final String entityType;
   // ID of the entity affected
   private final String entityId;
   // Optional: previous state
