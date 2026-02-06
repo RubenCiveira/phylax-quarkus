@@ -38,6 +38,7 @@ public class OtlpSpanData implements SpanData {
   private final int totalRecordedLinks;
   private final int getTotalAttributeCount;
   @Deprecated
+  @SuppressWarnings("deprecation")
   private final io.opentelemetry.sdk.common.InstrumentationLibraryInfo instrumentationLibraryInfo;
   private final InstrumentationScopeInfo instrumentationScopeInfo;
   private final Resource resource;

@@ -20,6 +20,7 @@ public class OtlpLogRecordData implements LogRecordData {
   private final Severity severity;
   private final String severityText;
   @Deprecated
+  @SuppressWarnings("deprecation")
   private final io.opentelemetry.sdk.logs.data.Body body;
   @Builder.Default
   private final Attributes attributes = Attributes.empty();
