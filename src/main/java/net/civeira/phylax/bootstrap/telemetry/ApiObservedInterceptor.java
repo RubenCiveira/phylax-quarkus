@@ -11,29 +11,29 @@ import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
-import net.civeira.phylax.common.telemetry.Observed;
+import net.civeira.phylax.common.telemetry.ApiObserved;
 
-@Observed
+@ApiObserved
 @Interceptor
 @Priority(Interceptor.Priority.APPLICATION + 10)
-public class ObservedInterceptor {
+public class ApiObservedInterceptor {
   @Inject
   Instance<Tracer> tracerInstance;
 
   @AroundInvoke
   public Object around(final InvocationContext context) throws Exception {
-    Observed observed = resolveObserved(context);
+    ApiObserved observed = resolveObserved(context);
     if (observed == null) {
       return context.proceed();
     }
-    return TelemetryInterceptor.around(context, tracerInstance, SpanKind.INTERNAL, observed.value(),
+    return TelemetryInterceptor.around(context, tracerInstance, SpanKind.SERVER, observed.value(),
         observed.value());
   }
 
-  private Observed resolveObserved(final InvocationContext context) {
+  private ApiObserved resolveObserved(final InvocationContext context) {
     Method method = context.getMethod();
-    if (method != null && method.isAnnotationPresent(Observed.class)) {
-      return method.getAnnotation(Observed.class);
+    if (method != null && method.isAnnotationPresent(ApiObserved.class)) {
+      return method.getAnnotation(ApiObserved.class);
     }
     return null;
   }

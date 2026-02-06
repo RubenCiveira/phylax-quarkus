@@ -38,9 +38,10 @@ public class TenantTermsOfUseAuditController implements TenantTermsOfUseAuditApi
   @Override
   public Response tenantTermsOfUseApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
+    String self = currentRequest.getActor().getName().orElse("-");
     List<AuditEvent> events =
         reader.findByFilters("access_tenant_terms_of_use_audit", "tenantTermsOfUse",
-            AuditQueryFilter.builder().performedBy(actor)
+            AuditQueryFilter.builder().performedBy(self)
                 .from(from.atStartOfDay(ZoneId.systemDefault()))
                 .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
             tenant(), 0, 1000);
@@ -54,8 +55,10 @@ public class TenantTermsOfUseAuditController implements TenantTermsOfUseAuditApi
    */
   @Override
   public Response tenantTermsOfUseApiEntityAudit(final String uid) {
-    List<AuditEvent> events = reader.findByFilters("access_tenant_terms_of_use_audit",
-        "tenantTermsOfUse", AuditQueryFilter.builder().entityId(uid).build(), tenant(), 0, 1000);
+    String self = currentRequest.getActor().getName().orElse("-");
+    List<AuditEvent> events =
+        reader.findByFilters("access_tenant_terms_of_use_audit", "tenantTermsOfUse",
+            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 

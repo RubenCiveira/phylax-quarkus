@@ -38,9 +38,9 @@ public class TenantConfigAuditController implements TenantConfigAuditApi {
   @Override
   public Response tenantConfigApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
+    String self = currentRequest.getActor().getName().orElse("-");
     List<AuditEvent> events = reader.findByFilters("access_tenant_config_audit", "tenantConfig",
-        AuditQueryFilter.builder().performedBy(actor)
-            .from(from.atStartOfDay(ZoneId.systemDefault()))
+        AuditQueryFilter.builder().performedBy(self).from(from.atStartOfDay(ZoneId.systemDefault()))
             .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
         tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
@@ -53,8 +53,9 @@ public class TenantConfigAuditController implements TenantConfigAuditApi {
    */
   @Override
   public Response tenantConfigApiEntityAudit(final String uid) {
+    String self = currentRequest.getActor().getName().orElse("-");
     List<AuditEvent> events = reader.findByFilters("access_tenant_config_audit", "tenantConfig",
-        AuditQueryFilter.builder().entityId(uid).build(), tenant(), 0, 1000);
+        AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
