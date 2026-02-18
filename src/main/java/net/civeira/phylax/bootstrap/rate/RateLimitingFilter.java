@@ -16,25 +16,33 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RateLimitingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
+  /**
+   * Property key used to pass the resolved bucket between the request and response filter phases.
+   * Storing the bucket avoids a second call to {@link BucketService#resolveBucket}, which would
+   * re-run IP resolution and cleanup, and could theoretically return a different bucket if the
+   * original was evicted between the two filter invocations.
+   */
+  private static final String BUCKET_PROPERTY = "rate.limit.bucket";
+
   private final BucketService buckets;
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
     Bucket bucket = buckets.resolveBucket(requestContext);
-    // Verificar si hay tokens disponibles
+    requestContext.setProperty(BUCKET_PROPERTY, bucket);
     if (!bucket.tryConsume(1)) {
-      // Limitar la solicitud si no hay tokens
-      Response response =
-          Response.status(Response.Status.TOO_MANY_REQUESTS).entity("Too many requests").build();
-      requestContext.abortWith(response);
+      requestContext.abortWith(
+          Response.status(Response.Status.TOO_MANY_REQUESTS).entity("Too many requests").build());
     }
   }
 
+  @Override
   public void filter(ContainerRequestContext requestContext,
       ContainerResponseContext responseContext) {
-    // Añadir cabeceras de información al cliente
-    Bucket bucket = buckets.resolveBucket(requestContext);
-    responseContext.getHeaders().add("X-RateLimit-Remaining",
-        String.valueOf(bucket.getAvailableTokens()));
+    Bucket bucket = (Bucket) requestContext.getProperty(BUCKET_PROPERTY);
+    if (bucket != null) {
+      responseContext.getHeaders().add("X-RateLimit-Remaining",
+          String.valueOf(bucket.getAvailableTokens()));
+    }
   }
 }

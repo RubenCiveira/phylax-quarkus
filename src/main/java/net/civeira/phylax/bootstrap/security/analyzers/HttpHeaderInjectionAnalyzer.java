@@ -4,10 +4,10 @@ package net.civeira.phylax.bootstrap.security.analyzers;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalizer;
+import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalyzer;
 
 @ApplicationScoped
-public class HttpHeaderInjectionAnalyzer implements MaliciousInjectionRiskAnalizer {
+public class HttpHeaderInjectionAnalyzer implements MaliciousInjectionRiskAnalyzer {
   private static final Pattern HTML_TAG_WITH_JS_EVENT =
       Pattern.compile("(?i)<\\w+\\b[^>]*\\bon[a-z]+\\s*=", Pattern.CASE_INSENSITIVE);
   private static final Pattern JAVASCRIPT_PROTOCOL = Pattern.compile("(?i)\\bjavascript:");

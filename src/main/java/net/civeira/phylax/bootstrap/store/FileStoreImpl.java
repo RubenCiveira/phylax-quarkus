@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -24,46 +23,61 @@ import net.civeira.phylax.common.infrastructure.store.FileStore;
 import net.civeira.phylax.common.infrastructure.store.RepositoryLink;
 
 /**
- * Repositorio de ficheros usando apache virtual file system
+ * Database-backed implementation of {@link FileStore} using a {@code _filestorer} table.
  *
+ * <p>
+ * Files are stored either as temporary (pending commit) or permanent. Temporary files are
+ * automatically evicted when they exceed the configured age or when the total count surpasses the
+ * configured capacity.
+ * </p>
  */
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class FileStoreImpl implements FileStore {
-  /**
-   * El prefijo de url para los ficheros almacenados internamente.
-   */
+
+  /** URL prefix for files stored internally by this implementation. */
   private static final String UPLOAD_SCHEMA = "upload://";
-  private static final int tempCapacity = 1000;
-  private static final int minutesLifeTime = 60;
+
+  /** Maximum number of temporary files to retain before evicting the oldest ones. */
+  private static final int TEMP_CAPACITY = 1000;
+
+  /** Maximum age in minutes for a temporary file before it is evicted. */
+  private static final int TEMP_LIFETIME_MINUTES = 60;
 
   private final DataSource datasource;
 
   private void cleanTemp() throws SQLException {
     try (Connection connection = datasource.getConnection()) {
-      try (PreparedStatement prepareStatement =
+      // Evict expired temporary files by age
+      try (PreparedStatement ps =
           connection.prepareStatement("DELETE FROM _filestorer where temp = 1 and upload < ?")) {
-        prepareStatement.setTimestamp(1,
-            new Timestamp(System.currentTimeMillis() - minutesLifeTime * 60000));
-        prepareStatement.executeUpdate();
+        ps.setTimestamp(1,
+            new Timestamp(System.currentTimeMillis() - (long) TEMP_LIFETIME_MINUTES * 60_000));
+        ps.executeUpdate();
       }
-      List<String> uids = new ArrayList<>();
-      try (PreparedStatement prepareStatement = connection.prepareStatement(
+
+      // Collect codes of temporary files beyond the capacity limit
+      List<String> toDelete = new ArrayList<>();
+      try (PreparedStatement ps = connection.prepareStatement(
           "SELECT code FROM _filestorer where temp = 1 order by upload desc limit 1000000 offset ?")) {
-        prepareStatement.setInt(1, tempCapacity);
-        try (ResultSet executeQuery = prepareStatement.executeQuery()) {
-          while (executeQuery.next()) {
-            uids.add(executeQuery.getString(1));
+        ps.setInt(1, TEMP_CAPACITY);
+        try (ResultSet rs = ps.executeQuery()) {
+          while (rs.next()) {
+            toDelete.add(rs.getString(1));
           }
         }
       }
-      if (!uids.isEmpty()) {
-        String secureQuery =
-            String.format("DELETE FROM _filestorer where temp = 1 and code in (%s)",
-                uids.stream().collect(Collectors.joining(",")));
-        try (PreparedStatement prepareStatement = connection.prepareStatement(secureQuery)) {
-          prepareStatement.executeUpdate();
+
+      // Delete excess temporary files using a parameterized single-row statement per entry
+      if (!toDelete.isEmpty()) {
+        try (PreparedStatement ps =
+            connection.prepareStatement("DELETE FROM _filestorer where temp = 1 and code = ?")) {
+          for (String code : toDelete) {
+            ps.setString(1, code);
+            ps.addBatch();
+          }
+          ps.executeBatch();
         }
       }
     }
@@ -92,15 +106,15 @@ public class FileStoreImpl implements FileStore {
   @Override
   public RepositoryLink replaceContent(String key, BinaryContent content) {
     try (Connection connection = datasource.getConnection()) {
-      try (PreparedStatement updateStatement = connection.prepareStatement(
+      try (PreparedStatement ps = connection.prepareStatement(
           "UPDATE _filestorer SET name = ?, mime = ?, upload = ?, bytes = ? WHERE code = ?")) {
-        updateStatement.setString(1, content.getName());
-        updateStatement.setString(2, content.getContentType());
-        updateStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-        updateStatement.setBinaryStream(4, content.getInputStream());
-        updateStatement.setString(5, code(key));
-        if (updateStatement.executeUpdate() != 1) {
-          throw new IllegalArgumentException("Imposible updatear para " + key);
+        ps.setString(1, content.getName());
+        ps.setString(2, content.getContentType());
+        ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+        ps.setBinaryStream(4, content.getInputStream());
+        ps.setString(5, code(key));
+        if (ps.executeUpdate() != 1) {
+          throw new IllegalArgumentException("Failed to update file content for key: " + key);
         }
         return RepositoryLink.builder().key(key).build();
       }
@@ -122,26 +136,22 @@ public class FileStoreImpl implements FileStore {
     try {
       cleanTemp();
     } catch (SQLException ex) {
-      log.error("Unable to clear temp");
+      log.error("Unable to clear temp files", ex);
     }
     try (Connection connection = datasource.getConnection()) {
-      try (PreparedStatement prepareStatement = connection.prepareStatement(
-          "Select name, mime, bytes, upload from _filestorer where code = ? and temp=?")) {
-        prepareStatement.setString(1, code(path));
-        prepareStatement.setInt(2, temporal ? 1 : 0);
-        try (ResultSet executeQuery = prepareStatement.executeQuery()) {
-          Optional<BinaryContent> dataSource;
-          if (executeQuery.next()) {
-            String name = executeQuery.getString(1);
-            InputStream fcontent = executeQuery.getBinaryStream(3);
-            BinaryContent content = BinaryContent.builder().name(name)
-                .contentType(executeQuery.getString(2)).inputStream(fcontent)
-                .lastModification(executeQuery.getTimestamp(4).getTime()).build();
-            dataSource = Optional.of(content);
-          } else {
-            dataSource = Optional.empty();
+      try (PreparedStatement ps = connection.prepareStatement(
+          "SELECT name, mime, bytes, upload FROM _filestorer WHERE code = ? AND temp = ?")) {
+        ps.setString(1, code(path));
+        ps.setInt(2, temporal ? 1 : 0);
+        try (ResultSet rs = ps.executeQuery()) {
+          if (rs.next()) {
+            String name = rs.getString(1);
+            InputStream fcontent = rs.getBinaryStream(3);
+            BinaryContent content = BinaryContent.builder().name(name).contentType(rs.getString(2))
+                .inputStream(fcontent).lastModification(rs.getTimestamp(4).getTime()).build();
+            return Optional.of(content);
           }
-          return dataSource;
+          return Optional.empty();
         }
       }
     } catch (SQLException e) {
@@ -168,20 +178,20 @@ public class FileStoreImpl implements FileStore {
     try {
       cleanTemp();
     } catch (SQLException ex) {
-      log.error("Unable to clear temp");
+      log.error("Unable to clear temp files", ex);
     }
     try (Connection connection = datasource.getConnection()) {
-      try (PreparedStatement updateStatement = connection.prepareStatement(
+      try (PreparedStatement ps = connection.prepareStatement(
           "INSERT INTO _filestorer (code, temp, name, mime, upload, bytes) VALUES (?, ?, ?, ?, ?, ?)")) {
         final String path = UUID.randomUUID().toString();
-        updateStatement.setString(1, path);
-        updateStatement.setInt(2, 1);
-        updateStatement.setString(3, source.getName());
-        updateStatement.setString(4, source.getContentType());
-        updateStatement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-        updateStatement.setBinaryStream(6, source.getInputStream());
-        if (updateStatement.executeUpdate() != 1) {
-          throw new IOException("Imposible insertar para " + path);
+        ps.setString(1, path);
+        ps.setInt(2, 1);
+        ps.setString(3, source.getName());
+        ps.setString(4, source.getContentType());
+        ps.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+        ps.setBinaryStream(6, source.getInputStream());
+        if (ps.executeUpdate() != 1) {
+          throw new IOException("Failed to store temporary file: " + path);
         }
         return RepositoryLink.builder().key(path).build();
       }
@@ -191,23 +201,23 @@ public class FileStoreImpl implements FileStore {
   }
 
   private RepositoryLink runCommit(Connection connection, String path) throws SQLException {
-    try (PreparedStatement updateStatement =
-        connection.prepareStatement("UPDATE _filestorer SET upload = ?, temp = 0 where code = ?")) {
-      updateStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-      updateStatement.setString(2, code(path));
-      if (updateStatement.executeUpdate() != 1) {
-        throw new IllegalArgumentException("Imposible insertar para " + path);
+    try (PreparedStatement ps =
+        connection.prepareStatement("UPDATE _filestorer SET upload = ?, temp = 0 WHERE code = ?")) {
+      ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+      ps.setString(2, code(path));
+      if (ps.executeUpdate() != 1) {
+        throw new IllegalArgumentException("Failed to commit file: " + path);
       }
       return RepositoryLink.builder().key(path).build();
     }
   }
 
   private void runDelete(Connection connection, String path) throws SQLException {
-    try (PreparedStatement prepareStatement =
-        connection.prepareStatement("DELETE from _filestorer where code = ?")) {
-      prepareStatement.setString(1, code(path));
-      if (prepareStatement.executeUpdate() != 1) {
-        log.warn("Imposible borrar para " + path);
+    try (PreparedStatement ps =
+        connection.prepareStatement("DELETE FROM _filestorer WHERE code = ?")) {
+      ps.setString(1, code(path));
+      if (ps.executeUpdate() != 1) {
+        log.warn("File not found for deletion: {}", path);
       }
     }
   }

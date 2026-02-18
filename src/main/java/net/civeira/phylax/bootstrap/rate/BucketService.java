@@ -7,40 +7,98 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import io.github.bucket4j.Bucket;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.container.ContainerRequestContext;
+import lombok.RequiredArgsConstructor;
 
+/**
+ * Manages per-IP token-bucket instances used for rate limiting.
+ *
+ * <p>
+ * Each unique client IP gets its own {@link Bucket} that is lazily created on first access and
+ * automatically removed after the configured idle expiration window. The {@code lastAccessTime} map
+ * is updated on every call to {@link #resolveBucket} so that actively-used IPs are never evicted
+ * prematurely.
+ * </p>
+ *
+ * <p>
+ * <strong>IP resolution:</strong> When {@code app.rate-limit.trust-forwarded-for} is {@code true},
+ * the first value of the {@code X-Forwarded-For} header is used as the client IP. This should only
+ * be enabled when the application sits behind a trusted reverse proxy that sets this header
+ * correctly. When {@code false} (the default), the request host from the URI is used instead.
+ * </p>
+ */
 @ApplicationScoped
+@RequiredArgsConstructor
 public class BucketService {
-  private static final long EXPIRATION_TIME_MS = Duration.ofMinutes(10).toMillis();
+
+  private final @ConfigProperty(name = "app.rate-limit.bucket-capacity",
+      defaultValue = "200") long bucketCapacity;
+
+  private final @ConfigProperty(name = "app.rate-limit.refill-tokens",
+      defaultValue = "100") long refillTokens;
+
+  private final @ConfigProperty(name = "app.rate-limit.refill-period-seconds",
+      defaultValue = "60") long refillPeriodSeconds;
+
+  private final @ConfigProperty(name = "app.rate-limit.ip-expiration-minutes",
+      defaultValue = "10") long ipExpirationMinutes;
+
+  /**
+   * When {@code true}, the {@code X-Forwarded-For} header is trusted for client IP resolution.
+   * Enable only when the service is behind a trusted reverse proxy.
+   */
+  private final @ConfigProperty(name = "app.rate-limit.trust-forwarded-for",
+      defaultValue = "false") boolean trustForwardedFor;
+
   private final Map<String, Bucket> ipBucket = new ConcurrentHashMap<>();
   private final Map<String, Long> lastAccessTime = new ConcurrentHashMap<>();
 
+  /**
+   * Returns the bucket for the client IP extracted from the request. The last-access timestamp is
+   * updated on every call so that active clients are not evicted during cleanup.
+   *
+   * @param requestContext the current JAX-RS request context
+   * @return the existing or newly created bucket for this client IP
+   */
   public Bucket resolveBucket(ContainerRequestContext requestContext) {
-    String ip = requestContext.getHeaders().getFirst("X-Forwarded-For");
-    if (ip == null) {
-      ip = requestContext.getUriInfo().getRequestUri().getHost();
-    }
+    String ip = resolveClientIp(requestContext);
     cleanExpiredEntries();
-    return ipBucket.computeIfAbsent(ip, key -> {
-      lastAccessTime.put(key, Instant.now().toEpochMilli());
-      return createNewBucket();
-    });
+    // Update last-access on every call, not only on creation, so active IPs are never evicted
+    lastAccessTime.put(ip, Instant.now().toEpochMilli());
+    return ipBucket.computeIfAbsent(ip, key -> createNewBucket());
+  }
+
+  private String resolveClientIp(ContainerRequestContext requestContext) {
+    if (trustForwardedFor) {
+      String forwarded = requestContext.getHeaders().getFirst("X-Forwarded-For");
+      if (forwarded != null && !forwarded.isBlank()) {
+        // X-Forwarded-For can be a comma-separated list; the first entry is the original client IP
+        int comma = forwarded.indexOf(',');
+        return comma >= 0 ? forwarded.substring(0, comma).strip() : forwarded.strip();
+      }
+    }
+    return requestContext.getUriInfo().getRequestUri().getHost();
   }
 
   private Bucket createNewBucket() {
+    Duration refillPeriod = Duration.ofSeconds(refillPeriodSeconds);
     return Bucket.builder()
-        .addLimit(limit -> limit.capacity(200).refillGreedy(100, Duration.ofMinutes(1))).build();
+        .addLimit(limit -> limit.capacity(bucketCapacity).refillGreedy(refillTokens, refillPeriod))
+        .build();
   }
 
   private void cleanExpiredEntries() {
+    long expirationMs = Duration.ofMinutes(ipExpirationMinutes).toMillis();
     long currentTime = Instant.now().toEpochMilli();
     Iterator<Map.Entry<String, Long>> iterator = lastAccessTime.entrySet().iterator();
 
     while (iterator.hasNext()) {
       Map.Entry<String, Long> entry = iterator.next();
-      if (currentTime - entry.getValue() > EXPIRATION_TIME_MS) {
+      if (currentTime - entry.getValue() > expirationMs) {
         iterator.remove();
         ipBucket.remove(entry.getKey());
       }

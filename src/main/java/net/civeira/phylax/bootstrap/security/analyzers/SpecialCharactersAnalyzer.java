@@ -4,10 +4,10 @@ package net.civeira.phylax.bootstrap.security.analyzers;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalizer;
+import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalyzer;
 
 @ApplicationScoped
-public class SpecialCharactersAnalyzer implements MaliciousInjectionRiskAnalizer {
+public class SpecialCharactersAnalyzer implements MaliciousInjectionRiskAnalyzer {
   private static final Pattern SPECIAL_CHARACTERS_PATTERN =
       Pattern.compile("(%[0-9a-fA-F]{2}|\\\\x[0-9a-fA-F]{2})");
 

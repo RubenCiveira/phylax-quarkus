@@ -4,10 +4,10 @@ package net.civeira.phylax.bootstrap.security.analyzers;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalizer;
+import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalyzer;
 
 @ApplicationScoped
-public class CommandInjectionAnalyzer implements MaliciousInjectionRiskAnalizer {
+public class CommandInjectionAnalyzer implements MaliciousInjectionRiskAnalyzer {
   private static final Pattern COMMAND_INJECTION_PATTERN = Pattern.compile(
       "(?i)(\\b(ls|cat|rm|netstat|sudo|bash|sh|python|perl)\\b\\s*(&&|\\||;|>|>>)|(;|&&)\\s*(ls|cat|rm|sudo|bash|sh|python|perl))");
 

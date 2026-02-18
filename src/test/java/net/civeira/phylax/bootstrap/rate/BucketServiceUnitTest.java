@@ -4,6 +4,8 @@ package net.civeira.phylax.bootstrap.rate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.net.URI;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,87 +17,110 @@ import jakarta.ws.rs.core.UriInfo;
 
 class BucketServiceUnitTest {
 
-  private BucketService bucketService;
+  /** Default bucket parameters used across most tests. */
+  private static final long CAPACITY = 200;
+  private static final long REFILL_TOKENS = 100;
+  private static final long REFILL_SECONDS = 60;
+  private static final long IP_EXPIRY_MINUTES = 10;
+
   private ContainerRequestContext requestContext;
   private MultivaluedMap<String, String> headers;
   private UriInfo uriInfo;
 
   @BeforeEach
   void setUp() {
-    bucketService = new BucketService();
     requestContext = mock(ContainerRequestContext.class);
     headers = new MultivaluedHashMap<>();
     uriInfo = mock(UriInfo.class);
 
     when(requestContext.getHeaders()).thenReturn(headers);
     when(requestContext.getUriInfo()).thenReturn(uriInfo);
+    when(uriInfo.getRequestUri()).thenReturn(URI.create("http://127.0.0.1"));
   }
 
   @Test
   void shouldCreateBucketForNewIPFromXForwardedFor() {
+    // trustForwardedFor = true so the X-Forwarded-For header is used
+    BucketService service =
+        new BucketService(CAPACITY, REFILL_TOKENS, REFILL_SECONDS, IP_EXPIRY_MINUTES, true);
     headers.putSingle("X-Forwarded-For", "192.168.1.1");
 
-    Bucket bucket = bucketService.resolveBucket(requestContext);
+    Bucket bucket = service.resolveBucket(requestContext);
 
     assertNotNull(bucket);
   }
 
   @Test
   void shouldCreateBucketForNewIPFromRequestHost() {
-    when(uriInfo.getRequestUri()).thenReturn(java.net.URI.create("http://10.0.0.1"));
+    BucketService service =
+        new BucketService(CAPACITY, REFILL_TOKENS, REFILL_SECONDS, IP_EXPIRY_MINUTES, false);
+    when(uriInfo.getRequestUri()).thenReturn(URI.create("http://10.0.0.1"));
 
-    Bucket bucket = bucketService.resolveBucket(requestContext);
+    Bucket bucket = service.resolveBucket(requestContext);
 
     assertNotNull(bucket);
   }
 
   @Test
   void shouldReuseBucketForSameIP() {
+    BucketService service =
+        new BucketService(CAPACITY, REFILL_TOKENS, REFILL_SECONDS, IP_EXPIRY_MINUTES, true);
     headers.putSingle("X-Forwarded-For", "192.168.1.2");
 
-    Bucket firstBucket = bucketService.resolveBucket(requestContext);
-    Bucket secondBucket = bucketService.resolveBucket(requestContext);
+    Bucket firstBucket = service.resolveBucket(requestContext);
+    Bucket secondBucket = service.resolveBucket(requestContext);
 
-    assertSame(firstBucket, secondBucket, "El bucket debería ser el mismo para la misma IP");
+    assertSame(firstBucket, secondBucket, "The same bucket should be returned for the same IP");
   }
 
   @Test
   void shouldRemoveExpiredBuckets() {
+    BucketService service =
+        new BucketService(CAPACITY, REFILL_TOKENS, REFILL_SECONDS, IP_EXPIRY_MINUTES, true);
     headers.putSingle("X-Forwarded-For", "192.168.1.3");
+    service.resolveBucket(requestContext);
 
-    // Resolver un bucket para esta IP
-    bucketService.resolveBucket(requestContext);
-
-    // Resolver otra IP para forzar la limpieza de buckets expirados
     headers.putSingle("X-Forwarded-For", "192.168.1.4");
-    bucketService.resolveBucket(requestContext);
+    service.resolveBucket(requestContext);
 
-    // Verificar que la IP anterior fue eliminada
-    assertNotNull(bucketService);
-
+    assertNotNull(service);
   }
 
   @Test
   void shouldMaintainActiveBuckets() {
+    BucketService service =
+        new BucketService(CAPACITY, REFILL_TOKENS, REFILL_SECONDS, IP_EXPIRY_MINUTES, true);
     headers.putSingle("X-Forwarded-For", "192.168.1.5");
+    service.resolveBucket(requestContext);
 
-    // Resolver un bucket
-    bucketService.resolveBucket(requestContext);
-
-    // Resolver otra IP para forzar la limpieza
     headers.putSingle("X-Forwarded-For", "192.168.1.6");
-    bucketService.resolveBucket(requestContext);
+    service.resolveBucket(requestContext);
 
-    // Verificar que el bucket original sigue presente
-    assertNotNull(bucketService);
+    assertNotNull(service);
   }
 
   @Test
   void shouldHandleMissingXForwardedForHeader() {
-    when(uriInfo.getRequestUri()).thenReturn(java.net.URI.create("http://127.0.0.1"));
+    BucketService service =
+        new BucketService(CAPACITY, REFILL_TOKENS, REFILL_SECONDS, IP_EXPIRY_MINUTES, false);
+    when(uriInfo.getRequestUri()).thenReturn(URI.create("http://127.0.0.1"));
 
-    Bucket bucket = bucketService.resolveBucket(requestContext);
+    Bucket bucket = service.resolveBucket(requestContext);
 
     assertNotNull(bucket);
+  }
+
+  @Test
+  void shouldUseFirstIpFromCommaSeparatedXForwardedFor() {
+    BucketService service =
+        new BucketService(CAPACITY, REFILL_TOKENS, REFILL_SECONDS, IP_EXPIRY_MINUTES, true);
+    headers.putSingle("X-Forwarded-For", "10.1.1.1, 10.2.2.2, 10.3.3.3");
+
+    Bucket first = service.resolveBucket(requestContext);
+
+    // The bucket created for "10.1.1.1" should be reused on subsequent calls with the same header
+    Bucket second = service.resolveBucket(requestContext);
+    assertSame(first, second,
+        "Bucket should be keyed on the first (client) IP in the X-Forwarded-For list");
   }
 }

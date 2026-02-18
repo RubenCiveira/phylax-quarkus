@@ -4,10 +4,10 @@ package net.civeira.phylax.bootstrap.security.analyzers;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalizer;
+import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalyzer;
 
 @ApplicationScoped
-public class PathTraversalAnalyzer implements MaliciousInjectionRiskAnalizer {
+public class PathTraversalAnalyzer implements MaliciousInjectionRiskAnalyzer {
   private static final Pattern PATH_TRAVERSAL_PATTERN = Pattern.compile("(\\.\\./|\\.\\.\\\\)");
 
   @Override

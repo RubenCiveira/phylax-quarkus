@@ -5,9 +5,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.github.bucket4j.Bucket;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -28,47 +31,64 @@ import net.civeira.phylax.bootstrap.rate.BucketService;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class SecurityFilter implements ContainerRequestFilter {
-  private final Instance<MaliciousInjectionRiskAnalizer> analizers;
+
+  /**
+   * Maximum number of bytes read from the request body for injection analysis. Requests with larger
+   * bodies are analyzed only up to this limit; the full body is still passed downstream. Prevents
+   * unbounded memory allocation when a client sends a very large payload.
+   */
+  private static final int MAX_BODY_ANALYSIS_BYTES = 512 * 1024; // 512 KB
+
+  private final Instance<MaliciousInjectionRiskAnalyzer> analyzers;
 
   private final MeterRegistry meterRegistry;
 
   private final BucketService buckets;
 
+  /**
+   * Minimum risk score that causes the request to be rejected immediately. Requests with a score
+   * between 1 and this threshold only consume tokens from the IP bucket; requests at or above the
+   * threshold are blocked outright and the event is recorded as a metric.
+   */
+  private final @ConfigProperty(name = "app.security.risk-block-threshold",
+      defaultValue = "10") int riskBlockThreshold;
+
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     int riskScore = 0;
 
-    // Análisis de headers
+    // Analyze headers
     for (String header : requestContext.getHeaders().keySet()) {
       String value = requestContext.getHeaderString(header);
       riskScore += analyzeValue(value);
     }
+
+    // Analyze query parameters
     for (Entry<String, List<String>> entry : requestContext.getUriInfo().getQueryParameters()
         .entrySet()) {
       for (String value : entry.getValue()) {
         riskScore += analyzeValue(value);
       }
     }
-    // Análisis del cuerpo (si es JSON o texto plano)
+
+    // Analyze request body (capped to avoid OOM on large payloads)
     String body = extractRequestBody(requestContext);
     if (body != null && !body.isEmpty()) {
       riskScore += analyzeValue(body);
     }
 
-    // Skipping for brevity.
-    if (riskScore > 10) {
-      // Umbral arbitrario, puedes ajustar esto
-      // Registrar métrica en Micrometer
+    if (riskScore >= riskBlockThreshold) {
       meterRegistry
           .counter("request.security.risk", "source", requestContext.getUriInfo().getPath())
           .increment();
+      requestContext.abortWith(
+          Response.status(Status.FORBIDDEN).entity("Request blocked due to security risk").build());
+      return;
     }
 
-    Bucket bucket = buckets.resolveBucket(requestContext);
-
     if (riskScore > 0) {
+      Bucket bucket = buckets.resolveBucket(requestContext);
       if (!bucket.tryConsume(riskScore)) {
-        // Limitar la solicitud si no hay tokens
         requestContext.abortWith(Response.status(Status.FORBIDDEN)
             .entity("Request blocked due to security risk").build());
       }
@@ -80,29 +100,34 @@ public class SecurityFilter implements ContainerRequestFilter {
     if (value == null || value.isEmpty()) {
       return riskScore;
     }
-    for (MaliciousInjectionRiskAnalizer maliciousInjectionRiskAnalizer : analizers) {
-      riskScore += maliciousInjectionRiskAnalizer.analyze(value);
+    for (MaliciousInjectionRiskAnalyzer analyzer : analyzers) {
+      riskScore += analyzer.analyze(value);
     }
     return riskScore;
   }
 
+  /**
+   * Reads the request body up to {@link #MAX_BODY_ANALYSIS_BYTES} bytes into a buffer, replaces the
+   * entity stream so downstream consumers can still read it, and returns the body as a UTF-8 string
+   * for analysis.
+   */
   private String extractRequestBody(ContainerRequestContext requestContext) throws IOException {
-    // Leer el InputStream de la solicitud
     InputStream originalInputStream = requestContext.getEntityStream();
     ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    byte[] data = new byte[1024];
+    byte[] data = new byte[8192];
     int nRead;
-    while ((nRead = originalInputStream.read(data, 0, data.length)) != -1) {
+    int totalRead = 0;
+    while (totalRead < MAX_BODY_ANALYSIS_BYTES
+        && (nRead = originalInputStream.read(data, 0, data.length)) != -1) {
       buffer.write(data, 0, nRead);
+      totalRead += nRead;
     }
-    buffer.flush();
-
-    // Convertir el buffer a String
     String body = buffer.toString(StandardCharsets.UTF_8);
 
-    // Volver a asignar el InputStream al contexto para futuras lecturas
-    InputStream newInputStream = new ByteArrayInputStream(buffer.toByteArray());
-    requestContext.setEntityStream(newInputStream);
+    // Restore entity stream: prepend buffered bytes to the remaining original stream
+    InputStream restored = new SequenceInputStream(new ByteArrayInputStream(buffer.toByteArray()),
+        originalInputStream);
+    requestContext.setEntityStream(restored);
 
     return body;
   }

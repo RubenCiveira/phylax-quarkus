@@ -4,10 +4,10 @@ package net.civeira.phylax.bootstrap.security.analyzers;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalizer;
+import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalyzer;
 
 @ApplicationScoped
-public class RceAnalyzer implements MaliciousInjectionRiskAnalizer {
+public class RceAnalyzer implements MaliciousInjectionRiskAnalyzer {
   private static final Pattern RCE_PATTERN = Pattern.compile(
       "(?i)(System\\.(exec|getRuntime)|Runtime\\.getRuntime\\(\\)|eval\\(|os\\.system|subprocess\\.|\\.__class__)");
 

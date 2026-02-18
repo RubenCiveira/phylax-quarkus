@@ -4,10 +4,10 @@ package net.civeira.phylax.bootstrap.security.analyzers;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalizer;
+import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalyzer;
 
 @ApplicationScoped
-public class XssAnalyzer implements MaliciousInjectionRiskAnalizer {
+public class XssAnalyzer implements MaliciousInjectionRiskAnalyzer {
   private static final Pattern XSS_SCRIPT_PATTERN = Pattern.compile("(?i)<script\\s++[^>]*+>");
 
   private static final Pattern XSS_JAVASCRIPT_PROTOCOL_PATTERN = Pattern.compile("(?i)javascript:");
