@@ -8,12 +8,42 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+/**
+ * A thread-safe, bounded in-memory cache with per-entry TTL expiration.
+ *
+ * <p>
+ * Entries are stored with an expiry timestamp computed from the provided {@link Duration}. Expired
+ * entries are evicted lazily on access and eagerly during {@link #cleanUp()}. When the cache
+ * reaches its configured maximum size, expired entries are removed first; if the cache is still
+ * over capacity, a best-effort eviction removes arbitrary entries to stay within bounds.
+ * </p>
+ *
+ * <p>
+ * The {@link #get(Object, Function)} method is {@code synchronized} to prevent concurrent threads
+ * from both missing the cache and invoking the callback simultaneously for the same key (cache
+ * stampede protection).
+ * </p>
+ *
+ * @param <K> the key type
+ * @param <V> the value type
+ */
 public class InMemoryCache<K, V> {
 
+  /**
+   * A cached value paired with its expiry timestamp.
+   *
+   * @param <V> the value type
+   */
   public static class Entry<V> {
     private final V value;
     private final long expireAtMillis;
 
+    /**
+     * Creates a new entry with the given value and TTL.
+     *
+     * @param value the value to cache
+     * @param ttl how long the entry should live; zero or negative values expire immediately
+     */
     public Entry(V value, Duration ttl) {
       this.value = value;
       long ttlMillis = ttl.toMillis();
@@ -21,6 +51,11 @@ public class InMemoryCache<K, V> {
       this.expireAtMillis = System.currentTimeMillis() + effectiveTtl;
     }
 
+    /**
+     * Returns the cached value.
+     *
+     * @return the value
+     */
     public V getValue() {
       return value;
     }
@@ -33,31 +68,65 @@ public class InMemoryCache<K, V> {
   private final ConcurrentHashMap<K, Entry<V>> map = new ConcurrentHashMap<>();
   private final int maxSize;
 
+  /**
+   * Constructs a new cache with the given maximum size.
+   *
+   * @param maxSize the maximum number of entries to hold before eviction
+   */
   public InMemoryCache(int maxSize) {
     this.maxSize = maxSize;
   }
 
-  public synchronized V get(K key, Function<K, Entry<V>> callbakc) {
+  /**
+   * Returns the cached value for the given key, invoking the callback if the key is absent or
+   * expired.
+   *
+   * <p>
+   * This method is {@code synchronized} to prevent concurrent cache misses for the same key from
+   * each triggering the callback independently.
+   * </p>
+   *
+   * @param key the cache key; must not be {@code null}
+   * @param callback a function that computes the entry when the key is not cached
+   * @return the cached or freshly computed value
+   * @throws NullPointerException if {@code key} is {@code null}
+   */
+  public synchronized V get(K key, Function<K, Entry<V>> callback) {
     Objects.requireNonNull(key);
     V cached = get(key);
     if (null == cached) {
-      Entry<V> entry = callbakc.apply(key);
+      Entry<V> entry = callback.apply(key);
       put(key, entry);
       cached = entry.value;
     }
     return cached;
   }
 
+  /**
+   * Removes the entry associated with the given key, if present.
+   *
+   * @param key the key to remove
+   */
   public void remove(K key) {
     map.remove(key);
   }
 
+  /**
+   * Returns the current number of entries in the cache, including expired entries not yet evicted.
+   *
+   * @return the current entry count
+   */
   public int size() {
     return map.size();
   }
 
   /**
-   * Limpieza manual (por si quieres llamarla de vez en cuando desde un scheduler).
+   * Removes all expired entries from the cache.
+   *
+   * <p>
+   * This can be called periodically from a scheduler to keep memory usage low. Expired entries are
+   * also removed lazily on {@link #get(Object, Function)} access.
+   * </p>
    */
   public void cleanUp() {
     long now = System.currentTimeMillis();
@@ -77,7 +146,7 @@ public class InMemoryCache<K, V> {
       return null;
     }
     if (entry.isExpired(now)) {
-      // TTL pasado → lo quitamos y devolvemos null
+      // TTL elapsed: evict and signal a cache miss
       map.remove(key, entry);
       return null;
     }
@@ -95,14 +164,14 @@ public class InMemoryCache<K, V> {
     if (map.size() <= maxSize) {
       return;
     }
-    // Estrategia simple: intentamos quitar expirados, y si no hay, quitamos algunos al azar
+    // First attempt: evict expired entries to free space
     cleanUp();
 
     if (map.size() <= maxSize) {
       return;
     }
 
-    // Best effort: quitamos los primeros que encontremos
+    // Best effort: evict arbitrary entries until within bounds
     int toRemove = map.size() - maxSize;
     Iterator<K> it = map.keySet().iterator();
     while (it.hasNext() && toRemove > 0) {
