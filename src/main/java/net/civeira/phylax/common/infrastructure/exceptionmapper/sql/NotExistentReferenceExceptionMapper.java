@@ -22,7 +22,6 @@ import net.civeira.phylax.common.infrastructure.sql.NotExistentReferenceExceptio
 public class NotExistentReferenceExceptionMapper
     implements ExceptionMapper<NotExistentReferenceException> {
 
-  @Override
   /**
    * Converts a missing-reference exception into an HTTP response.
    *
@@ -33,6 +32,7 @@ public class NotExistentReferenceExceptionMapper
    * @param exception missing-reference exception
    * @return HTTP 422 response
    */
+  @Override
   public Response toResponse(NotExistentReferenceException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);

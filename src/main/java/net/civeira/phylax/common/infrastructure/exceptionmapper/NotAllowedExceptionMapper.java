@@ -26,7 +26,6 @@ public class NotAllowedExceptionMapper implements ExceptionMapper<NotAllowedExce
 
   private final CurrentRequest restService;
 
-  @Override
   /**
    * Converts a not-allowed exception into an HTTP response.
    *
@@ -36,6 +35,7 @@ public class NotAllowedExceptionMapper implements ExceptionMapper<NotAllowedExce
    * @param exception not-allowed exception
    * @return HTTP response with error details
    */
+  @Override
   public Response toResponse(NotAllowedException exception) {
     if (log.isDebugEnabled()) {
       log.warn("not allowed", exception);

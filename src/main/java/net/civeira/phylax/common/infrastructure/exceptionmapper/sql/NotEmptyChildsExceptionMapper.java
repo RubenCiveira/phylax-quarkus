@@ -21,7 +21,6 @@ import net.civeira.phylax.common.infrastructure.sql.NotEmptyChildsException;
 @Provider
 public class NotEmptyChildsExceptionMapper implements ExceptionMapper<NotEmptyChildsException> {
 
-  @Override
   /**
    * Converts a not-empty-children exception into an HTTP response.
    *
@@ -32,6 +31,7 @@ public class NotEmptyChildsExceptionMapper implements ExceptionMapper<NotEmptyCh
    * @param exception constraint exception
    * @return HTTP 422 response
    */
+  @Override
   public Response toResponse(NotEmptyChildsException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);

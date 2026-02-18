@@ -21,7 +21,6 @@ import net.civeira.phylax.common.infrastructure.sql.OptimistLockException;
 @Provider
 public class OptimistLockExceptionMapper implements ExceptionMapper<OptimistLockException> {
 
-  @Override
   /**
    * Converts an optimistic lock exception into an HTTP response.
    *
@@ -32,6 +31,7 @@ public class OptimistLockExceptionMapper implements ExceptionMapper<OptimistLock
    * @param exception optimistic lock exception
    * @return HTTP 412 response
    */
+  @Override
   public Response toResponse(OptimistLockException exception) {
     if (log.isDebugEnabled()) {
       log.info("optimist lock exception", exception);

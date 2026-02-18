@@ -26,7 +26,6 @@ import net.civeira.phylax.common.exception.AbstractFailsException;
 public class AbstractFailMapper implements ExceptionMapper<AbstractFailsException> {
   private final HttpHeaders headers;
 
-  @Override
   /**
    * Converts a validation failure exception into an HTTP response.
    *
@@ -37,6 +36,7 @@ public class AbstractFailMapper implements ExceptionMapper<AbstractFailsExceptio
    * @param exception validation failure exception
    * @return HTTP response containing localized errors
    */
+  @Override
   public Response toResponse(AbstractFailsException exception) {
     if (log.isDebugEnabled()) {
       log.info("constraint exception", exception);

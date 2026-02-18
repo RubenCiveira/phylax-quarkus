@@ -21,7 +21,6 @@ import net.civeira.phylax.common.infrastructure.sql.NotUniqueException;
 @Provider
 public class NotUniqueExceptionMapper implements ExceptionMapper<NotUniqueException> {
 
-  @Override
   /**
    * Converts a not-unique exception into an HTTP response.
    *
@@ -32,6 +31,7 @@ public class NotUniqueExceptionMapper implements ExceptionMapper<NotUniqueExcept
    * @param exception not-unique exception
    * @return HTTP 422 response
    */
+  @Override
   public Response toResponse(NotUniqueException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);

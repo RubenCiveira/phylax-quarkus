@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 @Provider
 public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
-  @Override
   /**
    * Converts an unhandled exception into an HTTP response.
    *
@@ -32,6 +31,7 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
    * @param exception throwable to map
    * @return HTTP 500 response
    */
+  @Override
   public Response toResponse(Throwable exception) {
     log.warn("unhandled exception", exception);
     Map<String, String> error = new HashMap<>();

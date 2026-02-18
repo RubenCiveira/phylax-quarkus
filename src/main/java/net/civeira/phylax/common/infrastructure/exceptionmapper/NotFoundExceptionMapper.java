@@ -22,7 +22,6 @@ import net.civeira.phylax.common.exception.NotFoundException;
 @Provider
 public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException> {
 
-  @Override
   /**
    * Converts a not-found exception into an HTTP response.
    *
@@ -33,6 +32,7 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
    * @param exception not-found exception
    * @return HTTP 404 response
    */
+  @Override
   public Response toResponse(NotFoundException exception) {
     log.info("not found exception", exception);
     Map<String, String> error = new HashMap<>();

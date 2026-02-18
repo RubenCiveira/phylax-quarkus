@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 @Provider
 public class UncheckedIOExceptionMapper implements ExceptionMapper<UncheckedIOException> {
 
-  @Override
   /**
    * Converts an unchecked IO exception into an HTTP response.
    *
@@ -32,6 +31,7 @@ public class UncheckedIOExceptionMapper implements ExceptionMapper<UncheckedIOEx
    * @param exception unchecked IO exception
    * @return HTTP 502 response
    */
+  @Override
   public Response toResponse(UncheckedIOException exception) {
     if (log.isDebugEnabled()) {
       log.warn("Uncheked io exception", exception);

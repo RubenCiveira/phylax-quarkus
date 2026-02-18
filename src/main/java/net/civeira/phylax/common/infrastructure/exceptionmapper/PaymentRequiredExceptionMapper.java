@@ -22,7 +22,6 @@ import net.civeira.phylax.common.exception.PaymentRequiredException;
 @Provider
 public class PaymentRequiredExceptionMapper implements ExceptionMapper<PaymentRequiredException> {
 
-  @Override
   /**
    * Converts a payment-required exception into an HTTP response.
    *
@@ -32,6 +31,7 @@ public class PaymentRequiredExceptionMapper implements ExceptionMapper<PaymentRe
    * @param exception payment-required exception
    * @return HTTP 402 response
    */
+  @Override
   public Response toResponse(PaymentRequiredException exception) {
     if (log.isDebugEnabled()) {
       log.info("payment required", exception);

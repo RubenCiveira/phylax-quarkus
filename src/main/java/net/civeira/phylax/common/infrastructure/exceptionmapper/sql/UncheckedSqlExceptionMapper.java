@@ -21,7 +21,6 @@ import net.civeira.phylax.common.infrastructure.sql.UncheckedSqlException;
 @Provider
 public class UncheckedSqlExceptionMapper implements ExceptionMapper<UncheckedSqlException> {
 
-  @Override
   /**
    * Converts an unchecked SQL exception into an HTTP response.
    *
@@ -32,6 +31,7 @@ public class UncheckedSqlExceptionMapper implements ExceptionMapper<UncheckedSql
    * @param exception unchecked SQL exception
    * @return HTTP 500 response
    */
+  @Override
   public Response toResponse(UncheckedSqlException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);
