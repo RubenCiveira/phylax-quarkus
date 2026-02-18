@@ -115,3 +115,6 @@ Thumbs.db
 ehthumbs.db
 desktop.ini
 hs_err_pid*
+
+.agents/
+.claude/
