@@ -15,27 +15,22 @@ import net.civeira.phylax.common.security.scope.ScopeAllowList;
 import net.civeira.phylax.common.security.scope.ScopeDescription;
 
 @ApplicationScoped
-@IfBuildProperty(name = "mp.rcab.model", stringValue = "keycloack")
+@IfBuildProperty(name = "mp.rcab.model", stringValue = "keycloak")
 @RequiredArgsConstructor
-public class Keycloack implements RbacStore {
-  private final String KIND = "keycloack";
+public class Keycloak implements RbacStore {
+  private final String KIND = "keycloak";
   private final @ConfigProperty(name = "mp.rcab.model") String model;
 
   @Override
   public boolean isActive() {
-    System.out.println("MIRANDO CON " + KIND);
     return KIND.equals(model);
   }
 
   @Override
-  public void registerResourceAction(ResourceDescription resource, ScopeDescription action) {
-    System.err.println("KEYCLOACK MODE FOR SCOPE OF " + resource + " on " + action);
-  }
+  public void registerResourceAction(ResourceDescription resource, ScopeDescription action) {}
 
   @Override
-  public void registerResourceField(ResourceDescription resource, FieldDescription field) {
-    System.err.println("KEYCLOACK MODE FOR FIELD OF " + resource + " as " + field);
-  }
+  public void registerResourceField(ResourceDescription resource, FieldDescription field) {}
 
   @Override
   public ScopeAllowList checkRoleScopes(Actor actor) {

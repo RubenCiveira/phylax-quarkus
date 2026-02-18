@@ -22,7 +22,7 @@ public class RbacAllowListener {
   }
 
   public void checkAllow(@Observes PropertiesProposal event) {
-    event.add(rbac.inaccesibleFileds(event.getQuery().getActor(), event.resourceName(),
+    event.add(rbac.inaccessibleFields(event.getQuery().getActor(), event.resourceName(),
         event.viewName()));
   }
 }

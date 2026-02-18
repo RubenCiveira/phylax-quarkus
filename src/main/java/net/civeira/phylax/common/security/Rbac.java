@@ -4,6 +4,8 @@ package net.civeira.phylax.common.security;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import lombok.RequiredArgsConstructor;
@@ -11,11 +13,53 @@ import net.civeira.phylax.common.security.scope.FieldDescription;
 import net.civeira.phylax.common.security.scope.ResourceDescription;
 import net.civeira.phylax.common.security.scope.ScopeDescription;
 
+/**
+ * Manages role-based access control (RBAC) by delegating to registered {@link RbacStore}
+ * implementations.
+ *
+ * <p>
+ * At application startup, RBAC resources (fields and actions) are registered on <em>all</em> active
+ * stores. At request time, access checks aggregate results across all active stores using OR logic:
+ * access is granted if at least one active store grants it.
+ * </p>
+ *
+ * <p>
+ * When no active stores are registered, the access decision falls back to the configurable
+ * {@code app.security.rbac.default-allow} property. Its default value is {@code false}
+ * (fail-closed), which is the recommended production setting.
+ * </p>
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class Rbac {
+
+  /**
+   * CDI instance providing all registered {@link RbacStore} implementations.
+   */
   private final Instance<RbacStore> manager;
 
+  /**
+   * Default access decision applied when no active RBAC stores are registered.
+   *
+   * <p>
+   * Defaults to {@code false} (fail-closed). Set {@code app.security.rbac.default-allow=true} to
+   * switch to fail-open. Fail-closed is strongly recommended for production environments.
+   * </p>
+   */
+  private final @ConfigProperty(name = "app.security.rbac.default-allow",
+      defaultValue = "false") boolean defaultAllow;
+
+  /**
+   * Registers a resource field on all active RBAC stores.
+   *
+   * <p>
+   * Typically called at startup to inform every active access control backend about available
+   * resource fields and their visibility constraints.
+   * </p>
+   *
+   * @param resource the resource to which the field belongs
+   * @param field the field description to register
+   */
   public void registerResourceField(ResourceDescription resource, FieldDescription field) {
     manager.forEach(instance -> {
       if (instance.isActive()) {
@@ -24,6 +68,17 @@ public class Rbac {
     });
   }
 
+  /**
+   * Registers a resource action on all active RBAC stores.
+   *
+   * <p>
+   * Typically called at startup to inform every active access control backend about allowed
+   * operations on a resource.
+   * </p>
+   *
+   * @param resource the resource on which the action is available
+   * @param action the scope description to register
+   */
   public void registerResourceAction(ResourceDescription resource, ScopeDescription action) {
     manager.forEach(instance -> {
       if (instance.isActive()) {
@@ -32,28 +87,65 @@ public class Rbac {
     });
   }
 
+  /**
+   * Checks whether an actor is allowed to perform an action on a resource.
+   *
+   * <p>
+   * All active stores are queried. Access is granted if at least one active store allows the
+   * requested action (OR logic). When no active stores are registered, {@code defaultAllow} is
+   * returned.
+   * </p>
+   *
+   * @param actor the actor requesting access
+   * @param resource the name of the resource
+   * @param action the name of the action
+   * @return an {@link Allow} decision
+   */
   public Allow checkAllow(Actor actor, String resource, String action) {
-    List<RbacStore> processors = new ArrayList<>();
-    manager.forEach(instance -> {
-      if (instance.isActive()) {
-        processors.add(instance);
-      }
-    });
-    return processors.stream().findFirst()
-        .<Allow>map(store -> Allow.builder()
-            .allowed(store.checkRoleScopes(actor).allowed(resource, action)).build())
-        .orElseGet(() -> Allow.builder().allowed(true).build());
+    List<RbacStore> activeStores = activeStores();
+    if (activeStores.isEmpty()) {
+      return Allow.builder().allowed(defaultAllow).build();
+    }
+    boolean allowed = activeStores.stream()
+        .anyMatch(store -> store.checkRoleScopes(actor).allowed(resource, action));
+    return Allow.builder().allowed(allowed).build();
   }
 
-  public List<String> inaccesibleFileds(Actor actor, String resource, String view) {
-    List<RbacStore> processors = new ArrayList<>();
+  /**
+   * Returns the list of fields that the actor cannot access for the specified resource view.
+   *
+   * <p>
+   * All active stores are queried. A field is considered inaccessible if any store marks it as
+   * inaccessible (union semantics). Returns an empty list when no active stores are registered.
+   * </p>
+   *
+   * @param actor the actor whose field access is being evaluated
+   * @param resource the resource name
+   * @param view the view name
+   * @return a deduplicated list of field names the actor cannot access
+   */
+  public List<String> inaccessibleFields(Actor actor, String resource, String view) {
+    List<RbacStore> activeStores = activeStores();
+    if (activeStores.isEmpty()) {
+      return List.of();
+    }
+    return activeStores.stream()
+        .flatMap(store -> store.checkRoleProperties(actor).innacesiblesFor(resource, view).stream())
+        .distinct().toList();
+  }
+
+  /**
+   * Collects all currently active RBAC stores.
+   *
+   * @return list of active stores; never {@code null}
+   */
+  private List<RbacStore> activeStores() {
+    List<RbacStore> stores = new ArrayList<>();
     manager.forEach(instance -> {
       if (instance.isActive()) {
-        processors.add(instance);
+        stores.add(instance);
       }
     });
-    return processors.stream().findFirst()
-        .map(store -> store.checkRoleProperties(actor).innacesiblesFor(resource, view))
-        .orElseGet(List::of);
+    return stores;
   }
 }
