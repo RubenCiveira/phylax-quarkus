@@ -30,6 +30,13 @@ public class SqlTemplate implements AutoCloseable {
   private final Tracer tracer;
 
   /**
+   * Cached result of SQL Server driver detection. {@code null} means not yet computed; it is
+   * resolved once on first use and reused for all subsequent lock operations on this connection.
+   * Driver metadata never changes for the lifetime of a connection.
+   */
+  private Boolean sqlserver;
+
+  /**
    * Constructs a template using a direct {@link Connection}.
    *
    * The connection is used for all operations created by this template. Callers are responsible for
@@ -328,14 +335,20 @@ public class SqlTemplate implements AutoCloseable {
   /**
    * Checks if the underlying database is Microsoft SQL Server.
    *
+   * The result is computed on first call and cached for the lifetime of this template instance.
+   * Driver metadata does not change within a connection, so querying it repeatedly is unnecessary.
+   *
    * @return {@code true} if SQL Server is detected; {@code false} otherwise
    */
   private boolean isSqlserver() {
-    try {
-      String driver = connection.getMetaData().getDriverName().toLowerCase();
-      return driver.contains("sqlserver");
-    } catch (SQLException ex) {
-      throw UncheckedSqlException.exception(connection, ex);
+    if (sqlserver == null) {
+      try {
+        String driver = connection.getMetaData().getDriverName().toLowerCase();
+        sqlserver = driver.contains("sqlserver");
+      } catch (SQLException ex) {
+        throw UncheckedSqlException.exception(connection, ex);
+      }
     }
+    return sqlserver;
   }
 }

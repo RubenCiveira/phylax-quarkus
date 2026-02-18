@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -147,6 +148,23 @@ class SqlTemplateUnitTest {
   }
 
   @Test
+  void isSqlserverIsComputedOnlyOnce() throws SQLException {
+    Connection conn = mock(Connection.class);
+    DatabaseMetaData meta = mock(DatabaseMetaData.class);
+    when(meta.getDriverName()).thenReturn("PostgreSQL");
+    when(conn.getMetaData()).thenReturn(meta);
+
+    try (SqlTemplate template = new SqlTemplate(conn)) {
+      template.withTableLock("SELECT 1");
+      template.withQueryLock("SELECT 1");
+      template.sqlWithQueryLock("SELECT * FROM t");
+    }
+
+    // getDriverName must be called exactly once regardless of how many lock methods are invoked
+    verify(meta, times(1)).getDriverName();
+  }
+
+  @Test
   void testWithTableLockSqlServer() throws SQLException {
     Connection conn = mock(Connection.class);
     DatabaseMetaData meta = mock(DatabaseMetaData.class);
@@ -268,18 +286,20 @@ class SqlTemplateUnitTest {
     when(spanBuilder.setSpanKind(any())).thenReturn(spanBuilder);
     when(spanBuilder.startSpan()).thenReturn(mock(Span.class));
 
-    SqlTemplate template = new SqlTemplate(mock(Connection.class), tracer);
-    Optional<Span> result = template.createSpan("query", Optional.of(span));
+    try (SqlTemplate template = new SqlTemplate(mock(Connection.class), tracer)) {
+      Optional<Span> result = template.createSpan("query", Optional.of(span));
 
-    assertTrue(result.isPresent());
+      assertTrue(result.isPresent());
+    }
   }
 
   @Test
   void testCreateSqlObjects() {
-    SqlTemplate template = new SqlTemplate(mock(Connection.class));
-    assertNotNull(template.createSqlQuery("SELECT * FROM test"));
-    assertNotNull(template.createSqlCommand("DELETE FROM test"));
-    assertNotNull(template.createSqlSchematicQuery("test_table"));
+    try (SqlTemplate template = new SqlTemplate(mock(Connection.class))) {
+      assertNotNull(template.createSqlQuery("SELECT * FROM test"));
+      assertNotNull(template.createSqlCommand("DELETE FROM test"));
+      assertNotNull(template.createSqlSchematicQuery("test_table"));
+    }
   }
 
   @Test
