@@ -24,17 +24,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import net.civeira.phylax.common.batch.storage.MasiveOperationStorage;
+import net.civeira.phylax.common.batch.storage.MassiveOperationStorage;
 
 class BatchServiceUnitTest {
 
-  private MasiveOperationStorage storage;
+  private MassiveOperationStorage storage;
   private ManagedExecutor executor;
   private BatchService service;
 
   @BeforeEach
   void setup() {
-    storage = mock(MasiveOperationStorage.class);
+    storage = mock(MassiveOperationStorage.class);
     executor = mock(ManagedExecutor.class);
     service = new BatchService(storage, executor);
   }
@@ -133,7 +133,7 @@ class BatchServiceUnitTest {
     @Test
     @DisplayName("should invoke monitor callback and persist progress mid-step")
     void testStartTriggersMonitorUpdateViaExecutor() {
-      MasiveOperationStorage realStorage = mock(MasiveOperationStorage.class);
+      MassiveOperationStorage realStorage = mock(MassiveOperationStorage.class);
       ManagedExecutor localExecutor = mock(ManagedExecutor.class);
       BatchService localService = new BatchService(realStorage, localExecutor);
 

@@ -40,7 +40,7 @@ import net.civeira.phylax.common.batch.BatchProgress.GlobalStatus;
 import net.civeira.phylax.common.batch.BatchStepProgress;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 
-class MapMasiveOperationStorageUnitTest {
+class MapMassiveOperationStorageUnitTest {
 
   @Mock
   private DataSource dataSource;
@@ -55,7 +55,7 @@ class MapMasiveOperationStorageUnitTest {
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @InjectMocks
-  private MapMasiveOperationStorage storage;
+  private MapMassiveOperationStorage storage;
 
   private final String task = "export-task";
   private final String actor = "user123";
@@ -65,7 +65,7 @@ class MapMasiveOperationStorageUnitTest {
     MockitoAnnotations.openMocks(this);
 
     objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-    objectMapper.findAndRegisterModules(); // opcional, pero útil
+    objectMapper.findAndRegisterModules();
 
     when(dataSource.getConnection()).thenReturn(connection);
     when(connection.prepareStatement(anyString())).thenReturn(stmt);
@@ -139,7 +139,8 @@ class MapMasiveOperationStorageUnitTest {
   @Test
   void testSaveThrowsExceptionOnJsonError() throws Exception {
     ObjectMapper mockMapper = mock(ObjectMapper.class);
-    MapMasiveOperationStorage faultyStorage = new MapMasiveOperationStorage(mockMapper, dataSource);
+    MapMassiveOperationStorage faultyStorage =
+        new MapMassiveOperationStorage(mockMapper, dataSource);
 
     when(mockMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("fail") {
       private static final long serialVersionUID = 1L;
@@ -157,7 +158,8 @@ class MapMasiveOperationStorageUnitTest {
   @Test
   void testRestoresThrowsExceptionOnJsonError() throws Exception {
     ObjectMapper mockMapper = mock(ObjectMapper.class);
-    MapMasiveOperationStorage faultyStorage = new MapMasiveOperationStorage(mockMapper, dataSource);
+    MapMassiveOperationStorage faultyStorage =
+        new MapMassiveOperationStorage(mockMapper, dataSource);
 
     when(resultSet.next()).thenReturn(true);
     when(resultSet.getString(1)).thenReturn("not-json");
@@ -172,7 +174,7 @@ class MapMasiveOperationStorageUnitTest {
 
   @Test
   void testSaveWhenResultSetNextReturnsFalse_ShouldInsert() throws Exception {
-    // Simula que el ResultSet está vacío (next() → false)
+    // ResultSet is empty: treat as zero existing records and insert
     when(resultSet.next()).thenReturn(false);
     when(stmt.executeUpdate()).thenReturn(1);
 
@@ -181,17 +183,14 @@ class MapMasiveOperationStorageUnitTest {
 
     storage.save(task, actor, progress);
 
-    // Asegura que intenta hacer un INSERT
     verify(connection, atLeastOnce()).prepareStatement(contains("INSERT INTO"));
   }
 
   @Test
   void testSaveInsertFailsWhenExecuteUpdateReturnsZero() throws Exception {
-    // ResultSet.next() = true pero count = 0 → inserta
+    // count = 0 → insert path; executeUpdate returns 0 to simulate failure
     when(resultSet.next()).thenReturn(true);
     when(resultSet.getLong(1)).thenReturn(0L);
-
-    // INSERT falla
     when(stmt.executeUpdate()).thenReturn(0);
 
     BatchProgress progress = BatchProgress.builder().uid(task).startTime(Instant.now())
@@ -203,10 +202,8 @@ class MapMasiveOperationStorageUnitTest {
   @Test
   void testSaveUpdateFailsWhenExecuteUpdateReturnsZero() throws Exception {
     when(resultSet.next()).thenReturn(true);
-    when(resultSet.getLong(1)).thenReturn(1L); // count = 1 → UPDATE
-
-    // UPDATE falla
-    when(stmt.executeUpdate()).thenReturn(0);
+    when(resultSet.getLong(1)).thenReturn(1L); // count = 1 → update path
+    when(stmt.executeUpdate()).thenReturn(0); // update returns 0 to simulate failure
 
     BatchProgress progress = BatchProgress.builder().uid(task).startTime(Instant.now())
         .steps(List.of(progress(Status.PROCESSING))).build();
