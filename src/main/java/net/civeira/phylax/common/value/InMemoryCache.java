@@ -16,7 +16,9 @@ public class InMemoryCache<K, V> {
 
     public Entry(V value, Duration ttl) {
       this.value = value;
-      this.expireAtMillis = ttl.toMillis();
+      long ttlMillis = ttl.toMillis();
+      long effectiveTtl = Math.max(0, ttlMillis - 1);
+      this.expireAtMillis = System.currentTimeMillis() + effectiveTtl;
     }
 
     public V getValue() {
@@ -24,7 +26,7 @@ public class InMemoryCache<K, V> {
     }
 
     private boolean isExpired(long now) {
-      return expireAtMillis < now;
+      return expireAtMillis <= now;
     }
   }
 
