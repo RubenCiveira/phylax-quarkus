@@ -8,6 +8,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
+/**
+ * Defines a remote node used for projection execution.
+ *
+ * Nodes describe how to call a remote endpoint and map parameters. They also declare relationships
+ * that can be expanded via batch requests. Nodes are composed into an {@link ExecutionTree} for
+ * lookups by path. This structure drives execution planning and projection resolution.
+ */
 @Getter
 @Builder
 public class ExecutionNode {
@@ -23,10 +30,28 @@ public class ExecutionNode {
   @NonNull
   private final Map<String, RelationshipDefinition> relations;
 
+  /**
+   * Adds a relationship definition to this node.
+   *
+   * Relationships are used to resolve related resources during projections. The property key
+   * corresponds to the field being expanded. This mutates the internal relations map for the node.
+   *
+   * @param property relation property name
+   * @param definition relation definition
+   */
   public void addRelation(String property, RelationshipDefinition definition) {
     relations.put(property, definition);
   }
 
+  /**
+   * Resolves the target URL by expanding template parameters.
+   *
+   * The method replaces each {param} segment with the provided value. It uses the node's server and
+   * endpoint as the base URL. This is used during execution to build the request target.
+   *
+   * @param params path parameters
+   * @return resolved target URL
+   */
   public String target(Map<String, String> params) {
     String output = server + endpoint;
     for (Entry<String, String> entry : params.entrySet()) {

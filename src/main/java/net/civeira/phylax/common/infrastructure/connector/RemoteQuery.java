@@ -6,86 +6,119 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Interface representing a remote query that allows setting headers, query parameters, and path
- * parameters for a remote request. It also provides methods to define response processors.
+ * Represents a configurable remote request before execution.
+ *
+ * It allows setting headers, query parameters, and path parameters on the request. A processor is
+ * used to map the response into a {@link RemoteConnection} handle. The resulting connection is
+ * executed by a {@link RemoteConnector}. This abstraction keeps request building separate from
+ * transport concerns.
  */
 public interface RemoteQuery {
 
   /**
    * Adds a single header to the request.
    *
-   * @param name The name of the header.
-   * @param value The value of the header.
-   * @return The current instance of {@link RemoteQuery} for method chaining.
+   * Use this for common headers like authorization or content type. The method returns the same
+   * query instance for fluent chaining. Header values are applied when the request is executed.
+   *
+   * @param name header name
+   * @param value header value
+   * @return current {@link RemoteQuery} instance for chaining
    */
   RemoteQuery header(String name, String value);
 
   /**
    * Adds a header with multiple values to the request.
    *
-   * @param name The name of the header.
-   * @param values The list of values associated with the header.
-   * @return The current instance of {@link RemoteQuery} for method chaining.
+   * This is useful for headers that accept repeated values. The method returns the same query
+   * instance for fluent chaining. Values are applied when the request is executed.
+   *
+   * @param name header name
+   * @param values header values
+   * @return current {@link RemoteQuery} instance for chaining
    */
   RemoteQuery header(String name, List<String> values);
 
   /**
    * Adds multiple headers to the request.
    *
-   * @param headers A map containing header names as keys and lists of values as values.
-   * @return The current instance of {@link RemoteQuery} for method chaining.
+   * This is a convenience method for bulk header assignment. The method returns the same query
+   * instance for fluent chaining. Values are applied when the request is executed.
+   *
+   * @param headers header map with names and values
+   * @return current {@link RemoteQuery} instance for chaining
    */
   RemoteQuery headers(Map<String, List<String>> headers);
 
   /**
    * Adds a query parameter to the request URL.
    *
-   * @param name The name of the query parameter.
-   * @param value The value of the query parameter.
-   * @return The current instance of {@link RemoteQuery} for method chaining.
+   * Use this to filter or paginate remote queries. The method returns the same query instance for
+   * fluent chaining. Parameters are applied when the request is executed.
+   *
+   * @param name query parameter name
+   * @param value query parameter value
+   * @return current {@link RemoteQuery} instance for chaining
    */
   RemoteQuery queryParam(String name, String value);
 
   /**
    * Adds multiple query parameters to the request URL.
    *
-   * @param params A map containing query parameter names as keys and their respective values.
-   * @return The current instance of {@link RemoteQuery} for method chaining.
+   * This is a convenience method for bulk query parameter assignment. The method returns the same
+   * query instance for fluent chaining. Parameters are applied when the request is executed.
+   *
+   * @param params query parameter names and values
+   * @return current {@link RemoteQuery} instance for chaining
    */
   RemoteQuery queryParam(Map<String, String> params);
 
   /**
    * Adds a path parameter to the request URL.
    *
-   * @param name The name of the path parameter.
-   * @param value The value of the path parameter.
-   * @return The current instance of {@link RemoteQuery} for method chaining.
+   * Use this to replace URI template variables in the target path. The method returns the same
+   * query instance for fluent chaining. Parameters are applied when the request is executed.
+   *
+   * @param name path parameter name
+   * @param value path parameter value
+   * @return current {@link RemoteQuery} instance for chaining
    */
   RemoteQuery pathParam(String name, String value);
 
   /**
    * Adds multiple path parameters to the request URL.
    *
-   * @param params A map containing path parameter names as keys and their respective values.
-   * @return The current instance of {@link RemoteQuery} for method chaining.
+   * This is a convenience method for bulk path parameter assignment. The method returns the same
+   * query instance for fluent chaining. Parameters are applied when the request is executed.
+   *
+   * @param params path parameter names and values
+   * @return current {@link RemoteQuery} instance for chaining
    */
   RemoteQuery pathParam(Map<String, String> params);
 
   /**
    * Defines a processor to handle the response of the request.
    *
-   * @param <T> The type of the response object.
-   * @param type The class type of the expected response.
-   * @param consumer A consumer function to process the response.
-   * @return A {@link RemoteConnection} instance representing the processed request.
+   * The consumer is invoked with the mapped response object on completion. The returned
+   * {@link RemoteConnection} represents the configured request. Use this to map JSON responses into
+   * typed objects.
+   *
+   * @param <T> response type
+   * @param type class type of the expected response
+   * @param consumer consumer function to process the response
+   * @return a {@link RemoteConnection} representing the processed request
    */
   <T> RemoteConnection processor(Class<T> type, Consumer<T> consumer);
 
   /**
    * Defines a processor that executes a {@link Runnable} upon receiving the response.
    *
-   * @param runnable A runnable task to be executed after the request is processed.
-   * @return A {@link RemoteConnection} instance representing the processed request.
+   * This is useful when the response body is not needed. The returned {@link RemoteConnection}
+   * represents the configured request. The runnable is executed after a successful response is
+   * received.
+   *
+   * @param runnable task to be executed after the request is processed
+   * @return a {@link RemoteConnection} representing the processed request
    */
   RemoteConnection processor(Runnable runnable);
 }

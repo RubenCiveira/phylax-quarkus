@@ -6,36 +6,27 @@ import java.util.Comparator;
 import jakarta.annotation.Priority;
 
 /**
- * A comparator that compares objects based on the {@link Priority} annotation present on their
- * class.
+ * Comparator that orders instances based on their class {@link Priority} annotation.
  *
- * <p>
- * This comparator allows sorting of objects by the value defined in their {@code @Priority}
- * annotation. Objects whose classes do not define this annotation are considered to have a default
- * priority of 0.
- * </p>
- *
- * <p>
- * It is particularly useful in scenarios where processing or execution order needs to be determined
- * based on annotations rather than explicit configuration.
- * </p>
- *
- * <p>
- * Note: This comparator uses the priority of the object's <em>class</em>, not the object itself, so
- * it assumes that all instances of a class share the same priority.
- * </p>
+ * It reads the {@code @Priority} value from the runtime class of each instance. Classes without the
+ * annotation are treated as priority 0 for ordering. This supports deterministic ordering when
+ * implementations are discovered dynamically. It assumes all instances of a class share the same
+ * priority level.
  *
  * @param <T> the type of objects being compared
  */
 public class PriorityComparator<T> implements Comparator<T> {
 
   /**
-   * Compares two objects based on the value of their class-level {@link Priority} annotation.
+   * Compares two objects based on their class-level {@link Priority} annotation.
    *
-   * @param one the first object to be compared
-   * @param other the second object to be compared
-   * @return a negative integer, zero, or a positive integer as the first argument has less than,
-   *         equal to, or greater priority than the second
+   * The comparison uses the annotation on the runtime class, not the instance. Missing annotations
+   * default to a priority value of 0. Returns a negative, zero, or positive value following
+   * {@link Comparator} contract.
+   *
+   * @param one the first object to compare
+   * @param other the second object to compare
+   * @return ordering based on priority values
    */
   @Override
   public int compare(T one, T other) {

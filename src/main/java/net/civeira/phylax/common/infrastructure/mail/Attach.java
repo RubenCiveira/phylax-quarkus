@@ -8,12 +8,28 @@ import java.util.Optional;
 import jakarta.activation.DataSource;
 import lombok.Data;
 
+/**
+ * Represents an attachment or inline resource for an email.
+ *
+ * Attachments can be created from files on disk or from data sources. Each attachment has a name
+ * used in the email client and storage. Inline attachments can reference the content id generated
+ * by {@link #getCid()}. This model is used by {@link EmailMessage} to construct mail payloads.
+ */
 @Data
 public class Attach {
   private final String name;
   private final Optional<File> fichero;
   private final Optional<DataSource> datasource;
 
+  /**
+   * Creates an attachment from a file on disk.
+   *
+   * The file is referenced directly and attached when the message is sent. Use this for local files
+   * and generated exports. The name is used as the filename in the email client.
+   *
+   * @param name attachment name
+   * @param fichero file to attach
+   */
   public Attach(final String name, final File fichero) {
     super();
     this.name = name;
@@ -21,6 +37,15 @@ public class Attach {
     this.datasource = Optional.empty();
   }
 
+  /**
+   * Creates an attachment from a data source.
+   *
+   * The data source is converted to a temporary file when sending. Use this for streamed content or
+   * in-memory generated files. The name is used as the filename in the email client.
+   *
+   * @param name attachment name
+   * @param datasource data source to attach
+   */
   public Attach(final String name, final DataSource datasource) {
     super();
     this.name = name;
@@ -28,6 +53,15 @@ public class Attach {
     this.fichero = Optional.empty();
   }
 
+  /**
+   * Returns a content-id for inline attachments.
+   *
+   * The content-id is derived from the attachment name and base64 encoded. It can be used to
+   * reference the inline attachment in HTML content. The value is stable for the same attachment
+   * name.
+   *
+   * @return content-id string
+   */
   public String getCid() {
     return Base64.getEncoder().encodeToString(this.name.getBytes());
   }

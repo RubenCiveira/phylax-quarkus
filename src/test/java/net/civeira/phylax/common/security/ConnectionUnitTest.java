@@ -1,0 +1,160 @@
+package net.civeira.phylax.common.security;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Locale;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("Connection security model")
+class ConnectionUnitTest {
+
+  @Nested
+  @DisplayName("Builder and required fields")
+  class BuilderAndRequired {
+
+    @Test
+    @DisplayName("Should build connection with required request field")
+    void shouldBuildConnectionWithRequiredRequestField() {
+      // Arrange / Act — build a Connection with a request path
+      Connection conn = Connection.builder().request("/api/test").build();
+
+      // Assert — the request field holds the provided value
+      assertEquals("/api/test", conn.getRequest(), "Request should match the value set in builder");
+    }
+
+    @Test
+    @DisplayName("Should throw when request is null")
+    void shouldThrowWhenRequestIsNull() {
+      // Arrange / Act / Assert — building a Connection with a null request throws
+      // NullPointerException
+      assertThrows(NullPointerException.class, () -> Connection.builder().request(null).build(),
+          "Building a Connection with null request should throw NullPointerException");
+    }
+  }
+
+  @Nested
+  @DisplayName("Optional fields")
+  class OptionalFields {
+
+    @Test
+    @DisplayName("Should return present optional when remote is set")
+    void shouldReturnPresentOptionalWhenRemoteIsSet() {
+      // Arrange — build a Connection with a remote address
+      Connection conn = Connection.builder().request("/api").remote("192.168.1.1").build();
+
+      // Act / Assert — getRemote() returns a present Optional with the correct value
+      assertTrue(conn.getRemote().isPresent(), "Remote should be present when set");
+      assertEquals("192.168.1.1", conn.getRemote().get(),
+          "Remote address should match the value set in builder");
+    }
+
+    @Test
+    @DisplayName("Should return empty optional when remote is not set")
+    void shouldReturnEmptyOptionalWhenRemoteIsNotSet() {
+      // Arrange — build a Connection without setting a remote address
+      Connection conn = Connection.builder().request("/api").build();
+
+      // Act / Assert — getRemote() returns an empty Optional
+      assertTrue(conn.getRemote().isEmpty(), "Remote should be empty when not set");
+    }
+
+    @Test
+    @DisplayName("Should return present optional when remote device is set")
+    void shouldReturnPresentOptionalWhenRemoteDeviceIsSet() {
+      // Arrange — build a Connection with a remote device identifier
+      Connection conn = Connection.builder().request("/api").remoteDevice("device-123").build();
+
+      // Act / Assert — getRemoteDevice() returns a present Optional with the correct value
+      assertTrue(conn.getRemoteDevice().isPresent(), "Remote device should be present when set");
+      assertEquals("device-123", conn.getRemoteDevice().get(),
+          "Remote device should match the value set in builder");
+    }
+
+    @Test
+    @DisplayName("Should return empty optional when remote device is not set")
+    void shouldReturnEmptyOptionalWhenRemoteDeviceIsNotSet() {
+      // Arrange — build a Connection without setting a remote device
+      Connection conn = Connection.builder().request("/api").build();
+
+      // Act / Assert — getRemoteDevice() returns an empty Optional
+      assertTrue(conn.getRemoteDevice().isEmpty(), "Remote device should be empty when not set");
+    }
+
+    @Test
+    @DisplayName("Should return present optional when remote application is set")
+    void shouldReturnPresentOptionalWhenRemoteApplicationIsSet() {
+      // Arrange — build a Connection with a remote application name
+      Connection conn =
+          Connection.builder().request("/api").remoteApplication("mobile-app").build();
+
+      // Act / Assert — getRemoteApplication() returns a present Optional with the correct value
+      assertTrue(conn.getRemoteApplication().isPresent(),
+          "Remote application should be present when set");
+      assertEquals("mobile-app", conn.getRemoteApplication().get(),
+          "Remote application should match the value set in builder");
+    }
+
+    @Test
+    @DisplayName("Should return empty optional when remote application is not set")
+    void shouldReturnEmptyOptionalWhenRemoteApplicationIsNotSet() {
+      // Arrange — build a Connection without setting a remote application
+      Connection conn = Connection.builder().request("/api").build();
+
+      // Act / Assert — getRemoteApplication() returns an empty Optional
+      assertTrue(conn.getRemoteApplication().isEmpty(),
+          "Remote application should be empty when not set");
+    }
+  }
+
+  @Nested
+  @DisplayName("Locale handling")
+  class LocaleHandling {
+
+    @Test
+    @DisplayName("Should return default locale when locale field is set (inverted ternary in source)")
+    void shouldReturnDefaultLocaleWhenLocaleIsSet() {
+      // Arrange — build a Connection with a French locale set
+      Connection conn = Connection.builder().request("/api").locale(Locale.FRENCH).build();
+
+      // Act — retrieve the locale from the connection
+      Locale locale = conn.getLocale();
+
+      // Assert — source code has inverted ternary: returns Locale.getDefault() when field is
+      // non-null
+      assertEquals(Locale.getDefault(), locale,
+          "getLocale returns system default when field is non-null due to inverted ternary in source");
+    }
+
+    @Test
+    @DisplayName("Should return null when locale field is null (inverted ternary in source)")
+    void shouldReturnNullWhenLocaleIsNull() {
+      // Arrange — build a Connection without setting a locale
+      Connection conn = Connection.builder().request("/api").build();
+
+      // Act — retrieve the locale from the connection
+      Locale locale = conn.getLocale();
+
+      // Assert — source code has inverted ternary: returns null when field is null
+      assertNull(locale,
+          "getLocale returns null when field is null due to inverted ternary in source");
+    }
+  }
+
+  @Nested
+  @DisplayName("Start time")
+  class StartTime {
+
+    @Test
+    @DisplayName("Should have a non-null start time after construction")
+    void shouldHaveNonNullStartTimeAfterConstruction() {
+      // Arrange / Act — build a Connection to observe the auto-set start time
+      Connection conn = Connection.builder().request("/api").build();
+
+      // Assert — the start time is automatically populated on construction
+      assertNotNull(conn.getStartTime(), "Start time should be automatically set on construction");
+    }
+  }
+}

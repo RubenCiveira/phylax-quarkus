@@ -7,45 +7,68 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 
+/**
+ * Defines SQL statements and behaviors for migration bookkeeping tables.
+ *
+ * Dialects supply DDL and DML for creating and updating migration log/lock tables. Implementations
+ * adapt to vendor differences in syntax and date handling. Default methods provide common SQL for
+ * lock management and migration tracking. This interface is used by the migration manager during
+ * startup.
+ */
 public interface SQLDialect {
 
   /**
-   * SQL para crear la tabla de logs de migraciones.
-   * 
-   * @return La sentencia SQL para crear la tabla.
+   * Builds the SQL statement to create the migration log table.
+   *
+   * The log table tracks executed migrations and their checksums. Implementations may add
+   * vendor-specific column types or constraints.
+   *
+   * @return SQL statement to create the log table
    */
   String createLogTable(String name);
 
   /**
-   * SQL para crear la tabla de locks para las migraciones.
-   * 
-   * @return La sentencia SQL para crear la tabla.
+   * Builds the SQL statement to create the migration lock table.
+   *
+   * The lock table coordinates concurrent migration execution. Implementations may add
+   * vendor-specific column types or constraints.
+   *
+   * @return SQL statement to create the lock table
    */
   String createLockTable(String name);
 
   /**
-   * SQL para insertar un valor en la tabla de locks.
-   * 
-   * @return La sentencia SQL para insertar un valor.
+   * Returns SQL to insert the initial lock row.
+   *
+   * This row is used to coordinate lock acquisition across instances. It is typically inserted once
+   * during migration setup.
+   *
+   * @return SQL statement to insert the lock row
    */
   default String insertLock(String name) {
     return "INSERT INTO " + name + " (id, locked, granted) VALUES (1, 0, NULL)";
   }
 
   /**
-   * SQL para liberar el lock de migración.
+   * Returns SQL to release the migration lock.
    *
-   * @return La sentencia SQL para liberar el lock.
+   * This sets the lock row to unlocked and clears the granted timestamp. Use this after successful
+   * or failed migration execution.
+   *
+   * @return SQL statement to release the lock
    */
   default String releaseLock(String name) {
     return "UPDATE " + name + " SET locked = 0, granted = NULL WHERE id = 1";
   }
 
   /**
-   * SQL para marcar una migración como exitosa.
-   * 
-   * @param exists Indica si el registro ya existe.
-   * @return La sentencia SQL para marcar la migración como exitosa.
+   * Returns SQL to mark a migration as successful.
+   *
+   * The statement updates an existing log entry or inserts a new one. The exists flag indicates
+   * whether the entry already exists.
+   *
+   * @param exists whether a log entry already exists
+   * @return SQL statement to mark the migration as successful
    */
   default String markOkSql(String name, boolean exists) {
     return exists
@@ -56,10 +79,13 @@ public interface SQLDialect {
   }
 
   /**
-   * SQL para marcar una migración como fallida.
+   * Returns SQL to mark a migration as failed.
    *
-   * @param exists Indica si el registro ya existe.
-   * @return La sentencia SQL para marcar la migración como fallida.
+   * The statement updates an existing log entry or inserts a new one. The exists flag indicates
+   * whether the entry already exists.
+   *
+   * @param exists whether a log entry already exists
+   * @return SQL statement to mark the migration as failed
    */
   default String markFailSql(String name, boolean exists) {
     return exists
@@ -69,43 +95,67 @@ public interface SQLDialect {
   }
 
   /**
-   * SQL para obtener las migraciones ejecutadas.
+   * Returns SQL to list executed migrations for a given application name.
    *
-   * @return La sentencia SQL para obtener las migraciones ejecutadas.
+   * The result set includes filename, checksum, and error information. The statement orders results
+   * by execution time.
+   *
+   * @return SQL statement to list executed migrations
    */
   default String listExecutedSql(String name) {
     return "SELECT filename, md5sum, error FROM " + name + " WHERE name = ? ORDER BY execution ASC";
   }
 
   /**
-   * SQL para actualizar el estado de lock a activo.
+   * Returns SQL to acquire the migration lock.
    *
-   * @return La sentencia SQL para actualizar el estado del lock.
+   * This sets the lock row to locked and stores the granted timestamp. It is used before running
+   * migration scripts.
+   *
+   * @return SQL statement to acquire the lock
    */
   default String updateLock(String name) {
     return "UPDATE " + name + " SET locked = 1, granted = NOW() WHERE id = 1";
   }
 
   /**
-   * SQL para seleccionar el estado del lock.
+   * Returns SQL to read the current lock state.
    *
-   * @return La sentencia SQL para consultar el estado del lock.
+   * The query returns both the lock flag and the granted timestamp. It is used to decide whether a
+   * new lock can be acquired.
+   *
+   * @return SQL statement to read the lock state
    */
   default String selectLock(String name) {
     return "SELECT locked, granted FROM " + name + " WHERE id = 1 ";
   }
 
   /**
-   * Interpreta el valor de la columna 'locked' desde el ResultSet.
+   * Interprets the lock state using the current row of the result set.
    *
-   * @param rs El ResultSet que contiene la columna.
-   * @return true si 'locked' es activo, false en caso contrario.
-   * @throws SQLException Si ocurre un error al leer el ResultSet.
+   * It verifies the lock flag and ensures the grant timestamp is still valid. The duration
+   * parameter defines how long a lock remains valid.
+   *
+   * @param rs result set containing the lock columns
+   * @param duration lock validity duration
+   * @return true when the lock is active and not expired
+   * @throws SQLException when reading the result set fails
    */
   default boolean interpretLocked(ResultSet rs, Duration duration) throws SQLException {
     return rs.getInt("locked") == 1 && stillGranted(rs, duration);
   }
 
+  /**
+   * Checks whether the granted timestamp is still within the validity window.
+   *
+   * This is used to prevent stale locks from blocking migrations indefinitely. When the timestamp
+   * is null, the lock is treated as not granted.
+   *
+   * @param rs result set containing the granted timestamp
+   * @param duration lock validity duration
+   * @return true when the granted timestamp is still valid
+   * @throws SQLException when reading the result set fails
+   */
   default boolean stillGranted(ResultSet rs, Duration duration) throws SQLException {
     Timestamp ts = rs.getTimestamp("granted");
     if (null == ts) {

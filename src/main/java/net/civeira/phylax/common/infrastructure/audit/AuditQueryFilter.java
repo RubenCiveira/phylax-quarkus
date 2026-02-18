@@ -8,6 +8,14 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Defines filtering criteria for audit event queries.
+ *
+ * The filter encapsulates optional criteria such as actor, action, and time ranges. It is used by
+ * {@link AuditReadService} to build SQL predicates safely. Filters can be combined with pagination
+ * parameters at the service layer. This model is intended for management endpoints and audit
+ * dashboards.
+ */
 @Data
 @Builder
 public class AuditQueryFilter {

@@ -15,13 +15,11 @@ import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.value.validation.AbstractFail.LocalizedFail;
 
 /**
- * A localized representation of a single batch step's progress, suitable for user interfaces or
- * APIs.
+ * Localized representation of a single batch step's progress.
  *
- * <p>
- * This class provides translated error and warning messages, while retaining all step execution
- * metadata.
- * </p>
+ * It preserves timing and status metadata while translating warnings and errors. The localized view
+ * is intended for UI consumption and API responses. It maps low-level error structures into
+ * human-readable messages. The class is immutable and supports native reflection for serialization.
  */
 @Data
 @Builder
@@ -30,6 +28,10 @@ public class LocalizedBatchStepProgress {
 
   /**
    * Localized representation of validation or processing errors for a specific item.
+   *
+   * Each entry holds the item identifier and a list of localized failures. This structure is used
+   * to render item-level error summaries in UIs. It is built from {@link ErrorInfo} using the
+   * target locale.
    */
   @Data
   @Builder
@@ -75,9 +77,13 @@ public class LocalizedBatchStepProgress {
   /**
    * Creates a localized view of a {@link BatchStepProgress} using the given locale.
    *
-   * @param step the original batch step progress
-   * @param locale the locale to use for translations
-   * @return a localized version of the step progress
+   * This preserves the step status, timing, and counters while localizing errors. Warnings and
+   * errors are mapped through {@link #mapMap(Map, Locale)}. Use this when returning batch progress
+   * to a localized client.
+   *
+   * @param step original batch step progress
+   * @param locale locale to use for translations
+   * @return localized version of the step progress
    */
   public static LocalizedBatchStepProgress from(BatchStepProgress step, Locale locale) {
     return LocalizedBatchStepProgress.builder().name(step.getName()).error(step.getError())
@@ -90,9 +96,12 @@ public class LocalizedBatchStepProgress {
   /**
    * Converts an {@link ErrorInfo} instance into a localized error info object.
    *
-   * @param info the error information to localize
-   * @param locale the target locale
-   * @return the localized error info
+   * The method maps each fail into a localized representation. This is used for both warnings and
+   * errors in the localized view. The item key is populated by the caller when mapping the entry.
+   *
+   * @param info error information to localize
+   * @param locale target locale
+   * @return localized error info
    */
   public static LocalizedErrorInfo from(ErrorInfo info, Locale locale) {
     return LocalizedErrorInfo.builder().fails(null == info.getFails() ? null
@@ -100,10 +109,13 @@ public class LocalizedBatchStepProgress {
   }
 
   /**
-   * Helper method to convert a map of error data into a list of localized error entries.
+   * Converts a map of error data into localized error entries.
    *
-   * @param map the original map from item identifiers to error info
-   * @param locale the target locale for translation
+   * Each map entry is transformed into a {@link LocalizedErrorInfo} with item id. The list is empty
+   * when the input map is null. This preserves the order of the input map iteration.
+   *
+   * @param map map from item identifiers to error info
+   * @param locale target locale for translation
    * @return list of localized error info entries
    */
   private static List<LocalizedErrorInfo> mapMap(Map<String, ErrorInfo> map, Locale locale) {

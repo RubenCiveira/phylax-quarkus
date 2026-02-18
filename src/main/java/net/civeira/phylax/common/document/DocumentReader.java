@@ -14,6 +14,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Reads structured records from document sources using readers and transformers.
+ *
+ * It selects a reader that can handle the input and applies transformations as needed.
+ * Transformations allow converting one content type into another before reading. This is used by
+ * import workflows that accept multiple file formats. The output is a list of key-value maps
+ * representing parsed rows.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class DocumentReader {
@@ -22,6 +30,16 @@ public class DocumentReader {
 
   private final Instance<FileTransformer> transforms;
 
+  /**
+   * Reads a document source and returns the extracted records.
+   *
+   * The method finds a compatible reader and applies transformations when required. Each record is
+   * represented as a key-value map aligned to the file schema. This supports batch imports where
+   * records are later validated and persisted.
+   *
+   * @param source document input source
+   * @return list of key-value records extracted from the document
+   */
   public List<Map<String, String>> read(DataSource source) {
     List<Map<String, String>> result = new ArrayList<>();
     Queue<DataSource> queue = new ArrayDeque<>();

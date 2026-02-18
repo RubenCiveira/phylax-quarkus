@@ -21,6 +21,14 @@ import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.sql.UncheckedSqlException;
 
+/**
+ * Coordinates database migrations at application startup.
+ *
+ * The manager builds or reuses a datasource and triggers migration execution. It supports optional
+ * separate JDBC settings for migration operations. Migrations are executed during the startup phase
+ * with configurable priority. This class wraps SQL errors into {@link UncheckedSqlException} for
+ * uniform handling.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class MigrationsManager {
@@ -29,6 +37,13 @@ public class MigrationsManager {
           "org.mariadb.jdbc.Driver", "h2", "org.h2.Driver", "oracle", "oracle.jdbc.OracleDriver",
           "sqlserver", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
+  /**
+   * Configuration for an optional JDBC datasource used only for migrations.
+   *
+   * This allows migrations to run on a separate connection or credentials. Each property is
+   * optional and falls back to the main datasource when absent. Values are sourced from the
+   * application configuration mapping.
+   */
   public static interface JdbcConfig {
     Optional<String> url();
 
@@ -37,6 +52,13 @@ public class MigrationsManager {
     Optional<Integer> minSize();
   }
 
+  /**
+   * Configuration mapping for migration settings.
+   *
+   * It allows specifying a separate JDBC configuration, DB kind, and location. The group identifier
+   * scopes migration execution across environments. Values are optional and fall back to sensible
+   * defaults.
+   */
   @ConfigMapping(prefix = "app.migration")
   public static interface MigrationsConfig {
     Optional<JdbcConfig> jdbc();
@@ -55,6 +77,15 @@ public class MigrationsManager {
   private final MigrationsConfig config;
   private final DataSource source;
 
+  /**
+   * Executes migrations during application startup.
+   *
+   * The method resolves a migration datasource when configured, otherwise uses the default. It
+   * creates a {@link Migrations} instance and runs pending scripts. SQL errors are wrapped into
+   * {@link UncheckedSqlException}.
+   *
+   * @param init startup event triggering migration execution
+   */
   public void onInit(@Observes @Priority(Migrations.MIGRATION_PHASE_PRIORITY) StartupEvent init) {
     DataSource migrationsSource = config.jdbc().flatMap(JdbcConfig::url).map(url -> {
       String driverClassName = DB_KIND_TO_DRIVER.get(config.dbKind().orElse(""));

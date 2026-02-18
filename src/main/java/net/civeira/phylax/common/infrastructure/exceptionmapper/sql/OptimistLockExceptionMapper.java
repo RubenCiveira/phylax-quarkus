@@ -10,11 +10,28 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.sql.OptimistLockException;
 
+/**
+ * Maps optimistic lock violations to HTTP 412 responses.
+ *
+ * This mapper handles concurrency conflicts detected by optimistic locking. It returns a 412
+ * response to indicate precondition failure on update. The response includes a reason derived from
+ * the exception message. Logging provides visibility into concurrent modification scenarios.
+ */
 @Slf4j
 @Provider
 public class OptimistLockExceptionMapper implements ExceptionMapper<OptimistLockException> {
 
   @Override
+  /**
+   * Converts an optimistic lock exception into an HTTP response.
+   *
+   * The response status is set to 412 with a minimal reason payload. Logging is performed at info
+   * level based on logger configuration. This mapper is used by SQL repositories to surface
+   * concurrency conflicts.
+   *
+   * @param exception optimistic lock exception
+   * @return HTTP 412 response
+   */
   public Response toResponse(OptimistLockException exception) {
     if (log.isDebugEnabled()) {
       log.info("optimist lock exception", exception);

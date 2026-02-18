@@ -4,11 +4,11 @@ package net.civeira.phylax.common.infrastructure.sql;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Represents an executable SQL command (e.g., INSERT, UPDATE, DELETE) with parameter support.
- * <p>
- * This class allows parameter binding and execution through a template engine, and is meant to be
- * used with SQL statements that do not return result sets.
- * </p>
+ * Represents an executable SQL command (e.g., INSERT, UPDATE, DELETE).
+ *
+ * The command supports named parameter binding and executes via {@link SqlTemplate}. It is intended
+ * for statements that do not return a result set. The class is final to keep behavior consistent
+ * and predictable. Execution delegates to the base class which handles tracing and errors.
  */
 @Slf4j
 public final class SqlCommand extends AbstractSqlCommand<SqlCommand> {
@@ -21,6 +21,10 @@ public final class SqlCommand extends AbstractSqlCommand<SqlCommand> {
   /**
    * Constructs a new {@code SqlCommand} using the given SQL template and statement.
    *
+   * The raw SQL is stored and later executed with parameter binding. Use
+   * {@link SqlTemplate#createSqlCommand(String)} to create commands. The template manages
+   * connection and optional tracing.
+   *
    * @param template the SQL template engine used to prepare the final query
    * @param sql the SQL statement as a raw string
    */
@@ -31,6 +35,9 @@ public final class SqlCommand extends AbstractSqlCommand<SqlCommand> {
 
   /**
    * Binds a named parameter to this command.
+   *
+   * The parameter name must match a placeholder in the SQL statement. The value object handles
+   * binding to the prepared statement. This method returns the command for fluent chaining.
    *
    * @param name the parameter name
    * @param consumer the parameter value object
@@ -45,7 +52,11 @@ public final class SqlCommand extends AbstractSqlCommand<SqlCommand> {
   /**
    * Executes the SQL command (e.g., INSERT, UPDATE, DELETE).
    *
-   * @return the number of affected rows, or {@code null} if execution failed
+   * The execution binds parameters and runs the statement through the template. The return value
+   * typically represents the number of affected rows. Errors are wrapped as
+   * {@link UncheckedSqlException} by the base class.
+   *
+   * @return the number of affected rows
    */
   @Override
   public Integer execute() {

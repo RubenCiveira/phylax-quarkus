@@ -22,6 +22,14 @@ import org.jboss.logging.Logger.Level;
 
 import lombok.Data;
 
+/**
+ * Executes SQL migrations from a configured resource index.
+ *
+ * The runner tracks executed migrations in a log table and uses a lock table for concurrency. It
+ * reads migration files, computes checksums, and applies SQL statements sequentially. When a
+ * migration fails, the error is recorded for later inspection. This class is used by
+ * {@link MigrationsManager} during application startup.
+ */
 public class Migrations implements AutoCloseable {
   private static final String MD5SUM = "md5sum";
 
@@ -51,6 +59,18 @@ public class Migrations implements AutoCloseable {
   private final String group;
   private final String migrationsIndex;
 
+  /**
+   * Creates a migrations runner for the given connection, index, and group.
+   *
+   * The constructor resolves the database dialect from the connection metadata. It also ensures log
+   * and lock tables exist before execution. The group scopes migration execution across
+   * environments or tenants.
+   *
+   * @param connection JDBC connection to use
+   * @param migrationsIndex classpath index listing migration files
+   * @param group migration group identifier
+   * @throws SQLException when table creation fails
+   */
   public Migrations(Connection connection, String migrationsIndex, String group)
       throws SQLException {
     this.connection = connection;
@@ -80,6 +100,16 @@ public class Migrations implements AutoCloseable {
     }
   }
 
+  /**
+   * Executes pending migrations and returns an execution report.
+   *
+   * The report contains executed files, SQL statements, and error messages. A lock is acquired to
+   * prevent concurrent migration execution. Migration results are persisted in the log table with
+   * checksums.
+   *
+   * @return a result map with keys for files, queries, and errors
+   * @throws SQLException when database operations fail
+   */
   public Map<String, Object> runMigrations() throws SQLException {
     Map<String, Object> result = new HashMap<>();
     result.put(ERRORS, new ArrayList<String>());
@@ -114,10 +144,29 @@ public class Migrations implements AutoCloseable {
     return result;
   }
 
+  /**
+   * Returns the SQL statements of pending migrations.
+   *
+   * This is used to preview what will be executed without applying changes. Statements are built
+   * from SQL files in the migration index.
+   *
+   * @return list of pending SQL statements
+   * @throws Exception when reading resources or computing checksums fails
+   */
   public List<String> getPendingMigrations() throws Exception {
     return getPendingMigrationsSql(false);
   }
 
+  /**
+   * Returns pending migration SQL and optionally the mark-ok statements.
+   *
+   * When includeMarkQueries is true, the output includes comments with mark SQL. This helps preview
+   * synchronization steps without executing them.
+   *
+   * @param includeMarkQueries whether to include mark-ok statements
+   * @return list of pending SQL statements and optional mark entries
+   * @throws Exception when reading resources or computing checksums fails
+   */
   public List<String> getPendingMigrationsAndSyncs(boolean includeMarkQueries) throws Exception {
     return getPendingMigrationsSql(true);
   }
@@ -356,6 +405,14 @@ public class Migrations implements AutoCloseable {
     ((List<String>) result.get(FILES)).add(query);
   }
 
+  /**
+   * Closes the underlying JDBC connection.
+   *
+   * This is invoked by try-with-resources usage in the migration manager. The caller is responsible
+   * for managing pooled data sources separately.
+   *
+   * @throws SQLException when connection close fails
+   */
   @Override
   public void close() throws SQLException {
     connection.close();

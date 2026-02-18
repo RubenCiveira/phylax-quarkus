@@ -11,11 +11,12 @@ import lombok.Data;
 import net.civeira.phylax.common.batch.BatchProgress.GlobalStatus;
 
 /**
- * A localized view of {@link BatchProgress} intended for user-facing APIs or UIs.
+ * Localized view of {@link BatchProgress} for user-facing APIs and UIs.
  *
- * <p>
- * Contains translated step-level results based on the provided locale.
- * </p>
+ * It mirrors the batch progress structure while translating step-level results. The locale
+ * determines how error messages and labels are rendered. This is useful when exposing batch status
+ * to clients in multiple languages. The class is immutable and supports native reflection for
+ * serialization.
  */
 @Data
 @Builder
@@ -38,9 +39,13 @@ public class LocalizedBatchProgress {
   /**
    * Converts a {@link BatchProgress} to a localized view using the specified locale.
    *
-   * @param progress the original batch progress
-   * @param locale the target locale for localization
-   * @return a localized representation
+   * This maps each step through {@link LocalizedBatchStepProgress#from}. Timestamps and status are
+   * preserved while errors are localized. Use this when returning progress to a localized UI or API
+   * client.
+   *
+   * @param progress original batch progress
+   * @param locale target locale for localization
+   * @return localized representation of the batch progress
    */
   public static LocalizedBatchProgress from(BatchProgress progress, Locale locale) {
     return LocalizedBatchProgress.builder().uid(progress.getUid()).status(progress.getStatus())

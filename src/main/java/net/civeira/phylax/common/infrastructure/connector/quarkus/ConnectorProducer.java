@@ -8,11 +8,21 @@ import jakarta.enterprise.inject.Produces;
 import net.civeira.phylax.common.infrastructure.connector.RemoteConnector;
 import net.civeira.phylax.common.infrastructure.connector.quarkus.munity.MunityWebConnector;
 
+/**
+ * Produces Quarkus-based remote connectors backed by Vert.x and OpenTelemetry.
+ */
 @ApplicationScoped
 public class ConnectorProducer {
 
   @Produces
   @ApplicationScoped
+  /**
+   * Creates a {@link RemoteConnector} backed by Mutiny WebClient.
+   *
+   * @param vertx Vert.x instance
+   * @param tracer OpenTelemetry tracer
+   * @return remote connector implementation
+   */
   public RemoteConnector connector(Vertx vertx, Tracer tracer) {
     return new MunityWebConnector(vertx, tracer);
   }

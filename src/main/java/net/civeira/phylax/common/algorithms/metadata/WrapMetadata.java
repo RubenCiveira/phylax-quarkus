@@ -7,18 +7,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * A generic wrapper class that associates a data object with a generation timestamp.
+ * A generic wrapper that associates data with a generation timestamp.
  *
- * <p>
- * This class is typically used to transport data alongside metadata indicating when the data was
- * produced or last updated. It is useful in scenarios involving caching, data synchronization, or
- * auditing.
- * </p>
- *
- * <p>
- * The class is immutable and uses Lombok annotations to automatically generate getters and a
- * builder for convenient instantiation.
- * </p>
+ * This is used to transport data alongside metadata about when it was produced. It supports
+ * caching, synchronization, and auditing workflows that need freshness. The wrapper is immutable
+ * and exposes only getters for its fields. A builder is provided by Lombok for convenient
+ * construction.
  *
  * @param <T> the type of the wrapped data
  */

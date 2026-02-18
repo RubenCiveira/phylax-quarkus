@@ -19,6 +19,14 @@ import io.quarkus.mailer.Mailer;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Sends email messages using the configured Quarkus mailer.
+ *
+ * The service supports synchronous and asynchronous delivery modes. It applies configuration
+ * overrides and handles attachments and inline resources. Errors are reported via optional
+ * observers on {@link EmailMessage} instances. This is intended for internal notifications and
+ * automated emails.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class EmailService {
@@ -46,10 +54,28 @@ public class EmailService {
 
   private ExecutorService executor;
 
+  /**
+   * Sends messages asynchronously using the default configuration.
+   *
+   * Messages are queued into a thread pool for background sending. Observers on each message are
+   * notified on success or failure. The method returns immediately and does not block the caller.
+   *
+   * @param message messages to send
+   */
   public void delaySendMessages(EmailMessage... message) {
     delaySendMessages(Optional.empty(), message);
   }
 
+  /**
+   * Sends messages asynchronously using an optional configuration override.
+   *
+   * The override allows per-message SMTP settings and credentials. Messages are queued into a
+   * thread pool for background sending. Observers on each message are notified on success or
+   * failure.
+   *
+   * @param config optional mail configuration
+   * @param message messages to send
+   */
   public synchronized void delaySendMessages(Optional<MailConfiguration> config,
       EmailMessage... message) {
     if (null == executor) {
@@ -60,10 +86,27 @@ public class EmailService {
     }
   }
 
+  /**
+   * Sends a message synchronously using the default configuration.
+   *
+   * The call blocks until the mailer finishes sending. Observers on the message are notified on
+   * success or failure. Use the async methods when sending in request threads.
+   *
+   * @param message message to send
+   */
   public void sendMessage(EmailMessage message) {
     sendMessage(message, Optional.empty());
   }
 
+  /**
+   * Sends a message synchronously using an optional configuration override.
+   *
+   * The override allows per-message SMTP settings and credentials. The call blocks until the mailer
+   * finishes sending. Observers on the message are notified on success or failure.
+   *
+   * @param message message to send
+   * @param config optional mail configuration
+   */
   public void sendMessage(EmailMessage message, Optional<MailConfiguration> config) {
     try {
       String to = message.getTargetName() + " <" + message.getTargetAddress() + ">";

@@ -3,44 +3,132 @@ package net.civeira.phylax.common.infrastructure.mail;
 
 import java.util.Optional;
 
+/**
+ * Provides mail configuration overrides for email delivery.
+ *
+ * Implementations supply SMTP settings used by {@link EmailService} when sending. Default methods
+ * provide reasonable defaults for local development. This allows per-tenant or per-message
+ * configuration without global changes. The interface is intentionally small to keep configuration
+ * flexible.
+ */
 public interface MailConfiguration {
 
+  /**
+   * Indicates whether TLS should be used.
+   *
+   * When true, the mailer is configured to require STARTTLS. Implementations can override to
+   * disable encryption for local testing. Use this to align with SMTP server security requirements.
+   *
+   * @return true to use TLS
+   */
   default boolean isUseTtls() {
     return true;
   }
 
+  /**
+   * Returns the generic timeout in seconds.
+   *
+   * This value is used as the base for connection and write timeouts. Implementations can override
+   * to tune reliability under load. The default is conservative for typical SMTP servers.
+   *
+   * @return timeout in seconds
+   */
   default int getTimeout() {
     return 30;
   }
 
+  /**
+   * Returns the write timeout in seconds.
+   *
+   * This controls how long the mailer waits for data to be written. It defaults to
+   * {@link #getTimeout()} for consistency. Override to tune performance for large attachments.
+   *
+   * @return write timeout in seconds
+   */
   default int getWriteTimeout() {
     return getTimeout();
   }
 
+  /**
+   * Returns the connection timeout in seconds.
+   *
+   * This controls how long the mailer waits for the SMTP handshake. It defaults to
+   * {@link #getTimeout()} for consistency. Override to tune performance for slow networks.
+   *
+   * @return connection timeout in seconds
+   */
   default int getConnectionTimeout() {
     return getTimeout();
   }
 
+  /**
+   * Returns the SMTP host.
+   *
+   * Implementations should provide a valid SMTP hostname or IP. The default is localhost for
+   * development environments. Use this to route email through the desired server.
+   *
+   * @return SMTP host
+   */
   default String getSmtpHost() {
     return "localhost";
   }
 
+  /**
+   * Returns the SMTP port.
+   *
+   * The default is 25, but TLS-enabled servers may use 587 or 465. Implementations should match the
+   * configured SMTP server port. This value is applied when initializing the mailer.
+   *
+   * @return SMTP port
+   */
   default int getSmtpPort() {
     return 25;
   }
 
+  /**
+   * Returns the SMTP login username.
+   *
+   * Provide an empty string when authentication is not required. This is passed to the mailer
+   * configuration at send time. Use it for authenticated SMTP servers.
+   *
+   * @return SMTP login username
+   */
   default String getSmtpLogin() {
     return "";
   }
 
+  /**
+   * Returns the SMTP login password.
+   *
+   * Provide an empty string when authentication is not required. This is passed to the mailer
+   * configuration at send time. Use secure secret storage for sensitive credentials.
+   *
+   * @return SMTP login password
+   */
   default String getSmtpPass() {
     return "";
   }
 
+  /**
+   * Returns the optional from name.
+   *
+   * This is used to build the display name for outgoing emails. When empty, the mailer defaults to
+   * configured global settings. Use this for branded or tenant-specific sender names.
+   *
+   * @return optional from name
+   */
   default Optional<String> getFromName() {
     return Optional.empty();
   }
 
+  /**
+   * Returns the optional from email address.
+   *
+   * This can override the global sender address for a message. When empty, the mailer defaults to
+   * configured global settings. Use a valid address to avoid SMTP rejection.
+   *
+   * @return optional from email
+   */
   default Optional<String> getFromEmail() {
     return Optional.empty();
   }

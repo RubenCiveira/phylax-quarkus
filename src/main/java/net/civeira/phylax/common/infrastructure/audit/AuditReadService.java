@@ -20,6 +20,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Reads audit events from the underlying audit store.
+ *
+ * The service translates filter criteria into SQL queries against the audit table. It supports
+ * pagination and tenant scoping for multi-tenant environments. Results are returned as
+ * {@link AuditEvent} records for downstream processing. This is typically used by management
+ * endpoints and operational tooling.
+ */
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -29,6 +37,21 @@ public class AuditReadService {
 
   private final ObjectMapper mapper;
 
+  /**
+   * Queries audit events using the provided filters and pagination.
+   *
+   * The query is scoped to a tenant and can filter by actor, action, or date range. It applies a
+   * limit and offset for paging through large audit logs. The audit table name can be derived from
+   * the provided prefix.
+   *
+   * @param on audit table prefix or schema identifier
+   * @param entity entity name used for logging or routing
+   * @param filter filter constraints for the query
+   * @param tenant tenant identifier to scope results
+   * @param limit maximum number of results
+   * @param offset number of results to skip
+   * @return matching audit events
+   */
   public List<AuditEvent> findByFilters(String on, String entity, AuditQueryFilter filter,
       String tenant, int limit, int offset) {
     try (Connection conn = dataSource.getConnection()) {

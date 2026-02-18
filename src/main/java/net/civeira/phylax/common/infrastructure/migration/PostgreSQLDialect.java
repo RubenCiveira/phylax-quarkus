@@ -5,31 +5,83 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 
+/**
+ * SQL dialect implementation for PostgreSQL migrations.
+ *
+ * It provides DDL and DML statements tuned for PostgreSQL syntax. The dialect uses ON CONFLICT for
+ * lock row initialization. Timestamp values rely on NOW() and PostgreSQL boolean types. This is
+ * used by the migration manager when PostgreSQL is detected.
+ */
 public class PostgreSQLDialect implements SQLDialect {
 
+  /**
+   * Builds the SQL to create the migration log table for PostgreSQL.
+   *
+   * The log table stores filename, checksum, and error metadata. It uses TIMESTAMP for execution
+   * timestamps.
+   *
+   * @param name table name
+   * @return SQL statement for creating the log table
+   */
   @Override
   public String createLogTable(String name) {
     return "CREATE TABLE IF NOT EXISTS " + name
         + " (name VARCHAR(250),filename VARCHAR(250),md5sum CHAR(64), execution TIMESTAMP, error VARCHAR(250) );";
   }
 
+  /**
+   * Builds the SQL to create the migration lock table for PostgreSQL.
+   *
+   * The lock table uses boolean flags and a timestamp grant time. This table coordinates concurrent
+   * migration execution.
+   *
+   * @param name table name
+   * @return SQL statement for creating the lock table
+   */
   @Override
   public String createLockTable(String name) {
     return "CREATE TABLE IF NOT EXISTS " + name
         + " (id INT PRIMARY KEY, locked BOOLEAN, granted TIMESTAMP);";
   }
 
+  /**
+   * Builds the SQL to insert the lock row for PostgreSQL.
+   *
+   * ON CONFLICT DO NOTHING ensures a single row exists without errors. This establishes the lock
+   * row used for coordination.
+   *
+   * @param name table name
+   * @return SQL statement for inserting the lock row
+   */
   @Override
   public String insertLock(String name) {
     return "INSERT INTO " + name
         + " (id, locked, granted) VALUES (1, FALSE, NULL) ON CONFLICT DO NOTHING;";
   }
 
+  /**
+   * Builds the SQL to release the lock row for PostgreSQL.
+   *
+   * This clears the lock flag and granted timestamp. It is used after migrations complete.
+   *
+   * @param name table name
+   * @return SQL statement for releasing the lock
+   */
   @Override
   public String releaseLock(String name) {
     return "UPDATE " + name + " SET locked = FALSE, granted = NULL WHERE id = 1";
   }
 
+  /**
+   * Builds SQL to record a successful migration in PostgreSQL.
+   *
+   * The statement updates an existing entry or inserts a new one. It uses NOW() to record the
+   * execution time.
+   *
+   * @param name table name
+   * @param exists whether the entry already exists
+   * @return SQL statement to mark success
+   */
   @Override
   public String markOkSql(String name, boolean exists) {
     return exists
@@ -39,6 +91,16 @@ public class PostgreSQLDialect implements SQLDialect {
             + " (md5sum, error, name, filename, execution) VALUES (?, NULL, ?, ?, NOW())";
   }
 
+  /**
+   * Builds SQL to record a failed migration in PostgreSQL.
+   *
+   * The statement updates an existing entry or inserts a new one. It uses NOW() to record the
+   * execution time.
+   *
+   * @param name table name
+   * @param exists whether the entry already exists
+   * @return SQL statement to mark failure
+   */
   @Override
   public String markFailSql(String name, boolean exists) {
     return exists
@@ -47,11 +109,31 @@ public class PostgreSQLDialect implements SQLDialect {
             + " (md5sum, error, name, filename, execution) VALUES (?, ?, ?, ?, NOW())";
   }
 
+  /**
+   * Builds SQL to acquire the lock in PostgreSQL.
+   *
+   * The lock flag is set to true and the grant timestamp is updated. This is called before
+   * executing migrations.
+   *
+   * @param name table name
+   * @return SQL statement to acquire the lock
+   */
   @Override
   public String updateLock(String name) {
     return "UPDATE " + name + " SET locked = TRUE, granted = NOW() WHERE id = 1";
   }
 
+  /**
+   * Interprets the lock row for PostgreSQL using a boolean lock flag.
+   *
+   * The lock is considered active when the flag is true and not expired. Expiration is checked
+   * using the provided duration window.
+   *
+   * @param rs result set containing lock fields
+   * @param duration lock validity duration
+   * @return true when the lock is active and not expired
+   * @throws SQLException when reading the result set fails
+   */
   @Override
   public boolean interpretLocked(ResultSet rs, Duration duration) throws SQLException {
     return rs.getBoolean("locked") && stillGranted(rs, duration);

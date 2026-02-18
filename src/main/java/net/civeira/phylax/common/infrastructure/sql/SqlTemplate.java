@@ -15,8 +15,12 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 
 /**
- * Provides SQL command/query creation and transaction management utilities with optional
- * OpenTelemetry tracing integration.
+ * Provides SQL command/query creation and transaction management utilities.
+ *
+ * The template wraps a JDBC connection and exposes helpers to build queries and commands. It
+ * optionally integrates with OpenTelemetry to create spans around SQL execution. The class also
+ * provides vendor-specific locking hints for SQL Server. Use it as the entry point for repository
+ * SQL operations.
  */
 public class SqlTemplate implements AutoCloseable {
   /** The underlying SQL connection. */
@@ -27,6 +31,10 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Constructs a template using a direct {@link Connection}.
+   *
+   * The connection is used for all operations created by this template. Callers are responsible for
+   * lifecycle management unless using {@link #close()}. Passing a null connection results in an
+   * {@link IllegalArgumentException}.
    *
    * @param connection the active JDBC connection
    * @throws IllegalArgumentException if the connection is {@code null}
@@ -41,6 +49,10 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Constructs a template using a {@link DataSource}, acquiring a new connection.
+   *
+   * The connection is obtained immediately and stored for future operations. This is convenient
+   * when a template must manage its own connection. Errors are wrapped in
+   * {@link UncheckedSqlException} for uniform handling.
    *
    * @param source the data source to acquire a connection from
    * @throws IllegalArgumentException if the source is {@code null}
@@ -61,6 +73,9 @@ public class SqlTemplate implements AutoCloseable {
   /**
    * Constructs a template with OpenTelemetry tracing support.
    *
+   * The tracer is used to create spans around query execution. When no valid parent span is
+   * present, spans are not created. This keeps tracing overhead minimal for background operations.
+   *
    * @param connection the JDBC connection
    * @param tracer the tracer for telemetry
    * @throws IllegalArgumentException if the connection is {@code null}
@@ -75,6 +90,10 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Constructs a template using a {@link DataSource} and OpenTelemetry tracing.
+   *
+   * The connection is obtained immediately and tracing is enabled if a tracer is provided. Errors
+   * while obtaining the connection are wrapped in {@link UncheckedSqlException}. Use this when you
+   * want SQL operations to emit telemetry spans.
    *
    * @param source the data source
    * @param tracer the tracer for telemetry
@@ -95,6 +114,10 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Begins a transaction by setting auto-commit to {@code false}.
+   *
+   * This is a no-op if auto-commit is already disabled. Use {@link #commit()} or
+   * {@link #rollback()} to end the transaction. Exceptions are wrapped into
+   * {@link UncheckedSqlException}.
    */
   public void begin() {
     try {
@@ -108,6 +131,9 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Commits the current transaction and re-enables auto-commit.
+   *
+   * This is a no-op if auto-commit is already enabled. After commit, auto-commit is restored to
+   * avoid leaking state. Exceptions are wrapped into {@link UncheckedSqlException}.
    */
   public void commit() {
     try {
@@ -122,6 +148,9 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Rolls back the current transaction and re-enables auto-commit.
+   *
+   * This is a no-op if auto-commit is already enabled. After rollback, auto-commit is restored to
+   * avoid leaking state. Exceptions are wrapped into {@link UncheckedSqlException}.
    */
   public void rollback() {
     try {
@@ -136,6 +165,10 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Closes the underlying JDBC connection if not already closed.
+   *
+   * Use this when the template owns the connection lifecycle. For pooled data sources, ensure
+   * closing returns the connection to the pool. Exceptions are wrapped into
+   * {@link UncheckedSqlException}.
    */
   public void close() {
     try {
@@ -150,6 +183,9 @@ public class SqlTemplate implements AutoCloseable {
   /**
    * Adds SQL Server table lock hint to a SELECT clause.
    *
+   * When the underlying driver is SQL Server, table hints are appended. For other databases, the
+   * SQL is returned unchanged. This is used to emulate row-level locking semantics.
+   *
    * @param select the select query
    * @return the query with locking clause if on SQL Server
    */
@@ -160,6 +196,10 @@ public class SqlTemplate implements AutoCloseable {
   /**
    * Adds query-level lock hint to a SQL query.
    *
+   * For SQL Server, this returns the SQL unchanged and uses table hints elsewhere. For other
+   * databases, it appends FOR UPDATE to the query. This is used to lock selected rows for update
+   * operations.
+   *
    * @param sql the SQL query
    * @return the query with locking syntax depending on the database
    */
@@ -168,10 +208,13 @@ public class SqlTemplate implements AutoCloseable {
   }
 
   /**
-   * Applies SQL Server-specific locking clause within the FROM section for SqlServer.
+   * Applies SQL Server-specific locking clause within the FROM section.
+   *
+   * For SQL Server, it injects WITH (UPDLOCK, ROWLOCK) into the FROM table. For other databases, it
+   * appends FOR UPDATE. This is used when SELECT ... FOR UPDATE is not supported.
    *
    * @param sql the SQL query
-   * @return the modified SQL with SQL Server row locking hints
+   * @return the modified SQL with row locking hints
    */
   /* default */ String sqlWithQueryLock(String sql) {
     if (isSqlserver()) {
@@ -190,6 +233,10 @@ public class SqlTemplate implements AutoCloseable {
   /**
    * Returns the underlying JDBC connection.
    *
+   * Use this when you need to access connection metadata or configure settings. Callers should
+   * avoid closing the connection if it is managed elsewhere. This method is package-private to
+   * limit external use.
+   *
    * @return the JDBC connection
    */
   /* default */ Connection currentConnection() {
@@ -197,7 +244,10 @@ public class SqlTemplate implements AutoCloseable {
   }
 
   /**
-   * Creates a span for tracing if tracing is enabled and there's a valid parent span.
+   * Creates a span for tracing if tracing is enabled and a parent span exists.
+   *
+   * Spans are only created when the tracer is present and the parent is valid. This avoids creating
+   * root spans for background tasks. The caller is responsible for ending the span.
    *
    * @param title the span name
    * @return an {@link Optional} span
@@ -215,6 +265,10 @@ public class SqlTemplate implements AutoCloseable {
 
   /**
    * Creates a span using a provided parent span.
+   *
+   * The span is created only when a valid parent is provided and tracing is enabled. This allows
+   * nested spans during complex query execution flows. The caller is responsible for ending the
+   * span.
    *
    * @param title the span name
    * @param parent the optional parent span
@@ -234,6 +288,10 @@ public class SqlTemplate implements AutoCloseable {
   /**
    * Creates a {@link SqlSchematicQuery} from the given table name.
    *
+   * Schematic queries are used to build structured SQL with dynamic filters. The table name is used
+   * as the base for generated SQL. The returned query can be further configured with parameters and
+   * limits.
+   *
    * @param table the table name
    * @return a new {@code SqlSchematicQuery}
    */
@@ -244,6 +302,9 @@ public class SqlTemplate implements AutoCloseable {
   /**
    * Creates a {@link SqlQuery} from the given SQL string.
    *
+   * Use this for arbitrary SELECT statements with parameter binding. The returned query can be
+   * executed with a row converter. This is the primary entry point for custom queries.
+   *
    * @param sql the SQL query
    * @return a new {@code SqlQuery}
    */
@@ -252,10 +313,13 @@ public class SqlTemplate implements AutoCloseable {
   }
 
   /**
-   * Creates a {@link SqlQuery} from the given SQL string.
+   * Creates a {@link SqlCommand} from the given SQL string.
    *
-   * @param sql the SQL query
-   * @return a new {@code SqlQuery}
+   * Use this for INSERT, UPDATE, or DELETE statements. The returned command can be executed with
+   * parameter binding. This is the primary entry point for write operations.
+   *
+   * @param sql the SQL statement
+   * @return a new {@code SqlCommand}
    */
   public SqlCommand createSqlCommand(String sql) {
     return new SqlCommand(this, sql);

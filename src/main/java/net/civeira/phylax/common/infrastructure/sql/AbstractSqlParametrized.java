@@ -20,6 +20,16 @@ import java.util.stream.IntStream;
 
 import io.opentelemetry.api.trace.Span;
 
+/**
+ * Base class for parameterized SQL commands and queries.
+ *
+ * It handles parameter binding, list expansion, and statement preparation. The class also
+ * integrates tracing attributes for executed SQL and results. Child queries can be registered to
+ * resolve related data in batches. Subclasses use this to implement query and command execution
+ * flows.
+ *
+ * @param <T> the fluent type for subclass chaining
+ */
 public abstract class AbstractSqlParametrized<T extends AbstractSqlParametrized<T>> {
   private static final String TRACE_QUERY_RESULT = "query.result.value.";
   private static final String TRACE_ERROR_TITLE = "error";
@@ -89,6 +99,16 @@ public abstract class AbstractSqlParametrized<T extends AbstractSqlParametrized<
     return (T) this;
   }
 
+  /**
+   * Executes an update statement with the current parameters.
+   *
+   * This prepares the statement, binds parameters, and executes the update. Trace attributes are
+   * recorded for query text and parameter values. SQL exceptions are wrapped as
+   * {@link UncheckedSqlException}.
+   *
+   * @param sql SQL statement to execute
+   * @return number of affected rows
+   */
   protected Integer executeUpdate(String sql) {
     Optional<Span> createSpan = template.createSpan("execute update");
     try (Prepared prep = prepareStatement(sql); PreparedStatement run = prep.stat) {
@@ -119,6 +139,20 @@ public abstract class AbstractSqlParametrized<T extends AbstractSqlParametrized<
   }
 
   // consulta hija
+  /**
+   * Registers a child query to resolve related data in batches.
+   *
+   * Child queries are executed after the main query and mapped by reference keys. The batch size
+   * controls how many parent references are resolved per query. The converter maps each child row
+   * into the desired output type.
+   *
+   * @param batch batch size for child resolution
+   * @param name child name used to attach results
+   * @param sql child query SQL with list placeholders
+   * @param parentBind parent field used to collect references
+   * @param childRef child field referencing the parent
+   * @param converter converter for child result rows
+   */
   public <S> void child(int batch, String name, String sql, String parentBind, String childRef,
       SqlConverter<S> converter) {
     // select * from childs where bind in (?)
@@ -126,6 +160,18 @@ public abstract class AbstractSqlParametrized<T extends AbstractSqlParametrized<
   }
 
 
+  /**
+   * Executes a query statement and returns a lazy {@link SqlResult} wrapper.
+   *
+   * The result exposes convenience methods for one, limit, and all retrieval. Query execution uses
+   * the provided converter to map rows into result objects. Tracing attributes are recorded for
+   * query text and results.
+   *
+   * @param sql SQL query to execute
+   * @param converter row converter for result mapping
+   * @param <R> result item type
+   * @return a {@link SqlResult} wrapper for the query
+   */
   protected <R> SqlResult<R> executeQuery(String sql, SqlConverter<R> converter) {
     return new SqlResult<R>() {
       @Override

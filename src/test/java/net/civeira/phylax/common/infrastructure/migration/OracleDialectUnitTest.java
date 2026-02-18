@@ -1,0 +1,97 @@
+package net.civeira.phylax.common.infrastructure.migration;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("OracleDialect SQL dialect for Oracle database")
+class OracleDialectUnitTest {
+
+  private OracleDialect dialect;
+
+  @BeforeEach
+  void setUp() {
+    dialect = new OracleDialect();
+  }
+
+  @Nested
+  @DisplayName("createLogTable()")
+  class CreateLogTable {
+
+    @Test
+    @DisplayName("Should generate PL/SQL block with CREATE TABLE")
+    void shouldGeneratePlsqlBlock() {
+      // Arrange / Act — Generate the CREATE TABLE SQL for the log table using Oracle dialect
+      String sql = dialect.createLogTable("migration_log");
+
+      // Assert — Verify Oracle-specific PL/SQL block syntax with VARCHAR2 column types
+      assertTrue(sql.contains("BEGIN EXECUTE IMMEDIATE"),
+          "SQL should use PL/SQL block for Oracle table creation");
+      assertTrue(sql.contains("CREATE TABLE migration_log"),
+          "SQL should contain CREATE TABLE with the provided name");
+      assertTrue(sql.contains("VARCHAR2"), "SQL should use VARCHAR2 for Oracle string columns");
+    }
+  }
+
+  @Nested
+  @DisplayName("createLockTable()")
+  class CreateLockTable {
+
+    @Test
+    @DisplayName("Should generate PL/SQL block with NUMBER type for lock")
+    void shouldGeneratePlsqlBlockWithNumber() {
+      // Arrange / Act — Generate the CREATE TABLE SQL for the lock table using Oracle dialect
+      String sql = dialect.createLockTable("migration_lock");
+
+      // Assert — Verify Oracle uses NUMBER(1) for boolean representation
+      assertTrue(sql.contains("NUMBER(1)"),
+          "SQL should use NUMBER(1) for Oracle boolean representation");
+    }
+  }
+
+  @Nested
+  @DisplayName("markOkSql()")
+  class MarkOkSql {
+
+    @Test
+    @DisplayName("Should use SYSDATE for Oracle timestamps when exists")
+    void shouldUseSysdateWhenExists() {
+      // Arrange / Act — Generate the mark-OK SQL for an existing migration record in Oracle
+      String sql = dialect.markOkSql("log", true);
+
+      // Assert — Verify the SQL uses Oracle's SYSDATE function for timestamps
+      assertTrue(sql.contains("SYSDATE"), "SQL should use SYSDATE for Oracle timestamp");
+    }
+
+    @Test
+    @DisplayName("Should generate INSERT with SYSDATE when not exists")
+    void shouldGenerateInsertWithSysdateWhenNotExists() {
+      // Arrange / Act — Generate the mark-OK SQL for a new migration record in Oracle
+      String sql = dialect.markOkSql("log", false);
+
+      // Assert — Verify the SQL inserts a new record using Oracle's SYSDATE
+      assertTrue(sql.startsWith("INSERT INTO log"),
+          "SQL should be INSERT when record does not exist");
+      assertTrue(sql.contains("SYSDATE"), "SQL should use SYSDATE for Oracle timestamp");
+    }
+  }
+
+  @Nested
+  @DisplayName("updateLock()")
+  class UpdateLock {
+
+    @Test
+    @DisplayName("Should use numeric 1 for locked and SYSDATE")
+    void shouldUseNumericOneAndSysdate() {
+      // Arrange / Act — Generate the update-lock SQL to acquire the migration lock in Oracle
+      String sql = dialect.updateLock("migration_lock");
+
+      // Assert — Verify Oracle uses numeric 1 for locked state and SYSDATE for granted time
+      assertTrue(sql.contains("locked = 1"), "SQL should use numeric 1 for locked state in Oracle");
+      assertTrue(sql.contains("SYSDATE"), "SQL should use SYSDATE for granted time in Oracle");
+    }
+  }
+}

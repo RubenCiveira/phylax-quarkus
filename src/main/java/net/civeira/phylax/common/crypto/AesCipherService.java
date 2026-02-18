@@ -98,6 +98,10 @@ public class AesCipherService {
    * including IV and salt prepended to the ciphertext.
    * </p>
    *
+   * The method returns an empty optional when the payload cannot be decrypted. This can happen due
+   * to invalid input, wrong password, or corrupted data. Callers should treat empty results as a
+   * decryption failure.
+   *
    * @param cipherText the Base64-encoded encrypted string
    * @param password the password used to derive the decryption key
    * @return an {@link Optional} containing the decrypted string, or {@code Optional.empty()} if
@@ -140,11 +144,14 @@ public class AesCipherService {
   }
 
   /**
-   * Decrypts a Base64-encoded AES-encrypted string using the application-wide configured key.
+   * Decrypts a Base64-encoded AES-encrypted string using the configured application key.
+   *
+   * This is a convenience wrapper around {@link #decrypt(String, String)}. It uses the configured
+   * encryption key from application configuration. Returns empty when decryption fails for any
+   * reason.
    *
    * @param cText the Base64-encoded encrypted string
-   * @return an {@link Optional} containing the decrypted string, or {@code Optional.empty()} if
-   *         decryption fails
+   * @return an {@link Optional} containing the decrypted string, or empty if decryption fails
    */
   public Optional<String> decryptForAll(String cText) {
     return decrypt(cText, cipherKey);
@@ -154,10 +161,9 @@ public class AesCipherService {
   /**
    * Encrypts a string using AES-GCM with a user-provided password.
    *
-   * <p>
-   * The result includes a randomly generated salt and IV, both prepended to the final
-   * Base64-encoded output.
-   * </p>
+   * The output includes a randomly generated salt and IV prepended to the ciphertext. The payload
+   * is Base64-encoded to allow storage and transport as text. Use {@link #decrypt(String, String)}
+   * to reverse the operation.
    *
    * @param value the plaintext string to encrypt
    * @param password the password used to derive the encryption key
@@ -196,6 +202,9 @@ public class AesCipherService {
   /**
    * Encrypts a string using the application-wide encryption key.
    *
+   * This is a convenience wrapper that avoids passing the key explicitly. It uses the configured
+   * key from application properties. The output is Base64-encoded and includes salt and IV.
+   *
    * @param value the plaintext string to encrypt
    * @return the Base64-encoded ciphertext including IV and salt
    */
@@ -204,12 +213,11 @@ public class AesCipherService {
   }
 
   /**
-   * Generates a secure, random API secret string composed of digits, letters, and special
-   * characters.
+   * Generates a secure, random API secret string.
    *
-   * <p>
-   * The result is a high-entropy string suitable for use as an API key or client secret.
-   * </p>
+   * The result includes digits, letters, and special characters for entropy. It is suitable for API
+   * keys, client secrets, or one-time tokens. The exact composition is randomized for each
+   * invocation.
    *
    * @return a secure, randomly generated secret string
    */
@@ -227,11 +235,10 @@ public class AesCipherService {
 
 
   /**
-   * Generates a secure, random password string with letters, digits, and special characters.
+   * Generates a secure, random password string.
    *
-   * <p>
-   * Useful for user password generation with strong entropy.
-   * </p>
+   * The output combines letters, digits, and special characters. It is intended for
+   * system-generated passwords with strong entropy. The composition is randomized for each call.
    *
    * @return a secure, randomly generated password
    */

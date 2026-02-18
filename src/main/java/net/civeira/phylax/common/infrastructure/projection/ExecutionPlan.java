@@ -18,11 +18,25 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.connector.RemoteConnector;
 
+/**
+ * Executes projection plans by orchestrating remote node calls.
+ *
+ * The plan resolves an execution tree and performs batched remote requests. It expands
+ * relationships and aggregates results into a flattened response map. Execution is driven by
+ * {@link ExecutionNode} definitions and selection trees. This class is used by
+ * {@link ProjectionRunner} to retrieve projections.
+ */
 @Slf4j
 @Builder
 @Getter
 public class ExecutionPlan {
 
+  /**
+   * Holds pending relationship requests to be resolved in batch.
+   *
+   * Pending requests group reference codes by relationship definition. They are processed in
+   * batches to reduce remote calls. This structure is built during initial mapping of responses.
+   */
   @Builder
   @Getter
   public static class PendingRequest {

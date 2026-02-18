@@ -10,11 +10,28 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.PaymentRequiredException;
 
+/**
+ * Maps payment-required exceptions to HTTP 402 responses.
+ *
+ * The mapper converts billing-related access errors into a standardized payload. It logs at info
+ * level while preserving a reason string in the response body. This provides consistent handling
+ * for premium feature access enforcement. Clients can use the 402 response to trigger billing
+ * flows.
+ */
 @Slf4j
 @Provider
 public class PaymentRequiredExceptionMapper implements ExceptionMapper<PaymentRequiredException> {
 
   @Override
+  /**
+   * Converts a payment-required exception into an HTTP response.
+   *
+   * The response status is set to 402 and includes a reason message. Logging varies with the
+   * configured log level for diagnostics. This mapper is intended for billing-aware endpoints.
+   *
+   * @param exception payment-required exception
+   * @return HTTP 402 response
+   */
   public Response toResponse(PaymentRequiredException exception) {
     if (log.isDebugEnabled()) {
       log.info("payment required", exception);

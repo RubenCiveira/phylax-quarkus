@@ -2,17 +2,12 @@
 package net.civeira.phylax.common.infrastructure.connector;
 
 /**
- * Represents a remote connection that encapsulates multiple remote queries.
- * 
- * <p>
- * This interface serves as a marker to group multiple requests configured via {@link RemoteQuery}
- * and executed using a {@link RemoteConnector}.
- * </p>
- * 
- * <p>
- * A {@code RemoteConnection} does not define any methods, as its primary purpose is to represent a
- * configured request that will be processed by a remote connector.
- * </p>
+ * Represents a configured remote request ready to be executed.
+ *
+ * It serves as a marker type produced by {@link RemoteQuery#processor} calls. The connector uses
+ * this handle to dispatch the request and process responses. It intentionally exposes no methods to
+ * keep request execution centralized. Implementations may capture request metadata and response
+ * processors internally.
  */
 public interface RemoteConnection {
 }

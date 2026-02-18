@@ -1,0 +1,52 @@
+package net.civeira.phylax.common.infrastructure.projection;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("ExecutionTree node lookup")
+class ExecutionTreeUnitTest {
+
+  @Nested
+  @DisplayName("byId()")
+  class ById {
+
+    @Test
+    @DisplayName("Should return present optional when node exists")
+    void shouldReturnPresentOptionalWhenNodeExists() {
+      // Arrange — a tree with one node stored under the key "tenant-node"
+      ExecutionNode node =
+          ExecutionNode.builder().server("http://localhost").endpoint("/api/tenants").method("GET")
+              .list(true).params(Map.of()).relations(new HashMap<>()).build();
+      ExecutionTree tree = ExecutionTree.builder().tree(Map.of("tenant-node", node)).build();
+
+      // Act — look up the node by its existing id
+      Optional<ExecutionNode> result = tree.byId("tenant-node");
+
+      // Assert — the returned optional contains the expected node
+      assertTrue(result.isPresent(),
+          "Should return present optional when node with given id exists");
+      assertEquals(node, result.get(), "Returned node should be the one stored with the given id");
+    }
+
+    @Test
+    @DisplayName("Should return empty optional when node does not exist")
+    void shouldReturnEmptyOptionalWhenNodeDoesNotExist() {
+      // Arrange — an empty tree with no nodes
+      ExecutionTree tree = ExecutionTree.builder().tree(Map.of()).build();
+
+      // Act — look up a node by a non-existent id
+      Optional<ExecutionNode> result = tree.byId("nonexistent");
+
+      // Assert — the returned optional is empty
+      assertTrue(result.isEmpty(),
+          "Should return empty optional when no node matches the given id");
+    }
+  }
+}

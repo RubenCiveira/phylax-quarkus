@@ -4,27 +4,20 @@ package net.civeira.phylax.common.exception;
 /**
  * Exception thrown when an operation is denied due to unmet payment requirements.
  *
- * <p>
- * This exception represents a specific type of authorization failure that occurs when a user or
- * client attempts to access a resource or perform an action that requires prior payment,
- * subscription, or billing fulfillment.
- * </p>
- *
- * <p>
- * It is typically used in billing-aware systems or premium-feature enforcement to indicate that
- * access is restricted until the user completes the necessary financial obligations.
- * </p>
- *
- * <p>
- * This is an unchecked exception extending {@link RuntimeException} and can be used in service
- * layers, access control filters, or API endpoints.
- * </p>
+ * It represents a billing or subscription constraint preventing access to a resource. The exception
+ * is typically mapped to HTTP 402 responses by the API layer. Use it to enforce premium features or
+ * licensing requirements. This is an unchecked exception suitable for service and controller
+ * layers.
  */
 public class PaymentRequiredException extends RuntimeException {
   private static final long serialVersionUID = 895104693033357772L;
 
   /**
    * Constructs a {@code PaymentRequiredException} with no detail message or cause.
+   *
+   * Use this when the context is provided elsewhere or not required for responses. The exception
+   * can still be mapped to a 402 response by the API layer. Prefer a message when the client needs
+   * a reason string.
    */
   public PaymentRequiredException() {
     super();
@@ -32,6 +25,10 @@ public class PaymentRequiredException extends RuntimeException {
 
   /**
    * Constructs a {@code PaymentRequiredException} with a specific detail message.
+   *
+   * The message should explain the billing requirement in a user-safe way. It can be surfaced in
+   * API responses or UI error displays. Use concise messages to avoid leaking internal billing
+   * logic.
    *
    * @param message the detail message explaining the reason for the exception
    */
@@ -42,6 +39,9 @@ public class PaymentRequiredException extends RuntimeException {
   /**
    * Constructs a {@code PaymentRequiredException} with a cause.
    *
+   * Use this when the payment requirement is derived from another error. The cause is preserved for
+   * logging and traceability. This helps diagnostics while still mapping to a 402 response.
+   *
    * @param cause the underlying cause of the exception
    */
   public PaymentRequiredException(final String message) {
@@ -50,6 +50,10 @@ public class PaymentRequiredException extends RuntimeException {
 
   /**
    * Constructs a {@code PaymentRequiredException} with both a detail message and a cause.
+   *
+   * This is the most expressive constructor for billing-related failures. It captures a user-safe
+   * message along with the underlying error cause. Use it when you need both diagnostics and
+   * client-facing messaging.
    *
    * @param message the detail message
    * @param cause the underlying cause of the exception

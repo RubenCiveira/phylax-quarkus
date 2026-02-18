@@ -1,0 +1,165 @@
+package net.civeira.phylax.common.infrastructure.migration;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("H2Dialect SQL dialect for H2 database")
+class H2DialectUnitTest {
+
+  private H2Dialect dialect;
+
+  @BeforeEach
+  void setUp() {
+    dialect = new H2Dialect();
+  }
+
+  @Nested
+  @DisplayName("createLogTable()")
+  class CreateLogTable {
+
+    @Test
+    @DisplayName("Should generate CREATE TABLE IF NOT EXISTS for log table")
+    void shouldGenerateCreateTableForLogTable() {
+      // Arrange / Act — Generate the CREATE TABLE SQL for the migration log table
+      String sql = dialect.createLogTable("migration_log");
+
+      // Assert — Verify the SQL contains H2-specific DDL with proper column types
+      assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS migration_log"),
+          "SQL should contain CREATE TABLE IF NOT EXISTS with the provided name");
+      assertTrue(sql.contains("name VARCHAR(250)"), "SQL should include 'name' column definition");
+      assertTrue(sql.contains("md5sum CHAR(64)"), "SQL should include 'md5sum' column definition");
+      assertTrue(sql.contains("TIMESTAMP"),
+          "SQL should include TIMESTAMP type for execution column");
+    }
+  }
+
+  @Nested
+  @DisplayName("createLockTable()")
+  class CreateLockTable {
+
+    @Test
+    @DisplayName("Should generate CREATE TABLE IF NOT EXISTS for lock table")
+    void shouldGenerateCreateTableForLockTable() {
+      // Arrange / Act — Generate the CREATE TABLE SQL for the migration lock table
+      String sql = dialect.createLockTable("migration_lock");
+
+      // Assert — Verify the SQL uses H2's BOOLEAN type for the locked column
+      assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS migration_lock"),
+          "SQL should contain CREATE TABLE IF NOT EXISTS with the provided name");
+      assertTrue(sql.contains("BOOLEAN"), "SQL should use BOOLEAN type for locked column in H2");
+    }
+  }
+
+  @Nested
+  @DisplayName("insertLock()")
+  class InsertLock {
+
+    @Test
+    @DisplayName("Should generate MERGE INTO statement for H2")
+    void shouldGenerateMergeIntoStatement() {
+      // Arrange / Act — Generate the insert-lock SQL using H2's MERGE INTO syntax
+      String sql = dialect.insertLock("migration_lock");
+
+      // Assert — Verify H2-specific MERGE INTO upsert syntax with initial unlocked state
+      assertTrue(sql.contains("MERGE INTO migration_lock"),
+          "SQL should use MERGE INTO for H2 upsert semantics");
+      assertTrue(sql.contains("FALSE"), "Initial locked value should be FALSE");
+    }
+  }
+
+  @Nested
+  @DisplayName("releaseLock()")
+  class ReleaseLock {
+
+    @Test
+    @DisplayName("Should generate UPDATE with FALSE for releasing lock")
+    void shouldGenerateUpdateWithFalse() {
+      // Arrange / Act — Generate the release-lock SQL to unlock the migration lock
+      String sql = dialect.releaseLock("migration_lock");
+
+      // Assert — Verify the SQL resets the locked column to FALSE
+      assertTrue(sql.contains("UPDATE migration_lock"), "SQL should be an UPDATE statement");
+      assertTrue(sql.contains("locked = FALSE"), "SQL should set locked to FALSE");
+    }
+  }
+
+  @Nested
+  @DisplayName("markOkSql()")
+  class MarkOkSql {
+
+    @Test
+    @DisplayName("Should generate UPDATE when record exists")
+    void shouldGenerateUpdateWhenRecordExists() {
+      // Arrange / Act — Generate the mark-OK SQL for an existing migration record
+      String sql = dialect.markOkSql("migration_log", true);
+
+      // Assert — Verify the SQL updates the existing record and clears any error
+      assertTrue(sql.startsWith("UPDATE migration_log"),
+          "SQL should be an UPDATE when record exists");
+      assertTrue(sql.contains("error=NULL"),
+          "SQL should set error to NULL for successful migration");
+    }
+
+    @Test
+    @DisplayName("Should generate INSERT when record does not exist")
+    void shouldGenerateInsertWhenRecordDoesNotExist() {
+      // Arrange / Act — Generate the mark-OK SQL for a new migration record
+      String sql = dialect.markOkSql("migration_log", false);
+
+      // Assert — Verify the SQL inserts a new record for the migration
+      assertTrue(sql.startsWith("INSERT INTO migration_log"),
+          "SQL should be an INSERT when record does not exist");
+    }
+  }
+
+  @Nested
+  @DisplayName("markFailSql()")
+  class MarkFailSql {
+
+    @Test
+    @DisplayName("Should generate UPDATE with error when record exists")
+    void shouldGenerateUpdateWithErrorWhenRecordExists() {
+      // Arrange / Act — Generate the mark-fail SQL for an existing migration record
+      String sql = dialect.markFailSql("migration_log", true);
+
+      // Assert — Verify the SQL updates the record with an error parameter
+      assertTrue(sql.startsWith("UPDATE migration_log"),
+          "SQL should be an UPDATE when record exists");
+      assertTrue(sql.contains("error=?"),
+          "SQL should include error parameter for failed migration");
+    }
+
+    @Test
+    @DisplayName("Should generate INSERT with error when record does not exist")
+    void shouldGenerateInsertWithErrorWhenRecordDoesNotExist() {
+      // Arrange / Act — Generate the mark-fail SQL for a new migration record
+      String sql = dialect.markFailSql("migration_log", false);
+
+      // Assert — Verify the SQL inserts a new record with the error
+      assertTrue(sql.startsWith("INSERT INTO migration_log"),
+          "SQL should be an INSERT when record does not exist");
+    }
+  }
+
+  @Nested
+  @DisplayName("updateLock()")
+  class UpdateLock {
+
+    @Test
+    @DisplayName("Should generate UPDATE with TRUE for acquiring lock")
+    void shouldGenerateUpdateWithTrue() {
+      // Arrange / Act — Generate the update-lock SQL to acquire the migration lock
+      String sql = dialect.updateLock("migration_lock");
+
+      // Assert — Verify the SQL sets locked to TRUE and uses H2's CURRENT_TIMESTAMP
+      assertTrue(sql.contains("locked = TRUE"),
+          "SQL should set locked to TRUE when acquiring lock");
+      assertTrue(sql.contains("CURRENT_TIMESTAMP"),
+          "SQL should use CURRENT_TIMESTAMP for granted time");
+    }
+  }
+}

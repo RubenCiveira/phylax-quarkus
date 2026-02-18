@@ -12,6 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.NotAllowedException;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 
+/**
+ * Maps not-allowed exceptions to HTTP 401/403 responses.
+ *
+ * The mapper inspects the current request to determine whether the user is anonymous. Anonymous
+ * users receive 401 responses, while authenticated users receive 403. A simple error payload with a
+ * reason field is returned to the client. This keeps access violations consistent across endpoints.
+ */
 @Slf4j
 @Provider
 @RequiredArgsConstructor
@@ -20,6 +27,15 @@ public class NotAllowedExceptionMapper implements ExceptionMapper<NotAllowedExce
   private final CurrentRequest restService;
 
   @Override
+  /**
+   * Converts a not-allowed exception into an HTTP response.
+   *
+   * The response status depends on whether the user is anonymous or authenticated. It logs the
+   * error at warn level for visibility. The response body includes a minimal reason message.
+   *
+   * @param exception not-allowed exception
+   * @return HTTP response with error details
+   */
   public Response toResponse(NotAllowedException exception) {
     if (log.isDebugEnabled()) {
       log.warn("not allowed", exception);

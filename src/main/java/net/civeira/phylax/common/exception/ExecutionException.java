@@ -5,25 +5,12 @@ package net.civeira.phylax.common.exception;
 import net.civeira.phylax.common.value.validation.ExecutionFail;
 
 /**
- * Exception representing an execution-time failure during application or business logic processing.
+ * Exception representing an execution-time failure in business processing.
  *
- * <p>
- * This exception is used to signal a failure that occurs during the execution of a process, task,
- * or workflow step — typically after all input validation has passed. It wraps an
- * {@link ExecutionFail}, which provides structured information about the failure, including an
- * error code and a human-readable message.
- * </p>
- *
- * <p>
- * Unlike {@link ConstraintException}, which represents input or precondition violations,
- * {@code ExecutionException} is intended for post-validation failures such as processing errors,
- * business rule violations, or external service issues.
- * </p>
- *
- * <p>
- * Failures can later be localized and transformed into user-friendly messages using the parent
- * class methods like {@code localize(...)}.
- * </p>
+ * It is used for failures that occur after input validation has passed. The exception wraps an
+ * {@link ExecutionFail} with code and message details. Typical use cases include workflow errors,
+ * rule violations, or external failures. Failures can be localized using the parent class
+ * localization utilities.
  *
  * @see ExecutionFail
  * @see AbstractFailsException
@@ -34,6 +21,10 @@ public class ExecutionException extends AbstractFailsException {
   /**
    * Constructs an {@code ExecutionException} with a single {@link ExecutionFail} instance.
    *
+   * Use this when an execution error is already expressed as a structured fail. The failure can
+   * later be localized and grouped with other errors. The message is included in the exception text
+   * for diagnostics.
+   *
    * @param message the message
    * @param fail the execution failure to include in the exception
    */
@@ -43,6 +34,10 @@ public class ExecutionException extends AbstractFailsException {
 
   /**
    * Constructs an {@code ExecutionException} with the given error code and message.
+   *
+   * This is a convenience constructor when a single error must be reported. The code identifies the
+   * failure type for localization and UI mapping. The error message describes the failure in
+   * human-readable form.
    *
    * @param message the message
    * @param code the error code identifying the type of execution failure

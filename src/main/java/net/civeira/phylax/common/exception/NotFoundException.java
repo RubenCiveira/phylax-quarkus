@@ -4,17 +4,10 @@ package net.civeira.phylax.common.exception;
 /**
  * Exception thrown when a requested resource cannot be found.
  *
- * <p>
- * This exception represents a typical "not found" condition, such as when a database record, file,
- * or domain object is missing or inaccessible. It can also be used to signal that a required
- * precondition (such as a paid subscription) has not been fulfilled, and thus the resource is
- * considered unavailable.
- * </p>
- *
- * <p>
- * This is a runtime (unchecked) exception and may be used in service layers, repositories, or API
- * controllers to indicate missing data or entities.
- * </p>
+ * It represents typical missing data scenarios such as absent records or entities. The exception is
+ * used across repositories, services, and controllers to signal 404 cases. It can also represent
+ * business-level absence, such as unavailable features for a user. This is an unchecked exception
+ * intended for propagation to API mappers.
  *
  * @see RuntimeException
  */
@@ -23,6 +16,10 @@ public class NotFoundException extends RuntimeException {
 
   /**
    * Constructs a {@code NotFoundException} with no detail message or cause.
+   *
+   * Use this when the missing resource context is provided elsewhere. The exception can still be
+   * mapped to a 404 response by the API layer. Prefer a message when the caller needs debugging
+   * context.
    */
   public NotFoundException() {
     super();
@@ -30,6 +27,9 @@ public class NotFoundException extends RuntimeException {
 
   /**
    * Constructs a {@code NotFoundException} with a specified detail message.
+   *
+   * Use concise, user-safe messages when the exception is mapped to responses. Include identifiers
+   * when helpful for debugging and traceability. The message is used as the exception text.
    *
    * @param message the detail message explaining the reason for the exception
    */
@@ -40,6 +40,9 @@ public class NotFoundException extends RuntimeException {
   /**
    * Constructs a {@code NotFoundException} with a specified cause.
    *
+   * This variant is used when the missing state is derived from another failure. The cause is
+   * preserved for logging and diagnostic purposes. Use this when wrapping lower-level exceptions.
+   *
    * @param cause the underlying cause of the exception
    */
   public NotFoundException(final String message) {
@@ -48,6 +51,9 @@ public class NotFoundException extends RuntimeException {
 
   /**
    * Constructs a {@code NotFoundException} with both a detail message and a cause.
+   *
+   * This is the most expressive constructor for missing resource errors. It captures both a
+   * user-safe message and the underlying cause. Use it when you need traceable context in logs.
    *
    * @param message the detail message
    * @param cause the underlying cause of the exception

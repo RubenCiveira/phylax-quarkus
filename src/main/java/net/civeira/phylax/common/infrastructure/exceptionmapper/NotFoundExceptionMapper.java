@@ -10,11 +10,29 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.NotFoundException;
 
+/**
+ * Maps not-found exceptions to HTTP 404 responses.
+ *
+ * The mapper translates missing resource exceptions into a standard 404 payload. It logs the
+ * exception to aid diagnostics while keeping the response simple. The response body contains a
+ * reason field with the exception message. This ensures consistent not-found handling across REST
+ * endpoints.
+ */
 @Slf4j
 @Provider
 public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException> {
 
   @Override
+  /**
+   * Converts a not-found exception into an HTTP response.
+   *
+   * The response status is set to 404 and includes a minimal error payload. The reason message is
+   * taken from the exception for debugging context. Logging is performed at info level to avoid
+   * noisy errors.
+   *
+   * @param exception not-found exception
+   * @return HTTP 404 response
+   */
   public Response toResponse(NotFoundException exception) {
     log.info("not found exception", exception);
     Map<String, String> error = new HashMap<>();

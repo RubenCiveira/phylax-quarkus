@@ -5,72 +5,100 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Interface representing a remote connector that allows communication with external services.
- * Provides methods for performing HTTP-like requests (GET, POST, PUT, DELETE, PATCH).
+ * Remote connector that builds and dispatches HTTP-like requests to external services.
+ *
+ * It exposes factory methods for GET, POST, PUT, PATCH, and DELETE style requests. Each method
+ * returns a {@link RemoteQuery} used to set headers and parameters. Requests are executed by
+ * passing {@link RemoteConnection} handles to {@link #send}. This abstraction decouples clients
+ * from specific HTTP client implementations.
  */
 public interface RemoteConnector {
 
   /**
-   * Performs a GET request to the specified target.
+   * Builds a GET request for the specified target.
    *
-   * @param target The target URL or endpoint.
-   * @return A {@link RemoteQuery} representing the GET request.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
+   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   *
+   * @param target target URL or endpoint
+   * @return a {@link RemoteQuery} representing the GET request
    */
   RemoteQuery get(String target);
 
   /**
-   * Performs a DELETE request to the specified target.
+   * Builds a DELETE request for the specified target.
    *
-   * @param target The target URL or endpoint.
-   * @return A {@link RemoteQuery} representing the DELETE request.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
+   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   *
+   * @param target target URL or endpoint
+   * @return a {@link RemoteQuery} representing the DELETE request
    */
   RemoteQuery delete(String target);
 
   /**
-   * Performs a POST request to the specified target with the provided parameters.
+   * Builds a POST request for the specified target and payload.
    *
-   * @param target The target URL or endpoint.
-   * @param params The request payload or body.
-   * @return A {@link RemoteQuery} representing the POST request.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
+   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   *
+   * @param target target URL or endpoint
+   * @param params request payload or body
+   * @return a {@link RemoteQuery} representing the POST request
    */
   RemoteQuery post(String target, Object params);
 
   /**
-   * Performs a PUT request to the specified target with the provided parameters.
+   * Builds a PUT request for the specified target and payload.
    *
-   * @param target The target URL or endpoint.
-   * @param params The request payload or body.
-   * @return A {@link RemoteQuery} representing the PUT request.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
+   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   *
+   * @param target target URL or endpoint
+   * @param params request payload or body
+   * @return a {@link RemoteQuery} representing the PUT request
    */
   RemoteQuery put(String target, Object params);
 
   /**
-   * Performs a PATCH request to the specified target with the provided parameters.
+   * Builds a PATCH request for the specified target and payload.
    *
-   * @param target The target URL or endpoint.
-   * @param params The request payload or body.
-   * @return A {@link RemoteQuery} representing the PATCH request.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
+   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   *
+   * @param target target URL or endpoint
+   * @param params request payload or body
+   * @return a {@link RemoteQuery} representing the PATCH request
    */
   RemoteQuery patch(String target, Object params);
 
   /**
-   * Sends and wait multiple remote connection requests.
+   * Sends and waits for multiple remote connection requests.
    *
-   * @param request One or more {@link RemoteConnection} objects representing the requests.
+   * This is a convenience method for executing several prepared requests. Implementations may
+   * dispatch in parallel or sequentially. The call returns when all requests have completed.
+   *
+   * @param request one or more {@link RemoteConnection} objects representing the requests
    */
   void send(RemoteConnection... request);
 
   /**
-   * Sends and wait a batch of remote connection requests.
+   * Sends and waits for a batch of remote connection requests.
    *
-   * @param request A list of {@link RemoteConnection} objects to be sent.
+   * This overload accepts a list for easier dynamic request collection. Implementations may
+   * dispatch in parallel or sequentially. The call returns when all requests have completed.
+   *
+   * @param request list of {@link RemoteConnection} objects to be sent
    */
   void send(List<RemoteConnection> request);
 
   /**
-   * Sends and wait a stream of remote connection requests.
+   * Sends and waits for a stream of remote connection requests.
    *
-   * @param request A stream of {@link RemoteConnection} objects to be processed.
+   * This overload supports lazy request generation from a stream. Implementations may evaluate the
+   * stream eagerly or lazily. The call returns when all requests have completed.
+   *
+   * @param request stream of {@link RemoteConnection} objects to be processed
    */
   void send(Stream<RemoteConnection> request);
 }

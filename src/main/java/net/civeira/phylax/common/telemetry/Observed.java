@@ -10,11 +10,19 @@ import java.lang.annotation.Target;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.interceptor.InterceptorBinding;
 
+/**
+ * Marks methods or classes for internal tracing spans.
+ */
 @Inherited
 @InterceptorBinding
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Observed {
+  /**
+   * Alias for {@link #title()} to support concise annotation usage.
+   *
+   * @return span title alias
+   */
   @Nonbinding
   String value() default "";
 }

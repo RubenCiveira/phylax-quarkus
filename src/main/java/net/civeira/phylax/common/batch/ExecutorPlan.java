@@ -5,12 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Represents a named executable unit in a batch execution plan.
+ * Represents a named executable unit within a batch plan.
  *
- * <p>
- * This class binds together the name of a step, the executor implementation, and the input
- * parameters required to run it.
- * </p>
+ * It binds a step name, the executor implementation, and the parameters for execution. The plan is
+ * used by {@link BatchService} to run steps in order. This class is immutable and built using
+ * Lombok's builder pattern. Each plan instance encapsulates all details needed to execute a step.
  *
  * @param <T> the type of parameters passed to the executor
  */

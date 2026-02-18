@@ -20,19 +20,12 @@ import net.civeira.phylax.common.exception.AbstractFailsException;
 import net.civeira.phylax.common.value.validation.ExecutionFail;
 
 /**
- * Executor implementation that runs a batch step in deferred stages: reading, processing, and
- * writing.
+ * Executor implementation that runs a batch step in deferred read/process/write stages.
  *
- * <p>
- * This executor is dynamically built using class references to component types (reader, writer,
- * processor, etc.) that are resolved using Quarkus Arc CDI container at runtime. It is designed to
- * be highly modular and reusable.
- * </p>
- *
- * <p>
- * The execution includes configurable sleep durations between stages, context lifecycle management,
- * and progressive persistence of step results.
- * </p>
+ * The executor is configured with component classes that are resolved via CDI at runtime. It
+ * supports step initialization, counting, processing, and finalization with optional hooks. Results
+ * are buffered and written in batches to control throughput. Sleep intervals between phases help
+ * avoid resource contention in large workloads.
  *
  * @param <T> the input item type
  * @param <R> the result/output item type
@@ -72,10 +65,14 @@ public class ExecutorByDeferSteps<T, R, P, S> implements Executor<P> {
   private final SleepService sleeper = new RealSleepService();
 
   /**
-   * Executes the batch step by initializing context and executing read-process-write cycles.
+   * Executes the batch step by initializing context and performing read/process/write cycles.
    *
-   * @param result the step result tracker
-   * @param store a monitor to update execution state
+   * It activates the request context, resolves CDI components, and runs the step loop. Progress is
+   * updated after processing and writing, with errors captured per item. Optional initializer,
+   * counter, and finalizer hooks are invoked when configured.
+   *
+   * @param result step result tracker
+   * @param store monitor used to persist progress updates
    * @param param execution parameters
    */
   @Override
@@ -148,8 +145,10 @@ public class ExecutorByDeferSteps<T, R, P, S> implements Executor<P> {
   }
 
   /**
-   * Returns the sleep service responsible for delaying between execution phases. Can be overridden
-   * for testing.
+   * Returns the sleep service responsible for delaying between execution phases.
+   *
+   * This can be overridden in tests to avoid real delays. The default implementation uses a real
+   * sleep for throttling. Callers should not use this for business timing logic.
    *
    * @return the {@link SleepService} implementation used
    */
@@ -160,23 +159,30 @@ public class ExecutorByDeferSteps<T, R, P, S> implements Executor<P> {
   /**
    * Checks whether the given list of items is non-null and not empty.
    *
-   * @param items the list of items to check
-   * @return {@code true} if items can be processed
+   * This is used to decide whether another read cycle should continue. Empty or null lists signal
+   * that no more items are available. The method keeps the step loop logic concise and readable.
+   *
+   * @param items list of items to check
+   * @return true if items can be processed
    */
   private boolean procesable(List<T> items) {
     return items != null && !items.isEmpty();
   }
 
   /**
-   * Processes a single item using the configured processor, handling any exceptions.
+   * Processes a single item using the configured processor and handles errors.
    *
-   * @param item the item to process
-   * @param processor the processor implementation
+   * Validation failures are captured as structured errors on the result. Unexpected exceptions are
+   * also recorded to keep the batch running. The item descriptor provides an identifier for error
+   * reporting.
+   *
+   * @param item item to process
+   * @param processor processor implementation
    * @param descriptor descriptor used to identify the item
-   * @param result the step result container
-   * @param store the monitor to update the state
-   * @param context the execution context
-   * @return the processed result, or {@code null} if an error occurred
+   * @param result step result container
+   * @param store monitor to update the state
+   * @param context execution context
+   * @return processed result, or null when an error occurs
    */
   private R process(T item, ItemProcessor<T, R, P, S> processor, ItemDescriptor<T, P, S> descriptor,
       BatchStepProgress result, Monitor store, StepContext<P, S> context) {
@@ -199,12 +205,16 @@ public class ExecutorByDeferSteps<T, R, P, S> implements Executor<P> {
   /**
    * Writes a list of processed items and updates the batch result accordingly.
    *
+   * The method groups input/output pairs and delegates to the writer. On success, it records OK
+   * entries using the item descriptor. On failure, it records errors for each input item in the
+   * batch.
+   *
    * @param items list of input/output pairs to write
-   * @param writer the writer component
+   * @param writer writer component
    * @param descriptor descriptor used to identify items
-   * @param result the step result container
-   * @param store the monitor to update the state
-   * @param context the execution context
+   * @param result step result container
+   * @param store monitor to update the state
+   * @param context execution context
    */
   @SuppressWarnings("unchecked")
   private void write(List<Object[]> items, ItemWriter<R, P, S> writer,

@@ -6,11 +6,27 @@ import java.util.Optional;
 
 import lombok.Builder;
 
+/**
+ * Holds the available execution nodes for projection paths.
+ *
+ * The tree maps endpoint identifiers to executable node definitions. It is built by combining
+ * {@link ProjectionDescriptor} outputs. The tree enables fast lookup of root nodes for projection
+ * execution. This structure is immutable after construction.
+ */
 @Builder
 public class ExecutionTree {
 
   private final Map<String, ExecutionNode> tree;
 
+  /**
+   * Returns the execution node for the given identifier.
+   *
+   * The identifier is typically the endpoint path used in the projection plan. When the node is not
+   * present, the optional is empty. This is used by {@link ProjectionRunner} to start execution.
+   *
+   * @param id node identifier
+   * @return optional execution node
+   */
   public Optional<ExecutionNode> byId(String id) {
     return Optional.ofNullable(tree.get(id));
   }

@@ -10,19 +10,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * An abstract streaming utility that allows controlled, paginated access to a data sequence.
+ * Streaming utility that allows controlled, paginated access to a data sequence.
  *
- * <p>
- * The {@code Slider} class wraps an existing {@link Iterator} and buffers its data. It provides
- * mechanisms to "slide" through elements in a filtered, paginated way, dynamically requesting more
- * elements as needed. It is designed for cases where data needs to be processed in chunks, possibly
- * with filtering, and where more data may be loaded progressively.
- * </p>
- *
- * <p>
- * Subclasses must implement the {@link #next(List, int)} method, which defines how additional data
- * is fetched when more elements are needed.
- * </p>
+ * The slider buffers an iterator and yields filtered elements in batches. When the current data is
+ * exhausted, it can request more elements dynamically. This is useful for incremental loading where
+ * a target number of matches is needed. Subclasses implement {@link #next(List, int)} to define how
+ * to fetch more data.
  *
  * @param <T> the type of elements being streamed and processed
  */
@@ -45,17 +38,24 @@ public abstract class Slider<T> {
   }
 
   /**
-   * Abstract method to be implemented by subclasses to provide additional data when needed.
+   * Provides additional data when the current iterator is exhausted.
+   *
+   * Implementations receive the list of accepted items and a target count. The returned iterator
+   * should yield enough elements to fill the requested limit. Returning null indicates there is no
+   * more data to fetch.
    *
    * @param valids the currently accepted (filtered) elements
-   * @param limit the number of additional elements needed to reach the desired result size
-   * @return an {@link Iterator} providing the next batch of elements, or {@code null} if no more
-   *         data is available
+   * @param limit number of additional elements requested
+   * @return next batch iterator or null when exhausted
    */
   public abstract Iterator<T> next(List<T> valids, int limit);
 
   /**
    * Returns all buffered elements, including unfiltered data.
+   *
+   * This exposes the internal buffer collected from the initial iterator. It is useful for
+   * diagnostics or pre-processing before sliding. The returned list is the same backing list used
+   * by the slider.
    *
    * @return a list containing all elements currently held in memory
    */
@@ -64,11 +64,13 @@ public abstract class Slider<T> {
   }
 
   /**
-   * Returns a single element from the buffer if exactly one exists.
+   * Returns a single element from the buffer when exactly one exists.
    *
-   * @return an {@link Optional} containing the element if exactly one exists, otherwise throws an
-   *         exception or returns empty
-   * @throws IllegalStateException if more than one element is present
+   * This is useful for assertions where a unique element is expected. It throws when more than one
+   * element is present. Returns empty when the buffer is empty.
+   *
+   * @return optional containing the single element, or empty if none
+   * @throws IllegalStateException when more than one element is present
    */
   public Optional<T> one() {
     if (items.size() > 1) {
@@ -79,16 +81,14 @@ public abstract class Slider<T> {
   }
 
   /**
-   * Returns an iterator that slides through the data based on the given predicate.
+   * Returns an iterator that slides through the data using a filter predicate.
    *
-   * <p>
-   * This iterator will continue to load additional elements using the {@link #next(List, int)}
-   * method until the configured {@code limit} of accepted elements is reached, or no more data is
-   * available.
-   * </p>
+   * The iterator yields only elements that match the predicate. It requests more data via
+   * {@link #next(List, int)} until the limit is reached. When no more data is available, iteration
+   * ends.
    *
-   * @param predicate a filter to determine which elements are considered valid
-   * @return an iterator that streams valid elements with sliding pagination
+   * @param predicate filter to determine which elements are considered valid
+   * @return iterator over filtered elements with sliding pagination
    */
   public Iterator<T> slide(Predicate<T> predicate) {
     return applySlide(predicate);
@@ -108,13 +108,12 @@ public abstract class Slider<T> {
 
 
 /**
- * Internal helper iterator for the {@link Slider}, which wraps an underlying iterator and
- * dynamically loads additional data when the current stream is exhausted.
+ * Internal helper iterator for {@link Slider} that supports dynamic loading.
  *
- * <p>
- * Each element returned is stored in a list to be passed to the sliding logic in order to determine
- * how much additional data is needed and whether to continue streaming.
- * </p>
+ * It wraps an underlying iterator and applies the predicate to each candidate. When the current
+ * iterator is exhausted, it requests a new iterator from the supplier. Collected items are tracked
+ * to estimate how many new elements are needed. This class is package-private and used only by the
+ * slider implementation.
  *
  * @param <T> the type of elements being iterated
  */
@@ -129,11 +128,14 @@ class SlideIterator<T> implements Iterator<T> {
   private final List<T> filteredItems = new ArrayList<>();
 
   /**
-   * Constructs a new {@code FD} iterator.
+   * Constructs a new slide iterator for the given inputs.
    *
-   * @param initial the initial iterator to stream elements from
-   * @param next a function that returns a new iterator when more data is needed, based on
-   *        previously collected items
+   * The initial iterator is used until it is exhausted. The next function supplies additional
+   * iterators as needed. The predicate determines which elements are yielded to callers.
+   *
+   * @param initial initial iterator to stream elements from
+   * @param predicate filter used to accept elements
+   * @param next supplier for additional iterators when needed
    */
   public SlideIterator(Iterator<T> initial, Predicate<T> predicate,
       Function<List<T>, Iterator<T>> next) {
@@ -144,9 +146,12 @@ class SlideIterator<T> implements Iterator<T> {
   }
 
   /**
-   * Returns {@code true} if the iterator has more elements, including potentially fetched ones.
+   * Returns {@code true} when another element is available.
    *
-   * @return {@code true} if more elements are available
+   * This method may trigger loading of additional data when needed. It prepares the next element
+   * using the predicate filter. Returns false when no further data can be fetched.
+   *
+   * @return true if another element is available
    */
   @Override
   public boolean hasNext() {
@@ -155,9 +160,12 @@ class SlideIterator<T> implements Iterator<T> {
   }
 
   /**
-   * Returns the next element in the iteration.
+   * Returns the next filtered element in the iteration.
    *
-   * @return the next element
+   * This advances the iterator and records the returned element. It throws when no more elements
+   * are available. The method relies on {@link #hasNext()} preparation.
+   *
+   * @return next accepted element
    */
   @Override
   public T next() {

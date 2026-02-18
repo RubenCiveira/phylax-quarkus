@@ -5,24 +5,11 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Exception representing one or more constraint validation failures in domain or application logic.
+ * Exception representing one or more constraint validation failures.
  *
- * <p>
- * This exception is a concrete implementation of {@link AbstractFailsException} that specifically
- * wraps {@link ConstraintFail} or {@link ConstraintFailList} instances. It is intended to be thrown
- * when input data, user commands, or internal state violate defined constraints.
- * </p>
- *
- * <p>
- * Each instance of this exception can carry detailed information about one or more failed
- * constraints, including the field, value, and reason for the failure. The errors can later be
- * localized for user-facing responses via the parent class methods.
- * </p>
- *
- * <p>
- * Typical use cases include validation of DTOs, API requests, configuration values, or domain
- * invariants.
- * </p>
+ * It is a concrete {@link AbstractFailsException} that wraps constraint failures. Use it when input
+ * data, commands, or domain invariants are violated. The exception carries structured details such
+ * as field, value, and reason. Localized error responses can be produced via the parent class API.
  *
  * @see ConstraintFail
  * @see ConstraintFailList
@@ -34,6 +21,9 @@ public class ConstraintException extends AbstractFailsException {
   /**
    * Constructs a {@code ConstraintException} with a single constraint failure.
    *
+   * The failure is wrapped into a list for consistent handling. Use this for simple validation
+   * errors with one failing rule. The failure can later be localized and grouped by code.
+   *
    * @param message the message
    * @param fail the constraint failure to include in the exception
    */
@@ -44,6 +34,10 @@ public class ConstraintException extends AbstractFailsException {
   /**
    * Constructs a {@code ConstraintException} with a list of constraint failures.
    *
+   * This is useful when multiple fields fail validation simultaneously. The list preserves all
+   * violations for later inspection or localization. The message is combined with the failure
+   * details for the exception text.
+   *
    * @param message the message
    * @param fails a list of multiple constraint violations
    */
@@ -53,6 +47,10 @@ public class ConstraintException extends AbstractFailsException {
 
   /**
    * Constructs a {@code ConstraintException} with the given error metadata.
+   *
+   * This is a convenience constructor for building a single failure inline. It captures the error
+   * code, field, and offending value for diagnostics. The error message describes the violation in
+   * human-readable form.
    *
    * @param message the message
    * @param code the error code identifying the type of constraint violation
@@ -67,6 +65,10 @@ public class ConstraintException extends AbstractFailsException {
 
   /**
    * Constructs a {@code ConstraintException} with minimal violation information.
+   *
+   * This is a shorter form when a custom error message is not needed. The error code and field are
+   * used to build localized messages later. The wrong value is stored for debugging and API
+   * responses.
    *
    * @param message the message
    * @param code the error code identifying the type of constraint violation

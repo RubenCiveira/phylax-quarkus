@@ -12,6 +12,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Registers management routes to inspect audit events.
+ *
+ * The actuator plugs audit endpoints into the Quarkus management interface. It enables operational
+ * access to recent audit records for diagnostics. This is intended for internal or admin-only
+ * monitoring use cases. The handler delegates query execution to the read service.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class AuditActuator {
@@ -20,6 +27,15 @@ public class AuditActuator {
 
   private final ObjectMapper mapper;
 
+  /**
+   * Registers the audit endpoint on the Quarkus management interface.
+   *
+   * The endpoint is exposed under the management port for operational tooling. It wires the handler
+   * to fetch audit records from the read service. The management interface is provided by Quarkus
+   * at startup time.
+   *
+   * @param management management interface to configure
+   */
   public void registerManagementRoutes(@Observes ManagementInterface management) {
     management.router().get("/q/audit").handler(this::handleAuditRequest);
   }

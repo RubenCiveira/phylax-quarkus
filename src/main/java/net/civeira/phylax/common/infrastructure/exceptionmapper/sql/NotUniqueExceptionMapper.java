@@ -10,11 +10,28 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.sql.NotUniqueException;
 
+/**
+ * Maps not-unique constraint errors to HTTP 422 responses.
+ *
+ * This mapper handles uniqueness violations from the database layer. It returns a 422 response to
+ * indicate semantic constraint failures. The response includes a reason derived from the exception
+ * message. Logging provides visibility into duplicate key errors.
+ */
 @Slf4j
 @Provider
 public class NotUniqueExceptionMapper implements ExceptionMapper<NotUniqueException> {
 
   @Override
+  /**
+   * Converts a not-unique exception into an HTTP response.
+   *
+   * The response status is set to 422 with a minimal reason payload. Logging is performed at info
+   * level based on logger configuration. This mapper is used by SQL repositories to surface unique
+   * constraint errors.
+   *
+   * @param exception not-unique exception
+   * @return HTTP 422 response
+   */
   public Response toResponse(NotUniqueException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);

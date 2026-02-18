@@ -7,11 +7,20 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Span;
 
+/**
+ * Provides convenience methods for recording tracing events and attributes on the current
+ * OpenTelemetry span.
+ */
 public final class Trace {
   private Trace() {
     /* private constructor to avoid build */
   }
 
+  /**
+   * Adds a simple event to the current span if a valid span is active.
+   *
+   * @param name event name to record
+   */
   public static void addEvent(final String name) {
     Span span = Span.current();
     if (isValid(span) && name != null && !name.isBlank()) {
@@ -19,6 +28,12 @@ public final class Trace {
     }
   }
 
+  /**
+   * Sets a boolean attribute on the current span if a valid span is active.
+   *
+   * @param key attribute key
+   * @param value attribute value
+   */
   public static void setAttribute(final String key, final boolean value) {
     Span span = Span.current();
     if (isValid(span) && key != null && !key.isBlank()) {
@@ -26,6 +41,12 @@ public final class Trace {
     }
   }
 
+  /**
+   * Sets a double attribute on the current span if a valid span is active.
+   *
+   * @param key attribute key
+   * @param value attribute value
+   */
   public static void setAttribute(final String key, final double value) {
     Span span = Span.current();
     if (isValid(span) && key != null && !key.isBlank()) {
@@ -33,6 +54,12 @@ public final class Trace {
     }
   }
 
+  /**
+   * Sets a long attribute on the current span if a valid span is active.
+   *
+   * @param key attribute key
+   * @param value attribute value
+   */
   public static void setAttribute(final String key, final long value) {
     Span span = Span.current();
     if (isValid(span) && key != null && !key.isBlank()) {
@@ -40,6 +67,12 @@ public final class Trace {
     }
   }
 
+  /**
+   * Sets a string attribute on the current span if a valid span is active.
+   *
+   * @param key attribute key
+   * @param value attribute value
+   */
   public static void setAttribute(final String key, final String value) {
     Span span = Span.current();
     if (isValid(span) && key != null && !key.isBlank() && value != null) {
@@ -47,6 +80,12 @@ public final class Trace {
     }
   }
 
+  /**
+   * Adds an event with string attributes to the current span.
+   *
+   * @param name event name to record
+   * @param attributes key-value attributes to attach
+   */
   public static void addEvent(final String name, final Map<String, String> attributes) {
     Span span = Span.current();
     if (!isValid(span) || name == null || name.isBlank()) {

@@ -4,10 +4,14 @@ package net.civeira.phylax.common.infrastructure.sql;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Represents a typed SQL query that can be configured and executed. Allows parameter binding and
- * execution with or without locking (FOR UPDATE).
+ * Represents a typed SQL query that can be configured and executed.
  *
- * @param <T> The type of the object to map the result to.
+ * The query supports named parameter binding and optional row locking. It delegates execution to
+ * the underlying {@link SqlTemplate} for consistency. Callers provide a {@link SqlConverter} to map
+ * result rows into domain objects. Use {@link #forUpdate()} to request a locking read when
+ * supported.
+ *
+ * @param <T> the type of the object to map the result to
  */
 @Slf4j
 public final class SqlQuery<T> extends AbstractSqlQuery<T, SqlQuery<T>> {
@@ -30,6 +34,10 @@ public final class SqlQuery<T> extends AbstractSqlQuery<T, SqlQuery<T>> {
   /**
    * Constructs a new SqlQuery.
    *
+   * The SQL string is stored and executed later with parameter binding. Use
+   * {@link SqlTemplate#createSqlQuery(String)} to create queries. The template manages connection
+   * and optional tracing.
+   *
    * @param template the SQL template engine used to prepare the final query
    * @param sql the SQL statement as a string
    */
@@ -42,6 +50,9 @@ public final class SqlQuery<T> extends AbstractSqlQuery<T, SqlQuery<T>> {
   /**
    * Enables row locking for this query (i.e., adds FOR UPDATE).
    *
+   * This is used to lock selected rows for subsequent updates. Locking behavior depends on the
+   * underlying database dialect. Returns the query instance for fluent chaining.
+   *
    * @return the current SqlQuery instance with locking enabled
    */
   public SqlQuery<T> forUpdate() {
@@ -52,6 +63,9 @@ public final class SqlQuery<T> extends AbstractSqlQuery<T, SqlQuery<T>> {
   /**
    * Disables row locking for this query.
    *
+   * This is the default behavior for read-only queries. Returns the query instance for fluent
+   * chaining. Use this to override a previous {@link #forUpdate()} call.
+   *
    * @return the current SqlQuery instance with locking disabled
    */
   public SqlQuery<T> forQuery() {
@@ -61,6 +75,9 @@ public final class SqlQuery<T> extends AbstractSqlQuery<T, SqlQuery<T>> {
 
   /**
    * Adds a named parameter to the query.
+   *
+   * The parameter name must match a placeholder in the SQL string. The value provider handles
+   * binding to the prepared statement. Returns the query instance for fluent chaining.
    *
    * @param name the name of the parameter
    * @param consumer the value provider for the parameter
@@ -73,8 +90,11 @@ public final class SqlQuery<T> extends AbstractSqlQuery<T, SqlQuery<T>> {
   }
 
   /**
-   * Executes the SQL query using the given converter. Applies locking if {@code forUpdate()} was
-   * called.
+   * Executes the SQL query using the given converter.
+   *
+   * The query is executed with locking when {@link #forUpdate()} was called. The converter maps
+   * each row into the requested result type. Returns a {@link SqlResult} wrapper for lazy access to
+   * results.
    *
    * @param converter the result converter
    * @return the result of the query execution

@@ -12,6 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.AbstractFailsException;
 
+/**
+ * Maps validation failures to HTTP 422 responses.
+ *
+ * This mapper converts {@link AbstractFailsException} into a standardized response. It chooses the
+ * locale from request headers to localize failure messages. Responses include a list of localized
+ * errors grouped by error code. This is used by REST endpoints to report constraint violations
+ * consistently.
+ */
 @Slf4j
 @Provider
 @RequiredArgsConstructor
@@ -19,6 +27,16 @@ public class AbstractFailMapper implements ExceptionMapper<AbstractFailsExceptio
   private final HttpHeaders headers;
 
   @Override
+  /**
+   * Converts a validation failure exception into an HTTP response.
+   *
+   * The mapper determines the preferred locale from Accept-Language headers. It builds a 422
+   * response with localized validation errors as the entity. Logging behavior varies based on log
+   * level for diagnostics.
+   *
+   * @param exception validation failure exception
+   * @return HTTP response containing localized errors
+   */
   public Response toResponse(AbstractFailsException exception) {
     if (log.isDebugEnabled()) {
       log.info("constraint exception", exception);

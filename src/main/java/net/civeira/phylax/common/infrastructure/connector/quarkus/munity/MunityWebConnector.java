@@ -14,46 +14,98 @@ import net.civeira.phylax.common.infrastructure.connector.RemoteConnector;
 import net.civeira.phylax.common.infrastructure.connector.RemoteQuery;
 import net.civeira.phylax.common.infrastructure.connector.quarkus.munity.MunityWebQuery.Method;
 
+/**
+ * Remote connector implementation backed by Mutiny WebClient.
+ */
 public class MunityWebConnector implements RemoteConnector {
   private final WebClient client;
   private final Tracer tracer;
 
+  /**
+   * Creates a connector using the provided Vert.x instance and tracer.
+   *
+   * @param vertx Vert.x instance
+   * @param tracer OpenTelemetry tracer
+   */
   public MunityWebConnector(Vertx vertx, Tracer tracer) {
     this.client = WebClient.create(vertx);
     this.tracer = tracer;
   }
 
   @Override
+  /**
+   * Creates a GET request for the provided target.
+   *
+   * @param target target URL
+   * @return remote query
+   */
   public RemoteQuery get(String target) {
     return MunityWebQuery.create(tracer, client, null, target, null);
   }
 
   @Override
+  /**
+   * Creates a DELETE request for the provided target.
+   *
+   * @param target target URL
+   * @return remote query
+   */
   public RemoteQuery delete(String target) {
     return MunityWebQuery.create(tracer, client, Method.DELETE, target, null);
   }
 
   @Override
+  /**
+   * Creates a POST request with a body for the provided target.
+   *
+   * @param target target URL
+   * @param body request payload
+   * @return remote query
+   */
   public RemoteQuery post(String target, Object body) {
     return MunityWebQuery.create(tracer, client, Method.POST, target, body);
   }
 
   @Override
+  /**
+   * Creates a PUT request with a body for the provided target.
+   *
+   * @param target target URL
+   * @param body request payload
+   * @return remote query
+   */
   public RemoteQuery put(String target, Object body) {
     return MunityWebQuery.create(tracer, client, Method.PUT, target, body);
   }
 
   @Override
+  /**
+   * Creates a PATCH request with a body for the provided target.
+   *
+   * @param target target URL
+   * @param body request payload
+   * @return remote query
+   */
   public RemoteQuery patch(String target, Object body) {
     return MunityWebQuery.create(tracer, client, Method.PATCH, target, body);
   }
 
   @Override
+  /**
+   * Sends one or more remote connections and waits for completion.
+   *
+   * @param request connections to send
+   */
   public void send(RemoteConnection... request) {
     send(Arrays.asList(request));
   }
 
   @Override
+  /**
+   * Sends a list of remote connections and waits for completion.
+   *
+   * @param request connections to send
+   */
   public void send(List<RemoteConnection> request) {
     if (request.size() == 1) {
       map(request.get(0)).await().indefinitely();
@@ -63,6 +115,11 @@ public class MunityWebConnector implements RemoteConnector {
   }
 
   @Override
+  /**
+   * Sends a stream of remote connections and waits for completion.
+   *
+   * @param request connections to send
+   */
   public void send(Stream<RemoteConnection> request) {
     send(request.toList());
   }

@@ -3,10 +3,11 @@ package net.civeira.phylax.common.infrastructure.sql;
 
 /**
  * Represents a generic SQL command that can be executed.
- * <p>
- * This abstract class provides a base for SQL operations that return an integer result, such as
- * {@code INSERT}, {@code UPDATE}, or {@code DELETE}.
- * </p>
+ *
+ * This is the base for write operations such as INSERT, UPDATE, or DELETE. It extends
+ * {@link AbstractSqlParametrized} to provide parameter binding support. Implementations typically
+ * return the number of affected rows on execution. The class is generic to allow fluent chaining in
+ * subclasses.
  *
  * @param <T> the type of the subclass, enabling fluent-style method chaining
  */
@@ -16,6 +17,10 @@ public abstract class AbstractSqlCommand<T extends AbstractSqlCommand<T>>
   /**
    * Constructs a new {@code AbstractSqlCommand} with the given SQL template.
    *
+   * The template provides the raw SQL string and any static bindings. Subclasses use this to
+   * assemble parameterized statements. This constructor is package-private to keep creation
+   * controlled.
+   *
    * @param template the SQL template to be used by this command
    */
   /* default */ AbstractSqlCommand(SqlTemplate template) {
@@ -24,6 +29,10 @@ public abstract class AbstractSqlCommand<T extends AbstractSqlCommand<T>>
 
   /**
    * Executes the SQL command and returns the result.
+   *
+   * Implementations should prepare statements, bind parameters, and execute safely. The returned
+   * value typically represents the number of affected rows. Execution exceptions are expected to be
+   * wrapped by caller code.
    *
    * @return the result of executing the command, typically the number of affected rows
    */

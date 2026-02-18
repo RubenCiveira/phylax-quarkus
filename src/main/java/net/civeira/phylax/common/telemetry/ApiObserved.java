@@ -10,11 +10,27 @@ import java.lang.annotation.Target;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.interceptor.InterceptorBinding;
 
+/**
+ * Marks methods or classes for API-level tracing with a server span.
+ */
 @Inherited
 @InterceptorBinding
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface ApiObserved {
+  /**
+   * Defines the span title used for the API invocation.
+   *
+   * @return span title
+   */
+  @Nonbinding
+  String title() default "";
+
+  /**
+   * Alias for {@link #title()} to support concise annotation usage.
+   *
+   * @return span title alias
+   */
   @Nonbinding
   String value() default "";
 }

@@ -5,10 +5,18 @@ import io.smallrye.mutiny.Uni;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.connector.RemoteConnection;
 
+/**
+ * Wraps a Mutiny response buffer as a remote connection.
+ */
 @RequiredArgsConstructor
 public class MunityWebConnection implements RemoteConnection {
   private final Uni<String> buffer;
 
+  /**
+   * Returns the response buffer for this connection.
+   *
+   * @return async buffer content
+   */
   public Uni<String> buffer() {
     return buffer;
   }

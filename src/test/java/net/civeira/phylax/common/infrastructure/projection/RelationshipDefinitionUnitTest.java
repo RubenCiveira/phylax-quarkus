@@ -1,0 +1,78 @@
+package net.civeira.phylax.common.infrastructure.projection;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("RelationshipDefinition data holder")
+class RelationshipDefinitionUnitTest {
+
+  @Nested
+  @DisplayName("Builder and getters")
+  class BuilderAndGetters {
+
+    @Test
+    @DisplayName("Should build with all fields")
+    void shouldBuildWithAllFields() {
+      // Arrange / Act — build a relationship definition with all fields populated
+      RelationshipDefinition def =
+          RelationshipDefinition.builder().list(true).id("users").on("tenantId").url("/api/users")
+              .method("GET").batchParam("tenantIds").referenceField("tenant").build();
+
+      // Assert — every getter returns the value that was set via the builder
+      assertTrue(def.isList(), "List flag should be true");
+      assertEquals("users", def.getId(), "Id should match the value set in builder");
+      assertEquals("tenantId", def.getOn(), "On should match the value set in builder");
+      assertEquals("/api/users", def.getUrl(), "URL should match the value set in builder");
+      assertEquals("GET", def.getMethod(), "Method should match the value set in builder");
+      assertEquals("tenantIds", def.getBatchParam(),
+          "Batch param should match the value set in builder");
+      assertEquals("tenant", def.getReferenceField(),
+          "Reference field should match the value set in builder");
+    }
+
+    @Test
+    @DisplayName("Should default list to false")
+    void shouldDefaultListToFalse() {
+      // Arrange / Act — build a relationship definition without explicitly setting the list flag
+      RelationshipDefinition def = RelationshipDefinition.builder().id("single").url("/api/item")
+          .method("GET").batchParam("id").referenceField("ref").build();
+
+      // Assert — the list flag defaults to false
+      assertFalse(def.isList(), "List flag should default to false when not explicitly set");
+    }
+  }
+
+  @Nested
+  @DisplayName("Equality")
+  class Equality {
+
+    @Test
+    @DisplayName("Should be equal when all fields are the same")
+    void shouldBeEqualWhenAllFieldsMatch() {
+      // Arrange — two relationship definitions built with identical field values
+      RelationshipDefinition def1 = RelationshipDefinition.builder().id("r1").url("/api")
+          .method("GET").batchParam("id").referenceField("ref").build();
+      RelationshipDefinition def2 = RelationshipDefinition.builder().id("r1").url("/api")
+          .method("GET").batchParam("id").referenceField("ref").build();
+
+      // Act / Assert — comparing the two instances yields equality
+      assertEquals(def1, def2, "Two RelationshipDefinitions with identical fields should be equal");
+    }
+
+    @Test
+    @DisplayName("Should not be equal when fields differ")
+    void shouldNotBeEqualWhenFieldsDiffer() {
+      // Arrange — two relationship definitions with different id values
+      RelationshipDefinition def1 = RelationshipDefinition.builder().id("r1").url("/api")
+          .method("GET").batchParam("id").referenceField("ref").build();
+      RelationshipDefinition def2 = RelationshipDefinition.builder().id("r2").url("/api")
+          .method("GET").batchParam("id").referenceField("ref").build();
+
+      // Act / Assert — comparing the two instances yields inequality
+      assertNotEquals(def1, def2, "RelationshipDefinitions with different ids should not be equal");
+    }
+  }
+}

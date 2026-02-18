@@ -28,6 +28,14 @@ import net.civeira.phylax.common.security.Actor;
 import net.civeira.phylax.common.security.Connection;
 import net.civeira.phylax.common.security.Interaction;
 
+/**
+ * Provides helpers to derive actor, connection, and cache metadata from the current request.
+ *
+ * It builds {@link Actor} and {@link Connection} objects from security identity and headers. The
+ * class also offers cache-aware response building using timestamped payloads. It is request-scoped
+ * and relies on HTTP headers and JWT claims for context. Use it in controllers and gateways that
+ * need consistent request metadata.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class CurrentRequest {
@@ -37,6 +45,15 @@ public class CurrentRequest {
   private final HttpHeaders headers;
   private final @ConfigProperty(name = "mp.jwt.audiences") String audiences;
 
+  /**
+   * Builds the public host URL using forwarded headers when available.
+   *
+   * This inspects proxy headers to reconstruct the external URL seen by clients. When headers are
+   * absent, it falls back to request URI details. The result includes scheme, host, port, and any
+   * forwarded prefix.
+   *
+   * @return public scheme, host, port, and prefix URL
+   */
   public String getPublicHost() {
     /*
      * Forwarded X-Forwarded-Proto X-Forwarded-Host X-Forwarded-Port X-Forwarded-Ssl
@@ -64,6 +81,15 @@ public class CurrentRequest {
     return scheme + "://" + host + port + prefix;
   }
 
+  /**
+   * Checks whether the current security identity is anonymous.
+   *
+   * This uses the Quarkus security identity and guards against runtime failures. A failure to
+   * resolve identity is treated as anonymous for safety. Use this to decide access behavior in
+   * request-scoped components.
+   *
+   * @return true when the identity is anonymous
+   */
   public boolean isAnonymous() {
     try {
       return security.isAnonymous();
@@ -76,10 +102,33 @@ public class CurrentRequest {
     return Optional.ofNullable(headers.getHeaderString(name));
   }
 
+  /**
+   * Builds a cache-aware response using the given stamp object and ETag.
+   *
+   * When the stamp implements {@link Timestamped}, it uses Last-Modified logic. If the request is
+   * not modified, it returns a 304 response. Otherwise it returns a 200 response with ETag and
+   * Last-Modified headers.
+   *
+   * @param stampData timestamped data used to compute cache headers
+   * @param eTag response entity tag
+   * @return a cacheable response
+   */
   public Response cacheableResponse(Object stampData, String eTag) {
     return cacheableResponse(stampData, stampData, eTag);
   }
 
+  /**
+   * Builds a cache-aware response using a stamp and response payload.
+   *
+   * This computes Last-Modified from the stamp and compares If-Modified-Since. When unchanged, it
+   * returns a not-modified response without a body. Otherwise it returns the payload with cache
+   * headers applied.
+   *
+   * @param stamp timestamped object used to compute cache headers
+   * @param data response payload
+   * @param eTag response entity tag
+   * @return a cacheable response
+   */
   public Response cacheableResponse(Object stamp, Object data, String eTag) {
     return (((stamp instanceof Timestamped)
         ? ((Timestamped) stamp).getGeneratedAt().map(instant -> {
@@ -95,12 +144,30 @@ public class CurrentRequest {
         : Optional.<ResponseBuilder>empty()).orElseGet(() -> Response.ok(data))).build();
   }
 
+  /**
+   * Creates an interaction object using the current actor and connection.
+   *
+   * This is a convenience method for passing request metadata into use cases. The interaction
+   * captures both user identity and request origin details. Use it when invoking application
+   * services from controllers.
+   *
+   * @return interaction descriptor
+   */
   public Interaction interaction() {
     Actor actor = getActor();
     Connection conn = getConnection();
     return new Interaction(Interaction.builder().actor(actor).connection(conn)) {};
   }
 
+  /**
+   * Builds the actor for the current request using the security identity and JWT.
+   *
+   * It extracts roles, tenant information, and selected claims from the token. Anonymous identities
+   * are represented with empty role lists. The resulting actor is used in interaction and auditing
+   * flows.
+   *
+   * @return resolved actor
+   */
   public Actor getActor() {
     Actor.ActorBuilder builder = Actor.builder();
     if (security.isAnonymous()) {
@@ -126,6 +193,14 @@ public class CurrentRequest {
     return builder.build();
   }
 
+  /**
+   * Builds the connection metadata for the current request.
+   *
+   * It captures locale, device id, and request path details. This metadata is used for auditing and
+   * request tracing. The locale is derived from the Accept-Language header.
+   *
+   * @return connection descriptor
+   */
   public Connection getConnection() {
     String device = headers.getHeaderString("X-Device-ID");
     return Connection.builder().remoteDevice(device).locale(getRequestHeaderLocale())

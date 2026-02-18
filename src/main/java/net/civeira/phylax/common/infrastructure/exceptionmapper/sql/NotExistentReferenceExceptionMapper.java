@@ -10,12 +10,29 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.sql.NotExistentReferenceException;
 
+/**
+ * Maps missing-reference errors to HTTP 422 responses.
+ *
+ * This mapper handles foreign key or reference integrity violations. It returns a 422 response to
+ * indicate invalid input relationships. The response includes a reason derived from the exception
+ * message. Logging provides visibility into reference errors during writes.
+ */
 @Slf4j
 @Provider
 public class NotExistentReferenceExceptionMapper
     implements ExceptionMapper<NotExistentReferenceException> {
 
   @Override
+  /**
+   * Converts a missing-reference exception into an HTTP response.
+   *
+   * The response status is set to 422 with a minimal reason payload. Logging is performed at info
+   * level based on logger configuration. This mapper is used by SQL repositories to surface
+   * integrity errors.
+   *
+   * @param exception missing-reference exception
+   * @return HTTP 422 response
+   */
   public Response toResponse(NotExistentReferenceException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);

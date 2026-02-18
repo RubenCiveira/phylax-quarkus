@@ -21,12 +21,28 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.connector.RemoteConnection;
 import net.civeira.phylax.common.infrastructure.connector.RemoteQuery;
 
+/**
+ * Implements remote HTTP queries backed by Mutiny WebClient.
+ */
 @Slf4j
 public class MunityWebQuery implements RemoteQuery {
+  /**
+   * Supported HTTP methods for this query builder.
+   */
   public static enum Method {
     POST, PUT, PATCH, DELETE
   }
 
+  /**
+   * Creates a new query for the given target and optional request body.
+   *
+   * @param tracer tracer for client spans
+   * @param client web client instance
+   * @param method HTTP method, or null for GET
+   * @param target target URL
+   * @param body request payload
+   * @return query instance
+   */
   public static MunityWebQuery create(Tracer tracer, WebClient client, Method method, String target,
       Object body) {
     HttpRequest<?> query;
@@ -74,48 +90,102 @@ public class MunityWebQuery implements RemoteQuery {
     this.tracer = tracer;
   }
 
+  /**
+   * Adds multiple query parameters to the request.
+   *
+   * @param params query parameters
+   * @return this query instance
+   */
   @Override
   public RemoteQuery queryParam(Map<String, String> params) {
     params.forEach(client::addQueryParam);
     return this;
   }
 
+  /**
+   * Adds a query parameter to the request.
+   *
+   * @param name parameter name
+   * @param value parameter value
+   * @return this query instance
+   */
   @Override
   public RemoteQuery queryParam(String name, String value) {
     client.addQueryParam(name, value);
     return this;
   }
 
+  /**
+   * Adds template parameters for the URL path.
+   *
+   * @param params path parameters
+   * @return this query instance
+   */
   @Override
   public RemoteQuery pathParam(Map<String, String> params) {
     params.forEach(client::setTemplateParam);
     return this;
   }
 
+  /**
+   * Adds a template parameter for the URL path.
+   *
+   * @param name parameter name
+   * @param value parameter value
+   * @return this query instance
+   */
   @Override
   public RemoteQuery pathParam(String name, String value) {
     client.setTemplateParam(name, value);
     return this;
   }
 
+  /**
+   * Adds a header to the request.
+   *
+   * @param name header name
+   * @param value header value
+   * @return this query instance
+   */
   @Override
   public RemoteQuery header(String name, String value) {
     client.putHeader(name, value);
     return this;
   }
 
+  /**
+   * Adds a header with multiple values to the request.
+   *
+   * @param name header name
+   * @param values header values
+   * @return this query instance
+   */
   @Override
   public RemoteQuery header(String name, List<String> values) {
     client.putHeader(name, values);
     return this;
   }
 
+  /**
+   * Adds multiple headers to the request.
+   *
+   * @param headers headers to set
+   * @return this query instance
+   */
   @Override
   public RemoteQuery headers(Map<String, List<String>> headers) {
     headers.forEach(this::header);
     return this;
   }
 
+  /**
+   * Sends the request and applies a typed consumer to the response body.
+   *
+   * @param type response type
+   * @param consumer response consumer
+   * @param <T> response type parameter
+   * @return remote connection handle
+   */
   @SuppressWarnings("unchecked")
   @Override
   public <T> RemoteConnection processor(Class<T> type, Consumer<T> consumer) {
@@ -163,6 +233,12 @@ public class MunityWebQuery implements RemoteQuery {
     }));
   }
 
+  /**
+   * Sends the request and runs the given callback when the response arrives.
+   *
+   * @param runnable callback to run
+   * @return remote connection handle
+   */
   @Override
   public RemoteConnection processor(Runnable runnable) {
     return new MunityWebConnection(

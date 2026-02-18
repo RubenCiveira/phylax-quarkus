@@ -1,0 +1,49 @@
+package net.civeira.phylax.common.infrastructure.exceptionmapper;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Map;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import jakarta.ws.rs.core.Response;
+import net.civeira.phylax.common.exception.NotFoundException;
+
+@DisplayName("NotFoundExceptionMapper REST exception mapper")
+class NotFoundExceptionMapperUnitTest {
+
+  @Test
+  @DisplayName("Should return 404 status code")
+  @SuppressWarnings("unchecked")
+  void shouldReturn404StatusCode() {
+    // Arrange — an exception mapper and a NotFoundException are instantiated
+    NotFoundExceptionMapper mapper = new NotFoundExceptionMapper();
+    NotFoundException ex = new NotFoundException("Entity not found");
+
+    // Act — the mapper converts the exception into a REST response
+    Response response = mapper.toResponse(ex);
+
+    // Assert — the response status code should be 404
+    assertEquals(404, response.getStatus(), "Response status should be 404 Not Found");
+  }
+
+  @Test
+  @DisplayName("Should include reason in response entity")
+  @SuppressWarnings("unchecked")
+  void shouldIncludeReasonInResponseEntity() {
+    // Arrange — an exception mapper and a NotFoundException with a specific message are
+    // instantiated
+    NotFoundExceptionMapper mapper = new NotFoundExceptionMapper();
+    NotFoundException ex = new NotFoundException("Tenant not found");
+
+    // Act — the mapper converts the exception into a REST response and the entity is extracted
+    Response response = mapper.toResponse(ex);
+    Map<String, String> entity = (Map<String, String>) response.getEntity();
+
+    // Assert — the response entity should contain the exception message as the reason
+    assertNotNull(entity, "Response entity should not be null");
+    assertEquals("Tenant not found", entity.get("reason"),
+        "Entity 'reason' should match the exception message");
+  }
+}

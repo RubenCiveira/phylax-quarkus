@@ -1,0 +1,67 @@
+package net.civeira.phylax.common.security.rcab;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("PhylaxGrants role grants data")
+class PhylaxGrantsUnitTest {
+
+  @Nested
+  @DisplayName("Getters and setters")
+  class GettersAndSetters {
+
+    @Test
+    @DisplayName("Should store and retrieve role name")
+    void shouldStoreAndRetrieveRoleName() {
+      // Arrange — Create a new empty PhylaxGrants instance
+      PhylaxGrants grants = new PhylaxGrants();
+
+      // Act — Set the role name to "admin"
+      grants.setRolename("admin");
+
+      // Assert — The retrieved role name should match the value that was set
+      assertEquals("admin", grants.getRolename(), "Role name should match the value that was set");
+    }
+
+    @Test
+    @DisplayName("Should store and retrieve allowed scopes")
+    void shouldStoreAndRetrieveAllowedScopes() {
+      // Arrange — Create a PhylaxGrants and prepare a set of two allowed scopes
+      PhylaxGrants grants = new PhylaxGrants();
+      Set<String> scopes = Set.of("tenant:create", "tenant:read");
+
+      // Act — Assign the allowed scopes to the grants object
+      grants.setAllowedScopes(scopes);
+
+      // Assert — The stored scopes should contain both entries
+      assertEquals(2, grants.getAllowedScopes().size(),
+          "Allowed scopes should contain exactly 2 entries");
+      assertTrue(grants.getAllowedScopes().contains("tenant:create"),
+          "Allowed scopes should contain 'tenant:create'");
+    }
+
+    @Test
+    @DisplayName("Should store and retrieve restricted fields")
+    void shouldStoreAndRetrieveRestrictedFields() {
+      // Arrange — Create a PhylaxGrants and prepare a restricted fields map with two view entries
+      PhylaxGrants grants = new PhylaxGrants();
+      Map<String, Set<String>> restricted =
+          Map.of("list", Set.of("tenant:secret"), "detail", Set.of("tenant:password"));
+
+      // Act — Assign the restricted fields map to the grants object
+      grants.setRestrictedFields(restricted);
+
+      // Assert — The stored restricted fields should contain both view entries with their fields
+      assertEquals(2, grants.getRestrictedFields().size(),
+          "Restricted fields map should contain 2 view entries");
+      assertTrue(grants.getRestrictedFields().get("list").contains("tenant:secret"),
+          "List view should contain 'tenant:secret' restricted field");
+    }
+  }
+}

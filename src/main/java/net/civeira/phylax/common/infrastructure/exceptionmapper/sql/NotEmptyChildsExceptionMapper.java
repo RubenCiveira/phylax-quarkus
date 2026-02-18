@@ -10,11 +10,28 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.sql.NotEmptyChildsException;
 
+/**
+ * Maps not-empty-children constraint errors to HTTP 422 responses.
+ *
+ * This mapper handles delete failures caused by existing child records. It returns a 422 response
+ * to indicate a semantic constraint violation. The response includes a reason derived from the
+ * exception message. Logging provides insight into constraint errors during deletion.
+ */
 @Slf4j
 @Provider
 public class NotEmptyChildsExceptionMapper implements ExceptionMapper<NotEmptyChildsException> {
 
   @Override
+  /**
+   * Converts a not-empty-children exception into an HTTP response.
+   *
+   * The response status is set to 422 with a minimal reason payload. Logging is performed at info
+   * level based on logger configuration. This mapper is used by SQL repositories to surface
+   * constraint errors.
+   *
+   * @param exception constraint exception
+   * @return HTTP 422 response
+   */
   public Response toResponse(NotEmptyChildsException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);

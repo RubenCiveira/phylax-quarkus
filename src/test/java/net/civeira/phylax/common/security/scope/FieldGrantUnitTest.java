@@ -1,0 +1,58 @@
+package net.civeira.phylax.common.security.scope;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("FieldGrant field access grant")
+class FieldGrantUnitTest {
+
+  @Nested
+  @DisplayName("match()")
+  class Match {
+
+    @Test
+    @DisplayName("Should match when both resource and view are equal")
+    void shouldMatchWhenBothResourceAndViewAreEqual() {
+      // Arrange — Build a FieldGrant for field "secret" on resource "tenant" with view "list"
+      FieldGrant grant =
+          FieldGrant.builder().name("secret").resource("tenant").view("list").build();
+
+      // Act — Match against the same resource and view
+      boolean result = grant.match("tenant", "list");
+
+      // Assert — The match should succeed for identical resource and view
+      assertTrue(result, "Should match when resource and view are equal");
+    }
+
+    @Test
+    @DisplayName("Should not match when resource differs")
+    void shouldNotMatchWhenResourceDiffers() {
+      // Arrange — Build a FieldGrant for resource "tenant" with view "list"
+      FieldGrant grant =
+          FieldGrant.builder().name("secret").resource("tenant").view("list").build();
+
+      // Act — Match against a different resource "user" with the same view
+      boolean result = grant.match("user", "list");
+
+      // Assert — The match should fail when the resource differs
+      assertFalse(result, "Should not match when resource is different");
+    }
+
+    @Test
+    @DisplayName("Should not match when view differs")
+    void shouldNotMatchWhenViewDiffers() {
+      // Arrange — Build a FieldGrant for resource "tenant" with view "list"
+      FieldGrant grant =
+          FieldGrant.builder().name("secret").resource("tenant").view("list").build();
+
+      // Act — Match against the same resource but a different view "detail"
+      boolean result = grant.match("tenant", "detail");
+
+      // Assert — The match should fail when the view differs
+      assertFalse(result, "Should not match when view is different");
+    }
+  }
+}

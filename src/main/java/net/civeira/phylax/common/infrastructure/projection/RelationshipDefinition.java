@@ -4,6 +4,14 @@ package net.civeira.phylax.common.infrastructure.projection;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Defines a relationship used to resolve projection dependencies.
+ *
+ * Relationships describe how to fetch related entities from other endpoints. They include batch
+ * parameters and reference fields for grouping requests. This metadata is used by
+ * {@link ExecutionPlan} to resolve nested projections. Use list to indicate one-to-many
+ * relationships.
+ */
 @Data
 @Builder
 public class RelationshipDefinition {

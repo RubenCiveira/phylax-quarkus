@@ -9,6 +9,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
+/**
+ * Defines an email message with recipients, content, and attachments.
+ *
+ * The model includes subject, text and HTML content, and optional observers. Inline and standard
+ * attachments are supported via {@link Attach} lists. Observers allow callbacks on successful or
+ * failed delivery. Instances are typically created using the Lombok builder.
+ */
 @Builder
 @Getter
 public class EmailMessage {
@@ -29,10 +36,27 @@ public class EmailMessage {
   @Builder.Default
   private List<Attach> attacheds = new ArrayList<>();;
 
+  /**
+   * Returns the optional observer notified on successful send.
+   *
+   * This allows callers to trigger follow-up actions after delivery. The observer is invoked by
+   * {@link EmailService} when sending succeeds. If no observer is configured, the optional is
+   * empty.
+   *
+   * @return optional success observer
+   */
   public Optional<MailSended> getSendedObserver() {
     return Optional.ofNullable(sendedObserver);
   }
 
+  /**
+   * Returns the optional observer notified on send failure.
+   *
+   * This allows callers to react to delivery errors programmatically. The observer is invoked by
+   * {@link EmailService} when sending fails. If no observer is configured, the optional is empty.
+   *
+   * @return optional failure observer
+   */
   public Optional<MailFail> getFailObserver() {
     return Optional.ofNullable(failObserver);
   }

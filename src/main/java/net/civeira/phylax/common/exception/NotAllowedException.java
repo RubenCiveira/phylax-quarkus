@@ -2,29 +2,21 @@
 package net.civeira.phylax.common.exception;
 
 /**
- * Exception thrown when an unauthorized user attempts to perform a restricted operation.
+ * Exception thrown when an unauthorized user attempts a restricted operation.
  *
- * <p>
- * This exception indicates a violation of access control or permission rules. In most cases, the
- * application logic is expected to check access restrictions in advance and prevent the operation
- * from being invoked. However, this exception acts as a safeguard in case a restricted action is
- * attempted improperly.
- * </p>
- *
- * <p>
- * It is typically used to enforce business-level authorization policies or domain-specific access
- * constraints.
- * </p>
- *
- * <p>
- * This exception is unchecked and extends {@link RuntimeException}.
- * </p>
+ * It signals a violation of access control or permission rules in the domain. While checks should
+ * happen earlier, this acts as a defensive safeguard. It is commonly used to enforce business-level
+ * authorization policies. The exception is unchecked and typically mapped to HTTP 401/403
+ * responses.
  */
 public class NotAllowedException extends RuntimeException {
   private static final long serialVersionUID = -1693325582870899954L;
 
   /**
    * Constructs a new {@code NotAllowedException} with a descriptive message.
+   *
+   * The message should explain the reason for denial in a user-safe way. It can be surfaced by
+   * exception mappers for API responses. Use concise messages to avoid leaking sensitive details.
    *
    * @param message the detail message explaining the restriction or reason for denial
    */

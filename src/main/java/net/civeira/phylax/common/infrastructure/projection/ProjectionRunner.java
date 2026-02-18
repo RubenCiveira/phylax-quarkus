@@ -11,6 +11,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.connector.RemoteConnector;
 
+/**
+ * Executes projection plans and returns mapped results.
+ *
+ * The runner delegates execution to {@link ExecutionPlan} and maps results to types. It uses a
+ * {@link RemoteConnector} and {@link ObjectMapper} for HTTP calls and mapping. List and single-item
+ * retrieval methods are provided for convenience. This is the entry point used by application
+ * services to resolve projections.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ProjectionRunner {
@@ -18,12 +26,38 @@ public class ProjectionRunner {
   private final RemoteConnector connector;
 
   @SuppressWarnings("unchecked")
+  /**
+   * Executes a plan and returns a list of generic map results.
+   *
+   * This is useful when the caller needs raw map output without type conversion. The plan is
+   * executed with the provided parameters and headers. Results are flattened and mapped to a list
+   * of key-value maps.
+   *
+   * @param plan execution plan
+   * @param params request parameters
+   * @param headers request headers
+   * @return list of map results
+   */
   public List<Map<String, Object>> list(ExecutionPlan plan, Map<String, String> params,
       Map<String, List<String>> headers) {
     return list(plan, Map.class, params, headers).stream().map(map -> (Map<String, Object>) map)
         .toList();
   }
 
+  /**
+   * Executes a plan and returns a list of typed results.
+   *
+   * The object mapper converts the flattened response maps into the target type. Use this when you
+   * have a DTO or projection class to bind results to. The plan is executed with the provided
+   * parameters and headers.
+   *
+   * @param plan execution plan
+   * @param type target element type
+   * @param params request parameters
+   * @param headers request headers
+   * @param <T> result element type
+   * @return list of typed results
+   */
   public <T> List<T> list(ExecutionPlan plan, Class<T> type, Map<String, String> params,
       Map<String, List<String>> headers) {
     return plan.getTree().byId(plan.getPath())
@@ -32,11 +66,36 @@ public class ProjectionRunner {
   }
 
   @SuppressWarnings("unchecked")
+  /**
+   * Executes a plan and returns a single generic map result if present.
+   *
+   * This is useful for detail endpoints where a single item is expected. The plan is executed with
+   * the provided parameters and headers. The first result is returned when available.
+   *
+   * @param plan execution plan
+   * @param params request parameters
+   * @param headers request headers
+   * @return optional map result
+   */
   public Optional<Map<String, Object>> retrieve(ExecutionPlan plan, Map<String, String> params,
       Map<String, List<String>> headers) {
     return retrieve(plan, Map.class, params, headers).map(map -> (Map<String, Object>) map);
   }
 
+  /**
+   * Executes a plan and returns a single typed result if present.
+   *
+   * The object mapper converts the first response into the target type. Use this for detail views
+   * with a single projection instance. The plan is executed with the provided parameters and
+   * headers.
+   *
+   * @param plan execution plan
+   * @param type target type
+   * @param params request parameters
+   * @param headers request headers
+   * @param <T> result type
+   * @return optional typed result
+   */
   public <T> Optional<T> retrieve(ExecutionPlan plan, Class<T> type, Map<String, String> params,
       Map<String, List<String>> headers) {
     return plan.getTree().byId(plan.getPath()).flatMap(

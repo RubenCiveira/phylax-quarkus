@@ -10,11 +10,28 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Maps unchecked IO exceptions to HTTP 502 responses.
+ *
+ * This mapper captures {@link UncheckedIOException} errors from downstream IO operations. It
+ * returns a 502 response to indicate a bad gateway or upstream failure. The response includes a
+ * reason message derived from the exception. Logging is performed at warn level for operational
+ * visibility.
+ */
 @Slf4j
 @Provider
 public class UncheckedIOExceptionMapper implements ExceptionMapper<UncheckedIOException> {
 
   @Override
+  /**
+   * Converts an unchecked IO exception into an HTTP response.
+   *
+   * The response status is set to 502 and includes a reason message. Logging varies with configured
+   * log levels for diagnostics. This mapper is intended for IO failures from external resources.
+   *
+   * @param exception unchecked IO exception
+   * @return HTTP 502 response
+   */
   public Response toResponse(UncheckedIOException exception) {
     if (log.isDebugEnabled()) {
       log.warn("Uncheked io exception", exception);

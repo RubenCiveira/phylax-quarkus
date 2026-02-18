@@ -10,11 +10,28 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.sql.UncheckedSqlException;
 
+/**
+ * Maps unchecked SQL exceptions to HTTP 500 responses.
+ *
+ * This mapper captures generic SQL errors that bubble up from repositories. It returns a 500
+ * response to indicate server-side database failures. The response includes a minimal reason
+ * derived from the exception message. Logging provides visibility into unexpected SQL errors.
+ */
 @Slf4j
 @Provider
 public class UncheckedSqlExceptionMapper implements ExceptionMapper<UncheckedSqlException> {
 
   @Override
+  /**
+   * Converts an unchecked SQL exception into an HTTP response.
+   *
+   * The response status is set to 500 with a minimal reason payload. Logging is performed at info
+   * level based on logger configuration. This mapper is used by SQL repositories to surface
+   * database errors.
+   *
+   * @param exception unchecked SQL exception
+   * @return HTTP 500 response
+   */
   public Response toResponse(UncheckedSqlException exception) {
     if (log.isDebugEnabled()) {
       log.info("not found exception", exception);

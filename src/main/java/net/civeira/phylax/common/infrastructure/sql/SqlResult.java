@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Represents the result of executing a SQL query and provides different access patterns for
- * retrieving the result set.
+ * Represents the result of executing a SQL query.
  *
- * <p>
- * This interface abstracts over the data retrieval behavior and supports operations such as
- * retrieving a single result, a limited number of results, or all rows.
+ * It provides multiple access patterns for consuming the result set. Callers can fetch a single
+ * element, a limited subset, or all rows. Implementations may execute the query lazily when these
+ * methods are called. This abstraction decouples query execution from result consumption.
  *
  * @param <T> the type of the elements in the result
  */
@@ -19,22 +18,29 @@ public interface SqlResult<T> {
   /**
    * Retrieves an optional containing the first result in the result set, if available.
    *
-   * @return an {@link Optional} containing the first element, or an empty Optional if no result
-   *         exists
+   * This is useful for queries expected to return a single row. Implementations may execute a
+   * limited query for efficiency. Returns empty when the result set is empty.
+   *
+   * @return an {@link Optional} containing the first element, or empty if no result exists
    */
   Optional<T> one();
 
   /**
    * Retrieves at most {@code max} elements from the result set, if present.
    *
-   * @param max an {@link Optional} specifying the maximum number of elements to retrieve. If empty,
-   *        all results may be returned.
+   * When the optional is empty, implementations may return all results. This is useful for optional
+   * pagination logic in repositories. The result list preserves the query order.
+   *
+   * @param max optional maximum number of elements to retrieve
    * @return a list containing up to {@code max} elements from the result
    */
   List<T> limit(Optional<Integer> max);
 
   /**
    * Retrieves at most {@code max} elements from the result set.
+   *
+   * This is commonly used for page size or top-N queries. Implementations may add LIMIT/OFFSET
+   * semantics internally. The result list preserves the query order.
    *
    * @param max the maximum number of elements to retrieve
    * @return a list containing up to {@code max} elements from the result
@@ -43,6 +49,9 @@ public interface SqlResult<T> {
 
   /**
    * Retrieves all elements from the result set.
+   *
+   * This may execute a full query and load all rows into memory. Use with care for large result
+   * sets. The result list preserves the query order.
    *
    * @return a list containing all results
    */

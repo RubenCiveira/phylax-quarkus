@@ -1,0 +1,68 @@
+package net.civeira.phylax.common.security.scope;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("ScopeAllow scope matching")
+class ScopeAllowUnitTest {
+
+  @Nested
+  @DisplayName("match()")
+  class Match {
+
+    @Test
+    @DisplayName("Should match when both resource and action are equal")
+    void shouldMatchWhenBothResourceAndActionAreEqual() {
+      // Arrange — Build a ScopeAllow with resource "tenant" and action "create"
+      ScopeAllow scope = ScopeAllow.builder().resource("tenant").name("create").build();
+
+      // Act — Match against the same resource and action
+      boolean result = scope.match("tenant", "create");
+
+      // Assert — The match should succeed for identical resource and action
+      assertTrue(result, "Should match when resource and action are equal");
+    }
+
+    @Test
+    @DisplayName("Should not match when resource differs")
+    void shouldNotMatchWhenResourceDiffers() {
+      // Arrange — Build a ScopeAllow with resource "tenant" and action "create"
+      ScopeAllow scope = ScopeAllow.builder().resource("tenant").name("create").build();
+
+      // Act — Match against a different resource "user" with the same action
+      boolean result = scope.match("user", "create");
+
+      // Assert — The match should fail when the resource differs
+      assertFalse(result, "Should not match when resource is different");
+    }
+
+    @Test
+    @DisplayName("Should not match when action differs")
+    void shouldNotMatchWhenActionDiffers() {
+      // Arrange — Build a ScopeAllow with resource "tenant" and action "create"
+      ScopeAllow scope = ScopeAllow.builder().resource("tenant").name("create").build();
+
+      // Act — Match against the same resource but a different action "delete"
+      boolean result = scope.match("tenant", "delete");
+
+      // Assert — The match should fail when the action differs
+      assertFalse(result, "Should not match when action is different");
+    }
+
+    @Test
+    @DisplayName("Should not match when both resource and action differ")
+    void shouldNotMatchWhenBothDiffer() {
+      // Arrange — Build a ScopeAllow with resource "tenant" and action "create"
+      ScopeAllow scope = ScopeAllow.builder().resource("tenant").name("create").build();
+
+      // Act — Match against a different resource "user" and a different action "delete"
+      boolean result = scope.match("user", "delete");
+
+      // Assert — The match should fail when both resource and action differ
+      assertFalse(result, "Should not match when both resource and action differ");
+    }
+  }
+}

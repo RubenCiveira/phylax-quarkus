@@ -1,0 +1,129 @@
+package net.civeira.phylax.common.infrastructure.mail;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("EmailMessage email model")
+class EmailMessageUnitTest {
+
+  @Nested
+  @DisplayName("Builder and required fields")
+  class BuilderAndRequired {
+
+    @Test
+    @DisplayName("Should build message with all required fields")
+    void shouldBuildMessageWithAllRequiredFields() {
+      // Arrange / Act — Build an EmailMessage with all required fields populated
+      EmailMessage msg =
+          EmailMessage.builder().targetAddress("user@example.com").subject("Test Subject")
+              .content("Plain text content").htmlContent("<h1>HTML</h1>").build();
+
+      // Assert — Verify all required fields match the values provided to the builder
+      assertEquals("user@example.com", msg.getTargetAddress(),
+          "Target address should match the value set in builder");
+      assertEquals("Test Subject", msg.getSubject(),
+          "Subject should match the value set in builder");
+      assertEquals("Plain text content", msg.getContent(),
+          "Content should match the value set in builder");
+      assertEquals("<h1>HTML</h1>", msg.getHtmlContent(),
+          "HTML content should match the value set in builder");
+    }
+
+    @Test
+    @DisplayName("Should allow optional target name")
+    void shouldAllowOptionalTargetName() {
+      // Arrange / Act — Build an EmailMessage with an optional target name
+      EmailMessage msg =
+          EmailMessage.builder().targetName("John Doe").targetAddress("john@example.com")
+              .subject("Hello").content("Hi").htmlContent("<p>Hi</p>").build();
+
+      // Assert — Verify the optional target name is stored correctly
+      assertEquals("John Doe", msg.getTargetName(),
+          "Target name should match the value set in builder");
+    }
+  }
+
+  @Nested
+  @DisplayName("Optional observers")
+  class OptionalObservers {
+
+    @Test
+    @DisplayName("Should return present optional when sended observer is set")
+    void shouldReturnPresentOptionalWhenSendedObserverIsSet() {
+      // Arrange — Build an EmailMessage with a sended observer configured
+      MailSended observer = mock(MailSended.class);
+      EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
+          .htmlContent("h").sendedObserver(observer).build();
+
+      // Act / Assert — Verify the sended observer Optional is present
+      assertTrue(msg.getSendedObserver().isPresent(), "Sended observer should be present when set");
+    }
+
+    @Test
+    @DisplayName("Should return empty optional when sended observer is not set")
+    void shouldReturnEmptyOptionalWhenSendedObserverIsNotSet() {
+      // Arrange — Build an EmailMessage without a sended observer
+      EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
+          .htmlContent("h").build();
+
+      // Act / Assert — Verify the sended observer Optional is empty
+      assertTrue(msg.getSendedObserver().isEmpty(), "Sended observer should be empty when not set");
+    }
+
+    @Test
+    @DisplayName("Should return present optional when fail observer is set")
+    void shouldReturnPresentOptionalWhenFailObserverIsSet() {
+      // Arrange — Build an EmailMessage with a fail observer configured
+      MailFail observer = mock(MailFail.class);
+      EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
+          .htmlContent("h").failObserver(observer).build();
+
+      // Act / Assert — Verify the fail observer Optional is present
+      assertTrue(msg.getFailObserver().isPresent(), "Fail observer should be present when set");
+    }
+
+    @Test
+    @DisplayName("Should return empty optional when fail observer is not set")
+    void shouldReturnEmptyOptionalWhenFailObserverIsNotSet() {
+      // Arrange — Build an EmailMessage without a fail observer
+      EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
+          .htmlContent("h").build();
+
+      // Act / Assert — Verify the fail observer Optional is empty
+      assertTrue(msg.getFailObserver().isEmpty(), "Fail observer should be empty when not set");
+    }
+  }
+
+  @Nested
+  @DisplayName("Attachment lists")
+  class AttachmentLists {
+
+    @Test
+    @DisplayName("Should have empty embedded list by default")
+    void shouldHaveEmptyEmbeddedListByDefault() {
+      // Arrange / Act — Build an EmailMessage without specifying any embedded attachments
+      EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
+          .htmlContent("h").build();
+
+      // Assert — Verify the embedded list defaults to a non-null empty list
+      assertNotNull(msg.getEmbbeds(), "Embedded list should not be null by default");
+      assertTrue(msg.getEmbbeds().isEmpty(), "Embedded list should be empty by default");
+    }
+
+    @Test
+    @DisplayName("Should have empty attached list by default")
+    void shouldHaveEmptyAttachedListByDefault() {
+      // Arrange / Act — Build an EmailMessage without specifying any file attachments
+      EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
+          .htmlContent("h").build();
+
+      // Assert — Verify the attached list defaults to a non-null empty list
+      assertNotNull(msg.getAttacheds(), "Attached list should not be null by default");
+      assertTrue(msg.getAttacheds().isEmpty(), "Attached list should be empty by default");
+    }
+  }
+}

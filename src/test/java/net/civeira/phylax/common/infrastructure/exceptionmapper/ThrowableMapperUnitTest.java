@@ -1,0 +1,46 @@
+package net.civeira.phylax.common.infrastructure.exceptionmapper;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Map;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import jakarta.ws.rs.core.Response;
+
+@DisplayName("ThrowableMapper generic exception mapper")
+class ThrowableMapperUnitTest {
+
+  @Test
+  @DisplayName("Should return 500 status code")
+  void shouldReturn500StatusCode() {
+    // Arrange — a generic throwable mapper and an unexpected runtime exception are instantiated
+    ThrowableMapper mapper = new ThrowableMapper();
+    Throwable ex = new RuntimeException("unexpected error");
+
+    // Act — the mapper converts the throwable into a REST response
+    Response response = mapper.toResponse(ex);
+
+    // Assert — the response status code should be 500
+    assertEquals(500, response.getStatus(), "Response status should be 500 Internal Server Error");
+  }
+
+  @Test
+  @DisplayName("Should include 'unknown' as reason in response entity")
+  @SuppressWarnings("unchecked")
+  void shouldIncludeUnknownAsReasonInResponseEntity() {
+    // Arrange — a generic throwable mapper and a runtime exception are instantiated
+    ThrowableMapper mapper = new ThrowableMapper();
+    Throwable ex = new RuntimeException("something went wrong");
+
+    // Act — the mapper converts the throwable into a REST response and the entity is extracted
+    Response response = mapper.toResponse(ex);
+    Map<String, String> entity = (Map<String, String>) response.getEntity();
+
+    // Assert — the response entity reason should be 'unknown' for unhandled exceptions
+    assertNotNull(entity, "Response entity should not be null");
+    assertEquals("unknown", entity.get("reason"),
+        "Entity 'reason' should be 'unknown' for unhandled exceptions");
+  }
+}

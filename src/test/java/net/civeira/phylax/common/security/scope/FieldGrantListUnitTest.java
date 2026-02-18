@@ -1,0 +1,66 @@
+package net.civeira.phylax.common.security.scope;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("FieldGrantList inaccessible field collection")
+class FieldGrantListUnitTest {
+
+  @Nested
+  @DisplayName("innacesiblesFor()")
+  class InnacesiblesFor {
+
+    @Test
+    @DisplayName("Should return names of matching fields")
+    void shouldReturnNamesOfMatchingFields() {
+      // Arrange — Build a list with three field grants, two matching "tenant:list" and one matching
+      // "tenant:detail"
+      FieldGrantList list = new FieldGrantList();
+      list.add(FieldGrant.builder().name("secret").resource("tenant").view("list").build());
+      list.add(FieldGrant.builder().name("password").resource("tenant").view("list").build());
+      list.add(FieldGrant.builder().name("name").resource("tenant").view("detail").build());
+
+      // Act — Query inaccessible fields for resource "tenant" and view "list"
+      List<String> result = list.innacesiblesFor("tenant", "list");
+
+      // Assert — Only the two fields matching "tenant:list" should be returned
+      assertEquals(2, result.size(),
+          "Should return exactly 2 fields matching resource=tenant, view=list");
+      assertTrue(result.contains("secret"), "Result should contain 'secret'");
+      assertTrue(result.contains("password"), "Result should contain 'password'");
+    }
+
+    @Test
+    @DisplayName("Should return empty list when no fields match")
+    void shouldReturnEmptyListWhenNoFieldsMatch() {
+      // Arrange — Build a list with one field grant for a different resource "user"
+      FieldGrantList list = new FieldGrantList();
+      list.add(FieldGrant.builder().name("field").resource("user").view("list").build());
+
+      // Act — Query inaccessible fields for resource "tenant" which has no matching grants
+      List<String> result = list.innacesiblesFor("tenant", "list");
+
+      // Assert — No fields should be returned when none match the requested resource and view
+      assertTrue(result.isEmpty(),
+          "Should return empty list when no fields match the given resource and view");
+    }
+
+    @Test
+    @DisplayName("Should return empty list when list is empty")
+    void shouldReturnEmptyListWhenEmpty() {
+      // Arrange — Create an empty FieldGrantList with no entries
+      FieldGrantList list = new FieldGrantList();
+
+      // Act — Query inaccessible fields on the empty list
+      List<String> result = list.innacesiblesFor("tenant", "list");
+
+      // Assert — An empty list should return no inaccessible fields
+      assertTrue(result.isEmpty(), "Should return empty list when there are no field grants");
+    }
+  }
+}

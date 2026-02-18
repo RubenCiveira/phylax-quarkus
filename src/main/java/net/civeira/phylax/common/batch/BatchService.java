@@ -19,19 +19,13 @@ import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.batch.storage.MasiveOperationStorage;
 
 /**
- * Service responsible for managing the execution and tracking of batch jobs composed of multiple
- * steps.
+ * Manages asynchronous execution and tracking of multi-step batch jobs.
  *
- * <p>
- * This service provides the logic to initiate, execute, and monitor batch processes asynchronously.
- * Each batch process consists of a series of {@link ExecutorPlan} steps, whose execution state is
- * tracked and persisted via {@link MasiveOperationStorage}.
- * </p>
- *
- * <p>
- * Each job runs independently in a background thread, with progress persisted at each stage, and
- * finalization logic applied at the end of execution.
- * </p>
+ * The service initializes batch steps, persists progress, and runs them in a background executor.
+ * Each step is executed via an {@link ExecutorPlan} and persisted through
+ * {@link MasiveOperationStorage}. Progress is saved between steps so clients can monitor
+ * long-running work. When the job finishes, it is marked for expiration based on the preservation
+ * duration.
  */
 @Slf4j
 @RequestScoped
@@ -47,15 +41,14 @@ public class BatchService {
   /**
    * Starts the asynchronous execution of a batch job composed of multiple steps.
    *
-   * <p>
-   * This method initializes the step definitions, persists the initial state, and launches an
-   * asynchronous process to sequentially execute all steps. Each step is executed using its
-   * corresponding {@link Executor}, and its progress is updated after execution.
-   * </p>
+   * This initializes step progress, stores the initial state, and launches a background task. Steps
+   * run sequentially using their {@link Executor} implementations with progress persisted.
+   * Exceptions are recorded per step without stopping the overall job execution. The job is
+   * finalized and scheduled for expiration after the preservation window.
    *
    * @param actor the identifier of the user or system initiating the batch job
    * @param preservation how long the batch result should be preserved after completion
-   * @param plans the ordered set of execution plans (steps) that compose the batch
+   * @param plans ordered set of execution plans that compose the batch
    * @return a {@link BatchIdentificator} containing the batch UID and step names
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -107,18 +100,25 @@ public class BatchService {
   /**
    * Retrieves the current progress of a batch job.
    *
-   * @param uid the unique identifier of the batch
-   * @param locale the locale to apply for any localization (currently unused here)
-   * @param actor the actor or user who owns the batch
-   * @return an optional containing the {@link BatchProgress} if found
+   * This delegates to the storage layer to restore the last persisted state. The locale parameter
+   * is reserved for future localization of messages. Callers should provide the actor to enforce
+   * ownership constraints. Returns empty when no batch with the given uid is found for the actor.
+   *
+   * @param uid unique batch identifier
+   * @param locale locale to apply for future localization
+   * @param actor actor or user who owns the batch
+   * @return optional containing the {@link BatchProgress} if found
    */
   public Optional<BatchProgress> retrieve(String uid, Locale locale, String actor) {
     return storage.restores(uid, actor);
   }
 
   /**
-   * Returns the sleep service responsible for delaying between execution phases. Can be overridden
-   * for testing.
+   * Returns the sleep service responsible for delaying between execution phases.
+   *
+   * This is exposed to allow overriding in tests or specialized implementations. The default
+   * implementation uses a real sleep to avoid resource overload. Callers should not depend on this
+   * for business logic timing.
    *
    * @return the {@link SleepService} implementation used
    */

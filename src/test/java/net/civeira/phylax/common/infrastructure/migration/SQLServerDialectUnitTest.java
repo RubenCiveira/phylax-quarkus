@@ -1,0 +1,102 @@
+package net.civeira.phylax.common.infrastructure.migration;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("SQLServerDialect SQL dialect for SQL Server database")
+class SQLServerDialectUnitTest {
+
+  private SQLServerDialect dialect;
+
+  @BeforeEach
+  void setUp() {
+    dialect = new SQLServerDialect();
+  }
+
+  @Nested
+  @DisplayName("createLogTable()")
+  class CreateLogTable {
+
+    @Test
+    @DisplayName("Should generate IF NOT EXISTS check with sysobjects")
+    void shouldGenerateIfNotExistsCheck() {
+      // Arrange / Act — Generate the CREATE TABLE SQL for the log table using SQL Server dialect
+      String sql = dialect.createLogTable("migration_log");
+
+      // Assert — Verify SQL Server-specific IF NOT EXISTS check with sysobjects and NVARCHAR types
+      assertTrue(sql.contains("IF NOT EXISTS"),
+          "SQL should use IF NOT EXISTS check for SQL Server");
+      assertTrue(sql.contains("sysobjects"),
+          "SQL should reference sysobjects for SQL Server table existence check");
+      assertTrue(sql.contains("NVARCHAR"), "SQL should use NVARCHAR for SQL Server string columns");
+    }
+  }
+
+  @Nested
+  @DisplayName("createLockTable()")
+  class CreateLockTable {
+
+    @Test
+    @DisplayName("Should use BIT type for boolean in SQL Server")
+    void shouldUseBitType() {
+      // Arrange / Act — Generate the CREATE TABLE SQL for the lock table using SQL Server dialect
+      String sql = dialect.createLockTable("migration_lock");
+
+      // Assert — Verify SQL Server uses BIT type for boolean representation
+      assertTrue(sql.contains("BIT"),
+          "SQL should use BIT type for SQL Server boolean representation");
+    }
+  }
+
+  @Nested
+  @DisplayName("insertLock()")
+  class InsertLock {
+
+    @Test
+    @DisplayName("Should generate conditional INSERT for SQL Server")
+    void shouldGenerateConditionalInsert() {
+      // Arrange / Act — Generate the insert-lock SQL using SQL Server's conditional INSERT syntax
+      String sql = dialect.insertLock("migration_lock");
+
+      // Assert — Verify the SQL uses IF NOT EXISTS for conditional insert
+      assertTrue(sql.contains("IF NOT EXISTS"),
+          "SQL should use IF NOT EXISTS for conditional insert in SQL Server");
+    }
+  }
+
+  @Nested
+  @DisplayName("markOkSql()")
+  class MarkOkSql {
+
+    @Test
+    @DisplayName("Should use GETDATE() for SQL Server timestamps")
+    void shouldUseGetdate() {
+      // Arrange / Act — Generate the mark-OK SQL for an existing record in SQL Server
+      String sql = dialect.markOkSql("log", true);
+
+      // Assert — Verify the SQL uses SQL Server's GETDATE() function for timestamps
+      assertTrue(sql.contains("GETDATE()"), "SQL should use GETDATE() for SQL Server timestamp");
+    }
+  }
+
+  @Nested
+  @DisplayName("updateLock()")
+  class UpdateLock {
+
+    @Test
+    @DisplayName("Should use GETDATE() for granted time")
+    void shouldUseGetdateForGranted() {
+      // Arrange / Act — Generate the update-lock SQL to acquire the migration lock in SQL Server
+      String sql = dialect.updateLock("migration_lock");
+
+      // Assert — Verify SQL Server uses numeric 1 for locked state and GETDATE() for granted time
+      assertTrue(sql.contains("locked = 1"), "SQL should use numeric 1 for locked state");
+      assertTrue(sql.contains("GETDATE()"),
+          "SQL should use GETDATE() for granted time in SQL Server");
+    }
+  }
+}

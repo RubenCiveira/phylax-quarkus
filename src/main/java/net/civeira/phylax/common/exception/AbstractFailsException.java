@@ -18,22 +18,10 @@ import net.civeira.phylax.common.value.validation.AbstractFailList;
 /**
  * Base class for exceptions that encapsulate one or more validation failures.
  *
- * <p>
- * This abstract exception provides a unified mechanism for handling and propagating structured
- * validation errors through the application. It wraps an {@link AbstractFailList}, which may
- * contain multiple {@link AbstractFail} instances, allowing clients to inspect, localize, and
- * filter specific failure types.
- * </p>
- *
- * <p>
- * Intended for use in domain validation, request preconditions, or other constraint-based
- * validation logic where rich error reporting is needed.
- * </p>
- *
- * <p>
- * Localization support is provided via the {@link #localize(Locale, boolean)} method, enabling
- * translation of validation failures for display or API responses.
- * </p>
+ * It provides a structured mechanism to propagate rich validation errors. Each instance wraps an
+ * {@link AbstractFailList} with one or more failures. Consumers can inspect, filter, and localize
+ * failures for API responses. This is intended for domain validation and request precondition
+ * violations.
  *
  * @see AbstractFail
  * @see AbstractFailList
@@ -49,6 +37,10 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Constructs the exception with a full list of validation failures.
    *
+   * The message is combined with failure details for a readable default message. The list is stored
+   * for later inspection and localization. Use this constructor when multiple failures must be
+   * reported together.
+   *
    * @param message the message
    * @param fails the list of validation failures to include
    */
@@ -60,6 +52,10 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Constructs the exception with a single validation failure.
    *
+   * This wraps the failure into a list to keep behavior consistent. Use this when only one error is
+   * present and you want a concise API. The failure can still be localized via
+   * {@link #localize(Locale, boolean)}.
+   *
    * @param message the message
    * @param fail a single validation failure to include
    */
@@ -70,6 +66,9 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Returns {@code true} if the exception contains at least one validation error.
    *
+   * This delegates to the underlying failure list. Use it to short-circuit when no errors were
+   * recorded. It does not distinguish between warning and error severity.
+   *
    * @return {@code true} if there are any validation errors
    */
   public boolean hasErrors() {
@@ -79,6 +78,9 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Returns {@code true} if the exception does not contain any validation failures.
    *
+   * This is the inverse of {@link #hasErrors()} for convenience. It is useful when failures are
+   * collected conditionally. An empty list usually means the exception should not be thrown.
+   *
    * @return {@code true} if the error list is empty
    */
   public boolean isEmpty() {
@@ -87,6 +89,9 @@ public abstract class AbstractFailsException extends RuntimeException {
 
   /**
    * Checks if the list of validation failures includes a violation of a specific type.
+   *
+   * This allows callers to detect a particular validation rule quickly. It scans the failure list
+   * using the provided type class. Use it to branch error handling or map to specific responses.
    *
    * @param type the type of violation to check for
    * @param <T> a subtype of {@link ConstraintFail}
@@ -99,6 +104,9 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Checks if any of the validation failures match the given error code.
    *
+   * Codes are typically stable identifiers for validation rules. Use this to map errors to specific
+   * HTTP responses or UI messages. The comparison is exact and case-sensitive.
+   *
    * @param code the error code to look for
    * @return {@code true} if any failure has the given code
    */
@@ -109,6 +117,9 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Returns a stream of all validation failures associated with this exception.
    *
+   * The stream provides direct access to each failure instance. Consumers can filter by type, code,
+   * or field. The returned stream reflects the underlying failure list.
+   *
    * @return a {@link Stream} of {@link AbstractFail} objects
    */
   public Stream<? extends AbstractFail> getFails() {
@@ -118,14 +129,12 @@ public abstract class AbstractFailsException extends RuntimeException {
   /**
    * Returns a localized version of the validation failures for the given locale.
    *
-   * <p>
-   * If multiple failures share the same code, their {@link LocalizedWrongValue} values will be
-   * combined under a single {@link LocalizedFail} entry.
-   * </p>
+   * Failures sharing the same code are grouped and their wrong values merged. Localization uses the
+   * underlying fail definitions to build messages. The withSource flag controls whether field names
+   * and sources are included.
    *
    * @param locale the target {@link Locale} for localization
-   * @param withSource if {@code true}, includes additional context such as field names or source
-   *        information
+   * @param withSource if {@code true}, includes field and source context
    * @return a collection of {@link LocalizedFail} instances grouped by error code
    */
   public Collection<LocalizedFail> localize(Locale locale, boolean withSource) {

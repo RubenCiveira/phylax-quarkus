@@ -3,7 +3,23 @@ package net.civeira.phylax.common.infrastructure.projection;
 
 import java.util.List;
 
+/**
+ * Describes base execution nodes for projection resolution.
+ *
+ * Implementations supply node definitions that describe how to call endpoints. The descriptor is
+ * used by {@link SelfProjection} to build an execution tree. This allows each feature to contribute
+ * projection metadata independently. Nodes are typically generated based on API specifications.
+ */
 public interface ProjectionDescriptor {
 
+  /**
+   * Returns the base nodes for a given server URL.
+   *
+   * Each node defines endpoint, method, parameters, and relationships. The server URL is used as
+   * the base for building target URLs. Implementations should return a stable list of nodes.
+   *
+   * @param server base server URL
+   * @return execution nodes for the server
+   */
   List<ExecutionNode> baseNodes(String server);
 }

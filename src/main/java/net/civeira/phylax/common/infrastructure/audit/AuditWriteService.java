@@ -18,6 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Persists audit events to the audit store.
+ *
+ * The service writes audit records to the configured audit table. It is invoked by application
+ * services when state changes occur. This provides a durable trail of operations for compliance and
+ * debugging. The write path is optimized for append-only audit semantics.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class AuditWriteService {
@@ -26,6 +33,16 @@ public class AuditWriteService {
 
   private final ObjectMapper mapper;
 
+  /**
+   * Records an audit event into the configured audit table.
+   *
+   * The table name is resolved from the provided prefix or schema. Events are stored with actor,
+   * timestamp, entity, and payload details. Use this for mutation operations that require audit
+   * trails.
+   *
+   * @param on audit table prefix or schema identifier
+   * @param event audit event to persist
+   */
   public void record(String on, AuditEvent event) {
     String sql = "INSERT INTO " + on + "_audit ( " + """
                 id, operation, usecase, trace_id, entity_id,

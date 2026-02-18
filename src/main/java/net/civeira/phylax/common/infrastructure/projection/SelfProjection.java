@@ -9,6 +9,14 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 
+/**
+ * Builds a self projection tree from registered projection descriptors.
+ *
+ * The component collects {@link ProjectionDescriptor} beans and merges their nodes. It resolves the
+ * server base URL from configuration and applies it to nodes. The resulting {@link ExecutionTree}
+ * is used for internal projection execution. This enables cross-feature projection resolution
+ * without manual wiring.
+ */
 @ApplicationScoped
 public class SelfProjection {
   private final ExecutionTree tree;
@@ -29,6 +37,14 @@ public class SelfProjection {
     this.tree = ExecutionTree.builder().tree(pathMap).build();
   }
 
+  /**
+   * Returns the execution tree built for the current application.
+   *
+   * The tree aggregates nodes from all registered descriptors. It is immutable after construction
+   * and used for projection execution. Consumers should treat it as read-only metadata.
+   *
+   * @return execution tree
+   */
   public ExecutionTree getExecutionTree() {
     return tree;
   }

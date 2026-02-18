@@ -6,6 +6,14 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Describes a projection selection and nested aggregations.
+ *
+ * Each aggregation maps a source field name to an alias in the output. Nested selections allow
+ * expanding relationships into structured results. This is used by {@link ExecutionPlan} to map
+ * remote responses into projections. Aggregations are typically derived from projection descriptors
+ * or client requests.
+ */
 @Builder
 @Getter
 public class ExecutionAggregation {

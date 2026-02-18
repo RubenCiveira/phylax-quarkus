@@ -5,25 +5,21 @@ import java.time.Instant;
 import java.util.Optional;
 
 /**
- * Represents metadata for objects that are associated with a timestamp indicating when their data
- * was generated or last computed.
+ * Represents metadata for objects that are associated with a generation timestamp.
  *
- * <p>
- * This interface is typically used in systems where it's important to track the freshness of data,
- * such as when implementing caching strategies or invalidation policies based on generation time.
- * </p>
- *
- * <p>
- * Implementing classes should provide a mechanism to retrieve the timestamp associated with the
- * data generation. The absence of a timestamp is represented by an empty {@code Optional}.
- * </p>
+ * This interface is used to track freshness for cached or derived data. Consumers can decide to
+ * invalidate or refresh based on the timestamp. The timestamp refers to when the data was generated
+ * or last computed. Implementations may omit the timestamp when unknown or not applicable.
  */
 public interface Timestamped {
   /**
    * Returns the timestamp indicating when the data was generated or computed.
    *
-   * @return an {@code Optional} containing the generation {@link Instant}, or an empty
-   *         {@code Optional} if the generation time is unknown or not set
+   * Use this to evaluate data freshness or build cache validators. Implementations may return an
+   * empty optional when the timestamp is unknown. The timestamp should represent a stable
+   * generation instant, not access time.
+   *
+   * @return an optional containing the generation {@link Instant}, or empty if not set
    */
   Optional<Instant> getGeneratedAt();
 }

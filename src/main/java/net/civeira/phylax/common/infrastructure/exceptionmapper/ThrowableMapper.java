@@ -9,11 +9,29 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Maps uncaught throwables to HTTP 500 responses.
+ *
+ * This mapper provides a last-resort handler for unexpected exceptions. It logs the throwable at
+ * warn level and returns a generic error payload. The response avoids leaking internal details
+ * while signaling server failure. Use more specific mappers to provide richer error responses when
+ * possible.
+ */
 @Slf4j
 @Provider
 public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
   @Override
+  /**
+   * Converts an unhandled exception into an HTTP response.
+   *
+   * The response status is set to 500 with a generic reason string. The exception is logged for
+   * debugging and operational visibility. This mapper should remain stable and minimal to avoid new
+   * failures.
+   *
+   * @param exception throwable to map
+   * @return HTTP 500 response
+   */
   public Response toResponse(Throwable exception) {
     log.warn("unhandled exception", exception);
     Map<String, String> error = new HashMap<>();
