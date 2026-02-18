@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.batch.BatchProgress.GlobalStatus;
@@ -21,30 +21,42 @@ import net.civeira.phylax.common.batch.storage.MasiveOperationStorage;
 /**
  * Manages asynchronous execution and tracking of multi-step batch jobs.
  *
+ * <p>
  * The service initializes batch steps, persists progress, and runs them in a background executor.
  * Each step is executed via an {@link ExecutorPlan} and persisted through
  * {@link MasiveOperationStorage}. Progress is saved between steps so clients can monitor
  * long-running work. When the job finishes, it is marked for expiration based on the preservation
  * duration.
+ * </p>
+ *
+ * <p>
+ * This bean is {@code @ApplicationScoped} so that its injected dependencies and internal state
+ * remain valid for the full lifetime of any asynchronous task submitted via
+ * {@link #start(String, Duration, ExecutorPlan[])}. Asynchronous tasks outlive the HTTP request
+ * that triggered them; using {@code @RequestScoped} would cause CDI proxies to become invalid once
+ * the originating request context is destroyed.
+ * </p>
  */
 @Slf4j
-@RequestScoped
+@ApplicationScoped
 @RequiredArgsConstructor
 public class BatchService {
+
   /** The storage backend used to persist and restore batch progress. */
   private final MasiveOperationStorage storage;
+
   /** Managed executor service used to run batch jobs asynchronously. */
   private final ManagedExecutor executor;
-  /** Put the thread on suspend to avoid resources overload */
-  private final SleepService sleeper = new RealSleepService();
 
   /**
    * Starts the asynchronous execution of a batch job composed of multiple steps.
    *
+   * <p>
    * This initializes step progress, stores the initial state, and launches a background task. Steps
    * run sequentially using their {@link Executor} implementations with progress persisted.
    * Exceptions are recorded per step without stopping the overall job execution. The job is
    * finalized and scheduled for expiration after the preservation window.
+   * </p>
    *
    * @param actor the identifier of the user or system initiating the batch job
    * @param preservation how long the batch result should be preserved after completion
@@ -67,8 +79,6 @@ public class BatchService {
 
     storage.save(taskUid, actor, progress);
     executor.runAsync(() -> {
-      // We must delay until the http request finish to ensure a new Request Context is build
-      sleep("Initial delay to close request context", 5000);
       try {
         for (int i = 0; i < plans.length; i++) {
           ExecutorPlan<?> plan = plans[i];
@@ -83,6 +93,8 @@ public class BatchService {
             massiveOperationResult.setStatus(Status.FINISHED);
             storage.save(taskUid, actor, progress);
           } catch (RuntimeException ex) {
+            log.error("Step '{}' failed with error: {}", massiveOperationResult.getName(),
+                ex.getMessage(), ex);
             massiveOperationResult.setError(ex.getMessage());
             massiveOperationResult.setStatus(Status.FAILED);
             storage.save(taskUid, actor, progress);
@@ -100,9 +112,11 @@ public class BatchService {
   /**
    * Retrieves the current progress of a batch job.
    *
+   * <p>
    * This delegates to the storage layer to restore the last persisted state. The locale parameter
    * is reserved for future localization of messages. Callers should provide the actor to enforce
    * ownership constraints. Returns empty when no batch with the given uid is found for the actor.
+   * </p>
    *
    * @param uid unique batch identifier
    * @param locale locale to apply for future localization
@@ -112,37 +126,4 @@ public class BatchService {
   public Optional<BatchProgress> retrieve(String uid, Locale locale, String actor) {
     return storage.restores(uid, actor);
   }
-
-  /**
-   * Returns the sleep service responsible for delaying between execution phases.
-   *
-   * This is exposed to allow overriding in tests or specialized implementations. The default
-   * implementation uses a real sleep to avoid resource overload. Callers should not depend on this
-   * for business logic timing.
-   *
-   * @return the {@link SleepService} implementation used
-   */
-  protected SleepService sleeper() {
-    return sleeper;
-  }
-
-  /**
-   * Internal utility method to pause the thread for a specified time.
-   *
-   * <p>
-   * This is used to ensure the request context is closed before background execution starts.
-   * </p>
-   *
-   * @param label description of the context (used for logging)
-   * @param time the time in milliseconds to sleep
-   */
-  private void sleep(String label, long time) {
-    try {
-      sleeper().sleep(time);
-    } catch (InterruptedException e) {
-      log.error("Interrupt the thread {}", label, e);
-      Thread.currentThread().interrupt();
-    }
-  }
-
 }
