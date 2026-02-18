@@ -146,7 +146,7 @@ public class SqlTemplate implements AutoCloseable {
     try {
       if (!connection.getAutoCommit()) {
         connection.commit();
-        connection.setAutoCommit(true); // Vuelve a habilitar auto-commit
+        connection.setAutoCommit(true); // Restore auto-commit mode
       }
     } catch (SQLException ex) {
       throw UncheckedSqlException.exception(connection, ex);
@@ -163,7 +163,7 @@ public class SqlTemplate implements AutoCloseable {
     try {
       if (!connection.getAutoCommit()) {
         connection.rollback();
-        connection.setAutoCommit(true); // Vuelve a habilitar auto-commit
+        connection.setAutoCommit(true); // Restore auto-commit mode
       }
     } catch (SQLException ex) {
       throw UncheckedSqlException.exception(connection, ex);
@@ -230,7 +230,7 @@ public class SqlTemplate implements AutoCloseable {
       Pattern pattern = Pattern.compile(regex);
       Matcher matcher = pattern.matcher(sql);
 
-      // Reemplazo con la tabla + WITH (UPDLOCK, ROWLOCK)
+      // Inject WITH (UPDLOCK, ROWLOCK) hint after table name
       return matcher.replaceFirst("$1$2 WITH (UPDLOCK, ROWLOCK)$3$4");
     } else {
       return sql + " FOR UPDATE";

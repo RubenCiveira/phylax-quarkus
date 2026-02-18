@@ -220,10 +220,8 @@ class PartialWhereUnitTest {
     SchematicQuery query = mock(SchematicQuery.class);
     when(query.getParametrized()).thenReturn(mock(AbstractSqlParametrized.class));
 
-    // Outer PartialWhere (manually built)
-    PartialWhere outer = PartialWhere.empty();
-    // Simular un param[] con un PartialWhere vacío
-    outer.params.add(new Object[] {PartialWhere.empty()});
+    // and() of a single empty partial produces an empty PartialWhere — append must return ""
+    PartialWhere outer = PartialWhere.and(PartialWhere.empty());
 
     // Act
     String result = outer.append(0, query);
