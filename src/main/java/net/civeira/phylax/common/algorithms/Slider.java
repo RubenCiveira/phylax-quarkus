@@ -17,23 +17,33 @@ import java.util.function.Predicate;
  * a target number of matches is needed. Subclasses implement {@link #next(List, int)} to define how
  * to fetch more data.
  *
+ * <p>
+ * The source iterator is stored lazily: it is only drained into memory when {@link #all()} or
+ * {@link #one()} is called. Callers that use {@link #slide(Predicate)} consume the source iterator
+ * directly without loading everything into memory first. {@code all()}/{@code one()} and
+ * {@code slide()} are mutually exclusive — calling both on the same instance produces undefined
+ * results.
+ * </p>
+ *
  * @param <T> the type of elements being streamed and processed
  */
 public abstract class Slider<T> {
   private final int limit;
-  private final List<T> items;
+  private Iterator<T> source;
+  private List<T> items;
 
   /**
    * Constructs a new {@code Slider} from an initial data source and a result limit.
+   *
+   * The source iterator is stored but not consumed at construction time. Data is loaded lazily when
+   * {@link #all()} or {@link #one()} is called, or consumed directly by {@link #slide(Predicate)}.
    *
    * @param items the source iterator providing the initial data
    * @param limit the maximum number of results expected in a sliding operation
    */
   protected Slider(Iterator<T> items, int limit) {
-    this.items = new ArrayList<>();
-    while (items.hasNext()) {
-      this.items.add(items.next());
-    }
+    this.source = items;
+    this.items = null;
     this.limit = limit;
   }
 
@@ -53,14 +63,14 @@ public abstract class Slider<T> {
   /**
    * Returns all buffered elements, including unfiltered data.
    *
-   * This exposes the internal buffer collected from the initial iterator. It is useful for
-   * diagnostics or pre-processing before sliding. The returned list is the same backing list used
-   * by the slider.
+   * This drains the source iterator into memory on first call and caches the result. It is useful
+   * for diagnostics or pre-processing before sliding. The returned list is the same backing list
+   * used by the slider.
    *
    * @return a list containing all elements currently held in memory
    */
   public List<T> all() {
-    return items;
+    return ensureLoaded();
   }
 
   /**
@@ -73,11 +83,12 @@ public abstract class Slider<T> {
    * @throws IllegalStateException when more than one element is present
    */
   public Optional<T> one() {
-    if (items.size() > 1) {
+    List<T> loaded = ensureLoaded();
+    if (loaded.size() > 1) {
       throw new IllegalStateException(
-          "There are " + items.size() + " values when one was expected");
+          "There are " + loaded.size() + " values when one was expected");
     }
-    return items.isEmpty() ? Optional.empty() : Optional.of(items.get(0));
+    return loaded.isEmpty() ? Optional.empty() : Optional.of(loaded.get(0));
   }
 
   /**
@@ -94,14 +105,31 @@ public abstract class Slider<T> {
     return applySlide(predicate);
   }
 
+  private List<T> ensureLoaded() {
+    if (items == null) {
+      items = new ArrayList<>();
+      while (source.hasNext()) {
+        items.add(source.next());
+      }
+    }
+    return items;
+  }
+
   private Iterator<T> applySlide(Predicate<T> predicate) {
-    // Tengo que construir un iterador qeu cuando se termine llame al siguiente
-    return new SlideIterator<>(items.iterator(), predicate, filteredData -> {
+    Iterator<T> initial = items != null ? items.iterator() : source;
+    return new SlideIterator<>(initial, predicate, filteredData -> {
       int registrosUtiles = filteredData.size();
       int registrosFaltantes = limit - filteredData.size();
+      if (registrosFaltantes <= 0) {
+        return null;
+      }
+      if (registrosUtiles == 0) {
+        // No accepted items yet; cannot estimate discard ratio. Request the full remaining limit.
+        return next(filteredData, registrosFaltantes);
+      }
       double ratioDescarte = 1.0 - ((double) registrosUtiles / limit);
       int nuevosRegistros = (int) Math.ceil(registrosFaltantes / (1.0 - ratioDescarte));
-      return registrosFaltantes > 0 ? next(filteredData, nuevosRegistros) : null;
+      return next(filteredData, nuevosRegistros);
     });
   }
 }
@@ -111,9 +139,9 @@ public abstract class Slider<T> {
  * Internal helper iterator for {@link Slider} that supports dynamic loading.
  *
  * It wraps an underlying iterator and applies the predicate to each candidate. When the current
- * iterator is exhausted, it requests a new iterator from the supplier. Collected items are tracked
- * to estimate how many new elements are needed. This class is package-private and used only by the
- * slider implementation.
+ * iterator is exhausted, it requests a new iterator from the supplier. The accepted items are
+ * tracked so that the caller can estimate how many new elements are needed. This class is
+ * package-private and used only by the slider implementation.
  *
  * @param <T> the type of elements being iterated
  */
@@ -121,10 +149,10 @@ class SlideIterator<T> implements Iterator<T> {
   private Iterator<T> current;
   private T nextItem;
   private boolean prepared = false;
+  private int seenInCurrentBatch = 0;
 
   private final Predicate<T> predicate;
   private final Function<List<T>, Iterator<T>> next;
-  private final List<T> page = new ArrayList<>();
   private final List<T> filteredItems = new ArrayList<>();
 
   /**
@@ -135,7 +163,8 @@ class SlideIterator<T> implements Iterator<T> {
    *
    * @param initial initial iterator to stream elements from
    * @param predicate filter used to accept elements
-   * @param next supplier for additional iterators when needed
+   * @param next supplier for additional iterators when needed; receives the list of accepted items
+   *        so far and must return the next batch iterator, or {@code null} when exhausted
    */
   public SlideIterator(Iterator<T> initial, Predicate<T> predicate,
       Function<List<T>, Iterator<T>> next) {
@@ -185,20 +214,22 @@ class SlideIterator<T> implements Iterator<T> {
     while (true) {
       while (current.hasNext()) {
         T candidate = current.next();
-        page.add(candidate);
+        seenInCurrentBatch++;
         if (predicate.test(candidate)) {
           nextItem = candidate;
           prepared = true;
           return;
         }
       }
-      if (page.isEmpty()) {
+      if (seenInCurrentBatch == 0) {
+        // Batch was empty: no more data available.
         nextItem = null;
         prepared = true;
         return;
       } else {
-        current = next.apply(page);
-        page.clear();
+        // Batch exhausted but had items: request next batch passing the accepted items so far.
+        seenInCurrentBatch = 0;
+        current = next.apply(filteredItems);
         if (current == null) {
           nextItem = null;
           prepared = true;

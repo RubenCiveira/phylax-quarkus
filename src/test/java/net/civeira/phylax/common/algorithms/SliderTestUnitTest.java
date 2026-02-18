@@ -78,6 +78,50 @@ class SliderTestUnitTest {
   }
 
   @Test
+  void testConstructorDoesNotDrainIterator() {
+    int[] consumed = {0};
+    Iterator<String> counting = new Iterator<String>() {
+      private final String[] data = {"x", "y", "z"};
+      private int idx = 0;
+
+      @Override
+      public boolean hasNext() {
+        return idx < data.length;
+      }
+
+      @Override
+      public String next() {
+        consumed[0]++;
+        return data[idx++];
+      }
+    };
+
+    new TestSlider(counting, 5, new LinkedList<>());
+
+    assertEquals(0, consumed[0], "Constructor must not consume the iterator eagerly");
+  }
+
+  @Test
+  void testSlideWithAllItemsFilteredInFirstBatch() {
+    // All items in the initial batch are rejected by the predicate.
+    // This exercises the division-by-zero guard: filteredItems is empty when the
+    // first batch exhausts, so registrosUtiles == 0 and the ratio cannot be computed.
+    Queue<Iterator<String>> batches = new LinkedList<>();
+    batches.add(Arrays.asList("dog", "dolphin").iterator());
+
+    Slider<String> slider =
+        new TestSlider(Arrays.asList("cat", "cow", "chicken").iterator(), 3, batches);
+
+    Iterator<String> result = slider.slide(s -> s.startsWith("d"));
+    List<String> collected = new ArrayList<>();
+    while (result.hasNext()) {
+      collected.add(result.next());
+    }
+
+    assertEquals(List.of("dog", "dolphin"), collected);
+  }
+
+  @Test
   void testSlideWithoutNextPagination() {
     Queue<Iterator<String>> nextBatches = new LinkedList<>();
     Slider<String> slider = new TestSlider(initialData.iterator(), 2, nextBatches);
