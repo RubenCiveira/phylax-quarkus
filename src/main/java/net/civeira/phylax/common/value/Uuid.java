@@ -16,6 +16,13 @@ public class Uuid {
   private static final String UUID_REGEX =
       "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
 
+  /**
+   * Shared {@link SecureRandom} instance reused across all UUID generations. Initializing
+   * {@code SecureRandom} seeds from OS entropy and is expensive; a single instance is thread-safe
+   * and avoids that overhead on every call.
+   */
+  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
   private static long prevTime = System.currentTimeMillis();
   private static long prevNano = System.nanoTime();
 
@@ -121,6 +128,6 @@ public class Uuid {
    * @return A randomly generated long value.
    */
   private static long getRandomComponent() {
-    return new SecureRandom().nextLong();
+    return SECURE_RANDOM.nextLong();
   }
 }
