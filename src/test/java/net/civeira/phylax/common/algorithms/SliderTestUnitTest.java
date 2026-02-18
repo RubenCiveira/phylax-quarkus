@@ -105,7 +105,7 @@ class SliderTestUnitTest {
   void testSlideWithAllItemsFilteredInFirstBatch() {
     // All items in the initial batch are rejected by the predicate.
     // This exercises the division-by-zero guard: filteredItems is empty when the
-    // first batch exhausts, so registrosUtiles == 0 and the ratio cannot be computed.
+    // first batch exhausts, so matchCount == 0 and the discard ratio cannot be computed.
     Queue<Iterator<String>> batches = new LinkedList<>();
     batches.add(Arrays.asList("dog", "dolphin").iterator());
 
