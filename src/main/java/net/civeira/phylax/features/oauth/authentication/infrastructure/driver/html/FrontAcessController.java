@@ -43,16 +43,11 @@ import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
 import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.ConsentRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.NewMfaRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.NewPasswordRequiredException;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.SessionStoreGateway;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.SessionStoreGateway.SessionInfo;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.TemporalKeysGateway;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.TemporalKeysGateway.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
@@ -64,13 +59,18 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewMfaControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewPassControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.RecoverControllerPart;
-import net.civeira.phylax.features.oauth.client.application.spi.ClientRetrieveSpi;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedProviderDescription;
-import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAuthValidatorSpi;
+import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
+import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
+import net.civeira.phylax.features.oauth.session.domain.model.SessionInfo;
+import net.civeira.phylax.features.oauth.session.domain.model.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.token.domain.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.token.domain.model.IdToken;
+import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 @Slf4j
 @Path("")
@@ -121,7 +121,7 @@ public class FrontAcessController {
   private MultivaluedMap<String, String> formParams;
   private Challenge currentChallenge;
 
-  private final UserLoginSpi loginApi;
+  private final LoginUsecase loginUsecase;
   private final SecureHtmlBuilder securer;
   private final DecoratePageSpi decorator;
 
@@ -132,11 +132,11 @@ public class FrontAcessController {
   private final NewMfaControllerPart newMfaController;
   private final DelegatedControllerPart delegatedController;
 
-  private final ClientRetrieveSpi clientRetrieve;
+  private final ClientStoreGateway clientRetrieve;
   private final JwtTokenBuilder tokenBuilder;
   private final SessionStoreGateway sessionStore;
-  private final TemporalKeysGateway temporalStore;;
-  private final DelegatedAccessAuthValidatorSpi delegatedUsecase;
+  private final TemporalKeysGateway temporalStore;
+  private final DelegateLogin delegateLogin;
 
   private Map<Class<? extends AuthenticationException>, FlowInfo> loginErrorMappers =
       new HashMap<>();
@@ -327,7 +327,7 @@ public class FrontAcessController {
     StringBuilder delegatedLogins = new StringBuilder();
     StringBuilder execAuto = new StringBuilder();
 
-    for (DelegatedAccessExternalProvider provider : delegatedUsecase.providers(request)) {
+    for (DelegatedAccessExternalProvider provider : delegateLogin.providers(request)) {
       DelegatedProviderDescription info = provider.info(request);
       delegatedLogins.append("                    <form method=\"POST\" id=\"social-form-"
           + info.getId() + "\" class=\"social-form\">\r\n"
@@ -427,7 +427,7 @@ public class FrontAcessController {
       MultivaluedMap<String, String> paramMap, List<AuthenticationChallege> challenges) {
     String grant = "form";
     String password = securer.decrypt(first(paramMap, "password"));
-    AuthenticationResult authenticate = loginApi.validateUserData(request,
+    AuthenticationResult authenticate = loginUsecase.validatedUserData(request,
         first(paramMap, USERNAME), password, clientDetails, challenges);
     if (authenticate.isRight()) {
       return redirect(Optional.empty(), clientDetails, grant, request, authenticate.getData());
@@ -476,8 +476,9 @@ public class FrontAcessController {
       } else if (redirect.contains("?")) {
         separator = "&";
       }
-      String code = temporalStore.registerTemporalAuthCode(TemporalAuthCode.builder()
-          .clientDetails(clientDetails).request(request).data(validationData).build());
+      String code = temporalStore.registerTemporalAuthCode(
+          TemporalAuthCode.builder().client(clientDetails).request(request)
+              .nonce(request.getNonce().orElse(null)).data(validationData).build());
       to = redirect + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
     } else {
       IdToken buildIdToken =
@@ -546,7 +547,7 @@ public class FrontAcessController {
     if (null != currentChallenge) {
       chagenlles.addAll(currentChallenge.getChallenges());
     }
-    AuthenticationResult fillPreAuthenticated = loginApi.validatePreAuthenticated(
+    AuthenticationResult fillPreAuthenticated = loginUsecase.fillPreAuthenticated(
         result.getRequest(), result.getUsername(), result.getClientDetails(), chagenlles);
     if (fillPreAuthenticated.isRight()) {
       String grant = "form";

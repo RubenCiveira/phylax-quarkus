@@ -1,0 +1,35 @@
+package net.civeira.phylax.features.oauth.scopes.infrastructure.driven;
+
+import java.util.List;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
+import net.civeira.phylax.features.oauth.scopes.domain.model.ScopePermission;
+
+/**
+ * Stub adapter for scope consent. Returns no pending scopes (all scopes are pre-approved).
+ *
+ * TODO: implement with real persistence to track per-user, per-client scope consent grants.
+ */
+@ApplicationScoped
+public class ScopesConsentAdapter implements ScopesConsentGateway {
+
+  @Override
+  public List<ScopePermission> pendingScopes(String tenant, String username, String clientId,
+      List<String> scopes) {
+    System.err.println("=======");
+    System.err.println("=======");
+    System.err.println("=======");
+    System.err.println("\tScopes solicitados: " + scopes);
+    System.err.println("=======");
+    System.err.println("=======");
+    System.err.println("=======");
+    return List.of();
+  }
+
+  @Override
+  public void storeAcceptedScopes(String tenant, String username, String clientId,
+      List<String> scopes) {
+    // no-op: pending real persistence implementation
+  }
+}

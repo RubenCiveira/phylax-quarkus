@@ -1,0 +1,37 @@
+package net.civeira.phylax.features.oauth.scopes.application;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
+import net.civeira.phylax.features.oauth.scopes.domain.model.ScopePermission;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class ScopesConsentUsecase {
+
+  private final ScopesConsentGateway gateway;
+
+  public List<ScopePermission> pendingScopes(String tenant, String username, String clientId,
+      String scopeString) {
+    List<String> scopes = normalizeScopes(scopeString);
+    return gateway.pendingScopes(tenant, username, clientId, scopes);
+  }
+
+  public void storeAcceptedScopes(String tenant, String username, String clientId,
+      String scopeString) {
+    List<String> scopes = normalizeScopes(scopeString);
+    gateway.storeAcceptedScopes(tenant, username, clientId, scopes);
+  }
+
+  private List<String> normalizeScopes(String scopeString) {
+    if (null == scopeString || scopeString.isBlank()) {
+      return List.of();
+    }
+    return Arrays.stream(scopeString.split("\\s+")).filter(s -> !s.isBlank()).distinct()
+        .collect(Collectors.toList());
+  }
+}

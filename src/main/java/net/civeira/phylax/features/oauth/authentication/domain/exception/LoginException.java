@@ -1,0 +1,25 @@
+package net.civeira.phylax.features.oauth.authentication.domain.exception;
+
+import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
+
+/**
+ * Domain exception that encapsulates a failed {@link AuthenticationResult}. Replaces the specific
+ * checked exceptions (MfaRequiredException, ConsentRequiredException, etc.) with a single typed
+ * exception that carries the underlying result for routing.
+ */
+public class LoginException extends RuntimeException {
+
+  private static final long serialVersionUID = 1L;
+
+  private final AuthenticationResult result;
+
+  public LoginException(AuthenticationResult result) {
+    super(result != null && result.getFail() != null ? result.getFail().getClass().getSimpleName()
+        : "Login failed");
+    this.result = result;
+  }
+
+  public AuthenticationResult getResult() {
+    return result;
+  }
+}

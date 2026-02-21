@@ -6,15 +6,15 @@ import java.util.Map;
 
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class PasswordGranter implements TokenGranter {
-  private final UserLoginSpi loginApi;
+  private final LoginUsecase loginUsecase;
 
   @Override
   public boolean canHandle(String grantType) {
@@ -25,7 +25,7 @@ public class PasswordGranter implements TokenGranter {
   public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     if (client.isProtectedWithSecret()) {
-      return loginApi.validateUserData(request, first(paramMap, "username"),
+      return loginUsecase.validatedUserData(request, first(paramMap, "username"),
           first(paramMap, "password"), client, List.of());
     } else {
       return AuthenticationResult.notAllowed(request.getTenant(), "",

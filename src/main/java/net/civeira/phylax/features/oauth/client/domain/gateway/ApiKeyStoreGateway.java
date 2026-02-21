@@ -1,0 +1,14 @@
+package net.civeira.phylax.features.oauth.client.domain.gateway;
+
+import java.util.Optional;
+
+import net.civeira.phylax.features.oauth.client.domain.model.ApiKeyData;
+
+/**
+ * Domain port for API Key lookup.
+ */
+public interface ApiKeyStoreGateway {
+
+  /** Finds and validates an API key, returning its data if valid. */
+  Optional<ApiKeyData> apiKey(String key);
+}

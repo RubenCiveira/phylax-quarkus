@@ -1,0 +1,32 @@
+package net.civeira.phylax.features.oauth.mfa.application;
+
+import java.util.Locale;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
+import net.civeira.phylax.features.oauth.mfa.domain.model.PublicLoginMfaBuildResponse;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class UserMfa {
+
+  private final UserMfaGateway gateway;
+
+  public PublicLoginMfaBuildResponse configurationForNewMfa(String tenant, String username,
+      Locale locale) {
+    return gateway.configurationForNewMfa(tenant, username, locale);
+  }
+
+  public boolean verifyOtp(String tenant, String username, String otp) {
+    return gateway.verifyOtp(tenant, username, otp);
+  }
+
+  public boolean verifyNewOtp(String tenant, String username, String otp) {
+    return gateway.verifyNewOtp(tenant, username, otp);
+  }
+
+  public void storeSeed(String tenant, String username, String seed) {
+    gateway.storeSeed(tenant, username, seed);
+  }
+}

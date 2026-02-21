@@ -6,19 +6,19 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator.Builder;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -26,14 +26,14 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.NotAllowedException;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
 import net.civeira.phylax.features.oauth.token.domain.model.AutorizationToken;
 import net.civeira.phylax.features.oauth.token.domain.model.IdToken;
-import net.civeira.phylax.features.oauth.token.domain.model.KeyInformation;
 import net.civeira.phylax.features.oauth.token.domain.model.MfaToken;
-import net.civeira.phylax.features.oauth.token.domain.model.PublicKeyInformation;
 
 @Slf4j
 @RequestScoped
@@ -60,30 +60,27 @@ public class JwtTokenBuilder {
   }
 
   private final ObjectMapper mapper;
-  private final JwtTokenManager manager;
+  private final TokenSigner tokenSigner;
+  private final CurrentRequest current;
 
   public IdToken buildIdToken(String tenant, String state, String nonce, ClientDetails details,
       String grantType, AuthenticationData validationData) {
-    KeyInformation currentKey = manager.currentKey();
-    Algorithm algorithm = manager.signAlgoritm(currentKey);
-
     Duration expiration = propiedadEntera(EXPIRATION_CONF);
     Instant authExpires = Instant.now().plus(expiration);
     Instant refreshExpires = Instant.now().plus(propiedadEntera(EXPIRATION_CONF));
 
     String sessionState = UUID.randomUUID().toString();
 
-    String accessToken = accessToken(tenant, details, grantType, validationData)
-        .withKeyId(currentKey.getKeyId()).withExpiresAt(authExpires).sign(algorithm);
+    String accessToken = tokenSigner.sign(tenant,
+        accessToken(tenant, details, grantType, validationData), authExpires);
 
-    Builder identityToken = identityToken(tenant, accessToken, details, grantType, validationData)
-        .withExpiresAt(refreshExpires);
+    Builder identityToken = identityToken(tenant, accessToken, details, grantType, validationData);
     withChallenge(identityToken, state, sessionState, nonce);
 
-    String idtToken = identityToken.sign(algorithm);
+    String idtToken = tokenSigner.sign(tenant, identityToken, refreshExpires);
 
     IdToken idToken = new IdToken();
-    idToken.setIss(manager.getIssuer(tenant));
+    idToken.setIss(issuer(tenant));
     idToken.setTokenType(BEARER);
     idToken.setExpiresIn(expiration.getSeconds());
     idToken.setAccessToken(accessToken);
@@ -93,64 +90,49 @@ public class JwtTokenBuilder {
   }
 
   public <T> String buildChallengerToken(String tenant, T bean, Duration expiration) {
-    KeyInformation currentKey = manager.currentKey();
-    Algorithm algorithm = manager.signAlgoritm(currentKey);
-
     String jti = UUID.randomUUID().toString();
 
     @SuppressWarnings("unchecked")
     Map<String, Object> map = mapper.convertValue(bean, Map.class);
 
     Builder accessTokenInfo =
-        JWT.create().withIssuer(manager.getIssuer(tenant)).withIssuedAt(new Date()).withJWTId(jti)
+        JWT.create().withIssuer(issuer(tenant)).withIssuedAt(new Date()).withJWTId(jti)
             .withClaim(CHALLENGE, map).withArrayClaim(CLAIM_SCOPE, new String[] {CHALLENGE});
 
-    return accessTokenInfo.withExpiresAt(Instant.now().plus(expiration))
-        .withKeyId(currentKey.getPrivateKey()).sign(algorithm);
+    return tokenSigner.signKeypass(tenant, accessTokenInfo, Instant.now().plus(expiration));
   }
 
   public <T> Optional<T> verifyChalleger(Class<T> type, String token, String tenant) {
-    Optional<T> response = Optional.empty();
-    List<PublicKeyInformation> publicKeys = manager.getPublicKeys();
-    for (PublicKeyInformation inputStream : publicKeys) {
-      try {
-        String key = manager.extractSignerId(token).orElse("-");
-        if (key.equals(inputStream.getKeyId())) {
-          Optional<DecodedJWT> decode = manager.decode(inputStream, tenant, token);
-          if (decode.isPresent()) {
-            DecodedJWT jwt = decode.get();
-            List<String> asList = jwt.getClaim(CLAIM_SCOPE).asList(String.class);
-            if (asList.size() == 1 && asList.contains(CHALLENGE)) {
-              Map<String, Object> asMap = jwt.getClaim(CHALLENGE).asMap();
-              response = Optional.of(mapper.convertValue(asMap, type));
-            }
-            return response;
-          }
-        }
-      } catch (NotAllowedException nae) {
-        log.warn("Wrong challenger", nae);
+    try {
+      Map<String, Object> payload = tokenSigner.verifyTokenPayload(tenant, token);
+      if (payload.isEmpty()) {
         return Optional.empty();
       }
+      List<String> scopes = claimAsList(payload.get(CLAIM_SCOPE));
+      if (scopes.size() == 1 && scopes.contains(CHALLENGE)) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> asMap = (Map<String, Object>) payload.get(CHALLENGE);
+        return Optional.of(mapper.convertValue(asMap, type));
+      }
+      return Optional.empty();
+    } catch (NotAllowedException nae) {
+      log.warn("Wrong challenger", nae);
+      return Optional.empty();
     }
-    return response;
   }
 
   public MfaToken buildMfaToken(String username, String tenant) {
-    KeyInformation currentKey = manager.currentKey();
-    Algorithm algorithm = manager.signAlgoritm(currentKey);
-
     String jti = UUID.randomUUID().toString();
 
     Duration expiration = propiedadEntera("oauth.jwt.expiration.mfa-token");
     Instant authExpires = Instant.now().plus(expiration);
     MfaToken authorization = new MfaToken();
     authorization.setExpiresIn(expiration.getSeconds());
-    Builder accessTokenInfo = JWT.create().withIssuer(manager.getIssuer(tenant))
-        .withIssuedAt(new Date()).withJWTId(jti).withClaim(CLAIM_USER_NAME, username)
+    Builder accessTokenInfo = JWT.create().withIssuer(issuer(tenant)).withIssuedAt(new Date())
+        .withJWTId(jti).withClaim(CLAIM_USER_NAME, username)
         .withArrayClaim(CLAIM_SCOPE, new String[] {MFA_SCOPE});
     authorization.setError("mfa_required");
-    authorization.setToken(accessTokenInfo.withExpiresAt(authExpires)
-        .withKeyId(currentKey.getKeyId()).sign(algorithm));
+    authorization.setToken(tokenSigner.sign(tenant, accessTokenInfo, authExpires));
     return authorization;
   }
 
@@ -171,9 +153,15 @@ public class JwtTokenBuilder {
 
   public AutorizationToken buildToken(String tenant, ClientDetails details, String grantType,
       AuthenticationData validationData, AuthRequest request) {
-    KeyInformation currentKey = manager.currentKey();
-    Algorithm algorithm = manager.signAlgoritm(currentKey);
-
+    if (request != null && validationData.getScopes().isEmpty()) {
+      List<String> requested = request.getScope().map(s -> Arrays.stream(s.split("\\s+"))
+          .filter(sc -> !sc.isBlank()).collect(Collectors.toList())).orElse(List.of());
+      boolean wildcard = details.getAllowedScopes().contains("*");
+      List<String> granted = wildcard ? requested
+          : requested.stream().filter(details.getAllowedScopes()::contains)
+              .collect(Collectors.toList());
+      validationData.setScopes(granted);
+    }
     Builder accessToken = accessToken(tenant, details, grantType, validationData);
     Builder refreshToken = refreshToken(tenant, details, validationData);
 
@@ -187,19 +175,16 @@ public class JwtTokenBuilder {
     authorization.setUsername(validationData.getUsername());
     authorization.setExpiresIn(expiration.getSeconds());
 
-    authorization.setAccessToken(
-        accessToken.withExpiresAt(authExpires).withKeyId(currentKey.getKeyId()).sign(algorithm));
-    authorization.setRefreshToken(refreshToken.withExpiresAt(refreshExpires)
-        .withKeyId(currentKey.getKeyId()).sign(algorithm));
+    authorization.setAccessToken(tokenSigner.sign(tenant, accessToken, authExpires));
+    authorization.setRefreshToken(tokenSigner.sign(tenant, refreshToken, refreshExpires));
 
     if (null != request) {
       String sessionState = UUID.randomUUID().toString();
       Builder identityToken =
-          identityToken(tenant, authorization.getAccessToken(), details, grantType, validationData)
-              .withExpiresAt(refreshExpires);
+          identityToken(tenant, authorization.getAccessToken(), details, grantType, validationData);
       withChallenge(identityToken, request.getState().orElse(""), sessionState,
           request.getNonce().orElse(""));
-      authorization.setIdToken(identityToken.sign(algorithm));
+      authorization.setIdToken(tokenSigner.sign(tenant, identityToken, refreshExpires));
     }
 
     return authorization;
@@ -216,57 +201,43 @@ public class JwtTokenBuilder {
   public Optional<RefreshTokenInfo> verifyRefreshInfo(String token, String tenant) {
     String scope = REFRESH_SCOPE;
     Optional<RefreshTokenInfo> response = Optional.empty();
-    List<PublicKeyInformation> publicKeys = manager.getPublicKeys();
-    for (PublicKeyInformation inputStream : publicKeys) {
-      try {
-        String key = manager.extractSignerId(token).orElse("-");
-        if (key.equals(inputStream.getKeyId())) {
-          Optional<DecodedJWT> decode = manager.decode(inputStream, tenant, token);
-          if (decode.isPresent()) {
-            DecodedJWT jwt = decode.get();
-            List<String> asList = jwt.getClaim(CLAIM_SCOPE).asList(String.class);
-            if (asList.size() == 1 && asList.contains(scope)) {
-              List<String> aud = jwt.getClaim(CLAIM_AUDIENCE_ID).asList(String.class);
-              response = Optional
-                  .of(RefreshTokenInfo.builder().username(jwt.getClaim(CLAIM_USER_NAME).asString())
-                      .client(jwt.getClaim(CLAIM_CLIENT_ID).asString())
-                      .audiences(null == aud ? List.of() : aud).build());
-            }
-            return response;
-          }
-        }
-      } catch (NotAllowedException nae) {
+    try {
+      Map<String, Object> payload = tokenSigner.verifyTokenPayload(tenant, token);
+      if (payload.isEmpty()) {
         return Optional.empty();
       }
+      List<String> scopes = claimAsList(payload.get(CLAIM_SCOPE));
+      if (scopes.size() == 1 && scopes.contains(scope)) {
+        List<String> aud = claimAsList(payload.get(CLAIM_AUDIENCE_ID));
+        response = Optional
+            .of(RefreshTokenInfo.builder().username(claimAsString(payload.get(CLAIM_USER_NAME)))
+                .client(claimAsString(payload.get(CLAIM_CLIENT_ID)))
+                .audiences(null == aud ? List.of() : aud).build());
+      }
+      return response;
+    } catch (NotAllowedException nae) {
+      return Optional.empty();
     }
-    return response;
   }
 
 
 
   public Optional<String> verifyToken(String token, String scope, String tenant) {
     Optional<String> response = Optional.empty();
-    List<PublicKeyInformation> publicKeys = manager.getPublicKeys();
-    for (PublicKeyInformation inputStream : publicKeys) {
-      try {
-        String key = manager.extractSignerId(token).orElse("-");
-        if (key.equals(inputStream.getKeyId())) {
-          Optional<DecodedJWT> decode = manager.decode(inputStream, tenant, token);
-          if (decode.isPresent()) {
-            DecodedJWT jwt = decode.get();
-            List<String> asList = jwt.getClaim(CLAIM_SCOPE).asList(String.class);
-            if (asList.size() == 1 && asList.contains(scope)) {
-              response = Optional.of(jwt.getClaim(CLAIM_USER_NAME).asString());
-            }
-            return response;
-          }
-        }
-      } catch (NotAllowedException nae) {
-        log.warn("Wrong {0} token", scope);
+    try {
+      Map<String, Object> payload = tokenSigner.verifyTokenPayload(tenant, token);
+      if (payload.isEmpty()) {
         return Optional.empty();
       }
+      List<String> scopes = claimAsList(payload.get(CLAIM_SCOPE));
+      if (scopes.size() == 1 && scopes.contains(scope)) {
+        response = Optional.ofNullable(claimAsString(payload.get(CLAIM_USER_NAME)));
+      }
+      return response;
+    } catch (NotAllowedException nae) {
+      log.warn("Wrong {0} token", scope);
+      return Optional.empty();
     }
-    return response;
   }
 
   private Builder identityToken(String tenant, String accessToken, ClientDetails client,
@@ -275,7 +246,7 @@ public class JwtTokenBuilder {
     String authLevel = null == validationData.getMode() ? "0" : validationData.getMode().getAcr();
     Instant authTime = validationData.getTime();
 
-    Builder builder = JWT.create().withIssuer(manager.getIssuer(tenant)).withJWTId(jti)
+    Builder builder = JWT.create().withIssuer(issuer(tenant)).withJWTId(jti)
         .withClaim("acr", authLevel).withIssuedAt(new Date())
         .withSubject(validationData.getUsername()).withClaim("at_hash", generateHash(accessToken));
     if (null != authTime) {
@@ -307,9 +278,10 @@ public class JwtTokenBuilder {
     String jti = UUID.randomUUID().toString();
 
     Builder accessTokenInfo = JWT.create();
-    List<String> scopes = new ArrayList<>();
+    List<String> scopes = validationData.getScopes().isEmpty() ? new ArrayList<>()
+        : new ArrayList<>(validationData.getScopes());
 
-    accessTokenInfo = accessTokenInfo.withIssuer(manager.getIssuer(tenant)).withJWTId(jti)
+    accessTokenInfo = accessTokenInfo.withIssuer(issuer(tenant)).withJWTId(jti)
         .withIssuedAt(new Date()).withSubject(validationData.getUsername())
         .withClaim("aud", validationData.getAudiences()).withClaim(CLAIM_GRANT_TYPE, grantType)
         .withClaim("typ", BEARER).withClaim(CLAIM_USER_NAME, validationData.getUsername());
@@ -328,11 +300,33 @@ public class JwtTokenBuilder {
   private Builder refreshToken(String tenant, ClientDetails client,
       AuthenticationData validationData) {
     String jti = UUID.randomUUID().toString();
-    return JWT.create().withIssuer(manager.getIssuer(tenant)).withJWTId(jti)
-        .withIssuedAt(new Date()).withClaim("aud", validationData.getAudiences())
+    return JWT.create().withIssuer(issuer(tenant)).withJWTId(jti).withIssuedAt(new Date())
+        .withClaim("aud", validationData.getAudiences())
         .withClaim(CLAIM_USER_NAME, validationData.getUsername())
         .withClaim(CLAIM_CLIENT_ID, client.getClientId())
         .withArrayClaim(CLAIM_SCOPE, new String[] {REFRESH_SCOPE});
+  }
+
+  private String issuer(String tenant) {
+    return current.getPublicHost() + "/oauth/openid/" + tenant;
+  }
+
+  private String claimAsString(Object value) {
+    return null == value ? null : mapper.convertValue(value, String.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<String> claimAsList(Object value) {
+    if (null == value) {
+      return List.of();
+    }
+    if (value instanceof List) {
+      return (List<String>) value;
+    }
+    if (value instanceof String[]) {
+      return Arrays.asList((String[]) value);
+    }
+    return List.of(mapper.convertValue(value, String.class));
   }
 
   private static String generateHash(String value) {

@@ -7,18 +7,20 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
 import net.civeira.phylax.features.oauth.token.domain.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class MfaGranter implements TokenGranter {
   private final JwtTokenBuilder verifier;
-  private final UserLoginSpi loginApi;
+  private final UserMfa userMfa;
+  private final LoginUsecase loginUsecase;
 
   @Override
   public boolean canHandle(String grantType) {
@@ -33,8 +35,12 @@ public class MfaGranter implements TokenGranter {
     AuthenticationResult result;
     if (verifyMfa.isPresent()) {
       String username = verifyMfa.get();
-      result = loginApi.validateMfa(request, username, first(paramMap, "mfa_code"), client,
-          List.of(AuthenticationChallege.MFA));
+      boolean otpValid =
+          userMfa.verifyOtp(request.getTenant(), username, first(paramMap, "mfa_code"));
+      result = otpValid
+          ? loginUsecase.fillPreAuthenticated(request, username, client,
+              List.of(AuthenticationChallege.MFA))
+          : AuthenticationResult.notAllowed(request.getTenant(), username, "invalid mfa code");
     } else {
       result = AuthenticationResult.notAllowed(request.getTenant(), "", "invalid token");
     }

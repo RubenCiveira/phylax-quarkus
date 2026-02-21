@@ -1,0 +1,28 @@
+package net.civeira.phylax.features.oauth.user.application;
+
+import java.util.List;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
+import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.user.domain.gateway.LoginGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class LoginUsecase {
+
+  private final LoginGateway gateway;
+
+  public AuthenticationResult validatedUserData(AuthRequest request, String username,
+      String password, ClientDetails client, List<AuthenticationChallege> challenges) {
+    return gateway.validateUserData(request, username, password, client, challenges);
+  }
+
+  public AuthenticationResult fillPreAuthenticated(AuthRequest request, String username,
+      ClientDetails client, List<AuthenticationChallege> challenges) {
+    return gateway.validatePreAuthenticated(request, username, client, challenges);
+  }
+}

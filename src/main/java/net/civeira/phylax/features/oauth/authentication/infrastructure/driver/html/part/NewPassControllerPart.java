@@ -13,8 +13,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserPasswordChangeSpi;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserPasswordChangeSpi.ChPassRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
@@ -22,13 +20,14 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class NewPassControllerPart {
   private final SecureHtmlBuilder securer;
   private final DecoratePageSpi decorator;
-  private final UserPasswordChangeSpi passwordChangeApi;
+  private final ChangePasswordUsecase changePasswordUsecase;
 
   public AuthenticationChallege getChallenge() {
     return AuthenticationChallege.FRESH_PASSWORD;
@@ -92,9 +91,9 @@ public class NewPassControllerPart {
     Response response;
     String oldPass = securer.decrypt(FrontAcessController.first(paramMap, "old_pass"));
     String newPass = securer.decrypt(FrontAcessController.first(paramMap, "new_pass"));
-    boolean updatePassword = passwordChangeApi.updatePassword(request, username,
-        ChPassRequest.builder().newPassword(newPass).oldPassword(oldPass).build());
-    if (updatePassword) {
+    boolean updated =
+        changePasswordUsecase.forceUpdatePassword(request.getTenant(), username, oldPass, newPass);
+    if (updated) {
       response = resolver.apply(StepResult.builder().username(username).clientDetails(clientDetails)
           .request(request).build());
     } else {
@@ -103,5 +102,4 @@ public class NewPassControllerPart {
     }
     return response;
   }
-
 }

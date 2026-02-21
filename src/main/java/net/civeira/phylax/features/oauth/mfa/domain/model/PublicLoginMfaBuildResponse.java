@@ -1,0 +1,20 @@
+package net.civeira.phylax.features.oauth.mfa.domain.model;
+
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+public class PublicLoginMfaBuildResponse {
+
+  private final String seed;
+
+  private final String message;
+
+  /** Data URI (data:image/png;base64,...) del código QR para escanear con el autenticador. */
+  private final String image;
+
+  private final String url;
+
+  private final boolean requiresImage;
+}

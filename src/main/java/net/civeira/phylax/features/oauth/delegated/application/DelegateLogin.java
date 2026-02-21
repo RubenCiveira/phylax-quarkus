@@ -1,0 +1,82 @@
+package net.civeira.phylax.features.oauth.delegated.application;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegateLoginGateway;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.RequestInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.ResponseInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.UserData;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedLoginEndpoint;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedRequestDetails;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class DelegateLogin {
+
+  private final DelegateLoginGateway gateway;
+
+  public List<DelegatedAccessExternalProvider> providers(AuthRequest request) {
+    return gateway.providers(request);
+  }
+
+  public Optional<RequestInfo> getRequestInfo(AuthRequest request,
+      DelegatedLoginEndpoint endpoint) {
+    DelegatedRequestDetails details = toDetails(endpoint);
+    return gateway.providers(request).stream()
+        .filter(p -> p.getId(request).equals(endpoint.getProvider()))
+        .map(p -> p.request(request, details)).findFirst();
+  }
+
+  public Optional<ResponseInfo> processResponse(AuthRequest request,
+      DelegatedLoginEndpoint endpoint, Map<String, String[]> params) {
+    DelegatedRequestDetails details = toDetails(endpoint);
+    return gateway.providers(request).stream()
+        .filter(p -> p.getId(request).equals(endpoint.getProvider()))
+        .map(p -> p.response(request, details, params)).findFirst();
+  }
+
+  public void saveToken(AuthRequest request, String code, TokenInfo token) {
+    gateway.saveToken(request, code, token);
+  }
+
+  /**
+   * Resolves the username from a stored delegated token, verifying it belongs to the expected
+   * provider (for security in the browser callback flow).
+   */
+  public Optional<String> resolveUsername(AuthRequest request, String code,
+      String expectedProvider) {
+    return gateway.loadToken(request, code).filter(t -> t.getProvider().equals(expectedProvider))
+        .flatMap(info -> resolveFromInfo(request, info));
+  }
+
+  /**
+   * Resolves the username from a stored delegated token without constraining to a specific provider
+   * (used by token granters where the provider is already embedded in the stored token).
+   */
+  public Optional<String> resolveUsername(AuthRequest request, String code) {
+    return gateway.loadToken(request, code).flatMap(info -> resolveFromInfo(request, info));
+  }
+
+  private Optional<String> resolveFromInfo(AuthRequest request, TokenInfo info) {
+    DelegatedRequestDetails details = DelegatedRequestDetails.builder().provider(info.getProvider())
+        .externalUrl(info.getExternUrl()).build();
+    return gateway.providers(request).stream()
+        .filter(p -> p.getId(request).equals(info.getProvider())).findFirst()
+        .flatMap(ssoProvider -> {
+          UserData userInfo = ssoProvider.userInfo(request, details, info.getInnerToken());
+          return gateway.retrieveUsername(request, ssoProvider.getId(request), userInfo);
+        });
+  }
+
+  private DelegatedRequestDetails toDetails(DelegatedLoginEndpoint endpoint) {
+    return DelegatedRequestDetails.builder().provider(endpoint.getProvider())
+        .externalUrl(endpoint.getExternalUrl()).build();
+  }
+}

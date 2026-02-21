@@ -24,6 +24,10 @@ public class AuthenticationData {
    * La lista de audiencias
    */
   private List<String> audiences = new ArrayList<>();
+  /**
+   * Los scopes concedidos al token de acceso
+   */
+  private List<String> scopes = new ArrayList<>();
 
   private String tenant;
 

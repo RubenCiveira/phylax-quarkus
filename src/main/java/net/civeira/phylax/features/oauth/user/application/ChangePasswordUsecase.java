@@ -1,0 +1,31 @@
+package net.civeira.phylax.features.oauth.user.application;
+
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class ChangePasswordUsecase {
+
+  private final ChangePasswordGateway gateway;
+
+  public boolean allowRecover(String tenant) {
+    return gateway.allowRecover(tenant);
+  }
+
+  public void requestForChange(String urlBase, String tenant, String username) {
+    gateway.requestForChange(urlBase, tenant, username);
+  }
+
+  public Optional<String> validateChangeRequest(String tenant, String code, String newPassword) {
+    return gateway.validateChangeRequest(tenant, code, newPassword);
+  }
+
+  public boolean forceUpdatePassword(String tenant, String username, String oldPassword,
+      String newPassword) {
+    return gateway.forceUpdatePassword(tenant, username, oldPassword, newPassword);
+  }
+}

@@ -21,12 +21,8 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
-import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedStoreGateway;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.UserData;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedRequestDetails;
-import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAuthValidatorSpi;
 
 @Slf4j
 @RequestScoped
@@ -34,8 +30,7 @@ import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAut
 public class DelegatedControllerPart {
   private final ObjectMapper mapper;
   private final SecureHtmlBuilder securer;
-  private final DelegatedStoreGateway repository;
-  private final DelegatedAccessAuthValidatorSpi manager;
+  private final DelegateLogin delegateLogin;
 
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
@@ -43,33 +38,12 @@ public class DelegatedControllerPart {
     String usercode = paramMap.getFirst("user-code");
     String appprovider = paramMap.getFirst("app-provider");
     if ("query-delegated".equals(step) && usercode != null && appprovider != null) {
-      return repository.load(request, usercode).filter(token -> {
-        boolean accepted = token.getProvider().equals(appprovider);
-        if (!accepted) {
-          log.error("No se acepta consultar un token de " + token.getProvider() + " por parte de "
-              + appprovider);
-        }
-        return accepted;
-      }).flatMap(info -> lookupUser(request, info)).map(username -> resolver.apply(StepResult
-          .builder().request(request).username(username).clientDetails(clientDetails).build()));
+      return delegateLogin.resolveUsername(request, usercode, appprovider)
+          .map(username -> resolver.apply(StepResult.builder().request(request).username(username)
+              .clientDetails(clientDetails).build()));
     } else {
       return Optional.empty();
     }
-  }
-
-  private Optional<String> lookupUser(AuthRequest request, TokenInfo info) {
-    Optional<String> username = Optional.empty();
-    DelegatedRequestDetails drequest = DelegatedRequestDetails.builder()
-        .provider(info.getProvider()).externalUrl(info.getExternUrl()).build();
-
-    for (DelegatedAccessExternalProvider ssoProvider : manager.providers(request)) {
-      if (ssoProvider.getId(request).equals(info.getProvider())) {
-        UserData userInfo = ssoProvider.userInfo(request, drequest, info.getInnerToken());
-        username = manager.retrieveUsername(request, ssoProvider.getId(request), userInfo);
-        break;
-      }
-    }
-    return username;
   }
 
   public Response doBackLoginForm(String tenant, String provider, String code, Locale locale,

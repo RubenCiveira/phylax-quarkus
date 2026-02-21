@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.crypto.AesCipherService;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.TemporalKeysGateway;
+import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 
 @RequestScoped
 @RequiredArgsConstructor
@@ -50,7 +50,7 @@ public class SecureHtmlBuilder {
   }
 
   public String decrypt(String value) {
-    String secret = adapter.getCurrentKey();
+    String secret = adapter.currentKey();
     return cipher.decrypt(value, secret).orElse("");
   }
 
@@ -59,7 +59,7 @@ public class SecureHtmlBuilder {
   }
 
   public Snipped cypher(List<EncrytFieldTransfer> fields, String form) {
-    String secret = adapter.getCurrentKey();
+    String secret = adapter.currentKey();
 
     StringBuilder group = new StringBuilder();
     fields.forEach(field -> {
@@ -102,7 +102,7 @@ public class SecureHtmlBuilder {
   }
 
   private Snipped addSign(String name, boolean send, String form) {
-    String secret = adapter.getCurrentKey();
+    String secret = adapter.currentKey();
     return new Snipped(
         "" + "  const token = await signToken('" + secret + "');\r\n"
             + "  document.getElementById(\"" + name + "\").value = token;"

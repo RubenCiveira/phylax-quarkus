@@ -1,0 +1,22 @@
+package net.civeira.phylax.features.oauth.client.infrastructure.driven;
+
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ApiKeyStoreGateway;
+import net.civeira.phylax.features.oauth.client.domain.model.ApiKeyData;
+
+/**
+ * Stub adapter for API Key lookup.
+ *
+ * TODO: implement with access to ApiKeyClientReadGateway from the access feature, returning the
+ * scopes associated to the key.
+ */
+@ApplicationScoped
+public class ApiKeyStoreAdapter implements ApiKeyStoreGateway {
+
+  @Override
+  public Optional<ApiKeyData> apiKey(String key) {
+    return Optional.empty();
+  }
+}

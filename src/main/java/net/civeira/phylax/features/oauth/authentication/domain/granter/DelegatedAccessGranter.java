@@ -4,27 +4,21 @@ package net.civeira.phylax.features.oauth.authentication.domain.granter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
-import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedStoreGateway;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.UserData;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedRequestDetails;
-import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAuthValidatorSpi;
+import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
+import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class DelegatedAccessGranter implements TokenGranter {
 
-  private final DelegatedStoreGateway repository;
-  private final DelegatedAccessAuthValidatorSpi manager;
-  private final UserLoginSpi loginApi;
+  private final DelegateLogin delegateLogin;
+  private final LoginUsecase loginUsecase;
 
   @Override
   public boolean canHandle(String grantType) {
@@ -35,29 +29,16 @@ public class DelegatedAccessGranter implements TokenGranter {
   public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     String tenant = request.getTenant();
-    return repository.load(request, first(paramMap, "token")).flatMap(info -> {
-      Optional<AuthenticationResult> infoFesponse = Optional.empty();
-      DelegatedRequestDetails detail = DelegatedRequestDetails.builder()
-          .provider(info.getProvider()).externalUrl(info.getExternUrl()).build();
-      for (DelegatedAccessExternalProvider ssoProvider : manager.providers(request)) {
-        if (ssoProvider.getId(request).equals(info.getProvider())) {
-          // Saco el user name => necesito el resto....
-          String code = info.getInnerToken();
-          UserData userInfo = ssoProvider.userInfo(request, detail, info.getInnerToken());
-          AuthenticationResult result =
-              manager.retrieveUsername(request, ssoProvider.getId(request), userInfo)
-                  .map(username -> loginApi.validatePreAuthenticated(request, username, client,
-                      Arrays.asList()))
-                  .orElseGet(() -> AuthenticationResult.unknownName(tenant, code));
-          if (result.isRight()) {
-            infoFesponse = Optional.of(loginApi.validatePreAuthenticated(request,
-                result.getData().getUsername(), client, Arrays.asList()));
-          }
-          break;
-        }
+    String token = first(paramMap, "token");
+    return delegateLogin.resolveUsername(request, token).map(username -> {
+      AuthenticationResult result =
+          loginUsecase.fillPreAuthenticated(request, username, client, Arrays.asList());
+      if (result.isRight()) {
+        return loginUsecase.fillPreAuthenticated(request, result.getData().getUsername(), client,
+            Arrays.asList());
       }
-      return infoFesponse;
-    }).orElse(null);
+      return AuthenticationResult.unknownName(tenant, token);
+    }).orElse(AuthenticationResult.unknownName(tenant, token));
   }
 
   private String first(Map<String, List<String>> paramMap, String key) {

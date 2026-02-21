@@ -12,20 +12,19 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserConsentSpi;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserConsentSpi.Consent;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.user.application.ConsentUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class ConsentControllerPart {
   private final SecureHtmlBuilder securer;
-  private final UserConsentSpi consentApi;
+  private final ConsentUsecase consentUsecase;
   private final DecoratePageSpi decorator;
 
   public Response doPaintConsent(Locale locale, AuthRequest request, String user,
@@ -36,9 +35,10 @@ public class ConsentControllerPart {
 
   private ResponseBuilder doPaintConsentContent(Locale locale, AuthRequest request, String user,
       String msg) {
-    Optional<Consent> opt = consentApi.userRequiredConsent(locale, request, user);
-    if (opt.isPresent()) {
-      Consent consent = opt.get();
+    Optional<String> pendingText =
+        consentUsecase.getPendingConsent(request.getTenant(), user, locale);
+    if (pendingText.isPresent()) {
+      String fullText = pendingText.get();
       String js = securer.configureScripts(securer.addSign("sign"));
 
       String title = FrontAcessController.i18n(locale, "consent.title");
@@ -57,10 +57,9 @@ public class ConsentControllerPart {
               + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
               + "<form method=\"POST\">"
               + "<div style=\"with:100%;height:200px;overflow:auto; border:solid black 1px;\">" + ""
-              + consent.getFullText() + "</div>" + "<label>" + code
+              + fullText + "</div>" + "<label>" + code
               + "<input type=\"checkbox\" name=\"consent\" /></label>"
               + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-              + "<input type=\"hidden\" name=\"version\" value=\"" + consent.getVersion() + "\" />"
               + "<input type=\"hidden\" name=\"step\" value=\"consent\" />"
               + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
               + "\" />" + "</form>" + "<form method=\"POST\">"
@@ -85,9 +84,9 @@ public class ConsentControllerPart {
   private Response doExecConsent(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, String username,
       Function<StepResult, Response> resolver) {
-    boolean confirmConsent = consentApi.confirmConsent(request, username,
-        FrontAcessController.first(paramMap, "version"));
-    if (confirmConsent) {
+    String accepted = FrontAcessController.first(paramMap, "consent");
+    if ("on".equals(accepted) || "true".equals(accepted)) {
+      consentUsecase.storeAcceptedConsent(request.getTenant(), username);
       return resolver.apply(StepResult.builder().username(username).clientDetails(clientDetails)
           .request(request).build());
     } else {
@@ -99,5 +98,4 @@ public class ConsentControllerPart {
   public AuthenticationChallege getChallenge() {
     return AuthenticationChallege.USE_CONSENT;
   }
-
 }

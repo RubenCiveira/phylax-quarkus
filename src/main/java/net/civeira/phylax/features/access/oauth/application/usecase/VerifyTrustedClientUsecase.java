@@ -22,7 +22,7 @@ import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class VerifyTrustedClientUsecase {
-  private static final List<String> DEFAULT_SCOPES = List.of();
+  private static final List<String> DEFAULT_SCOPES = List.of("*");
   private static final List<String> DEFAULT_GRANTERS = List.of("password", "refresh", "mfa");
 
   private final AesCipherService cypher;

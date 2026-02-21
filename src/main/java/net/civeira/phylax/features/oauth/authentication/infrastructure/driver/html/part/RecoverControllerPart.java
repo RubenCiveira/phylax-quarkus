@@ -12,27 +12,26 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.interaction.command.RecoverPasswordCommand;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.application.spi.RecoverPasswordSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
-import net.civeira.phylax.features.oauth.token.domain.JwtTokenManager;
+import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class RecoverControllerPart {
   private final SecureHtmlBuilder securer;
   private final DecoratePageSpi decorator;
-  private final RecoverPasswordSpi recoverApi;
-  private final JwtTokenManager tokenManager;
+  private final ChangePasswordUsecase changePasswordUsecase;
+  private final CurrentRequest current;
 
   public boolean allowRecover(AuthRequest request) {
-    return recoverApi.allowRecover(request);
+    return changePasswordUsecase.allowRecover(request.getTenant());
   }
 
   public Response doPaintWaitRecover(Locale locale, String msg, String username,
@@ -65,11 +64,12 @@ public class RecoverControllerPart {
     // entry point of POST from doPaintWaitRecover
     String pass = securer.decrypt(FrontAcessController.first(paramMap, "password"));
     String recoverCode = FrontAcessController.first(paramMap, "recovercode");
-    boolean checkRecoberCode = recoverApi.checkRecoverCode(request, username, RecoverPasswordCommand
-        .builder().code(FrontAcessController.first(paramMap, "code")).password(pass).build());
-    if (checkRecoberCode) {
-      return resolver.apply(StepResult.builder().username(username).clientDetails(clientDetails)
-          .request(request).build());
+    String code = FrontAcessController.first(paramMap, "code");
+    Optional<String> validatedUsername =
+        changePasswordUsecase.validateChangeRequest(request.getTenant(), code, pass);
+    if (validatedUsername.isPresent()) {
+      return resolver.apply(StepResult.builder().username(validatedUsername.get())
+          .clientDetails(clientDetails).request(request).build());
     } else {
       return doPaintWaitRecover(request.getLocale(), "Wrong code", username, recoverCode);
     }
@@ -114,13 +114,13 @@ public class RecoverControllerPart {
 
   private Response doExecSendeRecover(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap) {
-    if (recoverApi.allowRecover(request)) {
+    if (changePasswordUsecase.allowRecover(request.getTenant())) {
       String username = FrontAcessController.first(paramMap, "username");
-      String url = tokenManager.getIssuer(request.getTenant()) + "/recover" + "?username="
+      String url = issuer(request.getTenant()) + "/recover" + "?username="
           + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&client_id="
           + URLEncoder.encode(clientDetails.getClientId(), StandardCharsets.UTF_8)
           + request.encodeInUrl() + "&recovercode=";
-      recoverApi.recover(request, username, url);
+      changePasswordUsecase.requestForChange(url, request.getTenant(), username);
       return securer.secureRedirectResponse(
           Response.status(302).location(FrontAcessController.buildUrl(url)));
     } else {
@@ -128,4 +128,7 @@ public class RecoverControllerPart {
     }
   }
 
+  private String issuer(String tenant) {
+    return current.getPublicHost() + "/oauth/openid/" + tenant;
+  }
 }

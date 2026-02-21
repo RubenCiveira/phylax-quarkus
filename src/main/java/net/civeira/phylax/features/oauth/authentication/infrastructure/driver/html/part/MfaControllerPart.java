@@ -13,20 +13,19 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class MfaControllerPart {
   private final SecureHtmlBuilder securer;
-  private final UserLoginSpi loginApi;
+  private final UserMfa userMfa;
   private final DecoratePageSpi decorator;
 
   public AuthenticationChallege getChallenge() {
@@ -80,9 +79,9 @@ public class MfaControllerPart {
   private Response doExecMfa(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, String username,
       Function<StepResult, Response> resolver, List<AuthenticationChallege> challenges) {
-    AuthenticationResult validateMfa = loginApi.validateMfa(request, username,
-        FrontAcessController.first(paramMap, "mfa_code"), clientDetails, challenges);
-    if (validateMfa.isRight()) {
+    boolean valid = userMfa.verifyOtp(request.getTenant(), username,
+        FrontAcessController.first(paramMap, "mfa_code"));
+    if (valid) {
       return resolver.apply(StepResult.builder().username(username).clientDetails(clientDetails)
           .request(request).build());
     } else {

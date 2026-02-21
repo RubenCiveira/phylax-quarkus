@@ -33,7 +33,16 @@ public class LoggingSpanExporter implements SpanExporter {
         MDC.put(name, String.valueOf(value));
         attributes.add(name);
       });
-      MDC.put("span.parentSpanId", span.getParentSpanId());
+      if (null != span.getParentSpanContext()) {
+        try {
+          MDC.put("span.parentSpanId",
+              span.getParentSpanContext().isValid() ? span.getParentSpanId() : "");
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      } else {
+        MDC.put("span.parentSpanId", "-");
+      }
       MDC.put("span.status", span.getStatus().getStatusCode().name());
       MDC.put("span.kind", span.getKind().name());
       MDC.put("span.startEpochNanos", span.getStartEpochNanos());

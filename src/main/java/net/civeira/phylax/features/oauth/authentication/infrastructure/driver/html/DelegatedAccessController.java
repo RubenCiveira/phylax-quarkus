@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,13 +26,11 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedStoreGateway;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.RequestInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.ResponseInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedRequestDetails;
-import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAuthValidatorSpi;
+import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedLoginEndpoint;
 
 @Path("")
 @RequestScoped
@@ -43,8 +40,7 @@ public class DelegatedAccessController {
   private static final String TEXT_HTML = "text/html";
 
   private boolean fallbackHtmlForSubmit = false;
-  private final DelegatedStoreGateway repository;
-  private final DelegatedAccessAuthValidatorSpi ssoManager;
+  private final DelegateLogin delegateLogin;
 
   @GET
   @Path("oauth/openid/{tenant}/delegated/redirect/{provider}")
@@ -53,11 +49,12 @@ public class DelegatedAccessController {
       @PathParam("provider") final String provider, final @Context UriInfo req,
       final @Context HttpHeaders headers) throws IOException {
     // El parametro back indica ha donde volver tras hacer el login.
-    DelegatedRequestDetails request = DelegatedRequestDetails.builder().provider(provider)
-        .externalUrl(getHost(req) + "/oauth/openid/-/delegated/authorization/" + provider).build();
+    DelegatedLoginEndpoint endpoint = DelegatedLoginEndpoint.builder().provider(provider)
+        .externalUrl(getHost(req) + "/oauth/openid/-/delegated/authorization/" + provider)
+        .method("GET").build();
     String back = req.getQueryParameters().getFirst("back");
 
-    return buildRequest(new AuthRequest(tenant, req, headers), request)
+    return delegateLogin.getRequestInfo(new AuthRequest(tenant, req, headers), endpoint)
         .map(msg -> writeLogin(tenant, null == back ? "*" : back, msg))
         .orElse("<!doctype html><html><h1>No provider for " + provider + "</h1></html>");
   }
@@ -69,14 +66,15 @@ public class DelegatedAccessController {
       final @PathParam("provider") String provider, final @Context UriInfo req,
       final @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap)
       throws IOException {
-    DelegatedRequestDetails detail = DelegatedRequestDetails.builder().provider(provider)
-        .externalUrl(getHost(req) + "/oauth/openid/-/delegated/authorization/" + provider).build();
+    DelegatedLoginEndpoint endpoint = DelegatedLoginEndpoint.builder().provider(provider)
+        .externalUrl(getHost(req) + "/oauth/openid/-/delegated/authorization/" + provider)
+        .method("POST").build();
     Map<String, String[]> params = new HashMap<>();
     paramMap.entrySet()
         .forEach(entry -> params.put(entry.getKey(), entry.getValue().toArray(new String[0])));
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return buildResponse(request, detail, params)
-        .map(response -> writeProyectEntry(request, detail, response))
+    return delegateLogin.processResponse(request, endpoint, params)
+        .map(response -> writeProyectEntry(request, endpoint, response))
         .orElse("<!doctype html><html><h1>No provider for " + provider + "</h1></html>");
   }
 
@@ -145,11 +143,11 @@ public class DelegatedAccessController {
         + provider + "\";" + "form.submit();" + "</script></html>";
   }
 
-  private String writeProyectEntry(final AuthRequest request, DelegatedRequestDetails detail,
+  private String writeProyectEntry(final AuthRequest request, DelegatedLoginEndpoint endpoint,
       ResponseInfo response) {
     try {
       String code = UUID.randomUUID().toString();
-      repository.save(null, code, buildToken(request, detail, response));
+      delegateLogin.saveToken(null, code, buildToken(request, endpoint, response));
       // Tenemos que saber a donde enviarlo, y darle el token de familia.
       return "<!doctype html><html><head></head><body>"
           + (fallbackHtmlForSubmit
@@ -174,37 +172,13 @@ public class DelegatedAccessController {
     return fullURL.substring(0, StringUtils.ordinalIndexOf(fullURL, "/", 3));
   }
 
-  private Optional<RequestInfo> buildRequest(final AuthRequest request,
-      DelegatedRequestDetails detail) {
-    RequestInfo result = null;
-    for (DelegatedAccessExternalProvider provider : ssoManager.providers(request)) {
-      if (provider.getId(request).equals(detail.getProvider())) {
-        result = provider.request(request, detail);
-        break;
-      }
-    }
-    return Optional.ofNullable(result);
-  }
-
-  private Optional<ResponseInfo> buildResponse(final AuthRequest request,
-      DelegatedRequestDetails detail, Map<String, String[]> properties) {
-    ResponseInfo response = null;
-    for (DelegatedAccessExternalProvider ssoProvider : ssoManager.providers(request)) {
-      if (ssoProvider.getId(request).equals(detail.getProvider())) {
-        response = ssoProvider.response(request, detail, properties);
-        break;
-      }
-    }
-    return Optional.ofNullable(response);
-  }
-
-  private TokenInfo buildToken(final AuthRequest request, final DelegatedRequestDetails detail,
+  private TokenInfo buildToken(final AuthRequest request, final DelegatedLoginEndpoint endpoint,
       ResponseInfo response) {
     String innerToken = response.getInnerToken();
     TokenInfo json = new TokenInfo();
     json.setRequest(request);
-    json.setProvider(detail.getProvider());
-    json.setExternUrl(detail.getExternalUrl());
+    json.setProvider(endpoint.getProvider());
+    json.setExternUrl(endpoint.getExternalUrl());
     json.setInnerToken(innerToken);
     return json;
   }

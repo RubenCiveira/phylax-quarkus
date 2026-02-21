@@ -8,17 +8,17 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 import net.civeira.phylax.features.oauth.token.domain.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class RefreshGranter implements TokenGranter {
   private final JwtTokenBuilder verifier;
-  private final UserLoginSpi loginApi;
+  private final LoginUsecase loginUsecase;
 
   @Override
   public boolean canHandle(String grantType) {
@@ -33,7 +33,7 @@ public class RefreshGranter implements TokenGranter {
         verifier.verifyRefresh(first(paramMap, "refresh_token"), request.getTenant());
     if (verifyRefresh.isPresent()) {
       String username = verifyRefresh.get();
-      result = loginApi.validatePreAuthenticated(request, username, client, Arrays.asList());
+      result = loginUsecase.fillPreAuthenticated(request, username, client, Arrays.asList());
     } else {
       result = AuthenticationResult.notAllowed(request.getTenant(), "", "invalid token");
     }
