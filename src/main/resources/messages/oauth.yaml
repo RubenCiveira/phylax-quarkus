@@ -1,0 +1,54 @@
+login:
+  title: "Sign in"
+  error-format: "{0}"
+  help: "Sign in to {0}"
+  username: "Username"
+  password: "Password"
+  recover-label: "Forgot password?"
+  enter: "Sign in"
+
+recover:
+  title: "Password recovery"
+  error-format: "{0}"
+  help: "Enter your email to receive a recovery link"
+  email: "Email"
+  send: "Send"
+  back-label: "Back to login"
+  back-text: "{0}"
+
+mfa:
+  title: "Multi-factor authentication"
+  error-format: "{0}"
+  help: "Enter your authentication code"
+  code: "Code"
+  send: "Verify"
+  back-label: "Back"
+  back-text: "{0}"
+
+newmfa:
+  title: "Set up authenticator"
+  error-format: "{0}"
+  help: "Scan the QR code and enter the code"
+  code: "Code"
+  send: "Verify"
+  back-label: "Back"
+  back-text: "{0}"
+
+chpass:
+  title: "Change password"
+  error-format: "{0}"
+  help: "Enter your current and new password"
+  current: "Current password"
+  newpass: "New password"
+  send: "Change"
+  back-label: "Back"
+  back-text: "{0}"
+
+consent:
+  title: "Permissions"
+  error-format: "{0}"
+  help: "The application requests the following permissions"
+  code: "Accept"
+  send: "Accept"
+  back-label: "Deny"
+  back-text: "{0}"

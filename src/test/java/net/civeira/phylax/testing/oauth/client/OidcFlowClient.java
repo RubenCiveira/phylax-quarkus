@@ -178,7 +178,7 @@ public class OidcFlowClient {
         .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE)
         .queryParam("username", username).formParam("recovercode", recoverCode)
         .formParam("code", recoverCode).formParam("password", newPassword)
-        .post("/oauth/openid/" + tenant + "/recover");
+        .formParam("csid", OidcTestFixtures.CSID).post("/oauth/openid/" + tenant + "/recover");
   }
 
   private io.restassured.specification.RequestSpecification baseAuthPost(String tenant) {

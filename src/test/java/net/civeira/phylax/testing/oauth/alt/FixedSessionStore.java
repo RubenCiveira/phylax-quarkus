@@ -20,6 +20,9 @@ public class FixedSessionStore implements SessionStoreGateway {
 
   @Override
   public Optional<SessionInfo> loadSession(String state) {
+    if (state == null || state.isBlank()) {
+      return Optional.empty();
+    }
     return Optional.ofNullable(sessions.get(state));
   }
 
