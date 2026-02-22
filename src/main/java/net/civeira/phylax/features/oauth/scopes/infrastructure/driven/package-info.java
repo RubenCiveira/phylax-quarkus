@@ -1,0 +1,14 @@
+/**
+ * Driven adapters for scope consent.
+ *
+ * Responsibilities: - Persist and retrieve scope consent records. - Implement scope consent
+ * gateways.
+ *
+ * Design notes: - Encapsulates storage logic and mapping. - Keeps domain decoupled from
+ * persistence.
+ *
+ * Dependencies: - Depends on scopes domain gateways.
+ *
+ * Stability: persistence adapters.
+ */
+package net.civeira.phylax.features.oauth.scopes.infrastructure.driven;

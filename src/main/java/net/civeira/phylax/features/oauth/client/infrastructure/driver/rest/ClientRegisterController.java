@@ -9,10 +9,28 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * REST controller for client registration endpoints.
+ *
+ * Responsibilities: - Reserve the client registration endpoint path. - Return forbidden responses
+ * until registration is enabled.
+ *
+ * Design notes: - Placeholder controller for future registration flows. - Keeps endpoint routing
+ * stable for clients.
+ */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class ClientRegisterController {
+  /**
+   * Handles dynamic client registration requests.
+   *
+   * Currently returns forbidden for all requests. Reserved for future registration implementation.
+   *
+   * @param tenant tenant identifier
+   * @param paramMap request parameters
+   * @return forbidden response
+   */
   @POST
   @Path("oauth/openid/{tenant}/connect")
   public Response device(final @PathParam("tenant") String tenant,

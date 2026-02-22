@@ -14,14 +14,42 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 
+/**
+ * Helper for building HTML responses with token signing and field encryption.
+ *
+ * Responsibilities: - Create script snippets used by HTML controllers. - Encrypt sensitive fields
+ * before form submission.
+ *
+ * Design notes: - Uses temporal keys for signing and encryption. - Encapsulates JS snippet
+ * generation logic.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class SecureHtmlBuilder {
   @Getter
+  /**
+   * Script snippet with optional JS dependencies.
+   *
+   * Used to compose secure HTML behaviors. Holds the JS code and required libraries.
+   */
   public static class Snipped {
+    /**
+     * JavaScript code to be executed.
+     */
     private final String code;
+    /**
+     * Dependency script file names required by the snippet.
+     */
     private final String[] dependecy;
 
+    /**
+     * Creates a snippet with the given code and dependencies.
+     *
+     * Used internally to build secure HTML scripts. Dependencies are included as script tags.
+     *
+     * @param code JavaScript code
+     * @param dependency script dependencies
+     */
     private Snipped(String code, String... dependency) {
       this.code = code;
       this.dependecy = dependency;
@@ -30,34 +58,99 @@ public class SecureHtmlBuilder {
 
   @Getter
   @Builder
+  /**
+   * Definition for transferring encrypted fields on form submit.
+   *
+   * Holds the source field and target field names. Used to replace plaintext with encrypted values.
+   */
   public static class EncrytFieldTransfer {
+    /**
+     * Target field to receive encrypted value.
+     */
     public final String to;
+    /**
+     * Source field containing plaintext value.
+     */
     public final String from;
   }
 
+  /**
+   * Gateway used to retrieve temporal keys.
+   */
   private final TemporalKeysGateway adapter;
+  /**
+   * Cipher service used to encrypt and decrypt fields.
+   */
   private final AesCipherService cipher;
+  /**
+   * Random generator used for snippet identifiers.
+   */
   private final SecureRandom random = new SecureRandom(); // Compliant for security-sensitive use
                                                           // cases
 
 
+  /**
+   * Builds a snippet that signs a token and submits a form.
+   *
+   * The token is written to the given input element. The form is submitted automatically after
+   * signing.
+   *
+   * @param name input element name for the token
+   * @param form form identifier to submit
+   * @return snippet with JS and dependencies
+   */
   public Snipped addSignAndSend(String name, String form) {
     return addSign(name, true, form);
   }
 
+  /**
+   * Builds a snippet that signs a token without submitting.
+   *
+   * The token is written to the given input element. No form submission is performed automatically.
+   *
+   * @param name input element name for the token
+   * @return snippet with JS and dependencies
+   */
   public Snipped addSign(String name) {
     return addSign(name, false, null);
   }
 
+  /**
+   * Decrypts a value using the current temporal key.
+   *
+   * Returns an empty string when decryption fails. The decryption is performed using the configured
+   * cipher.
+   *
+   * @param value encrypted value
+   * @return decrypted value or empty string
+   */
   public String decrypt(String value) {
     String secret = adapter.currentKey();
     return cipher.decrypt(value, secret).orElse("");
   }
 
+  /**
+   * Builds a snippet that focuses a specific input field.
+   *
+   * Used to improve usability when rendering forms. Generates a simple DOM focus instruction.
+   *
+   * @param name input element name
+   * @return snippet with JS code
+   */
   public Snipped focusOn(String name) {
     return new Snipped("document.getElementById('" + name + "').focus();");
   }
 
+  /**
+   * Builds a snippet that encrypts fields before submission.
+   *
+   * The plaintext values are replaced with encrypted content. The script runs on form submit with
+   * required dependencies.
+   *
+   * @param fields list of field transfers
+   * @param form form identifier
+   * @return snippet with JS and dependencies
+   */
   public Snipped cypher(List<EncrytFieldTransfer> fields, String form) {
     String secret = adapter.currentKey();
 
@@ -80,6 +173,15 @@ public class SecureHtmlBuilder {
         + "});" + "", "oauth.min.js");
   }
 
+  /**
+   * Builds HTML script tags and a combined script block.
+   *
+   * Ensures each dependency is included only once. Combines snippets into a single DOMContentLoaded
+   * handler.
+   *
+   * @param spnippeds snippets to include
+   * @return HTML script tags and combined script block
+   */
   public String configureScripts(Snipped... spnippeds) {
     String imp = "";
     String code = "";
@@ -101,6 +203,17 @@ public class SecureHtmlBuilder {
         + "</script>" + "";
   }
 
+  /**
+   * Builds a snippet that signs a token and optionally submits a form.
+   *
+   * Internal helper used by addSign and addSignAndSend. Adds required JS dependencies for token
+   * signing.
+   *
+   * @param name input element name
+   * @param send whether to submit the form
+   * @param form form identifier
+   * @return snippet with JS and dependencies
+   */
   private Snipped addSign(String name, boolean send, String form) {
     String secret = adapter.currentKey();
     return new Snipped(
@@ -110,14 +223,41 @@ public class SecureHtmlBuilder {
         "jsrsasign-jwths-min.js", "oauth.min.js");
   }
 
+  /**
+   * Verifies a signed token with the temporal key adapter.
+   *
+   * Returns the verified value when the token is valid. Returns an empty optional when verification
+   * fails.
+   *
+   * @param token signed token value
+   * @return optional verified value
+   */
   public Optional<String> verifyToken(String token) {
     return adapter.verifyToken(token);
   }
 
+  /**
+   * Builds a secure HTML response from a response builder.
+   *
+   * This is a hook for adding additional security headers. Currently returns the built response
+   * unchanged.
+   *
+   * @param builder response builder
+   * @return built response
+   */
   public Response secureHtmlResponse(ResponseBuilder builder) {
     return builder.build();
   }
 
+  /**
+   * Builds a secure redirect response from a response builder.
+   *
+   * This is a hook for adding additional security headers. Currently returns the built response
+   * unchanged.
+   *
+   * @param builder response builder
+   * @return built response
+   */
   public Response secureRedirectResponse(ResponseBuilder builder) {
     return builder.build();
   }

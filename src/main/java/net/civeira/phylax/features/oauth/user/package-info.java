@@ -1,0 +1,14 @@
+/**
+ * OAuth user management and consents.
+ *
+ * Responsibilities: - Manage user registration and login flows. - Handle user consent and password
+ * changes.
+ *
+ * Design notes: - Domain models capture registration and consent. - Adapters implement persistence
+ * operations.
+ *
+ * Dependencies: - Integrates with authentication and MFA.
+ *
+ * Stability: internal user module.
+ */
+package net.civeira.phylax.features.oauth.user;

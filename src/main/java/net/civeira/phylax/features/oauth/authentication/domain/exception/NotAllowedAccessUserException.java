@@ -3,10 +3,29 @@ package net.civeira.phylax.features.oauth.authentication.domain.exception;
 
 import lombok.Getter;
 
+/**
+ * Exception raised when a user access is not allowed.
+ *
+ * Responsibilities: - Signal that access is forbidden for a user. - Carry a reason used for
+ * response formatting.
+ *
+ * Design notes: - Used for grant restrictions and policy rules. - Extends AuthenticationException
+ * for uniform handling.
+ */
 @Getter
 public class NotAllowedAccessUserException extends AuthenticationException {
   private static final long serialVersionUID = -6052178794619376950L;
 
+  /**
+   * Creates a not-allowed exception for the user.
+   *
+   * The provided reason is exposed in response entities. Used when policy denies access to the
+   * flow.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param reason failure reason
+   */
   public NotAllowedAccessUserException(String tenant, String username, String reason) {
     super(tenant, username, reason);
   }

@@ -3,28 +3,76 @@ package net.civeira.phylax.features.oauth.user.domain;
 
 import lombok.Getter;
 
+/**
+ * Result of a user registration request.
+ *
+ * Responsibilities: - Represent registration outcomes and username. - Provide factory methods for
+ * common statuses.
+ *
+ * Design notes: - Immutable value object with static factories. - Used by registration flows and
+ * UI.
+ */
 @Getter
 public class RegistrationResult {
 
+  /**
+   * Status of the registration process.
+   */
   public enum Status {
     OK, PENDING, CANCEL
   }
 
+  /**
+   * Registration status.
+   */
   private final Status status;
+  /**
+   * Username when registration succeeds.
+   */
   private final String username;
 
+  /**
+   * Builds a successful registration result.
+   *
+   * Sets the status to OK and includes username. Used when registration is immediately activated.
+   *
+   * @param username registered username
+   * @return registration result
+   */
   public static RegistrationResult ok(String username) {
     return new RegistrationResult(Status.OK, username);
   }
 
+  /**
+   * Builds a pending registration result.
+   *
+   * Sets the status to PENDING without username. Used when email verification is required.
+   *
+   * @return registration result
+   */
   public static RegistrationResult pending() {
     return new RegistrationResult(Status.PENDING, null);
   }
 
+  /**
+   * Builds a cancelled registration result.
+   *
+   * Sets the status to CANCEL without username. Used when registration cannot be completed.
+   *
+   * @return registration result
+   */
   public static RegistrationResult cancel() {
     return new RegistrationResult(Status.CANCEL, null);
   }
 
+  /**
+   * Creates a registration result instance.
+   *
+   * Private constructor ensures use of factory methods. Stores status and username.
+   *
+   * @param status registration status
+   * @param username username when available
+   */
   private RegistrationResult(Status status, String username) {
     this.status = status;
     this.username = username;

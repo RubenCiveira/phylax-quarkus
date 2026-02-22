@@ -15,32 +15,78 @@ import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedAcces
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedStoreGateway;
 
 /**
- * Adapter that bridges the unified {@link DelegateLoginGateway} to the existing legacy
- * {@link DelegatedStoreGateway} (token persistence) and {@link DelegatedAccessProviderGateway}
- * (provider registry + username resolution).
+ * Adapter that bridges the unified DelegateLoginGateway to legacy gateways.
+ *
+ * Responsibilities: - Delegate token storage to DelegatedStoreGateway. - Delegate provider lookup
+ * to DelegatedAccessProviderGateway.
+ *
+ * Design notes: - Provides backward compatibility for existing gateways. - Keeps unified gateway
+ * contract simple.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class DelegateLoginAdapter implements DelegateLoginGateway {
 
+  /**
+   * Legacy store for delegated tokens.
+   */
   private final DelegatedStoreGateway store;
+  /**
+   * Legacy provider registry and username resolver.
+   */
   private final DelegatedAccessProviderGateway validator;
 
+  /**
+   * Loads a stored delegated token by code.
+   *
+   * Delegates to the legacy store gateway. Returns empty when the code is unknown.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @return optional token info
+   */
   @Override
   public Optional<TokenInfo> loadToken(AuthRequest request, String code) {
     return store.load(request, code);
   }
 
+  /**
+   * Stores a delegated token under a temporary code.
+   *
+   * Delegates to the legacy store gateway. Used to bridge browser callbacks to token granters.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @param token delegated token info
+   */
   @Override
   public void saveToken(AuthRequest request, String code, TokenInfo token) {
     store.save(request, code, token);
   }
 
+  /**
+   * Returns the delegated providers available for the request.
+   *
+   * Delegates to the legacy provider gateway. Used by UI to render provider options.
+   *
+   * @param request auth request context
+   * @return list of delegated providers
+   */
   @Override
   public List<DelegatedAccessExternalProvider> providers(AuthRequest request) {
     return validator.providers(request);
   }
 
+  /**
+   * Resolves a local username from provider user data.
+   *
+   * Delegates to the legacy provider gateway. Returns empty when no mapping is found.
+   *
+   * @param request auth request context
+   * @param provider provider identifier
+   * @param userInfo user data from provider
+   * @return optional username
+   */
   @Override
   public Optional<String> retrieveUsername(AuthRequest request, String provider,
       UserData userInfo) {

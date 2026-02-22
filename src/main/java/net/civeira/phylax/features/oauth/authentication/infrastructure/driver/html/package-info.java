@@ -1,0 +1,13 @@
+/**
+ * HTML controllers for authentication flows.
+ *
+ * Responsibilities: - Render login, consent, and MFA pages. - Drive browser-based OAuth
+ * authorization.
+ *
+ * Design notes: - Builds secure HTML using helper utilities. - Supports delegated login providers.
+ *
+ * Dependencies: - Uses application services and view helpers.
+ *
+ * Stability: internal UI delivery.
+ */
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;

@@ -8,25 +8,78 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
 
+/**
+ * Application service for MFA operations.
+ *
+ * Responsibilities: - Provide MFA enrollment configuration. - Verify OTP codes for login and
+ * enrollment.
+ *
+ * Design notes: - Delegates to UserMfaGateway for persistence. - Keeps transport concerns out of
+ * MFA logic.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class UserMfa {
 
+  /**
+   * Gateway for MFA configuration and validation.
+   */
   private final UserMfaGateway gateway;
 
+  /**
+   * Returns MFA enrollment configuration for a user.
+   *
+   * Builds public data such as QR code and messages. Delegates the generation to the gateway
+   * implementation.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param locale locale for messages
+   * @return MFA enrollment response
+   */
   public PublicLoginMfaBuildResponse configurationForNewMfa(String tenant, String username,
       Locale locale) {
     return gateway.configurationForNewMfa(tenant, username, locale);
   }
 
+  /**
+   * Verifies an OTP code for login.
+   *
+   * Delegates OTP verification to the gateway. Returns true when the code is valid.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param otp one-time password
+   * @return true when the OTP is valid
+   */
   public boolean verifyOtp(String tenant, String username, String otp) {
     return gateway.verifyOtp(tenant, username, otp);
   }
 
+  /**
+   * Verifies an OTP code during MFA enrollment.
+   *
+   * Delegates OTP verification to the gateway. Returns true when the code is valid.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param otp one-time password
+   * @return true when the OTP is valid
+   */
   public boolean verifyNewOtp(String tenant, String username, String otp) {
     return gateway.verifyNewOtp(tenant, username, otp);
   }
 
+  /**
+   * Stores an MFA seed for a user.
+   *
+   * Persists the seed so future OTPs can be verified. Delegates storage to the gateway
+   * implementation.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param seed MFA seed value
+   */
   public void storeSeed(String tenant, String username, String seed) {
     gateway.storeSeed(tenant, username, seed);
   }

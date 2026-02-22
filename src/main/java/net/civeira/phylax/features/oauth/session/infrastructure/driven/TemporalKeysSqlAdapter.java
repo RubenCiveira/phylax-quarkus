@@ -32,37 +32,90 @@ import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 
+/**
+ * JDBC adapter for temporal keys and auth codes.
+ *
+ * Responsibilities: - Store and rotate temporal encryption keys. - Persist and retrieve temporary
+ * authorization codes.
+ *
+ * Design notes: - Uses _oauth_temporal_keys and _oauth_temporal_codes tables. - Supports key
+ * rotation with fallback decryption.
+ */
 @Slf4j
 @RequestScoped
 @RequiredArgsConstructor
-/**
- * Tables: _oauth_temporal_keys, _oauth_temporal_codes
- */
 public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
   @Builder
   @Getter
+  /**
+   * Wrapper for current and previous temporal secrets.
+   */
   private static class KeyWrapper {
+    /**
+     * Previous secret used for fallback decryption.
+     */
     final String oldSecret;
+    /**
+     * Current secret used for encryption and signing.
+     */
     final String secret;
   }
 
+  /**
+   * Data source used for JDBC operations.
+   */
   private final DataSource datasource;
+  /**
+   * Cipher service used for encrypting and decrypting values.
+   */
   private final AesCipherService cipher;
+  /**
+   * JSON mapper used to serialize temporal auth codes.
+   */
   private final ObjectMapper mapper;
 
+  /**
+   * Duration for which a temporal key is valid.
+   */
   private final Duration keyDuration = Duration.of(1, ChronoUnit.HOURS);
+  /**
+   * Duration for which a temporal auth code is valid.
+   */
   private final Duration codeDuration = Duration.of(3, ChronoUnit.MINUTES);
 
+  /**
+   * Returns the current temporal secret key.
+   *
+   * Rotates keys when none are active. Returns the active secret for encryption.
+   *
+   * @return current secret key
+   */
   @Override
   public String currentKey() {
     return getCurrent().orElseGet(this::rotateKeys).secret;
   }
 
+  /**
+   * Encrypts a value using the current temporal key.
+   *
+   * Delegates encryption to the cipher service. Returns the encrypted string output.
+   *
+   * @param value plain value
+   * @return encrypted value
+   */
   @Override
   public String encrypt(String value) {
     return cipher.encrypt(value, currentKey());
   }
 
+  /**
+   * Verifies and decrypts a value using current or previous key.
+   *
+   * Attempts decryption with the current key first. Falls back to the previous key if needed.
+   *
+   * @param value encrypted value
+   * @return optional decrypted value
+   */
   @Override
   public Optional<String> verifyCypher(String value) {
     KeyWrapper wrapper = getCurrent().orElseThrow();
@@ -70,6 +123,14 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     return current.isPresent() ? current : cipher.decrypt(value, wrapper.oldSecret);
   }
 
+  /**
+   * Registers a temporary authorization code.
+   *
+   * Serializes code payload and stores it with expiration. Returns the generated code identifier.
+   *
+   * @param code temporal auth code payload
+   * @return generated code identifier
+   */
   @Override
   public String registerTemporalAuthCode(TemporalAuthCode code) {
     String sql = "INSERT INTO _oauth_temporal_codes(code, code_data, expiration) VALUES(?,?,?)";
@@ -92,6 +153,15 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     }
   }
 
+  /**
+   * Retrieves and removes a temporary authorization code.
+   *
+   * Removes expired codes and deletes the retrieved code. Returns empty when the code is missing or
+   * expired.
+   *
+   * @param code code identifier
+   * @return optional temporal auth code
+   */
   @Override
   public Optional<TemporalAuthCode> retrieveTemporalAuthCode(String code) {
     Optional<TemporalAuthCode> response;
@@ -114,12 +184,29 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     }
   }
 
+  /**
+   * Verifies a signed token and returns the identity claim.
+   *
+   * Uses current and previous secrets for verification. Returns empty when verification fails.
+   *
+   * @param token signed token
+   * @return optional identity value
+   */
   @Override
   public Optional<String> verifyToken(String token) {
     KeyWrapper wrapper = getCurrent().orElseThrow();
     return verifyToken(token, wrapper.secret, wrapper.oldSecret);
   }
 
+  /**
+   * Removes a temporary authorization code from storage.
+   *
+   * Used after successful code retrieval. Throws when SQL operations fail.
+   *
+   * @param connection SQL connection
+   * @param code code identifier
+   * @throws SQLException when deletion fails
+   */
   private void removeCode(Connection connection, String code) throws SQLException {
     String sql = "DELETE FROM _oauth_temporal_codes where code = ? ";
     try (PreparedStatement prepareStatement = connection.prepareStatement(sql)) {
@@ -128,6 +215,14 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     }
   }
 
+  /**
+   * Deletes expired temporary authorization codes.
+   *
+   * Uses the current timestamp to remove stale codes. Keeps the temporal codes table clean.
+   *
+   * @param connection SQL connection
+   * @throws SQLException when deletion fails
+   */
   private void clearCodes(Connection connection) throws SQLException {
     String sql = "DELETE FROM _oauth_temporal_codes where expiration < ?";
     try (PreparedStatement prepareStatement = connection.prepareStatement(sql)) {
@@ -136,6 +231,14 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     }
   }
 
+  /**
+   * Rotates temporal keys and persists new secrets.
+   *
+   * Stores current and previous secrets with a new expiration. Uses a generated secure random
+   * secret.
+   *
+   * @return key wrapper with current and old secrets
+   */
   private KeyWrapper rotateKeys() {
     // FIX: rotar cada hora.... sin schedurle: poniendo un expires en la tabla.
     Optional<KeyWrapper> current = getCurrent();
@@ -159,6 +262,13 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     }
   }
 
+  /**
+   * Loads the current key wrapper from storage.
+   *
+   * Returns empty when no active key exists. Used to determine whether rotation is required.
+   *
+   * @return optional key wrapper
+   */
   private Optional<KeyWrapper> getCurrent() {
     try (Connection connection = datasource.getConnection()) {
       try (PreparedStatement prepareStatement = connection
@@ -178,6 +288,17 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     }
   }
 
+  /**
+   * Verifies a token using the provided secrets.
+   *
+   * Attempts verification with the primary key first. Falls back to the secondary key when
+   * provided.
+   *
+   * @param token signed token
+   * @param key primary secret
+   * @param fallback fallback secret
+   * @return optional identity value
+   */
   private Optional<String> verifyToken(String token, String key, String fallback) {
     try {
       Algorithm algorithm = Algorithm.HMAC256(key);

@@ -1,0 +1,14 @@
+/**
+ * Use cases for scope consent.
+ *
+ * Responsibilities: - Orchestrate scope consent decisions. - Provide application-level consent
+ * operations.
+ *
+ * Design notes: - Keeps flow logic independent of transport. - Delegates storage to domain
+ * gateways.
+ *
+ * Dependencies: - Depends on scopes domain gateways.
+ *
+ * Stability: internal application services.
+ */
+package net.civeira.phylax.features.oauth.scopes.application;

@@ -1,0 +1,13 @@
+/**
+ * Infrastructure adapters for OIDC.
+ *
+ * Responsibilities: - Expose discovery endpoints to clients. - Map domain metadata to HTTP
+ * responses.
+ *
+ * Design notes: - Driver adapters handle REST delivery. - Keeps OIDC metadata logic isolated.
+ *
+ * Dependencies: - Uses OIDC domain models.
+ *
+ * Stability: internal infrastructure layer.
+ */
+package net.civeira.phylax.features.oauth.oidc.infrastructure;

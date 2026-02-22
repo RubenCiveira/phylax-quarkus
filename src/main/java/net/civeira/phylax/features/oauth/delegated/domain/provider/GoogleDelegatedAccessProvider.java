@@ -22,52 +22,138 @@ import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExterna
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
 
+/**
+ * Delegated access provider implementation for Google OAuth.
+ *
+ * Responsibilities: - Build Google authorization requests. - Exchange authorization codes for user
+ * information.
+ *
+ * Design notes: - Uses Google OAuth endpoints and userinfo API. - Returns minimal user data for
+ * mapping.
+ */
 @RequiredArgsConstructor
 public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalProvider {
   @Data
+  /**
+   * Google userinfo response payload.
+   *
+   * Contains name, email, and profile metadata. Used to derive local user data.
+   */
   public static class GoogleUserData {
+    /**
+     * Given name from Google profile.
+     */
     @JsonProperty("given_name")
     private String name;
+    /**
+     * Family name from Google profile.
+     */
     @JsonProperty("family_name")
     private String surname;
+    /**
+     * Email address from Google profile.
+     */
     @JsonProperty("email")
     private String email;
+    /**
+     * Whether the email has been verified.
+     */
     @JsonProperty("verified_email")
     private boolean verified;
+    /**
+     * URL for the user's profile picture.
+     */
     @JsonProperty("picture")
     private String userPictureUrl;
   }
 
   @Data
+  /**
+   * Google token response payload.
+   *
+   * Contains the access token used to fetch user info. Used after exchanging the authorization
+   * code.
+   */
   public static class GoogleAuth {
+    /**
+     * Access token returned by Google.
+     */
     @JsonProperty("access_token")
     private String accessToken;
   }
 
   @Data
+  /**
+   * Google token exchange request payload.
+   *
+   * Contains client credentials and authorization code. Serialized to JSON for token exchange.
+   */
   public static class GoogleCheck {
+    /**
+     * Google client id.
+     */
     @JsonProperty("client_id")
     private String clientId;
+    /**
+     * Google client secret.
+     */
     @JsonProperty("client_secret")
     private String clientSecret;
+    /**
+     * Authorization code returned by Google.
+     */
     @JsonProperty("code")
     private String code;
+    /**
+     * Grant type used for exchange.
+     */
     @JsonProperty("grant_type")
     private String grantType;
+    /**
+     * Redirect URI used in the authorization request.
+     */
     @JsonProperty("redirect_uri")
     private String redirect;
   }
 
+  /**
+   * Provider identifier for this instance.
+   */
   private final String id;
+  /**
+   * Google OAuth client id.
+   */
   private final String googleClientId;
+  /**
+   * Google OAuth client secret.
+   */
   private final String googleSecretId;
+  /**
+   * Whether the provider should auto-submit in the UI.
+   */
   private final boolean automatic;
 
+  /**
+   * Returns the provider identifier.
+   *
+   * Used to select the Google provider by id. The id is configured per instance.
+   *
+   * @param request auth request context
+   * @return provider identifier
+   */
   @Override
   public String getId(AuthRequest request) {
     return id;
   }
 
+  /**
+   * Returns the provider description for UI rendering.
+   *
+   * Includes name, logo, and automation flag. Used to render provider buttons in the login UI.
+   *
+   * @param request auth request context
+   * @return provider description
+   */
   @Override
   public DelegatedProviderDescription info(AuthRequest request) {
     DelegatedProviderDescription pd = new DelegatedProviderDescription();
@@ -78,6 +164,16 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
     return pd;
   }
 
+  /**
+   * Builds the Google authorization request info.
+   *
+   * Provides target URL and required parameters for OAuth. Uses GET redirect with configured
+   * scopes.
+   *
+   * @param request auth request context
+   * @param detail delegated request details
+   * @return request information
+   */
   @Override
   public RequestInfo request(AuthRequest request, DelegatedRequestDetails detail) {
     RequestInfo info = new RequestInfo();
@@ -96,6 +192,17 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
     return info;
   }
 
+  /**
+   * Processes Google redirect response parameters.
+   *
+   * Extracts the authorization code and returns response info. The inner token holds the
+   * authorization code.
+   *
+   * @param request auth request context
+   * @param detail delegated request details
+   * @param params response parameters
+   * @return response information
+   */
   @Override
   public ResponseInfo response(AuthRequest request, DelegatedRequestDetails detail,
       Map<String, String[]> params) {
@@ -107,6 +214,17 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
     return response;
   }
 
+  /**
+   * Retrieves user information from Google using the authorization code.
+   *
+   * Exchanges the code for an access token and queries userinfo. Returns delegated user data
+   * derived from the profile.
+   *
+   * @param request auth request context
+   * @param detail delegated request details
+   * @param innerToken authorization code
+   * @return user data
+   */
   @Override
   public UserData userInfo(AuthRequest request, DelegatedRequestDetails detail, String innerToken) {
     HttpClient client = HttpClient.newHttpClient();

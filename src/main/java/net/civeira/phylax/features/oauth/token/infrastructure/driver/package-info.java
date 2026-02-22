@@ -1,0 +1,13 @@
+/**
+ * Driver adapters for token integration.
+ *
+ * Responsibilities: - Provide integration points for token-based auth. - Map token data into
+ * application principals.
+ *
+ * Design notes: - Keeps security integration localized. - Delegates token parsing to services.
+ *
+ * Dependencies: - Uses token application services.
+ *
+ * Stability: internal integration layer.
+ */
+package net.civeira.phylax.features.oauth.token.infrastructure.driver;

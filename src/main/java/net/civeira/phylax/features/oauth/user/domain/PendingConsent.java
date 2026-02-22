@@ -3,16 +3,48 @@ package net.civeira.phylax.features.oauth.user.domain;
 
 import lombok.Getter;
 
+/**
+ * Pending consent data for a relying party.
+ *
+ * Responsibilities: - Hold relying party identifier and consent text. - Provide a factory method
+ * for creation.
+ *
+ * Design notes: - Immutable value object with private constructor. - Used by consent flows to
+ * render terms.
+ */
 @Getter
 public class PendingConsent {
 
+  /**
+   * Relying party identifier requiring consent.
+   */
   private final String relyingParty;
+  /**
+   * Consent text to display for approval.
+   */
   private final String consentText;
 
+  /**
+   * Creates a pending consent instance.
+   *
+   * Used to build a simple immutable consent payload. Returns a new instance with provided values.
+   *
+   * @param relyingParty relying party identifier
+   * @param consentText consent text
+   * @return pending consent instance
+   */
   public static PendingConsent of(String relyingParty, String consentText) {
     return new PendingConsent(relyingParty, consentText);
   }
 
+  /**
+   * Creates a pending consent instance.
+   *
+   * Private constructor ensures use of factory method. Stores relying party and consent text.
+   *
+   * @param relyingParty relying party identifier
+   * @param consentText consent text
+   */
   private PendingConsent(String relyingParty, String consentText) {
     this.relyingParty = relyingParty;
     this.consentText = consentText;

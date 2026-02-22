@@ -1,0 +1,12 @@
+/**
+ * Domain model for sessions and temporary codes.
+ *
+ * Responsibilities: - Represent session info and auth codes. - Store temporal key data structures.
+ *
+ * Design notes: - Immutable data structures for session state. - Used across multiple OAuth flows.
+ *
+ * Dependencies: - Minimal dependencies on other modules.
+ *
+ * Stability: core session domain.
+ */
+package net.civeira.phylax.features.oauth.session.domain;

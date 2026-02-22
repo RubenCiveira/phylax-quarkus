@@ -8,23 +8,47 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationDat
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.EventNotifierGateway;
 
+/**
+ * Adapter that publishes authentication events to the CDI event bus.
+ *
+ * Responsibilities: - Emit login success events to CDI listeners. - Emit login failure events to
+ * CDI listeners.
+ *
+ * Design notes: - Keeps event emission outside of domain logic. - Uses CDI Event to support
+ * multiple subscribers.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class EventNotifierAppEventAdapter implements EventNotifierGateway {
   /**
-   * El servicio de eventos para errores en el login
+   * Event channel for login failures. Used to notify listeners about authentication errors.
    */
   private final Event<AuthenticationException> exceptionEvent;
   /**
-   * El servicio de eventos para login correcto
+   * Event channel for successful logins. Used to notify listeners about successful authentication.
    */
   private final Event<AuthenticationData> loginEvent;
 
+  /**
+   * Publishes a successful login event.
+   *
+   * Sends the authentication data to CDI subscribers. Used for audit and monitoring integrations.
+   *
+   * @param data authentication data
+   */
   @Override
   public void loginOk(AuthenticationData data) {
     loginEvent.fire(data);
   }
 
+  /**
+   * Publishes a failed login event.
+   *
+   * Sends the authentication exception to CDI subscribers. Used for audit and monitoring
+   * integrations.
+   *
+   * @param fail authentication exception
+   */
   @Override
   public void loginFail(AuthenticationException fail) {
     exceptionEvent.fire(fail);

@@ -15,18 +15,54 @@ import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
+/**
+ * Token granter for the MFA grant.
+ *
+ * Responsibilities: - Validate MFA tokens and OTP codes. - Produce authenticated results with MFA
+ * challenge satisfied.
+ *
+ * Design notes: - Uses JwtTokenBuilder to verify MFA tokens. - Delegates OTP validation to UserMfa.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class MfaGranter implements TokenGranter {
+  /**
+   * Verifies MFA tokens and extracts usernames.
+   */
   private final JwtTokenBuilder verifier;
+  /**
+   * Service for validating OTP codes.
+   */
   private final UserMfa userMfa;
+  /**
+   * Use case for loading pre-authenticated user context.
+   */
   private final LoginUsecase loginUsecase;
 
+  /**
+   * Indicates whether the MFA grant can be handled.
+   *
+   * Matches the "mfa" grant type exactly. Used by the controller to select a granter.
+   *
+   * @param grantType grant type name
+   * @return true when the grant type is mfa
+   */
   @Override
   public boolean canHandle(String grantType) {
     return "mfa".equals(grantType);
   }
 
+  /**
+   * Authenticates an MFA grant request.
+   *
+   * Verifies the MFA token, then validates the OTP code. Returns a not-allowed result when
+   * validation fails.
+   *
+   * @param request parsed authorization request
+   * @param client resolved client details
+   * @param paramMap request parameters
+   * @return the authentication result
+   */
   @Override
   public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
@@ -47,6 +83,15 @@ public class MfaGranter implements TokenGranter {
     return result;
   }
 
+  /**
+   * Returns the first parameter value for the given key.
+   *
+   * Used to extract single-valued OAuth parameters. Returns null when the key is missing.
+   *
+   * @param paramMap request parameters
+   * @param key parameter name
+   * @return the first value or null
+   */
   private String first(Map<String, List<String>> paramMap, String key) {
     return paramMap.containsKey(key) || paramMap.get(key).size() > 0 ? paramMap.get(key).get(0)
         : null;

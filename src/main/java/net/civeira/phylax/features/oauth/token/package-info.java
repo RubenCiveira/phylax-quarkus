@@ -1,0 +1,12 @@
+/**
+ * Models and utilities for OAuth tokens.
+ *
+ * Responsibilities: - Represent access, ID, and MFA tokens. - Provide token construction utilities.
+ *
+ * Design notes: - Domain types used by token builders. - Keeps token semantics centralized.
+ *
+ * Dependencies: - Integrates with key and session modules.
+ *
+ * Stability: core token module.
+ */
+package net.civeira.phylax.features.oauth.token;

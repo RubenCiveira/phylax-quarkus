@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.oidc.infrastructure.driver.rest;
 
 import java.util.Arrays;
+
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -16,16 +17,34 @@ import net.civeira.phylax.features.oauth.oidc.domain.MtlsEndpointAliases;
 import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
 
 /**
- * OpenID Connect Discovery endpoint (RFC 8414 / OpenID Connect Discovery 1.0). Moved from
- * authentication/infrastructure/driver/rest/OpenIdInformationController.
+ * OpenID Connect Discovery endpoint controller.
+ *
+ * Responsibilities: - Serve RFC 8414 / OIDC discovery metadata. - Provide tenant-specific
+ * configuration payloads.
+ *
+ * Design notes: - Uses CurrentRequest for issuer and base URL building. - Centralizes discovery
+ * configuration generation.
  */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class OpenIdConfigurationController {
 
+  /**
+   * Request context used to build public host URLs.
+   */
   private final CurrentRequest current;
 
+  /**
+   * Returns the discovery configuration for a tenant.
+   *
+   * Builds the configuration using the standard base URL. Returns the configuration as a JSON
+   * response.
+   *
+   * @param tenant tenant identifier
+   * @param request request URI info
+   * @return discovery configuration response
+   */
   @GET
   @Path("oauth/openid/{tenant}/configuration")
   public Response tenantType(final @PathParam("tenant") String tenant, @Context UriInfo request) {
@@ -33,6 +52,16 @@ public class OpenIdConfigurationController {
         .build();
   }
 
+  /**
+   * Returns the well-known discovery configuration for a tenant.
+   *
+   * Serves the OIDC standard .well-known endpoint. Returns the configuration as a JSON response.
+   *
+   * @param tenant tenant identifier
+   * @param headers HTTP headers
+   * @param request request URI info
+   * @return discovery configuration response
+   */
   @GET
   @Path("oauth/openid/{tenant}/.well-known/openid-configuration")
   public Response wellKnowTenantType(final @PathParam("tenant") String tenant,
@@ -41,6 +70,16 @@ public class OpenIdConfigurationController {
         .build();
   }
 
+  /**
+   * Builds the OpenID configuration object for a tenant.
+   *
+   * Uses the base URL to assemble endpoint paths. Returns a fully populated discovery
+   * configuration.
+   *
+   * @param base base URL for endpoints
+   * @param tenant tenant identifier
+   * @return openid configuration
+   */
   private OpenIdConfiguration info(String base, String tenant) {
     return OpenIdConfiguration.builder().issuer(issuer(tenant)).authorizationEndpoint(base + "auth")
         .tokenEndpoint(base + "token").introspectionEndpoint(base + "introspect")
@@ -96,6 +135,15 @@ public class OpenIdConfigurationController {
         .authorizationResponseIssParameterSupported(true).build();
   }
 
+  /**
+   * Builds the issuer URL for the given tenant.
+   *
+   * Uses the public host from the current request context. Keeps issuer generation consistent
+   * across endpoints.
+   *
+   * @param tenant tenant identifier
+   * @return issuer URL
+   */
   private String issuer(String tenant) {
     return current.getPublicHost() + "/oauth/openid/" + tenant;
   }

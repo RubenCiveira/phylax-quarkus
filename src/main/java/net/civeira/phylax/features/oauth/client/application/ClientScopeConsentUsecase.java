@@ -7,17 +7,51 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientScopeConsentGateway;
 
+/**
+ * Application service for client scope consent handling.
+ *
+ * Responsibilities: - Retrieve scopes still pending user consent. - Persist accepted scopes for a
+ * client and user.
+ *
+ * Design notes: - Delegates persistence to ClientScopeConsentGateway. - Keeps flow logic
+ * independent of transport.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ClientScopeConsentUsecase {
 
+  /**
+   * Gateway for reading and storing scope consents.
+   */
   private final ClientScopeConsentGateway gateway;
 
+  /**
+   * Returns the scopes pending consent for a user and client.
+   *
+   * Compares requested scopes with stored consents. Returns an empty list when nothing is pending.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param requestedScopes requested scopes
+   * @return list of pending scopes
+   */
   public List<String> getPendingScopes(String tenant, String username, String clientId,
       List<String> requestedScopes) {
     return gateway.getPendingScopes(tenant, username, clientId, requestedScopes);
   }
 
+  /**
+   * Stores accepted scopes for a user and client.
+   *
+   * Persists consent so future requests can be auto-approved. Delegates storage to the gateway
+   * implementation.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param scopes accepted scopes
+   */
   public void storeAcceptedScopes(String tenant, String username, String clientId,
       List<String> scopes) {
     gateway.storeAcceptedScopes(tenant, username, clientId, scopes);

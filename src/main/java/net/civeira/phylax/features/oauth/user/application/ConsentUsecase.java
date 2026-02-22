@@ -10,17 +10,49 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ConsentGateway;
 
+/**
+ * Application service for user consent handling.
+ *
+ * Responsibilities: - Retrieve pending consent text for relying parties. - Persist accepted consent
+ * decisions.
+ *
+ * Design notes: - Delegates persistence to ConsentGateway. - Keeps transport concerns outside of
+ * the use case.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ConsentUsecase {
 
+  /**
+   * Gateway used to retrieve and store consent data.
+   */
   private final ConsentGateway gateway;
 
+  /**
+   * Returns the first pending consent for the user.
+   *
+   * Checks relying parties in the provided audience list. Returns empty when no consent is pending.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param audiences relying parties/audiences
+   * @param locale locale for consent text
+   * @return optional pending consent
+   */
   public Optional<PendingConsent> getPendingConsent(String tenant, String username,
       List<String> audiences, Locale locale) {
     return gateway.getPendingConsent(tenant, username, audiences, locale);
   }
 
+  /**
+   * Stores accepted consent for the relying party.
+   *
+   * Persists the user's decision for future flows. Delegates storage to the consent gateway.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param relyingParty relying party identifier
+   */
   public void storeAcceptedConsent(String tenant, String username, String relyingParty) {
     gateway.storeAcceptedConsent(tenant, username, relyingParty);
   }

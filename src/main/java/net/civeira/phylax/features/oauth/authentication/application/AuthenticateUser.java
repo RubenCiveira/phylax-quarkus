@@ -12,22 +12,29 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 /**
- * Application service that orchestrates user authentication within an OIDC flow. Provides the two
- * main authentication entry-points:
- * <ul>
- * <li>{@link #authenticate} — full credential check (username + password)</li>
- * <li>{@link #preAuthenticate} — re-authentication of an already-identified user (e.g. after MFA,
- * consent, or password-change step)</li>
- * </ul>
+ * Application service that orchestrates user authentication within an OIDC flow.
+ *
+ * Responsibilities: - Handle credential-based authentication requests. - Re-validate users after
+ * challenge steps.
+ *
+ * Design notes: - Delegates credential checks to LoginUsecase. - Keeps transport concerns out of
+ * the use case.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class AuthenticateUser {
 
+  /**
+   * Use case that validates user credentials and pre-authentication state.
+   */
   private final LoginUsecase loginUsecase;
 
   /**
    * Authenticates a user with username and password credentials.
+   *
+   * This method is used for first-factor login within OIDC flows. It forwards inputs to the login
+   * use case without transport details. The returned result encodes success or the required next
+   * challenge.
    *
    * @param request the current OIDC auth request context
    * @param challenges challenges already satisfied in this flow (e.g. MFA_DONE)
@@ -43,7 +50,10 @@ public class AuthenticateUser {
   }
 
   /**
-   * Pre-authenticates a user that has already been identified (e.g. after MFA or consent).
+   * Pre-authenticates a user that has already been identified.
+   *
+   * This is used after challenge steps like MFA or consent. It verifies that the user can proceed
+   * for the current client. The method does not perform password validation.
    *
    * @param request the current OIDC auth request context
    * @param challenges challenges already satisfied in this flow

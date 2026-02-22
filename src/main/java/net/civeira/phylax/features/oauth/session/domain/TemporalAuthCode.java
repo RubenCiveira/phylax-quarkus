@@ -8,12 +8,33 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
+/**
+ * Temporary authorization code payload.
+ *
+ * Responsibilities: - Store auth request data during code flows. - Carry client and authentication
+ * data for exchange.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Stored in temporal key storage with
+ * short TTL.
+ */
 @Builder
 @RequiredArgsConstructor
 @RegisterForReflection
 public class TemporalAuthCode {
+  /**
+   * Authentication data associated with the code.
+   */
   public final AuthenticationData data;
+  /**
+   * Client details associated with the code.
+   */
   public final ClientDetails client;
+  /**
+   * Optional nonce used for OIDC replay protection.
+   */
   public final String nonce;
+  /**
+   * Original auth request context.
+   */
   public final AuthRequest request;
 }

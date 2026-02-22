@@ -8,18 +8,44 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
+/**
+ * Domain port for login validation.
+ *
+ * Responsibilities: - Validate user credentials and challenge requirements. - Load
+ * pre-authenticated user context.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps authentication logic outside the
+ * application layer.
+ */
 public interface LoginGateway {
 
   /**
-   * Valida las credenciales del usuario y aplica todos los checks del flujo de login: tenant,
-   * usuario, password, MFA, términos, scopes.
+   * Validates user credentials and login requirements.
+   *
+   * Applies tenant, user, password, MFA, terms, and scope checks. Returns an AuthenticationResult
+   * describing success or failure.
+   *
+   * @param request auth request context
+   * @param username username
+   * @param password raw password
+   * @param client client details
+   * @param challenges completed challenges
+   * @return authentication result
    */
   AuthenticationResult validateUserData(AuthRequest request, String username, String password,
       ClientDetails client, List<AuthenticationChallege> challenges);
 
   /**
-   * Carga los datos del usuario ya pre-autenticado (por username, sin password). Se usa cuando se
-   * han completado los challenges intermedios.
+   * Loads pre-authenticated user data without password.
+   *
+   * Used when intermediate challenges have been completed. Returns an AuthenticationResult
+   * describing success or failure.
+   *
+   * @param request auth request context
+   * @param username username
+   * @param client client details
+   * @param challenges completed challenges
+   * @return authentication result
    */
   AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
       ClientDetails client, List<AuthenticationChallege> challenges);

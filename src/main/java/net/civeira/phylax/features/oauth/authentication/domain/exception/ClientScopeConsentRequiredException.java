@@ -5,13 +5,38 @@ import java.util.List;
 
 import lombok.Getter;
 
+/**
+ * Exception indicating missing client scope consent.
+ *
+ * Responsibilities: - Carry client identifier for consent routing. - Provide pending scopes
+ * requiring consent.
+ *
+ * Design notes: - Used to redirect to scope-consent UI. - Extends AuthenticationException for
+ * context.
+ */
 @Getter
 public class ClientScopeConsentRequiredException extends AuthenticationException {
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Client identifier requiring scope consent.
+   */
   private final String clientId;
+  /**
+   * List of scopes pending user or client consent.
+   */
   private final List<String> pendingScopes;
 
+  /**
+   * Creates a consent-required exception with pending scopes.
+   *
+   * Used when consent must be collected before proceeding. Stores client and pending scope details.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param pendingScopes scopes requiring consent
+   */
   public ClientScopeConsentRequiredException(String tenant, String username, String clientId,
       List<String> pendingScopes) {
     super(tenant, username, "client scope consent required");

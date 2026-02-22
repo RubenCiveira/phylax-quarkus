@@ -89,4 +89,35 @@ class LoginFlowTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(302, confirm.statusCode());
     Assertions.assertNotNull(client.extractAuthCode(confirm));
   }
+
+  @Test
+  void invalidPreSession_staysOnLoginForm() {
+    // With a tampered PRE_SESSION_ID the challenge state cannot be decoded;
+    // the fallback login with no credentials must not issue a code.
+    loginGateway.whenValidate(() -> AuthenticationResult.wrongCredential(OidcTestFixtures.TENANT,
+        OidcTestFixtures.USERNAME));
+
+    Response response =
+        client.submitMfa(OidcTestFixtures.TENANT, OidcTestFixtures.MFA_CODE, "invalid-garbage");
+
+    Assertions.assertEquals(200, response.statusCode());
+    Assertions.assertNull(client.extractAuthCode(response));
+    Assertions.assertTrue(response.getBody().asString().contains("name=\"password\""),
+        "Login form must be shown when PRE_SESSION_ID is tampered");
+  }
+
+  @Test
+  void missingAuthSession_onConfirmPost_staysOnLoginForm() {
+    // Without a valid AUTH_SESSION_ID the session confirm falls back to a login attempt;
+    // with wrong credentials that must show the login form rather than issuing a code.
+    loginGateway.whenValidate(() -> AuthenticationResult.wrongCredential(OidcTestFixtures.TENANT,
+        OidcTestFixtures.USERNAME));
+
+    Response response = client.submitSessionConfirm(OidcTestFixtures.TENANT, null);
+
+    Assertions.assertEquals(200, response.statusCode());
+    Assertions.assertNull(client.extractAuthCode(response));
+    Assertions.assertTrue(response.getBody().asString().contains("name=\"password\""),
+        "Login form must be shown when AUTH_SESSION_ID is absent");
+  }
 }

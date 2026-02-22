@@ -21,19 +21,60 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.ConsentUsecase;
 import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 
+/**
+ * HTML controller part for user consent handling.
+ *
+ * Responsibilities: - Render the consent form and messages. - Store user consent decisions.
+ *
+ * Design notes: - Delegates consent retrieval to ConsentUsecase. - Uses SecureHtmlBuilder for CSRF
+ * and signing.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class ConsentControllerPart {
+  /**
+   * Helper to build secure HTML responses.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * Use case for retrieving and storing user consent.
+   */
   private final ConsentUsecase consentUsecase;
+  /**
+   * Page decorator for HTML layout and localization.
+   */
   private final DecoratePageGateway decorator;
 
+  /**
+   * Renders the consent form with a session cookie.
+   *
+   * Builds the consent content and attaches the pre-session cookie. Used when the flow requires
+   * user approval.
+   *
+   * @param locale locale for translations
+   * @param request auth request context
+   * @param user username
+   * @param session pre-session cookie
+   * @return HTML response with consent form
+   */
   public Response doPaintConsent(Locale locale, AuthRequest request, String user,
       NewCookie session) {
     return securer
         .secureHtmlResponse(doPaintConsentContent(locale, request, user, null).cookie(session));
   }
 
+  /**
+   * Builds the consent form content.
+   *
+   * Retrieves pending consent and renders the consent page. Throws when no consent is required for
+   * the user.
+   *
+   * @param locale locale for translations
+   * @param request auth request context
+   * @param user username
+   * @param msg optional error message
+   * @return response builder with HTML content
+   */
   private ResponseBuilder doPaintConsentContent(Locale locale, AuthRequest request, String user,
       String msg) {
     Optional<PendingConsent> pending =
@@ -74,6 +115,20 @@ public class ConsentControllerPart {
     }
   }
 
+  /**
+   * Processes consent form submissions.
+   *
+   * Executes consent handling when the step matches. Returns an empty optional when the step does
+   * not apply.
+   *
+   * @param step flow step identifier
+   * @param oUser optional username
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return optional response
+   */
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
       Function<StepResult, Response> resolver) {
@@ -84,6 +139,19 @@ public class ConsentControllerPart {
     }
   }
 
+  /**
+   * Executes consent submission and continues the flow.
+   *
+   * Stores the accepted consent when the checkbox is set. Re-renders the form when consent is not
+   * accepted.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param username username
+   * @param resolver continuation handler
+   * @return response for the next step
+   */
   private Response doExecConsent(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, String username,
       Function<StepResult, Response> resolver) {
@@ -99,6 +167,13 @@ public class ConsentControllerPart {
     }
   }
 
+  /**
+   * Returns the challenge type for this step.
+   *
+   * Used by flow controllers to route errors to this part. Maps to the user-consent challenge.
+   *
+   * @return consent challenge identifier
+   */
   public AuthenticationChallege getChallenge() {
     return AuthenticationChallege.USE_CONSENT;
   }

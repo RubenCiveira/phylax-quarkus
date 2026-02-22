@@ -5,14 +5,27 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Represents the target endpoint for a delegated (SSO) login redirection. Replaces/supersedes
- * {@link DelegatedRequestDetails}.
+ * Represents the target endpoint for a delegated (SSO) login redirection.
+ *
+ * Responsibilities: - Hold provider id, external URL, and HTTP method. - Describe the endpoint used
+ * for delegated flows.
+ *
+ * Design notes: - Replaces DelegatedRequestDetails in newer flows. - Built via Lombok builder for
+ * convenience.
  */
 @Getter
 @Builder
 public class DelegatedLoginEndpoint {
+  /**
+   * Provider identifier.
+   */
   private final String provider;
+  /**
+   * External URL used by the provider callback.
+   */
   private final String externalUrl;
-  /** HTTP method to use when redirecting: "GET" or "POST". */
+  /**
+   * HTTP method to use when redirecting: "GET" or "POST".
+   */
   private final String method;
 }

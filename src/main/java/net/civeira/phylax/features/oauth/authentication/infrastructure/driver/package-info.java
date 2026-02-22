@@ -1,0 +1,13 @@
+/**
+ * Driver adapters for authentication endpoints.
+ *
+ * Responsibilities: - Expose auth flows via HTTP and HTML. - Parse requests into domain-friendly
+ * structures.
+ *
+ * Design notes: - Split into REST and HTML drivers. - Keeps transport-specific logic localized.
+ *
+ * Dependencies: - Uses application services and domain models.
+ *
+ * Stability: internal delivery layer.
+ */
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver;

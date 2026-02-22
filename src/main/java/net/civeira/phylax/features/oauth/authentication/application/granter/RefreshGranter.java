@@ -14,17 +14,51 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
+/**
+ * Token granter for the OAuth refresh_token grant.
+ *
+ * Responsibilities: - Validate refresh tokens and rehydrate sessions. - Rebuild authentication data
+ * from refresh info.
+ *
+ * Design notes: - Uses JwtTokenBuilder to verify refresh tokens. - Delegates user context retrieval
+ * to LoginUsecase.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class RefreshGranter implements TokenGranter {
+  /**
+   * Verifies refresh tokens and extracts username information.
+   */
   private final JwtTokenBuilder verifier;
+  /**
+   * Use case for loading pre-authenticated user context.
+   */
   private final LoginUsecase loginUsecase;
 
+  /**
+   * Indicates whether the refresh_token grant can be handled.
+   *
+   * Matches the "refresh_token" grant type exactly. Used by the controller to select a granter.
+   *
+   * @param grantType grant type name
+   * @return true when the grant type is refresh_token
+   */
   @Override
   public boolean canHandle(String grantType) {
     return "refresh_token".equals(grantType);
   }
 
+  /**
+   * Authenticates a refresh_token grant request.
+   *
+   * Verifies the refresh token and rehydrates user context. Returns a not-allowed result when the
+   * token is invalid.
+   *
+   * @param request parsed authorization request
+   * @param client resolved client details
+   * @param paramMap request parameters
+   * @return the authentication result
+   */
   @Override
   public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
@@ -40,6 +74,15 @@ public class RefreshGranter implements TokenGranter {
     return result;
   }
 
+  /**
+   * Returns the first parameter value for the given key.
+   *
+   * Used to extract single-valued OAuth parameters. Returns null when the key is missing.
+   *
+   * @param paramMap request parameters
+   * @param key parameter name
+   * @return the first value or null
+   */
   private String first(Map<String, List<String>> paramMap, String key) {
     return paramMap.containsKey(key) || paramMap.get(key).size() > 0 ? paramMap.get(key).get(0)
         : null;

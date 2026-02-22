@@ -56,4 +56,17 @@ class RecoverPasswordFlowTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(200, response.statusCode());
     Assertions.assertTrue(response.getBody().asString().contains("Wrong code"));
   }
+
+  @Test
+  void showLoginForm_allowRecover_false_hidesRecoverLink() {
+    changePasswordGateway.setAllowRecover(false);
+
+    Response response = client.startAuthFlow(OidcTestFixtures.TENANT, OidcTestFixtures.CLIENT_ID,
+        OidcTestFixtures.REDIRECT_URI, OidcTestFixtures.SCOPE);
+
+    Assertions.assertEquals(200, response.statusCode());
+    String body = response.getBody().asString();
+    Assertions.assertFalse(body.contains("show-recover"),
+        "Recover link must not appear when allowRecover=false");
+  }
 }

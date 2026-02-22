@@ -5,17 +5,40 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
+/**
+ * Full key information including public and private parts.
+ *
+ * Responsibilities: - Carry key identifiers, usage, and algorithm metadata. - Provide encoded key
+ * material for signing.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by token signing and key storage.
+ */
 @Builder
 @Getter
 public class KeyInformation {
+  /**
+   * Key identifier.
+   */
   @NonNull
   private final String keyId;
+  /**
+   * Key usage, e.g., sig.
+   */
   @NonNull
   private final String keyUse;
+  /**
+   * Public key material (PEM or encoded).
+   */
   @NonNull
   private final String publicKey;
+  /**
+   * Private key material (encoded).
+   */
   @NonNull
   private final String privateKey;
+  /**
+   * Algorithm identifier for this key.
+   */
   @NonNull
   private final String alg;
 }

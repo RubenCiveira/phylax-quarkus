@@ -10,12 +10,23 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.ApiKeyStoreGatewa
 /**
  * Stub adapter for API Key lookup.
  *
- * TODO: implement with access to ApiKeyClientReadGateway from the access feature, returning the
- * scopes associated to the key.
+ * Responsibilities: - Provide a placeholder implementation for API key storage. - Return empty
+ * results until a real store is wired.
+ *
+ * Design notes: - Intended to integrate with access feature gateways. - Keeps API key wiring
+ * isolated in infrastructure.
  */
 @ApplicationScoped
 public class ApiKeyStoreAdapter implements ApiKeyStoreGateway {
 
+  /**
+   * Returns API key data when a key is valid.
+   *
+   * Current implementation always returns empty. Replace with a real lookup in production.
+   *
+   * @param key api key value
+   * @return optional API key data
+   */
   @Override
   public Optional<ApiKeyData> apiKey(String key) {
     return Optional.empty();

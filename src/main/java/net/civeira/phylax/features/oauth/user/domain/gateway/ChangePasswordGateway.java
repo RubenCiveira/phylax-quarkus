@@ -3,26 +3,60 @@ package net.civeira.phylax.features.oauth.user.domain.gateway;
 
 import java.util.Optional;
 
+/**
+ * Domain port for password change and recovery.
+ *
+ * Responsibilities: - Indicate whether recovery is supported per tenant. - Validate recovery codes
+ * and update passwords.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps persistence outside the domain.
+ */
 public interface ChangePasswordGateway {
 
-  /** Indica si el tenant permite la recuperación de contraseña por email. */
+  /**
+   * Indicates whether email-based password recovery is allowed.
+   *
+   * Used to enable or disable recovery flows. Returns false when recovery is disabled.
+   *
+   * @param tenant tenant identifier
+   * @return true when recovery is allowed
+   */
   boolean allowRecover(String tenant);
 
   /**
-   * Genera y envía el código de recuperación de contraseña al usuario. El parámetro {@code urlBase}
-   * se usa para construir el enlace de recuperación en el email.
+   * Requests a password recovery operation for a user.
+   *
+   * Uses urlBase to build recovery links for email delivery. Implementations should handle
+   * notification delivery.
+   *
+   * @param urlBase base URL for recovery links
+   * @param tenant tenant identifier
+   * @param username username
    */
   void requestForChange(String urlBase, String tenant, String username);
 
   /**
-   * Valida el código de recuperación y cambia la contraseña. Devuelve el username si el código es
-   * válido, vacío en caso contrario.
+   * Validates a recovery code and updates the password.
+   *
+   * Returns the username when the code is valid. Returns empty when the code is invalid.
+   *
+   * @param tenant tenant identifier
+   * @param code recovery code
+   * @param newPassword new password value
+   * @return optional username
    */
   Optional<String> validateChangeRequest(String tenant, String code, String newPassword);
 
   /**
-   * Cambia la contraseña del usuario verificando la contraseña antigua. Devuelve true si el cambio
-   * fue exitoso.
+   * Updates the password by verifying the old password.
+   *
+   * Returns true when the update succeeds. Implementations should enforce password policy.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param oldPassword old password value
+   * @param newPassword new password value
+   * @return true when update succeeds
    */
   boolean forceUpdatePassword(String tenant, String username, String oldPassword,
       String newPassword);

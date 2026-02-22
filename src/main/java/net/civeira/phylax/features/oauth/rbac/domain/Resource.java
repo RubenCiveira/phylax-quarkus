@@ -6,13 +6,28 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Resource definition used in RBAC metadata.
+ *
+ * Responsibilities: - Provide resource name and description. - Serve as a base for scope and
+ * property lists.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by resource registration
+ * endpoints.
+ */
 @Data
 @Builder
 @Jacksonized
 @RegisterForReflection
 public class Resource {
 
+  /**
+   * Resource name identifier.
+   */
   private final String name;
 
+  /**
+   * Human-readable resource description.
+   */
   private final String description;
 }

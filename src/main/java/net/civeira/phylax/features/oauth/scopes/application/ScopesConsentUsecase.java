@@ -10,24 +10,67 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
 
+/**
+ * Application service for scope consent handling.
+ *
+ * Responsibilities: - Compute pending scope permissions for a user and client. - Store accepted
+ * scopes after consent is granted.
+ *
+ * Design notes: - Normalizes scope strings before gateway calls. - Keeps flow logic independent of
+ * transport.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ScopesConsentUsecase {
 
+  /**
+   * Gateway used to retrieve and store scope consent data.
+   */
   private final ScopesConsentGateway gateway;
 
+  /**
+   * Returns scope permissions pending consent.
+   *
+   * Normalizes the scope string into a list before lookup. Delegates the consent resolution to the
+   * gateway.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param scopeString raw scope string
+   * @return list of pending scope permissions
+   */
   public List<ScopePermission> pendingScopes(String tenant, String username, String clientId,
       String scopeString) {
     List<String> scopes = normalizeScopes(scopeString);
     return gateway.pendingScopes(tenant, username, clientId, scopes);
   }
 
+  /**
+   * Stores accepted scopes for a user and client.
+   *
+   * Normalizes the scope string into a list before storage. Delegates the persistence to the
+   * gateway.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param scopeString raw scope string
+   */
   public void storeAcceptedScopes(String tenant, String username, String clientId,
       String scopeString) {
     List<String> scopes = normalizeScopes(scopeString);
     gateway.storeAcceptedScopes(tenant, username, clientId, scopes);
   }
 
+  /**
+   * Normalizes a raw scope string into a distinct list.
+   *
+   * Splits by whitespace and removes empty values. Returns an empty list when the string is blank.
+   *
+   * @param scopeString raw scope string
+   * @return list of normalized scopes
+   */
   private List<String> normalizeScopes(String scopeString) {
     if (null == scopeString || scopeString.isBlank()) {
       return List.of();

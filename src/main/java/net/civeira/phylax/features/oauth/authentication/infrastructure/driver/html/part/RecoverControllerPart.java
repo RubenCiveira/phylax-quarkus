@@ -22,18 +22,59 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
 
+/**
+ * HTML controller part for password recovery flows.
+ *
+ * Responsibilities: - Render recovery forms and validate recovery codes. - Trigger recovery email
+ * requests and redirects.
+ *
+ * Design notes: - Uses SecureHtmlBuilder to encrypt password fields. - Delegates operations to
+ * ChangePasswordUsecase.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class RecoverControllerPart {
+  /**
+   * Helper to build secure HTML responses.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * Page decorator for HTML layout and localization.
+   */
   private final DecoratePageGateway decorator;
+  /**
+   * Use case for password recovery operations.
+   */
   private final ChangePasswordUsecase changePasswordUsecase;
+  /**
+   * Current request context for public host resolution.
+   */
   private final CurrentRequest current;
 
+  /**
+   * Indicates whether password recovery is allowed for the tenant.
+   *
+   * Delegates to the change password use case. Used to enable or disable recovery UI.
+   *
+   * @param request auth request context
+   * @return true when recovery is allowed
+   */
   public boolean allowRecover(AuthRequest request) {
     return changePasswordUsecase.allowRecover(request.getTenant());
   }
 
+  /**
+   * Renders the recovery form for entering a new password.
+   *
+   * Used after a user clicks a recovery link with code. Includes CSID signing and encrypted
+   * password input.
+   *
+   * @param locale locale for translations
+   * @param msg optional error message
+   * @param username username
+   * @param recoverCode recovery code
+   * @return HTML response with recovery form
+   */
   public Response doPaintWaitRecover(Locale locale, String msg, String username,
       String recoverCode) {
     String js = securer.configureScripts(securer.addSign("sign"),
@@ -59,6 +100,18 @@ public class RecoverControllerPart {
         .type(FrontAcessController.TEXT_HTML));
   }
 
+  /**
+   * Executes the final recovery step and resumes the flow.
+   *
+   * Validates recovery codes and updates the password. Re-renders the form when validation fails.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param username username
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return response for the next step
+   */
   public Response doExecFinal(ClientDetails clientDetails, AuthRequest request, String username,
       MultivaluedMap<String, String> paramMap, Function<StepResult, Response> resolver) {
     // entry point of POST from doPaintWaitRecover
@@ -75,6 +128,20 @@ public class RecoverControllerPart {
     }
   }
 
+  /**
+   * Processes password recovery steps from the login flow.
+   *
+   * Executes recovery request handling when the step matches. Returns an empty optional when the
+   * step does not apply.
+   *
+   * @param step flow step identifier
+   * @param oUser optional username
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return optional response
+   */
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
       Function<StepResult, Response> resolver) {
@@ -85,6 +152,15 @@ public class RecoverControllerPart {
     }
   }
 
+  /**
+   * Renders the initial recovery request form.
+   *
+   * Allows users to submit their username for recovery. Includes CSID signing for form submission.
+   *
+   * @param locale locale for translations
+   * @param msg optional error message
+   * @return HTML response with recovery request form
+   */
   public Response doPaintRecoverForm(Locale locale, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("username"));
 
@@ -112,6 +188,17 @@ public class RecoverControllerPart {
         locale)).type(FrontAcessController.TEXT_HTML));
   }
 
+  /**
+   * Executes a recovery request and redirects to the recovery URL.
+   *
+   * Builds a recovery URL and triggers the recovery request. Returns a redirect response or the
+   * recovery form on failure.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @return response for the next step
+   */
   private Response doExecSendeRecover(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap) {
     if (changePasswordUsecase.allowRecover(request.getTenant())) {
@@ -128,6 +215,14 @@ public class RecoverControllerPart {
     }
   }
 
+  /**
+   * Builds the issuer URL for the given tenant.
+   *
+   * Uses the public host from the current request context. Keeps issuer construction in one place.
+   *
+   * @param tenant tenant identifier
+   * @return issuer URL
+   */
   private String issuer(String tenant) {
     return current.getPublicHost() + "/oauth/openid/" + tenant;
   }

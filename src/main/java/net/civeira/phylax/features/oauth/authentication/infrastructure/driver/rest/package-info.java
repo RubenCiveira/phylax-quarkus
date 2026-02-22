@@ -1,0 +1,14 @@
+/**
+ * REST controllers for authentication and status.
+ *
+ * Responsibilities: - Expose OAuth token and userinfo endpoints. - Handle non-HTML authentication
+ * flows.
+ *
+ * Design notes: - Delegates logic to use cases and granters. - Keeps HTTP concerns localized in
+ * controllers.
+ *
+ * Dependencies: - Uses application services and token builders.
+ *
+ * Stability: internal REST delivery.
+ */
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.rest;

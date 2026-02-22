@@ -1,0 +1,14 @@
+/**
+ * Domain ports for permission validation.
+ *
+ * Responsibilities: - Define interfaces for RBAC storage. - Support party verification and resource
+ * checks.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps RBAC logic decoupled from
+ * persistence.
+ *
+ * Dependencies: - Depends on RBAC domain types.
+ *
+ * Stability: gateway interfaces.
+ */
+package net.civeira.phylax.features.oauth.rbac.domain.gateway;

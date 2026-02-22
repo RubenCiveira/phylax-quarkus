@@ -31,34 +31,103 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGate
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
+/**
+ * REST controller for token issuance and related OAuth endpoints.
+ *
+ * Responsibilities: - Handle token issuance for multiple OAuth grants. - Validate client
+ * credentials and grant permissions.
+ *
+ * Design notes: - Delegates grant handling to TokenGranter implementations. - Uses JwtTokenBuilder
+ * for token creation and validation.
+ */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class AuthenticationController {
   @Data
+  /**
+   * DTO for change-password requests.
+   *
+   * Captures username, auth code, and new password. Used by password change flows.
+   */
   public static class ChPassRequestDto {
+    /**
+     * Username to update.
+     */
     private String username;
+    /**
+     * Authorization code for password change.
+     */
     private String authCode;
+    /**
+     * New password value.
+     */
     private String newPassword;
   }
 
   @Data
+  /**
+   * DTO for password recovery requests.
+   *
+   * Captures the username to recover. Used by recovery endpoints.
+   */
   public static class RecoverPassRequestDto {
+    /**
+     * Username to recover.
+     */
     private String username;
   }
 
   @Data
+  /**
+   * DTO for user registration requests.
+   *
+   * Captures username and password for registration. Used by registration endpoints.
+   */
   public static class RegisterUserRequestDto {
+    /**
+     * Username to register.
+     */
     private String username;
+    /**
+     * Password for the new user.
+     */
     private String newPassword;
   }
 
+  /**
+   * Available granters for grant type handling.
+   */
   private final Instance<TokenGranter> granters;
+  /**
+   * Token builder for creation and verification.
+   */
   private final JwtTokenBuilder tokenBuilder;
+  /**
+   * Gateway to load client details.
+   */
   private final ClientStoreGateway clientRetriever;
+  /**
+   * Gateway to store and retrieve temporal auth codes.
+   */
   private final TemporalKeysGateway temporalStore;
+  /**
+   * Use case for user login and pre-authenticated flows.
+   */
   private final LoginUsecase loginUsecase;
 
+  /**
+   * Issues tokens for supported OAuth grant types.
+   *
+   * Supports authorization_code, refresh_token, and configured custom grants. Validates client
+   * credentials and delegates to the appropriate granter.
+   *
+   * @param tenant tenant identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @param paramMap form parameters
+   * @return HTTP response with token or error
+   */
   @POST
   @Path("oauth/openid/{tenant}/token")
   public Response tenantLogin(final @PathParam("tenant") String tenant, final @Context UriInfo req,
@@ -141,6 +210,15 @@ public class AuthenticationController {
     return response;
   }
 
+  /**
+   * Introspection endpoint placeholder.
+   *
+   * Currently returns forbidden for client access. Reserved for future introspection support.
+   *
+   * @param tenant tenant identifier
+   * @param paramMap request parameters
+   * @return forbidden response
+   */
   @POST
   @Path("oauth/openid/{tenant}/introspect")
   public Response introspect(final @PathParam("tenant") String tenant,
@@ -148,6 +226,20 @@ public class AuthenticationController {
     return Response.status(403, "Client not allowed.").build();
   }
 
+  /**
+   * Processes a grant type using the provided granter.
+   *
+   * Builds the AuthRequest and delegates to the granter. Handles scope intersection for token
+   * building.
+   *
+   * @param tenant tenant identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @param paramMap form parameters
+   * @param granter granter implementation
+   * @param clientDetails resolved client details
+   * @return HTTP response with token or error
+   */
   private Response processGranterHandler(final String tenant, UriInfo req, HttpHeaders headers,
       final MultivaluedMap<String, String> paramMap, final TokenGranter granter,
       final ClientDetails clientDetails) {
@@ -178,16 +270,44 @@ public class AuthenticationController {
         : Response.status(401).entity(authenticate.getFail().entity(tokenBuilder)).build();
   }
 
+  /**
+   * Loads a private client using id and secret.
+   *
+   * Used for confidential client authentication. Delegates lookup to the client gateway.
+   *
+   * @param tenant tenant identifier
+   * @param clientId client identifier
+   * @param secretId client secret
+   * @return optional client details
+   */
   private Optional<ClientDetails> loadClient(final String tenant, final String clientId,
       final String secretId) {
     return clientRetriever.loadPrivate(tenant, clientId, secretId);
   }
 
+  /**
+   * Loads a pre-authorized client using only the client id.
+   *
+   * Used when client authentication is not required. Delegates lookup to the client gateway.
+   *
+   * @param tenant tenant identifier
+   * @param clientId client identifier
+   * @return optional client details
+   */
   private Optional<ClientDetails> loadPreautorizedClient(final String tenant,
       final String clientId) {
     return clientRetriever.loadPreautorized(tenant, clientId);
   }
 
+  /**
+   * Generates a PKCE code challenge using SHA-256.
+   *
+   * Encodes the hash using URL-safe Base64 without padding. Throws a runtime exception when crypto
+   * fails.
+   *
+   * @param codeVerifier PKCE code verifier
+   * @return code challenge string
+   */
   private String generateCodeChallenge(String codeVerifier) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");

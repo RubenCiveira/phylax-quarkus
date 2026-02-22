@@ -17,7 +17,13 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Controlador REST para consultar el usario conectado a un servidor de recursos
+ * REST controller for retrieving userinfo claims.
+ *
+ * Responsibilities: - Expose userinfo data for authenticated principals. - Provide a simplified
+ * profile for resource servers.
+ *
+ * Design notes: - Uses JsonWebToken from the security context. - Returns a map of standard OIDC
+ * claims.
  */
 @RequestScoped
 @RequiredArgsConstructor
@@ -26,19 +32,38 @@ public class InformationController {
 
   @Data
   @RegisterForReflection
+  /**
+   * DTO for representing userinfo details.
+   *
+   * Contains subject, name, and role list. Used for JSON serialization in responses.
+   */
   public static class Info {
+    /**
+     * Subject identifier.
+     */
     private String sub;
+    /**
+     * Display name for the user.
+     */
     private String name;
+    /**
+     * Roles granted to the user.
+     */
     private List<String> roles = new ArrayList<>();
   }
 
+  /**
+   * JWT for the currently authenticated subject.
+   */
   private final JsonWebToken jwt;
 
   /**
-   * Recupera los datos de un usuario conectado.
-   * 
-   * @param request la peticion http sobre la que se hace la petición
-   * @return los datos del usuario conecatdo
+   * Returns the current authenticated user info.
+   *
+   * Builds a map of standard claims from the active JWT. The tenant is part of the endpoint path.
+   *
+   * @param tenant tenant identifier
+   * @return the connected user information
    */
   @GET
   @Path("oauth/openid/{tenant}/userinfo")

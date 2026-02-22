@@ -1,0 +1,14 @@
+/**
+ * Domain model for authentication and challenges.
+ *
+ * Responsibilities: - Define authentication data structures. - Describe challenges and modes of
+ * authentication.
+ *
+ * Design notes: - Pure domain objects without infrastructure concerns. - Designed to be reused
+ * across flows and adapters.
+ *
+ * Dependencies: - Minimal dependencies on other domains.
+ *
+ * Stability: core domain model.
+ */
+package net.civeira.phylax.features.oauth.authentication.domain;

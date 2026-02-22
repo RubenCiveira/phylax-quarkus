@@ -6,9 +6,23 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Domain event emitted when a user is unlocked.
+ *
+ * Responsibilities: - Signal that a user lock has been cleared. - Provide tenant and username
+ * context.
+ *
+ * Design notes: - Used for auditing and notifications. - Immutable event data for event handlers.
+ */
 @Getter
 @RequiredArgsConstructor
 public class UserUnlocked {
+  /**
+   * Optional tenant identifier for the unlock event.
+   */
   private final Optional<String> tenant;
+  /**
+   * Username that has been unlocked.
+   */
   private final String name;
 }

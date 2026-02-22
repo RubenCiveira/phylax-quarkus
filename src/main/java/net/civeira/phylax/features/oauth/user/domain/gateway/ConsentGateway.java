@@ -7,17 +7,40 @@ import java.util.Optional;
 
 import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 
+/**
+ * Domain port for user consent persistence.
+ *
+ * Responsibilities: - Retrieve pending consent text for relying parties. - Persist accepted consent
+ * decisions.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps persistence outside the domain.
+ */
 public interface ConsentGateway {
 
   /**
-   * Devuelve el primer consentimiento pendiente de aceptación entre los relying parties indicados,
-   * o vacío si el usuario ya ha aceptado los términos de todos ellos.
+   * Returns the first pending consent for the given audiences.
+   *
+   * Returns empty when the user has accepted all relevant terms. Uses locale to resolve localized
+   * consent text.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param audiences relying party audiences
+   * @param locale locale for consent text
+   * @return optional pending consent
    */
   Optional<PendingConsent> getPendingConsent(String tenant, String username, List<String> audiences,
       Locale locale);
 
   /**
-   * Registra la aceptación de los términos de uso del relying party indicado por parte del usuario.
+   * Stores the user's consent acceptance for a relying party.
+   *
+   * Persists the acceptance so future flows can skip consent. Implementations should ensure
+   * idempotency.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param relyingParty relying party identifier
    */
   void storeAcceptedConsent(String tenant, String username, String relyingParty);
 }

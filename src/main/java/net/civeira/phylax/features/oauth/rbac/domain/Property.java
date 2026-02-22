@@ -6,13 +6,27 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Property definition for resource schemas.
+ *
+ * Responsibilities: - Provide property name and description. - Support schema registration for
+ * RBAC.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used inside PropertyList payloads.
+ */
 @Data
 @Builder
 @Jacksonized
 @RegisterForReflection
 public class Property {
+  /**
+   * Property name identifier.
+   */
   private final String name;
 
+  /**
+   * Human-readable property description.
+   */
   private final String description;
 
 }

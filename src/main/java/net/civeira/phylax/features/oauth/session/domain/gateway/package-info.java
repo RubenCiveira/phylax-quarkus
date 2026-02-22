@@ -1,0 +1,14 @@
+/**
+ * Domain ports for session storage.
+ *
+ * Responsibilities: - Define contracts for session persistence. - Support temporal key storage
+ * operations.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps domain independent from storage
+ * tech.
+ *
+ * Dependencies: - Depends on session domain models.
+ *
+ * Stability: gateway interfaces.
+ */
+package net.civeira.phylax.features.oauth.session.domain.gateway;

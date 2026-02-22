@@ -7,10 +7,27 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Domain event emitted when a user is locked.
+ *
+ * Responsibilities: - Signal that a user is locked until a time. - Provide tenant and username
+ * context.
+ *
+ * Design notes: - Used for auditing and notifications. - Immutable event data for event handlers.
+ */
 @Getter
 @RequiredArgsConstructor
 public class UserLocked {
+  /**
+   * Optional tenant identifier for the lock event.
+   */
   private final Optional<String> tenant;
+  /**
+   * Username that has been locked.
+   */
   private final String name;
+  /**
+   * Date and time until the user is locked.
+   */
   private final ZonedDateTime until;
 }

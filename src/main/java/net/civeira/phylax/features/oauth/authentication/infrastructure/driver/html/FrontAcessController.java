@@ -75,79 +75,238 @@ import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.token.domain.IdToken;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
+/**
+ * Main HTML controller for the OAuth/OIDC authorization user interface.
+ *
+ * Responsibilities: - Render login, consent, MFA, and registration flows. - Manage session and
+ * pre-session cookie handling.
+ *
+ * Design notes: - Orchestrates multiple controller parts for each step. - Uses SecureHtmlBuilder
+ * for signing and encryption.
+ */
 @Slf4j
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class FrontAcessController {
+  /**
+   * Path parameter name for tenant identifiers.
+   */
   private static final String TENANT = "tenant";
+  /**
+   * Parameter name used for usernames in forms.
+   */
   private static final String USERNAME = "username";
+  /**
+   * Base OAuth path used for cookies and routing.
+   */
   private static final String OAUTH_OPENID = "/oauth/openid/";
+  /**
+   * Cookie name for authenticated sessions.
+   */
   private static final String AUTH_SESSION_ID = "AUTH_SESSION_ID";
+  /**
+   * Cookie name for pre-authenticated sessions.
+   */
   private static final String PRE_SESSION_ID = "PRE_SESSION_ID";
+  /**
+   * Cached translations indexed by locale.
+   */
   private static Map<Locale, YamlLocaleMessages> TRANSLATIONS = new HashMap<>();
+  /**
+   * HTML content type value used by this controller.
+   */
   public static final String TEXT_HTML = "text/html";
 
   @Data
   @Builder
+  /**
+   * Result wrapper for step execution outcomes.
+   *
+   * Carries request context and client details for continuation. Used by controller parts to resume
+   * the flow.
+   */
   public static class StepResult {
+    /**
+     * Challenge session identifier.
+     */
     private final String csid;
+    /**
+     * Username for the flow.
+     */
     private final String username;
+    /**
+     * Auth request context.
+     */
     private final AuthRequest request;
+    /**
+     * Client details for the flow.
+     */
     private final ClientDetails clientDetails;
   }
 
   @Data
   @Builder
+  /**
+   * Initial form flow data used for rendering next steps.
+   *
+   * Contains locale, request, username, challenges, and cookies. Passed to flow handlers when
+   * challenges are required.
+   */
   private static class StartFormFlow {
+    /**
+     * Locale for translations.
+     */
     private final Locale locale;
+    /**
+     * Auth request context.
+     */
     private final AuthRequest request;
+    /**
+     * Username for the flow.
+     */
     private final String username;
+    /**
+     * Challenges already satisfied in the flow.
+     */
     private final List<AuthenticationChallege> challenges;
+    /**
+     * Pre-session cookie to persist the challenge state.
+     */
     private final NewCookie session;
   }
 
   @Data
   @Builder
+  /**
+   * Mapping between a challenge and its rendering function.
+   *
+   * Used to route authentication errors to the proper UI. Encapsulates the handler that produces a
+   * response.
+   */
   private static class FlowInfo {
+    /**
+     * Challenge that should be presented to the user.
+     */
     private final AuthenticationChallege chageller;
+    /**
+     * Function that renders the next response.
+     */
     private final Function<StartFormFlow, Response> function;
   }
 
   @Data
   @RegisterForReflection
+  /**
+   * Serializable challenge state used for pre-session cookies.
+   *
+   * Carries the username and the list of satisfied challenges. Used when resuming flows across
+   * requests.
+   */
   public static class Challenge {
+    /**
+     * Username for the challenge state.
+     */
     private String username;
+    /**
+     * Challenges already satisfied.
+     */
     private List<AuthenticationChallege> challenges = new ArrayList<>();
   }
 
+  /**
+   * Form parameters for the current request.
+   */
   private MultivaluedMap<String, String> formParams;
+  /**
+   * Current challenge state loaded from pre-session cookie.
+   */
   private Challenge currentChallenge;
 
+  /**
+   * Use case for credential validation and pre-authenticated flows.
+   */
   private final LoginUsecase loginUsecase;
+  /**
+   * Helper to build secure HTML responses and scripts.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * Page decorator for HTML layout and localization.
+   */
   private final DecoratePageGateway decorator;
 
+  /**
+   * Controller part for password recovery flows.
+   */
   private final RecoverControllerPart recoverController;
+  /**
+   * Controller part for registration flows.
+   */
   private final RegistrationControllerPart registerController;
+  /**
+   * Controller part for MFA validation flows.
+   */
   private final MfaControllerPart mfaController;
+  /**
+   * Controller part for consent handling.
+   */
   private final ConsentControllerPart consentController;
+  /**
+   * Controller part for client scope consent handling.
+   */
   private final ScopeConsentControllerPart scopeConsentController;
+  /**
+   * Controller part for password change flows.
+   */
   private final NewPassControllerPart newPassController;
+  /**
+   * Controller part for MFA enrollment flows.
+   */
   private final NewMfaControllerPart newMfaController;
+  /**
+   * Controller part for delegated login flows.
+   */
   private final DelegatedControllerPart delegatedController;
 
+  /**
+   * Gateway to retrieve client details.
+   */
   private final ClientStoreGateway clientRetrieve;
+  /**
+   * Token builder used for session tokens and ID tokens.
+   */
   private final JwtTokenBuilder tokenBuilder;
+  /**
+   * Session store gateway for authenticated sessions.
+   */
   private final SessionStoreGateway sessionStore;
+  /**
+   * Temporal store for auth codes and CSID tokens.
+   */
   private final TemporalKeysGateway temporalStore;
+  /**
+   * Use case for delegated login providers.
+   */
   private final DelegateLogin delegateLogin;
 
+  /**
+   * Map of authentication failures to UI flow handlers.
+   */
   private Map<Class<? extends AuthenticationException>, FlowInfo> loginErrorMappers =
       new HashMap<>();
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
+  /**
+   * Maps server exceptions to a friendly HTML error response.
+   *
+   * Uses the decorator to render a generic error page. Logs the exception for diagnostics.
+   *
+   * @param ex exception thrown during request handling
+   * @param headers HTTP headers
+   * @return error response
+   */
   public Response showError(Exception ex, @Context HttpHeaders headers) {
     Locale locale = headers.getAcceptableLanguages().get(0);
     log.error("There was an error with son outh step", ex);
@@ -161,6 +320,18 @@ public class FrontAcessController {
   @GET
   @Produces(TEXT_HTML)
   @Path("oauth/openid/{tenant}/me")
+  /**
+   * Returns the current session information as HTML.
+   *
+   * Loads the session and renders a simple profile page. Returns forbidden when client or session
+   * is invalid.
+   *
+   * @param tenant tenant identifier
+   * @param cookie session cookie
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @return HTML response with session info
+   */
   public Response showInfo(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String cookie, final @Context UriInfo req,
       @Context HttpHeaders headers) {
@@ -175,6 +346,19 @@ public class FrontAcessController {
   @GET
   @Produces(TEXT_HTML)
   @Path("oauth/openid/{tenant}/delegated-auth")
+  /**
+   * Handles delegated login return from external providers.
+   *
+   * Delegates to the delegated controller part to resume the flow. Returns a rendered HTML response
+   * for the next step.
+   *
+   * @param tenant tenant identifier
+   * @param provider provider identifier
+   * @param code delegated code
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @return HTML response for delegated flow
+   */
   public Response processDelegated(final @PathParam(TENANT) String tenant,
       @QueryParam("provider") String provider, @QueryParam("code") String code,
       final @Context UriInfo req, @Context HttpHeaders headers) {
@@ -184,6 +368,18 @@ public class FrontAcessController {
 
   @GET
   @Path("oauth/openid/{tenant}/auth")
+  /**
+   * Displays the login form or validates an existing session.
+   *
+   * Loads the client and checks existing session cookies. Redirects or renders login UI depending
+   * on prompt.
+   *
+   * @param tenant tenant identifier
+   * @param session session cookie
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @return HTML response for login flow
+   */
   public Response showForm(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String session, final @Context UriInfo req,
       @Context HttpHeaders headers) {
@@ -201,6 +397,20 @@ public class FrontAcessController {
 
   @POST
   @Path("oauth/openid/{tenant}/auth")
+  /**
+   * Processes login form submissions and flow steps.
+   *
+   * Dispatches to controller parts based on step parameter. Manages session and pre-session
+   * cookies.
+   *
+   * @param tenant tenant identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @param paramMap form parameters
+   * @param session session cookie
+   * @param cookie pre-session cookie
+   * @return response for next flow step
+   */
   public Response processForm(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap,
       @CookieParam(AUTH_SESSION_ID) String session, @CookieParam(PRE_SESSION_ID) String cookie) {
@@ -217,6 +427,18 @@ public class FrontAcessController {
 
   @GET
   @Path("oauth/openid/{tenant}/mfa-setup")
+  /**
+   * Returns the MFA enrollment image when required.
+   *
+   * Loads the pre-session username and delegates to MFA part. Returns forbidden when the client or
+   * session is invalid.
+   *
+   * @param tenant tenant identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @param cookie pre-session cookie
+   * @return response with MFA image or error
+   */
   public Response showMfaSelector(final @PathParam(TENANT) String tenant,
       final @Context UriInfo req, @Context HttpHeaders headers,
       @CookieParam(PRE_SESSION_ID) String cookie) {
@@ -229,6 +451,19 @@ public class FrontAcessController {
 
   @GET
   @Path("oauth/openid/{tenant}/recover")
+  /**
+   * Displays the password recovery form for a user.
+   *
+   * Renders the recovery form for a provided username and code. Returns forbidden when the client
+   * is not allowed.
+   *
+   * @param tenant tenant identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @param username username
+   * @param recovercode recovery code
+   * @return HTML response with recovery form
+   */
   public Response showRecover(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, @QueryParam(USERNAME) String username,
       @QueryParam("recovercode") String recovercode) {
@@ -242,6 +477,19 @@ public class FrontAcessController {
 
   @POST
   @Path("oauth/openid/{tenant}/recover")
+  /**
+   * Processes recovery form submissions.
+   *
+   * Delegates to the recovery controller part for validation. Returns forbidden when the client is
+   * not allowed.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param req request URI info
+   * @param paramMap form parameters
+   * @param headers HTTP headers
+   * @return response for next flow step
+   */
   public Response checkRecover(final @PathParam(TENANT) String tenant,
       @QueryParam(USERNAME) String username, @Context UriInfo req,
       final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers) {
@@ -257,6 +505,19 @@ public class FrontAcessController {
 
   @GET
   @Path("oauth/openid/{tenant}/register")
+  /**
+   * Displays the registration verification form.
+   *
+   * Renders the verification form for the given email and code. Returns forbidden when the client
+   * is not allowed.
+   *
+   * @param tenant tenant identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @param email email address
+   * @param regcode registration code
+   * @return HTML response with verification form
+   */
   public Response showRegister(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, @QueryParam("email") String email,
       @QueryParam("regcode") String regcode) {
@@ -268,6 +529,19 @@ public class FrontAcessController {
 
   @POST
   @Path("oauth/openid/{tenant}/register")
+  /**
+   * Processes registration verification submissions.
+   *
+   * Delegates to the registration controller part for validation. Returns forbidden when the client
+   * is not allowed.
+   *
+   * @param tenant tenant identifier
+   * @param email email address
+   * @param req request URI info
+   * @param paramMap form parameters
+   * @param headers HTTP headers
+   * @return response for next flow step
+   */
   public Response checkRegister(final @PathParam(TENANT) String tenant,
       @QueryParam("email") String email, @Context UriInfo req,
       final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers) {
@@ -281,6 +555,17 @@ public class FrontAcessController {
 
   @POST
   @Path("oauth/openid/{tenant}/revocation")
+  /**
+   * Revokes a pre-session by deleting its cookie session.
+   *
+   * Used to invalidate pre-authenticated flows. Returns an OK response on completion.
+   *
+   * @param tenant tenant identifier
+   * @param cookie pre-session cookie
+   * @param paramMap form parameters
+   * @param headers HTTP headers
+   * @return OK response
+   */
   public Response revoke(final @PathParam(TENANT) String tenant,
       @CookieParam(PRE_SESSION_ID) String cookie, final MultivaluedMap<String, String> paramMap,
       final @Context HttpHeaders headers) {
@@ -290,6 +575,17 @@ public class FrontAcessController {
 
   @GET
   @Path("oauth/openid/{tenant}/logout")
+  /**
+   * Logs out the current session and redirects to the post-logout URL.
+   *
+   * Deletes the session cookie and returns a redirect response. Trims query parameters from the
+   * redirect URL.
+   *
+   * @param tenant tenant identifier
+   * @param cookie session cookie
+   * @param redirect post-logout redirect URL
+   * @return redirect response
+   */
   public Response logout(final @PathParam(TENANT) String tenant,
       @CookieParam("AUTH_SESSION_ID") String cookie,
       @QueryParam("post_logout_redirect_uri") String redirect) {
@@ -306,10 +602,31 @@ public class FrontAcessController {
   @GET
   @Path("oauth/openid/{tenant}/login-status-iframe")
   @Produces(TEXT_HTML)
+  /**
+   * Returns a placeholder HTML for login status iframe checks.
+   *
+   * Currently returns a static placeholder response. Reserved for future session check support.
+   *
+   * @param tenant tenant identifier
+   * @return HTML response placeholder
+   */
   public String checkSession(final @PathParam(TENANT) String tenant) {
     return "<h1>Check</h1>";
   }
 
+  /**
+   * Validates an existing session and decides next step.
+   *
+   * Compares the CSID token and handles prompt=none behavior. Either redirects to success or
+   * renders the login form.
+   *
+   * @param sessionInfo session data
+   * @param loadClient client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param cookie session cookie
+   * @return response for the next step
+   */
   private Response doCheckSession(SessionInfo sessionInfo, ClientDetails loadClient,
       AuthRequest request, final MultivaluedMap<String, String> paramMap, String cookie) {
     String prompt = request.getPrompt().orElse("");
@@ -325,6 +642,18 @@ public class FrontAcessController {
     }
   }
 
+  /**
+   * Renders a verification form for an existing session.
+   *
+   * Builds a page that signs a CSID token and submits the form. Used when a session needs
+   * confirmation to proceed.
+   *
+   * @param sDDessionInfo session data
+   * @param loadClient client details
+   * @param request auth request context
+   * @param cookie session cookie
+   * @return HTML response for verification
+   */
   private Response doPaintVerifySession(SessionInfo sDDessionInfo, ClientDetails loadClient,
       AuthRequest request, String cookie) {
     String js = securer.configureScripts(securer.addSignAndSend("sign", "enter"));
@@ -337,6 +666,17 @@ public class FrontAcessController {
         .type(TEXT_HTML));
   }
 
+  /**
+   * Renders the primary login form.
+   *
+   * Builds the HTML content with delegated providers and recovery links. Includes secure scripts
+   * for CSID and encrypted password fields.
+   *
+   * @param request auth request context
+   * @param msg optional error message
+   * @param chagenlle optional challenge label
+   * @return HTML response with login form
+   */
   private Response doPaintLoginForm(AuthRequest request, String msg, String chagenlle) {
     Locale locale = request.getLocale();
     String js = securer.configureScripts(securer.focusOn(USERNAME), securer.addSign("sign"),
@@ -411,11 +751,32 @@ public class FrontAcessController {
             .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
   }
 
+  /**
+   * Returns the first present response between two optionals.
+   *
+   * Used to evaluate controller parts in sequence. The supplier is only invoked when needed.
+   *
+   * @param check current optional response
+   * @param supplier supplier for the next optional response
+   * @return the first non-empty optional
+   */
   private Optional<Response> fillIfEmpty(Optional<Response> check,
       Supplier<Optional<Response>> supplier) {
     return check.isPresent() ? check : supplier.get();
   }
 
+  /**
+   * Executes the next step in the form-based flow.
+   *
+   * Dispatches to specialized controller parts based on the step parameter. Falls back to direct
+   * login when no step is matched.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param cookie pre-session cookie
+   * @return response for the next step
+   */
   private Response doExecStep(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, @CookieParam(PRE_SESSION_ID) String cookie) {
     Response response;
@@ -466,6 +827,18 @@ public class FrontAcessController {
     return response;
   }
 
+  /**
+   * Executes a username/password login and routes results.
+   *
+   * Validates credentials and handles challenge requirements. On success, redirects to the
+   * authorization response.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param challenges already satisfied challenges
+   * @return response for the next step
+   */
   private Response doExecLogin(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, List<AuthenticationChallege> challenges) {
     String grant = "form";
@@ -491,6 +864,15 @@ public class FrontAcessController {
     }
   }
 
+  /**
+   * Redirects to the client with an error fragment.
+   *
+   * Builds a redirect URI with an encoded error message. Clears session cookies in the response.
+   *
+   * @param request auth request context
+   * @param message error message
+   * @return redirect response
+   */
   private Response redirectError(AuthRequest request, String message) {
     String to = request.getRedirect().orElse("") + "#error="
         + URLEncoder.encode(message, StandardCharsets.UTF_8);
@@ -499,6 +881,19 @@ public class FrontAcessController {
             .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
   }
 
+  /**
+   * Redirects to the client after successful authentication.
+   *
+   * Creates or updates sessions, and builds code or token responses. Sets cookies and constructs
+   * redirect URIs accordingly.
+   *
+   * @param cookie existing session cookie
+   * @param clientDetails client details
+   * @param grant grant type used for authentication
+   * @param request auth request context
+   * @param validationData authentication data
+   * @return redirect response
+   */
   private Response redirect(Optional<String> cookie, ClientDetails clientDetails, String grant,
       AuthRequest request, AuthenticationData validationData) {
     String uid = UUID.randomUUID().toString();
@@ -539,6 +934,17 @@ public class FrontAcessController {
             .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
   }
 
+  /**
+   * Builds a pre-session cookie for challenge continuation.
+   *
+   * Encodes the challenge state into a signed token. Used to persist MFA or consent steps between
+   * requests.
+   *
+   * @param username username
+   * @param chagenlles list of completed challenges
+   * @param tenant tenant identifier
+   * @return pre-session cookie
+   */
   private NewCookie sessionCookie(String username, List<AuthenticationChallege> chagenlles,
       String tenant) {
     Challenge ch = new Challenge();
@@ -549,6 +955,16 @@ public class FrontAcessController {
         .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true).build();
   }
 
+  /**
+   * Loads challenge state from the pre-session cookie.
+   *
+   * Verifies the signed token and updates currentChallenge. Returns an empty optional when the
+   * cookie is missing.
+   *
+   * @param cookie pre-session cookie value
+   * @param tenant tenant identifier
+   * @return optional challenge state
+   */
   private Optional<Challenge> preSessionUsername(String cookie, String tenant) {
     Optional<Challenge> verifyChalleger;
     if (StringUtils.isEmpty(cookie)) {
@@ -560,11 +976,31 @@ public class FrontAcessController {
     return verifyChalleger;
   }
 
+  /**
+   * Loads the client details for the request.
+   *
+   * Uses the tenant, client id, and redirect URI for validation. Returns empty when the client is
+   * not authorized.
+   *
+   * @param request auth request context
+   * @return optional client details
+   */
   private Optional<ClientDetails> loadClient(final AuthRequest request) {
     return clientRetrieve.loadPublic(request.getTenant(), request.getClientId().orElseThrow(),
         request.getRedirect().orElseThrow());
   }
 
+  /**
+   * Retrieves a localized message for the given key.
+   *
+   * Loads translations on demand and caches by locale. Supports parameterized messages via
+   * arguments.
+   *
+   * @param locale locale for translations
+   * @param key message key
+   * @param arguments message arguments
+   * @return localized message
+   */
   public static String i18n(Locale locale, String key, Object... arguments) {
     synchronized (TRANSLATIONS) {
       TRANSLATIONS.computeIfAbsent(locale, k -> YamlLocaleMessages.load("/messages/oauth", k));
@@ -572,11 +1008,29 @@ public class FrontAcessController {
     return TRANSLATIONS.get(locale).get(key, arguments);
   }
 
+  /**
+   * Returns the first value for a parameter key.
+   *
+   * Used to simplify access to form parameters. Returns an empty string when no value exists.
+   *
+   * @param paramMap parameters map
+   * @param key parameter name
+   * @return first value or empty string
+   */
   public static String first(Map<String, List<String>> paramMap, String key) {
     List<String> list = paramMap.get(key);
     return null == list || list.isEmpty() ? "" : list.get(0);
   }
 
+  /**
+   * Builds a URI from a raw string.
+   *
+   * Throws an IllegalArgumentException when the URL is invalid. Centralizes URI creation for
+   * redirects.
+   *
+   * @param url raw URL
+   * @return URI instance
+   */
   public static URI buildUrl(String url) {
     try {
       return new URI(url);
@@ -585,6 +1039,15 @@ public class FrontAcessController {
     }
   }
 
+  /**
+   * Continues the flow after completing a controller part step.
+   *
+   * Attempts pre-authenticated login and routes challenges if needed. Returns a redirect response
+   * or a challenge form.
+   *
+   * @param result step result data
+   * @return response for the next step
+   */
   private Response revolve(StepResult result) {
     List<AuthenticationChallege> chagenlles = new ArrayList<>();
     if (null != currentChallenge) {
@@ -612,6 +1075,14 @@ public class FrontAcessController {
     }
   }
 
+  /**
+   * Builds the mapping between authentication exceptions and UI handlers.
+   *
+   * Initializes the map lazily on first access. The map is synchronized to avoid concurrent
+   * mutation.
+   *
+   * @return map of exception types to flow handlers
+   */
   @Synchronized
   private Map<Class<? extends AuthenticationException>, FlowInfo> map() {
     if (loginErrorMappers.isEmpty()) {

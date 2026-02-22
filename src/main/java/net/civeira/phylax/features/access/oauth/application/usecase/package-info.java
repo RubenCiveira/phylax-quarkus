@@ -1,0 +1,28 @@
+/**
+ * Application usecases for the access/OAuth module.
+ *
+ * <p>
+ * Responsibilities:
+ * <ul>
+ * <li>{@code UserLoginUsecase} — full credential validation: password hash check, account lockout,
+ * MFA, terms acceptance, role aggregation per audience.</li>
+ * <li>{@code VerifyTrustedClientUsecase} — OAuth client loading and validation (public, private,
+ * pre-authorized).</li>
+ * <li>{@code PendingConsentUsecase} — checks and records terms-of-use consent.</li>
+ * <li>{@code PasswordRecoverUsecase} — generates and validates recovery codes.</li>
+ * <li>{@code DelegatedLoginProvidersUsecase} — resolves usernames from external IdP callbacks,
+ * auto-creating users when needed.</li>
+ * </ul>
+ *
+ * <p>
+ * Design notes:
+ * <ul>
+ * <li>These usecases are not called directly by HTTP controllers. The
+ * {@code infrastructure.driver.impl.*Interactor} adapters expose them as gateway port
+ * implementations.</li>
+ * </ul>
+ *
+ * <p>
+ * Stability: internal; subject to change as business rules evolve.
+ */
+package net.civeira.phylax.features.access.oauth.application.usecase;

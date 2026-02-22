@@ -1,0 +1,14 @@
+/**
+ * OAuth client management.
+ *
+ * Responsibilities: - Manage client registration and metadata. - Handle allowed grants and scope
+ * constraints.
+ *
+ * Design notes: - Domain focuses on client identity and policies. - Adapters expose REST endpoints
+ * for client ops.
+ *
+ * Dependencies: - Uses storage gateways and consent services.
+ *
+ * Stability: internal client feature module.
+ */
+package net.civeira.phylax.features.oauth.client;

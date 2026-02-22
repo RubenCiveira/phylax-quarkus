@@ -1,0 +1,14 @@
+/**
+ * Driven adapters for authentication services.
+ *
+ * Responsibilities: - Implement domain ports for outbound services. - Publish events or integrate
+ * with persistence.
+ *
+ * Design notes: - CDI adapters are kept minimal and focused. - Converts domain events to external
+ * signals.
+ *
+ * Dependencies: - Depends on domain ports and CDI APIs.
+ *
+ * Stability: adapter implementations.
+ */
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driven;

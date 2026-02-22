@@ -21,13 +21,37 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.key.domain.JwkSet;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
 
+/**
+ * REST controller that serves JWKS documents.
+ *
+ * Responsibilities: - Expose tenant-specific JWKS at the discovery endpoint. - Support caching with
+ * ETag and cache-control headers.
+ *
+ * Design notes: - Uses TokenSigner to build JWKS responses. - Hashes payload to produce ETag
+ * values.
+ */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class JwksController {
+  /**
+   * Token signer used to retrieve JWKS key sets.
+   */
   private final TokenSigner tokenSigner;
+  /**
+   * JSON mapper used to compute JWKS hashes.
+   */
   private final ObjectMapper mapper;
 
+  /**
+   * Returns the JWKS document for the given tenant.
+   *
+   * Computes an ETag and honors conditional requests. Sets cache-control for client caching.
+   *
+   * @param tenant tenant identifier
+   * @param request HTTP request context
+   * @return JWKS response
+   */
   @GET
   @Path("oauth/openid/{tenant}/jwks")
   public Response jwks(final @PathParam("tenant") String tenant, @Context Request request) {
@@ -43,6 +67,15 @@ public class JwksController {
     return Response.ok(jwkSet).cacheControl(cacheControl).tag(etag).build();
   }
 
+  /**
+   * Computes a stable hash for a JWKS payload.
+   *
+   * Serializes the key set to JSON and hashes with SHA-256. Returns a URL-safe base64 encoded hash
+   * value.
+   *
+   * @param jwkSet JWKS payload
+   * @return hash string
+   */
   private String hash(JwkSet jwkSet) {
     try {
       String payload = mapper.writeValueAsString(jwkSet);

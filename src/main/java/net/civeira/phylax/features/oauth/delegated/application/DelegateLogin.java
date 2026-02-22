@@ -17,16 +17,47 @@ import net.civeira.phylax.features.oauth.delegated.domain.DelegatedLoginEndpoint
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegateLoginGateway;
 
+/**
+ * Application service for delegated login flows.
+ *
+ * Responsibilities: - Orchestrate delegated provider requests and responses. - Resolve usernames
+ * from stored delegated tokens.
+ *
+ * Design notes: - Delegates provider access to DelegateLoginGateway. - Keeps provider selection
+ * logic centralized.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class DelegateLogin {
 
+  /**
+   * Gateway that provides delegated providers and token storage.
+   */
   private final DelegateLoginGateway gateway;
 
+  /**
+   * Returns the configured delegated providers for a request.
+   *
+   * Providers are resolved by the gateway based on tenant context. Used to render delegated login
+   * options.
+   *
+   * @param request auth request context
+   * @return list of delegated providers
+   */
   public List<DelegatedAccessExternalProvider> providers(AuthRequest request) {
     return gateway.providers(request);
   }
 
+  /**
+   * Builds request information for a specific delegated provider.
+   *
+   * Selects the provider based on endpoint configuration. Returns empty when no matching provider
+   * is found.
+   *
+   * @param request auth request context
+   * @param endpoint delegated login endpoint
+   * @return optional request info
+   */
   public Optional<RequestInfo> getRequestInfo(AuthRequest request,
       DelegatedLoginEndpoint endpoint) {
     DelegatedRequestDetails details = toDetails(endpoint);
@@ -35,6 +66,17 @@ public class DelegateLogin {
         .map(p -> p.request(request, details)).findFirst();
   }
 
+  /**
+   * Processes a delegated provider response.
+   *
+   * Selects the provider based on endpoint configuration. Returns empty when no matching provider
+   * is found.
+   *
+   * @param request auth request context
+   * @param endpoint delegated login endpoint
+   * @param params provider response parameters
+   * @return optional response info
+   */
   public Optional<ResponseInfo> processResponse(AuthRequest request,
       DelegatedLoginEndpoint endpoint, Map<String, String[]> params) {
     DelegatedRequestDetails details = toDetails(endpoint);
@@ -43,13 +85,29 @@ public class DelegateLogin {
         .map(p -> p.response(request, details, params)).findFirst();
   }
 
+  /**
+   * Stores a delegated token using the gateway.
+   *
+   * The token is stored under a short-lived code. Used to resume the flow after external login.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @param token delegated token info
+   */
   public void saveToken(AuthRequest request, String code, TokenInfo token) {
     gateway.saveToken(request, code, token);
   }
 
   /**
-   * Resolves the username from a stored delegated token, verifying it belongs to the expected
-   * provider (for security in the browser callback flow).
+   * Resolves the username from a stored delegated token, validating provider.
+   *
+   * Ensures the stored token belongs to the expected provider. Used for browser callback flows for
+   * security.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @param expectedProvider expected provider identifier
+   * @return optional username
    */
   public Optional<String> resolveUsername(AuthRequest request, String code,
       String expectedProvider) {
@@ -58,13 +116,29 @@ public class DelegateLogin {
   }
 
   /**
-   * Resolves the username from a stored delegated token without constraining to a specific provider
-   * (used by token granters where the provider is already embedded in the stored token).
+   * Resolves the username from a stored delegated token.
+   *
+   * Does not constrain provider, used by token granters. Provider verification occurs within stored
+   * token data.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @return optional username
    */
   public Optional<String> resolveUsername(AuthRequest request, String code) {
     return gateway.loadToken(request, code).flatMap(info -> resolveFromInfo(request, info));
   }
 
+  /**
+   * Resolves a username from stored token info.
+   *
+   * Loads provider and queries user info to map to local user. Uses gateway to resolve the final
+   * username.
+   *
+   * @param request auth request context
+   * @param info delegated token info
+   * @return optional username
+   */
   private Optional<String> resolveFromInfo(AuthRequest request, TokenInfo info) {
     DelegatedRequestDetails details = DelegatedRequestDetails.builder().provider(info.getProvider())
         .externalUrl(info.getExternUrl()).build();
@@ -76,6 +150,15 @@ public class DelegateLogin {
         });
   }
 
+  /**
+   * Converts a login endpoint to delegated request details.
+   *
+   * Extracts provider id and external URL for provider calls. Keeps detail creation consistent
+   * across methods.
+   *
+   * @param endpoint delegated login endpoint
+   * @return request details
+   */
   private DelegatedRequestDetails toDetails(DelegatedLoginEndpoint endpoint) {
     return DelegatedRequestDetails.builder().provider(endpoint.getProvider())
         .externalUrl(endpoint.getExternalUrl()).build();

@@ -23,13 +23,36 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedStoreGateway;
 
+/**
+ * JDBC adapter for storing delegated login tokens.
+ *
+ * Responsibilities: - Persist delegated tokens and temporary codes. - Clean up expired delegated
+ * tokens on a schedule.
+ *
+ * Design notes: - Uses a dedicated database table for storage. - Encodes token info as base64 JSON
+ * strings.
+ */
 @Slf4j
 @RequestScoped
 @RequiredArgsConstructor
 public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
+  /**
+   * Data source used for JDBC operations.
+   */
   private final DataSource source;
+  /**
+   * JSON mapper used to serialize token info.
+   */
   private final ObjectMapper mapper;
 
+  /**
+   * Scheduled cleanup of expired delegated tokens.
+   *
+   * Deletes rows older than the configured expiration window. Runs periodically to prevent table
+   * growth.
+   *
+   * @throws SQLException when cleanup fails
+   */
   @Scheduled(every = "1h")
   public void cleanTemp() throws SQLException {
     try (Connection connection = source.getConnection()) {
@@ -41,11 +64,30 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
     }
   }
 
+  /**
+   * Stores a delegated token under the given code.
+   *
+   * Serializes the token to JSON and base64 encodes it. Writes the token with a short expiration
+   * time.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @param token delegated token info
+   */
   @Override
   public void save(AuthRequest request, String code, TokenInfo token) {
     write(code, Base64.getEncoder().encodeToString(format(token).getBytes(StandardCharsets.UTF_8)));
   }
 
+  /**
+   * Formats token info as a JSON string.
+   *
+   * Uses ObjectMapper for serialization with fallback text. Returns a minimal JSON-like string on
+   * failure.
+   *
+   * @param json token info
+   * @return JSON string
+   */
   private String format(TokenInfo json) {
     try {
       return mapper.writeValueAsString(json);
@@ -57,6 +99,14 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
     }
   }
 
+  /**
+   * Writes a token record to the database.
+   *
+   * Inserts the token with a short expiration timestamp. Throws when database operations fail.
+   *
+   * @param code temporary code
+   * @param token token payload
+   */
   private void write(String code, String token) {
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(
@@ -70,6 +120,15 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
     }
   }
 
+  /**
+   * Loads a delegated token by code.
+   *
+   * Reads and decodes the token payload if not expired. Filters out tokens from other tenants.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @return optional token info
+   */
   @Override
   public Optional<TokenInfo> load(AuthRequest request, String code) {
     Optional<String> response = Optional.empty();
@@ -96,6 +155,14 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
     });
   }
 
+  /**
+   * Parses a token from a base64 JSON string.
+   *
+   * Returns empty when decoding or parsing fails. Logs warnings for invalid token payloads.
+   *
+   * @param str base64 JSON string
+   * @return optional token info
+   */
   public Optional<TokenInfo> readToken(String str) {
     String res = new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
     try {

@@ -22,21 +22,66 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
 
+/**
+ * HTML controller part for forced password changes.
+ *
+ * Responsibilities: - Render the password change form. - Validate and apply new passwords.
+ *
+ * Design notes: - Uses SecureHtmlBuilder to encrypt form fields. - Delegates updates to
+ * ChangePasswordUsecase.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class NewPassControllerPart {
+  /**
+   * Helper to build secure HTML responses.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * Page decorator for HTML layout and localization.
+   */
   private final DecoratePageGateway decorator;
+  /**
+   * Use case for changing user passwords.
+   */
   private final ChangePasswordUsecase changePasswordUsecase;
 
+  /**
+   * Returns the challenge type for password refresh.
+   *
+   * Used by flow controllers to route password-change steps. Indicates the fresh password
+   * challenge.
+   *
+   * @return password refresh challenge identifier
+   */
   public AuthenticationChallege getChallenge() {
     return AuthenticationChallege.FRESH_PASSWORD;
   }
 
+  /**
+   * Renders the password change form with a session cookie.
+   *
+   * Builds the form content and attaches the pre-session cookie. Used when a user must change their
+   * password.
+   *
+   * @param locale locale for translations
+   * @param session pre-session cookie
+   * @return HTML response with password form
+   */
   public Response doPaintNewPassForm(Locale locale, NewCookie session) {
     return securer.secureHtmlResponse(doPaintNewPassFormContent(locale, null).cookie(session));
   }
 
+  /**
+   * Builds the password change form HTML content.
+   *
+   * Encrypts password fields and renders error messages. Includes a signed CSID token for form
+   * submission.
+   *
+   * @param locale locale for translations
+   * @param msg optional error message
+   * @return response builder with HTML content
+   */
   private ResponseBuilder doPaintNewPassFormContent(Locale locale, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"),
         securer.cypher(
@@ -75,6 +120,20 @@ public class NewPassControllerPart {
         locale)).type(FrontAcessController.TEXT_HTML);
   }
 
+  /**
+   * Processes password change form submissions.
+   *
+   * Validates the new password and continues the flow. Returns an empty optional when the step does
+   * not apply.
+   *
+   * @param step flow step identifier
+   * @param oUser optional username
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return optional response
+   */
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
       Function<StepResult, Response> resolver) {
@@ -85,6 +144,19 @@ public class NewPassControllerPart {
     }
   }
 
+  /**
+   * Executes password change and routes to the next step.
+   *
+   * Decrypts password fields and invokes the update use case. Re-renders the form when the update
+   * fails.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param username username
+   * @param resolver continuation handler
+   * @return response for the next step
+   */
   private Response doExecNewPass(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, String username,
       Function<StepResult, Response> resolver) {

@@ -31,23 +31,57 @@ import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExterna
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedLoginEndpoint;
 
+/**
+ * HTML controller that drives delegated login redirects and callbacks.
+ *
+ * Responsibilities: - Build redirect forms for external providers. - Process provider callbacks and
+ * finalize flows.
+ *
+ * Design notes: - Uses DelegateLogin to orchestrate provider interactions. - Produces HTML
+ * responses with auto-submit behavior.
+ */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class DelegatedAccessController {
+  /**
+   * Logger for delegated access flow diagnostics.
+   */
   private static final Logger LOGGER = LoggerFactory.getLogger(DelegatedAccessController.class);
+  /**
+   * HTML content type value used by this controller.
+   */
   private static final String TEXT_HTML = "text/html";
 
+  /**
+   * Whether to include a manual submit fallback in HTML forms.
+   */
   private boolean fallbackHtmlForSubmit = false;
+  /**
+   * Use case that coordinates delegated provider interactions.
+   */
   private final DelegateLogin delegateLogin;
 
+  /**
+   * Starts a delegated login redirect flow.
+   *
+   * Builds an HTML form targeting the external provider. Stores return location information in
+   * cookies.
+   *
+   * @param tenant tenant identifier
+   * @param provider provider identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @return HTML page for redirecting to provider
+   * @throws IOException when provider request creation fails
+   */
   @GET
   @Path("oauth/openid/{tenant}/delegated/redirect/{provider}")
   @Produces(TEXT_HTML)
   public String loginGet(final @PathParam("tenant") String tenant,
       @PathParam("provider") final String provider, final @Context UriInfo req,
       final @Context HttpHeaders headers) throws IOException {
-    // El parametro back indica ha donde volver tras hacer el login.
+    // The back parameter indicates where to return after login.
     DelegatedLoginEndpoint endpoint = DelegatedLoginEndpoint.builder().provider(provider)
         .externalUrl(getHost(req) + "/oauth/openid/-/delegated/authorization/" + provider)
         .method("GET").build();
@@ -58,6 +92,20 @@ public class DelegatedAccessController {
         .orElse("<!doctype html><html><h1>No provider for " + provider + "</h1></html>");
   }
 
+  /**
+   * Handles delegated login callback and finalizes the flow.
+   *
+   * Processes provider response parameters and builds a final redirect. Produces an HTML response
+   * that completes the browser flow.
+   *
+   * @param tenant tenant identifier
+   * @param provider provider identifier
+   * @param req request URI info
+   * @param headers HTTP headers
+   * @param paramMap form parameters from provider response
+   * @return HTML page that completes delegated login
+   * @throws IOException when processing fails
+   */
   @POST
   @Path("oauth/openid/{tenant}/delegated/token/{provider}")
   @Produces(TEXT_HTML)
@@ -77,6 +125,17 @@ public class DelegatedAccessController {
         .orElse("<!doctype html><html><h1>No provider for " + provider + "</h1></html>");
   }
 
+  /**
+   * Receives GET responses from delegated providers.
+   *
+   * Builds a local POST form to forward provider parameters. Used when providers redirect with
+   * query parameters.
+   *
+   * @param provider provider identifier
+   * @param info request URI info
+   * @return HTML page that auto-posts to local callback
+   * @throws IOException when response rendering fails
+   */
   @GET
   @Path("oauth/openid/-/delegated/authorization/{provider}")
   @Produces(TEXT_HTML)
@@ -85,6 +144,18 @@ public class DelegatedAccessController {
     return writeEntry(provider, info, info.getQueryParameters());
   }
 
+  /**
+   * Receives POST responses from delegated providers.
+   *
+   * Builds a local POST form to forward provider parameters. Used when providers send form-encoded
+   * responses.
+   *
+   * @param provider provider identifier
+   * @param info request URI info
+   * @param paramMap form parameters from provider
+   * @return HTML page that auto-posts to local callback
+   * @throws IOException when response rendering fails
+   */
   @POST
   @Path("oauth/openid/-/delegated/authorization/{provider}")
   @Produces(TEXT_HTML)
@@ -93,6 +164,17 @@ public class DelegatedAccessController {
     return writeEntry(provider, info, paramMap);
   }
 
+  /**
+   * Builds the HTML form that redirects the browser to the provider.
+   *
+   * Creates hidden inputs for each provider parameter. Also stores navigation data in cookies
+   * before redirecting.
+   *
+   * @param tenant tenant identifier
+   * @param back return URL after delegated login
+   * @param request provider request information
+   * @return HTML page with auto-submit form
+   */
   private String writeLogin(String tenant, String back, RequestInfo request) {
     String formMethod = (request.isWithPost() ? "POST" : "GET");
     StringBuilder formHiddens = new StringBuilder();
@@ -117,10 +199,29 @@ public class DelegatedAccessController {
         + "</script>" + "</html>";
   }
 
+  /**
+   * URL-encodes a parameter using UTF-8.
+   *
+   * Used when writing cookies and query strings. Keeps encoding logic centralized in one method.
+   *
+   * @param param raw parameter value
+   * @return encoded parameter value
+   */
   private String encode(String param) {
     return URLEncoder.encode(param, StandardCharsets.UTF_8);
   }
 
+  /**
+   * Builds the HTML form that posts provider parameters locally.
+   *
+   * Creates hidden inputs for all incoming parameters. The form auto-submits to the local delegated
+   * token endpoint.
+   *
+   * @param provider provider identifier
+   * @param req request URI info
+   * @param parameterNames parameters to forward
+   * @return HTML page with auto-submit form
+   */
   private String writeEntry(String provider, UriInfo req,
       MultivaluedMap<String, String> parameterNames) {
     StringBuilder fromHiddens = new StringBuilder();
@@ -142,6 +243,17 @@ public class DelegatedAccessController {
         + provider + "\";" + "form.submit();" + "</script></html>";
   }
 
+  /**
+   * Builds the HTML response that redirects back to the original client.
+   *
+   * Stores a short-lived code mapped to the delegated token. The browser is redirected to the
+   * "back" URL with the code.
+   *
+   * @param request original auth request
+   * @param endpoint delegated login endpoint metadata
+   * @param response provider response information
+   * @return HTML page that performs the redirect
+   */
   private String writeProyectEntry(final AuthRequest request, DelegatedLoginEndpoint endpoint,
       ResponseInfo response) {
     try {
@@ -166,11 +278,31 @@ public class DelegatedAccessController {
     }
   }
 
+  /**
+   * Extracts the base host URL from the request.
+   *
+   * This is used to build callback URLs for providers. The host includes scheme and authority
+   * segments.
+   *
+   * @param request request URI info
+   * @return base host URL
+   */
   private static String getHost(UriInfo request) {
     String fullURL = request.getRequestUri().toString();
     return fullURL.substring(0, StringUtils.ordinalIndexOf(fullURL, "/", 3));
   }
 
+  /**
+   * Builds a token info payload for delegated flows.
+   *
+   * Combines request context with provider response data. The resulting structure is stored for
+   * later exchange.
+   *
+   * @param request original auth request
+   * @param endpoint delegated login endpoint metadata
+   * @param response provider response information
+   * @return token info payload
+   */
   private TokenInfo buildToken(final AuthRequest request, final DelegatedLoginEndpoint endpoint,
       ResponseInfo response) {
     String innerToken = response.getInnerToken();

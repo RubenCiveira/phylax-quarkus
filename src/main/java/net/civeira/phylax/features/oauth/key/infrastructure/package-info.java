@@ -1,0 +1,13 @@
+/**
+ * Infrastructure adapters for key handling.
+ *
+ * Responsibilities: - Implement signing and storage gateways. - Expose JWKS endpoints to clients.
+ *
+ * Design notes: - Splits into driven and driver adapters. - Keeps crypto provider details
+ * localized.
+ *
+ * Dependencies: - Uses key domain models and gateways.
+ *
+ * Stability: internal infrastructure layer.
+ */
+package net.civeira.phylax.features.oauth.key.infrastructure;

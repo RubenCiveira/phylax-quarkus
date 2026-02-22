@@ -1,0 +1,14 @@
+/**
+ * Infrastructure adapters for RBAC.
+ *
+ * Responsibilities: - Provide REST adapters and integration gateways. - Bridge RBAC domain with
+ * external systems.
+ *
+ * Design notes: - Driven adapters manage persistence and checks. - Driver adapters expose
+ * registration endpoints.
+ *
+ * Dependencies: - Uses RBAC domain ports and models.
+ *
+ * Stability: internal infrastructure layer.
+ */
+package net.civeira.phylax.features.oauth.rbac.infrastructure;

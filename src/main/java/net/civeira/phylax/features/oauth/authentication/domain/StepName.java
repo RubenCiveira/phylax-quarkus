@@ -3,6 +3,11 @@ package net.civeira.phylax.features.oauth.authentication.domain;
 
 /**
  * Enumerates all the authentication steps supported by the OIDC authorize flow.
+ *
+ * Responsibilities: - Provide stable identifiers for UI steps. - Keep routing names consistent
+ * across controllers.
+ *
+ * Design notes: - Used by HTML controllers and flow logic. - Aligned with form step parameters.
  */
 public enum StepName {
   LOGIN, CONSENT, SCOPES_CONSENT, MFA, NEW_MFA, RECOVER_PASS, NEW_PASS, REGISTER_USER, DELEGATED_LOGIN

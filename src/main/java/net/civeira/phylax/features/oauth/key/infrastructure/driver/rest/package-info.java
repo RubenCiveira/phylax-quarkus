@@ -1,0 +1,14 @@
+/**
+ * REST controllers for JWKS and public keys.
+ *
+ * Responsibilities: - Serve JWKS documents and key metadata. - Provide public key access for token
+ * validation.
+ *
+ * Design notes: - HTTP details live in this package only. - Responses are derived from key
+ * services.
+ *
+ * Dependencies: - Depends on key domain types.
+ *
+ * Stability: internal delivery endpoints.
+ */
+package net.civeira.phylax.features.oauth.key.infrastructure.driver.rest;

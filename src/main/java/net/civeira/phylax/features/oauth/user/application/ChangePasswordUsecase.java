@@ -7,24 +7,74 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
 
+/**
+ * Application service for password change and recovery.
+ *
+ * Responsibilities: - Check whether password recovery is enabled. - Initiate and validate recovery
+ * flows.
+ *
+ * Design notes: - Delegates to ChangePasswordGateway for persistence. - Keeps transport concerns
+ * outside of the use case.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ChangePasswordUsecase {
 
+  /**
+   * Gateway used for password change operations.
+   */
   private final ChangePasswordGateway gateway;
 
+  /**
+   * Indicates whether password recovery is allowed for a tenant.
+   *
+   * Delegates to the gateway configuration. Used to enable or disable recovery UI.
+   *
+   * @param tenant tenant identifier
+   * @return true when recovery is allowed
+   */
   public boolean allowRecover(String tenant) {
     return gateway.allowRecover(tenant);
   }
 
+  /**
+   * Requests a password recovery flow for a user.
+   *
+   * Builds a recovery URL and triggers a recovery email. Delegates the request to the gateway.
+   *
+   * @param urlBase base URL for recovery links
+   * @param tenant tenant identifier
+   * @param username username
+   */
   public void requestForChange(String urlBase, String tenant, String username) {
     gateway.requestForChange(urlBase, tenant, username);
   }
 
+  /**
+   * Validates a recovery code and updates the password.
+   *
+   * Returns the username when the code is valid. Returns empty when the code is invalid or expired.
+   *
+   * @param tenant tenant identifier
+   * @param code recovery code
+   * @param newPassword new password value
+   * @return optional username
+   */
   public Optional<String> validateChangeRequest(String tenant, String code, String newPassword) {
     return gateway.validateChangeRequest(tenant, code, newPassword);
   }
 
+  /**
+   * Updates the password by verifying the old password.
+   *
+   * Returns true when the update succeeds. Delegates validation to the gateway.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param oldPassword old password value
+   * @param newPassword new password value
+   * @return true when update succeeds
+   */
   public boolean forceUpdatePassword(String tenant, String username, String oldPassword,
       String newPassword) {
     return gateway.forceUpdatePassword(tenant, username, oldPassword, newPassword);

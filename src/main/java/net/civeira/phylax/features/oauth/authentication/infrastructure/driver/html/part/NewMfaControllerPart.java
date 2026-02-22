@@ -21,23 +21,70 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
 import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 
+/**
+ * HTML controller part for new MFA enrollment.
+ *
+ * Responsibilities: - Render the MFA enrollment form and QR code. - Validate enrollment OTP and
+ * continue the flow.
+ *
+ * Design notes: - Uses UserMfa to build enrollment configuration. - Uses SecureHtmlBuilder for
+ * signing and focus.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class NewMfaControllerPart {
+  /**
+   * Helper to build secure HTML responses.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * Page decorator for HTML layout and localization.
+   */
   private final DecoratePageGateway decorator;
+  /**
+   * MFA service used for enrollment and validation.
+   */
   private final UserMfa userMfa;
 
+  /**
+   * Returns the challenge type for MFA enrollment.
+   *
+   * Used by flow controllers to route MFA enrollment steps. Indicates the MFA challenge type.
+   *
+   * @return MFA challenge identifier
+   */
   public AuthenticationChallege getChallenge() {
     return AuthenticationChallege.MFA;
   }
 
+  /**
+   * Renders the MFA enrollment form with a session cookie.
+   *
+   * Builds the enrollment content and attaches the pre-session cookie. Used when a user must enroll
+   * a new MFA method.
+   *
+   * @param request auth request context
+   * @param username username
+   * @param locale locale for translations
+   * @param session pre-session cookie
+   * @return HTML response with enrollment form
+   */
   public Response doPaintNewMfaForm(AuthRequest request, String username, Locale locale,
       NewCookie session) {
     return securer.secureHtmlResponse(
         doPaintNewMfaFormContent(request, username, locale, null).cookie(session));
   }
 
+  /**
+   * Returns the MFA enrollment image if available.
+   *
+   * Decodes base64 image data and returns a binary response. Returns empty when no image is
+   * required.
+   *
+   * @param request auth request context
+   * @param user username
+   * @return optional image response
+   */
   public Optional<Response> mfaSelector(AuthRequest request, String user) {
     PublicLoginMfaBuildResponse config =
         userMfa.configurationForNewMfa(request.getTenant(), user, request.getLocale());
@@ -54,6 +101,18 @@ public class NewMfaControllerPart {
     return Optional.of(Response.ok(imageBytes).type(contentType).build());
   }
 
+  /**
+   * Builds the MFA enrollment form HTML content.
+   *
+   * Includes QR image when required and renders form labels. Shows error messages when validation
+   * fails.
+   *
+   * @param request auth request context
+   * @param username username
+   * @param locale locale for translations
+   * @param msg optional error message
+   * @return response builder with HTML content
+   */
   private ResponseBuilder doPaintNewMfaFormContent(AuthRequest request, String username,
       Locale locale, String msg) {
     PublicLoginMfaBuildResponse config =
@@ -87,6 +146,20 @@ public class NewMfaControllerPart {
         locale)).type(FrontAcessController.TEXT_HTML);
   }
 
+  /**
+   * Processes new MFA enrollment submissions.
+   *
+   * Validates the OTP code and continues the flow. Returns an empty optional when the step does not
+   * apply.
+   *
+   * @param step flow step identifier
+   * @param oUser optional username
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return optional response
+   */
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
       Function<StepResult, Response> resolver) {
@@ -97,6 +170,19 @@ public class NewMfaControllerPart {
     }
   }
 
+  /**
+   * Executes MFA enrollment validation and routes to next step.
+   *
+   * Verifies the OTP code and invokes the resolver when valid. Re-renders the form when
+   * verification fails.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param username username
+   * @param resolver continuation handler
+   * @return response for the next step
+   */
   private Response doExecNewMfa(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, String username,
       Function<StepResult, Response> resolver) {

@@ -1,0 +1,12 @@
+/**
+ * REST controllers for registration and API keys.
+ *
+ * Responsibilities: - Handle client registration requests. - Manage API key operations.
+ *
+ * Design notes: - Delegates logic to use cases and gateways. - Keeps HTTP concerns localized.
+ *
+ * Dependencies: - Uses client application services.
+ *
+ * Stability: internal REST delivery.
+ */
+package net.civeira.phylax.features.oauth.client.infrastructure.driver.rest;

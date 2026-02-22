@@ -1,0 +1,14 @@
+/**
+ * Authentication domain events.
+ *
+ * Responsibilities: - Represent security events in the auth lifecycle. - Provide payloads for
+ * event-driven reactions.
+ *
+ * Design notes: - Lightweight, immutable event objects. - Emitted through adapters or application
+ * services.
+ *
+ * Dependencies: - No dependency on transport or persistence.
+ *
+ * Stability: domain event contracts.
+ */
+package net.civeira.phylax.features.oauth.authentication.domain.event;

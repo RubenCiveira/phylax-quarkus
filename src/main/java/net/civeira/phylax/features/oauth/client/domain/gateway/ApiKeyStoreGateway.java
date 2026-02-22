@@ -7,9 +7,22 @@ import net.civeira.phylax.features.oauth.client.domain.ApiKeyData;
 
 /**
  * Domain port for API Key lookup.
+ *
+ * Responsibilities: - Validate API key credentials. - Return associated scope data for valid keys.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps storage concerns outside the
+ * domain.
  */
 public interface ApiKeyStoreGateway {
 
-  /** Finds and validates an API key, returning its data if valid. */
+  /**
+   * Finds and validates an API key, returning its data if valid.
+   *
+   * Implementations should verify key existence and status. Returns empty when the key is invalid
+   * or missing.
+   *
+   * @param key api key value
+   * @return optional API key data
+   */
   Optional<ApiKeyData> apiKey(String key);
 }

@@ -8,13 +8,29 @@ import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
 
 /**
- * Stub adapter for scope consent. Returns no pending scopes (all scopes are pre-approved).
+ * Stub adapter for scope consent.
  *
- * TODO: implement with real persistence to track per-user, per-client scope consent grants.
+ * Responsibilities: - Provide a placeholder consent implementation. - Return no pending scopes
+ * (pre-approved).
+ *
+ * Design notes: - Intended to be replaced with real persistence. - Keeps consent wiring isolated in
+ * infrastructure.
  */
 @ApplicationScoped
 public class ScopesConsentAdapter implements ScopesConsentGateway {
 
+  /**
+   * Returns pending scopes for consent.
+   *
+   * Current implementation always returns an empty list. Replace with persistent consent lookup as
+   * needed.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param scopes requested scopes
+   * @return list of pending scope permissions
+   */
   @Override
   public List<ScopePermission> pendingScopes(String tenant, String username, String clientId,
       List<String> scopes) {
@@ -28,6 +44,16 @@ public class ScopesConsentAdapter implements ScopesConsentGateway {
     return List.of();
   }
 
+  /**
+   * Stores accepted scopes for the user and client.
+   *
+   * Current implementation is a no-op placeholder. Replace with persistence logic as needed.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param scopes accepted scopes
+   */
   @Override
   public void storeAcceptedScopes(String tenant, String username, String clientId,
       List<String> scopes) {

@@ -20,11 +20,30 @@ import net.civeira.phylax.features.oauth.key.domain.KeyInformation;
 import net.civeira.phylax.features.oauth.key.domain.PublicKeyInformation;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenStoreGateway;
 
+/**
+ * JDBC adapter for storing and retrieving signing keys.
+ *
+ * Responsibilities: - Persist key material and public keys in SQL tables. - Provide key lookup for
+ * signing and JWKS responses.
+ *
+ * Design notes: - Uses a dedicated table for key rotation. - Deletes expired keys on access.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class TokenStoreSqlAdapter implements TokenStoreGateway {
+  /**
+   * Data source used for JDBC operations.
+   */
   private final DataSource datasource;
 
+  /**
+   * Returns the current signing key for the tenant.
+   *
+   * Deletes expired keys before selecting the active key. Returns empty when no key is active.
+   *
+   * @param tenant tenant identifier
+   * @return optional key information
+   */
   @Override
   public Optional<KeyInformation> currentKey(String tenant) {
     try (Connection connection = datasource.getConnection()) {
@@ -44,6 +63,14 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
     }
   }
 
+  /**
+   * Deletes expired keys from the database.
+   *
+   * Uses the current time to remove outdated key records. Keeps key table clean during access.
+   *
+   * @param connection SQL connection
+   * @throws SQLException when deletion fails
+   */
   private void deleteOldKeys(Connection connection) throws SQLException {
     try (PreparedStatement prepareStatement =
         connection.prepareStatement("delete from _oauth_jwt_keys where expiration < ?")) {
@@ -52,6 +79,15 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
     }
   }
 
+  /**
+   * Returns the expiration instant of the latest future key.
+   *
+   * Used by rotation logic to decide when to generate new keys. Returns a past instant when no
+   * future keys exist.
+   *
+   * @param tenant tenant identifier
+   * @return expiration instant
+   */
   @Override
   public Instant nextKeysExpiration(String tenant) {
     try (Connection connection = datasource.getConnection()) {
@@ -68,6 +104,14 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
     }
   }
 
+  /**
+   * Lists public keys for the tenant.
+   *
+   * Returns keys ordered by expiration, newest first. Used to build JWKS responses.
+   *
+   * @param tenant tenant identifier
+   * @return list of public key information
+   */
   @Override
   public List<PublicKeyInformation> listPublicKeys(String tenant) {
     try (Connection connection = datasource.getConnection()) {
@@ -87,6 +131,14 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
     }
   }
 
+  /**
+   * Lists full keys for the tenant.
+   *
+   * Returns keys ordered by expiration, newest first. Used for maintenance and diagnostics.
+   *
+   * @param tenant tenant identifier
+   * @return list of key information
+   */
   @Override
   public List<KeyInformation> listKeys(String tenant) {
     try (Connection connection = datasource.getConnection()) {
@@ -107,6 +159,16 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
     }
   }
 
+  /**
+   * Saves a new key with validity metadata.
+   *
+   * Inserts a key record with expiration and start time. Throws when insertion fails.
+   *
+   * @param tenant tenant identifier
+   * @param key key information
+   * @param since key validity start instant
+   * @param caducidad key validity duration
+   */
   @Override
   public void saveKey(String tenant, KeyInformation key, Instant since, Duration caducidad) {
     try (Connection connection = datasource.getConnection()) {

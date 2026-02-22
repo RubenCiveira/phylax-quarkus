@@ -8,13 +8,27 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * List of scopes associated with a resource.
+ *
+ * Responsibilities: - Bind a resource to a list of scopes. - Serve as payload for scope
+ * registration APIs.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by RBAC registration endpoints.
+ */
 @Data
 @Builder
 @Jacksonized
 @RegisterForReflection
 public class ScopeList {
 
+  /**
+   * Resource to which the scopes belong.
+   */
   private final Resource resource;
 
+  /**
+   * Scopes associated with the resource.
+   */
   private final List<Scope> scopes;
 }

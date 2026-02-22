@@ -5,25 +5,60 @@ import java.util.Optional;
 
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 
+/**
+ * Domain port for user registration operations.
+ *
+ * Responsibilities: - Provide registration configuration and consent text. - Handle registration
+ * requests and verification.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps persistence outside the domain.
+ */
 public interface RegisterUserGateway {
 
-  /** Indica si el tenant permite el auto-registro de usuarios. */
+  /**
+   * Indicates whether self-registration is allowed for the tenant.
+   *
+   * Used to enable or disable registration flows. Returns false when registration is disabled.
+   *
+   * @param tenant tenant identifier
+   * @return true when registration is allowed
+   */
   boolean allowRegister(String tenant);
 
-  /** Devuelve el texto de los términos de uso a aceptar en el registro, si los hay. */
+  /**
+   * Returns the registration consent text for the tenant.
+   *
+   * Used to display terms of use during registration. Returns empty when no consent is required.
+   *
+   * @param tenant tenant identifier
+   * @return optional consent text
+   */
   Optional<String> getRegisterConsent(String tenant);
 
   /**
-   * Inicia el proceso de registro. Devuelve {@link RegistrationResult#ok} si el usuario queda
-   * activado inmediatamente, {@link RegistrationResult#pending} si se envió un email de
-   * verificación, o {@link RegistrationResult#cancel} si el registro no pudo completarse.
+   * Initiates the registration process for a user.
+   *
+   * Returns OK when the user is activated immediately, PENDING when email verification is required,
+   * or CANCEL when registration fails.
+   *
+   * @param urlBase base URL for verification links
+   * @param tenant tenant identifier
+   * @param email user email
+   * @param password raw password
+   * @return registration result
    */
   RegistrationResult requestForRegister(String urlBase, String tenant, String email,
       String password);
 
   /**
-   * Verifica el código de registro. Devuelve el username si el código es válido y el usuario queda
-   * activado, vacío en caso contrario.
+   * Verifies a registration code for the tenant.
+   *
+   * Returns the username when the code is valid and activates the user. Returns empty when the code
+   * is invalid.
+   *
+   * @param tenant tenant identifier
+   * @param code registration code
+   * @return optional username
    */
   Optional<String> verifyRegister(String tenant, String code);
 }

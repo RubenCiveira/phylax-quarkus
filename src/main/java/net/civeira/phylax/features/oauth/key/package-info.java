@@ -1,0 +1,14 @@
+/**
+ * Key management and token signing.
+ *
+ * Responsibilities: - Manage key material and signing metadata. - Provide JWKS and signing
+ * operations.
+ *
+ * Design notes: - Domain models abstract JWK and JKS formats. - Adapters handle storage and crypto
+ * operations.
+ *
+ * Dependencies: - Integrates with token and session modules.
+ *
+ * Stability: security-critical module.
+ */
+package net.civeira.phylax.features.oauth.key;

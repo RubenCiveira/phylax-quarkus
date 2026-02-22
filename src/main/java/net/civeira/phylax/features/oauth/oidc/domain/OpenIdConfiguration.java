@@ -2,120 +2,293 @@
 package net.civeira.phylax.features.oauth.oidc.domain;
 
 import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * OpenID Connect discovery configuration payload.
+ *
+ * Responsibilities: - Represent RFC 8414 / OIDC discovery metadata. - Provide endpoints and
+ * supported feature lists.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Serialized using JSON property names
+ * required by OIDC.
+ */
 @Data
 @Builder
 @RegisterForReflection
 public class OpenIdConfiguration {
+  /**
+   * Issuer URL for the OIDC provider.
+   */
   private final String issuer;
+  /**
+   * Authorization endpoint URL.
+   */
   @JsonProperty("authorization_endpoint")
   private final String authorizationEndpoint;
+  /**
+   * Token endpoint URL.
+   */
   @JsonProperty("token_endpoint")
   private final String tokenEndpoint;
+  /**
+   * Introspection endpoint URL.
+   */
   @JsonProperty("introspection_endpoint")
   private final String introspectionEndpoint;
+  /**
+   * Userinfo endpoint URL.
+   */
   @JsonProperty("userinfo_endpoint")
   private final String userinfoEndpoint;
+  /**
+   * End-session endpoint URL.
+   */
   @JsonProperty("end_session_endpoint")
   private final String endSessionEndpoint;
+  /**
+   * Whether front-channel logout sessions are supported.
+   */
   @JsonProperty("frontchannel_logout_session_supported")
   private final boolean frontchannelLogoutSessionSupported;
+  /**
+   * Whether front-channel logout is supported.
+   */
   @JsonProperty("frontchannel_logout_supported")
   private final boolean frontchannelLogoutSupported;
+  /**
+   * JWKS endpoint URL.
+   */
   @JsonProperty("jwks_uri")
   private final String jwksUri;
+  /**
+   * Session check iframe URL.
+   */
   @JsonProperty("check_session_iframe")
   private final String checkSessionIframe;
+  /**
+   * Supported OAuth grant types.
+   */
   @JsonProperty("grant_types_supported")
   private final List<String> grantTypesSupported;
+  /**
+   * Supported ACR values.
+   */
   @JsonProperty("acr_values_supported")
   private final List<String> acrValuesSupported;
+  /**
+   * Supported response types.
+   */
   @JsonProperty("response_types_supported")
   private final List<String> responseTypesSupported;
+  /**
+   * Supported subject types.
+   */
   @JsonProperty("subject_types_supported")
   private final List<String> subjectTypesSupported;
+  /**
+   * Supported ID token signing algorithms.
+   */
   @JsonProperty("id_token_signing_alg_values_supported")
   private final List<String> idTokenSigningAlgValuesSupported;
+  /**
+   * Supported ID token encryption algorithms.
+   */
   @JsonProperty("id_token_encryption_alg_values_supported")
   private final List<String> idTokenEncryptionAlgValuesSupported;
+  /**
+   * Supported ID token encryption methods.
+   */
   @JsonProperty("id_token_encryption_enc_values_supported")
   private final List<String> idTokenEncryptionEncValuesSupported;
+  /**
+   * Supported userinfo signing algorithms.
+   */
   @JsonProperty("userinfo_signing_alg_values_supported")
   private final List<String> userinfoSigningAlgValuesSupported;
+  /**
+   * Supported userinfo encryption algorithms.
+   */
   @JsonProperty("userinfo_encryption_alg_values_supported")
   private final List<String> userinfoEncryptionAlgValuesSupported;
+  /**
+   * Supported userinfo encryption methods.
+   */
   @JsonProperty("userinfo_encryption_enc_values_supported")
   private final List<String> userinfoEncryptionEncValuesSupported;
+  /**
+   * Supported request object signing algorithms.
+   */
   @JsonProperty("request_object_signing_alg_values_supported")
   private final List<String> requestObjectSigningAlgValuesSupported;
+  /**
+   * Supported request object encryption algorithms.
+   */
   @JsonProperty("request_object_encryption_alg_values_supported")
   private final List<String> requestObjectEncryptionAlgValuesSupported;
+  /**
+   * Supported request object encryption methods.
+   */
   @JsonProperty("request_object_encryption_enc_values_supported")
   private final List<String> requestObjectEncryptionEncValuesSupported;
+  /**
+   * Supported response modes.
+   */
   @JsonProperty("response_modes_supported")
   private final List<String> responseModesSupported;
+  /**
+   * Registration endpoint URL.
+   */
   @JsonProperty("registration_endpoint")
   private final String registrationEndpoint;
+  /**
+   * Supported token endpoint auth methods.
+   */
   @JsonProperty("token_endpoint_auth_methods_supported")
   private final List<String> tokenEndpointAuthMethodsSupported;
+  /**
+   * Supported token endpoint auth signing algorithms.
+   */
   @JsonProperty("token_endpoint_auth_signing_alg_values_supported")
   private final List<String> tokenEndpointAuthSigningAlgValuesSupported;
+  /**
+   * Supported introspection endpoint auth methods.
+   */
   @JsonProperty("introspection_endpoint_auth_methods_supported")
   private final List<String> introspectionEndpointAuthMethodsSupported;
+  /**
+   * Supported introspection endpoint auth signing algorithms.
+   */
   @JsonProperty("introspection_endpoint_auth_signing_alg_values_supported")
   private final List<String> introspectionEndpointAuthSigningAlgValuesSupported;
+  /**
+   * Supported authorization signing algorithms.
+   */
   @JsonProperty("authorization_signing_alg_values_supported")
   private final List<String> authorizationSigningAlgValuesSupported;
+  /**
+   * Supported authorization encryption algorithms.
+   */
   @JsonProperty("authorization_encryption_alg_values_supported")
   private final List<String> authorizationEncryptionAlgValuesSupported;
+  /**
+   * Supported authorization encryption methods.
+   */
   @JsonProperty("authorization_encryption_enc_values_supported")
   private final List<String> authorizationEncryptionEncValuesSupported;
+  /**
+   * Supported claims.
+   */
   @JsonProperty("claims_supported")
   private final List<String> claimsSupported;
+  /**
+   * Supported claim types.
+   */
   @JsonProperty("claim_types_supported")
   private final List<String> claimTypesSupported;
+  /**
+   * Whether the claims parameter is supported.
+   */
   @JsonProperty("claims_parameter_supported")
   private final boolean claimsParameterSupported;
+  /**
+   * Supported scopes.
+   */
   @JsonProperty("scopes_supported")
   private final List<String> scopesSupported;
+  /**
+   * Whether the request parameter is supported.
+   */
   @JsonProperty("request_parameter_supported")
   private final boolean requestParameterSupported;
+  /**
+   * Whether request URI parameter is supported.
+   */
   @JsonProperty("request_uri_parameter_supported")
   private final boolean requestUriParameterSupported;
+  /**
+   * Whether request URI registration is required.
+   */
   @JsonProperty("require_request_uri_registration")
   private final boolean requireRequestUriRegistration;
+  /**
+   * Supported PKCE code challenge methods.
+   */
   @JsonProperty("code_challenge_methods_supported")
   private final List<String> codeChallengeMethodsSupported;
+  /**
+   * Whether TLS-bound access tokens are supported.
+   */
   @JsonProperty("tls_client_certificate_bound_access_tokens")
   private final boolean tlsClientCertificateBoundAccessTokens;
+  /**
+   * Revocation endpoint URL.
+   */
   @JsonProperty("revocation_endpoint")
   private final String revocationEndpoint;
+  /**
+   * Supported revocation endpoint auth methods.
+   */
   @JsonProperty("revocation_endpoint_auth_methods_supported")
   private final List<String> revocationEndpointAuthMethodsSupported;
+  /**
+   * Supported revocation endpoint auth signing algorithms.
+   */
   @JsonProperty("revocation_endpoint_auth_signing_alg_values_supported")
   private final List<String> revocationEndpointAuthSigningAlgValuesSupported;
+  /**
+   * Whether backchannel logout is supported.
+   */
   @JsonProperty("backchannel_logout_supported")
   private final boolean backchannelLogoutSupported;
+  /**
+   * Whether backchannel logout sessions are supported.
+   */
   @JsonProperty("backchannel_logout_session_supported")
   private final boolean backchannelLogoutSessionSupported;
+  /**
+   * Device authorization endpoint URL.
+   */
   @JsonProperty("device_authorization_endpoint")
   private final String deviceAuthorizationEndpoint;
+  /**
+   * Supported backchannel token delivery modes.
+   */
   @JsonProperty("backchannel_token_delivery_modes_supported")
   private final List<String> backchannelTokenDeliveryModesSupported;
+  /**
+   * Backchannel authentication endpoint URL.
+   */
   @JsonProperty("backchannel_authentication_endpoint")
   private final String backchannelAuthenticationEndpoint;
+  /**
+   * Supported backchannel auth request signing algorithms.
+   */
   @JsonProperty("backchannel_authentication_request_signing_alg_values_supported")
   private final List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
+  /**
+   * Whether pushed authorization requests are required.
+   */
   @JsonProperty("require_pushed_authorization_requests")
   private final boolean requirePushedAuthorizationRequests;
+  /**
+   * Pushed authorization request endpoint URL.
+   */
   @JsonProperty("pushed_authorization_request_endpoint")
   private final String pushedAuthorizationRequestEndpoint;
+  /**
+   * mTLS endpoint aliases for the provider.
+   */
   @JsonProperty("mtls_endpoint_aliases")
   private final MtlsEndpointAliases mtlsEndpointAliases;
+  /**
+   * Whether authorization response iss parameter is supported.
+   */
   @JsonProperty("authorization_response_iss_parameter_supported")
   private final boolean authorizationResponseIssParameterSupported;
 }

@@ -14,48 +14,159 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.NotAllo
 import net.civeira.phylax.features.oauth.authentication.domain.exception.UnknownUserException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.WrongCredentialsException;
 
+/**
+ * Result wrapper for authentication attempts, holding either data or an exception.
+ *
+ * Responsibilities: - Encapsulate success data or a failure exception. - Provide factory methods
+ * for common error states.
+ *
+ * Design notes: - Uses right/left semantics via data or fail. - Throws when accessing the wrong
+ * side.
+ */
 public final class AuthenticationResult {
 
+  /**
+   * Failure information when authentication did not succeed.
+   */
   private AuthenticationException fail;
 
+  /**
+   * Authentication data when the operation succeeds.
+   */
   private AuthenticationData data;
 
+  /**
+   * Creates a successful authentication result.
+   *
+   * Wraps the provided data in a right-side result. The fail side is left empty.
+   *
+   * @param data authentication data
+   * @return a success result
+   */
   public static AuthenticationResult right(AuthenticationData data) {
     return new AuthenticationResult(null, data);
   }
 
+  /**
+   * Creates a failed authentication result.
+   *
+   * Wraps the provided exception in a left-side result. The data side is left empty.
+   *
+   * @param fail authentication exception
+   * @return a failure result
+   */
   public static AuthenticationResult wrong(AuthenticationException fail) {
     return new AuthenticationResult(fail, null);
   }
 
+  /**
+   * Creates a failure result for an unknown user.
+   *
+   * Used when the username does not exist in the tenant. The result encodes the required error
+   * state.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @return a failure result
+   */
   public static AuthenticationResult unknownName(String tenant, String name) {
     return new AuthenticationResult(new UnknownUserException(tenant, name), null);
   }
 
+  /**
+   * Creates a failure result for wrong credentials.
+   *
+   * Used when the supplied password does not match. The result encodes the required error state.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @return a failure result
+   */
   public static AuthenticationResult wrongCredential(String tenant, String name) {
     return new AuthenticationResult(new WrongCredentialsException(tenant, name), null);
   }
 
+  /**
+   * Creates a failure result indicating MFA is required.
+   *
+   * Used when additional factor verification is pending. The result encodes the required error
+   * state.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @return a failure result
+   */
   public static AuthenticationResult mfaRequired(String tenant, String name) {
     return new AuthenticationResult(new MfaRequiredException(tenant, name), null);
   }
 
+  /**
+   * Creates a failure result indicating new MFA enrollment is required.
+   *
+   * Used when a user must enroll a new MFA method. The result encodes the required error state.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @return a failure result
+   */
   public static AuthenticationResult newMfaRequired(String tenant, String name) {
     return new AuthenticationResult(new NewMfaRequiredException(tenant, name), null);
   }
 
+  /**
+   * Creates a failure result indicating a password change is required.
+   *
+   * Used when a user must set a new password. The result encodes the required error state.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @return a failure result
+   */
   public static AuthenticationResult newPasswordRequired(String tenant, String name) {
     return new AuthenticationResult(new NewPasswordRequiredException(tenant, name), null);
   }
 
+  /**
+   * Creates a failure result indicating user consent is required.
+   *
+   * Used when the authorization flow requires user approval. The result encodes the required error
+   * state.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @return a failure result
+   */
   public static AuthenticationResult consentRequired(String tenant, String name) {
     return new AuthenticationResult(new ConsentRequiredException(tenant, name), null);
   }
 
+  /**
+   * Creates a failure result for not-allowed access.
+   *
+   * Used when the user is not allowed to access the flow. The reason message is carried in the
+   * exception.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @param reason failure reason message
+   * @return a failure result
+   */
   public static AuthenticationResult notAllowed(String tenant, String name, String reason) {
     return new AuthenticationResult(new NotAllowedAccessUserException(tenant, name, reason), null);
   }
 
+  /**
+   * Creates a failure result for missing client scope consent.
+   *
+   * Used when client-specific scope consent is missing. The pending scopes are included in the
+   * exception.
+   *
+   * @param tenant tenant identifier
+   * @param name username
+   * @param clientId client identifier
+   * @param pendingScopes scopes requiring consent
+   * @return a failure result
+   */
   public static AuthenticationResult clientScopeConsentRequired(String tenant, String name,
       String clientId, List<String> pendingScopes) {
     return new AuthenticationResult(
@@ -68,6 +179,14 @@ public final class AuthenticationResult {
     this.data = data;
   }
 
+  /**
+   * Returns the authentication data when the result is successful.
+   *
+   * Throws the underlying exception if the result is a failure. This enforces correct usage of the
+   * right side.
+   *
+   * @return authentication data
+   */
   public AuthenticationData getData() {
     if (!isRight()) {
       throw fail;
@@ -75,6 +194,13 @@ public final class AuthenticationResult {
     return data;
   }
 
+  /**
+   * Returns the authentication exception when the result is a failure.
+   *
+   * Throws when called on a successful result. This enforces correct usage of the left side.
+   *
+   * @return authentication exception
+   */
   public AuthenticationException getFail() {
     if (isRight()) {
       throw new NoSuchElementException();
@@ -82,6 +208,14 @@ public final class AuthenticationResult {
     return fail;
   }
 
+  /**
+   * Indicates whether the result is successful.
+   *
+   * A result is successful when authentication data is present. This is the primary check before
+   * accessing data or fail.
+   *
+   * @return true when authentication succeeded
+   */
   public boolean isRight() {
     return null != data;
   }

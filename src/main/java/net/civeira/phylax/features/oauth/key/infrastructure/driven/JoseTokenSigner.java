@@ -53,21 +53,58 @@ import net.civeira.phylax.features.oauth.key.domain.PublicKeyInformation;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenStoreGateway;
 
+/**
+ * Token signer implementation using JOSE and RSA keys.
+ *
+ * Responsibilities: - Sign and verify JWT tokens for tenants. - Expose JWKS data derived from
+ * stored keys.
+ *
+ * Design notes: - Uses TokenStoreGateway for key rotation and storage. - Performs RSA key parsing
+ * and validation internally.
+ */
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class JoseTokenSigner implements TokenSigner {
+  /**
+   * Request context for building issuer URLs.
+   */
   private final CurrentRequest current;
+  /**
+   * Duration for which each signing key is valid.
+   */
   @ConfigProperty(name = "oauth.jwt.authorization.key-duration", defaultValue = "7d")
   private final Duration keyDuration;
+  /**
+   * Number of future keys to pre-generate.
+   */
   @ConfigProperty(name = "oauth.jwt.authorization.key-futures", defaultValue = "3")
   private final int futureKeysNumber;
+  /**
+   * Repository for storing and retrieving signing keys.
+   */
   private final TokenStoreGateway repository;
+  /**
+   * Store password configuration value.
+   */
   @ConfigProperty(name = "oauth.jwt.authorization.store-pass")
   private final String storePass;
+  /**
+   * Store pair configuration value.
+   */
   @ConfigProperty(name = "oauth.jwt.authorization.store-pair")
   private final String storePair;
 
+  /**
+   * Signs a JWT using the current tenant key.
+   *
+   * Applies expiration and key id before signing. Uses RSA algorithm based on stored key data.
+   *
+   * @param tenant tenant identifier
+   * @param data JWT builder
+   * @param expiration token expiration instant
+   * @return signed JWT token
+   */
   @Override
   public String sign(String tenant, Builder data, Instant expiration) {
     KeyInformation currentKey = currentKey(tenant);
@@ -75,6 +112,14 @@ public class JoseTokenSigner implements TokenSigner {
         .sign(signAlgoritm(currentKey));
   }
 
+  /**
+   * Builds a JWKS for the given tenant.
+   *
+   * Converts stored public keys into JWK entries. Logs errors when public keys cannot be parsed.
+   *
+   * @param tenant tenant identifier
+   * @return JWKS set
+   */
   @Override
   public JwkSet keysAsJwks(String tenant) {
     List<Jks> syncCopy = new ArrayList<>();
@@ -89,6 +134,16 @@ public class JoseTokenSigner implements TokenSigner {
     return JwkSet.builder().keys(syncCopy).build();
   }
 
+  /**
+   * Signs a JWT using the private key as key id.
+   *
+   * Uses the keypass strategy for key identification. Returns the signed token string.
+   *
+   * @param tenant tenant identifier
+   * @param data JWT builder
+   * @param expiration token expiration instant
+   * @return signed JWT token
+   */
   @Override
   public String signKeypass(String tenant, Builder data, Instant expiration) {
     KeyInformation currentKey = currentKey(tenant);
@@ -96,6 +151,15 @@ public class JoseTokenSigner implements TokenSigner {
         .sign(signAlgoritm(currentKey));
   }
 
+  /**
+   * Verifies a token and returns its payload claims.
+   *
+   * Uses issuer validation when verifying the token. Returns an empty map when verification fails.
+   *
+   * @param tenant tenant identifier
+   * @param token token string
+   * @return map of payload claims
+   */
   @Override
   public Map<String, Object> verifyTokenPayload(String tenant, String token) {
     Optional<DecodedJWT> decoded = verifyToken(tenant, token, true);
@@ -107,12 +171,33 @@ public class JoseTokenSigner implements TokenSigner {
     return payload;
   }
 
+  /**
+   * Verifies a token and returns its key id.
+   *
+   * Uses relaxed issuer validation for keypass tokens. Returns an empty string when verification
+   * fails.
+   *
+   * @param tenant tenant identifier
+   * @param token token string
+   * @return key id string
+   */
   @Override
   public String verifiedKeypass(String tenant, String token) {
     Optional<DecodedJWT> decoded = verifyToken(tenant, token, false);
     return decoded.map(DecodedJWT::getKeyId).orElse("");
   }
 
+  /**
+   * Verifies a token using available public keys.
+   *
+   * Attempts verification with a matching key id if present. Falls back to all public keys when key
+   * id is missing.
+   *
+   * @param tenant tenant identifier
+   * @param token token string
+   * @param issuerValidation whether to enforce issuer validation
+   * @return optional decoded JWT
+   */
   private Optional<DecodedJWT> verifyToken(String tenant, String token, boolean issuerValidation) {
     String keyId = extractSignerId(token).orElse(null);
     List<PublicKeyInformation> publicKeys = repository.listPublicKeys(tenant);
@@ -132,6 +217,14 @@ public class JoseTokenSigner implements TokenSigner {
     return Optional.empty();
   }
 
+  /**
+   * Extracts the key id from a JWT without verification.
+   *
+   * Returns empty when the token cannot be decoded. Used to narrow verification candidates.
+   *
+   * @param token token string
+   * @return optional key id
+   */
   private Optional<String> extractSignerId(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
@@ -141,12 +234,32 @@ public class JoseTokenSigner implements TokenSigner {
     }
   }
 
+  /**
+   * Returns the current active key for a tenant.
+   *
+   * Ensures key rotation is up to date before retrieval. Throws when no active key exists.
+   *
+   * @param tenant tenant identifier
+   * @return key information
+   */
   private KeyInformation currentKey(String tenant) {
     checkNewNeeded(tenant);
     return repository.currentKey(tenant)
         .orElseThrow(() -> new IllegalStateException("There is no active key"));
   }
 
+  /**
+   * Attempts to decode and verify a token with a specific public key.
+   *
+   * Handles signature verification and optional issuer validation. Returns empty when validation
+   * fails.
+   *
+   * @param key public key information
+   * @param tenant tenant identifier
+   * @param token token string
+   * @param issuerValidation whether to enforce issuer validation
+   * @return optional decoded JWT
+   */
   private Optional<DecodedJWT> decode(PublicKeyInformation key, String tenant, String token,
       boolean issuerValidation) {
     try {
@@ -171,10 +284,27 @@ public class JoseTokenSigner implements TokenSigner {
     }
   }
 
+  /**
+   * Builds the issuer URL for the tenant.
+   *
+   * Uses the public host from the current request context. Keeps issuer construction centralized.
+   *
+   * @param tenant tenant identifier
+   * @return issuer URL
+   */
   private String getIssuer(String tenant) {
     return current.getPublicHost() + "/oauth/openid/" + tenant;
   }
 
+  /**
+   * Builds the RSA signing algorithm for the given key.
+   *
+   * Parses public and private key material to RSA keys. Throws a NotAllowedException on
+   * cryptographic errors.
+   *
+   * @param key key information
+   * @return RSA signing algorithm
+   */
   private Algorithm signAlgoritm(KeyInformation key) {
     try {
       byte[] privateKeyBytes = java.util.Base64.getDecoder().decode(key.getPrivateKey());
@@ -219,6 +349,17 @@ public class JoseTokenSigner implements TokenSigner {
     }
   }
 
+  /**
+   * Reads an RSA public key from PEM content.
+   *
+   * Strips headers and decodes base64 key bytes. Returns the parsed RSAPublicKey instance.
+   *
+   * @param publicKeyContent PEM-encoded public key
+   * @return RSA public key
+   * @throws IOException when decoding fails
+   * @throws NoSuchAlgorithmException when RSA is unavailable
+   * @throws InvalidKeySpecException when key spec is invalid
+   */
   private RSAPublicKey readKey(String publicKeyContent)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     String base64 = publicKeyContent.replace("\\n", "").replace("-----BEGIN PUBLIC KEY-----", "")
@@ -231,6 +372,14 @@ public class JoseTokenSigner implements TokenSigner {
     return (RSAPublicKey) keyFactory.generatePublic(publicKeySpec);
   }
 
+  /**
+   * Ensures enough future keys are generated for rotation.
+   *
+   * Compares expected future expiration to stored keys. Generates and persists new keys when
+   * needed.
+   *
+   * @param tenant tenant identifier
+   */
   private void checkNewNeeded(String tenant) {
     KeyConfig config = KeyConfig.builder().ttl(keyDuration).futures(futureKeysNumber).build();
     Instant expected = Instant.now();
@@ -253,6 +402,13 @@ public class JoseTokenSigner implements TokenSigner {
     }
   }
 
+  /**
+   * Generates a new RSA key pair and wraps it as KeyInformation.
+   *
+   * Uses a 4096-bit key size and marks usage as "sig". Throws when RSA algorithm is unavailable.
+   *
+   * @return key information
+   */
   private KeyInformation createKeys() {
     try {
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -272,6 +428,15 @@ public class JoseTokenSigner implements TokenSigner {
     }
   }
 
+  /**
+   * Generates a JWK entry from a public RSA key.
+   *
+   * Encodes modulus and exponent using base64url. Sets algorithm and usage metadata.
+   *
+   * @param key key identifier
+   * @param rsa RSA public key
+   * @return JWK entry
+   */
   private Jks generateJWK(String key, RSAPublicKey rsa) {
     return Jks.builder().kty(rsa.getAlgorithm()).kid(key)
         .n(Base64.encodeBase64URLSafeString(toByteArray(rsa.getModulus())))
@@ -279,6 +444,14 @@ public class JoseTokenSigner implements TokenSigner {
         .use("sig").build();
   }
 
+  /**
+   * Converts a BigInteger to a minimal byte array.
+   *
+   * Removes leading zero padding when present. Used for RSA modulus and exponent encoding.
+   *
+   * @param bigInteger input integer
+   * @return byte array
+   */
   private static byte[] toByteArray(BigInteger bigInteger) {
     byte[] bytes = bigInteger.toByteArray();
     byte[] result;
@@ -291,6 +464,15 @@ public class JoseTokenSigner implements TokenSigner {
     return result;
   }
 
+  /**
+   * Logs an error message with JSON-escaped details.
+   *
+   * Uses the logger only when error level is enabled. Avoids leaking sensitive error details in
+   * logs.
+   *
+   * @param message error message
+   * @param ex exception to log
+   */
   private void logError(String message, Exception ex) {
     if (log.isErrorEnabled()) {
       log.error(message + ": {0}", StringEscapeUtils.escapeJson(ex.getMessage()));

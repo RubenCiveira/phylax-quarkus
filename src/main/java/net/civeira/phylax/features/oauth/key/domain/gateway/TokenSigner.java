@@ -8,14 +8,70 @@ import com.auth0.jwt.JWTCreator.Builder;
 
 import net.civeira.phylax.features.oauth.key.domain.JwkSet;
 
+/**
+ * Domain port for token signing and verification.
+ *
+ * Responsibilities: - Sign JWT tokens with tenant-specific keys. - Provide JWKS and token
+ * verification utilities.
+ *
+ * Design notes: - Implemented by infrastructure cryptographic adapters. - Keeps cryptography
+ * concerns outside the domain.
+ */
 public interface TokenSigner {
+  /**
+   * Signs a JWT using the current tenant key.
+   *
+   * Applies expiration and key id to the JWT builder. Returns the signed token string.
+   *
+   * @param tenant tenant identifier
+   * @param data JWT builder
+   * @param expiration token expiration instant
+   * @return signed JWT token
+   */
   String sign(String tenant, Builder data, Instant expiration);
 
+  /**
+   * Returns a JWKS for the given tenant.
+   *
+   * Used for discovery endpoints and client validation. The key set should reflect current public
+   * keys.
+   *
+   * @param tenant tenant identifier
+   * @return JWKS set
+   */
   JwkSet keysAsJwks(String tenant);
 
+  /**
+   * Signs a JWT using a keypass strategy.
+   *
+   * Uses private key id as key id in the JWT. Returns the signed token string.
+   *
+   * @param tenant tenant identifier
+   * @param data JWT builder
+   * @param expiration token expiration instant
+   * @return signed JWT token
+   */
   String signKeypass(String tenant, Builder data, Instant expiration);
 
+  /**
+   * Verifies a token and returns its payload claims.
+   *
+   * Returns an empty map when verification fails. Used by internal services to validate tokens.
+   *
+   * @param tenant tenant identifier
+   * @param token token string
+   * @return map of payload claims
+   */
   Map<String, Object> verifyTokenPayload(String tenant, String token);
 
+  /**
+   * Verifies a token and returns its keypass identifier.
+   *
+   * Returns an empty string when verification fails. Used for keypass token validation.
+   *
+   * @param tenant tenant identifier
+   * @param token token string
+   * @return keypass id
+   */
   String verifiedKeypass(String tenant, String token);
 }

@@ -1,0 +1,14 @@
+/**
+ * Domain ports for MFA services.
+ *
+ * Responsibilities: - Define outbound contracts for MFA storage. - Support verification and
+ * enrollment operations.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps domain logic decoupled from
+ * storage.
+ *
+ * Dependencies: - Depends on MFA domain types.
+ *
+ * Stability: gateway interfaces.
+ */
+package net.civeira.phylax.features.oauth.mfa.domain.gateway;

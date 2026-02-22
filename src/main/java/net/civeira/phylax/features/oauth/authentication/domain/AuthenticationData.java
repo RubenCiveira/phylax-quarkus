@@ -8,33 +8,63 @@ import java.util.List;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
+/**
+ * Mutable authentication context used during token issuance.
+ *
+ * Responsibilities: - Hold authenticated user identity and claims. - Track audiences, scopes, and
+ * roles for tokens.
+ *
+ * Design notes: - Mutable to allow incremental enrichment during flows. - Used by token builders
+ * and session stores.
+ */
 @Data
 @RegisterForReflection
 public class AuthenticationData {
+  /**
+   * Unique identifier for the authenticated subject.
+   */
   private String uid;
   /**
-   * El nombre del acceso
+   * Authenticated username or subject name. Used to resolve user data during token creation.
    */
   private String username;
   /**
-   * La lista de roles del usuario
+   * Roles granted to the user. Stored as flattened role names with audience prefixes.
    */
   private List<String> roles = new ArrayList<>();
   /**
-   * La lista de audiencias
+   * Audiences requested for the token. Used to scope roles and access claims.
    */
   private List<String> audiences = new ArrayList<>();
   /**
-   * Los scopes concedidos al token de acceso
+   * Scopes granted to the access token. Used by resource servers for authorization.
    */
   private List<String> scopes = new ArrayList<>();
 
+  /**
+   * Tenant identifier for the current authentication context.
+   */
   private String tenant;
 
+  /**
+   * Authentication mode used for this session.
+   */
   private AuthenticationMode mode;
 
+  /**
+   * Timestamp of authentication completion.
+   */
   private Instant time;
 
+  /**
+   * Adds role names for the given audience.
+   *
+   * Roles are prefixed with the audience when not a wildcard. The resulting list is appended to the
+   * current roles.
+   *
+   * @param audience audience name or wildcard
+   * @param names role names to add
+   */
   public void addRolesTo(String audience, List<String> names) {
     names.stream().forEach(name -> {
       roles.add(("*".equals(audience) ? "" : audience + ".") + name);

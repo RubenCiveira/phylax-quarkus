@@ -44,24 +44,73 @@ import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExterna
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
 
+/**
+ * Delegated access provider implementation for SAML.
+ *
+ * Responsibilities: - Build SAML authentication requests. - Validate SAML responses and extract
+ * user data.
+ *
+ * Design notes: - Uses XML signature validation for security. - Returns minimal user data for
+ * mapping.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvider {
 
   @Data
   @RegisterForReflection
+  /**
+   * Parsed SAML response data for user mapping.
+   *
+   * Contains name, code, and email extracted from assertions. Used to build
+   * DelegatedAccessExternalProvider.UserData.
+   */
   public static class SamlData {
+    /**
+     * Display name extracted from SAML.
+     */
     private String name;
+    /**
+     * Identifier extracted from SAML (NameID).
+     */
     private String code;
+    /**
+     * Email extracted from SAML.
+     */
     private String email;
   }
 
+  /**
+   * Provider identifier for this instance.
+   */
   private final String id;
+  /**
+   * Identity provider SSO target URL.
+   */
   private final String idpSsoTargetUrl;
+  /**
+   * Issuer value used in SAML requests.
+   */
   private final String issuer;
+  /**
+   * PEM-encoded certificate used to validate responses.
+   */
   private final String certificate;
+  /**
+   * Whether the provider should auto-submit in the UI.
+   */
   private final boolean automatic;
 
+  /**
+   * Builds the SAML authentication request info.
+   *
+   * Generates a SAML request and constructs redirect URL. Returns request info for a GET redirect
+   * to the IdP.
+   *
+   * @param request auth request context
+   * @param detail delegated request details
+   * @return request information
+   */
   @Override
   public RequestInfo request(AuthRequest request, DelegatedRequestDetails detail) {
     try {
@@ -81,6 +130,16 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     }
   }
 
+  /**
+   * Processes the SAML response parameters.
+   *
+   * Validates the SAML response and builds response info. Returns null when response parsing fails.
+   *
+   * @param request auth request context
+   * @param detail delegated request details
+   * @param params response parameters
+   * @return response information
+   */
   @Override
   public ResponseInfo response(AuthRequest request, DelegatedRequestDetails detail,
       Map<String, String[]> params) {
@@ -97,6 +156,16 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     }
   }
 
+  /**
+   * Retrieves user data from a SAML response payload.
+   *
+   * Parses the inner token as JSON and maps to user data. Returns null when parsing fails.
+   *
+   * @param request auth request context
+   * @param detail delegated request details
+   * @param innerToken SAML response payload
+   * @return user data or null
+   */
   @Override
   public UserData userInfo(AuthRequest request, DelegatedRequestDetails detail, String innerToken) {
     ObjectMapper mapper = new ObjectMapper();
@@ -110,11 +179,27 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     }
   }
 
+  /**
+   * Returns the provider identifier.
+   *
+   * Used to select the SAML provider by id. The id is configured per instance.
+   *
+   * @param request auth request context
+   * @return provider identifier
+   */
   @Override
   public String getId(AuthRequest request) {
     return id;
   }
 
+  /**
+   * Returns the provider description for UI rendering.
+   *
+   * Includes name, logo, and automation flag. Used to render provider buttons in the login UI.
+   *
+   * @param request auth request context
+   * @return provider description
+   */
   @Override
   public DelegatedProviderDescription info(AuthRequest request) {
     DelegatedProviderDescription pd = new DelegatedProviderDescription();
@@ -125,6 +210,17 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     return pd;
   }
 
+  /**
+   * Generates a SAML AuthnRequest XML and returns it as base64.
+   *
+   * Builds a minimal AuthnRequest document with issuer and destination. Uses secure XML transformer
+   * settings.
+   *
+   * @param assertionConsumerServiceUrl callback URL
+   * @return base64-encoded SAML request XML
+   * @throws ParserConfigurationException when XML builder fails
+   * @throws TransformerException when XML serialization fails
+   */
   private String generateAuthRequest(String assertionConsumerServiceUrl)
       throws ParserConfigurationException, TransformerException {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -161,6 +257,16 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     return Base64.getEncoder().encodeToString(authRequestXml.getBytes());
   }
 
+  /**
+   * Loads an X509 certificate from a PEM string.
+   *
+   * Removes PEM headers and decodes base64 content. Returns the certificate for signature
+   * validation.
+   *
+   * @param pemCertificate PEM-encoded certificate
+   * @return X509 certificate
+   * @throws Exception when decoding or parsing fails
+   */
   private static X509Certificate loadCertificate(String pemCertificate) throws Exception {
     String pemContent = pemCertificate.replace("-----BEGIN CERTIFICATE-----", "")
         .replace("-----END CERTIFICATE-----", "").replaceAll("\\s+", "");
@@ -170,6 +276,18 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
         .generateCertificate(new ByteArrayInputStream(decoded));
   }
 
+  /**
+   * Processes a SAML response and extracts user data.
+   *
+   * Validates signature, time conditions, and audience. Extracts attributes and NameID to populate
+   * user data.
+   *
+   * @param samlResponse base64 SAML response
+   * @param certificate certificate for signature validation
+   * @param expectedAudience expected audience value
+   * @return parsed SAML data
+   * @throws Exception when validation fails
+   */
   private SamlData processResponse(String samlResponse, X509Certificate certificate,
       String expectedAudience) throws Exception {
     SamlData result = new SamlData();
@@ -250,6 +368,18 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     return result;
   }
 
+  /**
+   * Verifies the XML digital signature of a SAML response.
+   *
+   * Locates the Signature element and validates it using the certificate. Enables secure validation
+   * to prevent known attacks.
+   *
+   * @param document parsed SAML XML document
+   * @param certificate certificate for signature validation
+   * @return true when the signature is valid
+   * @throws XMLSignatureException when signature is invalid
+   * @throws MarshalException when signature cannot be parsed
+   */
   private boolean verifySignature(Document document, X509Certificate certificate)
       throws XMLSignatureException, MarshalException {
     NodeList signatureNodeList = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
@@ -271,6 +401,15 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     return signature.validate(valContext);
   }
 
+  /**
+   * Validates time conditions on a SAML assertion.
+   *
+   * Ensures the assertion is not used before NotBefore or after NotOnOrAfter. Throws when the time
+   * window is invalid.
+   *
+   * @param assertion assertion element
+   * @throws XMLSignatureException when conditions are missing
+   */
   private void validateTimeConditions(Element assertion) throws XMLSignatureException {
     NodeList conditionsList =
         assertion.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "Conditions");
@@ -293,6 +432,15 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
     }
   }
 
+  /**
+   * Validates audience restrictions on a SAML assertion.
+   *
+   * Ensures that the expected audience is present. Throws when no matching audience is found.
+   *
+   * @param assertion assertion element
+   * @param expectedAudience expected audience value
+   * @throws XMLSignatureException when restrictions are missing
+   */
   private void validateAudience(Element assertion, String expectedAudience)
       throws XMLSignatureException {
     NodeList audienceRestrictionList = assertion

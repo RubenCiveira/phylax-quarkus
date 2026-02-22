@@ -11,17 +11,54 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationRes
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.domain.gateway.LoginGateway;
 
+/**
+ * Application service for user login flows.
+ *
+ * Responsibilities: - Validate credentials against login policies. - Load pre-authenticated data
+ * after challenges.
+ *
+ * Design notes: - Delegates to LoginGateway for domain validation. - Keeps transport concerns
+ * outside of the use case.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class LoginUsecase {
 
+  /**
+   * Gateway responsible for user validation operations.
+   */
   private final LoginGateway gateway;
 
+  /**
+   * Validates a user's credentials and challenge state.
+   *
+   * Delegates validation logic to the gateway implementation. Returns an AuthenticationResult
+   * describing success or failure.
+   *
+   * @param request auth request context
+   * @param username username
+   * @param password raw password
+   * @param client client details
+   * @param challenges completed challenges
+   * @return authentication result
+   */
   public AuthenticationResult validatedUserData(AuthRequest request, String username,
       String password, ClientDetails client, List<AuthenticationChallege> challenges) {
     return gateway.validateUserData(request, username, password, client, challenges);
   }
 
+  /**
+   * Loads pre-authenticated user data by username.
+   *
+   * Used after intermediate challenges like MFA or consent. Returns an AuthenticationResult
+   * describing success or failure.
+   *
+   * @param request auth request context
+   * @param username username
+   * @param client client details
+   * @param challenges completed challenges
+   * @return authentication result
+   */
   public AuthenticationResult fillPreAuthenticated(AuthRequest request, String username,
       ClientDetails client, List<AuthenticationChallege> challenges) {
     return gateway.validatePreAuthenticated(request, username, client, challenges);

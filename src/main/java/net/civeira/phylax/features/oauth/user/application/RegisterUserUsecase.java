@@ -8,25 +8,74 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
 
+/**
+ * Application service for user registration flows.
+ *
+ * Responsibilities: - Check whether registration is enabled per tenant. - Orchestrate registration
+ * requests and verification.
+ *
+ * Design notes: - Delegates persistence to RegisterUserGateway. - Keeps transport concerns outside
+ * of the use case.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class RegisterUserUsecase {
 
+  /**
+   * Gateway for registration operations.
+   */
   private final RegisterUserGateway gateway;
 
+  /**
+   * Indicates whether self-registration is allowed for a tenant.
+   *
+   * Delegates to the gateway configuration. Used to enable or disable registration UI.
+   *
+   * @param tenant tenant identifier
+   * @return true when registration is allowed
+   */
   public boolean allowRegister(String tenant) {
     return gateway.allowRegister(tenant);
   }
 
+  /**
+   * Returns the registration consent text for a tenant.
+   *
+   * Used to display terms of use during registration. Returns empty when no consent is required.
+   *
+   * @param tenant tenant identifier
+   * @return optional consent text
+   */
   public Optional<String> getRegisterConsent(String tenant) {
     return gateway.getRegisterConsent(tenant);
   }
 
+  /**
+   * Initiates a registration request for a user.
+   *
+   * Builds a registration flow and returns the resulting status. The result indicates immediate
+   * activation or pending verification.
+   *
+   * @param urlBase base URL for verification links
+   * @param tenant tenant identifier
+   * @param email user email
+   * @param password raw password
+   * @return registration result
+   */
   public RegistrationResult requestForRegister(String urlBase, String tenant, String email,
       String password) {
     return gateway.requestForRegister(urlBase, tenant, email, password);
   }
 
+  /**
+   * Verifies a registration code for a tenant.
+   *
+   * Returns the username when the code is valid. Returns empty when the code is invalid or expired.
+   *
+   * @param tenant tenant identifier
+   * @param code registration code
+   * @return optional username
+   */
   public Optional<String> verifyRegister(String tenant, String code) {
     return gateway.verifyRegister(tenant, code);
   }

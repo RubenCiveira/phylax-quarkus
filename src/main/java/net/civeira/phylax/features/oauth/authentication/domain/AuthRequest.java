@@ -18,36 +18,91 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Parsed authorization request parameters for OAuth and OIDC flows.
+ *
+ * Responsibilities: - Parse query parameters and headers into fields. - Provide helpers to
+ * serialize into URL fragments.
+ *
+ * Design notes: - Uses Optional for nullable parameters. - Provides a builder for tests and
+ * internal flows.
+ */
 @Data
 @Jacksonized
 @Builder
 @AllArgsConstructor
 public class AuthRequest {
+  /**
+   * Tenant identifier for this request.
+   */
   @NonNull
   private final String tenant;
   @Builder.Default
+  /**
+   * Client identifier, when provided.
+   */
   private final Optional<String> clientId = Optional.empty();
   @Builder.Default
+  /**
+   * Prompt parameter controlling UI behavior.
+   */
   private final Optional<String> prompt = Optional.empty();
   @Builder.Default
+  /**
+   * Scope parameter requested by the client.
+   */
   private final Optional<String> scope = Optional.empty();
   @Builder.Default
+  /**
+   * OAuth state parameter for CSRF protection.
+   */
   private final Optional<String> state = Optional.empty();
   @Builder.Default
+  /**
+   * OIDC nonce parameter for replay protection.
+   */
   private final Optional<String> nonce = Optional.empty();
   @Builder.Default
+  /**
+   * PKCE code challenge value.
+   */
   private final Optional<String> codeChallenge = Optional.empty();
   @Builder.Default
+  /**
+   * PKCE code challenge method value.
+   */
   private final Optional<String> codeChallengeMethod = Optional.empty();
   @Builder.Default
+  /**
+   * Redirect URI for the authorization response.
+   */
   private final Optional<String> redirect = Optional.empty();
   @Builder.Default
+  /**
+   * Preferred locale inferred from the request.
+   */
   private final Locale locale = Locale.getDefault();
   @Builder.Default
+  /**
+   * Response type requested by the client.
+   */
   private final Optional<String> responseType = Optional.empty();
   @Builder.Default
+  /**
+   * Requested audiences for token issuance.
+   */
   private final List<String> audiences = List.of();
 
+  /**
+   * Creates an AuthRequest by parsing HTTP query parameters and headers.
+   *
+   * This constructor extracts standard OAuth/OIDC parameters. It also normalizes audiences and
+   * client identifiers.
+   *
+   * @param tenant tenant identifier
+   * @param req request URI information
+   * @param headers request headers
+   */
   public AuthRequest(String tenant, UriInfo req, HttpHeaders headers) {
     MultivaluedMap<String, String> params = req.getQueryParameters();
     String aus = params.getFirst("audience");
@@ -73,6 +128,14 @@ public class AuthRequest {
     this.audiences = explicitAud.stream().toList();
   }
 
+  /**
+   * Encodes the request parameters into a URL fragment string.
+   *
+   * Only populated fields are included in the output. The result is suitable for redirects or
+   * links.
+   *
+   * @return encoded URL fragment
+   */
   public String encodeInUrl() {
     return "" + append("audiences", getAudiences()) + append("prompt", getPrompt())
         + append("scope", getScope()) + append("clientId", getClientId())
@@ -82,11 +145,30 @@ public class AuthRequest {
         + append("redirect_uri", getRedirect()) + append("response_type", getResponseType());
   }
 
+  /**
+   * Appends a list parameter to the encoded URL fragment.
+   *
+   * Joins list values by comma and URL-encodes the result. Returns an empty string when the list is
+   * empty.
+   *
+   * @param key parameter name
+   * @param of parameter values
+   * @return encoded fragment part
+   */
   private String append(String key, List<String> of) {
     return of.isEmpty() ? ""
         : "&" + key + "=" + URLEncoder.encode(String.join(",", of), StandardCharsets.UTF_8);
   }
 
+  /**
+   * Appends an optional parameter to the encoded URL fragment.
+   *
+   * URL-encodes the value when present. Returns an empty string when the value is missing.
+   *
+   * @param key parameter name
+   * @param of optional parameter value
+   * @return encoded fragment part
+   */
   private String append(String key, Optional<String> of) {
     return of.map(val -> "&" + key + "=" + URLEncoder.encode(val, StandardCharsets.UTF_8))
         .orElse("");

@@ -8,23 +8,62 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
+/**
+ * Client metadata used during OAuth and OIDC flows.
+ *
+ * Responsibilities: - Provide allowed scopes and grant types for a client. - Describe whether
+ * client authentication is required.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by controllers and token
+ * builders.
+ */
 @Data
 @Builder
 @RegisterForReflection
 public class ClientDetails {
+  /**
+   * Client identifier.
+   */
   @NonNull
   private final String clientId;
+  /**
+   * Scopes allowed for this client.
+   */
   @NonNull
   private final List<String> allowedScopes;
+  /**
+   * Grant types allowed for this client.
+   */
   @NonNull
   private final List<String> allowedGrants;
 
+  /**
+   * Indicates whether client authentication requires a secret.
+   */
   private final boolean protectedWithSecret;
 
+  /**
+   * Checks whether a scope is allowed for this client.
+   *
+   * Returns true when the scope is present in the allowed list. Used to filter requested scopes
+   * during token issuance.
+   *
+   * @param scope scope name
+   * @return true when the scope is allowed
+   */
   public boolean allowedScope(String scope) {
     return allowedScopes.contains(scope);
   }
 
+  /**
+   * Checks whether a grant type is allowed for this client.
+   *
+   * Returns true when the grant type is present in the allowed list. Used when selecting token
+   * granters.
+   *
+   * @param grant grant type name
+   * @return true when the grant is allowed
+   */
   public boolean allowdedGrant(String grant) {
     return allowedGrants.contains(grant);
   }

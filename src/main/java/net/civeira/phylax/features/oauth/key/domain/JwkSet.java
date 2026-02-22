@@ -7,9 +7,20 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * JSON Web Key Set (JWKS) container.
+ *
+ * Responsibilities: - Provide a list of JWK entries for clients. - Support JWKS discovery
+ * endpoints.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by the JWKS REST controller.
+ */
 @Data
 @Builder
 @RegisterForReflection
 public class JwkSet {
+  /**
+   * List of JWK entries.
+   */
   private final List<Jks> keys;
 }

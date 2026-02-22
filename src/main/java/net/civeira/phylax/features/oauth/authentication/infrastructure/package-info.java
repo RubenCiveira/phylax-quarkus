@@ -1,0 +1,14 @@
+/**
+ * Infrastructure adapters for authentication.
+ *
+ * Responsibilities: - Provide driver and driven integrations for auth. - Translate between
+ * transports and domain objects.
+ *
+ * Design notes: - Contains REST, HTML, and CDI adapters. - Keeps application and domain layers
+ * clean.
+ *
+ * Dependencies: - Uses application services and domain ports.
+ *
+ * Stability: internal infrastructure layer.
+ */
+package net.civeira.phylax.features.oauth.authentication.infrastructure;

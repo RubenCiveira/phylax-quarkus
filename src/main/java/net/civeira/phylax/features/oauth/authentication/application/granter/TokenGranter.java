@@ -8,10 +8,39 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
+/**
+ * Strategy contract for handling a specific OAuth grant type.
+ *
+ * Responsibilities: - Declare whether a grant type is supported. - Authenticate and build a domain
+ * authentication result.
+ *
+ * Design notes: - Implementations are stateless and request-scoped. - Keeps grant-specific logic
+ * separated by class.
+ */
 public interface TokenGranter {
 
+  /**
+   * Checks whether this granter supports the given grant type.
+   *
+   * Implementations should match the configured grant value. This is used to dispatch the request
+   * to the correct granter.
+   *
+   * @param grantType grant type name
+   * @return true when the grant is handled
+   */
   public boolean canHandle(String grantType);
 
+  /**
+   * Authenticates a token request for the given grant type.
+   *
+   * Implementations should validate input and return a domain result. The result encodes success or
+   * the next required challenge.
+   *
+   * @param request parsed authorization request context
+   * @param client resolved client details
+   * @param paramMap request parameters
+   * @return the authentication result
+   */
   public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap);
 }

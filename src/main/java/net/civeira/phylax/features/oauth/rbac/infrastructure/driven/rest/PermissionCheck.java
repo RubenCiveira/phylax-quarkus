@@ -13,13 +13,36 @@ import net.civeira.phylax.features.oauth.rbac.domain.RoleGrant;
 import net.civeira.phylax.features.oauth.rbac.domain.gateway.PartyVerifierGateway;
 import net.civeira.phylax.features.oauth.rbac.domain.gateway.RbacStoreGateway;
 
+/**
+ * REST endpoint for retrieving RBAC role grants.
+ *
+ * Responsibilities: - Validate API key and resolve relying party. - Return granted roles and scopes
+ * for the party.
+ *
+ * Design notes: - Uses PartyVerifierGateway for authorization. - Delegates data retrieval to
+ * RbacStoreGateway.
+ */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class PermissionCheck {
+  /**
+   * Gateway to validate API keys and resolve relying parties.
+   */
   private final PartyVerifierGateway verifier;
+  /**
+   * Gateway to read RBAC grants and metadata.
+   */
   private final RbacStoreGateway schemaStore;
 
+  /**
+   * Returns role grants for the relying party.
+   *
+   * Validates the API key and loads granted roles. Returns forbidden when the key is invalid.
+   *
+   * @param apiKey API key header value
+   * @return response with role grants or error
+   */
   @GET
   @Path("authz/protection/grant")
   public Response roles(@HeaderParam("API-Key") final String apiKey) {

@@ -9,11 +9,29 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * REST endpoints for device, PAR, and CIBA flows (currently not allowed).
+ *
+ * Responsibilities: - Expose placeholder endpoints for advanced OAuth flows. - Return forbidden
+ * responses until supported.
+ *
+ * Design notes: - Keeps future endpoints reserved and documented. - Prevents accidental exposure of
+ * unsupported features.
+ */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class DevicesAccessController {
 
+  /**
+   * Handles device authorization requests.
+   *
+   * Currently returns forbidden for all clients. Reserved for future device flow support.
+   *
+   * @param tenant tenant identifier
+   * @param paramMap request parameters
+   * @return forbidden response
+   */
   @POST
   @Path("oauth/openid/{tenant}/device")
   public Response device(final @PathParam("tenant") String tenant,
@@ -21,6 +39,15 @@ public class DevicesAccessController {
     return Response.status(403, "Client not allowed.").build();
   }
 
+  /**
+   * Handles pushed authorization requests (PAR).
+   *
+   * Currently returns forbidden for all clients. Reserved for future PAR support.
+   *
+   * @param tenant tenant identifier
+   * @param paramMap request parameters
+   * @return forbidden response
+   */
   @POST
   @Path("oauth/openid/{tenant}/par-request")
   public Response par(final @PathParam("tenant") String tenant,
@@ -28,6 +55,15 @@ public class DevicesAccessController {
     return Response.status(403, "Client not allowed.").build();
   }
 
+  /**
+   * Handles CIBA authentication requests.
+   *
+   * Currently returns forbidden for all clients. Reserved for future CIBA support.
+   *
+   * @param tenant tenant identifier
+   * @param paramMap request parameters
+   * @return forbidden response
+   */
   @POST
   @Path("oauth/openid/{tenant}/ciba-auth")
   public Response ciba(final @PathParam("tenant") String tenant,

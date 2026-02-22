@@ -1,0 +1,13 @@
+/**
+ * Infrastructure adapters for OAuth clients.
+ *
+ * Responsibilities: - Implement storage and delivery integrations. - Translate HTTP and persistence
+ * to domain types.
+ *
+ * Design notes: - Organizes driven and driver adapters. - Keeps transport-specific logic isolated.
+ *
+ * Dependencies: - Uses application services and domain ports.
+ *
+ * Stability: internal infrastructure layer.
+ */
+package net.civeira.phylax.features.oauth.client.infrastructure;

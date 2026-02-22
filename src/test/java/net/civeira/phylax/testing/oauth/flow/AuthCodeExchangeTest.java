@@ -35,4 +35,24 @@ class AuthCodeExchangeTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(OidcTestFixtures.USERNAME, String.valueOf(claims.get("sub")));
     Assertions.assertEquals(OidcTestFixtures.CLIENT_ID, String.valueOf(claims.get("azp")));
   }
+
+  @Test
+  void pkce_wrongVerifier_returns401() {
+    Response login = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
+        OidcTestFixtures.PASSWORD, null);
+    String code = client.extractAuthCode(login);
+    Assertions.assertNotNull(code);
+
+    Response exchange = client.exchangeCodeWithBadVerifier(OidcTestFixtures.TENANT, code,
+        OidcTestFixtures.REDIRECT_URI, OidcTestFixtures.CLIENT_ID);
+
+    Assertions.assertEquals(401, exchange.statusCode());
+  }
+
+  @Test
+  void introspect_returns403() {
+    Response response = client.introspect(OidcTestFixtures.TENANT);
+
+    Assertions.assertEquals(403, response.statusCode());
+  }
 }

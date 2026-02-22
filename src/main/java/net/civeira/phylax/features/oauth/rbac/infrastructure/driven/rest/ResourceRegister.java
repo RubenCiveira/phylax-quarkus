@@ -14,13 +14,37 @@ import net.civeira.phylax.features.oauth.rbac.domain.ScopeList;
 import net.civeira.phylax.features.oauth.rbac.domain.gateway.PartyVerifierGateway;
 import net.civeira.phylax.features.oauth.rbac.domain.gateway.RbacStoreGateway;
 
+/**
+ * REST endpoint for registering RBAC resources and scopes.
+ *
+ * Responsibilities: - Validate API keys and resolve relying parties. - Register scopes and schemas
+ * for resource servers.
+ *
+ * Design notes: - Uses PartyVerifierGateway for authorization. - Delegates storage to
+ * RbacStoreGateway.
+ */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class ResourceRegister {
+  /**
+   * Gateway to validate API keys and resolve relying parties.
+   */
   private final PartyVerifierGateway verifier;
+  /**
+   * Gateway to store RBAC schema and scope metadata.
+   */
   private final RbacStoreGateway schemaStore;
 
+  /**
+   * Registers scopes for a relying party.
+   *
+   * Validates the API key and persists scope metadata. Returns forbidden when the key is invalid.
+   *
+   * @param apiKey API key header value
+   * @param paramMap scope list payload
+   * @return response with status
+   */
   @POST
   @Path("authz/protection/resource/scope")
   public Response registerScopes(@HeaderParam("API-Key") final String apiKey,
@@ -31,6 +55,15 @@ public class ResourceRegister {
     }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
+  /**
+   * Registers resource schemas for a relying party.
+   *
+   * Validates the API key and persists schema metadata. Returns forbidden when the key is invalid.
+   *
+   * @param apiKey API key header value
+   * @param paramMap property list payload
+   * @return response with status
+   */
   @POST
   @Path("authz/protection/resource/schema")
   public Response registerSchemas(@HeaderParam("API-Key") final String apiKey,

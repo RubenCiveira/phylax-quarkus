@@ -5,14 +5,44 @@ import lombok.Builder;
 import lombok.Data;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 
+/**
+ * Session information for authenticated users.
+ *
+ * Responsibilities: - Hold session identifiers and issuer data. - Provide client and user
+ * identifiers for validation.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by session validation and
+ * redirects.
+ */
 @Data
 @Builder
 public class SessionInfo {
+  /**
+   * Challenge session identifier for CSID validation.
+   */
   private final String csid;
+  /**
+   * Whether MFA was used for this session.
+   */
   private final boolean withMfa;
+  /**
+   * Issuer URL for the session.
+   */
   private final String issuer;
+  /**
+   * User identifier for the session.
+   */
   private final String userId;
+  /**
+   * Client identifier associated with the session.
+   */
   private final String clientId;
+  /**
+   * Grant type used to create the session.
+   */
   private final String grant;
+  /**
+   * Authentication data used to validate the session.
+   */
   private final AuthenticationData validationData;
 }

@@ -4,11 +4,31 @@ package net.civeira.phylax.features.oauth.scopes.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Scope permission metadata for consent screens.
+ *
+ * Responsibilities: - Describe a scope with label and description. - Indicate whether the scope is
+ * required.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used in consent UIs and APIs.
+ */
 @Getter
 @Builder
 public class ScopePermission {
+  /**
+   * Scope name identifier.
+   */
   private final String scope;
+  /**
+   * Whether the scope is required by the client.
+   */
   private final boolean required;
+  /**
+   * Human-readable label for the scope.
+   */
   private final String label;
+  /**
+   * Human-readable description for the scope.
+   */
   private final String description;
 }

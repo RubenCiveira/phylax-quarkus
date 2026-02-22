@@ -1,0 +1,13 @@
+/**
+ * Infrastructure adapters for delegated access.
+ *
+ * Responsibilities: - Implement gateways for provider persistence. - Bridge external providers and
+ * domain logic.
+ *
+ * Design notes: - Contains driven adapters for storage. - Keeps integration details isolated.
+ *
+ * Dependencies: - Uses delegated domain gateways.
+ *
+ * Stability: internal infrastructure layer.
+ */
+package net.civeira.phylax.features.oauth.delegated.infrastructure;

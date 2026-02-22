@@ -5,17 +5,74 @@ import java.util.Optional;
 
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 
+/**
+ * Domain port for temporal key and code management.
+ *
+ * Responsibilities: - Provide encryption and verification for temporary values. - Store and
+ * retrieve short-lived authorization codes.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Used by authorization code and CSID
+ * flows.
+ */
 public interface TemporalKeysGateway {
 
+  /**
+   * Returns the current temporal secret key.
+   *
+   * Used for encryption and signing of short-lived values. The key may be rotated periodically.
+   *
+   * @return current secret key
+   */
   String currentKey();
 
+  /**
+   * Encrypts a value using the current temporal key.
+   *
+   * Used to protect sensitive form fields. Returns the encrypted value as a string.
+   *
+   * @param value plain value
+   * @return encrypted value
+   */
   String encrypt(String value);
 
+  /**
+   * Verifies and decrypts a value using current or previous key.
+   *
+   * Returns empty when verification fails. Supports a fallback to the previous key.
+   *
+   * @param value encrypted value
+   * @return optional decrypted value
+   */
   Optional<String> verifyCypher(String value);
 
+  /**
+   * Verifies a signed token and returns the identity claim.
+   *
+   * Returns empty when verification fails. Used by CSID and pre-session flows.
+   *
+   * @param token signed token
+   * @return optional identity value
+   */
   Optional<String> verifyToken(String token);
 
+  /**
+   * Registers a temporary authorization code.
+   *
+   * Stores the code with a short expiration window. Returns the generated code identifier.
+   *
+   * @param code temporal auth code payload
+   * @return generated code
+   */
   String registerTemporalAuthCode(TemporalAuthCode code);
 
+  /**
+   * Retrieves and removes a temporary authorization code.
+   *
+   * Returns empty when the code is missing or expired. Implementations should remove the code after
+   * retrieval.
+   *
+   * @param code code identifier
+   * @return optional temporal auth code
+   */
   Optional<TemporalAuthCode> retrieveTemporalAuthCode(String code);
 }

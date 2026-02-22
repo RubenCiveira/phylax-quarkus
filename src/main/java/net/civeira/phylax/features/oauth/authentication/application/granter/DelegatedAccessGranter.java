@@ -13,18 +13,53 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
+/**
+ * Token granter for delegated access tokens.
+ *
+ * Responsibilities: - Resolve delegated tokens into usernames. - Reuse login flow to build
+ * authentication context.
+ *
+ * Design notes: - Uses DelegateLogin to resolve external tokens. - Returns unknown user for invalid
+ * tokens.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class DelegatedAccessGranter implements TokenGranter {
 
+  /**
+   * Service that resolves delegated tokens to usernames.
+   */
   private final DelegateLogin delegateLogin;
+  /**
+   * Use case for loading pre-authenticated user context.
+   */
   private final LoginUsecase loginUsecase;
 
+  /**
+   * Indicates whether the delegated grant can be handled.
+   *
+   * Matches the "delegated" grant type, case-insensitive. Used by the controller to select a
+   * granter.
+   *
+   * @param grantType grant type name
+   * @return true when the grant type is delegated
+   */
   @Override
   public boolean canHandle(String grantType) {
     return "delegated".equalsIgnoreCase(grantType);
   }
 
+  /**
+   * Authenticates a delegated grant request.
+   *
+   * Resolves the delegated token and builds authentication context. Returns unknown user results
+   * when resolution fails.
+   *
+   * @param request parsed authorization request
+   * @param client resolved client details
+   * @param paramMap request parameters
+   * @return the authentication result
+   */
   @Override
   public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
@@ -41,6 +76,15 @@ public class DelegatedAccessGranter implements TokenGranter {
     }).orElse(AuthenticationResult.unknownName(tenant, token));
   }
 
+  /**
+   * Returns the first parameter value for the given key.
+   *
+   * Used to extract single-valued OAuth parameters. Returns null when the key is missing.
+   *
+   * @param paramMap request parameters
+   * @param key parameter name
+   * @return the first value or null
+   */
   private String first(Map<String, List<String>> paramMap, String key) {
     return paramMap.containsKey(key) || paramMap.get(key).size() > 0 ? paramMap.get(key).get(0)
         : null;

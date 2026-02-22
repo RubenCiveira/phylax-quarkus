@@ -21,21 +21,64 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
 
+/**
+ * HTML controller part for MFA verification.
+ *
+ * Responsibilities: - Render the MFA challenge form. - Validate OTP codes through the MFA service.
+ *
+ * Design notes: - Uses SecureHtmlBuilder for signing and focus. - Delegates OTP verification to
+ * UserMfa.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class MfaControllerPart {
+  /**
+   * Helper to build secure HTML responses.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * MFA service used to verify OTP codes.
+   */
   private final UserMfa userMfa;
+  /**
+   * Page decorator for HTML layout and localization.
+   */
   private final DecoratePageGateway decorator;
 
+  /**
+   * Returns the challenge type for MFA validation.
+   *
+   * Used by flow controllers to route MFA failures. Indicates the MFA challenge step.
+   *
+   * @return MFA challenge identifier
+   */
   public AuthenticationChallege getChallenge() {
     return AuthenticationChallege.MFA;
   }
 
+  /**
+   * Renders the MFA form with a session cookie.
+   *
+   * Builds the MFA form content and attaches the pre-session cookie. Used when the flow requires
+   * MFA validation.
+   *
+   * @param locale locale for translations
+   * @param session pre-session cookie
+   * @return HTML response with MFA form
+   */
   public Response doPaintMfaForm(Locale locale, NewCookie session) {
     return securer.secureHtmlResponse(doPaintMfaFormContent(locale, null).cookie(session));
   }
 
+  /**
+   * Builds the MFA form HTML content.
+   *
+   * Renders labels, help text, and error messages. Includes a signed CSID token and focus behavior.
+   *
+   * @param locale locale for translations
+   * @param msg optional error message
+   * @return response builder with HTML content
+   */
   private ResponseBuilder doPaintMfaFormContent(Locale locale, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("mfa_code"));
 
@@ -65,6 +108,21 @@ public class MfaControllerPart {
         .type(FrontAcessController.TEXT_HTML);
   }
 
+  /**
+   * Processes MFA form submissions.
+   *
+   * Validates the OTP code and continues the flow. Returns an empty optional when the step does not
+   * apply.
+   *
+   * @param step flow step identifier
+   * @param oUser optional username
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @param challenges already satisfied challenges
+   * @return optional response
+   */
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
       Function<StepResult, Response> resolver, List<AuthenticationChallege> challenges) {
@@ -76,6 +134,20 @@ public class MfaControllerPart {
     }
   }
 
+  /**
+   * Executes MFA verification and routes to the next step.
+   *
+   * Verifies the OTP code and invokes the resolver when valid. Re-renders the MFA form when the
+   * code is invalid.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param username username
+   * @param resolver continuation handler
+   * @param challenges already satisfied challenges
+   * @return response for the next step
+   */
   private Response doExecMfa(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, String username,
       Function<StepResult, Response> resolver, List<AuthenticationChallege> challenges) {

@@ -8,10 +8,20 @@ import lombok.Getter;
 
 /**
  * Represents an API Key credential with its associated allowed scopes.
+ *
+ * Responsibilities: - Carry API key identifier data. - Provide scopes authorized for the key.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by API key authentication flows.
  */
 @Getter
 @Builder
 public class ApiKeyData {
+  /**
+   * Identifier for the API key.
+   */
   private final String id;
+  /**
+   * Scopes authorized for this key.
+   */
   private final List<String> scopes;
 }

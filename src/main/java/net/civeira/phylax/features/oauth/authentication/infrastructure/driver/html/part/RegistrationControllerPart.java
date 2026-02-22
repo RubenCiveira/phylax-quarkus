@@ -23,18 +23,56 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.RegisterUserUsecase;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 
+/**
+ * HTML controller part for user registration.
+ *
+ * Responsibilities: - Render registration and verification forms. - Orchestrate registration
+ * requests and validation.
+ *
+ * Design notes: - Uses SecureHtmlBuilder for form encryption. - Delegates registration logic to
+ * RegisterUserUsecase.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class RegistrationControllerPart {
+  /**
+   * Helper to build secure HTML responses.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * Page decorator for HTML layout and localization.
+   */
   private final DecoratePageGateway decorator;
+  /**
+   * Use case for registration workflows.
+   */
   private final RegisterUserUsecase registerUserUsecase;
+  /**
+   * Current request context for public host resolution.
+   */
   private final CurrentRequest current;
 
+  /**
+   * Indicates whether registration is allowed for the tenant.
+   *
+   * Delegates to the registration use case. Used to enable or disable registration UI.
+   *
+   * @param request auth request context
+   * @return true when registration is allowed
+   */
   public boolean allowRegister(AuthRequest request) {
     return registerUserUsecase.allowRegister(request.getTenant());
   }
 
+  /**
+   * Renders the registration form.
+   *
+   * Builds form content with encrypted password fields. Includes CSID signing for form submission.
+   *
+   * @param locale locale for translations
+   * @param msg optional error message
+   * @return HTML response with registration form
+   */
   public Response doPaintRegisterForm(Locale locale, String msg) {
     String js =
         securer.configureScripts(securer.addSign("sign"),
@@ -70,6 +108,16 @@ public class RegistrationControllerPart {
         locale)).type(FrontAcessController.TEXT_HTML));
   }
 
+  /**
+   * Renders the pending registration confirmation page.
+   *
+   * Shows a message indicating that verification is pending. Used when registration requires email
+   * confirmation.
+   *
+   * @param locale locale for translations
+   * @param email user email address
+   * @return HTML response with pending message
+   */
   public Response doPaintPendingPage(Locale locale, String email) {
     String title = FrontAcessController.i18n(locale, "register.pending-title");
     String help = FrontAcessController.i18n(locale, "register.pending-help", email);
@@ -82,6 +130,17 @@ public class RegistrationControllerPart {
                 .type(FrontAcessController.TEXT_HTML));
   }
 
+  /**
+   * Renders the registration verification form.
+   *
+   * Allows users to submit the registration code. Includes CSID signing for form submission.
+   *
+   * @param locale locale for translations
+   * @param email user email address
+   * @param regcode registration code
+   * @param msg optional error message
+   * @return HTML response with verification form
+   */
   public Response doPaintVerifyForm(Locale locale, String email, String regcode, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"));
 
@@ -107,6 +166,19 @@ public class RegistrationControllerPart {
         locale)).type(FrontAcessController.TEXT_HTML));
   }
 
+  /**
+   * Executes registration code verification.
+   *
+   * Validates the code and continues the flow when valid. Re-renders the verification form when
+   * invalid.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param email user email address
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return response for the next step
+   */
   public Response doExecVerify(ClientDetails clientDetails, AuthRequest request, String email,
       MultivaluedMap<String, String> paramMap, Function<StepResult, Response> resolver) {
     String code = FrontAcessController.first(paramMap, "regcode");
@@ -121,6 +193,20 @@ public class RegistrationControllerPart {
     }
   }
 
+  /**
+   * Processes registration steps from the login flow.
+   *
+   * Executes registration handling when the step matches. Returns an empty optional when the step
+   * does not apply.
+   *
+   * @param step flow step identifier
+   * @param oUser optional username
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return optional response
+   */
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
       Function<StepResult, Response> resolver) {
@@ -130,6 +216,18 @@ public class RegistrationControllerPart {
     return Optional.empty();
   }
 
+  /**
+   * Executes the registration request and routes to the next step.
+   *
+   * Builds a verification URL and triggers registration logic. Returns different pages based on
+   * registration status.
+   *
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return response for the next step
+   */
   private Response doExecRegister(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, Function<StepResult, Response> resolver) {
     if (!registerUserUsecase.allowRegister(request.getTenant())) {
@@ -157,10 +255,26 @@ public class RegistrationControllerPart {
     }
   }
 
+  /**
+   * Builds the issuer URL for the given tenant.
+   *
+   * Uses the public host from the current request context. Keeps issuer construction in one place.
+   *
+   * @param tenant tenant identifier
+   * @return issuer URL
+   */
   private String issuer(String tenant) {
     return current.getPublicHost() + "/oauth/openid/" + tenant;
   }
 
+  /**
+   * Returns an empty string when the input is null.
+   *
+   * Used to safely populate form fields. Keeps null handling in one place.
+   *
+   * @param value input value
+   * @return empty string or the original value
+   */
   private String nullToEmpty(String value) {
     return value == null ? "" : value;
   }

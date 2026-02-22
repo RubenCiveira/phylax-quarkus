@@ -9,14 +9,66 @@ import java.util.Optional;
 import net.civeira.phylax.features.oauth.key.domain.KeyInformation;
 import net.civeira.phylax.features.oauth.key.domain.PublicKeyInformation;
 
+/**
+ * Domain port for storing and retrieving signing keys.
+ *
+ * Responsibilities: - Retrieve current and future keys for signing. - Persist key material and
+ * public key listings.
+ *
+ * Design notes: - Implemented by infrastructure storage adapters. - Supports key rotation logic in
+ * TokenSigner.
+ */
 public interface TokenStoreGateway {
+  /**
+   * Returns the current active key for a tenant.
+   *
+   * Used to sign new tokens. Returns empty when no active key exists.
+   *
+   * @param tenant tenant identifier
+   * @return optional key information
+   */
   Optional<KeyInformation> currentKey(String tenant);
 
+  /**
+   * Returns the expiration instant of the latest future key.
+   *
+   * Used to determine whether new keys must be generated. Returns a past instant when no future
+   * keys exist.
+   *
+   * @param tenant tenant identifier
+   * @return expiration instant
+   */
   Instant nextKeysExpiration(String tenant);
 
+  /**
+   * Lists public keys for the tenant.
+   *
+   * Used to build JWKS responses for clients. Should include active and future public keys.
+   *
+   * @param tenant tenant identifier
+   * @return list of public key information
+   */
   List<PublicKeyInformation> listPublicKeys(String tenant);
 
+  /**
+   * Lists full key information for the tenant.
+   *
+   * Used for maintenance and diagnostics. May include expired keys depending on storage.
+   *
+   * @param tenant tenant identifier
+   * @return list of key information
+   */
   List<KeyInformation> listKeys(String tenant);
 
+  /**
+   * Saves a new key with validity window for rotation.
+   *
+   * Persists key material and its validity period. Used by token signer key rotation logic.
+   *
+   * @param tenant tenant identifier
+   * @param key key information
+   * @param since key validity start instant
+   * @param caducidad key validity duration
+   */
   void saveKey(String tenant, KeyInformation key, Instant since, Duration caducidad);
 }

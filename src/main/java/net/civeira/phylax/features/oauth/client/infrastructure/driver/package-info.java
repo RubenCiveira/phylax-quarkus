@@ -1,0 +1,13 @@
+/**
+ * Driver adapters for client endpoints.
+ *
+ * Responsibilities: - Expose HTTP endpoints for client operations. - Validate input and route to
+ * use cases.
+ *
+ * Design notes: - REST controllers live under driver/rest. - Keeps API details out of domain layer.
+ *
+ * Dependencies: - Uses application services and domain models.
+ *
+ * Stability: internal API delivery.
+ */
+package net.civeira.phylax.features.oauth.client.infrastructure.driver;

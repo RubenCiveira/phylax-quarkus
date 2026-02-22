@@ -7,10 +7,28 @@ import lombok.Builder;
 import lombok.Getter;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
+/**
+ * Immutable request context used by authentication flows.
+ *
+ * Responsibilities: - Carry scope, client, and audience information. - Provide a lightweight
+ * context for validation.
+ *
+ * Design notes: - Built via Lombok builder for convenience. - Used by multiple authentication entry
+ * points.
+ */
 @Getter
 @Builder
 public class AuthenticationRequest {
+  /**
+   * Scope requested by the client.
+   */
   private final String scope;
+  /**
+   * Client details for the current request.
+   */
   private final ClientDetails client;
+  /**
+   * Audiences requested for the token.
+   */
   private final List<String> audiences;
 }

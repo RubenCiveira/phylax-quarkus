@@ -3,12 +3,38 @@ package net.civeira.phylax.features.oauth.token.domain;
 
 import lombok.Data;
 
+/**
+ * ID token response payload for OIDC flows.
+ *
+ * Responsibilities: - Carry ID token and access token data. - Provide issuer, session state, and
+ * expiry fields.
+ *
+ * Design notes: - Mutable DTO used for JSON serialization. - Populated by JwtTokenBuilder.
+ */
 @Data
 public class IdToken {
+  /**
+   * Issuer URL for the token.
+   */
   private String iss;
+  /**
+   * Session state identifier.
+   */
   private String sessionState;
+  /**
+   * Signed ID token value.
+   */
   private String idToken;
+  /**
+   * Access token value.
+   */
   private String accessToken;
+  /**
+   * Token type, typically Bearer.
+   */
   private String tokenType;
+  /**
+   * Token lifetime in seconds.
+   */
   private Long expiresIn;
 }

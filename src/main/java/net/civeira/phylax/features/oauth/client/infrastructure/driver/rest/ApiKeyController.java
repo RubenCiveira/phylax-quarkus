@@ -10,18 +10,33 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ApiKeyStoreGateway;
 
 /**
- * REST controller for API Key authentication. Validates an API key and returns an access token.
+ * REST controller for API Key authentication.
  *
- * TODO: complete implementation — validate the key via ApiKeyStoreGateway, build an access token
- * with the key's scopes, and return it as a standard token response.
+ * Responsibilities: - Validate API keys via the API key gateway. - Return an access token response
+ * when supported.
+ *
+ * Design notes: - Current implementation is a placeholder. - Token building will be added when
+ * available.
  */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class ApiKeyController {
 
+  /**
+   * Gateway used to validate and load API key data.
+   */
   private final ApiKeyStoreGateway apiKeyStore;
 
+  /**
+   * Exchanges an API key for a token response.
+   *
+   * Validates the key and returns either a placeholder or error. Token construction is not
+   * implemented yet.
+   *
+   * @param paramMap form parameters
+   * @return response indicating success or failure
+   */
   @POST
   @Path("oauth/api-key")
   public Response exchangeApiKey(MultivaluedMap<String, String> paramMap) {

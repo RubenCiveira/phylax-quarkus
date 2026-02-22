@@ -5,14 +5,41 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 
+/**
+ * Base runtime exception for authentication failures.
+ *
+ * Responsibilities: - Carry tenant, username, and message context. - Provide a default entity for
+ * HTTP responses.
+ *
+ * Design notes: - Extended by specialized authentication exceptions. - Can be translated to
+ * user-facing messages.
+ */
 @Getter
 @RequiredArgsConstructor
 public class AuthenticationException extends RuntimeException {
   private static final long serialVersionUID = 1L;
+  /**
+   * Tenant identifier where the failure occurred.
+   */
   private final String tenant;
+  /**
+   * Username associated with the failure.
+   */
   private final String username;
+  /**
+   * Failure message intended for response formatting.
+   */
   private final String message;
 
+  /**
+   * Returns the default response entity for this exception.
+   *
+   * Subclasses can override to provide structured payloads. The token builder is provided for
+   * generating token responses.
+   *
+   * @param tokenBuilder token builder for response shaping
+   * @return response entity
+   */
   public Object entity(JwtTokenBuilder tokenBuilder) {
     return message;
   }

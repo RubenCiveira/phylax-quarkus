@@ -1,0 +1,12 @@
+/**
+ * Domain model for MFA and public challenge data.
+ *
+ * Responsibilities: - Represent MFA response payloads. - Define MFA domain structures.
+ *
+ * Design notes: - Immutable data shapes for MFA state. - Independent from delivery or storage.
+ *
+ * Dependencies: - Minimal dependencies on other modules.
+ *
+ * Stability: core MFA domain.
+ */
+package net.civeira.phylax.features.oauth.mfa.domain;

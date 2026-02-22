@@ -4,9 +4,24 @@ package net.civeira.phylax.features.oauth.key.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Public key information used for JWKS exposure.
+ *
+ * Responsibilities: - Provide key id and public key material. - Support public key listings and
+ * discovery.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by TokenSigner and JWKS
+ * controller.
+ */
 @Builder
 @Getter
 public class PublicKeyInformation {
+  /**
+   * Key identifier.
+   */
   private final String keyId;
+  /**
+   * Public key material.
+   */
   private final String publicKey;
 }

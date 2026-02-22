@@ -1,0 +1,14 @@
+/**
+ * Domain model for issued tokens.
+ *
+ * Responsibilities: - Represent issued tokens and their claims. - Define token-specific payload
+ * structures.
+ *
+ * Design notes: - Immutable data objects for token exchange. - Used by token builders and
+ * controllers.
+ *
+ * Dependencies: - Minimal dependencies on other modules.
+ *
+ * Stability: core token domain.
+ */
+package net.civeira.phylax.features.oauth.token.domain;

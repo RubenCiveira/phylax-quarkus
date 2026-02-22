@@ -5,13 +5,64 @@ import java.util.Locale;
 
 import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 
+/**
+ * Domain port for MFA configuration and validation.
+ *
+ * Responsibilities: - Provide MFA enrollment configuration and QR data. - Verify OTP codes for
+ * login and enrollment.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps MFA storage concerns outside the
+ * domain.
+ */
 public interface UserMfaGateway {
 
+  /**
+   * Builds MFA enrollment configuration for a user.
+   *
+   * Should include seed, message, and QR code data. Used when the user must enroll a new MFA
+   * method.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param locale locale for messages
+   * @return public MFA enrollment response
+   */
   PublicLoginMfaBuildResponse configurationForNewMfa(String tenant, String username, Locale locale);
 
+  /**
+   * Verifies an OTP code for login.
+   *
+   * Returns true when the OTP is valid for the user. Implementations should enforce OTP timing
+   * rules.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param otp one-time password
+   * @return true when the OTP is valid
+   */
   boolean verifyOtp(String tenant, String username, String otp);
 
+  /**
+   * Verifies an OTP code for enrollment.
+   *
+   * Returns true when the OTP is valid for enrollment. Implementations should enforce OTP timing
+   * rules.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param otp one-time password
+   * @return true when the OTP is valid
+   */
   boolean verifyNewOtp(String tenant, String username, String otp);
 
+  /**
+   * Stores an MFA seed for the user.
+   *
+   * Used to enable future OTP verification. Implementations should secure the seed at rest.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param seed MFA seed value
+   */
   void storeSeed(String tenant, String username, String seed);
 }

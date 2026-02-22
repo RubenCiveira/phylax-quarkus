@@ -1,0 +1,13 @@
+/**
+ * Domain model for OpenID configuration.
+ *
+ * Responsibilities: - Represent OpenID discovery metadata. - Provide mtls endpoint alias
+ * structures.
+ *
+ * Design notes: - Immutable data used by controllers. - Follows OIDC discovery specification.
+ *
+ * Dependencies: - Minimal dependencies on other modules.
+ *
+ * Stability: core OIDC domain.
+ */
+package net.civeira.phylax.features.oauth.oidc.domain;

@@ -24,14 +24,46 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
 
+/**
+ * HTML controller part for delegated login callbacks.
+ *
+ * Responsibilities: - Resolve delegated login codes to usernames. - Render forms that hand off
+ * delegated flow state.
+ *
+ * Design notes: - Uses DelegateLogin for provider resolution. - Encodes token payloads via
+ * ObjectMapper.
+ */
 @Slf4j
 @RequestScoped
 @RequiredArgsConstructor
 public class DelegatedControllerPart {
+  /**
+   * JSON mapper used to parse delegated token payloads.
+   */
   private final ObjectMapper mapper;
+  /**
+   * Helper to build secure HTML responses.
+   */
   private final SecureHtmlBuilder securer;
+  /**
+   * Use case for delegated login handling.
+   */
   private final DelegateLogin delegateLogin;
 
+  /**
+   * Processes delegated login query steps.
+   *
+   * Resolves delegated user codes into usernames. Returns an empty optional when the step does not
+   * apply.
+   *
+   * @param step flow step identifier
+   * @param oUser optional username
+   * @param clientDetails client details
+   * @param request auth request context
+   * @param paramMap form parameters
+   * @param resolver continuation handler
+   * @return optional response
+   */
   public Optional<Response> process(String step, Optional<String> oUser,
       ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
       Function<StepResult, Response> resolver) {
@@ -46,6 +78,19 @@ public class DelegatedControllerPart {
     }
   }
 
+  /**
+   * Builds a back-login form to continue delegated flow.
+   *
+   * Creates a signed form that posts to the stored target. Used after a delegated provider
+   * redirects back.
+   *
+   * @param tenant tenant identifier
+   * @param provider provider identifier
+   * @param code delegated user code
+   * @param locale locale for translations
+   * @param msg optional message
+   * @return HTML response with auto-submit form
+   */
   public Response doBackLoginForm(String tenant, String provider, String code, Locale locale,
       String msg) {
     // No se puede crear nada, porque no estamos seguros que el navegador sea el mismmo.
@@ -67,6 +112,18 @@ public class DelegatedControllerPart {
         .type(FrontAcessController.TEXT_HTML));
   }
 
+  /**
+   * Starts a delegated login flow by redirecting to provider.
+   *
+   * Sets a cookie with the return target and triggers redirect. Used when user selects a delegated
+   * provider.
+   *
+   * @param tenant tenant identifier
+   * @param provider provider identifier
+   * @param locale locale for translations
+   * @param msg optional message
+   * @return HTML response that redirects to provider
+   */
   public Response doPaintLoginForm(String tenant, String provider, Locale locale, String msg) {
     String back = "/oauth/openid/" + tenant + "/delegated-auth?provider=" + provider + "&code=";
     return securer.secureHtmlResponse(Response
@@ -80,10 +137,27 @@ public class DelegatedControllerPart {
         .type(FrontAcessController.TEXT_HTML));
   }
 
+  /**
+   * URL-encodes a parameter using UTF-8.
+   *
+   * Used for query parameters and redirect construction. Keeps encoding logic centralized in one
+   * place.
+   *
+   * @param param raw parameter value
+   * @return encoded parameter value
+   */
   private String encode(String param) {
     return URLEncoder.encode(param, StandardCharsets.UTF_8);
   }
 
+  /**
+   * Parses a delegated token from a Base64 JSON payload.
+   *
+   * Returns an empty optional when parsing fails. Logs a warning for invalid token payloads.
+   *
+   * @param str base64-encoded JSON token
+   * @return optional token info
+   */
   public Optional<TokenInfo> readToken(String str) {
     String res = new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
     try {

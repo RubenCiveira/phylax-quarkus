@@ -10,16 +10,59 @@ import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExterna
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.UserData;
 
 /**
- * Unified port for delegated (SSO) login. Combines token persistence and provider registry.
- * Supersedes {@link DelegatedStoreGateway} + {@link DelegatedAccessProviderGateway}.
+ * Unified port for delegated (SSO) login.
+ *
+ * Responsibilities: - Provide provider registry access and token storage. - Resolve delegated user
+ * data into local usernames.
+ *
+ * Design notes: - Supersedes DelegatedStoreGateway and DelegatedAccessProviderGateway. -
+ * Implemented by infrastructure adapters.
  */
 public interface DelegateLoginGateway {
 
+  /**
+   * Loads a stored delegated token by code.
+   *
+   * Used to resume delegated flows after redirects. Returns empty when the code is unknown or
+   * expired.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @return optional token info
+   */
   Optional<TokenInfo> loadToken(AuthRequest request, String code);
 
+  /**
+   * Stores a delegated token under a temporary code.
+   *
+   * Used to bridge browser callbacks to token granters. Implementations should enforce expiration.
+   *
+   * @param request auth request context
+   * @param code temporary code
+   * @param token delegated token info
+   */
   void saveToken(AuthRequest request, String code, TokenInfo token);
 
+  /**
+   * Returns the delegated providers available for the request.
+   *
+   * Providers may vary by tenant or configuration. Used by UI to render provider options.
+   *
+   * @param request auth request context
+   * @return list of delegated providers
+   */
   List<DelegatedAccessExternalProvider> providers(AuthRequest request);
 
+  /**
+   * Resolves a local username from provider user data.
+   *
+   * Used to map external identity to local user accounts. Returns empty when no user mapping
+   * exists.
+   *
+   * @param request auth request context
+   * @param provider provider identifier
+   * @param userInfo user data from provider
+   * @return optional username
+   */
   Optional<String> retrieveUsername(AuthRequest request, String provider, UserData userInfo);
 }

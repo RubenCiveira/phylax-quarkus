@@ -1,0 +1,14 @@
+/**
+ * OAuth and OIDC functionality for the system.
+ *
+ * Responsibilities: - Provide authorization, token, and session capabilities. - Organize submodules
+ * for clients, users, and tokens.
+ *
+ * Design notes: - Layered structure with application, domain, and infrastructure. - Separates
+ * drivers and driven adapters consistently.
+ *
+ * Dependencies: - Integrates with common crypto and persistence services.
+ *
+ * Stability: core security feature set.
+ */
+package net.civeira.phylax.features.oauth;

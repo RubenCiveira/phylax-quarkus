@@ -1,0 +1,13 @@
+/**
+ * Implementations of delegated providers.
+ *
+ * Responsibilities: - Provide concrete provider integrations. - Map provider claims into local
+ * structures.
+ *
+ * Design notes: - Each provider focuses on one external system. - Uses shared domain interfaces.
+ *
+ * Dependencies: - Depends on delegated domain contracts.
+ *
+ * Stability: internal provider adapters.
+ */
+package net.civeira.phylax.features.oauth.delegated.domain.provider;

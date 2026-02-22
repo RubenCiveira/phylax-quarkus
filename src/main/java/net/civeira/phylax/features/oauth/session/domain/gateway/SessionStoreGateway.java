@@ -7,13 +7,57 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationDat
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 
+/**
+ * Domain port for session storage.
+ *
+ * Responsibilities: - Load, save, update, and delete sessions. - Persist authentication data for
+ * active sessions.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps persistence outside the domain.
+ */
 public interface SessionStoreGateway {
+  /**
+   * Loads a session by its identifier.
+   *
+   * Returns empty when the session is missing or expired. Used by session validation and
+   * continuation flows.
+   *
+   * @param state session identifier
+   * @return optional session info
+   */
   Optional<SessionInfo> loadSession(String state);
 
+  /**
+   * Saves a new session with authentication data.
+   *
+   * Persists client details, grant type, and validation data. Used after successful authentication.
+   *
+   * @param state session identifier
+   * @param clientDetails client details
+   * @param grant grant type
+   * @param validationData authentication data
+   * @param csid challenge session id
+   */
   void saveSession(String state, ClientDetails clientDetails, String grant,
       AuthenticationData validationData, String csid);
 
+  /**
+   * Updates the session identifier while preserving data.
+   *
+   * Used to rotate session ids after validation. Implementations should update expiration as
+   * needed.
+   *
+   * @param newState new session identifier
+   * @param oldState old session identifier
+   */
   void updateSession(String newState, String oldState);
 
+  /**
+   * Deletes a session by its identifier.
+   *
+   * Used for logout and session revocation. Implementations should ignore missing sessions.
+   *
+   * @param state session identifier
+   */
   void deleteSession(String state);
 }

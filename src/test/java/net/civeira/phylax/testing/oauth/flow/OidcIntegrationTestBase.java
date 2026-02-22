@@ -20,6 +20,7 @@ import net.civeira.phylax.testing.oauth.client.OidcFlowClient;
 import net.civeira.phylax.testing.oauth.fixtures.OidcTestFixtures;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioChangePasswordGateway;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioConsentGateway;
+import net.civeira.phylax.testing.oauth.scenario.ScenarioDelegateGateway;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioLoginGateway;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioMfaGateway;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioRegisterUserGateway;
@@ -48,6 +49,8 @@ public abstract class OidcIntegrationTestBase {
   @Inject
   ScenarioRegisterUserGateway registerGateway;
   @Inject
+  ScenarioDelegateGateway delegateGateway;
+  @Inject
   TokenSigner tokenSigner;
   @Inject
   JwtTokenBuilder tokenBuilder;
@@ -63,6 +66,7 @@ public abstract class OidcIntegrationTestBase {
     changePasswordGateway.reset();
     scopeConsentGateway.reset();
     registerGateway.reset();
+    delegateGateway.reset();
   }
 
   protected Map<String, Object> decodeToken(String token) {

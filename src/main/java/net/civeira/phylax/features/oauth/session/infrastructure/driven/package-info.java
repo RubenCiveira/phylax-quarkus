@@ -1,0 +1,12 @@
+/**
+ * Driven adapters for session persistence.
+ *
+ * Responsibilities: - Persist sessions and temporal keys. - Implement session storage gateways.
+ *
+ * Design notes: - Encapsulates SQL and data mapping. - Keeps persistence logic localized.
+ *
+ * Dependencies: - Depends on session domain gateways.
+ *
+ * Stability: persistence adapters.
+ */
+package net.civeira.phylax.features.oauth.session.infrastructure.driven;

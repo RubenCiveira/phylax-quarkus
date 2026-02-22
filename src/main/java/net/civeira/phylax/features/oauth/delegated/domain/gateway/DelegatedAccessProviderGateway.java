@@ -8,9 +8,36 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.UserData;
 
+/**
+ * Legacy gateway for delegated provider access.
+ *
+ * Responsibilities: - Provide access to configured delegated providers. - Resolve local usernames
+ * from provider user data.
+ *
+ * Design notes: - Superseded by DelegateLoginGateway. - Retained for adapter compatibility.
+ */
 public interface DelegatedAccessProviderGateway {
 
+  /**
+   * Returns the delegated providers available for the request.
+   *
+   * Providers may vary by tenant or configuration. Used by UI to render provider options.
+   *
+   * @param request auth request context
+   * @return list of delegated providers
+   */
   List<DelegatedAccessExternalProvider> providers(AuthRequest request);
 
+  /**
+   * Resolves a local username from provider user data.
+   *
+   * Used to map external identity to local user accounts. Returns empty when no user mapping
+   * exists.
+   *
+   * @param request auth request context
+   * @param provider provider identifier
+   * @param userInfo user data from provider
+   * @return optional username
+   */
   Optional<String> retrieveUsername(AuthRequest request, String provider, UserData userInfo);
 }

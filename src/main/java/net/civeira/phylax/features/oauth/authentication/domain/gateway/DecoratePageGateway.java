@@ -3,7 +3,27 @@ package net.civeira.phylax.features.oauth.authentication.domain.gateway;
 
 import java.util.Locale;
 
+/**
+ * Port for decorating authentication HTML pages.
+ *
+ * Responsibilities: - Wrap HTML fragments in a consistent page layout. - Apply localization and
+ * theming based on locale.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps HTML decoration outside
+ * controllers.
+ */
 public interface DecoratePageGateway {
 
+  /**
+   * Builds a full HTML page for the provided inner content.
+   *
+   * Implementations may inject layout, styles, and scripts. The locale may be used to localize page
+   * chrome.
+   *
+   * @param title page title
+   * @param innerContent HTML body content
+   * @param locale locale for localization
+   * @return full HTML page
+   */
   String getFullPage(String title, String innerContent, Locale locale);
 }

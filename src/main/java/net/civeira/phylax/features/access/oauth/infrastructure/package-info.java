@@ -1,0 +1,23 @@
+/**
+ * Infrastructure layer for the access/OAuth module.
+ *
+ * <p>
+ * Responsibilities:
+ * <ul>
+ * <li>Provide CDI adapters ({@code *Interactor}) that implement the gateway ports defined in
+ * {@code features/oauth/}.</li>
+ * <li>Handle application bootstrapping and initial data setup.</li>
+ * </ul>
+ *
+ * <p>
+ * Design notes:
+ * <ul>
+ * <li>Interactors are thin transactional wrappers — they add {@code @Transactional} and delegate
+ * immediately to the application usecases.</li>
+ * <li>Bootstrap beans run once on startup to initialize required configuration.</li>
+ * </ul>
+ *
+ * <p>
+ * Stability: stable; changes only when new ports are added.
+ */
+package net.civeira.phylax.features.access.oauth.infrastructure;

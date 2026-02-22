@@ -2,28 +2,62 @@
 package net.civeira.phylax.features.oauth.oidc.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * mTLS endpoint alias configuration for OIDC discovery.
+ *
+ * Responsibilities: - Provide alternative endpoint URLs for mTLS clients. - Advertise mTLS-specific
+ * endpoints in discovery.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Serialized using OIDC-required JSON
+ * names.
+ */
 @Data
 @Builder
 @RegisterForReflection
 public class MtlsEndpointAliases {
+  /**
+   * Token endpoint alias for mTLS.
+   */
   @JsonProperty("token_endpoint")
   private final String tokenEndpoint;
+  /**
+   * Revocation endpoint alias for mTLS.
+   */
   @JsonProperty("revocation_endpoint")
   private final String revocationEndpoint;
+  /**
+   * Introspection endpoint alias for mTLS.
+   */
   @JsonProperty("introspection_endpoint")
   private final String introspectionEndpoint;
+  /**
+   * Device authorization endpoint alias for mTLS.
+   */
   @JsonProperty("device_authorization_endpoint")
   private final String deviceAuthorizationEndpoint;
+  /**
+   * Registration endpoint alias for mTLS.
+   */
   @JsonProperty("registration_endpoint")
   private final String registrationEndpoint;
+  /**
+   * Userinfo endpoint alias for mTLS.
+   */
   @JsonProperty("userinfo_endpoint")
   private final String userinfoEndpoint;
+  /**
+   * PAR endpoint alias for mTLS.
+   */
   @JsonProperty("pushed_authorization_request_endpoint")
   private final String pushedAuthorizationRequestEndpoint;
+  /**
+   * Backchannel authentication endpoint alias for mTLS.
+   */
   @JsonProperty("backchannel_authentication_endpoint")
   private final String backchannelAuthenticationEndpoint;
 }

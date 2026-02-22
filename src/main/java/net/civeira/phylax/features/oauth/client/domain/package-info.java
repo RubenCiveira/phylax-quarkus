@@ -1,0 +1,13 @@
+/**
+ * Domain model for clients and API keys.
+ *
+ * Responsibilities: - Represent client details and API keys. - Encode allowed grants and scopes.
+ *
+ * Design notes: - Immutable data objects used across flows. - Keeps business rules close to client
+ * data.
+ *
+ * Dependencies: - Minimal dependencies on other modules.
+ *
+ * Stability: core client domain.
+ */
+package net.civeira.phylax.features.oauth.client.domain;

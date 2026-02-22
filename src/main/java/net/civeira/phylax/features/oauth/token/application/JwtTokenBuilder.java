@@ -35,34 +35,112 @@ import net.civeira.phylax.features.oauth.token.domain.AutorizationToken;
 import net.civeira.phylax.features.oauth.token.domain.IdToken;
 import net.civeira.phylax.features.oauth.token.domain.MfaToken;
 
+/**
+ * JWT token builder for OAuth and OIDC flows.
+ *
+ * Responsibilities: - Build access, refresh, ID, and MFA tokens. - Verify and parse token payloads
+ * for authentication flows.
+ *
+ * Design notes: - Delegates signing to TokenSigner. - Uses ObjectMapper to map claim payloads.
+ */
 @Slf4j
 @RequestScoped
 @RequiredArgsConstructor
 public class JwtTokenBuilder {
+  /**
+   * Claim name used to store challenge payloads.
+   */
   private static final String CHALLENGE = "challenge";
+  /**
+   * Token type value for bearer tokens.
+   */
   private static final String BEARER = "Bearer";
+  /**
+   * Configuration key for access token expiration.
+   */
   private static final String EXPIRATION_CONF = "oauth.jwt.expiration.access-token";
+  /**
+   * Claim name for the subject/username.
+   */
   private static final String CLAIM_USER_NAME = "sub";
+  /**
+   * Claim name for grant type.
+   */
   private static final String CLAIM_GRANT_TYPE = "grant_type";
+  /**
+   * Claim name for client id.
+   */
   private static final String CLAIM_CLIENT_ID = "azp";
+  /**
+   * Claim name for audience.
+   */
   private static final String CLAIM_AUDIENCE_ID = "aud";
+  /**
+   * Claim name for authorities/roles.
+   */
   private static final String CLAIM_AUTHORITIES = "groups";
+  /**
+   * Claim name for scopes.
+   */
   private static final String CLAIM_SCOPE = "scope";
+  /**
+   * Scope value used for refresh tokens.
+   */
   private static final String REFRESH_SCOPE = "refresh";
+  /**
+   * Scope value used for MFA tokens.
+   */
   private static final String MFA_SCOPE = "mfa";
 
   @Data
   @lombok.Builder
+  /**
+   * Information extracted from a refresh token.
+   *
+   * Carries username, audiences, and client id. Used to rehydrate authentication state.
+   */
   public static class RefreshTokenInfo {
+    /**
+     * Username associated with the refresh token.
+     */
     private final String username;
+    /**
+     * Audiences associated with the refresh token.
+     */
     private final List<String> audiences;
+    /**
+     * Client id associated with the refresh token.
+     */
     private final String client;
   }
 
+  /**
+   * Object mapper used for claim conversions.
+   */
   private final ObjectMapper mapper;
+  /**
+   * Token signer used to sign and verify JWTs.
+   */
   private final TokenSigner tokenSigner;
+  /**
+   * Request context used to build issuer URLs.
+   */
   private final CurrentRequest current;
 
+  /**
+   * Builds an ID token response for OIDC flows.
+   *
+   * Creates access and ID tokens and sets session state. Uses configured expiration values for
+   * token lifetimes.
+   *
+   * @param tenant tenant identifier
+   * @param state OAuth state value
+   * @param nonce OIDC nonce value
+   * @param details client details
+   * @param grantType grant type used
+   * @param validationData authentication data
+   * @return ID token response payload
+   */
   public IdToken buildIdToken(String tenant, String state, String nonce, ClientDetails details,
       String grantType, AuthenticationData validationData) {
     Duration expiration = propiedadEntera(EXPIRATION_CONF);
@@ -89,6 +167,17 @@ public class JwtTokenBuilder {
     return idToken;
   }
 
+  /**
+   * Builds a challenge token for pre-session flows.
+   *
+   * Serializes the provided bean as a challenge claim. Uses keypass signing and the provided
+   * expiration.
+   *
+   * @param tenant tenant identifier
+   * @param bean payload to include
+   * @param expiration token lifetime
+   * @return signed challenge token
+   */
   public <T> String buildChallengerToken(String tenant, T bean, Duration expiration) {
     String jti = UUID.randomUUID().toString();
 
@@ -102,6 +191,17 @@ public class JwtTokenBuilder {
     return tokenSigner.signKeypass(tenant, accessTokenInfo, Instant.now().plus(expiration));
   }
 
+  /**
+   * Verifies and parses a challenge token.
+   *
+   * Validates the token scope and converts the challenge payload. Returns empty when validation
+   * fails.
+   *
+   * @param type target payload type
+   * @param token challenge token
+   * @param tenant tenant identifier
+   * @return optional parsed payload
+   */
   public <T> Optional<T> verifyChalleger(Class<T> type, String token, String tenant) {
     try {
       Map<String, Object> payload = tokenSigner.verifyTokenPayload(tenant, token);
@@ -121,6 +221,15 @@ public class JwtTokenBuilder {
     }
   }
 
+  /**
+   * Builds an MFA token response.
+   *
+   * Creates a short-lived token with MFA scope. Used to continue MFA verification flows.
+   *
+   * @param username username
+   * @param tenant tenant identifier
+   * @return MFA token response
+   */
   public MfaToken buildMfaToken(String username, String tenant) {
     String jti = UUID.randomUUID().toString();
 
@@ -137,13 +246,16 @@ public class JwtTokenBuilder {
   }
 
   /**
-   * If no request is provided, no info about audiences.
-   * 
-   * @param tenant
-   * @param details
-   * @param grantType
-   * @param validationData
-   * @return
+   * Builds an authorization token response without a request context.
+   *
+   * When no request is provided, audience information is omitted. Delegates to the overload that
+   * accepts an AuthRequest.
+   *
+   * @param tenant tenant identifier
+   * @param details client details
+   * @param grantType grant type used
+   * @param validationData authentication data
+   * @return authorization token response
    */
   @Deprecated
   public AutorizationToken buildToken(String tenant, ClientDetails details, String grantType,
@@ -151,6 +263,19 @@ public class JwtTokenBuilder {
     return buildToken(tenant, details, grantType, validationData, null);
   }
 
+  /**
+   * Builds an authorization token response.
+   *
+   * Creates access and refresh tokens and optional ID token. Applies scope filtering when a request
+   * is provided.
+   *
+   * @param tenant tenant identifier
+   * @param details client details
+   * @param grantType grant type used
+   * @param validationData authentication data
+   * @param request auth request context (optional)
+   * @return authorization token response
+   */
   public AutorizationToken buildToken(String tenant, ClientDetails details, String grantType,
       AuthenticationData validationData, AuthRequest request) {
     if (request != null && validationData.getScopes().isEmpty()) {
@@ -190,14 +315,43 @@ public class JwtTokenBuilder {
     return authorization;
   }
 
+  /**
+   * Verifies an MFA token and returns the username.
+   *
+   * Validates the token and ensures the MFA scope is present. Returns empty when verification
+   * fails.
+   *
+   * @param token MFA token
+   * @param tenant tenant identifier
+   * @return optional username
+   */
   public Optional<String> verifyMfa(String token, String tenant) {
     return verifyToken(token, MFA_SCOPE, tenant);
   }
 
+  /**
+   * Verifies a refresh token and returns the username.
+   *
+   * Validates the token and ensures the refresh scope is present. Returns empty when verification
+   * fails.
+   *
+   * @param token refresh token
+   * @param tenant tenant identifier
+   * @return optional username
+   */
   public Optional<String> verifyRefresh(String token, String tenant) {
     return verifyToken(token, REFRESH_SCOPE, tenant);
   }
 
+  /**
+   * Verifies a refresh token and returns detailed info.
+   *
+   * Extracts username, audiences, and client id from claims. Returns empty when verification fails.
+   *
+   * @param token refresh token
+   * @param tenant tenant identifier
+   * @return optional refresh token info
+   */
   public Optional<RefreshTokenInfo> verifyRefreshInfo(String token, String tenant) {
     String scope = REFRESH_SCOPE;
     Optional<RefreshTokenInfo> response = Optional.empty();
@@ -222,6 +376,16 @@ public class JwtTokenBuilder {
 
 
 
+  /**
+   * Verifies a token for a specific scope and returns username.
+   *
+   * Ensures the token contains only the expected scope. Returns empty when verification fails.
+   *
+   * @param token token to verify
+   * @param scope expected scope value
+   * @param tenant tenant identifier
+   * @return optional username
+   */
   public Optional<String> verifyToken(String token, String scope, String tenant) {
     Optional<String> response = Optional.empty();
     try {
@@ -240,6 +404,18 @@ public class JwtTokenBuilder {
     }
   }
 
+  /**
+   * Builds the JWT builder for an ID token.
+   *
+   * Includes auth level, audience, and hash claims. Adds auth_time claim when present.
+   *
+   * @param tenant tenant identifier
+   * @param accessToken access token value
+   * @param client client details
+   * @param grantType grant type used
+   * @param validationData authentication data
+   * @return JWT builder for ID token
+   */
   private Builder identityToken(String tenant, String accessToken, ClientDetails client,
       String grantType, AuthenticationData validationData) {
     String jti = UUID.randomUUID().toString();
@@ -260,6 +436,18 @@ public class JwtTokenBuilder {
         .withArrayClaim(CLAIM_AUTHORITIES, validationData.getRoles().toArray(new String[0]));
   }
 
+  /**
+   * Adds challenge-related claims to a JWT builder.
+   *
+   * Includes state hash, session state, and nonce when provided. Returns the updated builder for
+   * chaining.
+   *
+   * @param builder JWT builder
+   * @param state OAuth state value
+   * @param session session state value
+   * @param nonce OIDC nonce value
+   * @return updated JWT builder
+   */
   private Builder withChallenge(Builder builder, String state, String session, String nonce) {
     if (null != state) {
       builder = builder.withClaim("s_hash", generateHash(state));
@@ -273,6 +461,17 @@ public class JwtTokenBuilder {
     return builder;
   }
 
+  /**
+   * Builds the JWT builder for an access token.
+   *
+   * Includes audience, grant type, roles, and scopes. Adds tenant claim when available.
+   *
+   * @param tenant tenant identifier
+   * @param client client details
+   * @param grantType grant type used
+   * @param validationData authentication data
+   * @return JWT builder for access token
+   */
   private Builder accessToken(String tenant, ClientDetails client, String grantType,
       AuthenticationData validationData) {
     String jti = UUID.randomUUID().toString();
@@ -297,6 +496,17 @@ public class JwtTokenBuilder {
     return accessTokenInfo;
   }
 
+  /**
+   * Builds the JWT builder for a refresh token.
+   *
+   * Includes audience, username, and client id claims. Adds the refresh scope to identify the
+   * token.
+   *
+   * @param tenant tenant identifier
+   * @param client client details
+   * @param validationData authentication data
+   * @return JWT builder for refresh token
+   */
   private Builder refreshToken(String tenant, ClientDetails client,
       AuthenticationData validationData) {
     String jti = UUID.randomUUID().toString();
@@ -307,14 +517,39 @@ public class JwtTokenBuilder {
         .withArrayClaim(CLAIM_SCOPE, new String[] {REFRESH_SCOPE});
   }
 
+  /**
+   * Builds the issuer URL for the tenant.
+   *
+   * Uses the public host from the current request context. Keeps issuer construction consistent
+   * across tokens.
+   *
+   * @param tenant tenant identifier
+   * @return issuer URL
+   */
   private String issuer(String tenant) {
     return current.getPublicHost() + "/oauth/openid/" + tenant;
   }
 
+  /**
+   * Converts a claim value to a string.
+   *
+   * Uses ObjectMapper for conversion when necessary. Returns null when the input is null.
+   *
+   * @param value claim value
+   * @return string value or null
+   */
   private String claimAsString(Object value) {
     return null == value ? null : mapper.convertValue(value, String.class);
   }
 
+  /**
+   * Converts a claim value into a list of strings.
+   *
+   * Handles lists, arrays, and single values. Returns an empty list when the input is null.
+   *
+   * @param value claim value
+   * @return list of strings
+   */
   @SuppressWarnings("unchecked")
   private List<String> claimAsList(Object value) {
     if (null == value) {
@@ -329,6 +564,15 @@ public class JwtTokenBuilder {
     return List.of(mapper.convertValue(value, String.class));
   }
 
+  /**
+   * Generates a base64url hash for token challenge claims.
+   *
+   * Uses SHA-256 and returns the first half of the hash. Throws when the algorithm is not
+   * available.
+   *
+   * @param value value to hash
+   * @return base64url hash string
+   */
   private static String generateHash(String value) {
     try {
       // Obtener instancia de SHA-256
@@ -349,6 +593,14 @@ public class JwtTokenBuilder {
     }
   }
 
+  /**
+   * Reads a Duration value from configuration.
+   *
+   * Uses the provided configuration key. Throws when the configuration value is missing.
+   *
+   * @param clave configuration key
+   * @return duration value
+   */
   private Duration propiedadEntera(String clave) {
     return ConfigProvider.getConfig().getValue(clave, Duration.class);
   }

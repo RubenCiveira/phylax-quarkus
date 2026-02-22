@@ -4,18 +4,41 @@ package net.civeira.phylax.features.oauth.client.domain.gateway;
 import java.util.List;
 
 /**
- * Port for checking and storing user authorizations for OAuth client scope requests. Distinct from
- * {@code ConsentGateway} which handles tenant-level usage policy acceptance.
+ * Port for checking and storing user authorizations for OAuth client scope requests.
+ *
+ * Responsibilities: - Determine which scopes still need user consent. - Persist accepted scopes for
+ * a client and user.
+ *
+ * Design notes: - Distinct from ConsentGateway for tenant policy consent. - Implemented by
+ * infrastructure adapters.
  */
 public interface ClientScopeConsentGateway {
 
   /**
    * Returns the list of scopes requested by the client that the user has not yet authorized.
-   * Returns an empty list if all scopes are already authorized.
+   *
+   * Compares requested scopes with stored consent data. Returns an empty list if all scopes are
+   * already authorized.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param requestedScopes requested scopes
+   * @return list of pending scopes
    */
   List<String> getPendingScopes(String tenant, String username, String clientId,
       List<String> requestedScopes);
 
-  /** Stores the user's authorization for the given scopes on the given client. */
+  /**
+   * Stores the user's authorization for the given scopes on the given client.
+   *
+   * Persists consent so subsequent requests can be auto-approved. Implementations should ensure
+   * idempotency where possible.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientId client identifier
+   * @param scopes accepted scopes
+   */
   void storeAcceptedScopes(String tenant, String username, String clientId, List<String> scopes);
 }

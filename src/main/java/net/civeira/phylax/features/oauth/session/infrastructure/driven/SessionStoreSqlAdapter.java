@@ -21,15 +21,34 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 
+/**
+ * JDBC adapter for OAuth session storage.
+ *
+ * Responsibilities: - Persist and load session information in SQL tables. - Clean expired sessions
+ * on access.
+ *
+ * Design notes: - Uses _oauth_sessions table for storage. - Serializes AuthenticationData as JSON.
+ */
 @RequestScoped
 @RequiredArgsConstructor
-/**
- * Tables: _oauth_sessions
- */
 public class SessionStoreSqlAdapter implements SessionStoreGateway {
+  /**
+   * Data source used for JDBC operations.
+   */
   private final DataSource source;
+  /**
+   * JSON mapper used to serialize authentication data.
+   */
   private final ObjectMapper mapper;
 
+  /**
+   * Loads a session by its identifier.
+   *
+   * Cleans expired sessions before retrieval. Returns empty when no active session is found.
+   *
+   * @param state session identifier
+   * @return optional session info
+   */
   @Override
   public Optional<SessionInfo> loadSession(String state) {
     cleanTemp();
@@ -57,6 +76,18 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
     return Optional.empty();
   }
 
+  /**
+   * Saves a new session record.
+   *
+   * Stores client id, grant type, and authentication data. Sets a fixed expiration time for the
+   * session.
+   *
+   * @param state session identifier
+   * @param clientDetails client details
+   * @param grant grant type
+   * @param validationData authentication data
+   * @param csid challenge session id
+   */
   @Override
   public void saveSession(String state, ClientDetails clientDetails, String grant,
       AuthenticationData validationData, String csid) {
@@ -75,6 +106,13 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
     }
   }
 
+  /**
+   * Deletes a session by its identifier.
+   *
+   * Used for logout and session revocation. Throws when database operations fail.
+   *
+   * @param state session identifier
+   */
   @Override
   public void deleteSession(String state) {
     try (Connection conn = source.getConnection();
@@ -87,6 +125,14 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
     }
   }
 
+  /**
+   * Updates the session identifier and expiration.
+   *
+   * Used to rotate session ids after validation. Throws when database operations fail.
+   *
+   * @param newState new session identifier
+   * @param oldState old session identifier
+   */
   @Override
   public void updateSession(String newState, String oldState) {
     try (Connection conn = source.getConnection();
@@ -101,6 +147,13 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
     }
   }
 
+  /**
+   * Removes expired sessions from the database.
+   *
+   * Uses current time to delete stale session records. Called before session retrieval operations.
+   *
+   * @throws IllegalStateException when SQL operations fail
+   */
   private void cleanTemp() {
     try (Connection connection = source.getConnection()) {
       try (PreparedStatement prepareStatement =

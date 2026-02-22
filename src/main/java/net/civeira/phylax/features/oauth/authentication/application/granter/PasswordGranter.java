@@ -11,16 +11,47 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationRes
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
+/**
+ * Token granter for the OAuth password grant.
+ *
+ * Responsibilities: - Validate username and password credentials. - Enforce that only protected
+ * clients can use this grant.
+ *
+ * Design notes: - Uses LoginUsecase for credential validation. - Rejects requests from public
+ * clients.
+ */
 @RequestScoped
 @RequiredArgsConstructor
 public class PasswordGranter implements TokenGranter {
+  /**
+   * Use case for validating user credentials.
+   */
   private final LoginUsecase loginUsecase;
 
+  /**
+   * Indicates whether the password grant can be handled.
+   *
+   * Matches the "password" grant type exactly. Used by the controller to select a granter.
+   *
+   * @param grantType grant type name
+   * @return true when the grant type is password
+   */
   @Override
   public boolean canHandle(String grantType) {
     return "password".equals(grantType);
   }
 
+  /**
+   * Authenticates a password grant request.
+   *
+   * Validates credentials only for clients protected with a secret. Returns a not-allowed result
+   * for public clients.
+   *
+   * @param request parsed authorization request
+   * @param client resolved client details
+   * @param paramMap request parameters
+   * @return the authentication result
+   */
   @Override
   public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
@@ -33,6 +64,15 @@ public class PasswordGranter implements TokenGranter {
     }
   }
 
+  /**
+   * Returns the first parameter value for the given key.
+   *
+   * Used to extract single-valued OAuth parameters. Returns null when the key is missing.
+   *
+   * @param paramMap request parameters
+   * @param key parameter name
+   * @return the first value or null
+   */
   private String first(Map<String, List<String>> paramMap, String key) {
     return paramMap.containsKey(key) || paramMap.get(key).size() > 0 ? paramMap.get(key).get(0)
         : null;

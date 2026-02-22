@@ -1,0 +1,14 @@
+/**
+ * Domain model for delegated providers.
+ *
+ * Responsibilities: - Describe delegated provider metadata. - Represent delegated request and token
+ * details.
+ *
+ * Design notes: - Immutable data structures for flow state. - Designed for reuse in UI and API
+ * adapters.
+ *
+ * Dependencies: - Minimal dependencies on other modules.
+ *
+ * Stability: core delegated domain.
+ */
+package net.civeira.phylax.features.oauth.delegated.domain;

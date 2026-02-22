@@ -226,6 +226,44 @@ public class OidcFlowClient {
         .formParam("csid", OidcTestFixtures.CSID).post("/oauth/openid/" + tenant + "/recover");
   }
 
+  public Response exchangeCodeWithBadVerifier(String tenant, String code, String redirectUri,
+      String clientId) {
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .formParam("grant_type", "authorization_code").formParam("code", code)
+        .formParam("code_verifier", "wrong-verifier-xyz").formParam("redirect_uri", redirectUri)
+        .formParam("client_id", clientId).post("/oauth/openid/" + tenant + "/token");
+  }
+
+  public Response revoke(String tenant, String preSessionCookie) {
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
+        .post("/oauth/openid/" + tenant + "/revocation");
+  }
+
+  public Response logout(String tenant, String authSessionCookie, String postLogoutRedirectUri) {
+    return RestAssured.given().redirects().follow(false)
+        .cookie("AUTH_SESSION_ID", nullToEmpty(authSessionCookie))
+        .queryParam("post_logout_redirect_uri", postLogoutRedirectUri)
+        .get("/oauth/openid/" + tenant + "/logout");
+  }
+
+  public Response introspect(String tenant) {
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .post("/oauth/openid/" + tenant + "/introspect");
+  }
+
+  /**
+   * Simulates the final step of a delegated login callback.
+   *
+   * Bypasses browser-driven JavaScript redirects and posts directly to /auth with the stored
+   * delegated code and provider, mirroring what {@code doBackLoginForm} auto-submits.
+   */
+  public Response submitQueryDelegated(String tenant, String userCode, String appProvider) {
+    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "query-delegated")
+        .formParam("user-code", userCode).formParam("app-provider", appProvider)
+        .formParam("csid", OidcTestFixtures.CSID).post("/oauth/openid/" + tenant + "/auth");
+  }
+
   private io.restassured.specification.RequestSpecification baseAuthPost(String tenant) {
     return RestAssured.given().redirects().follow(false).header("Accept-Language", "es-ES")
         .queryParam("client_id", OidcTestFixtures.CLIENT_ID)

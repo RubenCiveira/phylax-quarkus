@@ -7,15 +7,49 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
 /**
  * Domain port for loading OAuth client data.
+ *
+ * Responsibilities: - Load client details for different authentication scenarios. - Validate
+ * redirect URIs and client secrets as needed.
+ *
+ * Design notes: - Implemented by infrastructure adapters. - Keeps persistence details outside
+ * domain logic.
  */
 public interface ClientStoreGateway {
 
-  /** Loads a client that was already pre-authorized (e.g. from an authorization_code flow). */
+  /**
+   * Loads a client that was already pre-authorized.
+   *
+   * Used when a client is known from an authorization_code flow. Returns empty when the client is
+   * not found.
+   *
+   * @param tenant tenant identifier
+   * @param clientId client identifier
+   * @return optional client details
+   */
   Optional<ClientDetails> loadPreautorized(String tenant, String clientId);
 
-  /** Loads a public client validating redirect URL (used for authorization_endpoint flows). */
+  /**
+   * Loads a public client validating its redirect URL.
+   *
+   * Used for authorization endpoint flows and public clients. Returns empty when the client or
+   * redirect is invalid.
+   *
+   * @param tenant tenant identifier
+   * @param clientId client identifier
+   * @param redirect redirect URI
+   * @return optional client details
+   */
   Optional<ClientDetails> loadPublic(String tenant, String clientId, String redirect);
 
-  /** Loads a confidential client validating the client_secret credential. */
+  /**
+   * Loads a confidential client validating the client secret.
+   *
+   * Used for token endpoint authentication. Returns empty when the secret is invalid.
+   *
+   * @param tenant tenant identifier
+   * @param clientId client identifier
+   * @param clientSecret client secret
+   * @return optional client details
+   */
   Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret);
 }

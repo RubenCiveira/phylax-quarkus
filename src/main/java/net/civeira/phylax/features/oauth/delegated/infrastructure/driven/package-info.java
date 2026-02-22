@@ -1,0 +1,13 @@
+/**
+ * Driven adapters for delegated storage.
+ *
+ * Responsibilities: - Persist delegated tokens and mappings. - Implement delegated storage
+ * gateways.
+ *
+ * Design notes: - Focused on JDBC or external persistence. - Encapsulates SQL and mapping details.
+ *
+ * Dependencies: - Depends on delegated domain gateways.
+ *
+ * Stability: storage adapter implementations.
+ */
+package net.civeira.phylax.features.oauth.delegated.infrastructure.driven;

@@ -4,18 +4,40 @@ package net.civeira.phylax.features.oauth.mfa.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Public response payload for MFA enrollment.
+ *
+ * Responsibilities: - Provide the OTP seed and enrollment metadata. - Include QR code data when
+ * required.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by HTML controllers and APIs.
+ */
 @Getter
 @Builder
 public class PublicLoginMfaBuildResponse {
 
+  /**
+   * MFA seed value for OTP generation.
+   */
   private final String seed;
 
+  /**
+   * Human-readable message for the user.
+   */
   private final String message;
 
-  /** Data URI (data:image/png;base64,...) del código QR para escanear con el autenticador. */
+  /**
+   * Data URI (data:image/png;base64,...) for QR code scanning.
+   */
   private final String image;
 
+  /**
+   * Optional URL associated with the enrollment.
+   */
   private final String url;
 
+  /**
+   * Whether a QR image is required for enrollment.
+   */
   private final boolean requiresImage;
 }

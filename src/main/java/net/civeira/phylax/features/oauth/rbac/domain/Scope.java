@@ -6,15 +6,33 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Scope definition for RBAC authorization.
+ *
+ * Responsibilities: - Provide scope name, description, and kind. - Support scope listings and
+ * consent flows.
+ *
+ * Design notes: - Immutable value object built via Lombok. - Used by resource servers and RBAC
+ * storage.
+ */
 @Data
 @Builder
 @Jacksonized
 @RegisterForReflection
 public class Scope {
+  /**
+   * Scope name identifier.
+   */
   private final String name;
 
+  /**
+   * Human-readable scope description.
+   */
   private final String description;
 
+  /**
+   * Scope kind such as READ, WRITE, or MANAGE.
+   */
   private final ScopeKind kind;
 
 }

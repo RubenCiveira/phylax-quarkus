@@ -9,19 +9,44 @@ import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 
 /**
- * Application service for managing authenticated sessions. Wraps {@link SessionStoreGateway} to
- * provide session lifecycle operations.
+ * Application service for managing authenticated sessions.
+ *
+ * Responsibilities: - Load existing sessions by identifier. - Remove sessions when users log out or
+ * revoke.
+ *
+ * Design notes: - Delegates persistence to SessionStoreGateway. - Keeps session lifecycle logic
+ * centralized.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class SessionManager {
 
+  /**
+   * Gateway used to load and delete session data.
+   */
   private final SessionStoreGateway sessionStore;
 
+  /**
+   * Loads a session by its identifier.
+   *
+   * Returns an empty optional when the session is missing or expired. Delegates the lookup to the
+   * configured session gateway.
+   *
+   * @param sessionId session identifier
+   * @return the session info if present
+   */
   public Optional<SessionInfo> loadSession(String sessionId) {
     return sessionStore.loadSession(sessionId);
   }
 
+  /**
+   * Removes a session by its identifier.
+   *
+   * Used for logout flows and administrative revocations. Delegates deletion to the session
+   * gateway.
+   *
+   * @param sessionId session identifier
+   */
   public void removeSession(String sessionId) {
     sessionStore.deleteSession(sessionId);
   }

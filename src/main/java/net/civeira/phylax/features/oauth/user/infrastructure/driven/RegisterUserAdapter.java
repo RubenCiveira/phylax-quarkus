@@ -8,28 +8,69 @@ import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
 
 /**
- * Stub desactivado — la implementación real está en
- * {@code features/access/oauth/infrastructure/driver/impl/user/RegisterUserInteractor}.
+ * Disabled stub adapter for user registration.
+ *
+ * Responsibilities: - Provide a placeholder implementation for registration gateway. - Return
+ * defaults when real implementation is not wired.
+ *
+ * Design notes: - Real implementation lives in access feature module. - Marked @Vetoed to avoid CDI
+ * registration.
  */
 @Vetoed
 public class RegisterUserAdapter implements RegisterUserGateway {
 
+  /**
+   * Indicates whether registration is allowed.
+   *
+   * Current stub always returns false. Replace with real implementation when wired.
+   *
+   * @param tenant tenant identifier
+   * @return false in this stub
+   */
   @Override
   public boolean allowRegister(String tenant) {
     return false;
   }
 
+  /**
+   * Returns the registration consent text.
+   *
+   * Current stub returns empty. Replace with real implementation when wired.
+   *
+   * @param tenant tenant identifier
+   * @return empty optional
+   */
   @Override
   public Optional<String> getRegisterConsent(String tenant) {
     return Optional.empty();
   }
 
+  /**
+   * Initiates a registration request.
+   *
+   * Current stub always cancels the registration. Replace with real implementation when wired.
+   *
+   * @param urlBase base URL for verification links
+   * @param tenant tenant identifier
+   * @param email user email
+   * @param password raw password
+   * @return cancelled registration result
+   */
   @Override
   public RegistrationResult requestForRegister(String urlBase, String tenant, String email,
       String password) {
     return RegistrationResult.cancel();
   }
 
+  /**
+   * Verifies a registration code.
+   *
+   * Current stub always returns empty. Replace with real implementation when wired.
+   *
+   * @param tenant tenant identifier
+   * @param code registration code
+   * @return empty optional
+   */
   @Override
   public Optional<String> verifyRegister(String tenant, String code) {
     return Optional.empty();

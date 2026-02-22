@@ -1,0 +1,14 @@
+/**
+ * Authentication domain exceptions.
+ *
+ * Responsibilities: - Model authentication failure scenarios. - Carry context used by UI and REST
+ * adapters.
+ *
+ * Design notes: - Exceptions encode required remediation steps. - Used to route flows for MFA or
+ * consent.
+ *
+ * Dependencies: - Domain-focused with minimal infrastructure ties.
+ *
+ * Stability: domain error contracts.
+ */
+package net.civeira.phylax.features.oauth.authentication.domain.exception;

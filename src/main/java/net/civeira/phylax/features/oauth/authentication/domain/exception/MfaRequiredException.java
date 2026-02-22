@@ -3,13 +3,39 @@ package net.civeira.phylax.features.oauth.authentication.domain.exception;
 
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 
+/**
+ * Exception indicating MFA must be completed.
+ *
+ * Responsibilities: - Signal that MFA verification is required. - Provide a token entity for MFA
+ * continuation.
+ *
+ * Design notes: - Overrides entity() to return an MFA token. - Extends AuthenticationException for
+ * uniform handling.
+ */
 public class MfaRequiredException extends AuthenticationException {
   private static final long serialVersionUID = 6947556334360106459L;
 
+  /**
+   * Creates an MFA-required exception for the user.
+   *
+   * This is used to trigger MFA flows in the UI. The response entity will include an MFA token.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   */
   public MfaRequiredException(String tenant, String username) {
     super(tenant, username, "");
   }
 
+  /**
+   * Returns the MFA token entity for this failure.
+   *
+   * Uses the token builder to produce a short-lived MFA token. The token is used to continue the
+   * MFA flow.
+   *
+   * @param tokenBuilder token builder for MFA tokens
+   * @return MFA token payload
+   */
   public Object entity(JwtTokenBuilder tokenBuilder) {
     return tokenBuilder.buildMfaToken(getUsername(), getTenant());
   }

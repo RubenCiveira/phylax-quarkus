@@ -1,0 +1,13 @@
+/**
+ * Infrastructure adapters for scopes.
+ *
+ * Responsibilities: - Implement persistence for scope consent. - Bridge domain models with storage.
+ *
+ * Design notes: - Driven adapters encapsulate storage details. - Keeps application logic
+ * storage-agnostic.
+ *
+ * Dependencies: - Uses scopes domain gateways.
+ *
+ * Stability: internal infrastructure layer.
+ */
+package net.civeira.phylax.features.oauth.scopes.infrastructure;

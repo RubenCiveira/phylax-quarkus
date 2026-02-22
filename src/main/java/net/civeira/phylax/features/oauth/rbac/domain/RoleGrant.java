@@ -9,15 +9,33 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Role grant definition with allowed scopes and restrictions.
+ *
+ * Responsibilities: - Represent a role and its allowed scopes. - Optionally restrict fields per
+ * resource.
+ *
+ * Design notes: - Builder supports creating modified copies. - Used by authorization checks and
+ * responses.
+ */
 @Data
 @Builder(toBuilder = true)
 @Jacksonized
 @RegisterForReflection
 public class RoleGrant {
 
+  /**
+   * Role name identifier.
+   */
   private final String rolename;
 
+  /**
+   * Set of allowed scopes for the role.
+   */
   private Set<String> allowedScopes;
 
+  /**
+   * Map of resource fields restricted per scope.
+   */
   private Map<String, Set<String>> restrictedFields;
 }
