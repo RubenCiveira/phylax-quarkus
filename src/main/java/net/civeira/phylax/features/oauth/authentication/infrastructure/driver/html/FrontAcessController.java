@@ -60,6 +60,7 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewMfaControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewPassControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.RecoverControllerPart;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.RegistrationControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.ScopeConsentControllerPart;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
@@ -128,6 +129,7 @@ public class FrontAcessController {
   private final DecoratePageGateway decorator;
 
   private final RecoverControllerPart recoverController;
+  private final RegistrationControllerPart registerController;
   private final MfaControllerPart mfaController;
   private final ConsentControllerPart consentController;
   private final ScopeConsentControllerPart scopeConsentController;
@@ -253,6 +255,30 @@ public class FrontAcessController {
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
+  @GET
+  @Path("oauth/openid/{tenant}/register")
+  public Response showRegister(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
+      @Context HttpHeaders headers, @QueryParam("email") String email,
+      @QueryParam("regcode") String regcode) {
+    AuthRequest request = new AuthRequest(tenant, req, headers);
+    return loadClient(request).map(clientDetails -> registerController
+        .doPaintVerifyForm(request.getLocale(), email, regcode, null))
+        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/register")
+  public Response checkRegister(final @PathParam(TENANT) String tenant,
+      @QueryParam("email") String email, @Context UriInfo req,
+      final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers) {
+    formParams = paramMap;
+    AuthRequest request = new AuthRequest(tenant, req, headers);
+    return loadClient(request)
+        .map(clientDetails -> registerController.doExecVerify(clientDetails, request, email,
+            paramMap, this::revolve))
+        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
+  }
+
   @POST
   @Path("oauth/openid/{tenant}/revocation")
   public Response revoke(final @PathParam(TENANT) String tenant,
@@ -370,6 +396,12 @@ public class FrontAcessController {
                 ? "<form method=\"POST\">"
                     + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />" + "<p>"
                     + recoverText + "</p></form>"
+                : "")
+            + (registerController.allowRegister(request)
+                ? "<form method=\"POST\">"
+                    + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />" + "<p>"
+                    + "<input class=\"inline\" type=\"submit\" value=\""
+                    + i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
                 : ""),
             locale))
         .type(TEXT_HTML)
@@ -404,6 +436,8 @@ public class FrontAcessController {
         request, paramMap, this::revolve));
     process = fillIfEmpty(process, () -> scopeConsentController.process(step, oUser, clientDetails,
         request, paramMap, this::revolve));
+    process = fillIfEmpty(process, () -> registerController.process(step, oUser, clientDetails,
+        request, paramMap, this::revolve));
     process = fillIfEmpty(process, () -> newPassController.process(step, oUser, clientDetails,
         request, paramMap, this::revolve));
     process = fillIfEmpty(process, () -> newMfaController.process(step, oUser, clientDetails,
@@ -416,6 +450,10 @@ public class FrontAcessController {
           first(paramMap, "delegated-provider"), request.getLocale(), null);
     } else if ("show-recover".equals(step)) {
       response = recoverController.doPaintRecoverForm(request.getLocale(), null);
+    } else if ("show-register".equals(step)) {
+      response = registerController.allowRegister(request)
+          ? registerController.doPaintRegisterForm(request.getLocale(), null)
+          : doPaintLoginForm(request, null, null);
     } else if ("start".equals(step) && oUser.isPresent()) {
       response = doPaintLoginForm(request, null, null);
     } else {

@@ -8,12 +8,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedLoginEndpoint;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.RequestInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.ResponseInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.UserData;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedLoginEndpoint;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegateLoginGateway;
 
 @ApplicationScoped

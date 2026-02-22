@@ -1,21 +1,25 @@
-package net.civeira.phylax.features.oauth.user.infrastructure.driven;
+package net.civeira.phylax.features.access.oauth.infrastructure.driver.impl.user;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
 
 /**
- * Stub desactivado — la implementación real está en
- * {@code features/access/oauth/infrastructure/driver/impl/user/RegisterUserInteractor}.
+ * Interactor for user self-registration. Disabled (allowRegister=false) until real persistence is
+ * integrated with TenantConfig.enableRegisterUsers and the temporal code system.
+ *
+ * TODO: integrate with UserApproveOptions, TenantConfig and temporal auth codes.
  */
-@Vetoed
-public class RegisterUserAdapter implements RegisterUserGateway {
+@Transactional
+@ApplicationScoped
+public class RegisterUserInteractor implements RegisterUserGateway {
 
   @Override
   public boolean allowRegister(String tenant) {
-    return false;
+    return true;
   }
 
   @Override

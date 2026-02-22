@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.oauth.client.domain.gateway;
 
 import java.util.Optional;
+
 import net.civeira.phylax.features.oauth.client.domain.ApiKeyData;
 
 /**

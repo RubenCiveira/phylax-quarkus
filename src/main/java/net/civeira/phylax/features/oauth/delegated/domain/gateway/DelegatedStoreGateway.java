@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.delegated.domain.gateway;
 
 import java.util.Optional;
+
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
 

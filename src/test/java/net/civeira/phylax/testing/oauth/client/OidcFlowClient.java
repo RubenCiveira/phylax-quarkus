@@ -93,6 +93,36 @@ public class OidcFlowClient {
         .post("/oauth/openid/" + tenant + "/auth");
   }
 
+  public Response showRegisterForm(String tenant) {
+    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "show-register")
+        .post("/oauth/openid/" + tenant + "/auth");
+  }
+
+  public Response submitRegister(String tenant, String email, String password) {
+    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "do_register")
+        .formParam("reg_email", email).formParam("reg_password", password)
+        .formParam("csid", OidcTestFixtures.CSID).post("/oauth/openid/" + tenant + "/auth");
+  }
+
+  public Response showRegisterVerify(String tenant, String email, String regcode) {
+    return RestAssured.given().redirects().follow(false).header("Accept-Language", "es-ES")
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("response_type", "code").queryParam("state", OidcTestFixtures.STATE)
+        .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE).queryParam("email", email)
+        .queryParam("regcode", regcode).get("/oauth/openid/" + tenant + "/register");
+  }
+
+  public Response submitRegisterVerify(String tenant, String email, String regcode) {
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("response_type", "code").queryParam("state", OidcTestFixtures.STATE)
+        .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE).queryParam("email", email)
+        .formParam("regcode", regcode).formParam("csid", OidcTestFixtures.CSID)
+        .post("/oauth/openid/" + tenant + "/register");
+  }
+
   public Response requestRecover(String tenant, String username) {
     return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "send-recover")
         .formParam("username", username).post("/oauth/openid/" + tenant + "/auth");

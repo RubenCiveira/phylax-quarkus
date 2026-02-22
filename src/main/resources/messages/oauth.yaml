@@ -5,6 +5,7 @@ login:
   username: "Username"
   password: "Password"
   recover-label: "Forgot password?"
+  register-label: "Create account"
   enter: "Sign in"
 
 recover:
@@ -59,4 +60,26 @@ scopeconsent:
   help: "The application requests access to the following scopes"
   accept: "Authorize"
   back-label: "Deny"
+  back-text: "{0}"
+
+register:
+  title: "Create account"
+  error-format: "{0}"
+  error-cancel: "Registration could not be completed"
+  help: "Register with your email and password"
+  email: "Email"
+  password: "Password"
+  send: "Register"
+  back-label: "Back to login"
+  back-text: "{0}"
+  pending-title: "Check your email"
+  pending-help: "We sent a verification link to {0}"
+
+register-verify:
+  title: "Verify your email"
+  error-format: "{0}"
+  help: "Enter the verification code from the email we sent you"
+  code: "Verification code"
+  send: "Verify"
+  back-label: "Back to login"
   back-text: "{0}"

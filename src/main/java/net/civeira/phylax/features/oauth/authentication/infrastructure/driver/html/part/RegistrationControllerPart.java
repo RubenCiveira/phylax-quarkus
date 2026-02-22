@@ -1,0 +1,166 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.user.application.RegisterUserUsecase;
+import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
+
+@RequestScoped
+@RequiredArgsConstructor
+public class RegistrationControllerPart {
+  private final SecureHtmlBuilder securer;
+  private final DecoratePageGateway decorator;
+  private final RegisterUserUsecase registerUserUsecase;
+  private final CurrentRequest current;
+
+  public boolean allowRegister(AuthRequest request) {
+    return registerUserUsecase.allowRegister(request.getTenant());
+  }
+
+  public Response doPaintRegisterForm(Locale locale, String msg) {
+    String js =
+        securer.configureScripts(securer.addSign("sign"),
+            securer.cypher(Arrays.asList(
+                EncrytFieldTransfer.builder().from("type_reg_password").to("reg_password").build()),
+                "register"),
+            securer.focusOn("reg_email"));
+
+    String title = FrontAcessController.i18n(locale, "register.title");
+    String error = FrontAcessController.i18n(locale, "register.error-format", msg);
+    String help = FrontAcessController.i18n(locale, "register.help");
+    String emailLabel = FrontAcessController.i18n(locale, "register.email");
+    String passwordLabel = FrontAcessController.i18n(locale, "register.password");
+    String send = FrontAcessController.i18n(locale, "register.send");
+    String backLabel = FrontAcessController.i18n(locale, "register.back-label");
+    String backText = FrontAcessController.i18n(locale, "register.back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+
+    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Register",
+        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+            + "<form id=\"register\" method=\"POST\">"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+            + "<input type=\"hidden\" name=\"step\" value=\"do_register\" />" + "<label>"
+            + emailLabel + " <input type=\"text\" id=\"reg_email\" name=\"reg_email\" value=\""
+            + "\" /></label>" + "<label>" + passwordLabel
+            + " <input type=\"password\" id=\"type_reg_password\" value=\"" + "\" /></label>"
+            + "<input type=\"hidden\" id=\"reg_password\" name=\"reg_password\" value=\"" + "\" />"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        locale)).type(FrontAcessController.TEXT_HTML));
+  }
+
+  public Response doPaintPendingPage(Locale locale, String email) {
+    String title = FrontAcessController.i18n(locale, "register.pending-title");
+    String help = FrontAcessController.i18n(locale, "register.pending-help", email);
+
+    return securer
+        .secureHtmlResponse(
+            Response
+                .ok(decorator.getFullPage("Register",
+                    "<h1>" + title + "</h1>" + "<p>" + help + "</p>", locale))
+                .type(FrontAcessController.TEXT_HTML));
+  }
+
+  public Response doPaintVerifyForm(Locale locale, String email, String regcode, String msg) {
+    String js = securer.configureScripts(securer.addSign("sign"));
+
+    String title = FrontAcessController.i18n(locale, "register-verify.title");
+    String error = FrontAcessController.i18n(locale, "register-verify.error-format", msg);
+    String help = FrontAcessController.i18n(locale, "register-verify.help");
+    String codeLabel = FrontAcessController.i18n(locale, "register-verify.code");
+    String send = FrontAcessController.i18n(locale, "register-verify.send");
+    String backLabel = FrontAcessController.i18n(locale, "register-verify.back-label");
+    String backText = FrontAcessController.i18n(locale, "register-verify.back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+
+    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Verify Registration",
+        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + codeLabel
+            + " <input type=\"text\" name=\"regcode\" value=\"" + nullToEmpty(regcode)
+            + "\" /></label>"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        locale)).type(FrontAcessController.TEXT_HTML));
+  }
+
+  public Response doExecVerify(ClientDetails clientDetails, AuthRequest request, String email,
+      MultivaluedMap<String, String> paramMap, Function<StepResult, Response> resolver) {
+    String code = FrontAcessController.first(paramMap, "regcode");
+    Optional<String> verifiedUsername =
+        registerUserUsecase.verifyRegister(request.getTenant(), code);
+    if (verifiedUsername.isPresent()) {
+      return resolver.apply(StepResult.builder().username(verifiedUsername.get())
+          .clientDetails(clientDetails).request(request).build());
+    } else {
+      return doPaintVerifyForm(request.getLocale(), email, code, FrontAcessController
+          .i18n(request.getLocale(), "register-verify.error-format", "Invalid code"));
+    }
+  }
+
+  public Optional<Response> process(String step, Optional<String> oUser,
+      ClientDetails clientDetails, AuthRequest request, MultivaluedMap<String, String> paramMap,
+      Function<StepResult, Response> resolver) {
+    if ("do_register".equals(step)) {
+      return Optional.of(doExecRegister(clientDetails, request, paramMap, resolver));
+    }
+    return Optional.empty();
+  }
+
+  private Response doExecRegister(ClientDetails clientDetails, AuthRequest request,
+      MultivaluedMap<String, String> paramMap, Function<StepResult, Response> resolver) {
+    if (!registerUserUsecase.allowRegister(request.getTenant())) {
+      return doPaintRegisterForm(request.getLocale(), FrontAcessController.i18n(request.getLocale(),
+          "register.error-format", "Registration not allowed"));
+    }
+    String email = FrontAcessController.first(paramMap, "reg_email");
+    String password = securer.decrypt(FrontAcessController.first(paramMap, "reg_password"));
+    String urlBase = issuer(request.getTenant()) + "/register" + "?email="
+        + URLEncoder.encode(email, StandardCharsets.UTF_8) + "&client_id="
+        + URLEncoder.encode(clientDetails.getClientId(), StandardCharsets.UTF_8)
+        + request.encodeInUrl() + "&regcode=";
+    RegistrationResult result =
+        registerUserUsecase.requestForRegister(urlBase, request.getTenant(), email, password);
+    switch (result.getStatus()) {
+      case OK:
+        return resolver.apply(StepResult.builder().username(result.getUsername())
+            .clientDetails(clientDetails).request(request).build());
+      case PENDING:
+        return doPaintPendingPage(request.getLocale(), email);
+      case CANCEL:
+      default:
+        return doPaintRegisterForm(request.getLocale(),
+            FrontAcessController.i18n(request.getLocale(), "register.error-cancel"));
+    }
+  }
+
+  private String issuer(String tenant) {
+    return current.getPublicHost() + "/oauth/openid/" + tenant;
+  }
+
+  private String nullToEmpty(String value) {
+    return value == null ? "" : value;
+  }
+}

@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.authentication.application.granter;
 
 import java.util.List;
 import java.util.Map;
+
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;

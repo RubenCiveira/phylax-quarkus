@@ -11,6 +11,8 @@ public final class OidcTestFixtures {
   public static final String SCOPE = "openid profile email";
   public static final String MFA_CODE = "123456";
   public static final String RECOVER_CODE = "valid-recover-code";
+  public static final String REGISTER_CODE = "valid-register-code";
+  public static final String REGISTER_EMAIL = "newuser@example.com";
   public static final String STATE = "test-state";
   public static final String CODE_CHALLENGE = "test-verifier";
   public static final String CSID = "test-csid";

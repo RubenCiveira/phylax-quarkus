@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.session.domain.gateway;
 
 import java.util.Optional;
+
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;

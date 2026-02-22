@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.oauth.mfa.domain.gateway;
 
 import java.util.Locale;
+
 import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 
 public interface UserMfaGateway {

@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.session.domain.gateway;
 
 import java.util.Optional;
+
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 
 public interface TemporalKeysGateway {

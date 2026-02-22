@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
 
 @ApplicationScoped
@@ -20,8 +21,9 @@ public class RegisterUserUsecase {
     return gateway.getRegisterConsent(tenant);
   }
 
-  public void requestForRegister(String urlBase, String tenant, String email, String password) {
-    gateway.requestForRegister(urlBase, tenant, email, password);
+  public RegistrationResult requestForRegister(String urlBase, String tenant, String email,
+      String password) {
+    return gateway.requestForRegister(urlBase, tenant, email, password);
   }
 
   public Optional<String> verifyRegister(String tenant, String code) {
