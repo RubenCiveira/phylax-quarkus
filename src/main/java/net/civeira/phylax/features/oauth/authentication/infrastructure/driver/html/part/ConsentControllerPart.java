@@ -19,6 +19,7 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.ConsentUsecase;
+import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 
 @RequestScoped
 @RequiredArgsConstructor
@@ -35,10 +36,10 @@ public class ConsentControllerPart {
 
   private ResponseBuilder doPaintConsentContent(Locale locale, AuthRequest request, String user,
       String msg) {
-    Optional<String> pendingText =
-        consentUsecase.getPendingConsent(request.getTenant(), user, locale);
-    if (pendingText.isPresent()) {
-      String fullText = pendingText.get();
+    Optional<PendingConsent> pending =
+        consentUsecase.getPendingConsent(request.getTenant(), user, request.getAudiences(), locale);
+    if (pending.isPresent()) {
+      PendingConsent pendingConsent = pending.get();
       String js = securer.configureScripts(securer.addSign("sign"));
 
       String title = FrontAcessController.i18n(locale, "consent.title");
@@ -56,9 +57,11 @@ public class ConsentControllerPart {
           js + "<h1>" + title + "</h1><p>" + help + "</p>"
               + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
               + "<form method=\"POST\">"
-              + "<div style=\"with:100%;height:200px;overflow:auto; border:solid black 1px;\">" + ""
-              + fullText + "</div>" + "<label>" + code
+              + "<div style=\"with:100%;height:200px;overflow:auto; border:solid black 1px;\">"
+              + pendingConsent.getConsentText() + "</div>" + "<label>" + code
               + "<input type=\"checkbox\" name=\"consent\" /></label>"
+              + "<input type=\"hidden\" name=\"relying_party\" value=\""
+              + pendingConsent.getRelyingParty() + "\" />"
               + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
               + "<input type=\"hidden\" name=\"step\" value=\"consent\" />"
               + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
@@ -86,7 +89,8 @@ public class ConsentControllerPart {
       Function<StepResult, Response> resolver) {
     String accepted = FrontAcessController.first(paramMap, "consent");
     if ("on".equals(accepted) || "true".equals(accepted)) {
-      consentUsecase.storeAcceptedConsent(request.getTenant(), username);
+      String relyingParty = FrontAcessController.first(paramMap, "relying_party");
+      consentUsecase.storeAcceptedConsent(request.getTenant(), username, relyingParty);
       return resolver.apply(StepResult.builder().username(username).clientDetails(clientDetails)
           .request(request).build());
     } else {

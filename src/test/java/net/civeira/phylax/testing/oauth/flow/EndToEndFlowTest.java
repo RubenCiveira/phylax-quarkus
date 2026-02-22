@@ -36,7 +36,8 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Assertions.assertTrue(
         decodeChallenge(preSession).getChallenges().contains(AuthenticationChallege.USE_CONSENT));
 
-    Response consent = client.submitConsent(OidcTestFixtures.TENANT, "on", preSession);
+    Response consent =
+        client.submitConsent(OidcTestFixtures.TENANT, "on", OidcTestFixtures.CLIENT_ID, preSession);
     String preSessionAfterConsent = client.extractPreSessionCookie(consent);
     Assertions.assertNotNull(preSessionAfterConsent);
     Assertions.assertTrue(decodeChallenge(preSessionAfterConsent).getChallenges()
@@ -75,7 +76,8 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Assertions.assertTrue(decodeChallenge(preSessionAfterPass).getChallenges()
         .contains(AuthenticationChallege.USE_CONSENT));
 
-    Response consent = client.submitConsent(OidcTestFixtures.TENANT, "on", preSessionAfterPass);
+    Response consent = client.submitConsent(OidcTestFixtures.TENANT, "on",
+        OidcTestFixtures.CLIENT_ID, preSessionAfterPass);
     Assertions.assertEquals(302, consent.statusCode());
     Assertions.assertNotNull(client.extractAuthCode(consent));
   }

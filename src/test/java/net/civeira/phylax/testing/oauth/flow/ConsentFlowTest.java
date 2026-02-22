@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 import net.civeira.phylax.testing.oauth.fixtures.OidcTestFixtures;
 
 @Tag("oidc-flow")
@@ -17,7 +18,8 @@ class ConsentFlowTest extends OidcIntegrationTestBase {
   void consentRequired_showsConsentForm() {
     loginGateway.whenValidate(() -> AuthenticationResult.consentRequired(OidcTestFixtures.TENANT,
         OidcTestFixtures.USERNAME));
-    consentGateway.whenPending(() -> java.util.Optional.of("Texto de los terminos"));
+    consentGateway.whenPending(() -> java.util.Optional
+        .of(PendingConsent.of(OidcTestFixtures.CLIENT_ID, "Texto de los terminos")));
 
     Response response = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null);
@@ -38,7 +40,8 @@ class ConsentFlowTest extends OidcIntegrationTestBase {
         OidcTestFixtures.PASSWORD, null);
     String preSession = client.extractPreSessionCookie(response);
 
-    Response submit = client.submitConsent(OidcTestFixtures.TENANT, "off", preSession);
+    Response submit = client.submitConsent(OidcTestFixtures.TENANT, "off",
+        OidcTestFixtures.CLIENT_ID, preSession);
 
     Assertions.assertEquals(200, submit.statusCode());
     Assertions.assertTrue(submit.getBody().asString().contains("name=\"consent\""));
@@ -53,12 +56,14 @@ class ConsentFlowTest extends OidcIntegrationTestBase {
         OidcTestFixtures.PASSWORD, null);
     String preSession = client.extractPreSessionCookie(response);
 
-    Response submit = client.submitConsent(OidcTestFixtures.TENANT, "on", preSession);
+    Response submit =
+        client.submitConsent(OidcTestFixtures.TENANT, "on", OidcTestFixtures.CLIENT_ID, preSession);
 
     Assertions.assertEquals(302, submit.statusCode());
     Assertions.assertNotNull(client.extractAuthCode(submit));
     Assertions.assertEquals(1, consentGateway.getAcceptedCount());
     Assertions.assertEquals(OidcTestFixtures.TENANT, consentGateway.getLastTenant());
     Assertions.assertEquals(OidcTestFixtures.USERNAME, consentGateway.getLastUsername());
+    Assertions.assertEquals(OidcTestFixtures.CLIENT_ID, consentGateway.getLastRelyingParty());
   }
 }

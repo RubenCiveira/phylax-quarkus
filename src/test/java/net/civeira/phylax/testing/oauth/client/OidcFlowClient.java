@@ -52,9 +52,11 @@ public class OidcFlowClient {
         .post("/oauth/openid/" + tenant + "/auth");
   }
 
-  public Response submitConsent(String tenant, String consentValue, String preSessionCookie) {
+  public Response submitConsent(String tenant, String consentValue, String relyingParty,
+      String preSessionCookie) {
     return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "consent")
-        .formParam("consent", consentValue).formParam("csid", OidcTestFixtures.CSID)
+        .formParam("consent", consentValue).formParam("relying_party", relyingParty)
+        .formParam("csid", OidcTestFixtures.CSID)
         .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
         .post("/oauth/openid/" + tenant + "/auth");
   }
