@@ -5,11 +5,11 @@ import java.util.Locale;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
 
 @RequiredArgsConstructor
 @ApplicationScoped
-public class DecoratePageInteractor implements DecoratePageSpi {
+public class DecoratePageInteractor implements DecoratePageGateway {
 
   @Override
   public String getFullPage(String title, String innerContent, Locale locale) {

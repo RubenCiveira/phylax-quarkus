@@ -8,8 +8,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 import net.civeira.phylax.testing.oauth.fixtures.OidcTestFixtures;
 
 @Alternative

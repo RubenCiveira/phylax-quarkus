@@ -3,8 +3,8 @@ package net.civeira.phylax.features.oauth.client.infrastructure.driven;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.features.oauth.client.domain.ApiKeyData;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ApiKeyStoreGateway;
-import net.civeira.phylax.features.oauth.client.domain.model.ApiKeyData;
 
 /**
  * Stub adapter for API Key lookup.

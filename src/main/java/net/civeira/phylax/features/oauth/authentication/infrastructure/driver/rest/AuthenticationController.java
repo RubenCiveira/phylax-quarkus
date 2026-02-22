@@ -21,14 +21,14 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.granter.TokenGranter;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.application.granter.TokenGranter;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
-import net.civeira.phylax.features.oauth.session.domain.model.TemporalAuthCode;
-import net.civeira.phylax.features.oauth.token.domain.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 @Path("")

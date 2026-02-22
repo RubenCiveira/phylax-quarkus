@@ -9,17 +9,17 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.rbac.application.spi.PartyVerifier;
-import net.civeira.phylax.features.oauth.rbac.application.spi.RbacStore;
 import net.civeira.phylax.features.oauth.rbac.domain.PropertyList;
 import net.civeira.phylax.features.oauth.rbac.domain.ScopeList;
+import net.civeira.phylax.features.oauth.rbac.domain.gateway.PartyVerifierGateway;
+import net.civeira.phylax.features.oauth.rbac.domain.gateway.RbacStoreGateway;
 
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class ResourceRegister {
-  private final PartyVerifier verifier;
-  private final RbacStore schemaStore;
+  private final PartyVerifierGateway verifier;
+  private final RbacStoreGateway schemaStore;
 
   @POST
   @Path("authz/protection/resource/scope")

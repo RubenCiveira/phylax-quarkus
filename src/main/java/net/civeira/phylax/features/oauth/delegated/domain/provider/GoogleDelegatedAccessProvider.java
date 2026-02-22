@@ -17,10 +17,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedProviderDescription;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
 
 @RequiredArgsConstructor
 public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalProvider {

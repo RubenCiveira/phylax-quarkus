@@ -1,0 +1,8 @@
+package net.civeira.phylax.features.oauth.rbac.domain.gateway;
+
+import java.util.Optional;
+
+public interface PartyVerifierGateway {
+
+  Optional<String> findOptional(String apiKey);
+}

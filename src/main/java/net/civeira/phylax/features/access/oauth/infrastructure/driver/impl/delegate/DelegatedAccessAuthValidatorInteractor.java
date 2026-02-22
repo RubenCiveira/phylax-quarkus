@@ -7,17 +7,17 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.oauth.application.usecase.DelegeatedLoginProvidersUsecase;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.UserData;
-import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAuthValidatorSpi;
+import net.civeira.phylax.features.access.oauth.application.usecase.DelegatedLoginProvidersUsecase;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.UserData;
+import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedAccessProviderGateway;
 
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
-public class DelegatedAccessAuthValidatorInteractor implements DelegatedAccessAuthValidatorSpi {
-  private final DelegeatedLoginProvidersUsecase providers;
+public class DelegatedAccessAuthValidatorInteractor implements DelegatedAccessProviderGateway {
+  private final DelegatedLoginProvidersUsecase providers;
 
   @Override
   public List<DelegatedAccessExternalProvider> providers(AuthRequest request) {

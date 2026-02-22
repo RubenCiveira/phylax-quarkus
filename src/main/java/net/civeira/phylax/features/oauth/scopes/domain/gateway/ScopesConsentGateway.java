@@ -1,8 +1,7 @@
 package net.civeira.phylax.features.oauth.scopes.domain.gateway;
 
 import java.util.List;
-
-import net.civeira.phylax.features.oauth.scopes.domain.model.ScopePermission;
+import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 
 public interface ScopesConsentGateway {
 

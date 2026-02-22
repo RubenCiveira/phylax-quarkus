@@ -15,7 +15,7 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAcce
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 
 @ApplicationScoped
 @RequiredArgsConstructor

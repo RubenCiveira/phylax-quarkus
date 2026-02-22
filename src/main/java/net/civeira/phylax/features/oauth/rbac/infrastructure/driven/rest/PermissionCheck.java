@@ -9,16 +9,16 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.rbac.application.spi.PartyVerifier;
-import net.civeira.phylax.features.oauth.rbac.application.spi.RbacStore;
 import net.civeira.phylax.features.oauth.rbac.domain.RoleGrant;
+import net.civeira.phylax.features.oauth.rbac.domain.gateway.PartyVerifierGateway;
+import net.civeira.phylax.features.oauth.rbac.domain.gateway.RbacStoreGateway;
 
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class PermissionCheck {
-  private final PartyVerifier verifier;
-  private final RbacStore schemaStore;
+  private final PartyVerifierGateway verifier;
+  private final RbacStoreGateway schemaStore;
 
   @GET
   @Path("authz/protection/grant")

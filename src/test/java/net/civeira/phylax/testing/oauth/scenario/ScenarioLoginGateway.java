@@ -7,12 +7,12 @@ import java.util.function.Supplier;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationMode;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.domain.gateway.LoginGateway;
 import net.civeira.phylax.testing.oauth.fixtures.OidcTestFixtures;
 

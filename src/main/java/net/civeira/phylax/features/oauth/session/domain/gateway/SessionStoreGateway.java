@@ -2,10 +2,9 @@
 package net.civeira.phylax.features.oauth.session.domain.gateway;
 
 import java.util.Optional;
-
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
-import net.civeira.phylax.features.oauth.session.domain.model.SessionInfo;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 
 public interface SessionStoreGateway {
   Optional<SessionInfo> loadSession(String state);

@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
-import net.civeira.phylax.features.oauth.session.domain.model.TemporalAuthCode;
 
 @Alternative
 @Priority(1)

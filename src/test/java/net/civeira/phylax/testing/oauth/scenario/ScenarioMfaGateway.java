@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
-import net.civeira.phylax.features.oauth.mfa.domain.model.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.testing.oauth.fixtures.OidcTestFixtures;
 
 @Alternative

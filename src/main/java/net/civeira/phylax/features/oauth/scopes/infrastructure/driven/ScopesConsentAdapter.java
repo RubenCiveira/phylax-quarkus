@@ -3,8 +3,8 @@ package net.civeira.phylax.features.oauth.scopes.infrastructure.driven;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
-import net.civeira.phylax.features.oauth.scopes.domain.model.ScopePermission;
 
 /**
  * Stub adapter for scope consent. Returns no pending scopes (all scopes are pre-approved).

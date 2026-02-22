@@ -16,13 +16,13 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
 
 @Slf4j
 @RequestScoped

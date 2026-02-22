@@ -4,9 +4,9 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driven;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.EventNotifierGateway;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
 
 @RequestScoped
 @RequiredArgsConstructor

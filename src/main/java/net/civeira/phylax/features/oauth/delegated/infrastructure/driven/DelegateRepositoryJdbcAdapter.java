@@ -19,9 +19,9 @@ import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedStoreGateway;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.TokenInfo;
 
 @Slf4j
 @RequestScoped

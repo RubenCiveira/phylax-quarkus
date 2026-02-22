@@ -22,9 +22,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import net.civeira.phylax.features.oauth.key.domain.Jks;
+import net.civeira.phylax.features.oauth.key.domain.JwkSet;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
-import net.civeira.phylax.features.oauth.key.domain.model.Jks;
-import net.civeira.phylax.features.oauth.key.domain.model.JwkSet;
 
 @Alternative
 @Priority(1)

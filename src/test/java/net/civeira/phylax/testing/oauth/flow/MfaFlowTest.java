@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.testing.oauth.fixtures.OidcTestFixtures;
 
 @Tag("oidc-flow")

@@ -8,15 +8,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.usecase.ExportResourceScopesUsecase;
 import net.civeira.phylax.features.access.oauth.application.usecase.RegisterResourceUsecase;
-import net.civeira.phylax.features.oauth.rbac.application.spi.RbacStore;
 import net.civeira.phylax.features.oauth.rbac.domain.PropertyList;
 import net.civeira.phylax.features.oauth.rbac.domain.RoleGrant;
 import net.civeira.phylax.features.oauth.rbac.domain.ScopeList;
+import net.civeira.phylax.features.oauth.rbac.domain.gateway.RbacStoreGateway;
 
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
-public class RbacStoreImpl implements RbacStore {
+public class RbacStoreImpl implements RbacStoreGateway {
   private final RegisterResourceUsecase register;
   private final ExportResourceScopesUsecase exporter;
 

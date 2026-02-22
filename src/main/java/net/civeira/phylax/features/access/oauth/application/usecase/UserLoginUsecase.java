@@ -37,13 +37,13 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.
 import net.civeira.phylax.features.access.useridentity.domain.UserIdentity;
 import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdentityFilter;
 import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdentityReadRepositoryGateway;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.EventNotifierGateway;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationMode;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
 @Slf4j
 @ApplicationScoped

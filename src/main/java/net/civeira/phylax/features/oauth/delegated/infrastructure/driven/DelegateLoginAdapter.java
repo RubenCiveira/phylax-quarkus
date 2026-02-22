@@ -5,17 +5,17 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.UserData;
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegateLoginGateway;
+import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedAccessProviderGateway;
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegatedStoreGateway;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.UserData;
-import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAuthValidatorSpi;
 
 /**
  * Adapter that bridges the unified {@link DelegateLoginGateway} to the existing legacy
- * {@link DelegatedStoreGateway} (token persistence) and {@link DelegatedAccessAuthValidatorSpi}
+ * {@link DelegatedStoreGateway} (token persistence) and {@link DelegatedAccessProviderGateway}
  * (provider registry + username resolution).
  */
 @ApplicationScoped
@@ -23,7 +23,7 @@ import net.civeira.phylax.features.oauth.delegated.domain.spi.DelegatedAccessAut
 public class DelegateLoginAdapter implements DelegateLoginGateway {
 
   private final DelegatedStoreGateway store;
-  private final DelegatedAccessAuthValidatorSpi validator;
+  private final DelegatedAccessProviderGateway validator;
 
   @Override
   public Optional<TokenInfo> loadToken(AuthRequest request, String code) {

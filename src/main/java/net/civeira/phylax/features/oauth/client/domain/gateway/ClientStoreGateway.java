@@ -1,12 +1,10 @@
 package net.civeira.phylax.features.oauth.client.domain.gateway;
 
 import java.util.Optional;
-
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
 /**
- * Domain port for loading OAuth client data. Supersedes
- * {@link net.civeira.phylax.features.oauth.client.application.spi.ClientRetrieveSpi}.
+ * Domain port for loading OAuth client data.
  */
 public interface ClientStoreGateway {
 

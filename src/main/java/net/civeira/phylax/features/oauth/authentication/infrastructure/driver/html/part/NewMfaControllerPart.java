@@ -11,21 +11,21 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
-import net.civeira.phylax.features.oauth.mfa.domain.model.PublicLoginMfaBuildResponse;
+import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class NewMfaControllerPart {
   private final SecureHtmlBuilder securer;
-  private final DecoratePageSpi decorator;
+  private final DecoratePageGateway decorator;
   private final UserMfa userMfa;
 
   public AuthenticationChallege getChallenge() {

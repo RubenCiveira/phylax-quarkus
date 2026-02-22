@@ -7,12 +7,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.usecase.VerifyRelayingPartyUsecase;
-import net.civeira.phylax.features.oauth.rbac.application.spi.PartyVerifier;
+import net.civeira.phylax.features.oauth.rbac.domain.gateway.PartyVerifierGateway;
 
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
-public class PartyVerifierImpl implements PartyVerifier {
+public class PartyVerifierImpl implements PartyVerifierGateway {
   private final VerifyRelayingPartyUsecase verifier;
 
   @Override

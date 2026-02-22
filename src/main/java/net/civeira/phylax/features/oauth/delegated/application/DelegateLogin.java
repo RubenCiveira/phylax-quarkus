@@ -6,15 +6,15 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedLoginEndpoint;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.RequestInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.ResponseInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.UserData;
 import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegateLoginGateway;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.RequestInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.ResponseInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider.UserData;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedLoginEndpoint;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedRequestDetails;
 
 @ApplicationScoped
 @RequiredArgsConstructor

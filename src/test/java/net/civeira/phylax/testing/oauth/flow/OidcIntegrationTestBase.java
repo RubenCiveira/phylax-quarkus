@@ -12,7 +12,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.Challenge;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
-import net.civeira.phylax.features.oauth.token.domain.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.testing.oauth.alt.FixedClientStoreGateway;
 import net.civeira.phylax.testing.oauth.alt.FixedSessionStore;
 import net.civeira.phylax.testing.oauth.alt.FixedTemporalKeysGateway;
@@ -22,6 +22,7 @@ import net.civeira.phylax.testing.oauth.scenario.ScenarioChangePasswordGateway;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioConsentGateway;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioLoginGateway;
 import net.civeira.phylax.testing.oauth.scenario.ScenarioMfaGateway;
+import net.civeira.phylax.testing.oauth.scenario.ScenarioScopeConsentGateway;
 
 @QuarkusTest
 public abstract class OidcIntegrationTestBase {
@@ -42,6 +43,8 @@ public abstract class OidcIntegrationTestBase {
   @Inject
   ScenarioChangePasswordGateway changePasswordGateway;
   @Inject
+  ScenarioScopeConsentGateway scopeConsentGateway;
+  @Inject
   TokenSigner tokenSigner;
   @Inject
   JwtTokenBuilder tokenBuilder;
@@ -55,6 +58,7 @@ public abstract class OidcIntegrationTestBase {
     consentGateway.reset();
     mfaGateway.reset();
     changePasswordGateway.reset();
+    scopeConsentGateway.reset();
   }
 
   protected Map<String, Object> decodeToken(String token) {

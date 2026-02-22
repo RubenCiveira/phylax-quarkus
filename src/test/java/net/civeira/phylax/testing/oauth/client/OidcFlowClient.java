@@ -59,6 +59,19 @@ public class OidcFlowClient {
         .post("/oauth/openid/" + tenant + "/auth");
   }
 
+  public Response submitScopeConsent(String tenant, String preSessionCookie) {
+    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "scope_consent")
+        .formParam("csid", OidcTestFixtures.CSID)
+        .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
+        .post("/oauth/openid/" + tenant + "/auth");
+  }
+
+  public Response submitDenyScopeConsent(String tenant, String preSessionCookie) {
+    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "start")
+        .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
+        .post("/oauth/openid/" + tenant + "/auth");
+  }
+
   public Response submitNewPass(String tenant, String oldPass, String newPass,
       String preSessionCookie) {
     return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "new_pass")

@@ -16,9 +16,9 @@ import javax.sql.DataSource;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.key.domain.KeyInformation;
+import net.civeira.phylax.features.oauth.key.domain.PublicKeyInformation;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenStoreGateway;
-import net.civeira.phylax.features.oauth.key.domain.model.KeyInformation;
-import net.civeira.phylax.features.oauth.key.domain.model.PublicKeyInformation;
 
 @ApplicationScoped
 @RequiredArgsConstructor

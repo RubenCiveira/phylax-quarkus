@@ -4,8 +4,8 @@ import java.util.Locale;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
-import net.civeira.phylax.features.oauth.mfa.domain.model.PublicLoginMfaBuildResponse;
 
 @ApplicationScoped
 @RequiredArgsConstructor

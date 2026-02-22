@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
-import net.civeira.phylax.features.oauth.session.domain.model.SessionInfo;
 
 /**
  * Application service for managing authenticated sessions. Wraps {@link SessionStoreGateway} to

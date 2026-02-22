@@ -45,13 +45,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.NotAllowedException;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
+import net.civeira.phylax.features.oauth.key.domain.Jks;
+import net.civeira.phylax.features.oauth.key.domain.JwkSet;
+import net.civeira.phylax.features.oauth.key.domain.KeyConfig;
+import net.civeira.phylax.features.oauth.key.domain.KeyInformation;
+import net.civeira.phylax.features.oauth.key.domain.PublicKeyInformation;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenStoreGateway;
-import net.civeira.phylax.features.oauth.key.domain.model.Jks;
-import net.civeira.phylax.features.oauth.key.domain.model.JwkSet;
-import net.civeira.phylax.features.oauth.key.domain.model.KeyConfig;
-import net.civeira.phylax.features.oauth.key.domain.model.KeyInformation;
-import net.civeira.phylax.features.oauth.key.domain.model.PublicKeyInformation;
 
 @Slf4j
 @ApplicationScoped

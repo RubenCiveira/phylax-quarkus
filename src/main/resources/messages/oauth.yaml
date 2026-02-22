@@ -52,3 +52,11 @@ consent:
   send: "Accept"
   back-label: "Deny"
   back-text: "{0}"
+
+scopeconsent:
+  title: "Authorize permissions"
+  error-format: "{0}"
+  help: "The application requests access to the following scopes"
+  accept: "Authorize"
+  back-label: "Deny"
+  back-text: "{0}"

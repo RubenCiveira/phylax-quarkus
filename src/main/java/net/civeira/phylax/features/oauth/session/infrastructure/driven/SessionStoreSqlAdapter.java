@@ -15,11 +15,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationMode;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
-import net.civeira.phylax.features.oauth.session.domain.model.SessionInfo;
 
 @RequestScoped
 @RequiredArgsConstructor

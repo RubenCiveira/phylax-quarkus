@@ -13,20 +13,20 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
-import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
 
 @RequestScoped
 @RequiredArgsConstructor
 public class RecoverControllerPart {
   private final SecureHtmlBuilder securer;
-  private final DecoratePageSpi decorator;
+  private final DecoratePageGateway decorator;
   private final ChangePasswordUsecase changePasswordUsecase;
   private final CurrentRequest current;
 

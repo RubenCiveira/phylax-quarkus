@@ -18,8 +18,8 @@ import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.key.domain.JwkSet;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
-import net.civeira.phylax.features.oauth.key.domain.model.JwkSet;
 
 @Path("")
 @RequestScoped

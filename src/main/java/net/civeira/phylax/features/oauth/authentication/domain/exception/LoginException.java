@@ -1,6 +1,6 @@
 package net.civeira.phylax.features.oauth.authentication.domain.exception;
 
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 
 /**
  * Domain exception that encapsulates a failed {@link AuthenticationResult}. Replaces the specific

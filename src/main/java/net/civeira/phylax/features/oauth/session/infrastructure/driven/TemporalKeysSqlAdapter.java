@@ -29,8 +29,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
-import net.civeira.phylax.features.oauth.session.domain.model.TemporalAuthCode;
 
 @Slf4j
 @RequestScoped

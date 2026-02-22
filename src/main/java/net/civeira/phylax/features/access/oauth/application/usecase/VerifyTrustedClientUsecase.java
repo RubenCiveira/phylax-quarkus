@@ -16,7 +16,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
 @Slf4j
 @ApplicationScoped

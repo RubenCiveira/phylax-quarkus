@@ -7,16 +7,16 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.usecase.UserLoginUsecase;
-import net.civeira.phylax.features.oauth.authentication.application.spi.UserLoginSpi;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.user.domain.gateway.LoginGateway;
 
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
-public class UserLoginInteractor implements UserLoginSpi {
+public class UserLoginInteractor implements LoginGateway {
   private final UserLoginUsecase login;
 
   @Override
@@ -31,9 +31,4 @@ public class UserLoginInteractor implements UserLoginSpi {
     return login.validateUserData(request, username, password, appkey, challenges);
   }
 
-  @Override
-  public AuthenticationResult validateMfa(AuthRequest request, String username, String secreto,
-      ClientDetails client, List<AuthenticationChallege> challenges) {
-    return login.validateMfa(request, username, secreto, client, challenges);
-  }
 }

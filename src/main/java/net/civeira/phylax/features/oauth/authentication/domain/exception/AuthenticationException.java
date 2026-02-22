@@ -3,7 +3,7 @@ package net.civeira.phylax.features.oauth.authentication.domain.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.token.domain.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 
 @Getter
 @RequiredArgsConstructor

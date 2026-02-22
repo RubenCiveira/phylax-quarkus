@@ -1,0 +1,8 @@
+package net.civeira.phylax.features.oauth.authentication.domain.gateway;
+
+import java.util.Locale;
+
+public interface DecoratePageGateway {
+
+  String getFullPage(String title, String innerContent, Locale locale);
+}

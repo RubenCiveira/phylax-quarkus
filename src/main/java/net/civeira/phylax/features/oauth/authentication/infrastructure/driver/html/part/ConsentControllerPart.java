@@ -11,13 +11,13 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.StepResult;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.ConsentUsecase;
 
 @RequestScoped
@@ -25,7 +25,7 @@ import net.civeira.phylax.features.oauth.user.application.ConsentUsecase;
 public class ConsentControllerPart {
   private final SecureHtmlBuilder securer;
   private final ConsentUsecase consentUsecase;
-  private final DecoratePageSpi decorator;
+  private final DecoratePageGateway decorator;
 
   public Response doPaintConsent(Locale locale, AuthRequest request, String user,
       NewCookie session) {

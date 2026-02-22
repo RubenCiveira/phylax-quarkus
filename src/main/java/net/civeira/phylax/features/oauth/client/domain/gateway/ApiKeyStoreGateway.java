@@ -1,8 +1,7 @@
 package net.civeira.phylax.features.oauth.client.domain.gateway;
 
 import java.util.Optional;
-
-import net.civeira.phylax.features.oauth.client.domain.model.ApiKeyData;
+import net.civeira.phylax.features.oauth.client.domain.ApiKeyData;
 
 /**
  * Domain port for API Key lookup.

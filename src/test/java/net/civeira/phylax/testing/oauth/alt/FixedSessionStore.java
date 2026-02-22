@@ -7,10 +7,10 @@ import java.util.concurrent.ConcurrentMap;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
-import net.civeira.phylax.features.oauth.session.domain.model.SessionInfo;
 
 @Alternative
 @Priority(1)

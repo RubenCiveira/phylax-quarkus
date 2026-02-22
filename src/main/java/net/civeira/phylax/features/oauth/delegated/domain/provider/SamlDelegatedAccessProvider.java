@@ -39,10 +39,10 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedProviderDescription;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
 
 @Slf4j
 @RequiredArgsConstructor

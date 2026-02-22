@@ -1,0 +1,20 @@
+package net.civeira.phylax.features.oauth.authentication.domain.exception;
+
+import java.util.List;
+
+import lombok.Getter;
+
+@Getter
+public class ClientScopeConsentRequiredException extends AuthenticationException {
+  private static final long serialVersionUID = 1L;
+
+  private final String clientId;
+  private final List<String> pendingScopes;
+
+  public ClientScopeConsentRequiredException(String tenant, String username, String clientId,
+      List<String> pendingScopes) {
+    super(tenant, username, "client scope consent required");
+    this.clientId = clientId;
+    this.pendingScopes = pendingScopes;
+  }
+}

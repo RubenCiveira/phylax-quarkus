@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
-import net.civeira.phylax.features.oauth.scopes.domain.model.ScopePermission;
 
 @ApplicationScoped
 @RequiredArgsConstructor

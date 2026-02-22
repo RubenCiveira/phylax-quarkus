@@ -42,16 +42,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
-import net.civeira.phylax.features.oauth.authentication.application.spi.DecoratePageSpi;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.ClientScopeConsentRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.ConsentRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.NewMfaRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.NewPasswordRequiredException;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationData;
-import net.civeira.phylax.features.oauth.authentication.domain.model.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.ConsentControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.DelegatedControllerPart;
@@ -59,17 +60,18 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewMfaControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewPassControllerPart;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.RecoverControllerPart;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.ScopeConsentControllerPart;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
-import net.civeira.phylax.features.oauth.client.domain.model.ClientDetails;
 import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.model.DelegatedProviderDescription;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
+import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
-import net.civeira.phylax.features.oauth.session.domain.model.SessionInfo;
-import net.civeira.phylax.features.oauth.session.domain.model.TemporalAuthCode;
-import net.civeira.phylax.features.oauth.token.domain.JwtTokenBuilder;
-import net.civeira.phylax.features.oauth.token.domain.model.IdToken;
+import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.token.domain.IdToken;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 @Slf4j
@@ -123,11 +125,12 @@ public class FrontAcessController {
 
   private final LoginUsecase loginUsecase;
   private final SecureHtmlBuilder securer;
-  private final DecoratePageSpi decorator;
+  private final DecoratePageGateway decorator;
 
   private final RecoverControllerPart recoverController;
   private final MfaControllerPart mfaController;
   private final ConsentControllerPart consentController;
+  private final ScopeConsentControllerPart scopeConsentController;
   private final NewPassControllerPart newPassController;
   private final NewMfaControllerPart newMfaController;
   private final DelegatedControllerPart delegatedController;
@@ -399,6 +402,8 @@ public class FrontAcessController {
             null == this.currentChallenge ? List.of() : this.currentChallenge.challenges));
     process = fillIfEmpty(process, () -> consentController.process(step, oUser, clientDetails,
         request, paramMap, this::revolve));
+    process = fillIfEmpty(process, () -> scopeConsentController.process(step, oUser, clientDetails,
+        request, paramMap, this::revolve));
     process = fillIfEmpty(process, () -> newPassController.process(step, oUser, clientDetails,
         request, paramMap, this::revolve));
     process = fillIfEmpty(process, () -> newMfaController.process(step, oUser, clientDetails,
@@ -580,6 +585,11 @@ public class FrontAcessController {
           FlowInfo.builder().chageller(consentController.getChallenge())
               .function(mfa -> consentController.doPaintConsent(mfa.getLocale(), mfa.getRequest(),
                   mfa.getUsername(), mfa.getSession()))
+              .build());
+      loginErrorMappers.put(ClientScopeConsentRequiredException.class,
+          FlowInfo.builder().chageller(scopeConsentController.getChallenge())
+              .function(f -> scopeConsentController.doPaintScopeConsentForm(f.getLocale(),
+                  f.getRequest(), f.getUsername(), f.getSession()))
               .build());
       loginErrorMappers.put(NewPasswordRequiredException.class,
           FlowInfo.builder().chageller(newPassController.getChallenge())
