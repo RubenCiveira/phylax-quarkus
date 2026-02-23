@@ -34,13 +34,6 @@ public class ScopesConsentAdapter implements ScopesConsentGateway {
   @Override
   public List<ScopePermission> pendingScopes(String tenant, String username, String clientId,
       List<String> scopes) {
-    System.err.println("=======");
-    System.err.println("=======");
-    System.err.println("=======");
-    System.err.println("\tScopes solicitados: " + scopes);
-    System.err.println("=======");
-    System.err.println("=======");
-    System.err.println("=======");
     return List.of();
   }
 
