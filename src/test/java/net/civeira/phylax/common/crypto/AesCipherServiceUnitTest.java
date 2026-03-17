@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.testing.mock.LoggerChecker;
 
 class AesCipherServiceUnitTest {

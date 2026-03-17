@@ -2,7 +2,6 @@
 package net.civeira.phylax.common.value.validation.validators;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 
 class BankAccountValidatorUnitTest {
@@ -19,7 +18,7 @@ class BankAccountValidatorUnitTest {
     assertFalse(validator.validate("ES79210@@813610123456789").isValid());
   }
 
-
+  
   @Test
   void shouldValidateValidIBAN() {
     BankAccountValidator validator = new BankAccountValidator(false, "Error");
@@ -43,7 +42,7 @@ class BankAccountValidatorUnitTest {
     BankAccountValidator validator = new BankAccountValidator(true, "Error");
     assertFalse(validator.validate("ES7921000813610123456789 INVALIDSWIFT").isValid());
   }
-
+  
   @Test
   void shouldInvalidateIBANWithoutSWIFTIfRequired() {
     BankAccountValidator validator = new BankAccountValidator(true, "Error");

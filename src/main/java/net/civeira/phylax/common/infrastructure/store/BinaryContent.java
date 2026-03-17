@@ -9,8 +9,8 @@ import lombok.Getter;
 /**
  * Represents a binary file or content stored in an input stream.
  * <p>
- * This class is designed to hold the binary content along with metadata such as content type, name,
- * and last modification timestamp.
+ * This class is designed to hold the binary content along with 
+ * metadata such as content type, name, and last modification timestamp.
  * </p>
  */
 @Getter

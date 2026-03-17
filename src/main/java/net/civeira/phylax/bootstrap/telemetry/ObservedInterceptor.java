@@ -2,7 +2,6 @@
 package net.civeira.phylax.bootstrap.telemetry;
 
 import java.lang.reflect.Method;
-
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.annotation.Priority;
@@ -26,8 +25,8 @@ public class ObservedInterceptor {
     if (observed == null) {
       return context.proceed();
     }
-    return TelemetryInterceptor.around(context, tracerInstance, SpanKind.INTERNAL, observed.value(),
-        observed.value());
+    return TelemetryInterceptor.around(context, tracerInstance, SpanKind.INTERNAL,
+        observed.value(), observed.value());
   }
 
   private Observed resolveObserved(final InvocationContext context) {

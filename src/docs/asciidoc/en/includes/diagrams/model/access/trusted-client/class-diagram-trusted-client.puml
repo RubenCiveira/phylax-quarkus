@@ -10,6 +10,7 @@ version:integer
 class access.TrustedClient{
 uid:string
 code:string
+allowAllScopes:boolean
 publicAllow:boolean
 secretOauth:string
 enabled:boolean

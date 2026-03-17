@@ -4,15 +4,15 @@ package net.civeira.phylax.common.infrastructure.sql;
 import java.sql.SQLException;
 
 /**
- * Exception thrown when a database operation violates a foreign key constraint due to the presence
- * of related child records.
+ * Exception thrown when a database operation violates a foreign key constraint
+ * due to the presence of related child records.
  * <p>
- * This typically occurs during a DELETE operation on a parent record that has dependent child
- * records and is prevented by a restrict or no-cascade delete policy.
+ * This typically occurs during a DELETE operation on a parent record that has
+ * dependent child records and is prevented by a restrict or no-cascade delete policy.
  * </p>
  * <p>
- * This is a domain-specific exception that wraps a {@link SQLException} and is intended to provide
- * clearer semantics for the business layer.
+ * This is a domain-specific exception that wraps a {@link SQLException} and is intended
+ * to provide clearer semantics for the business layer.
  * </p>
  */
 public class NotEmptyChildsException extends UncheckedSqlException {

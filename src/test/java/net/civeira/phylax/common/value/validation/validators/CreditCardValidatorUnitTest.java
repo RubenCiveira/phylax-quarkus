@@ -2,7 +2,6 @@
 package net.civeira.phylax.common.value.validation.validators;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 
 class CreditCardValidatorUnitTest {

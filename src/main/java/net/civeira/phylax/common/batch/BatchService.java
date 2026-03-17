@@ -86,7 +86,7 @@ public class BatchService {
           try {
             massiveOperationResult.setStatus(Status.PROCESSING);
             storage.save(taskUid, actor, progress);
-            task.run(massiveOperationResult, t -> {
+            task.run(massiveOperationResult, _ -> {
               storage.save(taskUid, actor, progress);
             }, plan.getParams());
             massiveOperationResult.setStatus(Status.FINISHED);

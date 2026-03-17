@@ -2,7 +2,6 @@
 package net.civeira.phylax.bootstrap.security.analyzers;
 
 import java.util.regex.Pattern;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.bootstrap.security.MaliciousInjectionRiskAnalyzer;
 

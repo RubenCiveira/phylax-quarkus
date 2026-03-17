@@ -4,13 +4,14 @@ package net.civeira.phylax.common.infrastructure.exceptionmapper;
 import java.util.List;
 import java.util.Locale;
 
+import net.civeira.phylax.common.exception.AbstractFailsException;
+
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.exception.AbstractFailsException;
 
 /**
  * Maps validation failures to HTTP 422 responses.

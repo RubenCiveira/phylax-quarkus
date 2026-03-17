@@ -2,7 +2,6 @@
 package net.civeira.phylax.common.value.validation.validators;
 
 import java.math.BigDecimal;
-
 import net.civeira.phylax.common.value.validation.ValidationResult;
 import net.civeira.phylax.common.value.validation.Validator;
 

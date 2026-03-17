@@ -3,9 +3,7 @@ package net.civeira.phylax.common.infrastructure.projection;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 

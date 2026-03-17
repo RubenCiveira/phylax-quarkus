@@ -69,7 +69,7 @@ public class BucketService {
     cleanExpiredEntries();
     // Update last-access on every call, not only on creation, so active IPs are never evicted
     lastAccessTime.put(ip, Instant.now().toEpochMilli());
-    return ipBucket.computeIfAbsent(ip, key -> createNewBucket());
+    return ipBucket.computeIfAbsent(ip, _ -> createNewBucket());
   }
 
   private String resolveClientIp(ContainerRequestContext requestContext) {

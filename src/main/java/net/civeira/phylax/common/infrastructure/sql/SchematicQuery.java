@@ -16,8 +16,7 @@ public class SchematicQuery {
   private final StringBuilder order = new StringBuilder();
   private final Map<String, String> set = new LinkedHashMap<>();
 
-  public SchematicQuery(SqlTemplate template, String type, String table,
-      AbstractSqlParametrized<?> parametrized) {
+  public SchematicQuery(SqlTemplate template, String type, String table, AbstractSqlParametrized<?> parametrized) {
     this.template = template;
     this.type = type;
     this.table = table;
@@ -27,10 +26,10 @@ public class SchematicQuery {
   public AbstractSqlParametrized<?> getParametrized() {
     return parametrized;
   }
-
+  
   public String buildQuery() {
     if (type.equals("SELECT")) {
-      String theTable = lock ? template.withTableLock(escape(table)) : escape(table);
+      String theTable = lock ? template.withTableLock( escape(table) ) : escape(table);
       String theQuery = "SELECT " + (select.length() > 0 ? select.substring(2) : " * ") + " FROM "
           + theTable + " " + (join.length() > 1 ? " JOIN " + join : "")
           + (where.length() > 1 ? " WHERE " + where.substring(5) : "")
@@ -108,7 +107,7 @@ public class SchematicQuery {
       parametrized.with(name, value);
     }
   }
-
+  
   public void forUpdate() {
     this.lock = true;
   }
@@ -116,7 +115,7 @@ public class SchematicQuery {
   public void forQuery() {
     this.lock = false;
   }
-
+  
   public void where(String field, SqlOperator operator, SqlParameterValue value) {
     where(null, field, operator, value);
   }

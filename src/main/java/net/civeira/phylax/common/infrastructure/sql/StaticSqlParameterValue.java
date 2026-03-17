@@ -31,8 +31,8 @@ import java.sql.SQLException;
   private final CustomAccepter accepter;
 
   /**
-   * Constructs a {@code StaticSqlParameterValue} using an object to describe the value. The
-   * {@code toString()} representation of the value is used for logging purposes.
+   * Constructs a {@code StaticSqlParameterValue} using an object to describe the value.
+   * The {@code toString()} representation of the value is used for logging purposes.
    *
    * @param value the value to describe
    * @param accepter the logic for applying this value to a prepared statement

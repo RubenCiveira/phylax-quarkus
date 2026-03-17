@@ -8,14 +8,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import net.civeira.phylax.common.value.validation.AbstractFail;
 import net.civeira.phylax.common.value.validation.AbstractFail.LocalizedFail;
 import net.civeira.phylax.common.value.validation.AbstractFail.LocalizedWrongValue;

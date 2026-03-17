@@ -54,7 +54,7 @@ public class RoleCacheGatewayAdapter implements RoleCacheGateway {
   public Optional<RoleCached> retrieve(final RoleFilter filter, final RoleCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at role cache for the key {}", key);
-    return cache.<String, RoleCached>get(key, k -> null).map(cached -> Optional.ofNullable(cached))
+    return cache.<String, RoleCached>get(key, _ -> null).map(cached -> Optional.ofNullable(cached))
         .await().indefinitely();
   }
 
@@ -71,7 +71,7 @@ public class RoleCacheGatewayAdapter implements RoleCacheGateway {
     cache.invalidate(key).await().indefinitely();
     return cache
         .<String, RoleCached>get(key,
-            k -> RoleCached.builder().since(OffsetDateTime.now()).value(roles).build())
+            _ -> RoleCached.builder().since(OffsetDateTime.now()).value(roles).build())
         .await().indefinitely();
   }
 

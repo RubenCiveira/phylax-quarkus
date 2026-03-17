@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -29,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -190,98 +188,98 @@ public class SqlResultSetUnitTest {
     assertEquals("typedValue", resultSet.getObject(1, String.class));
     assertEquals("typedValue", resultSet.getObject("col", String.class));
   }
-
+  
   @Test
   public void testBasicDelegatedColumnIndexAndLabelMethods() throws Exception {
-    when(mockResultSet.getString(1)).thenReturn("string-val");
-    assertEquals("string-val", resultSet.getString(1));
+      when(mockResultSet.getString(1)).thenReturn("string-val");
+      assertEquals("string-val", resultSet.getString(1));
 
-    when(mockResultSet.getBoolean(1)).thenReturn(true);
-    assertTrue(resultSet.getBoolean(1));
+      when(mockResultSet.getBoolean(1)).thenReturn(true);
+      assertTrue(resultSet.getBoolean(1));
 
-    when(mockResultSet.getByte(1)).thenReturn((byte) 5);
-    assertEquals(5, resultSet.getByte(1));
+      when(mockResultSet.getByte(1)).thenReturn((byte) 5);
+      assertEquals(5, resultSet.getByte(1));
 
-    when(mockResultSet.getShort(1)).thenReturn((short) 12);
-    assertEquals(12, resultSet.getShort(1));
+      when(mockResultSet.getShort(1)).thenReturn((short) 12);
+      assertEquals(12, resultSet.getShort(1));
 
-    when(mockResultSet.getInt(1)).thenReturn(42);
-    assertEquals(42, resultSet.getInt(1));
+      when(mockResultSet.getInt(1)).thenReturn(42);
+      assertEquals(42, resultSet.getInt(1));
 
-    when(mockResultSet.getLong(1)).thenReturn(1000L);
-    assertEquals(1000L, resultSet.getLong(1));
+      when(mockResultSet.getLong(1)).thenReturn(1000L);
+      assertEquals(1000L, resultSet.getLong(1));
 
-    when(mockResultSet.getFloat(1)).thenReturn(1.5f);
-    assertEquals(1.5f, resultSet.getFloat(1), 0.0001);
+      when(mockResultSet.getFloat(1)).thenReturn(1.5f);
+      assertEquals(1.5f, resultSet.getFloat(1), 0.0001);
 
-    when(mockResultSet.getDouble(1)).thenReturn(2.5d);
-    assertEquals(2.5d, resultSet.getDouble(1), 0.0001);
+      when(mockResultSet.getDouble(1)).thenReturn(2.5d);
+      assertEquals(2.5d, resultSet.getDouble(1), 0.0001);
 
-    byte[] bytes = new byte[] {1, 2, 3};
-    when(mockResultSet.getBytes(1)).thenReturn(bytes);
-    assertArrayEquals(bytes, resultSet.getBytes(1));
+      byte[] bytes = new byte[] {1, 2, 3};
+      when(mockResultSet.getBytes(1)).thenReturn(bytes);
+      assertArrayEquals(bytes, resultSet.getBytes(1));
 
-    Date date = new Date(System.currentTimeMillis());
-    when(mockResultSet.getDate(1)).thenReturn(date);
-    assertEquals(date, resultSet.getDate(1));
+      Date date = new Date(System.currentTimeMillis());
+      when(mockResultSet.getDate(1)).thenReturn(date);
+      assertEquals(date, resultSet.getDate(1));
 
-    Time time = new Time(System.currentTimeMillis());
-    when(mockResultSet.getTime(1)).thenReturn(time);
-    assertEquals(time, resultSet.getTime(1));
+      Time time = new Time(System.currentTimeMillis());
+      when(mockResultSet.getTime(1)).thenReturn(time);
+      assertEquals(time, resultSet.getTime(1));
 
-    Timestamp ts = new Timestamp(System.currentTimeMillis());
-    when(mockResultSet.getTimestamp(1)).thenReturn(ts);
-    assertEquals(ts, resultSet.getTimestamp(1));
+      Timestamp ts = new Timestamp(System.currentTimeMillis());
+      when(mockResultSet.getTimestamp(1)).thenReturn(ts);
+      assertEquals(ts, resultSet.getTimestamp(1));
 
-    InputStream ascii = mock(InputStream.class);
-    when(mockResultSet.getAsciiStream(1)).thenReturn(ascii);
-    assertEquals(ascii, resultSet.getAsciiStream(1));
+      InputStream ascii = mock(InputStream.class);
+      when(mockResultSet.getAsciiStream(1)).thenReturn(ascii);
+      assertEquals(ascii, resultSet.getAsciiStream(1));
 
-    InputStream binary = mock(InputStream.class);
-    when(mockResultSet.getBinaryStream(1)).thenReturn(binary);
-    assertEquals(binary, resultSet.getBinaryStream(1));
+      InputStream binary = mock(InputStream.class);
+      when(mockResultSet.getBinaryStream(1)).thenReturn(binary);
+      assertEquals(binary, resultSet.getBinaryStream(1));
 
-    // Label-based
-    when(mockResultSet.getString("col")).thenReturn("label-val");
-    assertEquals("label-val", resultSet.getString("col"));
+      // Label-based
+      when(mockResultSet.getString("col")).thenReturn("label-val");
+      assertEquals("label-val", resultSet.getString("col"));
 
-    when(mockResultSet.getBoolean("col")).thenReturn(false);
-    assertFalse(resultSet.getBoolean("col"));
+      when(mockResultSet.getBoolean("col")).thenReturn(false);
+      assertFalse(resultSet.getBoolean("col"));
 
-    when(mockResultSet.getByte("col")).thenReturn((byte) 10);
-    assertEquals(10, resultSet.getByte("col"));
+      when(mockResultSet.getByte("col")).thenReturn((byte) 10);
+      assertEquals(10, resultSet.getByte("col"));
 
-    when(mockResultSet.getShort("col")).thenReturn((short) 99);
-    assertEquals(99, resultSet.getShort("col"));
+      when(mockResultSet.getShort("col")).thenReturn((short) 99);
+      assertEquals(99, resultSet.getShort("col"));
 
-    when(mockResultSet.getInt("col")).thenReturn(7);
-    assertEquals(7, resultSet.getInt("col"));
+      when(mockResultSet.getInt("col")).thenReturn(7);
+      assertEquals(7, resultSet.getInt("col"));
 
-    when(mockResultSet.getLong("col")).thenReturn(9999L);
-    assertEquals(9999L, resultSet.getLong("col"));
+      when(mockResultSet.getLong("col")).thenReturn(9999L);
+      assertEquals(9999L, resultSet.getLong("col"));
 
-    when(mockResultSet.getFloat("col")).thenReturn(3.14f);
-    assertEquals(3.14f, resultSet.getFloat("col"), 0.0001);
+      when(mockResultSet.getFloat("col")).thenReturn(3.14f);
+      assertEquals(3.14f, resultSet.getFloat("col"), 0.0001);
 
-    when(mockResultSet.getDouble("col")).thenReturn(6.28d);
-    assertEquals(6.28d, resultSet.getDouble("col"), 0.0001);
+      when(mockResultSet.getDouble("col")).thenReturn(6.28d);
+      assertEquals(6.28d, resultSet.getDouble("col"), 0.0001);
 
-    when(mockResultSet.getBytes("col")).thenReturn(bytes);
-    assertArrayEquals(bytes, resultSet.getBytes("col"));
+      when(mockResultSet.getBytes("col")).thenReturn(bytes);
+      assertArrayEquals(bytes, resultSet.getBytes("col"));
 
-    when(mockResultSet.getDate("col")).thenReturn(date);
-    assertEquals(date, resultSet.getDate("col"));
+      when(mockResultSet.getDate("col")).thenReturn(date);
+      assertEquals(date, resultSet.getDate("col"));
 
-    when(mockResultSet.getTime("col")).thenReturn(time);
-    assertEquals(time, resultSet.getTime("col"));
+      when(mockResultSet.getTime("col")).thenReturn(time);
+      assertEquals(time, resultSet.getTime("col"));
 
-    when(mockResultSet.getTimestamp("col")).thenReturn(ts);
-    assertEquals(ts, resultSet.getTimestamp("col"));
+      when(mockResultSet.getTimestamp("col")).thenReturn(ts);
+      assertEquals(ts, resultSet.getTimestamp("col"));
 
-    when(mockResultSet.getAsciiStream("col")).thenReturn(ascii);
-    assertEquals(ascii, resultSet.getAsciiStream("col"));
+      when(mockResultSet.getAsciiStream("col")).thenReturn(ascii);
+      assertEquals(ascii, resultSet.getAsciiStream("col"));
 
-    when(mockResultSet.getBinaryStream("col")).thenReturn(binary);
-    assertEquals(binary, resultSet.getBinaryStream("col"));
+      when(mockResultSet.getBinaryStream("col")).thenReturn(binary);
+      assertEquals(binary, resultSet.getBinaryStream("col"));
   }
 }

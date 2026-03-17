@@ -2,7 +2,6 @@
 package net.civeira.phylax.common.batch;
 
 import java.util.function.BiConsumer;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

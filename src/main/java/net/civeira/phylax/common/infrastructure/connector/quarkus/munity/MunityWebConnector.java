@@ -5,14 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.opentelemetry.api.trace.Tracer;
-import io.smallrye.mutiny.Uni;
-import io.vertx.mutiny.core.Vertx;
-import io.vertx.mutiny.ext.web.client.WebClient;
 import net.civeira.phylax.common.infrastructure.connector.RemoteConnection;
 import net.civeira.phylax.common.infrastructure.connector.RemoteConnector;
 import net.civeira.phylax.common.infrastructure.connector.RemoteQuery;
 import net.civeira.phylax.common.infrastructure.connector.quarkus.munity.MunityWebQuery.Method;
+import io.opentelemetry.api.trace.Tracer;
+import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.core.Vertx;
+import io.vertx.mutiny.ext.web.client.WebClient;
 
 /**
  * Remote connector implementation backed by Mutiny WebClient.
@@ -110,7 +110,7 @@ public class MunityWebConnector implements RemoteConnector {
     if (request.size() == 1) {
       map(request.get(0)).await().indefinitely();
     } else if (!request.isEmpty()) {
-      Uni.combine().all().unis(map(request)).with(result -> "").await().indefinitely();
+      Uni.combine().all().unis(map(request)).with(_ -> "").await().indefinitely();
     }
   }
 

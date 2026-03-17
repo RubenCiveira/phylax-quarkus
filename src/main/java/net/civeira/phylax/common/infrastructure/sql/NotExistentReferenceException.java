@@ -4,15 +4,15 @@ package net.civeira.phylax.common.infrastructure.sql;
 import java.sql.SQLException;
 
 /**
- * Exception thrown when a database operation violates referential integrity due to referencing a
- * non-existent parent record.
+ * Exception thrown when a database operation violates referential integrity
+ * due to referencing a non-existent parent record.
  * <p>
- * This typically occurs during an INSERT or UPDATE operation where a foreign key refers to a parent
- * record that does not exist.
+ * This typically occurs during an INSERT or UPDATE operation where a foreign key
+ * refers to a parent record that does not exist.
  * </p>
  * <p>
- * This domain-specific exception wraps a {@link SQLException} and provides clearer semantics to the
- * business layer regarding referential integrity issues.
+ * This domain-specific exception wraps a {@link SQLException} and provides
+ * clearer semantics to the business layer regarding referential integrity issues.
  * </p>
  */
 public class NotExistentReferenceException extends UncheckedSqlException {

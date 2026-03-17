@@ -11,10 +11,10 @@ import lombok.Data;
 /**
  * Represents an audited operation with actor, entity, and tracing metadata.
  *
- * Each audit event captures who performed an action, when it happened, and what changed. The
- * structure is designed for storage and later inspection by administrators. It supports correlation
- * with traces and request context for debugging. Instances are typically persisted by
- * {@link AuditWriteService}.
+ * Each audit event captures who performed an action, when it happened, and what changed.
+ * The structure is designed for storage and later inspection by administrators.
+ * It supports correlation with traces and request context for debugging.
+ * Instances are typically persisted by {@link AuditWriteService}.
  */
 @Data
 @Builder

@@ -7,18 +7,19 @@ import java.util.stream.Stream;
 /**
  * Remote connector that builds and dispatches HTTP-like requests to external services.
  *
- * It exposes factory methods for GET, POST, PUT, PATCH, and DELETE style requests. Each method
- * returns a {@link RemoteQuery} used to set headers and parameters. Requests are executed by
- * passing {@link RemoteConnection} handles to {@link #send}. This abstraction decouples clients
- * from specific HTTP client implementations.
+ * It exposes factory methods for GET, POST, PUT, PATCH, and DELETE style requests.
+ * Each method returns a {@link RemoteQuery} used to set headers and parameters.
+ * Requests are executed by passing {@link RemoteConnection} handles to {@link #send}.
+ * This abstraction decouples clients from specific HTTP client implementations.
  */
 public interface RemoteConnector {
 
   /**
    * Builds a GET request for the specified target.
    *
-   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
-   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters.
+   * The request is not executed until passed to {@link #send}.
+   * This keeps request building separate from dispatching.
    *
    * @param target target URL or endpoint
    * @return a {@link RemoteQuery} representing the GET request
@@ -28,8 +29,9 @@ public interface RemoteConnector {
   /**
    * Builds a DELETE request for the specified target.
    *
-   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
-   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters.
+   * The request is not executed until passed to {@link #send}.
+   * This keeps request building separate from dispatching.
    *
    * @param target target URL or endpoint
    * @return a {@link RemoteQuery} representing the DELETE request
@@ -39,8 +41,9 @@ public interface RemoteConnector {
   /**
    * Builds a POST request for the specified target and payload.
    *
-   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
-   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters.
+   * The request is not executed until passed to {@link #send}.
+   * This keeps request building separate from dispatching.
    *
    * @param target target URL or endpoint
    * @param params request payload or body
@@ -51,8 +54,9 @@ public interface RemoteConnector {
   /**
    * Builds a PUT request for the specified target and payload.
    *
-   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
-   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters.
+   * The request is not executed until passed to {@link #send}.
+   * This keeps request building separate from dispatching.
    *
    * @param target target URL or endpoint
    * @param params request payload or body
@@ -63,8 +67,9 @@ public interface RemoteConnector {
   /**
    * Builds a PATCH request for the specified target and payload.
    *
-   * Use the returned {@link RemoteQuery} to configure headers and parameters. The request is not
-   * executed until passed to {@link #send}. This keeps request building separate from dispatching.
+   * Use the returned {@link RemoteQuery} to configure headers and parameters.
+   * The request is not executed until passed to {@link #send}.
+   * This keeps request building separate from dispatching.
    *
    * @param target target URL or endpoint
    * @param params request payload or body
@@ -75,8 +80,9 @@ public interface RemoteConnector {
   /**
    * Sends and waits for multiple remote connection requests.
    *
-   * This is a convenience method for executing several prepared requests. Implementations may
-   * dispatch in parallel or sequentially. The call returns when all requests have completed.
+   * This is a convenience method for executing several prepared requests.
+   * Implementations may dispatch in parallel or sequentially.
+   * The call returns when all requests have completed.
    *
    * @param request one or more {@link RemoteConnection} objects representing the requests
    */
@@ -85,8 +91,9 @@ public interface RemoteConnector {
   /**
    * Sends and waits for a batch of remote connection requests.
    *
-   * This overload accepts a list for easier dynamic request collection. Implementations may
-   * dispatch in parallel or sequentially. The call returns when all requests have completed.
+   * This overload accepts a list for easier dynamic request collection.
+   * Implementations may dispatch in parallel or sequentially.
+   * The call returns when all requests have completed.
    *
    * @param request list of {@link RemoteConnection} objects to be sent
    */
@@ -95,8 +102,9 @@ public interface RemoteConnector {
   /**
    * Sends and waits for a stream of remote connection requests.
    *
-   * This overload supports lazy request generation from a stream. Implementations may evaluate the
-   * stream eagerly or lazily. The call returns when all requests have completed.
+   * This overload supports lazy request generation from a stream.
+   * Implementations may evaluate the stream eagerly or lazily.
+   * The call returns when all requests have completed.
    *
    * @param request stream of {@link RemoteConnection} objects to be processed
    */

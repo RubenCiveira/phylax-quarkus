@@ -6,8 +6,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 /**
  * Represents a validation failure caused by a constraint violation.
  * <p>
- * This class extends {@link AbstractFail} and is used to indicate that a validation constraint has
- * been violated for a specific field.
+ * This class extends {@link AbstractFail} and is used to indicate that a validation
+ * constraint has been violated for a specific field.
  * </p>
  */
 @RegisterForReflection
@@ -16,21 +16,21 @@ public class ConstraintFail extends AbstractFail {
   /**
    * Creates a {@code ConstraintFail} instance with a validation code, field, and invalid value.
    *
-   * @param code The error code representing the type of constraint violation.
-   * @param field The name of the field that failed value.validation.
-   * @param wrongValue The incorrect value that caused the validation failure.
+   * @param code        The error code representing the type of constraint violation.
+   * @param field       The name of the field that failed value.validation.
+   * @param wrongValue  The incorrect value that caused the validation failure.
    */
   public ConstraintFail(String code, String field, Object wrongValue) {
     super(code, field, wrongValue);
   }
 
   /**
-   * Creates a {@code ConstraintFail} instance with a validation code, field, invalid value, and a
-   * specific error message.
+   * Creates a {@code ConstraintFail} instance with a validation code, field, invalid value,
+   * and a specific error message.
    *
-   * @param code The error code representing the type of constraint violation.
-   * @param field The name of the field that failed value.validation.
-   * @param wrongValue The incorrect value that caused the validation failure.
+   * @param code        The error code representing the type of constraint violation.
+   * @param field       The name of the field that failed value.validation.
+   * @param wrongValue  The incorrect value that caused the validation failure.
    * @param errorMessage A descriptive error message explaining the validation failure.
    */
   public ConstraintFail(String code, String field, Object wrongValue, String errorMessage) {

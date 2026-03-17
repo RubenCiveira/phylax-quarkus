@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Represents a collection of validation failures. This class provides methods to store, retrieve,
- * and check for validation errors.
+ * Represents a collection of validation failures.
+ * This class provides methods to store, retrieve, and check for validation errors.
  */
 public class AbstractFailList {
   private List<AbstractFail> fails = new ArrayList<>();
@@ -88,8 +88,7 @@ public class AbstractFailList {
    *
    * @param type The class type of the failure to check.
    * @param <T> The type of the failure extending {@link AbstractFail}.
-   * @return {@code true} if any failure in the list matches the given type, otherwise
-   *         {@code false}.
+   * @return {@code true} if any failure in the list matches the given type, otherwise {@code false}.
    */
   public <T extends AbstractFail> boolean includeViolation(Class<T> type) {
     return fails.stream().anyMatch(fail -> type.isAssignableFrom(fail.getClass()));
@@ -99,8 +98,7 @@ public class AbstractFailList {
    * Checks if the list contains a failure with a specific error code.
    *
    * @param code The error code to search for.
-   * @return {@code true} if any failure in the list has the specified code, otherwise
-   *         {@code false}.
+   * @return {@code true} if any failure in the list has the specified code, otherwise {@code false}.
    */
   public boolean includeCode(String code) {
     return fails.stream().anyMatch(fail -> code.equals(fail.getCode()));

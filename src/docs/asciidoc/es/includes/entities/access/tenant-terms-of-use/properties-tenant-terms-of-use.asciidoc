@@ -3,6 +3,8 @@ Uid* (string)::
 A number to identify the db record
 Tenant* (xref:#entidad-tenant[Tenant])::
 La cuenta a la que pertenece
+Relying party (xref:#entidad-relying-party[RelyingParty])::
+La applicación a tener en cuenta
 Text* (blob)::
 El text de tenant terms of use
 Enabled* (boolean)::

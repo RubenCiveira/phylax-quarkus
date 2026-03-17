@@ -2,7 +2,6 @@
 package net.civeira.phylax.common.infrastructure.sql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
 
 /**

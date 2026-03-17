@@ -55,7 +55,7 @@ public class ApiKeyClientCacheGatewayAdapter implements ApiKeyClientCacheGateway
       final ApiKeyClientCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at apiKeyClient cache for the key {}", key);
-    return cache.<String, ApiKeyClientCached>get(key, k -> null)
+    return cache.<String, ApiKeyClientCached>get(key, _ -> null)
         .map(cached -> Optional.ofNullable(cached)).await().indefinitely();
   }
 
@@ -71,7 +71,7 @@ public class ApiKeyClientCacheGatewayAdapter implements ApiKeyClientCacheGateway
     String key = key(filter, cursor);
     cache.invalidate(key).await().indefinitely();
     return cache.<String, ApiKeyClientCached>get(key,
-        k -> ApiKeyClientCached.builder().since(OffsetDateTime.now()).value(apiKeyClients).build())
+        _ -> ApiKeyClientCached.builder().since(OffsetDateTime.now()).value(apiKeyClients).build())
         .await().indefinitely();
   }
 

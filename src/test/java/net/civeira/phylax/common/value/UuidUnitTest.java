@@ -6,12 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mockStatic;
-
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-
 import net.civeira.phylax.common.value.Uuid.ClockProvider;
 
 class UuidUnitTest {

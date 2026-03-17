@@ -24,8 +24,7 @@ public class IPAddressValidator implements Validator<String> {
   private final String errorMessage;
 
   /**
-   * Constructs an IPAddressValidator that validates only the IP format without subnet
-   * value.validation.
+   * Constructs an IPAddressValidator that validates only the IP format without subnet value.validation.
    *
    * @param ipVersion The IP version to validate (IPv4, IPv6, or both).
    * @param errorMessage The error message returned if validation fails.

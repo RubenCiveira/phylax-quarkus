@@ -4,10 +4,8 @@ package net.civeira.phylax.bootstrap.telemetry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.jboss.logging.Logger;
 import org.jboss.logging.MDC;
-
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -15,8 +13,7 @@ import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-@IfBuildProperty(name = "quarkus.otel.exporter.otlp.traces.endpoint", stringValue = "",
-    enableIfMissing = true)
+@IfBuildProperty(name = "quarkus.otel.exporter.otlp.traces.endpoint", stringValue = "", enableIfMissing = true)
 public class LoggingSpanExporter implements SpanExporter {
 
   private static final Logger LOGGER = Logger.getLogger("traces");

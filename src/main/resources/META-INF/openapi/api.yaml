@@ -47,14 +47,6 @@ tags:
     description: Audit operations for changes on trusted client
   - name: trusted-client-acl
     description: Access control for trusted client
-  - name: user-identity
-    description: user-identity
-  - name: user-identity-batch
-    description: Massive operations for user identity
-  - name: user-identity-audit
-    description: Audit operations for changes on user identity
-  - name: user-identity-acl
-    description: Access control for user identity
   - name: tenant-config
     description: tenant-config
   - name: tenant-config-batch
@@ -87,6 +79,14 @@ tags:
     description: Audit operations for changes on tenant terms of use
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
+  - name: client-identity
+    description: client-identity
+  - name: client-identity-batch
+    description: Massive operations for client identity
+  - name: client-identity-audit
+    description: Audit operations for changes on client identity
+  - name: client-identity-acl
+    description: Access control for client identity
   - name: user
     description: user
   - name: user-batch
@@ -95,6 +95,14 @@ tags:
     description: Audit operations for changes on user
   - name: user-acl
     description: Access control for user
+  - name: platform-identity
+    description: platform-identity
+  - name: platform-identity-batch
+    description: Massive operations for platform identity
+  - name: platform-identity-audit
+    description: Audit operations for changes on platform identity
+  - name: platform-identity-acl
+    description: Access control for platform identity
   - name: tenant
     description: tenant
   - name: tenant-batch
@@ -1373,376 +1381,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/identity:
-    get:
-      tags:
-        - user-identity
-      summary: List of user identity
-      operationId: user-identity-api-list
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: limit
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserIdentityApiDtoList'
-    post:
-      tags:
-        - user-identity
-      summary: Create a new user identity
-      operationId: user-identity-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserIdentityApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserIdentityApiDto'
-    delete:
-      tags:
-        - user-identity-batch
-      summary: Delete a colection of user identity by filter
-      operationId: user-identity-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/identity/{uid}:
-    get:
-      tags:
-        - user-identity
-      summary: Retrive on  user identity by their uid
-      operationId: user-identity-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserIdentityApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - user-identity
-      summary: Update a user identity by their uid
-      operationId: user-identity-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserIdentityApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserIdentityApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - user-identity
-      summary: Delete a  user identity by their uid
-      operationId: user-identity-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/identity/~/delete-status/{uid}:
-    get:
-      tags:
-        - user-identity-batch
-      summary: Query the result of an massive delete
-      operationId: user-identity-api-batch-delete-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/identity/-/audit/entity/{uid}:
-    get:
-      tags:
-        - user-identity-audit
-      summary: Update a user identity by their uid
-      operationId: user-identity-api-entity-audit
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/identity/-/audit/actor/{actor}/{from}/{to}:
-    get:
-      tags:
-        - user-identity-audit
-      summary: Update a user identity by their uid
-      operationId: user-identity-api-actor-audit
-      parameters:
-        - name: actor
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-        - name: from
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/me/acl/access/identity:
-    get:
-      tags:
-        - user-identity-acl
-      summary: Check for allow permissions for the current user on user identity
-      operationId: user-identity-api-generic-acl
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserIdentityGenericAcl'
-  /api/me/acl/access/identity/{uid}:
-    get:
-      tags:
-        - user-identity-acl
-      summary: Check for allow permissions for the current user on user identity by their uid
-      operationId: user-identity-api-contextual-acl
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserIdentitySpecificAcl'
         '404':
           description: The item dont exists
   /api/access/tenants-config:
@@ -3132,6 +2770,22 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
         - name: limit
           in: query
           description: The maximun number of results
@@ -3200,6 +2854,22 @@ paths:
         - name: tenants
           in: query
           description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
           required: false
           schema:
             type: array
@@ -3556,6 +3226,22 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
       responses:
         '200':
           description: OK
@@ -3624,6 +3310,22 @@ paths:
               type: string
           style: form
           explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
       responses:
         '200':
           description: OK
@@ -3651,6 +3353,376 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/client-identity:
+    get:
+      tags:
+        - client-identity
+      summary: List of client identity
+      operationId: client-identity-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentityApiDtoList'
+    post:
+      tags:
+        - client-identity
+      summary: Create a new client identity
+      operationId: client-identity-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientIdentityApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentityApiDto'
+    delete:
+      tags:
+        - client-identity-batch
+      summary: Delete a colection of client identity by filter
+      operationId: client-identity-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/client-identity/{uid}:
+    get:
+      tags:
+        - client-identity
+      summary: Retrive on  client identity by their uid
+      operationId: client-identity-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentityApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - client-identity
+      summary: Update a client identity by their uid
+      operationId: client-identity-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientIdentityApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentityApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - client-identity
+      summary: Delete a  client identity by their uid
+      operationId: client-identity-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/client-identity/~/delete-status/{uid}:
+    get:
+      tags:
+        - client-identity-batch
+      summary: Query the result of an massive delete
+      operationId: client-identity-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/client-identity/-/audit/entity/{uid}:
+    get:
+      tags:
+        - client-identity-audit
+      summary: Update a client identity by their uid
+      operationId: client-identity-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/client-identity/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - client-identity-audit
+      summary: Update a client identity by their uid
+      operationId: client-identity-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/client-identity:
+    get:
+      tags:
+        - client-identity-acl
+      summary: Check for allow permissions for the current user on client identity
+      operationId: client-identity-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentityGenericAcl'
+  /api/me/acl/access/client-identity/{uid}:
+    get:
+      tags:
+        - client-identity-acl
+      summary: Check for allow permissions for the current user on client identity by their uid
+      operationId: client-identity-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentitySpecificAcl'
         '404':
           description: The item dont exists
   /api/access/users:
@@ -4461,6 +4533,376 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/platform-identity:
+    get:
+      tags:
+        - platform-identity
+      summary: List of platform identity
+      operationId: platform-identity-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformIdentityApiDtoList'
+    post:
+      tags:
+        - platform-identity
+      summary: Create a new platform identity
+      operationId: platform-identity-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformIdentityApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformIdentityApiDto'
+    delete:
+      tags:
+        - platform-identity-batch
+      summary: Delete a colection of platform identity by filter
+      operationId: platform-identity-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/platform-identity/{uid}:
+    get:
+      tags:
+        - platform-identity
+      summary: Retrive on  platform identity by their uid
+      operationId: platform-identity-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformIdentityApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - platform-identity
+      summary: Update a platform identity by their uid
+      operationId: platform-identity-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformIdentityApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformIdentityApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - platform-identity
+      summary: Delete a  platform identity by their uid
+      operationId: platform-identity-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/platform-identity/~/delete-status/{uid}:
+    get:
+      tags:
+        - platform-identity-batch
+      summary: Query the result of an massive delete
+      operationId: platform-identity-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/platform-identity/-/audit/entity/{uid}:
+    get:
+      tags:
+        - platform-identity-audit
+      summary: Update a platform identity by their uid
+      operationId: platform-identity-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/platform-identity/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - platform-identity-audit
+      summary: Update a platform identity by their uid
+      operationId: platform-identity-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/platform-identity:
+    get:
+      tags:
+        - platform-identity-acl
+      summary: Check for allow permissions for the current user on platform identity
+      operationId: platform-identity-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformIdentityGenericAcl'
+  /api/me/acl/access/platform-identity/{uid}:
+    get:
+      tags:
+        - platform-identity-acl
+      summary: Check for allow permissions for the current user on platform identity by their uid
+      operationId: platform-identity-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformIdentitySpecificAcl'
         '404':
           description: The item dont exists
   /api/access/tenants:
@@ -5336,6 +5778,9 @@ components:
         code:
           description: El código identificativo de la aplicación
           type: string
+        allowAllScopes:
+          description: El allow all scopes de trusted client
+          type: boolean
         publicAllow:
           description: If true, users can use these client to access with public code flow
           type: boolean
@@ -5429,153 +5874,6 @@ components:
         - enable
         - disable
     TrustedClientAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
-    UserApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/users"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - user
-    TrustedClientApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/trusted-clients"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - user
-    RoleApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/roles"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - role
-    RolesApiDto:
-      type: object
-      description: user-identity-role
-      properties:
-        uid:
-          description: A uid string to identify the entity
-          type: string
-        role:
-          $ref: '#/components/schemas/RoleApiRef'
-        version:
-          description: Campo con el número de version de user identity role para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    UserIdentityApiDto:
-      type: object
-      description: user-identity
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        user:
-          $ref: '#/components/schemas/UserApiRef'
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        trustedClient:
-          $ref: '#/components/schemas/TrustedClientApiRef'
-        roles:
-          description: El roles de user identity
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesApiDto'
-        version:
-          description: Campo con el número de version de user identity para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    UserIdentityApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserIdentityApiDto'
-    UserIdentityGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/UserIdentityAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/UserIdentityAclFields'
-    UserIdentitySpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/UserIdentityAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/UserIdentityAclFields'
-    UserIdentityAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - list
-    UserIdentityAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-    UserIdentityAclFields:
       type: object
       properties:
         noEditables:
@@ -5961,6 +6259,8 @@ components:
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
+        relyingParty:
+          $ref: '#/components/schemas/RelyingPartyApiRef'
         text:
           description: El text de tenant terms of use
           type: string
@@ -6056,6 +6356,125 @@ components:
         - enable
         - disable
     TenantTermsOfUseAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    UserApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/users"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - user
+    TrustedClientApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/trusted-clients"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - user
+    ClientIdentityApiDto:
+      type: object
+      description: client-identity
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        user:
+          $ref: '#/components/schemas/UserApiRef'
+        relyingParty:
+          $ref: '#/components/schemas/RelyingPartyApiRef'
+        trustedClient:
+          $ref: '#/components/schemas/TrustedClientApiRef'
+        roles:
+          description: El roles de client identity
+          type: string
+        version:
+          description: Campo con el número de version de client identity para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ClientIdentityApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientIdentityApiDto'
+    ClientIdentityGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ClientIdentityAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ClientIdentityAclFields'
+    ClientIdentitySpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ClientIdentityAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ClientIdentityAclFields'
+    ClientIdentityAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    ClientIdentityAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    ClientIdentityAclFields:
       type: object
       properties:
         noEditables:
@@ -6208,6 +6627,127 @@ components:
         - enable
         - unlock
     UserAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    RoleApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/roles"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - role
+    RolesApiDto:
+      type: object
+      description: platform-identity-role
+      properties:
+        uid:
+          description: A uid string to identify the entity
+          type: string
+        role:
+          $ref: '#/components/schemas/RoleApiRef'
+        version:
+          description: Campo con el número de version de platform identity role para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    PlatformIdentityApiDto:
+      type: object
+      description: platform-identity
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        user:
+          $ref: '#/components/schemas/UserApiRef'
+        relyingParty:
+          $ref: '#/components/schemas/RelyingPartyApiRef'
+        trustedClient:
+          $ref: '#/components/schemas/TrustedClientApiRef'
+        roles:
+          description: El roles de platform identity
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesApiDto'
+        version:
+          description: Campo con el número de version de platform identity para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    PlatformIdentityApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformIdentityApiDto'
+    PlatformIdentityGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/PlatformIdentityAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/PlatformIdentityAclFields'
+    PlatformIdentitySpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/PlatformIdentityAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/PlatformIdentityAclFields'
+    PlatformIdentityAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    PlatformIdentityAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    PlatformIdentityAclFields:
       type: object
       properties:
         noEditables:

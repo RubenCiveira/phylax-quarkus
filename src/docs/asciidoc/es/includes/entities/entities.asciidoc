@@ -20,6 +20,9 @@ include::../diagrams/model/access/package-diagram.puml[]
 :leveloffset: +2
 
 include::access/api-key-client/entity-api-key-client.asciidoc[]
+include::access/client-identity/entity-client-identity.asciidoc[]
+include::access/platform-identity/entity-platform-identity.asciidoc[]
+include::access/platform-identity-role/entity-platform-identity-role.asciidoc[]
 include::access/relying-party/entity-relying-party.asciidoc[]
 include::access/role/entity-role.asciidoc[]
 include::access/tenant/entity-tenant.asciidoc[]
@@ -31,8 +34,6 @@ include::access/trusted-client-allowed-redirect/entity-trusted-client-allowed-re
 include::access/user/entity-user.asciidoc[]
 include::access/user-accepted-termns-of-use/entity-user-accepted-termns-of-use.asciidoc[]
 include::access/user-access-temporal-code/entity-user-access-temporal-code.asciidoc[]
-include::access/user-identity/entity-user-identity.asciidoc[]
-include::access/user-identity-role/entity-user-identity-role.asciidoc[]
 
 :leveloffset: -2
 

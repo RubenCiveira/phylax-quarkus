@@ -2,8 +2,8 @@
 package net.civeira.phylax.common.infrastructure.sql;
 
 /**
- * Represents SQL operators used for building query conditions. Each operator includes a SQL symbol
- * and an optional method to wrap parameters.
+ * Represents SQL operators used for building query conditions.
+ * Each operator includes a SQL symbol and an optional method to wrap parameters.
  */
 public enum SqlOperator {
   /** Equal operator (=) */
@@ -11,7 +11,7 @@ public enum SqlOperator {
 
   /** Not equal operator (!=) */
   NE("!=", null),
-
+  
   /** Greater than operator (>) */
   GT(">", null),
 
@@ -40,10 +40,10 @@ public enum SqlOperator {
    * The SQL symbol or keyword representing the operator.
    */
   /* default */ final String value;
-
+  
   /**
-   * Optional method name to wrap the parameter when formatting. If null, the parameter is used
-   * directly.
+   * Optional method name to wrap the parameter when formatting.
+   * If null, the parameter is used directly.
    */
   /* default */ final String method;
 
@@ -59,8 +59,8 @@ public enum SqlOperator {
   }
 
   /**
-   * Formats the input parameter for this SQL operator. If a method is specified, wraps the
-   * parameter using that method.
+   * Formats the input parameter for this SQL operator.
+   * If a method is specified, wraps the parameter using that method.
    *
    * @param param the parameter to be formatted
    * @return the formatted SQL string with operator and parameter

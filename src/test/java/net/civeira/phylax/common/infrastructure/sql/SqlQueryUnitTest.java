@@ -12,7 +12,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +50,7 @@ public class SqlQueryUnitTest {
   public void testForQueryDisablesLock() {
     SqlQuery<String> query = new SqlQuery<>(mockTemplate, baseSql);
     query = query.forUpdate().forQuery();
-
+    
     query.query(mockConverter);
 
     verify(mockTemplate, never()).sqlWithQueryLock(anyString());

@@ -19,6 +19,20 @@ delete()
 enable()
 disable()
 }
+class access.RelyingParty{
+uid:string
+code:string
+apiKey:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
 class access.TenantTermsOfUse{
 uid:string
 text:blob
@@ -35,6 +49,7 @@ enable()
 disable()
 }
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant
+access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

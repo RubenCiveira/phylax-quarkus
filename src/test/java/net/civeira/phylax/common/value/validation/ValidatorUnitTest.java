@@ -28,7 +28,7 @@ class ValidatorUnitTest {
     MockValidator one = new MockValidator(true);
     MockValidator two = new MockValidator(false);
     Validator<String> combinedValidator = one.and(two);
-
+    
     ValidationResult result = combinedValidator.validate("test");
 
     assertFalse(result.isValid(), "El resultado debería ser inválido");
@@ -38,15 +38,15 @@ class ValidatorUnitTest {
     MockValidator one2 = new MockValidator(true);
     MockValidator two2 = new MockValidator(true);
     Validator<String> rightCombinedValidator = one2.and(two2);
-
+    
     ValidationResult trueResult = rightCombinedValidator.validate("test");
     assertTrue(trueResult.isValid(), "El resultado debería ser válido");
     assertTrue(trueResult.getErrors().isEmpty(), "La lista de errores debería estar vacía");
-
+    
     MockValidator one3 = new MockValidator(false);
     MockValidator two3 = new MockValidator(true);
     Validator<String> alsoWrongCombinedValidator = one3.and(two3);
-
+    
     ValidationResult result3 = alsoWrongCombinedValidator.validate("test");
     assertFalse(result3.isValid(), "El resultado debería ser inválido");
     assertEquals(1, result3.getErrors().size(), "Debe haber un error registrado");
@@ -72,7 +72,7 @@ class ValidatorUnitTest {
 
     assertFalse(result2.isValid(), "El resultado debería ser inválido");
     assertEquals(2, result2.getErrors().size(), "Debe haber dos errores");
-
+    
     MockValidator one3 = new MockValidator(false);
     MockValidator two3 = new MockValidator(true);
 
@@ -98,10 +98,10 @@ class ValidatorUnitTest {
     assertTrue(resultFalse.isValid(), "El resultado debería ser valido");
     assertTrue(resultFalse.getErrors().isEmpty(), "Debe haber un error registrado");
   }
-
+  
   public static class MockValidator implements Validator<String> {
     private final boolean response;
-
+    
     public MockValidator(boolean response) {
       super();
       this.response = response;

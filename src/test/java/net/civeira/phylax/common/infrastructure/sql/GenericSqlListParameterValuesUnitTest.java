@@ -4,10 +4,8 @@ package net.civeira.phylax.common.infrastructure.sql;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
 import org.junit.jupiter.api.Test;
 
 /**

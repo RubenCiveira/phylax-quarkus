@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -15,7 +14,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 class SqlListParameterValueUnitTest {
@@ -193,7 +191,7 @@ class SqlListParameterValueUnitTest {
     verify(ps).setTimestamp(1, Timestamp.valueOf(dt1));
     verify(ps).setTimestamp(2, Timestamp.valueOf(dt2));
   }
-
+  
   @Test
   void testStringsFromList() throws SQLException {
     SqlListParameterValue param = SqlListParameterValue.strings(List.of("x", "y"));
@@ -226,43 +224,44 @@ class SqlListParameterValueUnitTest {
 
   @Test
   void testBigDecimalsFromList() throws SQLException {
-    SqlListParameterValue param =
-        SqlListParameterValue.bigDecimals(List.of(new BigDecimal("1.1"), new BigDecimal("2.2")));
+    SqlListParameterValue param = SqlListParameterValue.bigDecimals(
+        List.of(new BigDecimal("1.1"), new BigDecimal("2.2")));
     assertEquals(2, param.size());
   }
 
   @Test
   void testDatesFromList() throws SQLException {
-    SqlListParameterValue param = SqlListParameterValue
-        .dates(List.of(Date.valueOf("2023-01-01"), Date.valueOf("2023-12-31")));
+    SqlListParameterValue param = SqlListParameterValue.dates(
+        List.of(Date.valueOf("2023-01-01"), Date.valueOf("2023-12-31")));
     assertEquals(2, param.size());
   }
 
   @Test
   void testTimesFromList() throws SQLException {
-    SqlListParameterValue param =
-        SqlListParameterValue.times(List.of(Time.valueOf("10:00:00"), Time.valueOf("12:00:00")));
+    SqlListParameterValue param = SqlListParameterValue.times(
+        List.of(Time.valueOf("10:00:00"), Time.valueOf("12:00:00")));
     assertEquals(2, param.size());
   }
 
   @Test
   void testTimestampsFromList() throws SQLException {
-    SqlListParameterValue param = SqlListParameterValue.timestamps(List
-        .of(Timestamp.valueOf("2023-01-01 10:00:00"), Timestamp.valueOf("2023-01-01 12:00:00")));
+    SqlListParameterValue param = SqlListParameterValue.timestamps(
+        List.of(Timestamp.valueOf("2023-01-01 10:00:00"), Timestamp.valueOf("2023-01-01 12:00:00")));
     assertEquals(2, param.size());
   }
 
   @Test
   void testLocalDatesFromList() throws SQLException {
-    SqlParameterValue param = SqlListParameterValue
-        .localdates(List.of(LocalDate.of(2023, 1, 1), LocalDate.of(2024, 1, 1)));
+    SqlParameterValue param = SqlListParameterValue.localdates(
+        List.of(LocalDate.of(2023, 1, 1), LocalDate.of(2024, 1, 1)));
     assertNotNull(param);
   }
 
   @Test
   void testLocalDateTimesFromList() throws SQLException {
     SqlParameterValue param = SqlListParameterValue.localdatetimes(
-        List.of(LocalDateTime.of(2023, 1, 1, 10, 0), LocalDateTime.of(2023, 1, 2, 12, 0)));
+        List.of(LocalDateTime.of(2023, 1, 1, 10, 0),
+                LocalDateTime.of(2023, 1, 2, 12, 0)));
     assertNotNull(param);
   }
 

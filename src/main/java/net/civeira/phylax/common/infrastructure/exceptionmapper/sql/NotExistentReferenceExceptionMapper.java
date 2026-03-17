@@ -4,11 +4,12 @@ package net.civeira.phylax.common.infrastructure.exceptionmapper.sql;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.civeira.phylax.common.infrastructure.sql.NotExistentReferenceException;
+
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.infrastructure.sql.NotExistentReferenceException;
 
 /**
  * Maps missing-reference errors to HTTP 422 responses.

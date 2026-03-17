@@ -4,14 +4,13 @@ package net.civeira.phylax.common.value.importation;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
 import net.civeira.phylax.common.value.validation.AbstractFailList;
 import net.civeira.phylax.common.value.validation.ConstraintFail;
 
 public final class EnumeratedLoad {
 
-  public static <E extends Enum<E>, T extends AbstractFailList> Optional<E> toEnumerated(
-      Class<E> type, String field, String value, T fails) {
+  public static <E extends Enum<E>, T extends AbstractFailList> Optional<E> toEnumerated(Class<E> type, String field, String value,
+      T fails) {
     if (value == null || value.isBlank()) {
       // Aquí pon el método real para registrar el fallo
       fails.add(new ConstraintFail("NOT_NULL", field, null));
@@ -39,7 +38,7 @@ public final class EnumeratedLoad {
     fails.add(new ConstraintFail("WRONG_VALUE", field, value));
     return Optional.empty();
   }
-
+  
   private EnumeratedLoad() {
     /* do nothing */
   }

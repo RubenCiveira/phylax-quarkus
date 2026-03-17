@@ -7,8 +7,8 @@ import java.util.List;
 /**
  * Functional interface for validating objects of type {@code T}.
  * <p>
- * This interface defines a method for performing validation checks and provides default methods to
- * combine validators with logical operations.
+ * This interface defines a method for performing validation checks
+ * and provides default methods to combine validators with logical operations.
  * </p>
  *
  * @param <T> The type of object to validate.
@@ -27,8 +27,8 @@ public interface Validator<T> {
   /**
    * Combines this validator with another validator using logical AND.
    * <p>
-   * The combined validator returns valid only if both validators pass. If any validator fails, the
-   * combined result includes all error messages.
+   * The combined validator returns valid only if both validators pass.
+   * If any validator fails, the combined result includes all error messages.
    * </p>
    *
    * @param other The other validator to combine with.
@@ -51,8 +51,8 @@ public interface Validator<T> {
   /**
    * Combines this validator with another validator using logical OR.
    * <p>
-   * The combined validator returns valid if at least one of the validators passes. If both fail,
-   * the result includes all error messages.
+   * The combined validator returns valid if at least one of the validators passes.
+   * If both fail, the result includes all error messages.
    * </p>
    *
    * @param other The other validator to combine with.
@@ -75,8 +75,8 @@ public interface Validator<T> {
   /**
    * Creates a new validator that negates the result of this validator.
    * <p>
-   * If this validator passes, the new validator fails with the given message. If this validator
-   * fails, the new validator passes without errors.
+   * If this validator passes, the new validator fails with the given message.
+   * If this validator fails, the new validator passes without errors.
    * </p>
    *
    * @param message The error message to include when the original validator passes.

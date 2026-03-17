@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
+import net.civeira.phylax.common.infrastructure.connector.RemoteConnection;
+import net.civeira.phylax.common.infrastructure.connector.RemoteQuery;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
@@ -18,8 +19,6 @@ import io.vertx.mutiny.ext.web.client.WebClient;
 import io.vertx.mutiny.uritemplate.UriTemplate;
 import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.infrastructure.connector.RemoteConnection;
-import net.civeira.phylax.common.infrastructure.connector.RemoteQuery;
 
 /**
  * Implements remote HTTP queries backed by Mutiny WebClient.
@@ -242,7 +241,7 @@ public class MunityWebQuery implements RemoteQuery {
   @Override
   public RemoteConnection processor(Runnable runnable) {
     return new MunityWebConnection(
-        (null == body ? client.send() : client.sendJson(body)).onItem().transform(item -> {
+        (null == body ? client.send() : client.sendJson(body)).onItem().transform(_ -> {
           runnable.run();
           return "";
         }));

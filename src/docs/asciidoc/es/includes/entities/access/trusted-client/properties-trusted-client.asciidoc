@@ -3,6 +3,8 @@ Uid* (string)::
 El identificador de la aplicacion
 Code* (string)::
 El código identificativo de la aplicación
+Allow all scopes (boolean)::
+El allow all scopes de trusted client
 Public allow* (boolean)::
 If true, users can use these client to access with public code flow
 Secret oauth (string)::
