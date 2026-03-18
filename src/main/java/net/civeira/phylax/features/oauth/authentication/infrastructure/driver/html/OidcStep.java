@@ -12,7 +12,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.Authent
  * Common contract for all steps in the OIDC authentication flow.
  *
  * Replaces the inconsistent {@code process()} signatures across the {@code *ControllerPart} classes
- * and the hardcoded dispatch table inside {@code FrontAcessController.doExecStep()}.
+ * and the hardcoded dispatch table inside {@code AuthorizeHtml.doExecStep()}.
  *
  * Each implementation handles one logical step of the flow (MFA, consent, recover, etc.) and
  * self-declares which form step names it owns and which authentication challenge it satisfies.

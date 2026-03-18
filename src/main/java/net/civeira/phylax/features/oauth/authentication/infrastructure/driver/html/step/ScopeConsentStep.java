@@ -1,6 +1,5 @@
 package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,12 +15,13 @@ import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.ClientScopeConsentRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
-import net.civeira.phylax.features.oauth.client.application.ClientScopeConsentUsecase;
+import net.civeira.phylax.features.oauth.scopes.application.ScopesConsentUsecase;
+import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 
 /**
  * OIDC step for client scope consent.
@@ -35,7 +35,7 @@ public class ScopeConsentStep implements OidcStep {
 
   private final SecureHtmlBuilder securer;
   private final DecoratePageGateway decorator;
-  private final ClientScopeConsentUsecase clientScopeConsentUsecase;
+  private final ScopesConsentUsecase scopesConsentUsecase;
 
   @Override
   public AuthenticationChallege challenge() {
@@ -64,9 +64,9 @@ public class ScopeConsentStep implements OidcStep {
       return Optional.empty();
     }
     String username = input.currentUser().get();
-    List<String> requestedScopes = parseScopes(input.getRequest().getScope().orElse(""));
-    clientScopeConsentUsecase.storeAcceptedScopes(input.getRequest().getTenant(), username,
-        input.getClientDetails().getClientId(), requestedScopes);
+    String scopeString = input.getRequest().getScope().orElse("");
+    scopesConsentUsecase.storeAcceptedScopes(input.getRequest().getTenant(), username,
+        input.getClientDetails().getClientId(), scopeString);
     ChallengesState state = input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
     return Optional
         .of(new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
@@ -74,22 +74,23 @@ public class ScopeConsentStep implements OidcStep {
 
   private ResponseBuilder buildForm(StepInput input, String username, String msg) {
     String clientId = input.getRequest().getClientId().orElse("");
-    List<String> requestedScopes = parseScopes(input.getRequest().getScope().orElse(""));
-    List<String> pendingScopes = clientScopeConsentUsecase
-        .getPendingScopes(input.getRequest().getTenant(), username, clientId, requestedScopes);
+    String scopeString = input.getRequest().getScope().orElse("");
+    List<ScopePermission> pendingScopes = scopesConsentUsecase
+        .pendingScopes(input.getRequest().getTenant(), username, clientId, scopeString);
 
     String js = securer.configureScripts(securer.addSign("sign"));
 
-    String title = FrontAcessController.i18n(input.locale(), "scopeconsent.title");
-    String error = FrontAcessController.i18n(input.locale(), "scopeconsent.error-format", msg);
-    String help = FrontAcessController.i18n(input.locale(), "scopeconsent.help");
-    String accept = FrontAcessController.i18n(input.locale(), "scopeconsent.accept");
-    String backLabel = FrontAcessController.i18n(input.locale(), "scopeconsent.back-label");
-    String backText = FrontAcessController.i18n(input.locale(), "scopeconsent.back-text",
+    String title = AuthorizeHtml.i18n(input.locale(), "scopeconsent.title");
+    String error = AuthorizeHtml.i18n(input.locale(), "scopeconsent.error-format", msg);
+    String help = AuthorizeHtml.i18n(input.locale(), "scopeconsent.help");
+    String accept = AuthorizeHtml.i18n(input.locale(), "scopeconsent.accept");
+    String backLabel = AuthorizeHtml.i18n(input.locale(), "scopeconsent.back-label");
+    String backText = AuthorizeHtml.i18n(input.locale(), "scopeconsent.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    String scopeList =
-        pendingScopes.stream().map(s -> "<li>" + s + "</li>").collect(Collectors.joining());
+    String scopeList = pendingScopes.stream()
+        .map(s -> "<li>" + (null != s.getLabel() ? s.getLabel() : s.getScope()) + "</li>")
+        .collect(Collectors.joining());
 
     return Response.ok(decorator.getFullPage("scopeConsent",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
@@ -101,13 +102,7 @@ public class ScopeConsentStep implements OidcStep {
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
             + "</form>",
-        input.locale())).type(FrontAcessController.TEXT_HTML);
+        input.locale())).type(AuthorizeHtml.TEXT_HTML);
   }
 
-  private List<String> parseScopes(String scope) {
-    if (scope == null || scope.isBlank()) {
-      return List.of();
-    }
-    return Arrays.stream(scope.split("\\s+")).filter(s -> !s.isBlank()).toList();
-  }
 }

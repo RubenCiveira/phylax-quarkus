@@ -2,18 +2,13 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.h
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -28,7 +23,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.NewCookie;
-import jakarta.ws.rs.core.NewCookie.SameSite;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
@@ -52,11 +45,8 @@ import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
-import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
-import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
-import net.civeira.phylax.features.oauth.token.domain.IdToken;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 /**
@@ -72,7 +62,7 @@ import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
-public class FrontAcessController {
+public class AuthorizeHtml {
   /**
    * Path parameter name for tenant identifiers.
    */
@@ -81,18 +71,8 @@ public class FrontAcessController {
    * Parameter name used for usernames in forms.
    */
   private static final String USERNAME = "username";
-  /**
-   * Base OAuth path used for cookies and routing.
-   */
-  private static final String OAUTH_OPENID = "/oauth/openid/";
-  /**
-   * Cookie name for authenticated sessions.
-   */
-  private static final String AUTH_SESSION_ID = "AUTH_SESSION_ID";
-  /**
-   * Cookie name for pre-authenticated sessions.
-   */
-  private static final String PRE_SESSION_ID = "PRE_SESSION_ID";
+  private static final String AUTH_SESSION_ID = OidcCookieManager.AUTH_SESSION_ID;
+  private static final String PRE_SESSION_ID = OidcCookieManager.PRE_SESSION_ID;
   /**
    * Cached translations indexed by locale.
    */
@@ -139,6 +119,16 @@ public class FrontAcessController {
   private final DelegatedStep delegatedStep;
 
   /**
+   * Manages PRE_SESSION_ID and AUTH_SESSION_ID cookie lifecycle.
+   */
+  private final OidcCookieManager cookieManager;
+
+  /**
+   * Builds the final redirect responses (success and error).
+   */
+  private final OidcResponseBuilder responseBuilder;
+
+  /**
    * Gateway to retrieve client details.
    */
   private final ClientStoreGateway clientRetrieve;
@@ -150,10 +140,6 @@ public class FrontAcessController {
    * Session store gateway for authenticated sessions.
    */
   private final SessionStoreGateway sessionStore;
-  /**
-   * Temporal store for auth codes and CSID tokens.
-   */
-  private final TemporalKeysGateway temporalStore;
   /**
    * Use case for delegated login providers.
    */
@@ -218,7 +204,7 @@ public class FrontAcessController {
           .map(sessionInfo -> doPaintVerifySession(sessionInfo, loadClient, request, session))
           .orElseGet(() -> {
             return "none".equals(request.getPrompt().orElse(""))
-                ? redirectError(request, "no session")
+                ? responseBuilder.errorRedirect(request, "no session")
                 : doPaintLoginForm(request, null, null);
           });
     }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
@@ -251,7 +237,7 @@ public class FrontAcessController {
       @CookieParam(PRE_SESSION_ID) String cookie) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
-    return preSessionChallengeState(cookie, tenant).map(ChallengesState::getUsername)
+    return cookieManager.readPreSession(cookie, tenant).map(ChallengesState::getUsername)
         .flatMap(user -> newMfaStep.mfaImage(tenant, user))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
@@ -283,7 +269,7 @@ public class FrontAcessController {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
     return loadClient(request).map(clientDetails -> {
-      Optional<ChallengesState> challengeState = preSessionChallengeState(cookie, tenant);
+      Optional<ChallengesState> challengeState = cookieManager.readPreSession(cookie, tenant);
       StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
           .challenges(challengeState).formParams(paramMap).build();
       return recoverStep.doExecFinal(input).map(outcome -> handleOutcome(outcome, input, paramMap))
@@ -316,7 +302,7 @@ public class FrontAcessController {
       @CookieParam(PRE_SESSION_ID) String cookie) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
     return loadClient(request).map(clientDetails -> {
-      Optional<ChallengesState> challengeState = preSessionChallengeState(cookie, tenant);
+      Optional<ChallengesState> challengeState = cookieManager.readPreSession(cookie, tenant);
       StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
           .challenges(challengeState).formParams(paramMap).build();
       return registrationStep.doExecVerify(input, email)
@@ -351,7 +337,7 @@ public class FrontAcessController {
     if (-1 != onClean) {
       to = to.substring(0, onClean);
     }
-    return Response.status(302).cookie(new NewCookie.Builder(AUTH_SESSION_ID).value("").build())
+    return Response.status(302).cookie(cookieManager.clearAuthSession(tenant))
         .location(buildUrl(to)).build();
   }
 
@@ -374,10 +360,10 @@ public class FrontAcessController {
 
     String csid = securer.verifyToken(first(paramMap, "csid")).orElse("-");
     if (sessionInfo.getCsid().equals(csid)) {
-      return redirect(Optional.of(cookie), loadClient, sessionInfo.getGrant(), request,
-          sessionInfo.getValidationData(), paramMap);
+      return responseBuilder.successRedirect(Optional.of(cookie), loadClient,
+          sessionInfo.getGrant(), request, sessionInfo.getValidationData(), paramMap);
     } else if ("none".equals(prompt)) {
-      return redirectError(request, "invalid client");
+      return responseBuilder.errorRedirect(request, "invalid client");
     } else {
       return doPaintLoginForm(request, null, null);
     }
@@ -446,39 +432,32 @@ public class FrontAcessController {
     }
 
     return securer
-        .secureHtmlResponse(
-            Response
-                .ok(decorator.getFullPage("Login",
-                    js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
-                        + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-                        + "<form id=\"login\" method=\"POST\">"
-                        + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>"
-                        + username
-                        + " <input type=\"text\" id=\"username\" name=\"username\" value=\""
-                        + "\" /></label>" + "<label>" + password
-                        + " <input type=\"password\" id=\"type_password\" value=\""
-                        + "\" /></label>"
-                        + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\""
-                        + "\" />"
-                        + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-                        + enter + "\" />" + "</form>" + delegatedLogins + execAuto
-                        + (recoverStep.allowRecover(request.getTenant())
-                            ? "<form method=\"POST\">"
-                                + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />"
-                                + "<p>" + recoverText + "</p></form>"
-                            : "")
-                        + (registrationStep.allowRegister(request.getTenant())
-                            ? "<form method=\"POST\">"
-                                + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />"
-                                + "<p>" + "<input class=\"inline\" type=\"submit\" value=\""
-                                + i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
-                            : ""),
-                    locale))
-                .type(TEXT_HTML)
-                .cookie(new NewCookie.Builder(AUTH_SESSION_ID).value(null).sameSite(SameSite.NONE)
-                    .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build())
-                .cookie(new NewCookie.Builder(PRE_SESSION_ID).value(null).sameSite(SameSite.NONE)
-                    .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
+        .secureHtmlResponse(Response
+            .ok(decorator.getFullPage("Login",
+                js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+                    + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+                    + "<form id=\"login\" method=\"POST\">"
+                    + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + username
+                    + " <input type=\"text\" id=\"username\" name=\"username\" value=\""
+                    + "\" /></label>" + "<label>" + password
+                    + " <input type=\"password\" id=\"type_password\" value=\"" + "\" /></label>"
+                    + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"" + "\" />"
+                    + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                    + enter + "\" />" + "</form>" + delegatedLogins + execAuto
+                    + (recoverStep.allowRecover(request.getTenant())
+                        ? "<form method=\"POST\">"
+                            + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />"
+                            + "<p>" + recoverText + "</p></form>"
+                        : "")
+                    + (registrationStep.allowRegister(request.getTenant())
+                        ? "<form method=\"POST\">"
+                            + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />"
+                            + "<p>" + "<input class=\"inline\" type=\"submit\" value=\""
+                            + i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
+                        : ""),
+                locale))
+            .type(TEXT_HTML).cookie(cookieManager.clearAuthSession(request.getTenant()))
+            .cookie(cookieManager.clearPreSession(request.getTenant())));
   }
 
   /**
@@ -488,7 +467,7 @@ public class FrontAcessController {
       MultivaluedMap<String, String> paramMap, String cookie) {
     String step = first(paramMap, "step");
     Optional<ChallengesState> challengeState =
-        preSessionChallengeState(cookie, request.getTenant());
+        cookieManager.readPreSession(cookie, request.getTenant());
 
     // Direct steps not routed through OidcStepRouter
     if ("delegated-login".equals(step)) {
@@ -545,8 +524,8 @@ public class FrontAcessController {
         proceed.username(), proceed.clientDetails(), alreadyDone);
 
     if (result.isRight()) {
-      return redirect(Optional.empty(), proceed.clientDetails(), "form", proceed.request(),
-          result.getData(), paramMap);
+      return responseBuilder.successRedirect(Optional.empty(), proceed.clientDetails(), "form",
+          proceed.request(), result.getData(), paramMap);
     }
 
     AuthenticationException ex = result.getFail();
@@ -555,7 +534,7 @@ public class FrontAcessController {
       return doPaintLoginForm(proceed.request(), "Credenciales incorrectas", null);
     }
     ChallengesState next = proceed.challengesState().withCompleted(ch.get());
-    NewCookie preSession = buildPreSessionCookie(next, proceed.request().getTenant());
+    NewCookie preSession = cookieManager.writePreSession(next, proceed.request().getTenant());
     StepInput nextInput =
         StepInput.builder().request(proceed.request()).clientDetails(proceed.clientDetails())
             .challenges(Optional.of(next)).formParams(paramMap).build();
@@ -574,8 +553,8 @@ public class FrontAcessController {
         first(paramMap, USERNAME), password, clientDetails, challenges);
 
     if (authenticate.isRight()) {
-      return redirect(Optional.empty(), clientDetails, grant, request, authenticate.getData(),
-          paramMap);
+      return responseBuilder.successRedirect(Optional.empty(), clientDetails, grant, request,
+          authenticate.getData(), paramMap);
     }
 
     AuthenticationException ex = authenticate.getFail();
@@ -586,87 +565,11 @@ public class FrontAcessController {
     String username = first(paramMap, USERNAME);
     String tenant = request.getTenant();
     ChallengesState state = ChallengesState.empty(username).withCompleted(ch.get());
-    NewCookie preSession = buildPreSessionCookie(state, tenant);
+    NewCookie preSession = cookieManager.writePreSession(state, tenant);
     StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
         .challenges(Optional.of(state)).formParams(paramMap).build();
     return router.paint(ex.getClass(), input, preSession)
         .orElseGet(() -> doPaintLoginForm(request, "Credenciales incorrectas", null));
-  }
-
-  /**
-   * Redirects to the client with an error fragment.
-   */
-  private Response redirectError(AuthRequest request, String message) {
-    String to = request.getRedirect().orElse("") + "#error="
-        + URLEncoder.encode(message, StandardCharsets.UTF_8);
-    return securer.secureRedirectResponse(Response.status(302).location(buildUrl(to))
-        .cookie(new NewCookie.Builder(AUTH_SESSION_ID).value(null).sameSite(SameSite.NONE)
-            .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
-  }
-
-  /**
-   * Redirects to the client after successful authentication.
-   */
-  private Response redirect(Optional<String> cookie, ClientDetails clientDetails, String grant,
-      AuthRequest request, AuthenticationData validationData,
-      MultivaluedMap<String, String> paramMap) {
-    String uid = UUID.randomUUID().toString();
-    if (cookie.isPresent()) {
-      sessionStore.updateSession(uid, cookie.get());
-    } else {
-      String csid = securer.verifyToken(first(paramMap, "csid")).orElseThrow();
-      sessionStore.saveSession(uid, clientDetails, grant, validationData, csid);
-    }
-    validationData.setAudiences(request.getAudiences());
-    String type = request.getResponseType().orElse("code");
-    String to;
-    if ("code".equals(type)) {
-      String redirectUri = request.getRedirect().orElseThrow();
-      String separator = "?";
-      if (redirectUri.endsWith("?")) {
-        separator = "";
-      } else if (redirectUri.contains("?")) {
-        separator = "&";
-      }
-      String code = temporalStore.registerTemporalAuthCode(
-          TemporalAuthCode.builder().client(clientDetails).request(request)
-              .nonce(request.getNonce().orElse(null)).data(validationData).build());
-      to = redirectUri + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
-    } else {
-      IdToken buildIdToken =
-          tokenBuilder.buildIdToken(request.getTenant(), request.getState().orElseThrow(),
-              request.getNonce().orElse(null), clientDetails, grant, validationData);
-      to = request.getRedirect().orElseThrow() + "#state=" + request.getState().orElseThrow()
-          + "&session_state=" + buildIdToken.getSessionState() + "" + "&iss="
-          + URLEncoder.encode(buildIdToken.getIss(), StandardCharsets.UTF_8) + "&id_token="
-          + buildIdToken.getIdToken() + "&access_token=" + buildIdToken.getAccessToken()
-          + "&token_type=" + buildIdToken.getTokenType() + "&expires_in="
-          + buildIdToken.getExpiresIn();
-    }
-    return securer.secureRedirectResponse(Response.status(302).location(buildUrl(to))
-        .cookie(new NewCookie.Builder(AUTH_SESSION_ID).value(uid).sameSite(SameSite.NONE)
-            .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
-  }
-
-  /**
-   * Builds a pre-session cookie carrying the current {@link ChallengesState}.
-   */
-  private NewCookie buildPreSessionCookie(ChallengesState state, String tenant) {
-    String token = tokenBuilder.buildChallengerToken(tenant, state, Duration.ofHours(1));
-    return new NewCookie.Builder(PRE_SESSION_ID).value(token).sameSite(SameSite.NONE)
-        .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true).build();
-  }
-
-  /**
-   * Loads and verifies the pre-session cookie into a {@link ChallengesState}.
-   *
-   * Returns empty when the cookie is absent or invalid.
-   */
-  private Optional<ChallengesState> preSessionChallengeState(String cookie, String tenant) {
-    if (StringUtils.isEmpty(cookie)) {
-      return Optional.empty();
-    }
-    return tokenBuilder.verifyChalleger(ChallengesState.class, cookie, tenant);
   }
 
   /**

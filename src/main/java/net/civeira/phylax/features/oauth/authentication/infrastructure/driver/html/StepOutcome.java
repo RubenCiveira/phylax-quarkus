@@ -9,7 +9,7 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
  * Typed result of an {@link OidcStep} execution.
  *
  * Replaces the {@code Function<StepResult, Response> resolver} callback that ControllerParts
- * previously received. Instead of calling back into {@code FrontAcessController}, a step returns a
+ * previously received. Instead of calling back into {@code AuthorizeHtml}, a step returns a
  * {@code StepOutcome} and the controller decides what to do with it.
  *
  * <ul>

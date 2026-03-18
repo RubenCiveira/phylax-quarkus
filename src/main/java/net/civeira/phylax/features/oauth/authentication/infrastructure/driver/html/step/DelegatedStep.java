@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
@@ -104,7 +104,7 @@ public class DelegatedStep implements OidcStep {
             + "return c.substring(name.length, c.length);}}return \"\";" + "}"
             + "var target = getCookie(\"post-auth-target\");"
             + "document.getElementById(\"form\").action = target;" + "</script>")
-        .type(FrontAcessController.TEXT_HTML));
+        .type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
@@ -123,7 +123,7 @@ public class DelegatedStep implements OidcStep {
                 + "setCookie(\"post-auth-target\", document.location, 1);"
                 + "document.location = \"/oauth/openid/" + tenant + "/delegated/redirect/"
                 + provider + "?back=" + encode(back) + "\";" + "</script>")
-            .type(FrontAcessController.TEXT_HTML));
+            .type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**

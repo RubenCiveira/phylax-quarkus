@@ -9,12 +9,13 @@ import java.util.function.BiFunction;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
-import net.civeira.phylax.features.oauth.client.domain.gateway.ClientScopeConsentGateway;
+import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
+import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
 
 @Alternative
 @Priority(1)
 @ApplicationScoped
-public class ScenarioScopeConsentGateway implements ClientScopeConsentGateway {
+public class ScenarioScopeConsentGateway implements ScopesConsentGateway {
 
   /**
    * Default behavior: returns all requested scopes as pending (none pre-authorized).
@@ -67,9 +68,10 @@ public class ScenarioScopeConsentGateway implements ClientScopeConsentGateway {
   }
 
   @Override
-  public List<String> getPendingScopes(String tenant, String username, String clientId,
+  public List<ScopePermission> pendingScopes(String tenant, String username, String clientId,
       List<String> requestedScopes) {
-    return pendingProvider.apply(clientId, requestedScopes);
+    return pendingProvider.apply(clientId, requestedScopes).stream()
+        .map(s -> ScopePermission.builder().scope(s).required(true).build()).toList();
   }
 
   @Override

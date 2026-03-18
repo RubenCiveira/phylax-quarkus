@@ -16,7 +16,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
@@ -69,13 +69,11 @@ public class RegistrationStep implements OidcStep {
       return Optional.empty();
     }
     if (!registerUserUsecase.allowRegister(input.getRequest().getTenant())) {
-      return Optional
-          .of(new StepOutcome.Render(doPaintRegisterForm(input.locale(), FrontAcessController
-              .i18n(input.locale(), "register.error-format", "Registration not allowed"))));
+      return Optional.of(new StepOutcome.Render(doPaintRegisterForm(input.locale(), AuthorizeHtml
+          .i18n(input.locale(), "register.error-format", "Registration not allowed"))));
     }
-    String email = FrontAcessController.first(input.getFormParams(), "reg_email");
-    String password =
-        securer.decrypt(FrontAcessController.first(input.getFormParams(), "reg_password"));
+    String email = AuthorizeHtml.first(input.getFormParams(), "reg_email");
+    String password = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "reg_password"));
     String urlBase = issuer(input.getRequest().getTenant()) + "/register" + "?email="
         + URLEncoder.encode(email, StandardCharsets.UTF_8) + "&client_id="
         + URLEncoder.encode(input.getClientDetails().getClientId(), StandardCharsets.UTF_8)
@@ -92,7 +90,7 @@ public class RegistrationStep implements OidcStep {
       return Optional.of(new StepOutcome.Render(doPaintPendingPage(input.locale(), email)));
     } else {
       return Optional.of(new StepOutcome.Render(doPaintRegisterForm(input.locale(),
-          FrontAcessController.i18n(input.locale(), "register.error-cancel"))));
+          AuthorizeHtml.i18n(input.locale(), "register.error-cancel"))));
     }
   }
 
@@ -114,14 +112,14 @@ public class RegistrationStep implements OidcStep {
                 "register"),
             securer.focusOn("reg_email"));
 
-    String title = FrontAcessController.i18n(locale, "register.title");
-    String error = FrontAcessController.i18n(locale, "register.error-format", msg);
-    String help = FrontAcessController.i18n(locale, "register.help");
-    String emailLabel = FrontAcessController.i18n(locale, "register.email");
-    String passwordLabel = FrontAcessController.i18n(locale, "register.password");
-    String send = FrontAcessController.i18n(locale, "register.send");
-    String backLabel = FrontAcessController.i18n(locale, "register.back-label");
-    String backText = FrontAcessController.i18n(locale, "register.back-text",
+    String title = AuthorizeHtml.i18n(locale, "register.title");
+    String error = AuthorizeHtml.i18n(locale, "register.error-format", msg);
+    String help = AuthorizeHtml.i18n(locale, "register.help");
+    String emailLabel = AuthorizeHtml.i18n(locale, "register.email");
+    String passwordLabel = AuthorizeHtml.i18n(locale, "register.password");
+    String send = AuthorizeHtml.i18n(locale, "register.send");
+    String backLabel = AuthorizeHtml.i18n(locale, "register.back-label");
+    String backText = AuthorizeHtml.i18n(locale, "register.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
     return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Register",
@@ -139,22 +137,22 @@ public class RegistrationStep implements OidcStep {
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
             + "</form>",
-        locale)).type(FrontAcessController.TEXT_HTML));
+        locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
    * Renders the pending registration confirmation page.
    */
   public Response doPaintPendingPage(Locale locale, String email) {
-    String title = FrontAcessController.i18n(locale, "register.pending-title");
-    String help = FrontAcessController.i18n(locale, "register.pending-help", email);
+    String title = AuthorizeHtml.i18n(locale, "register.pending-title");
+    String help = AuthorizeHtml.i18n(locale, "register.pending-help", email);
 
     return securer
         .secureHtmlResponse(
             Response
                 .ok(decorator.getFullPage("Register",
                     "<h1>" + title + "</h1>" + "<p>" + help + "</p>", locale))
-                .type(FrontAcessController.TEXT_HTML));
+                .type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
@@ -163,13 +161,13 @@ public class RegistrationStep implements OidcStep {
   public Response doPaintVerifyForm(Locale locale, String email, String regcode, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"));
 
-    String title = FrontAcessController.i18n(locale, "register-verify.title");
-    String error = FrontAcessController.i18n(locale, "register-verify.error-format", msg);
-    String help = FrontAcessController.i18n(locale, "register-verify.help");
-    String codeLabel = FrontAcessController.i18n(locale, "register-verify.code");
-    String send = FrontAcessController.i18n(locale, "register-verify.send");
-    String backLabel = FrontAcessController.i18n(locale, "register-verify.back-label");
-    String backText = FrontAcessController.i18n(locale, "register-verify.back-text",
+    String title = AuthorizeHtml.i18n(locale, "register-verify.title");
+    String error = AuthorizeHtml.i18n(locale, "register-verify.error-format", msg);
+    String help = AuthorizeHtml.i18n(locale, "register-verify.help");
+    String codeLabel = AuthorizeHtml.i18n(locale, "register-verify.code");
+    String send = AuthorizeHtml.i18n(locale, "register-verify.send");
+    String backLabel = AuthorizeHtml.i18n(locale, "register-verify.back-label");
+    String backText = AuthorizeHtml.i18n(locale, "register-verify.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
     return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Verify Registration",
@@ -182,14 +180,14 @@ public class RegistrationStep implements OidcStep {
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
             + "</form>",
-        locale)).type(FrontAcessController.TEXT_HTML));
+        locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
    * Executes registration code verification and resumes the auth flow.
    */
   public Optional<StepOutcome> doExecVerify(StepInput input, String email) {
-    String code = FrontAcessController.first(input.getFormParams(), "regcode");
+    String code = AuthorizeHtml.first(input.getFormParams(), "regcode");
     Optional<String> verifiedUsername =
         registerUserUsecase.verifyRegister(input.getRequest().getTenant(), code);
     if (verifiedUsername.isPresent()) {
@@ -199,9 +197,8 @@ public class RegistrationStep implements OidcStep {
       return Optional.of(
           new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
-      return Optional.of(
-          new StepOutcome.Render(doPaintVerifyForm(input.locale(), email, code, FrontAcessController
-              .i18n(input.locale(), "register-verify.error-format", "Invalid code"))));
+      return Optional.of(new StepOutcome.Render(doPaintVerifyForm(input.locale(), email, code,
+          AuthorizeHtml.i18n(input.locale(), "register-verify.error-format", "Invalid code"))));
     }
   }
 

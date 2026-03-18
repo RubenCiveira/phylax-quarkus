@@ -48,6 +48,8 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMod
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.EventNotifierGateway;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.scopes.application.ScopesConsentUsecase;
+import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 
 @Slf4j
 @ApplicationScoped
@@ -80,6 +82,8 @@ public class UserLoginUsecase {
   private final AesCipherService cypher;
 
   private final MfaConfigUsecase otp;
+
+  private final ScopesConsentUsecase scopesConsent;
 
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
       ClientDetails appkey, List<AuthenticationChallege> challenges) {
@@ -140,7 +144,8 @@ public class UserLoginUsecase {
       String name, String password, Tenant tenant, User user) {
     List<Supplier<Optional<AuthenticationResult>>> calls =
         List.of(() -> checkPassword(request, user, password), () -> checkFirstPass(request, user),
-            () -> checkMfa(request, user, mode), () -> checkTerms(request, user));
+            () -> checkMfa(request, user, mode), () -> checkTerms(request, user),
+            () -> checkScopesConsent(request, user));
     for (Supplier<Optional<AuthenticationResult>> call : calls) {
       Optional<AuthenticationResult> value = call.get();
       if (value.isPresent()) {
@@ -242,6 +247,19 @@ public class UserLoginUsecase {
   private Optional<AuthenticationResult> checkTerms(AuthRequest request, User user) {
     return terms.findPendingTerms(user)
         .map(_ -> AuthenticationResult.consentRequired(request.getTenant(), user.getName()));
+  }
+
+  private Optional<AuthenticationResult> checkScopesConsent(AuthRequest request, User user) {
+    String clientId = request.getClientId().orElse("");
+    String scopeString = request.getScope().orElse("");
+    List<ScopePermission> pending =
+        scopesConsent.pendingScopes(request.getTenant(), user.getName(), clientId, scopeString);
+    if (pending.isEmpty()) {
+      return Optional.empty();
+    }
+    List<String> pendingNames = pending.stream().map(ScopePermission::getScope).toList();
+    return Optional.of(AuthenticationResult.clientScopeConsentRequired(request.getTenant(),
+        user.getName(), clientId, pendingNames));
   }
 
   private Optional<AuthenticationResult> checkPassword(AuthRequest request, User user,

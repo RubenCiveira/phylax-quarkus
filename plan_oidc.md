@@ -276,7 +276,7 @@ oauth/
 - **T5.3 ✅** — Creado `scopes/domain/gateway/ScopesConsentGateway.java` con `pendingScopes` y `storeAcceptedScopes`
 - **T5.4 ✅** — Creado `scopes/application/ScopesConsentUsecase.java` (`@ApplicationScoped`) con normalización de scopes (split por espacios, dedup)
 - **T5.5 ✅** — Creado `scopes/infrastructure/driven/ScopesConsentAdapter.java` (stub: `pendingScopes` devuelve lista vacía, `storeAcceptedScopes` es no-op; marcado con TODO)
-- **T5.6 ⏸** — Integración en `LoginAdapter` pendiente (requiere reescritura completa del adaptador)
+- **T5.6 ✅** — `checkScopesConsent` añadido a `UserLoginUsecase.userToGrant()` usando `ScopesConsentUsecase`; `ScopeConsentStep` migrado a `ScopesConsentUsecase` (retorna `List<ScopePermission>`); `ScenarioScopeConsentGateway` actualizado a `ScopesConsentGateway`
 
 ---
 
@@ -365,7 +365,7 @@ oauth/
 - **T7.1 ✅** — Creados paquetes `common/application/`, `common/infrastructure/driven/`, `common/infrastructure/driver/rest/`
 - **T7.2 ✅** — Creado `common/infrastructure/driven/UserLoaderAdapter.java` (stub `@ApplicationScoped` con TODOs para `checkTenant`, `checkUser`, `userCodeForUpdate`, `loadTenantTerms`)
 - **T7.3 ✅** — Creado `common/infrastructure/driver/rest/OpenIdConfigurationController.java` con el contenido completo de `OpenIdInformationController`; eliminado `authentication/infrastructure/driver/rest/OpenIdInformationController.java` para evitar conflicto de paths JAX-RS
-- **T7.4 ⏸** — `OidcMigrationProvider` pendiente (requiere revisión del mecanismo de migración actual)
+- **T7.4 ❌** — Descartado: no aporta funcionalidad y dispersa responsabilidad de los adaptadores; DDL ya cubierto por el changelog SQL
 
 ---
 
@@ -475,7 +475,11 @@ oauth/
 - **T8.10 ✅** — Creado `authentication/application/AuthenticateUser.java` (`@ApplicationScoped`): envuelve `LoginUsecase` con `authenticate()` y `preAuthenticate()`
 - **T8.13 ✅** — Creado `authentication/application/SessionManager.java` (`@ApplicationScoped`): envuelve `SessionStoreGateway` con `loadSession()` y `removeSession()`
 - **T8.14 ✅** — Creado `authentication/domain/exception/LoginException.java`: `RuntimeException` que encapsula `AuthenticationResult` fallido
-- **T8.1, T8.2, T8.4, T8.5, T8.6, T8.7, T8.8, T8.9, T8.11, T8.12, T8.15 ⏸** — Requieren reescritura completa de controladores; aplazados a iteración futura una vez estabilizada la capa de aplicación
+- **T8.8 ✅** — `OidcCookieManager` creado; cookie logic extraída de `AuthorizeHtml`
+- **T8.9 ✅** — `OidcResponseBuilder` creado; `redirect()`/`redirectError()` extraídos
+- **T8.11 ✅** — `FrontAcessController` renombrado → `AuthorizeHtml`; todos los dependientes actualizados; fichero original eliminado
+- **T8.12 ✅** — `AuthenticationController` renombrado → `TokenController`
+- **T8.1, T8.2, T8.4, T8.5, T8.6, T8.7, T8.15 ⏸** — Requieren reescritura completa de controladores; aplazados a iteración futura una vez estabilizada la capa de aplicación
 
 ---
 
@@ -910,6 +914,16 @@ default Class<? extends AuthenticationException> challengeException() { return n
 - [x] `tokenBuilder.verifyChalleger(ChallengesState.class, cookie, tenant)` — ya usado en F11.4
   (`@JsonAlias("challenges")` asegura lectura de cookies antiguas)
 - [x] Inner class `Challenge` eliminada de `FrontAcessController`
+- [x] Ejecutar `mvn test -Dgroups="oidc-flow"` — 62/62 PASS ✓
+
+---
+
+### F11.7 — Completar T5.6, T7.4, T8.8, T8.9, T8.11, T8.12
+
+- [x] T8.11 — `FrontAcessController` → `AuthorizeHtml` (fichero eliminado, 14 dependientes actualizados)
+- [x] T8.12 — `AuthenticationController` → `TokenController`
+- [x] T5.6 — `checkScopesConsent` en `UserLoginUsecase` + `ScopeConsentStep` migrado a `ScopesConsentUsecase`; `ScenarioScopeConsentGateway` actualizado a `ScopesConsentGateway`
+- [x] T7.4 — Descartado (no aporta valor; DDL cubierto por changelog SQL)
 - [x] Ejecutar `mvn test -Dgroups="oidc-flow"` — 62/62 PASS ✓
 
 ---

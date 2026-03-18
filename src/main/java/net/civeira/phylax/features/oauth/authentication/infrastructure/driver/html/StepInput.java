@@ -15,8 +15,8 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
  *
  * Replaces the individual parameters {@code step}, {@code oUser}, {@code clientDetails},
  * {@code request}, {@code paramMap} that each ControllerPart currently receives separately.
- * Constructed once per request in {@code FrontAcessController} and passed down to
- * {@code OidcStepRouter} and then to each {@link OidcStep}.
+ * Constructed once per request in {@code AuthorizeHtml} and passed down to {@code OidcStepRouter}
+ * and then to each {@link OidcStep}.
  */
 @Value
 @Builder(toBuilder = true)

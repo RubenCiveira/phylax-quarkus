@@ -13,7 +13,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
@@ -61,14 +61,14 @@ public class MfaStep implements OidcStep {
     }
     String username = input.currentUser().get();
     boolean valid = userMfa.verifyOtp(input.tenant(), username,
-        FrontAcessController.first(input.getFormParams(), "mfa_code"));
+        AuthorizeHtml.first(input.getFormParams(), "mfa_code"));
     if (valid) {
       ChallengesState state =
           input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
       return Optional.of(
           new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
-      String msg = FrontAcessController.i18n(input.locale(), "mfa.wrong-code");
+      String msg = AuthorizeHtml.i18n(input.locale(), "mfa.wrong-code");
       return Optional.of(new StepOutcome.Render(securer.secureHtmlResponse(buildForm(input, msg))));
     }
   }
@@ -76,13 +76,13 @@ public class MfaStep implements OidcStep {
   private ResponseBuilder buildForm(StepInput input, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("mfa_code"));
 
-    String title = FrontAcessController.i18n(input.locale(), "mfa.title");
-    String error = FrontAcessController.i18n(input.locale(), "mfa.error-format", msg);
-    String help = FrontAcessController.i18n(input.locale(), "mfa.help");
-    String code = FrontAcessController.i18n(input.locale(), "mfa.code");
-    String send = FrontAcessController.i18n(input.locale(), "mfa.send");
-    String backLabel = FrontAcessController.i18n(input.locale(), "mfa.back-label");
-    String backText = FrontAcessController.i18n(input.locale(), "mfa.back-text",
+    String title = AuthorizeHtml.i18n(input.locale(), "mfa.title");
+    String error = AuthorizeHtml.i18n(input.locale(), "mfa.error-format", msg);
+    String help = AuthorizeHtml.i18n(input.locale(), "mfa.help");
+    String code = AuthorizeHtml.i18n(input.locale(), "mfa.code");
+    String send = AuthorizeHtml.i18n(input.locale(), "mfa.send");
+    String backLabel = AuthorizeHtml.i18n(input.locale(), "mfa.back-label");
+    String backText = AuthorizeHtml.i18n(input.locale(), "mfa.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
     return Response.ok(decorator.getFullPage("MFA",
@@ -96,6 +96,6 @@ public class MfaStep implements OidcStep {
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
             + "</form>",
-        input.locale())).type(FrontAcessController.TEXT_HTML);
+        input.locale())).type(AuthorizeHtml.TEXT_HTML);
   }
 }

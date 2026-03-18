@@ -16,7 +16,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
@@ -69,16 +69,16 @@ public class RecoverStep implements OidcStep {
     }
     if (!changePasswordUsecase.allowRecover(input.getRequest().getTenant())) {
       return Optional.of(new StepOutcome.Render(doPaintRecoverForm(input.locale(),
-          FrontAcessController.i18n(input.locale(), "recover.save-error"))));
+          AuthorizeHtml.i18n(input.locale(), "recover.save-error"))));
     }
-    String username = FrontAcessController.first(input.getFormParams(), "username");
+    String username = AuthorizeHtml.first(input.getFormParams(), "username");
     String url = issuer(input.getRequest().getTenant()) + "/recover" + "?username="
         + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&client_id="
         + URLEncoder.encode(input.getClientDetails().getClientId(), StandardCharsets.UTF_8)
         + input.getRequest().encodeInUrl() + "&recovercode=";
     changePasswordUsecase.requestForChange(url, input.getRequest().getTenant(), username);
-    return Optional.of(new StepOutcome.Render(securer.secureRedirectResponse(
-        Response.status(302).location(FrontAcessController.buildUrl(url)))));
+    return Optional.of(new StepOutcome.Render(securer
+        .secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(url)))));
   }
 
   /**
@@ -94,13 +94,13 @@ public class RecoverStep implements OidcStep {
   public Response doPaintRecoverForm(Locale locale, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("username"));
 
-    String title = FrontAcessController.i18n(locale, "recover.title");
-    String error = FrontAcessController.i18n(locale, "recover.error-format", msg);
-    String help = FrontAcessController.i18n(locale, "recover.help");
-    String email = FrontAcessController.i18n(locale, "recover.email");
-    String send = FrontAcessController.i18n(locale, "recover.send");
-    String backLabel = FrontAcessController.i18n(locale, "recover.back-label");
-    String backText = FrontAcessController.i18n(locale, "recover.back-text",
+    String title = AuthorizeHtml.i18n(locale, "recover.title");
+    String error = AuthorizeHtml.i18n(locale, "recover.error-format", msg);
+    String help = AuthorizeHtml.i18n(locale, "recover.help");
+    String email = AuthorizeHtml.i18n(locale, "recover.email");
+    String send = AuthorizeHtml.i18n(locale, "recover.send");
+    String backLabel = AuthorizeHtml.i18n(locale, "recover.back-label");
+    String backText = AuthorizeHtml.i18n(locale, "recover.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
     return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Recover",
@@ -113,7 +113,7 @@ public class RecoverStep implements OidcStep {
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input class=\"inline\" type=\"hidden\" name=\"step\" />" + "<p>" + backText + "</p>"
             + "</form>",
-        locale)).type(FrontAcessController.TEXT_HTML));
+        locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
@@ -137,15 +137,15 @@ public class RecoverStep implements OidcStep {
             + "<label>New pass: <input type=\"password\" id=\"type_password\" value=\"\" /></label>"
             + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"\" />"
             + "<input type=\"submit\" />" + "</form>",
-        locale)).type(FrontAcessController.TEXT_HTML));
+        locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
    * Processes the final recovery code submission and resumes the auth flow.
    */
   public Optional<StepOutcome> doExecFinal(StepInput input) {
-    String pass = securer.decrypt(FrontAcessController.first(input.getFormParams(), "password"));
-    String code = FrontAcessController.first(input.getFormParams(), "code");
+    String pass = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "password"));
+    String code = AuthorizeHtml.first(input.getFormParams(), "code");
     Optional<String> validatedUsername =
         changePasswordUsecase.validateChangeRequest(input.getRequest().getTenant(), code, pass);
     if (validatedUsername.isPresent()) {
@@ -155,10 +155,10 @@ public class RecoverStep implements OidcStep {
       return Optional.of(
           new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
-      String recoverCode = FrontAcessController.first(input.getFormParams(), "recovercode");
-      String username = FrontAcessController.first(input.getFormParams(), "username");
+      String recoverCode = AuthorizeHtml.first(input.getFormParams(), "recovercode");
+      String username = AuthorizeHtml.first(input.getFormParams(), "username");
       return Optional.of(new StepOutcome.Render(doPaintWaitRecover(input.locale(),
-          FrontAcessController.i18n(input.locale(), "recover.wrong-code"), username, recoverCode)));
+          AuthorizeHtml.i18n(input.locale(), "recover.wrong-code"), username, recoverCode)));
     }
   }
 

@@ -14,7 +14,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.NewPasswordRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
@@ -62,8 +62,8 @@ public class NewPassStep implements OidcStep {
       return Optional.empty();
     }
     String username = input.currentUser().get();
-    String oldPass = securer.decrypt(FrontAcessController.first(input.getFormParams(), "old_pass"));
-    String newPass = securer.decrypt(FrontAcessController.first(input.getFormParams(), "new_pass"));
+    String oldPass = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "old_pass"));
+    String newPass = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "new_pass"));
     boolean updated = changePasswordUsecase.forceUpdatePassword(input.getRequest().getTenant(),
         username, oldPass, newPass);
     if (updated) {
@@ -72,7 +72,7 @@ public class NewPassStep implements OidcStep {
       return Optional.of(
           new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
-      String msg = FrontAcessController.i18n(input.locale(), "chpass.save-error");
+      String msg = AuthorizeHtml.i18n(input.locale(), "chpass.save-error");
       return Optional.of(new StepOutcome.Render(securer.secureHtmlResponse(buildForm(input, msg))));
     }
   }
@@ -86,14 +86,14 @@ public class NewPassStep implements OidcStep {
             "chpass"),
         securer.focusOn("type_old_pass"));
 
-    String title = FrontAcessController.i18n(input.locale(), "chpass.title");
-    String error = FrontAcessController.i18n(input.locale(), "chpass.error-format", msg);
-    String help = FrontAcessController.i18n(input.locale(), "chpass.help");
-    String current = FrontAcessController.i18n(input.locale(), "chpass.current");
-    String newpass = FrontAcessController.i18n(input.locale(), "chpass.newpass");
-    String send = FrontAcessController.i18n(input.locale(), "chpass.send");
-    String backLabel = FrontAcessController.i18n(input.locale(), "chpass.back-label");
-    String backText = FrontAcessController.i18n(input.locale(), "chpass.back-text",
+    String title = AuthorizeHtml.i18n(input.locale(), "chpass.title");
+    String error = AuthorizeHtml.i18n(input.locale(), "chpass.error-format", msg);
+    String help = AuthorizeHtml.i18n(input.locale(), "chpass.help");
+    String current = AuthorizeHtml.i18n(input.locale(), "chpass.current");
+    String newpass = AuthorizeHtml.i18n(input.locale(), "chpass.newpass");
+    String send = AuthorizeHtml.i18n(input.locale(), "chpass.send");
+    String backLabel = AuthorizeHtml.i18n(input.locale(), "chpass.back-label");
+    String backText = AuthorizeHtml.i18n(input.locale(), "chpass.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
     return Response.ok(decorator.getFullPage("password",
@@ -110,6 +110,6 @@ public class NewPassStep implements OidcStep {
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
             + "</form>",
-        input.locale())).type(FrontAcessController.TEXT_HTML);
+        input.locale())).type(AuthorizeHtml.TEXT_HTML);
   }
 }

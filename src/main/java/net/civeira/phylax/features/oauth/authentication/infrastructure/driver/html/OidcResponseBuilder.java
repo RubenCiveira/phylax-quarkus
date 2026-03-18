@@ -1,0 +1,116 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
+import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
+import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
+import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.token.domain.IdToken;
+
+/**
+ * Builds the final HTTP redirect responses for the OIDC authorization flow.
+ *
+ * Responsibilities: - Build the success redirect (authorization code or implicit token) after
+ * authentication. - Build the error redirect with a fragment error parameter.
+ *
+ * Design notes: - Persists or updates the authenticated session via {@link SessionStoreGateway}. -
+ * Registers the temporal auth code via {@link TemporalKeysGateway} for the code flow. - Sets the
+ * {@code AUTH_SESSION_ID} cookie on success via {@link OidcCookieManager}.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class OidcResponseBuilder {
+
+  private final SecureHtmlBuilder securer;
+  private final SessionStoreGateway sessionStore;
+  private final TemporalKeysGateway temporalStore;
+  private final JwtTokenBuilder tokenBuilder;
+  private final OidcCookieManager cookieManager;
+
+  /**
+   * Builds a redirect response after successful authentication.
+   *
+   * <p>
+   * When {@code existingSession} is present the session is updated in place; otherwise a new
+   * session is created using the {@code csid} from the form params.
+   *
+   * @param existingSession existing AUTH_SESSION_ID value, or empty for a new session
+   * @param clientDetails authenticated client
+   * @param grant grant type label (e.g. {@code "form"})
+   * @param request current auth request
+   * @param validationData authenticated user data
+   * @param paramMap form parameters (needed for {@code csid} on new sessions)
+   * @return 302 redirect response with the auth code or token fragment
+   */
+  public Response successRedirect(Optional<String> existingSession, ClientDetails clientDetails,
+      String grant, AuthRequest request, AuthenticationData validationData,
+      MultivaluedMap<String, String> paramMap) {
+    String uid = UUID.randomUUID().toString();
+    if (existingSession.isPresent()) {
+      sessionStore.updateSession(uid, existingSession.get());
+    } else {
+      String csid = securer.verifyToken(first(paramMap, "csid")).orElseThrow();
+      sessionStore.saveSession(uid, clientDetails, grant, validationData, csid);
+    }
+    validationData.setAudiences(request.getAudiences());
+    String type = request.getResponseType().orElse("code");
+    String to;
+    if ("code".equals(type)) {
+      String redirectUri = request.getRedirect().orElseThrow();
+      String separator = "?";
+      if (redirectUri.endsWith("?")) {
+        separator = "";
+      } else if (redirectUri.contains("?")) {
+        separator = "&";
+      }
+      String code = temporalStore.registerTemporalAuthCode(
+          TemporalAuthCode.builder().client(clientDetails).request(request)
+              .nonce(request.getNonce().orElse(null)).data(validationData).build());
+      to = redirectUri + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
+    } else {
+      IdToken buildIdToken =
+          tokenBuilder.buildIdToken(request.getTenant(), request.getState().orElseThrow(),
+              request.getNonce().orElse(null), clientDetails, grant, validationData);
+      to = request.getRedirect().orElseThrow() + "#state=" + request.getState().orElseThrow()
+          + "&session_state=" + buildIdToken.getSessionState() + "&iss="
+          + URLEncoder.encode(buildIdToken.getIss(), StandardCharsets.UTF_8) + "&id_token="
+          + buildIdToken.getIdToken() + "&access_token=" + buildIdToken.getAccessToken()
+          + "&token_type=" + buildIdToken.getTokenType() + "&expires_in="
+          + buildIdToken.getExpiresIn();
+    }
+    return securer.secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to))
+        .cookie(cookieManager.writeAuthSession(uid, request.getTenant())));
+  }
+
+  /**
+   * Builds an error redirect response with a {@code #error=} fragment.
+   *
+   * @param request the current auth request (used for redirect URI and tenant)
+   * @param message the error description to include in the fragment
+   * @return 302 redirect response with cleared AUTH_SESSION_ID cookie
+   */
+  public Response errorRedirect(AuthRequest request, String message) {
+    String to = request.getRedirect().orElse("") + "#error="
+        + URLEncoder.encode(message, StandardCharsets.UTF_8);
+    return securer.secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to))
+        .cookie(cookieManager.clearAuthSession(request.getTenant())));
+  }
+
+  private static String first(Map<String, List<String>> paramMap, String key) {
+    List<String> list = paramMap.get(key);
+    return null == list || list.isEmpty() ? "" : list.get(0);
+  }
+}

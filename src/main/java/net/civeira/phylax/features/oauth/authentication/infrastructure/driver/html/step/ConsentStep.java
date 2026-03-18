@@ -13,7 +13,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.ConsentRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
@@ -62,9 +62,9 @@ public class ConsentStep implements OidcStep {
       return Optional.empty();
     }
     String username = input.currentUser().get();
-    String accepted = FrontAcessController.first(input.getFormParams(), "consent");
+    String accepted = AuthorizeHtml.first(input.getFormParams(), "consent");
     if ("on".equals(accepted) || "true".equals(accepted)) {
-      String relyingParty = FrontAcessController.first(input.getFormParams(), "relying_party");
+      String relyingParty = AuthorizeHtml.first(input.getFormParams(), "relying_party");
       consentUsecase.storeAcceptedConsent(input.getRequest().getTenant(), username, relyingParty);
       ChallengesState state =
           input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
@@ -87,13 +87,13 @@ public class ConsentStep implements OidcStep {
 
     String js = securer.configureScripts(securer.addSign("sign"));
 
-    String title = FrontAcessController.i18n(input.locale(), "consent.title");
-    String error = FrontAcessController.i18n(input.locale(), "consent.error-format", msg);
-    String help = FrontAcessController.i18n(input.locale(), "consent.help");
-    String code = FrontAcessController.i18n(input.locale(), "consent.code");
-    String send = FrontAcessController.i18n(input.locale(), "consent.send");
-    String backLabel = FrontAcessController.i18n(input.locale(), "consent.back-label");
-    String backText = FrontAcessController.i18n(input.locale(), "consent.back-text",
+    String title = AuthorizeHtml.i18n(input.locale(), "consent.title");
+    String error = AuthorizeHtml.i18n(input.locale(), "consent.error-format", msg);
+    String help = AuthorizeHtml.i18n(input.locale(), "consent.help");
+    String code = AuthorizeHtml.i18n(input.locale(), "consent.code");
+    String send = AuthorizeHtml.i18n(input.locale(), "consent.send");
+    String backLabel = AuthorizeHtml.i18n(input.locale(), "consent.back-label");
+    String backText = AuthorizeHtml.i18n(input.locale(), "consent.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
     return Response.ok(decorator.getFullPage("Consent",
@@ -110,6 +110,6 @@ public class ConsentStep implements OidcStep {
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
             + "</form>",
-        input.locale())).type(FrontAcessController.TEXT_HTML);
+        input.locale())).type(AuthorizeHtml.TEXT_HTML);
   }
 }

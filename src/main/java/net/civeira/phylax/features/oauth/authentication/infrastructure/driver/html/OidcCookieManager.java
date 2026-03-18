@@ -1,0 +1,98 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;
+
+import java.time.Duration;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.NewCookie.SameSite;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
+
+/**
+ * Manages the OIDC cookie lifecycle for authenticated and pre-authenticated sessions.
+ *
+ * Responsibilities: - Build and clear the {@code AUTH_SESSION_ID} cookie (authenticated session). -
+ * Build, read, and clear the {@code PRE_SESSION_ID} cookie (challenge state between POSTs).
+ *
+ * Design notes: - {@code PRE_SESSION_ID} carries a signed {@link ChallengesState} JWT (1-hour TTL).
+ * - All cookies are Secure, HttpOnly, SameSite=None, scoped to {@code /oauth/openid/{tenant}}.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class OidcCookieManager {
+
+  /** Cookie name for the authenticated session UID. */
+  public static final String AUTH_SESSION_ID = "AUTH_SESSION_ID";
+
+  /** Cookie name for the pre-authenticated challenges state. */
+  public static final String PRE_SESSION_ID = "PRE_SESSION_ID";
+
+  private static final String OAUTH_OPENID = "/oauth/openid/";
+  private static final Duration PRE_SESSION_TTL = Duration.ofHours(1);
+
+  private final JwtTokenBuilder tokenBuilder;
+
+  /**
+   * Reads and verifies the {@code PRE_SESSION_ID} cookie.
+   *
+   * @param cookie raw cookie value from the request
+   * @param tenant tenant identifier used for signature verification
+   * @return the deserialized {@link ChallengesState}, or empty if absent/invalid
+   */
+  public Optional<ChallengesState> readPreSession(String cookie, String tenant) {
+    if (StringUtils.isEmpty(cookie)) {
+      return Optional.empty();
+    }
+    return tokenBuilder.verifyChalleger(ChallengesState.class, cookie, tenant);
+  }
+
+  /**
+   * Builds a {@code PRE_SESSION_ID} cookie carrying the given {@link ChallengesState}.
+   *
+   * @param state challenges already satisfied in the current flow
+   * @param tenant tenant identifier used for signing
+   * @return a new signed cookie ready to attach to the response
+   */
+  public NewCookie writePreSession(ChallengesState state, String tenant) {
+    String token = tokenBuilder.buildChallengerToken(tenant, state, PRE_SESSION_TTL);
+    return new NewCookie.Builder(PRE_SESSION_ID).value(token).sameSite(SameSite.NONE)
+        .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true).build();
+  }
+
+  /**
+   * Builds a {@code PRE_SESSION_ID} cookie with a null value to clear it in the browser.
+   *
+   * @param tenant tenant identifier used for the cookie path
+   * @return a cookie that clears the pre-session
+   */
+  public NewCookie clearPreSession(String tenant) {
+    return new NewCookie.Builder(PRE_SESSION_ID).value(null).sameSite(SameSite.NONE)
+        .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true).build();
+  }
+
+  /**
+   * Builds an {@code AUTH_SESSION_ID} cookie carrying the authenticated session UID.
+   *
+   * @param uid session unique identifier
+   * @param tenant tenant identifier used for the cookie path
+   * @return a new session cookie
+   */
+  public NewCookie writeAuthSession(String uid, String tenant) {
+    return new NewCookie.Builder(AUTH_SESSION_ID).value(uid).sameSite(SameSite.NONE)
+        .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true).build();
+  }
+
+  /**
+   * Builds an {@code AUTH_SESSION_ID} cookie with an empty value to clear it in the browser.
+   *
+   * @param tenant tenant identifier used for the cookie path
+   * @return a cookie that clears the session
+   */
+  public NewCookie clearAuthSession(String tenant) {
+    return new NewCookie.Builder(AUTH_SESSION_ID).value("").build();
+  }
+}

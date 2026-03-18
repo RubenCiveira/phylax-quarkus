@@ -17,7 +17,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.Authent
  * Routes OIDC authentication flow requests to the appropriate {@link OidcStep}.
  *
  * Replaces the hardcoded {@code fillIfEmpty} chain and {@code loginErrorMappers} map in
- * {@code FrontAcessController}. All registered {@link OidcStep} implementations are discovered
+ * {@code AuthorizeHtml}. All registered {@link OidcStep} implementations are discovered
  * automatically via CDI — adding a new step only requires creating a new bean.
  *
  * The routing caches are initialized lazily on first use. This bean is {@code @ApplicationScoped}

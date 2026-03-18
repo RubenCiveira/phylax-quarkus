@@ -14,9 +14,8 @@ import lombok.Value;
  * Immutable snapshot of the challenges already satisfied by the user during the current
  * authentication session.
  *
- * Replaces the mutable inner class {@code FrontAcessController.Challenge}. Designed to be
- * serialized into the {@code PRE_SESSION_ID} signed cookie so the state survives across HTTP
- * requests.
+ * Replaces the mutable inner class {@code AuthorizeHtml.Challenge}. Designed to be serialized into
+ * the {@code PRE_SESSION_ID} signed cookie so the state survives across HTTP requests.
  *
  * Backward-compatibility: the legacy JSON field name {@code challenges} is accepted on read via
  * {@code @JsonAlias} so existing cookies issued before the rename continue to deserialize

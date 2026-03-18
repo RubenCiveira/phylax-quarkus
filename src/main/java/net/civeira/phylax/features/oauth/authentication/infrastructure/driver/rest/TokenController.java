@@ -43,7 +43,7 @@ import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
-public class AuthenticationController {
+public class TokenController {
   @Data
   /**
    * DTO for change-password requests.
