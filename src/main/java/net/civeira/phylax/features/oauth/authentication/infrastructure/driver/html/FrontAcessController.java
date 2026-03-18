@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
@@ -33,8 +31,6 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.NewCookie.SameSite;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-import lombok.Builder;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
@@ -106,60 +102,6 @@ public class FrontAcessController {
    */
   public static final String TEXT_HTML = "text/html";
 
-  @Data
-  @Builder
-  /**
-   * Result wrapper for step execution outcomes.
-   *
-   * Compatibility shim kept during incremental migration. Will be removed in F11.5 once all
-   * ControllerPart files are deleted.
-   */
-  public static class StepResult {
-    private final String csid;
-    private final String username;
-    private final AuthRequest request;
-    private final ClientDetails clientDetails;
-
-    public StepOutcome.Proceed toOutcome(ChallengesState challengesState) {
-      return new StepOutcome.Proceed(username, clientDetails, request, challengesState);
-    }
-  }
-
-  @Data
-  @Builder
-  /**
-   * Initial form flow data. Kept for F11.5 cleanup — no longer constructed by F11.4 code.
-   */
-  private static class StartFormFlow {
-    private final Locale locale;
-    private final AuthRequest request;
-    private final String username;
-    private final List<AuthenticationChallege> challenges;
-    private final NewCookie session;
-  }
-
-  @Data
-  @Builder
-  /**
-   * Challenge-to-handler mapping. Kept for F11.5 cleanup — no longer populated by F11.4 code.
-   */
-  private static class FlowInfo {
-    private final AuthenticationChallege chageller;
-    private final java.util.function.Function<StartFormFlow, Response> function;
-  }
-
-  @Data
-  @RegisterForReflection
-  /**
-   * Legacy serializable challenge state for pre-session cookies.
-   *
-   * Kept for F11.6 cleanup. Cookie deserialization now uses {@link ChallengesState} directly with
-   * {@code @JsonAlias("challenges")} for backward compatibility.
-   */
-  public static class Challenge {
-    private String username;
-    private List<AuthenticationChallege> challenges = new ArrayList<>();
-  }
 
   /**
    * Use case for credential validation and pre-authenticated flows.

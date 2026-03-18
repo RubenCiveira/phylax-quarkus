@@ -892,12 +892,14 @@ default Class<? extends AuthenticationException> challengeException() { return n
 **Objetivo:** ≤400 líneas, sin estado mutable de instancia.
 **Criterio de fin:** Sin campos `formParams`/`currentChallenge`. Sin `FlowInfo`. Sin `loginErrorMappers`. Sin `@Synchronized` innecesario.
 
-- [ ] Eliminar inner class `FlowInfo` (ya no usada tras F11.4)
-- [ ] Eliminar inner class `StartFormFlow` (ya no usada)
-- [ ] Eliminar `loginErrorMappers` y `map()`
-- [ ] Eliminar `@Synchronized` de `map()` (método eliminado)
-- [ ] Mover `StepResult` a fichero propio o eliminar si ya no se usa tras migración completa
-- [ ] Unificar `sessionCookie(String, List, String)` → `buildPreSessionCookie(ChallengesState, String)` usable en toda la clase
+- [x] Eliminar inner class `FlowInfo` (ya no usada tras F11.4)
+- [x] Eliminar inner class `StartFormFlow` (ya no usada)
+- [x] Eliminar inner class `StepResult` (ya no usada tras borrar ControllerParts)
+- [x] `loginErrorMappers`, `map()`, `@Synchronized` — ya eliminados en F11.4
+- [x] `formParams`/`currentChallenge` — ya eliminados en F11.4
+- [x] `sessionCookie()` → ya reemplazado por `buildPreSessionCookie(ChallengesState, String)` en F11.4
+- [x] Imports limpiados: `ArrayList`, `@Builder`, `@Data`, `@RegisterForReflection`
+- **Resultado:** 708 líneas (objetivo ≤400 no alcanzado, pero la reducción estructural está completa)
 
 ---
 
@@ -905,11 +907,10 @@ default Class<? extends AuthenticationException> challengeException() { return n
 
 **Objetivo:** Sin referencias a `FrontAcessController.Challenge`.
 
-- [ ] Verificar que `tokenBuilder.verifyChalleger(ChallengesState.class, cookie, tenant)` funciona
+- [x] `tokenBuilder.verifyChalleger(ChallengesState.class, cookie, tenant)` — ya usado en F11.4
   (`@JsonAlias("challenges")` asegura lectura de cookies antiguas)
-- [ ] Reemplazar todos los usos de `Challenge` por `ChallengesState`
-- [ ] Eliminar inner class `Challenge` de `FrontAcessController`
-- [ ] Ejecutar `mvn test -Dgroups="oidc-flow"`
+- [x] Inner class `Challenge` eliminada de `FrontAcessController`
+- [x] Ejecutar `mvn test -Dgroups="oidc-flow"` — 62/62 PASS ✓
 
 ---
 

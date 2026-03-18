@@ -30,7 +30,7 @@ class MfaFlowTest extends OidcIntegrationTestBase {
     String preSession = client.extractPreSessionCookie(response);
     Assertions.assertNotNull(preSession);
     Assertions.assertTrue(
-        decodeChallenge(preSession).getChallenges().contains(AuthenticationChallege.MFA));
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.MFA));
   }
 
   @Test

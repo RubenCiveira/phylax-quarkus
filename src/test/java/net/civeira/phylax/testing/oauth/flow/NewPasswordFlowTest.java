@@ -29,8 +29,8 @@ class NewPasswordFlowTest extends OidcIntegrationTestBase {
     Assertions.assertTrue(body.contains("name=\"new_pass\""));
     String preSession = client.extractPreSessionCookie(response);
     Assertions.assertNotNull(preSession);
-    Assertions.assertTrue(decodeChallenge(preSession).getChallenges()
-        .contains(AuthenticationChallege.FRESH_PASSWORD));
+    Assertions.assertTrue(
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.FRESH_PASSWORD));
   }
 
   @Test

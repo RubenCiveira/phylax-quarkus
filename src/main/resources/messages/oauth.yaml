@@ -17,12 +17,12 @@ recover:
   back-label: "Back to login"
   back-text: "{0}"
   save-error: "Recovery could not be started"
-  wrong-code: "Wrong recovery code"
+  wrong-code: "Wrong code"
 
 mfa:
   title: "Multi-factor authentication"
   error-format: "{0}"
-  wrong-code: "Incorrect MFA code"
+  wrong-code: "MFA incorrecto"
   help: "Enter your authentication code"
   code: "Code"
   send: "Verify"
@@ -37,7 +37,7 @@ newmfa:
   send: "Verify"
   back-label: "Back"
   back-text: "{0}"
-  save-error: "MFA could not be saved"
+  save-error: "No se ha podido guardar"
 
 chpass:
   title: "Change password"
@@ -48,7 +48,7 @@ chpass:
   send: "Change"
   back-label: "Back"
   back-text: "{0}"
-  save-error: "Password could not be saved"
+  save-error: "No se ha podido guardar"
 
 consent:
   title: "Permissions"

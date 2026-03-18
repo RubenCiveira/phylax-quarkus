@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController.Challenge;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.testing.oauth.alt.FixedClientStoreGateway;
@@ -100,9 +100,9 @@ public abstract class OidcIntegrationTestBase {
     Assertions.assertEquals(expected, scopes);
   }
 
-  protected Challenge decodeChallenge(String cookie) {
-    Optional<Challenge> challenge =
-        tokenBuilder.verifyChalleger(Challenge.class, cookie, OidcTestFixtures.TENANT);
+  protected ChallengesState decodeChallenge(String cookie) {
+    Optional<ChallengesState> challenge =
+        tokenBuilder.verifyChalleger(ChallengesState.class, cookie, OidcTestFixtures.TENANT);
     Assertions.assertTrue(challenge.isPresent());
     return challenge.get();
   }

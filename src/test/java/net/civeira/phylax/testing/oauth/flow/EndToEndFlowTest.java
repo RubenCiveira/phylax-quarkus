@@ -35,13 +35,13 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
         OidcTestFixtures.PASSWORD, null);
     String preSession = client.extractPreSessionCookie(login);
     Assertions.assertTrue(
-        decodeChallenge(preSession).getChallenges().contains(AuthenticationChallege.USE_CONSENT));
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.USE_CONSENT));
 
     Response consent =
         client.submitConsent(OidcTestFixtures.TENANT, "on", OidcTestFixtures.CLIENT_ID, preSession);
     String preSessionAfterConsent = client.extractPreSessionCookie(consent);
     Assertions.assertNotNull(preSessionAfterConsent);
-    Assertions.assertTrue(decodeChallenge(preSessionAfterConsent).getChallenges()
+    Assertions.assertTrue(decodeChallenge(preSessionAfterConsent).getCompleted()
         .contains(AuthenticationChallege.MFA));
 
     Response mfa = client.submitMfa(OidcTestFixtures.TENANT, OidcTestFixtures.MFA_CODE,
@@ -67,14 +67,14 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Response login = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null);
     String preSession = client.extractPreSessionCookie(login);
-    Assertions.assertTrue(decodeChallenge(preSession).getChallenges()
-        .contains(AuthenticationChallege.FRESH_PASSWORD));
+    Assertions.assertTrue(
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.FRESH_PASSWORD));
 
     Response newPass = client.submitNewPass(OidcTestFixtures.TENANT, OidcTestFixtures.PASSWORD,
         "New@Password1", preSession);
     String preSessionAfterPass = client.extractPreSessionCookie(newPass);
     Assertions.assertNotNull(preSessionAfterPass);
-    Assertions.assertTrue(decodeChallenge(preSessionAfterPass).getChallenges()
+    Assertions.assertTrue(decodeChallenge(preSessionAfterPass).getCompleted()
         .contains(AuthenticationChallege.USE_CONSENT));
 
     Response consent = client.submitConsent(OidcTestFixtures.TENANT, "on",
@@ -99,8 +99,8 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(200, login.statusCode());
     Assertions
         .assertTrue(login.getBody().asString().contains("name=\"step\" value=\"scope_consent\""));
-    Assertions.assertTrue(decodeChallenge(preSession).getChallenges()
-        .contains(AuthenticationChallege.CLIENT_CONSENT));
+    Assertions.assertTrue(
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.CLIENT_CONSENT));
 
     Response scopeConsent = client.submitScopeConsent(OidcTestFixtures.TENANT, preSession);
 
