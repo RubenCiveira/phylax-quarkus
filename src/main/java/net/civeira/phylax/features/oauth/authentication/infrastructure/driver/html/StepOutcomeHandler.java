@@ -1,0 +1,98 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.application.AuthenticateUser;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+
+/**
+ * Handles {@link StepOutcome} values from step processing and routes the result.
+ *
+ * <p>
+ * Extracted from {@code AuthorizeHtml} so that both the main controller and dedicated endpoint
+ * controllers ({@code /recover}, {@code /register}, etc.) can reuse the same coordination logic
+ * without circular dependencies.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class StepOutcomeHandler {
+
+  private final AuthenticateUser authenticateUser;
+  private final OidcResponseBuilder responseBuilder;
+  private final OidcStepRouter router;
+  private final OidcCookieManager cookieManager;
+
+  /**
+   * Dispatches a {@link StepOutcome} to either render a response or continue the auth flow.
+   *
+   * @param outcome the step outcome
+   * @param input the current request context
+   * @param paramMap the form parameters
+   * @return the JAX-RS response
+   */
+  public Response handle(StepOutcome outcome, StepInput input,
+      MultivaluedMap<String, String> paramMap) {
+    return switch (outcome) {
+      case StepOutcome.Render r -> r.response();
+      case StepOutcome.Proceed p -> {
+        AuthenticationResult result = authenticateUser.preAuthenticate(p.request(),
+            p.challengesState().getCompleted(), p.username(), p.clientDetails());
+        yield routeChallenge(result, p.challengesState(), p.clientDetails(), p.request(), paramMap);
+      }
+    };
+  }
+
+  /**
+   * Routes an authentication result to a redirect, next challenge form, or login error.
+   *
+   * <p>
+   * On success builds the redirect response. On a known challenge writes the pre-session cookie and
+   * paints the challenge form. On an unknown failure shows the login form with an error.
+   *
+   * @param result the authentication result
+   * @param currentState challenges already completed
+   * @param client the OAuth client
+   * @param request the auth request
+   * @param paramMap the form parameters
+   * @return the JAX-RS response
+   */
+  public Response routeChallenge(AuthenticationResult result, ChallengesState currentState,
+      ClientDetails client, AuthRequest request, MultivaluedMap<String, String> paramMap) {
+    if (result.isRight()) {
+      return responseBuilder.successRedirect(Optional.empty(), client, "form", request,
+          result.getData(), paramMap);
+    }
+    AuthenticationException ex = result.getFail();
+    Optional<AuthenticationChallege> ch = router.challengeFor(ex.getClass());
+    StepInput fallbackInput = StepInput.builder().request(request).clientDetails(client)
+        .challenges(Optional.of(currentState)).formParams(paramMap).build();
+    if (ch.isEmpty()) {
+      return router.paintFallback(fallbackInput,
+          AuthorizeHtml.i18n(request.getLocale(), "login.wrong-credentials"));
+    }
+    ChallengesState next = currentState.withCompleted(ch.get());
+    NewCookie preSession = cookieManager.writePreSession(next, request.getTenant());
+    StepInput nextInput = StepInput.builder().request(request).clientDetails(client)
+        .challenges(Optional.of(next)).formParams(paramMap).build();
+    return router.paint(ex.getClass(), nextInput, preSession)
+        .orElseGet(() -> router.paintFallback(fallbackInput,
+            AuthorizeHtml.i18n(request.getLocale(), "login.wrong-credentials")));
+  }
+
+  /** Returns the first value for a parameter key (delegates to {@link AuthorizeHtml#first}). */
+  public static String first(Map<String, List<String>> paramMap, String key) {
+    return AuthorizeHtml.first(paramMap, key);
+  }
+}

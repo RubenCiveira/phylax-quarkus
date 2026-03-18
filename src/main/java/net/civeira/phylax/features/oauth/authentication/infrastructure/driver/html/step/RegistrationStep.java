@@ -59,6 +59,19 @@ public class RegistrationStep implements OidcStep {
   }
 
   @Override
+  public Set<String> initialStepNames() {
+    return Set.of("show-register");
+  }
+
+  @Override
+  public Optional<Response> paintInitial(StepInput input, String error) {
+    if (!allowRegister(input.tenant())) {
+      return Optional.empty();
+    }
+    return Optional.of(doPaintRegisterForm(input.locale(), null));
+  }
+
+  @Override
   public Response paint(StepInput input, NewCookie preSession) {
     throw new IllegalStateException("RegistrationStep is not triggered by a challenge exception");
   }

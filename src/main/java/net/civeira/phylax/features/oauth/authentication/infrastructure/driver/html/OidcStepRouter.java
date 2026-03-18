@@ -37,6 +37,12 @@ public class OidcStepRouter {
   /** AuthenticationException subclass → OidcStep that paints the challenge form */
   private volatile Map<Class<? extends AuthenticationException>, OidcStep> byException;
 
+  /** Initial-render step name → OidcStep (for named show-xxx dispatches) */
+  private volatile Map<String, OidcStep> byInitialStepName;
+
+  /** The fallback step (registered under initial step name {@code "login"}). */
+  private volatile OidcStep loginStep;
+
   /**
    * Processes a form submission by delegating to the step that owns the current step name.
    *
@@ -87,20 +93,64 @@ public class OidcStepRouter {
     return step != null ? Optional.ofNullable(step.challenge()) : Optional.empty();
   }
 
+  /**
+   * Renders the initial form for the named step (e.g. {@code show-recover},
+   * {@code delegated-login}).
+   *
+   * <p>
+   * If the resolved step's {@link OidcStep#paintInitial} returns empty (step not available), falls
+   * back to the login form.
+   *
+   * @param stepName the initial-render step name from the form param or dispatch logic
+   * @param input the current request context
+   * @param error optional error message; {@code null} for no error
+   * @return rendered response, or {@code empty} if no step is registered for this name
+   */
+  public Optional<Response> paintNamed(String stepName, StepInput input, String error) {
+    initCache();
+    OidcStep step = byInitialStepName.get(stepName);
+    if (step == null) {
+      return Optional.empty();
+    }
+    return Optional.of(step.paintInitial(input, error).orElseGet(() -> paintFallback(input, null)));
+  }
+
+  /**
+   * Renders the fallback login form.
+   *
+   * <p>
+   * Delegates to the {@link OidcStep} that registered {@code "login"} as an initial step name.
+   *
+   * @param input the current request context
+   * @param error optional error message; {@code null} for no error
+   * @return rendered login form response
+   * @throws IllegalStateException if no step registered {@code "login"}
+   */
+  public Response paintFallback(StepInput input, String error) {
+    initCache();
+    if (loginStep == null) {
+      throw new IllegalStateException("No OidcStep declares 'login' as an initialStepName");
+    }
+    return loginStep.paintInitial(input, error)
+        .orElseThrow(() -> new IllegalStateException("LoginStep returned empty from paintInitial"));
+  }
+
   private synchronized void initCache() {
     if (byStepName != null) {
       return;
     }
     Map<String, OidcStep> stepNames = new HashMap<>();
     Map<Class<? extends AuthenticationException>, OidcStep> exceptions = new HashMap<>();
-    allSteps.forEach(step -> {
-      step.stepNames().forEach(name -> {
+    Map<String, OidcStep> initialNames = new HashMap<>();
+    OidcStep foundLoginStep = null;
+    for (OidcStep step : allSteps) {
+      for (String name : step.stepNames()) {
         OidcStep previous = stepNames.put(name, step);
         if (previous != null) {
           log.warn("Two OidcStep beans claim the same step name '{}': {} and {}", name,
               previous.getClass().getSimpleName(), step.getClass().getSimpleName());
         }
-      });
+      }
       if (step.challengeException() != null) {
         OidcStep previous = exceptions.put(step.challengeException(), step);
         if (previous != null) {
@@ -109,8 +159,20 @@ public class OidcStepRouter {
               step.getClass().getSimpleName());
         }
       }
-    });
+      for (String name : step.initialStepNames()) {
+        OidcStep previous = initialNames.put(name, step);
+        if (previous != null) {
+          log.warn("Two OidcStep beans claim the same initial step name '{}': {} and {}", name,
+              previous.getClass().getSimpleName(), step.getClass().getSimpleName());
+        }
+        if ("login".equals(name)) {
+          foundLoginStep = step;
+        }
+      }
+    }
     byStepName = stepNames;
     byException = exceptions;
+    byInitialStepName = initialNames;
+    loginStep = foundLoginStep;
   }
 }

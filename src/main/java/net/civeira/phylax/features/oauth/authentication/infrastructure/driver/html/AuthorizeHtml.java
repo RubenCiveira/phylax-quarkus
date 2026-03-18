@@ -2,7 +2,6 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.h
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -21,33 +20,23 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.features.oauth.authentication.application.AuthenticateUser;
+import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
-import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.DelegatedStep;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.NewMfaStep;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.RecoverStep;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.RegistrationStep;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
-import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
-import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
-import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
-import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 /**
  * Main HTML controller for the OAuth/OIDC authorization user interface.
@@ -84,9 +73,9 @@ public class AuthorizeHtml {
 
 
   /**
-   * Use case for credential validation and pre-authenticated flows.
+   * Application service for credential validation and pre-authenticated flows.
    */
-  private final LoginUsecase loginUsecase;
+  private final AuthenticateUser authenticateUser;
   /**
    * Helper to build secure HTML responses and scripts.
    */
@@ -102,21 +91,9 @@ public class AuthorizeHtml {
   private final OidcStepRouter router;
 
   /**
-   * Step for password recovery flows (also exposes direct controller endpoints).
+   * Handles {@link StepOutcome} values and routes auth results back into the flow.
    */
-  private final RecoverStep recoverStep;
-  /**
-   * Step for user registration flows (also exposes direct controller endpoints).
-   */
-  private final RegistrationStep registrationStep;
-  /**
-   * Step for new MFA enrollment (also exposes the QR-image endpoint).
-   */
-  private final NewMfaStep newMfaStep;
-  /**
-   * Step for delegated login callbacks (also exposes back-login form and token parsing).
-   */
-  private final DelegatedStep delegatedStep;
+  private final StepOutcomeHandler stepOutcomeHandler;
 
   /**
    * Manages PRE_SESSION_ID and AUTH_SESSION_ID cookie lifecycle.
@@ -133,17 +110,9 @@ public class AuthorizeHtml {
    */
   private final ClientStoreGateway clientRetrieve;
   /**
-   * Token builder used for session tokens and ID tokens.
+   * Application service for authenticated session lifecycle.
    */
-  private final JwtTokenBuilder tokenBuilder;
-  /**
-   * Session store gateway for authenticated sessions.
-   */
-  private final SessionStoreGateway sessionStore;
-  /**
-   * Use case for delegated login providers.
-   */
-  private final DelegateLogin delegateLogin;
+  private final SessionManager sessionManager;
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
@@ -170,24 +139,11 @@ public class AuthorizeHtml {
       @CookieParam(AUTH_SESSION_ID) String cookie, final @Context UriInfo req,
       @Context HttpHeaders headers) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request).flatMap(_ -> sessionStore.loadSession(cookie))
+    return loadClient(request).flatMap(_ -> sessionManager.loadSession(cookie))
         .map(sessionInfo -> securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Data",
             "<h1>Ficha de " + sessionInfo.getValidationData().getUsername() + "</h1>",
             request.getLocale()))))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
-  }
-
-  @GET
-  @Produces(TEXT_HTML)
-  @Path("oauth/openid/{tenant}/delegated-auth")
-  /**
-   * Handles delegated login return from external providers.
-   */
-  public Response processDelegated(final @PathParam(TENANT) String tenant,
-      @QueryParam("provider") String provider, @QueryParam("code") String code,
-      final @Context UriInfo req, @Context HttpHeaders headers) {
-    Locale locale = headers.getAcceptableLanguages().get(0);
-    return delegatedStep.doBackLoginForm(tenant, provider, code, locale, null);
   }
 
   @GET
@@ -200,12 +156,15 @@ public class AuthorizeHtml {
       @Context HttpHeaders headers) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
     return loadClient(request).map(loadClient -> {
-      return sessionStore.loadSession(session)
+      return sessionManager.loadSession(session)
           .map(sessionInfo -> doPaintVerifySession(sessionInfo, loadClient, request, session))
           .orElseGet(() -> {
-            return "none".equals(request.getPrompt().orElse(""))
-                ? responseBuilder.errorRedirect(request, "no session")
-                : doPaintLoginForm(request, null, null);
+            if ("none".equals(request.getPrompt().orElse(""))) {
+              return responseBuilder.errorRedirect(request, "no session");
+            }
+            StepInput input = StepInput.builder().request(request).clientDetails(loadClient)
+                .challenges(Optional.empty()).formParams(new MultivaluedHashMap<>()).build();
+            return router.paintFallback(input, null);
           });
     }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
@@ -221,94 +180,10 @@ public class AuthorizeHtml {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
     return loadClient(request)
-        .map(loadClient -> sessionStore.loadSession(session)
+        .map(loadClient -> sessionManager.loadSession(session)
             .map(sessionInfo -> doCheckSession(sessionInfo, loadClient, request, paramMap, session))
             .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie)))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
-  }
-
-  @GET
-  @Path("oauth/openid/{tenant}/mfa-setup")
-  /**
-   * Returns the MFA enrollment image when required.
-   */
-  public Response showMfaSelector(final @PathParam(TENANT) String tenant,
-      final @Context UriInfo req, @Context HttpHeaders headers,
-      @CookieParam(PRE_SESSION_ID) String cookie) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
-
-    return cookieManager.readPreSession(cookie, tenant).map(ChallengesState::getUsername)
-        .flatMap(user -> newMfaStep.mfaImage(tenant, user))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
-  }
-
-  @GET
-  @Path("oauth/openid/{tenant}/recover")
-  /**
-   * Displays the password recovery form for a user.
-   */
-  public Response showRecover(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
-      @Context HttpHeaders headers, @QueryParam(USERNAME) String username,
-      @QueryParam("recovercode") String recovercode) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
-
-    return loadClient(request)
-        .map(_ -> recoverStep.doPaintWaitRecover(request.getLocale(), null, username, recovercode))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
-  }
-
-  @POST
-  @Path("oauth/openid/{tenant}/recover")
-  /**
-   * Processes recovery form submissions.
-   */
-  public Response checkRecover(final @PathParam(TENANT) String tenant,
-      @QueryParam(USERNAME) String username, @Context UriInfo req,
-      final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers,
-      @CookieParam(PRE_SESSION_ID) String cookie) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
-
-    return loadClient(request).map(clientDetails -> {
-      Optional<ChallengesState> challengeState = cookieManager.readPreSession(cookie, tenant);
-      StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
-          .challenges(challengeState).formParams(paramMap).build();
-      return recoverStep.doExecFinal(input).map(outcome -> handleOutcome(outcome, input, paramMap))
-          .orElseGet(() -> Response.status(400).build());
-    }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
-  }
-
-  @GET
-  @Path("oauth/openid/{tenant}/register")
-  /**
-   * Displays the registration verification form.
-   */
-  public Response showRegister(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
-      @Context HttpHeaders headers, @QueryParam("email") String email,
-      @QueryParam("regcode") String regcode) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request)
-        .map(_ -> registrationStep.doPaintVerifyForm(request.getLocale(), email, regcode, null))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
-  }
-
-  @POST
-  @Path("oauth/openid/{tenant}/register")
-  /**
-   * Processes registration verification submissions.
-   */
-  public Response checkRegister(final @PathParam(TENANT) String tenant,
-      @QueryParam("email") String email, @Context UriInfo req,
-      final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers,
-      @CookieParam(PRE_SESSION_ID) String cookie) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request).map(clientDetails -> {
-      Optional<ChallengesState> challengeState = cookieManager.readPreSession(cookie, tenant);
-      StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
-          .challenges(challengeState).formParams(paramMap).build();
-      return registrationStep.doExecVerify(input, email)
-          .map(outcome -> handleOutcome(outcome, input, paramMap))
-          .orElseGet(() -> Response.status(400).build());
-    }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
   @POST
@@ -319,7 +194,7 @@ public class AuthorizeHtml {
   public Response revoke(final @PathParam(TENANT) String tenant,
       @CookieParam(PRE_SESSION_ID) String cookie, final MultivaluedMap<String, String> paramMap,
       final @Context HttpHeaders headers) {
-    sessionStore.deleteSession(cookie);
+    sessionManager.removeSession(cookie);
     return Response.ok().build();
   }
 
@@ -331,7 +206,7 @@ public class AuthorizeHtml {
   public Response logout(final @PathParam(TENANT) String tenant,
       @CookieParam("AUTH_SESSION_ID") String cookie,
       @QueryParam("post_logout_redirect_uri") String redirect) {
-    sessionStore.deleteSession(cookie);
+    sessionManager.removeSession(cookie);
     String to = redirect;
     int onClean = to.indexOf('?');
     if (-1 != onClean) {
@@ -365,7 +240,9 @@ public class AuthorizeHtml {
     } else if ("none".equals(prompt)) {
       return responseBuilder.errorRedirect(request, "invalid client");
     } else {
-      return doPaintLoginForm(request, null, null);
+      StepInput input = StepInput.builder().request(request).clientDetails(loadClient)
+          .challenges(Optional.empty()).formParams(paramMap).build();
+      return router.paintFallback(input, null);
     }
   }
 
@@ -385,82 +262,6 @@ public class AuthorizeHtml {
   }
 
   /**
-   * Renders the primary login form.
-   */
-  private Response doPaintLoginForm(AuthRequest request, String msg, String chagenlle) {
-    Locale locale = request.getLocale();
-    String js = securer.configureScripts(securer.focusOn(USERNAME), securer.addSign("sign"),
-        securer.cypher(
-            Arrays
-                .asList(EncrytFieldTransfer.builder().from("type_password").to("password").build()),
-            "login"));
-    String title = i18n(locale, "login.title");
-    String error = i18n(locale, "login.error-format", msg);
-    String help = i18n(locale, "login.help", request.getTenant());
-    String username = i18n(locale, "login.username");
-    String password = i18n(locale, "login.password");
-    String recoverLabel = i18n(locale, "login.recover-label");
-    String recoverText = "<input class=\"inline\" type=\"submit\" value=\"" + recoverLabel + "\"/>";
-    String enter = i18n(locale, "login.enter");
-
-    StringBuilder delegatedLogins = new StringBuilder();
-    StringBuilder execAuto = new StringBuilder();
-
-    for (DelegatedAccessExternalProvider provider : delegateLogin.providers(request)) {
-      DelegatedProviderDescription info = provider.info(request);
-      delegatedLogins.append("                    <form method=\"POST\" id=\"social-form-"
-          + info.getId() + "\" class=\"social-form\">\r\n"
-          + "                        <input type=\"hidden\" name=\"step\" value=\"delegated-login\" />"
-          + "                        <input type=\"hidden\" name=\"delegated-provider\" value=\""
-          + info.getId() + "\" />"
-          + "                        <button type=\"submit\" class=\"social-button\">\r\n"
-          + "                            <img src=\"" + info.getLogo() + "\" alt=\""
-          + info.getName() + "\">\r\n" + "                        </button>\r\n"
-          + "                    </form>\r\n");
-
-      if (info.isAutomatic()) {
-        execAuto.append(
-            "<script>" + "document.addEventListener('DOMContentLoaded', function(event) {\r\n"
-                + "document.getElementById(\"social-form-" + info.getId() + "\").submit();" + "});"
-                + "</script>");
-      }
-    }
-
-    if (!delegatedLogins.isEmpty()) {
-      delegatedLogins.append(
-          " <div class=\"social-login-buttons\">\r\n" + "" + delegatedLogins + "" + "</div>");
-    }
-
-    return securer
-        .secureHtmlResponse(Response
-            .ok(decorator.getFullPage("Login",
-                js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
-                    + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-                    + "<form id=\"login\" method=\"POST\">"
-                    + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + username
-                    + " <input type=\"text\" id=\"username\" name=\"username\" value=\""
-                    + "\" /></label>" + "<label>" + password
-                    + " <input type=\"password\" id=\"type_password\" value=\"" + "\" /></label>"
-                    + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"" + "\" />"
-                    + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-                    + enter + "\" />" + "</form>" + delegatedLogins + execAuto
-                    + (recoverStep.allowRecover(request.getTenant())
-                        ? "<form method=\"POST\">"
-                            + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />"
-                            + "<p>" + recoverText + "</p></form>"
-                        : "")
-                    + (registrationStep.allowRegister(request.getTenant())
-                        ? "<form method=\"POST\">"
-                            + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />"
-                            + "<p>" + "<input class=\"inline\" type=\"submit\" value=\""
-                            + i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
-                        : ""),
-                locale))
-            .type(TEXT_HTML).cookie(cookieManager.clearAuthSession(request.getTenant()))
-            .cookie(cookieManager.clearPreSession(request.getTenant())));
-  }
-
-  /**
    * Executes the next step in the form-based flow via the OidcStepRouter.
    */
   private Response doExecStep(ClientDetails clientDetails, AuthRequest request,
@@ -469,29 +270,24 @@ public class AuthorizeHtml {
     Optional<ChallengesState> challengeState =
         cookieManager.readPreSession(cookie, request.getTenant());
 
-    // Direct steps not routed through OidcStepRouter
-    if ("delegated-login".equals(step)) {
-      return delegatedStep.doPaintLoginForm(request.getTenant(),
-          first(paramMap, "delegated-provider"), request.getLocale(), null);
-    }
-    if ("show-recover".equals(step)) {
-      return recoverStep.doPaintRecoverForm(request.getLocale(), null);
-    }
-    if ("show-register".equals(step)) {
-      return registrationStep.allowRegister(request.getTenant())
-          ? registrationStep.doPaintRegisterForm(request.getLocale(), null)
-          : doPaintLoginForm(request, null, null);
-    }
-    if ("start".equals(step) && challengeState.isPresent()) {
-      return doPaintLoginForm(request, null, null);
-    }
-
     StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
         .challenges(challengeState).formParams(paramMap).build();
 
+    // Initial-render requests (show-recover, show-register, delegated-login, start)
+    if (step != null && !step.isEmpty()) {
+      if ("start".equals(step) && challengeState.isPresent()) {
+        return router.paintFallback(input, null);
+      }
+      Optional<Response> named = router.paintNamed(step, input, null);
+      if (named.isPresent()) {
+        return named.get();
+      }
+    }
+
+    // Form submission routing
     Optional<StepOutcome> outcome = router.process(input);
     if (outcome.isPresent()) {
-      return handleOutcome(outcome.get(), input, paramMap);
+      return stepOutcomeHandler.handle(outcome.get(), input, paramMap);
     }
 
     List<AuthenticationChallege> challenges =
@@ -500,76 +296,15 @@ public class AuthorizeHtml {
   }
 
   /**
-   * Dispatches a {@link StepOutcome} to either render a response or continue the flow.
-   */
-  private Response handleOutcome(StepOutcome outcome, StepInput input,
-      MultivaluedMap<String, String> paramMap) {
-    return switch (outcome) {
-      case StepOutcome.Render r -> r.response();
-      case StepOutcome.Proceed p -> handleProceed(p, paramMap);
-    };
-  }
-
-  /**
-   * Continues the auth flow after a step signals proceed.
-   *
-   * Calls {@code fillPreAuthenticated} with the already-completed challenges. On success, redirects
-   * with an auth code. On a new challenge, writes the updated pre-session cookie and paints the
-   * next step form.
-   */
-  private Response handleProceed(StepOutcome.Proceed proceed,
-      MultivaluedMap<String, String> paramMap) {
-    List<AuthenticationChallege> alreadyDone = proceed.challengesState().getCompleted();
-    AuthenticationResult result = loginUsecase.fillPreAuthenticated(proceed.request(),
-        proceed.username(), proceed.clientDetails(), alreadyDone);
-
-    if (result.isRight()) {
-      return responseBuilder.successRedirect(Optional.empty(), proceed.clientDetails(), "form",
-          proceed.request(), result.getData(), paramMap);
-    }
-
-    AuthenticationException ex = result.getFail();
-    Optional<AuthenticationChallege> ch = router.challengeFor(ex.getClass());
-    if (ch.isEmpty()) {
-      return doPaintLoginForm(proceed.request(), "Credenciales incorrectas", null);
-    }
-    ChallengesState next = proceed.challengesState().withCompleted(ch.get());
-    NewCookie preSession = cookieManager.writePreSession(next, proceed.request().getTenant());
-    StepInput nextInput =
-        StepInput.builder().request(proceed.request()).clientDetails(proceed.clientDetails())
-            .challenges(Optional.of(next)).formParams(paramMap).build();
-    return router.paint(ex.getClass(), nextInput, preSession)
-        .orElseGet(() -> doPaintLoginForm(proceed.request(), "Credenciales incorrectas", null));
-  }
-
-  /**
    * Executes a username/password login and routes results.
    */
   private Response doExecLogin(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, List<AuthenticationChallege> challenges) {
-    String grant = "form";
     String password = securer.decrypt(first(paramMap, "password"));
-    AuthenticationResult authenticate = loginUsecase.validatedUserData(request,
-        first(paramMap, USERNAME), password, clientDetails, challenges);
-
-    if (authenticate.isRight()) {
-      return responseBuilder.successRedirect(Optional.empty(), clientDetails, grant, request,
-          authenticate.getData(), paramMap);
-    }
-
-    AuthenticationException ex = authenticate.getFail();
-    Optional<AuthenticationChallege> ch = router.challengeFor(ex.getClass());
-    if (ch.isEmpty()) {
-      return doPaintLoginForm(request, "Credenciales incorrectas", null);
-    }
-    String username = first(paramMap, USERNAME);
-    String tenant = request.getTenant();
-    ChallengesState state = ChallengesState.empty(username).withCompleted(ch.get());
-    NewCookie preSession = cookieManager.writePreSession(state, tenant);
-    StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
-        .challenges(Optional.of(state)).formParams(paramMap).build();
-    return router.paint(ex.getClass(), input, preSession)
-        .orElseGet(() -> doPaintLoginForm(request, "Credenciales incorrectas", null));
+    AuthenticationResult result = authenticateUser.authenticate(request, challenges,
+        first(paramMap, USERNAME), password, clientDetails);
+    return stepOutcomeHandler.routeChallenge(result,
+        ChallengesState.empty(first(paramMap, USERNAME)), clientDetails, request, paramMap);
   }
 
   /**

@@ -83,4 +83,35 @@ public interface OidcStep {
    *         the flow may continue
    */
   Optional<StepOutcome> process(StepInput input);
+
+  /**
+   * The set of step names that trigger the initial rendering of this form.
+   *
+   * <p>
+   * These names are used by {@link OidcStepRouter#paintNamed} to resolve which step to paint when
+   * the controller receives a step name that is not a form submission (e.g. {@code show-recover},
+   * {@code delegated-login}). The special name {@code "login"} identifies the fallback step shown
+   * when no other step matches.
+   *
+   * @return set of step names; defaults to empty (step does not support direct initial rendering)
+   */
+  default Set<String> initialStepNames() {
+    return Set.of();
+  }
+
+  /**
+   * Renders the initial form for this step when shown proactively (not triggered by a challenge).
+   *
+   * <p>
+   * Called by {@link OidcStepRouter#paintNamed} and {@link OidcStepRouter#paintFallback}. Returns
+   * {@code empty} when the step is unavailable (e.g. feature disabled for the tenant), causing the
+   * router to fall back to the login form.
+   *
+   * @param input the current request context
+   * @param error optional error message to display; {@code null} for no error
+   * @return rendered response, or {@code empty} if this step is not available
+   */
+  default Optional<Response> paintInitial(StepInput input, String error) {
+    return Optional.empty();
+  }
 }

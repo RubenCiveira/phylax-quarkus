@@ -58,6 +58,16 @@ public class RecoverStep implements OidcStep {
   }
 
   @Override
+  public Set<String> initialStepNames() {
+    return Set.of("show-recover");
+  }
+
+  @Override
+  public Optional<Response> paintInitial(StepInput input, String error) {
+    return Optional.of(doPaintRecoverForm(input.locale(), null));
+  }
+
+  @Override
   public Response paint(StepInput input, NewCookie preSession) {
     throw new IllegalStateException("RecoverStep is not triggered by a challenge exception");
   }

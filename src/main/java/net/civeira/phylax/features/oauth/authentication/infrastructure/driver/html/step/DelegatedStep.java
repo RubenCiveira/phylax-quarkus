@@ -61,6 +61,17 @@ public class DelegatedStep implements OidcStep {
   }
 
   @Override
+  public Set<String> initialStepNames() {
+    return Set.of("delegated-login");
+  }
+
+  @Override
+  public Optional<Response> paintInitial(StepInput input, String error) {
+    String provider = AuthorizeHtml.first(input.getFormParams(), "delegated-provider");
+    return Optional.of(doPaintLoginForm(input.tenant(), provider, input.locale(), null));
+  }
+
+  @Override
   public Response paint(StepInput input, NewCookie preSession) {
     throw new IllegalStateException("DelegatedStep is not triggered by a challenge exception");
   }

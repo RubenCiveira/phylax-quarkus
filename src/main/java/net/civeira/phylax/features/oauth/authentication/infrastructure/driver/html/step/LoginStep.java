@@ -1,0 +1,159 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
+
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
+
+/**
+ * Renders the primary login form for the OIDC authorization flow.
+ *
+ * <p>
+ * Responsibilities: build the login HTML with delegated-provider buttons, recover link, and
+ * register link based on tenant configuration.
+ *
+ * <p>
+ * Design notes: isolated from routing and authentication logic — only handles presentation.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class LoginStep implements OidcStep {
+
+  private static final String USERNAME = "username";
+
+  private final SecureHtmlBuilder securer;
+  private final DecoratePageGateway decorator;
+  private final OidcCookieManager cookieManager;
+  private final RecoverStep recoverStep;
+  private final RegistrationStep registrationStep;
+  private final DelegateLogin delegateLogin;
+
+  @Override
+  public AuthenticationChallege challenge() {
+    return null;
+  }
+
+  @Override
+  public Class<? extends AuthenticationException> challengeException() {
+    return null;
+  }
+
+  @Override
+  public Set<String> stepNames() {
+    return Set.of();
+  }
+
+  @Override
+  public Set<String> initialStepNames() {
+    return Set.of("login");
+  }
+
+  @Override
+  public Response paint(StepInput input, NewCookie preSession) {
+    throw new IllegalStateException("LoginStep is not triggered by a challenge exception");
+  }
+
+  @Override
+  public Optional<StepOutcome> process(StepInput input) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<Response> paintInitial(StepInput input, String error) {
+    return Optional.of(paintForm(input.getRequest(), error));
+  }
+
+  /**
+   * Renders the login form, optionally showing an error message.
+   *
+   * @param request current auth request (used for locale, tenant, client label)
+   * @param error optional error message to display; {@code null} for no error
+   * @return 200 HTML response with cleared session cookies
+   */
+  public Response paintForm(AuthRequest request, String error) {
+    Locale locale = request.getLocale();
+    String js = securer.configureScripts(securer.focusOn(USERNAME), securer.addSign("sign"),
+        securer.cypher(
+            Arrays
+                .asList(EncrytFieldTransfer.builder().from("type_password").to("password").build()),
+            "login"));
+
+    String title = AuthorizeHtml.i18n(locale, "login.title");
+    String errorMsg = AuthorizeHtml.i18n(locale, "login.error-format", error);
+    String help = AuthorizeHtml.i18n(locale, "login.help", request.getTenant());
+    String usernameLabel = AuthorizeHtml.i18n(locale, "login.username");
+    String passwordLabel = AuthorizeHtml.i18n(locale, "login.password");
+    String recoverLabel = AuthorizeHtml.i18n(locale, "login.recover-label");
+    String recoverText = "<input class=\"inline\" type=\"submit\" value=\"" + recoverLabel + "\"/>";
+    String enter = AuthorizeHtml.i18n(locale, "login.enter");
+
+    StringBuilder delegatedLogins = new StringBuilder();
+    StringBuilder execAuto = new StringBuilder();
+
+    for (DelegatedAccessExternalProvider provider : delegateLogin.providers(request)) {
+      DelegatedProviderDescription info = provider.info(request);
+      delegatedLogins.append("                    <form method=\"POST\" id=\"social-form-"
+          + info.getId() + "\" class=\"social-form\">\r\n"
+          + "                        <input type=\"hidden\" name=\"step\" value=\"delegated-login\" />"
+          + "                        <input type=\"hidden\" name=\"delegated-provider\" value=\""
+          + info.getId() + "\" />"
+          + "                        <button type=\"submit\" class=\"social-button\">\r\n"
+          + "                            <img src=\"" + info.getLogo() + "\" alt=\""
+          + info.getName() + "\">\r\n" + "                        </button>\r\n"
+          + "                    </form>\r\n");
+      if (info.isAutomatic()) {
+        execAuto.append(
+            "<script>" + "document.addEventListener('DOMContentLoaded', function(event) {\r\n"
+                + "document.getElementById(\"social-form-" + info.getId() + "\").submit();" + "});"
+                + "</script>");
+      }
+    }
+
+    if (!delegatedLogins.isEmpty()) {
+      delegatedLogins.append(
+          " <div class=\"social-login-buttons\">\r\n" + "" + delegatedLogins + "" + "</div>");
+    }
+
+    return securer.secureHtmlResponse(Response
+        .ok(decorator.getFullPage("Login", js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+            + (null == error ? "" : "<p class=\"error\">" + errorMsg + "</p>")
+            + "<form id=\"login\" method=\"POST\">"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + usernameLabel
+            + " <input type=\"text\" id=\"username\" name=\"username\" value=\"" + "\" /></label>"
+            + "<label>" + passwordLabel + " <input type=\"password\" id=\"type_password\" value=\""
+            + "\" /></label>" + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\""
+            + "\" />" + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+            + enter + "\" />" + "</form>" + delegatedLogins + execAuto
+            + (recoverStep.allowRecover(request.getTenant()) ? "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />" + "<p>"
+                + recoverText + "</p></form>" : "")
+            + (registrationStep.allowRegister(request.getTenant())
+                ? "<form method=\"POST\">"
+                    + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />" + "<p>"
+                    + "<input class=\"inline\" type=\"submit\" value=\""
+                    + AuthorizeHtml.i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
+                : ""),
+            locale))
+        .type(AuthorizeHtml.TEXT_HTML).cookie(cookieManager.clearAuthSession(request.getTenant()))
+        .cookie(cookieManager.clearPreSession(request.getTenant())));
+  }
+}

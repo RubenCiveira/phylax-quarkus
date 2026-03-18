@@ -1,0 +1,39 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;
+
+import java.util.Locale;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.DelegatedStep;
+
+/**
+ * Handles the return callback from delegated (SSO) providers at {@code /delegated-auth}.
+ *
+ * <p>
+ * After the external provider redirects back, this endpoint renders the back-login form that
+ * auto-posts the delegated user-code into the main auth flow.
+ */
+@Path("")
+@RequestScoped
+@RequiredArgsConstructor
+public class DelegatedAuthCallbackController {
+
+  private final DelegatedStep delegatedStep;
+
+  @GET
+  @Path("oauth/openid/{tenant}/delegated-auth")
+  public Response processDelegated(final @PathParam("tenant") String tenant,
+      @QueryParam("provider") String provider, @QueryParam("code") String code,
+      final @Context UriInfo req, @Context HttpHeaders headers) {
+    Locale locale = headers.getAcceptableLanguages().get(0);
+    return delegatedStep.doBackLoginForm(tenant, provider, code, locale, null);
+  }
+}
