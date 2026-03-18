@@ -464,7 +464,7 @@ public class ClientIdentityRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    sq.where(PartialWhere.or(
+    sq.where(PartialWhere.and(
         filter.getForAllAudiences().filter(Boolean.TRUE::equals)
             .map(_ -> PartialWhere.where("relying_party", SqlOperator.IS_NULL,
                 SqlParameterValue.ofNullString())),
