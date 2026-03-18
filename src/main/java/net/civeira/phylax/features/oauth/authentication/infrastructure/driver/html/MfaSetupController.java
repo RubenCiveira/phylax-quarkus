@@ -10,7 +10,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.NewMfaStep;
 
@@ -35,7 +34,6 @@ public class MfaSetupController {
   @Path("oauth/openid/{tenant}/mfa-setup")
   public Response showMfaImage(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, @CookieParam(OidcCookieManager.PRE_SESSION_ID) String cookie) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
     return cookieManager.readPreSession(cookie, tenant).map(ChallengesState::getUsername)
         .flatMap(user -> newMfaStep.mfaImage(tenant, user))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
