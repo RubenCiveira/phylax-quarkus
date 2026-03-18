@@ -77,11 +77,11 @@ public class AesCipherService {
   private static final String ENCRYPT_ALGO = "AES/GCM/NoPadding";
 
   /**
-   * Shared {@link SecureRandom} instance. Initializing {@code SecureRandom} is expensive because it
-   * seeds from the OS entropy pool; reusing a single instance avoids that cost on every call.
+   * Shared {@link SecureRandom} instance. Declared as an instance field (not static) so that
+   * GraalVM native-image does not capture a build-time-seeded instance in the image heap.
    * {@code SecureRandom} is thread-safe so sharing it across calls is safe.
    */
-  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+  private final SecureRandom secureRandom = new SecureRandom();
 
   /** Length of the initialization vector (IV) in bytes. */
   private static final int IV_LENGTH_BYTE = 12;
@@ -234,7 +234,7 @@ public class AesCipherService {
                 Stream.concat(getRandomSpecialChars(3), Stream.concat(getRandomAlphabets(10, false),
                     Stream.concat(getRandomNumbers(4), getRandomAlphabets(10, false)))))));
     List<Character> charList = pwdStream.collect(Collectors.toList());
-    Collections.shuffle(charList, SECURE_RANDOM);
+    Collections.shuffle(charList, secureRandom);
     return charList.stream()
         .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
   }
@@ -253,7 +253,7 @@ public class AesCipherService {
         Stream.concat(getRandomNumbers(2), Stream.concat(getRandomSpecialChars(2),
             Stream.concat(getRandomAlphabets(2, true), getRandomAlphabets(4, false))));
     List<Character> charList = pwdStream.collect(Collectors.toList());
-    Collections.shuffle(charList, SECURE_RANDOM);
+    Collections.shuffle(charList, secureRandom);
     return charList.stream()
         .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
   }
@@ -266,7 +266,7 @@ public class AesCipherService {
    * @return a stream of special characters
    */
   private Stream<Character> getRandomSpecialChars(int count) {
-    IntStream specialChars = SECURE_RANDOM.ints(count, 33, 45);
+    IntStream specialChars = secureRandom.ints(count, 33, 45);
     return specialChars.mapToObj(data -> (char) data);
   }
 
@@ -278,7 +278,7 @@ public class AesCipherService {
    * @return a stream of alphabetic characters
    */
   private Stream<Character> getRandomAlphabets(int count, boolean uppercase) {
-    IntStream specialChars = SECURE_RANDOM.ints(count, uppercase ? 65 : 97, uppercase ? 90 : 122);
+    IntStream specialChars = secureRandom.ints(count, uppercase ? 65 : 97, uppercase ? 90 : 122);
     return specialChars.mapToObj(data -> (char) data);
   }
 
@@ -289,7 +289,7 @@ public class AesCipherService {
    * @return a stream of numeric characters
    */
   private Stream<Character> getRandomNumbers(int count) {
-    IntStream specialChars = SECURE_RANDOM.ints(count, 48, 57);
+    IntStream specialChars = secureRandom.ints(count, 48, 57);
     return specialChars.mapToObj(data -> (char) data);
   }
 
@@ -316,9 +316,9 @@ public class AesCipherService {
    * @param numBytes the number of bytes to generate
    * @return a byte array filled with secure random data
    */
-  private static byte[] getRandomNonce(int numBytes) {
+  private byte[] getRandomNonce(int numBytes) {
     byte[] nonce = new byte[numBytes];
-    SECURE_RANDOM.nextBytes(nonce);
+    secureRandom.nextBytes(nonce);
     return nonce;
   }
 }
