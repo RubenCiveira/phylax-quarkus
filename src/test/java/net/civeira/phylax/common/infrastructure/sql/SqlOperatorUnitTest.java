@@ -38,8 +38,8 @@ public class SqlOperatorUnitTest {
     assertEquals("<=", SqlOperator.LTEQ.value);
     assertEquals("IN", SqlOperator.IN.value);
     assertEquals("LIKE", SqlOperator.LIKE.value);
-    assertEquals("", SqlOperator.IS_NULL.value);
-    assertEquals("", SqlOperator.IS_NOT_NULL.value);
+    assertEquals("IS NULL", SqlOperator.IS_NULL.value);
+    assertEquals("IS NOT NULL", SqlOperator.IS_NOT_NULL.value);
     assertEquals("!=", SqlOperator.NE.value);
   }
 
