@@ -34,18 +34,11 @@ public class Actor {
   }
 
   public boolean hasRole(String role) {
-    System.out.println("Miro si " + role + " esta en LOS ROLES::");
-    System.out.println(roles);
     if (role.endsWith(":*")) {
       String prefix = role.substring(0, role.length() - 1);
-      System.out.println("El prefijo es " + prefix);
-      boolean hasRole = roles.stream().anyMatch(has -> has.startsWith(prefix));
-      System.out.println("Valido si tienen a " + hasRole);
-      return hasRole;
+      return roles.stream().anyMatch(has -> has.startsWith(prefix));
     } else {
-      boolean hasRole = roles.contains(role);
-      System.out.println("Valido si tienen a " + hasRole);
-      return hasRole;
+      return roles.contains(role);
     }
   }
 

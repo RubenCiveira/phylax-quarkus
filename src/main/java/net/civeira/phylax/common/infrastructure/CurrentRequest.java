@@ -47,7 +47,8 @@ public class CurrentRequest {
   private final UriInfo uriInfo;
   private final HttpHeaders headers;
   private final @ConfigProperty(name = "mp.jwt.audiences") String audiences;
-  private final @ConfigProperty(name = "mp.jwt.roles.claim", defaultValue = "groups") String rolesClaimName;
+  private final @ConfigProperty(name = "mp.jwt.roles.claim",
+      defaultValue = "groups") String rolesClaimName;
 
   /**
    * Builds the public host URL using forwarded headers when available.
@@ -180,13 +181,12 @@ public class CurrentRequest {
       List<String> resolvedRoles;
       if ("roles".equals(rolesClaimName)) {
         JsonObject rolesJson = jwt.getClaim("roles");
-        resolvedRoles = rolesJson != null
-            ? rolesJson.entrySet().stream()
-                .flatMap(e -> e.getValue().asJsonArray().stream())
-                .filter(v -> v.getValueType() == JsonValue.ValueType.STRING)
-                .map(v -> ((JsonString) v).getString())
-                .toList()
-            : List.of();
+        resolvedRoles =
+            rolesJson != null
+                ? rolesJson.entrySet().stream().flatMap(e -> e.getValue().asJsonArray().stream())
+                    .filter(v -> v.getValueType() == JsonValue.ValueType.STRING)
+                    .map(v -> ((JsonString) v).getString()).toList()
+                : List.of();
       } else {
         resolvedRoles =
             security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList();
