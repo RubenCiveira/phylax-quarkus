@@ -1,0 +1,41 @@
+package net.civeira.phylax.features.oauth.scopes.infrastructure.driven;
+
+import java.util.List;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
+import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopeApprovalGateway;
+
+/**
+ * No-op adapter for scope approval.
+ *
+ * <p>
+ * Default implementation that approves all requested scopes automatically — no user interaction is
+ * required. Suitable for development environments and use cases where scope consent is not needed.
+ *
+ * <p>
+ * Replace this bean with a real implementation (higher CDI {@code @Priority}) to enforce scope
+ * approval in production.
+ */
+@ApplicationScoped
+public class NoOpScopeApprovalAdapter implements ScopeApprovalGateway {
+
+  /**
+   * Returns an empty list, indicating that no scope approval is required.
+   */
+  @Override
+  public List<ScopePermission> pendingApprovals(String tenant, String username, String clientId,
+      List<String> requestedScopes, List<AuthenticationChallege> completedChallenges) {
+    return List.of();
+  }
+
+  /**
+   * No-op — accepted scopes are not persisted by this adapter.
+   */
+  @Override
+  public void storeApprovedScopes(String tenant, String username, String clientId,
+      List<String> acceptedScopes) {
+    // no-op
+  }
+}

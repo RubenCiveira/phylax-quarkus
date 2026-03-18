@@ -1,0 +1,85 @@
+package net.civeira.phylax.features.oauth.user.application;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
+
+class ChangePasswordUsecaseTest {
+
+  private ChangePasswordGateway gateway;
+  private ChangePasswordUsecase usecase;
+
+  @BeforeEach
+  void setUp() {
+    gateway = mock(ChangePasswordGateway.class);
+    usecase = new ChangePasswordUsecase(gateway);
+  }
+
+  // T2.3.1
+  @Test
+  void forceUpdatePassword_success_returnsTrue() {
+    when(gateway.forceUpdatePassword("test-tenant", "alice@example.com", "old-pass", "new-pass"))
+        .thenReturn(true);
+
+    boolean result =
+        usecase.forceUpdatePassword("test-tenant", "alice@example.com", "old-pass", "new-pass");
+
+    assertTrue(result);
+  }
+
+  // T2.3.2
+  @Test
+  void forceUpdatePassword_failure_returnsFalse() {
+    when(gateway.forceUpdatePassword("test-tenant", "alice@example.com", "wrong", "new-pass"))
+        .thenReturn(false);
+
+    boolean result =
+        usecase.forceUpdatePassword("test-tenant", "alice@example.com", "wrong", "new-pass");
+
+    assertFalse(result);
+  }
+
+  // T2.3.3
+  @Test
+  void validateChangeRequest_valid_returnsUsername() {
+    when(gateway.validateChangeRequest("test-tenant", "valid-code", "newPass1!"))
+        .thenReturn(Optional.of("alice@example.com"));
+
+    Optional<String> result =
+        usecase.validateChangeRequest("test-tenant", "valid-code", "newPass1!");
+
+    assertTrue(result.isPresent());
+    assertTrue(result.get().equals("alice@example.com"));
+  }
+
+  // T2.3.4
+  @Test
+  void validateChangeRequest_invalid_returnsEmpty() {
+    when(gateway.validateChangeRequest("test-tenant", "bad-code", "newPass1!"))
+        .thenReturn(Optional.empty());
+
+    Optional<String> result = usecase.validateChangeRequest("test-tenant", "bad-code", "newPass1!");
+
+    assertFalse(result.isPresent());
+  }
+
+  // T2.3.5
+  @Test
+  void allowRecover_delegatesToGateway() {
+    when(gateway.allowRecover("test-tenant")).thenReturn(true);
+
+    boolean result = usecase.allowRecover("test-tenant");
+
+    assertTrue(result);
+    verify(gateway).allowRecover("test-tenant");
+  }
+}

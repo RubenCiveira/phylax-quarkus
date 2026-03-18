@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
@@ -20,14 +21,18 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
-import net.civeira.phylax.features.oauth.scopes.application.ScopesConsentUsecase;
+import net.civeira.phylax.features.oauth.scopes.application.ScopeApprovalUsecase;
 import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
 
 /**
- * OIDC step for client scope consent.
+ * OIDC step for scope approval.
  *
- * Handles the {@code step=scope_consent} form submission and renders the scope consent form when
- * {@link ClientScopeConsentRequiredException} is thrown by the login use case.
+ * <p>
+ * Renders a consent form showing mandatory and optional scopes when
+ * {@link ClientScopeConsentRequiredException} is thrown. Mandatory scopes are presented as
+ * read-only entries; optional scopes are rendered as opt-in checkboxes. On submission only the
+ * accepted scopes are stored and the {@link AuthRequest} is narrowed accordingly so the issued
+ * token only carries approved scopes.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -35,7 +40,7 @@ public class ScopeConsentStep implements OidcStep {
 
   private final SecureHtmlBuilder securer;
   private final DecoratePageGateway decorator;
-  private final ScopesConsentUsecase scopesConsentUsecase;
+  private final ScopeApprovalUsecase scopeApprovalUsecase;
 
   @Override
   public AuthenticationChallege challenge() {
@@ -64,19 +69,25 @@ public class ScopeConsentStep implements OidcStep {
       return Optional.empty();
     }
     String username = input.currentUser().get();
-    String scopeString = input.getRequest().getScope().orElse("");
-    scopesConsentUsecase.storeAcceptedScopes(input.getRequest().getTenant(), username,
-        input.getClientDetails().getClientId(), scopeString);
+    List<String> acceptedScopes = input.getFormParams().getOrDefault("scope_accepted", List.of());
+    scopeApprovalUsecase.storeApprovedScopes(input.getRequest().getTenant(), username,
+        input.getClientDetails().getClientId(), acceptedScopes);
+    AuthRequest narrowed = narrowScope(input.getRequest(), acceptedScopes);
     ChallengesState state = input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
     return Optional
-        .of(new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
+        .of(new StepOutcome.Proceed(username, input.getClientDetails(), narrowed, state));
   }
 
   private ResponseBuilder buildForm(StepInput input, String username, String msg) {
     String clientId = input.getRequest().getClientId().orElse("");
     String scopeString = input.getRequest().getScope().orElse("");
-    List<ScopePermission> pendingScopes = scopesConsentUsecase
-        .pendingScopes(input.getRequest().getTenant(), username, clientId, scopeString);
+    List<AuthenticationChallege> completed =
+        input.getChallenges().map(ChallengesState::getCompleted).orElse(List.of());
+    List<ScopePermission> pending = scopeApprovalUsecase.pendingApprovals(
+        input.getRequest().getTenant(), username, clientId, scopeString, completed);
+
+    List<ScopePermission> mandatory = pending.stream().filter(ScopePermission::isRequired).toList();
+    List<ScopePermission> optional = pending.stream().filter(s -> !s.isRequired()).toList();
 
     String js = securer.configureScripts(securer.addSign("sign"));
 
@@ -88,21 +99,49 @@ public class ScopeConsentStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(input.locale(), "scopeconsent.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    String scopeList = pendingScopes.stream()
-        .map(s -> "<li>" + (null != s.getLabel() ? s.getLabel() : s.getScope()) + "</li>")
+    String mandatoryInputs = mandatory.stream()
+        .map(s -> "<input type=\"hidden\" name=\"scope_accepted\" value=\"" + s.getScope() + "\" />"
+            + "<li class=\"scope-mandatory\">"
+            + (null != s.getLabel() ? s.getLabel() : s.getScope()) + "</li>")
         .collect(Collectors.joining());
+
+    String optionalCheckboxes = optional.stream()
+        .map(s -> "<li class=\"scope-optional\"><label>"
+            + "<input type=\"checkbox\" name=\"scope_accepted\" value=\"" + s.getScope()
+            + "\" checked />" + " " + (null != s.getLabel() ? s.getLabel() : s.getScope())
+            + "</label></li>")
+        .collect(Collectors.joining());
+
+    String scopeList = "<ul>" + mandatoryInputs + optionalCheckboxes + "</ul>";
 
     return Response.ok(decorator.getFullPage("scopeConsent",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
-            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<ul>" + scopeList
-            + "</ul>" + "<form method=\"POST\">"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-            + "<input type=\"hidden\" name=\"step\" value=\"scope_consent\" />"
+            + "<input type=\"hidden\" name=\"step\" value=\"scope_consent\" />" + scopeList
             + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + accept
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
             + "</form>",
         input.locale())).type(AuthorizeHtml.TEXT_HTML);
+  }
+
+  private AuthRequest narrowScope(AuthRequest original, List<String> acceptedScopes) {
+    String narrowed = String.join(" ", acceptedScopes);
+    return AuthRequest.builder()
+        .tenant(original.getTenant())
+        .clientId(original.getClientId())
+        .prompt(original.getPrompt())
+        .scope(Optional.of(narrowed))
+        .state(original.getState())
+        .nonce(original.getNonce())
+        .codeChallenge(original.getCodeChallenge())
+        .codeChallengeMethod(original.getCodeChallengeMethod())
+        .redirect(original.getRedirect())
+        .locale(original.getLocale())
+        .responseType(original.getResponseType())
+        .audiences(original.getAudiences())
+        .build();
   }
 
 }
