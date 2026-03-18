@@ -1,0 +1,146 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
+import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
+
+/**
+ * OIDC step for delegated login callbacks.
+ *
+ * Handles the {@code step=query-delegated} form submission to resolve delegated user codes. Not
+ * triggered by an authentication exception — delegated flows are initiated via explicit controller
+ * endpoints.
+ *
+ * Also exposes {@link #doBackLoginForm}, {@link #doPaintLoginForm}, and {@link #readToken} for
+ * direct use by the controller's delegated-auth endpoints.
+ */
+@Slf4j
+@ApplicationScoped
+@RequiredArgsConstructor
+public class DelegatedStep implements OidcStep {
+
+  private final ObjectMapper mapper;
+  private final SecureHtmlBuilder securer;
+  private final DelegateLogin delegateLogin;
+
+  @Override
+  public AuthenticationChallege challenge() {
+    return null;
+  }
+
+  @Override
+  public Class<? extends AuthenticationException> challengeException() {
+    return null;
+  }
+
+  @Override
+  public Set<String> stepNames() {
+    return Set.of("query-delegated");
+  }
+
+  @Override
+  public Response paint(StepInput input, NewCookie preSession) {
+    throw new IllegalStateException("DelegatedStep is not triggered by a challenge exception");
+  }
+
+  @Override
+  public Optional<StepOutcome> process(StepInput input) {
+    String usercode = input.getFormParams().getFirst("user-code");
+    String appprovider = input.getFormParams().getFirst("app-provider");
+    if (!"query-delegated".equals(input.step()) || usercode == null || appprovider == null) {
+      return Optional.empty();
+    }
+    return delegateLogin.resolveUsername(input.getRequest(), usercode, appprovider)
+        .map(username -> {
+          ChallengesState state =
+              input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+          return (StepOutcome) new StepOutcome.Proceed(username, input.getClientDetails(),
+              input.getRequest(), state);
+        });
+  }
+
+  /**
+   * Builds a back-login form to continue delegated flow.
+   *
+   * Creates a signed form that posts to the stored {@code post-auth-target} cookie. Used after a
+   * delegated provider redirects back.
+   */
+  public Response doBackLoginForm(String tenant, String provider, String code, Locale locale,
+      String msg) {
+    String js = securer.configureScripts(securer.addSignAndSend("sign", "form"));
+    return securer.secureHtmlResponse(Response
+        .ok(js + "<form id=\"form\" method=\"POST\">"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+            + "<input type=\"hidden\" name=\"user-code\" value=\"" + code + "\" />"
+            + "<input type=\"hidden\" name=\"app-provider\" value=\"" + provider + "\" />"
+            + "<input type=\"hidden\" name=\"step\" value=\"query-delegated\" />" + "</form>"
+            + "<script>" + "function getCookie(cname) {" + "let name = cname + \"=\";"
+            + "let decodedCookie = decodeURIComponent(document.cookie);"
+            + "let ca = decodedCookie.split(';');" + "for(let i = 0; i <ca.length; i++) {"
+            + "let c = ca[i];" + "while (c.charAt(0) == ' ') {"
+            + "c = c.substring(1); } if (c.indexOf(name) == 0) {"
+            + "return c.substring(name.length, c.length);}}return \"\";" + "}"
+            + "var target = getCookie(\"post-auth-target\");"
+            + "document.getElementById(\"form\").action = target;" + "</script>")
+        .type(FrontAcessController.TEXT_HTML));
+  }
+
+  /**
+   * Starts a delegated login flow by redirecting to the provider.
+   *
+   * Sets a {@code post-auth-target} cookie with the current page and triggers redirect.
+   */
+  public Response doPaintLoginForm(String tenant, String provider, Locale locale, String msg) {
+    String back = "/oauth/openid/" + tenant + "/delegated-auth?provider=" + provider + "&code=";
+    return securer.secureHtmlResponse(Response
+        .ok("" + "<script>" + "function setCookie(cname, cvalue, exhours) {"
+            + "const d = new Date();" + "d.setTime(d.getTime() + (exhours*60*60*1000));"
+            + "let expires = \"expires=\"+ d.toUTCString();"
+            + "document.cookie = cname + \"=\" + cvalue + \";\" + expires + \";path=/\";" + "}"
+            + "setCookie(\"post-auth-target\", document.location, 1);"
+            + "document.location = \"/oauth/openid/" + tenant + "/delegated/redirect/" + provider
+            + "?back=" + encode(back) + "\";" + "</script>")
+        .type(FrontAcessController.TEXT_HTML));
+  }
+
+  /**
+   * Parses a delegated token from a Base64 JSON payload.
+   *
+   * Returns an empty optional when parsing fails.
+   */
+  public Optional<TokenInfo> readToken(String str) {
+    String res = new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
+    try {
+      return Optional.of(mapper.readValue(res, TokenInfo.class));
+    } catch (IOException ex) {
+      log.warn("Se intenta login con un token sso invalido", ex);
+      return Optional.empty();
+    }
+  }
+
+  private String encode(String param) {
+    return URLEncoder.encode(param, StandardCharsets.UTF_8);
+  }
+}

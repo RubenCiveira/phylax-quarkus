@@ -1,0 +1,145 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
+
+import java.util.Optional;
+import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.NewMfaRequiredException;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
+import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
+
+/**
+ * OIDC step for new MFA enrollment.
+ *
+ * Handles the {@code step=valid_new_mfa} form submission and renders the MFA enrollment form when
+ * {@link NewMfaRequiredException} is thrown by the login use case.
+ *
+ * Also exposes {@link #mfaImage(String, String)} for serving the QR code image at the
+ * {@code ./mfa-setup} endpoint.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class NewMfaStep implements OidcStep {
+
+  private final SecureHtmlBuilder securer;
+  private final DecoratePageGateway decorator;
+  private final UserMfa userMfa;
+
+  @Override
+  public AuthenticationChallege challenge() {
+    return AuthenticationChallege.MFA;
+  }
+
+  @Override
+  public Class<? extends AuthenticationException> challengeException() {
+    return NewMfaRequiredException.class;
+  }
+
+  @Override
+  public Set<String> stepNames() {
+    return Set.of("valid_new_mfa");
+  }
+
+  @Override
+  public Response paint(StepInput input, NewCookie preSession) {
+    String username = input.currentUser().orElse("");
+    return securer.secureHtmlResponse(buildForm(input, username, null).cookie(preSession));
+  }
+
+  @Override
+  public Optional<StepOutcome> process(StepInput input) {
+    if (!"valid_new_mfa".equals(input.step()) || input.currentUser().isEmpty()) {
+      return Optional.empty();
+    }
+    String username = input.currentUser().get();
+    boolean verified = userMfa.verifyNewOtp(input.getRequest().getTenant(), username,
+        FrontAcessController.first(input.getFormParams(), "otp_code"));
+    if (verified) {
+      ChallengesState state =
+          input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
+          input.getRequest(), state));
+    } else {
+      String msg = FrontAcessController.i18n(input.locale(), "newmfa.save-error");
+      return Optional.of(new StepOutcome.Render(
+          securer.secureHtmlResponse(buildForm(input, username, msg))));
+    }
+  }
+
+  /**
+   * Returns the MFA enrollment QR image if available.
+   *
+   * Used by the controller to serve the {@code ./mfa-setup} image endpoint.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @return optional image response
+   */
+  public Optional<Response> mfaImage(String tenant, String username) {
+    PublicLoginMfaBuildResponse config =
+        userMfa.configurationForNewMfa(tenant, username, java.util.Locale.getDefault());
+    if (config.getImage() == null) {
+      return Optional.empty();
+    }
+    String imageData = config.getImage();
+    String contentType =
+        imageData.startsWith("data:") ? imageData.substring(5, imageData.indexOf(';'))
+            : "image/png";
+    String base64Data =
+        imageData.contains(",") ? imageData.substring(imageData.indexOf(',') + 1) : imageData;
+    byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
+    return Optional.of(Response.ok(imageBytes).type(contentType).build());
+  }
+
+  private ResponseBuilder buildForm(StepInput input, String username, String msg) {
+    PublicLoginMfaBuildResponse config = userMfa.configurationForNewMfa(
+        input.getRequest().getTenant(), username, input.locale());
+
+    String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("otp_code"));
+
+    String title = FrontAcessController.i18n(input.locale(), "newmfa.title");
+    String error = FrontAcessController.i18n(input.locale(), "newmfa.error-format", msg);
+    String help = FrontAcessController.i18n(input.locale(), "newmfa.help");
+    String code = FrontAcessController.i18n(input.locale(), "newmfa.code");
+    String send = FrontAcessController.i18n(input.locale(), "newmfa.send");
+    String backLabel = FrontAcessController.i18n(input.locale(), "newmfa.back-label");
+    String backText = FrontAcessController.i18n(input.locale(), "newmfa.back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+
+    return Response
+        .ok(decorator.getFullPage("newMfa",
+            js + "<h1>" + title + "</h1><p>" + help + "</p>"
+                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+                + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + (config.isRequiresImage()
+                    ? "<img style=\"width:50%;margin: 0px 25%;\" src=\"./mfa-setup\" />"
+                    : "")
+                + "<label>" + code
+                + "<input type=\"text\" name=\"otp_code\" id=\"otp_code\" value=\"\" />"
+                + "<input type=\"hidden\" name=\"step\" value=\"valid_new_mfa\" />"
+                + "</label>"
+                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                + send + "\" />"
+                + "</form>"
+                + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
+                + "<p>" + backText + "</p>"
+                + "</form>",
+            input.locale()))
+        .type(FrontAcessController.TEXT_HTML);
+  }
+}

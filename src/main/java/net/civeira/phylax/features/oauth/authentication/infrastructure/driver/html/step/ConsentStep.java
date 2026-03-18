@@ -1,0 +1,121 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
+
+import java.util.Optional;
+import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.ConsentRequiredException;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.user.application.ConsentUsecase;
+import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
+
+/**
+ * OIDC step for user consent handling.
+ *
+ * Handles the {@code step=consent} form submission and renders the consent form when
+ * {@link ConsentRequiredException} is thrown by the login use case.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class ConsentStep implements OidcStep {
+
+  private final SecureHtmlBuilder securer;
+  private final ConsentUsecase consentUsecase;
+  private final DecoratePageGateway decorator;
+
+  @Override
+  public AuthenticationChallege challenge() {
+    return AuthenticationChallege.USE_CONSENT;
+  }
+
+  @Override
+  public Class<? extends AuthenticationException> challengeException() {
+    return ConsentRequiredException.class;
+  }
+
+  @Override
+  public Set<String> stepNames() {
+    return Set.of("consent");
+  }
+
+  @Override
+  public Response paint(StepInput input, NewCookie preSession) {
+    String username = input.currentUser().orElse("");
+    return securer.secureHtmlResponse(buildForm(input, username, null).cookie(preSession));
+  }
+
+  @Override
+  public Optional<StepOutcome> process(StepInput input) {
+    if (!"consent".equals(input.step()) || input.currentUser().isEmpty()) {
+      return Optional.empty();
+    }
+    String username = input.currentUser().get();
+    String accepted = FrontAcessController.first(input.getFormParams(), "consent");
+    if ("on".equals(accepted) || "true".equals(accepted)) {
+      String relyingParty = FrontAcessController.first(input.getFormParams(), "relying_party");
+      consentUsecase.storeAcceptedConsent(input.getRequest().getTenant(), username, relyingParty);
+      ChallengesState state =
+          input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
+          input.getRequest(), state));
+    } else {
+      return Optional.of(new StepOutcome.Render(
+          securer.secureHtmlResponse(buildForm(input, username, ""))));
+    }
+  }
+
+  private ResponseBuilder buildForm(StepInput input, String username, String msg) {
+    Optional<PendingConsent> pending = consentUsecase.getPendingConsent(
+        input.getRequest().getTenant(), username, input.getRequest().getAudiences(),
+        input.locale());
+    if (pending.isEmpty()) {
+      throw new IllegalStateException("Consent is not required now...");
+    }
+    PendingConsent pendingConsent = pending.get();
+
+    String js = securer.configureScripts(securer.addSign("sign"));
+
+    String title = FrontAcessController.i18n(input.locale(), "consent.title");
+    String error = FrontAcessController.i18n(input.locale(), "consent.error-format", msg);
+    String help = FrontAcessController.i18n(input.locale(), "consent.help");
+    String code = FrontAcessController.i18n(input.locale(), "consent.code");
+    String send = FrontAcessController.i18n(input.locale(), "consent.send");
+    String backLabel = FrontAcessController.i18n(input.locale(), "consent.back-label");
+    String backText = FrontAcessController.i18n(input.locale(), "consent.back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+
+    return Response
+        .ok(decorator.getFullPage("Consent",
+            js + "<h1>" + title + "</h1><p>" + help + "</p>"
+                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+                + "<form method=\"POST\">"
+                + "<div style=\"with:100%;height:200px;overflow:auto; border:solid black 1px;\">"
+                + pendingConsent.getConsentText() + "</div>"
+                + "<label>" + code + "<input type=\"checkbox\" name=\"consent\" /></label>"
+                + "<input type=\"hidden\" name=\"relying_party\" value=\""
+                + pendingConsent.getRelyingParty() + "\" />"
+                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<input type=\"hidden\" name=\"step\" value=\"consent\" />"
+                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                + send + "\" />"
+                + "</form>"
+                + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
+                + "<p>" + backText + "</p>"
+                + "</form>",
+            input.locale()))
+        .type(FrontAcessController.TEXT_HTML);
+  }
+}

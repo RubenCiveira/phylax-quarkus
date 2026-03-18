@@ -798,60 +798,70 @@ default Class<? extends AuthenticationException> challengeException() { return n
 
 #### F11.3.2 — ScopeConsentStep
 
-- [ ] Crear `step/ScopeConsentStep.java`
+- [x] Crear `step/ScopeConsentStep.java`
   - `challengeException()` → `ClientScopeConsentRequiredException.class`
-  - `stepNames()` → `Set.of("scope-consent")` (verificar nombre real)
+  - `stepNames()` → `Set.of("scope_consent")` (underscore, verificado)
   - Migrar paint + process
-- [ ] Eliminar `ScopeConsentControllerPart.java`
+- [ ] Eliminar `ScopeConsentControllerPart.java` — **pendiente hasta F11.4**
 
 #### F11.3.3 — ConsentStep
 
-- [ ] Crear `step/ConsentStep.java`
+- [x] Crear `step/ConsentStep.java`
   - `challengeException()` → `ConsentRequiredException.class`
-  - Migrar paint + process
-- [ ] Eliminar `ConsentControllerPart.java`
+  - `stepNames()` → `Set.of("consent")`
+  - Migrar paint + process; checkbox `"on"`/`"true"`, hidden `relying_party`
+- [ ] Eliminar `ConsentControllerPart.java` — **pendiente hasta F11.4**
 
 #### F11.3.4 — NewPassStep
 
-- [ ] Crear `step/NewPassStep.java`
+- [x] Crear `step/NewPassStep.java`
   - `challengeException()` → `NewPasswordRequiredException.class`
-  - Reemplaza `"No se ha podido guardar"` → `i18n(input.locale(), "password.save-error")`
+  - `stepNames()` → `Set.of("new_pass")`
+  - Reemplaza `"No se ha podido guardar"` → `i18n(input.locale(), "chpass.save-error")`
   - Migrar paint + process
-- [ ] Eliminar `NewPassControllerPart.java`
+- [x] Añadir `chpass.save-error: "Password could not be saved"` a `oauth.yaml`
+- [ ] Eliminar `NewPassControllerPart.java` — **pendiente hasta F11.4**
 
 #### F11.3.5 — NewMfaStep
 
-- [ ] Crear `step/NewMfaStep.java`
+- [x] Crear `step/NewMfaStep.java`
   - `challengeException()` → `NewMfaRequiredException.class`
+  - `stepNames()` → `Set.of("valid_new_mfa")`
   - Migrar paint + process
-- [ ] Eliminar `NewMfaControllerPart.java`
+  - Expone `mfaImage(tenant, username)` extra (no OidcStep) para endpoint `./mfa-setup`
+- [x] Añadir `newmfa.save-error: "MFA could not be saved"` a `oauth.yaml`
+- [ ] Eliminar `NewMfaControllerPart.java` — **pendiente hasta F11.4**
 
 #### F11.3.6 — DelegatedStep
 
-- [ ] Crear `step/DelegatedStep.java`
+- [x] Crear `step/DelegatedStep.java`
   - `challenge()` → `null` (no corresponde a challenge)
-  - `stepNames()` → `Set.of("query-delegated")` + los step names del provider
+  - `stepNames()` → `Set.of("query-delegated")`
   - Migrar lógica de cookie `post-auth-target`
-- [ ] Eliminar `DelegatedControllerPart.java`
+  - Expone `doBackLoginForm`, `doPaintLoginForm`, `readToken` para endpoints del controller
+- [ ] Eliminar `DelegatedControllerPart.java` — **pendiente hasta F11.4**
 
 #### F11.3.7 — RecoverStep
 
-- [ ] Crear `step/RecoverStep.java`
+- [x] Crear `step/RecoverStep.java`
   - `challenge()` → `null`
-  - `stepNames()` → `Set.of("show-recover", "send-recover")`
-  - Inyectar `OidcUrlBuilder`, eliminar `issuer()` privado
-  - Reemplaza `"No se ha podido guardar"` → `i18n(input.locale(), "recover.save-error")`
-  - Migrar paint (formulario) + process (envío)
-- [ ] Eliminar `RecoverControllerPart.java`
+  - `stepNames()` → `Set.of("send-recover")`
+  - Reemplaza `"No se ha podido guardar"` → `i18n("recover.save-error")`
+  - Reemplaza `"Wrong code"` → `i18n("recover.wrong-code")`
+  - `doExecFinal()` ahora retorna `Optional<StepOutcome>` (en vez de `Response`)
+  - Expone `allowRecover`, `doPaintRecoverForm`, `doPaintWaitRecover` para endpoints directos
+- [x] Añadir `recover.save-error` y `recover.wrong-code` a `oauth.yaml`
+- [ ] Eliminar `RecoverControllerPart.java` — **pendiente hasta F11.4**
 
 #### F11.3.8 — RegistrationStep
 
-- [ ] Crear `step/RegistrationStep.java`
+- [x] Crear `step/RegistrationStep.java`
   - `challenge()` → `null`
-  - `stepNames()` → `Set.of("show-register", "verify-register", "send-register")`
-  - Inyectar `OidcUrlBuilder`, eliminar `issuer()` privado
-  - Migrar múltiples estados (PENDING, VERIFY, REGISTER)
-- [ ] Eliminar `RegistrationControllerPart.java`
+  - `stepNames()` → `Set.of("do_register")`
+  - Migrar múltiples estados (OK, PENDING, CANCEL) con switch expression
+  - `doExecVerify()` ahora retorna `Optional<StepOutcome>`
+  - Expone `allowRegister`, `doPaintRegisterForm`, `doPaintPendingPage`, `doPaintVerifyForm` para endpoints directos
+- [ ] Eliminar `RegistrationControllerPart.java` — **pendiente hasta F11.4**
 
 ---
 

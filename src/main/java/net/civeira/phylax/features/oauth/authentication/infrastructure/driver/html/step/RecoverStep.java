@@ -1,0 +1,184 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
+
+/**
+ * OIDC step for password recovery flows.
+ *
+ * Handles the {@code step=send-recover} form submission (sends recovery email). Not triggered by an
+ * authentication exception — recovery is user-initiated.
+ *
+ * Also exposes {@link #allowRecover}, {@link #doPaintRecoverForm}, {@link #doPaintWaitRecover}, and
+ * {@link #doExecFinal} for direct use by the controller's recovery endpoints.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class RecoverStep implements OidcStep {
+
+  private final SecureHtmlBuilder securer;
+  private final DecoratePageGateway decorator;
+  private final ChangePasswordUsecase changePasswordUsecase;
+  private final CurrentRequest current;
+
+  @Override
+  public AuthenticationChallege challenge() {
+    return null;
+  }
+
+  @Override
+  public Class<? extends AuthenticationException> challengeException() {
+    return null;
+  }
+
+  @Override
+  public Set<String> stepNames() {
+    return Set.of("send-recover");
+  }
+
+  @Override
+  public Response paint(StepInput input, NewCookie preSession) {
+    throw new IllegalStateException("RecoverStep is not triggered by a challenge exception");
+  }
+
+  @Override
+  public Optional<StepOutcome> process(StepInput input) {
+    if (!"send-recover".equals(input.step())) {
+      return Optional.empty();
+    }
+    if (!changePasswordUsecase.allowRecover(input.getRequest().getTenant())) {
+      return Optional.of(new StepOutcome.Render(
+          doPaintRecoverForm(input.locale(),
+              FrontAcessController.i18n(input.locale(), "recover.save-error"))));
+    }
+    String username = FrontAcessController.first(input.getFormParams(), "username");
+    String url = issuer(input.getRequest().getTenant()) + "/recover" + "?username="
+        + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&client_id="
+        + URLEncoder.encode(input.getClientDetails().getClientId(), StandardCharsets.UTF_8)
+        + input.getRequest().encodeInUrl() + "&recovercode=";
+    changePasswordUsecase.requestForChange(url, input.getRequest().getTenant(), username);
+    return Optional.of(new StepOutcome.Render(
+        securer.secureRedirectResponse(Response.status(302).location(FrontAcessController.buildUrl(url)))));
+  }
+
+  /**
+   * Returns whether password recovery is allowed for the given request's tenant.
+   */
+  public boolean allowRecover(StepInput input) {
+    return changePasswordUsecase.allowRecover(input.getRequest().getTenant());
+  }
+
+  /**
+   * Renders the initial recovery request form (user enters email/username).
+   */
+  public Response doPaintRecoverForm(Locale locale, String msg) {
+    String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("username"));
+
+    String title = FrontAcessController.i18n(locale, "recover.title");
+    String error = FrontAcessController.i18n(locale, "recover.error-format", msg);
+    String help = FrontAcessController.i18n(locale, "recover.help");
+    String email = FrontAcessController.i18n(locale, "recover.email");
+    String send = FrontAcessController.i18n(locale, "recover.send");
+    String backLabel = FrontAcessController.i18n(locale, "recover.back-label");
+    String backText = FrontAcessController.i18n(locale, "recover.back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+
+    return securer.secureHtmlResponse(Response
+        .ok(decorator.getFullPage("Recover",
+            js + "<h1>" + title + "</h1>"
+                + "<p>" + help + "</p>"
+                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+                + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<label>" + email
+                + "<input type=\"text\" name=\"username\" id=\"username\" value=\"\" /></label>"
+                + "<input type=\"hidden\" name=\"step\" value=\"send-recover\" />"
+                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                + send + "\" />"
+                + "</form>"
+                + "<form method=\"POST\">"
+                + "<input class=\"inline\" type=\"hidden\" name=\"step\" />"
+                + "<p>" + backText + "</p>"
+                + "</form>",
+            locale))
+        .type(FrontAcessController.TEXT_HTML));
+  }
+
+  /**
+   * Renders the recovery code form (user enters new password after clicking email link).
+   */
+  public Response doPaintWaitRecover(Locale locale, String msg, String username,
+      String recoverCode) {
+    String js = securer.configureScripts(securer.addSign("sign"),
+        securer.cypher(
+            Arrays.asList(
+                EncrytFieldTransfer.builder().from("type_password").to("password").build()),
+            "recover"),
+        securer.focusOn("password"));
+    return securer.secureHtmlResponse(Response
+        .ok(decorator.getFullPage("Recover",
+            js + "<h1>Code for Recover</h1>"
+                + (null == msg ? "" : "<p>Error: " + msg + "</p>")
+                + "<form id=\"recover\" method=\"POST\">"
+                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<label>The username: <input type=\"text\" name=\"username\" value=\""
+                + username + "\" /></label>"
+                + "<label>The code: <input type=\"text\" name=\"code\" value=\""
+                + recoverCode + "\" /></label>"
+                + "<label>New pass: <input type=\"password\" id=\"type_password\" value=\"\" /></label>"
+                + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"\" />"
+                + "<input type=\"submit\" />"
+                + "</form>",
+            locale))
+        .type(FrontAcessController.TEXT_HTML));
+  }
+
+  /**
+   * Processes the final recovery code submission and resumes the auth flow.
+   */
+  public Optional<StepOutcome> doExecFinal(StepInput input) {
+    String pass =
+        securer.decrypt(FrontAcessController.first(input.getFormParams(), "password"));
+    String code = FrontAcessController.first(input.getFormParams(), "code");
+    Optional<String> validatedUsername =
+        changePasswordUsecase.validateChangeRequest(input.getRequest().getTenant(), code, pass);
+    if (validatedUsername.isPresent()) {
+      String username = validatedUsername.get();
+      ChallengesState state = input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
+          input.getRequest(), state));
+    } else {
+      String recoverCode = FrontAcessController.first(input.getFormParams(), "recovercode");
+      String username = FrontAcessController.first(input.getFormParams(), "username");
+      return Optional.of(new StepOutcome.Render(
+          doPaintWaitRecover(input.locale(),
+              FrontAcessController.i18n(input.locale(), "recover.wrong-code"),
+              username, recoverCode)));
+    }
+  }
+
+  private String issuer(String tenant) {
+    return current.getPublicHost() + "/oauth/openid/" + tenant;
+  }
+}

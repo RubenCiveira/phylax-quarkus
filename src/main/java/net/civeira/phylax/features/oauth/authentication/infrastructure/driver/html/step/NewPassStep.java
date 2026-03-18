@@ -1,0 +1,125 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.NewPasswordRequiredException;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
+
+/**
+ * OIDC step for forced password changes.
+ *
+ * Handles the {@code step=new_pass} form submission and renders the password change form when
+ * {@link NewPasswordRequiredException} is thrown by the login use case.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class NewPassStep implements OidcStep {
+
+  private final SecureHtmlBuilder securer;
+  private final DecoratePageGateway decorator;
+  private final ChangePasswordUsecase changePasswordUsecase;
+
+  @Override
+  public AuthenticationChallege challenge() {
+    return AuthenticationChallege.FRESH_PASSWORD;
+  }
+
+  @Override
+  public Class<? extends AuthenticationException> challengeException() {
+    return NewPasswordRequiredException.class;
+  }
+
+  @Override
+  public Set<String> stepNames() {
+    return Set.of("new_pass");
+  }
+
+  @Override
+  public Response paint(StepInput input, NewCookie preSession) {
+    return securer.secureHtmlResponse(buildForm(input, null).cookie(preSession));
+  }
+
+  @Override
+  public Optional<StepOutcome> process(StepInput input) {
+    if (!"new_pass".equals(input.step()) || input.currentUser().isEmpty()) {
+      return Optional.empty();
+    }
+    String username = input.currentUser().get();
+    String oldPass = securer.decrypt(FrontAcessController.first(input.getFormParams(), "old_pass"));
+    String newPass = securer.decrypt(FrontAcessController.first(input.getFormParams(), "new_pass"));
+    boolean updated = changePasswordUsecase.forceUpdatePassword(input.getRequest().getTenant(),
+        username, oldPass, newPass);
+    if (updated) {
+      ChallengesState state =
+          input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
+          input.getRequest(), state));
+    } else {
+      String msg = FrontAcessController.i18n(input.locale(), "chpass.save-error");
+      return Optional.of(new StepOutcome.Render(
+          securer.secureHtmlResponse(buildForm(input, msg))));
+    }
+  }
+
+  private ResponseBuilder buildForm(StepInput input, String msg) {
+    String js = securer.configureScripts(
+        securer.addSign("sign"),
+        securer.cypher(
+            Arrays.asList(
+                EncrytFieldTransfer.builder().from("type_old_pass").to("old_pass").build(),
+                EncrytFieldTransfer.builder().from("type_new_pass").to("new_pass").build()),
+            "chpass"),
+        securer.focusOn("type_old_pass"));
+
+    String title = FrontAcessController.i18n(input.locale(), "chpass.title");
+    String error = FrontAcessController.i18n(input.locale(), "chpass.error-format", msg);
+    String help = FrontAcessController.i18n(input.locale(), "chpass.help");
+    String current = FrontAcessController.i18n(input.locale(), "chpass.current");
+    String newpass = FrontAcessController.i18n(input.locale(), "chpass.newpass");
+    String send = FrontAcessController.i18n(input.locale(), "chpass.send");
+    String backLabel = FrontAcessController.i18n(input.locale(), "chpass.back-label");
+    String backText = FrontAcessController.i18n(input.locale(), "chpass.back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+
+    return Response
+        .ok(decorator.getFullPage("password",
+            js + "<h1>" + title + "</h1>"
+                + "<p>" + help + "</p>"
+                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+                + "<form id=\"chpass\" method=\"POST\">"
+                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<label>" + current
+                + "<input type=\"password\" id=\"type_old_pass\" value=\"\" /></label>"
+                + "<label>" + newpass
+                + "<input type=\"password\" id=\"type_new_pass\" value=\"\" /></label>"
+                + "<input type=\"hidden\" id=\"old_pass\" name=\"old_pass\" value=\"\" />"
+                + "<input type=\"hidden\" id=\"new_pass\" name=\"new_pass\" value=\"\" />"
+                + "<input type=\"hidden\" name=\"step\" value=\"new_pass\" />"
+                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                + send + "\" />"
+                + "</form>"
+                + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
+                + "<p>" + backText + "</p>"
+                + "</form>",
+            input.locale()))
+        .type(FrontAcessController.TEXT_HTML);
+  }
+}
