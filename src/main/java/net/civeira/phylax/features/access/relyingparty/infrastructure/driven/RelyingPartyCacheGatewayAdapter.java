@@ -55,7 +55,7 @@ public class RelyingPartyCacheGatewayAdapter implements RelyingPartyCacheGateway
       final RelyingPartyCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at relyingParty cache for the key {}", key);
-    return cache.<String, RelyingPartyCached>get(key, k -> null)
+    return cache.<String, RelyingPartyCached>get(key, _ -> null)
         .map(cached -> Optional.ofNullable(cached)).await().indefinitely();
   }
 
@@ -71,7 +71,7 @@ public class RelyingPartyCacheGatewayAdapter implements RelyingPartyCacheGateway
     String key = key(filter, cursor);
     cache.invalidate(key).await().indefinitely();
     return cache.<String, RelyingPartyCached>get(key,
-        k -> RelyingPartyCached.builder().since(OffsetDateTime.now()).value(relyingPartys).build())
+        _ -> RelyingPartyCached.builder().since(OffsetDateTime.now()).value(relyingPartys).build())
         .await().indefinitely();
   }
 

@@ -55,7 +55,7 @@ public class TenantConfigCacheGatewayAdapter implements TenantConfigCacheGateway
       final TenantConfigCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at tenantConfig cache for the key {}", key);
-    return cache.<String, TenantConfigCached>get(key, k -> null)
+    return cache.<String, TenantConfigCached>get(key, _ -> null)
         .map(cached -> Optional.ofNullable(cached)).await().indefinitely();
   }
 
@@ -71,7 +71,7 @@ public class TenantConfigCacheGatewayAdapter implements TenantConfigCacheGateway
     String key = key(filter, cursor);
     cache.invalidate(key).await().indefinitely();
     return cache.<String, TenantConfigCached>get(key,
-        k -> TenantConfigCached.builder().since(OffsetDateTime.now()).value(tenantConfigs).build())
+        _ -> TenantConfigCached.builder().since(OffsetDateTime.now()).value(tenantConfigs).build())
         .await().indefinitely();
   }
 

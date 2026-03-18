@@ -6,9 +6,9 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 /**
  * Represents an execution failure that occurs during the processing of a domain object.
  * <p>
- * This class extends {@link AbstractFail} and is used to store information 
- * about a constraint violation or execution failure that is not directly 
- * related to a specific field or value but rather a general execution error.
+ * This class extends {@link AbstractFail} and is used to store information about a constraint
+ * violation or execution failure that is not directly related to a specific field or value but
+ * rather a general execution error.
  * </p>
  */
 @RegisterForReflection
@@ -17,7 +17,7 @@ public class ExecutionFail extends AbstractFail {
   /**
    * Constructs an {@code ExecutionFail} instance with an error code and a descriptive message.
    *
-   * @param code        The error code representing the type of execution failure.
+   * @param code The error code representing the type of execution failure.
    * @param description A descriptive message explaining the execution failure.
    */
   public ExecutionFail(final String code, final String description) {

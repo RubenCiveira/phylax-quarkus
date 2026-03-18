@@ -54,7 +54,7 @@ public class TenantCacheGatewayAdapter implements TenantCacheGateway {
   public Optional<TenantCached> retrieve(final TenantFilter filter, final TenantCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at tenant cache for the key {}", key);
-    return cache.<String, TenantCached>get(key, k -> null)
+    return cache.<String, TenantCached>get(key, _ -> null)
         .map(cached -> Optional.ofNullable(cached)).await().indefinitely();
   }
 
@@ -71,7 +71,7 @@ public class TenantCacheGatewayAdapter implements TenantCacheGateway {
     cache.invalidate(key).await().indefinitely();
     return cache
         .<String, TenantCached>get(key,
-            k -> TenantCached.builder().since(OffsetDateTime.now()).value(tenants).build())
+            _ -> TenantCached.builder().since(OffsetDateTime.now()).value(tenants).build())
         .await().indefinitely();
   }
 

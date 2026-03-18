@@ -12,6 +12,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
 import net.civeira.phylax.common.value.validation.AbstractFailList;
 import net.civeira.phylax.common.value.validation.ConstraintFail;
 
@@ -37,8 +38,9 @@ public final class DateLoad {
    * Convierte un valor en LocalDate, aceptando: - varios formatos de texto - timestamps numéricos
    * (epoch seconds/millis) - timestamps tipo Excel (días desde 1899-12-30)
    */
-  public static <T extends AbstractFailList> Optional<LocalDate> toLocalDate(ZoneId zone, String field, String value, T fails) {
-    
+  public static <T extends AbstractFailList> Optional<LocalDate> toLocalDate(ZoneId zone,
+      String field, String value, T fails) {
+
     if (value == null || value.isBlank()) {
       fails.add(new ConstraintFail("NOT_NULL", field, null));
       return Optional.empty();
@@ -72,8 +74,8 @@ public final class DateLoad {
    * timestamps numéricos (epoch seconds/millis) - timestamps tipo Excel (días desde 1899-12-30,
    * incluyendo parte decimal como hora)
    */
-  public static <T extends AbstractFailList> Optional<OffsetDateTime> toOffsetDateTime(ZoneId zone, String field, String value,
-      T fails) {
+  public static <T extends AbstractFailList> Optional<OffsetDateTime> toOffsetDateTime(ZoneId zone,
+      String field, String value, T fails) {
     if (value == null || value.isBlank()) {
       fails.add(new ConstraintFail("NOT_NULL", field, null));
       return Optional.empty();
@@ -208,10 +210,9 @@ public final class DateLoad {
     int secondsOfDay = fractional.multiply(BigDecimal.valueOf(24 * 60 * 60)).intValue(); // truncamos
 
     LocalTime time = LocalTime.ofSecondOfDay(secondsOfDay);
-    return OffsetDateTime.of(base.plusDays(days), time,
-        zone.getRules().getOffset(Instant.now()));
+    return OffsetDateTime.of(base.plusDays(days), time, zone.getRules().getOffset(Instant.now()));
   }
-  
+
   private DateLoad() {
     /* do noting */
   }

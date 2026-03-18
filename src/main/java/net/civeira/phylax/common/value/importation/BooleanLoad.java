@@ -4,6 +4,7 @@ package net.civeira.phylax.common.value.importation;
 import java.text.Normalizer;
 import java.util.Optional;
 import java.util.Set;
+
 import net.civeira.phylax.common.value.validation.AbstractFailList;
 import net.civeira.phylax.common.value.validation.ConstraintFail;
 
@@ -27,10 +28,11 @@ public final class BooleanLoad {
       "falso", "faux" // francés
   );
 
-  public static <T extends AbstractFailList> Optional<Boolean> toBoolean(String field, String value, T fails) {
+  public static <T extends AbstractFailList> Optional<Boolean> toBoolean(String field, String value,
+      T fails) {
     if (value == null || value.isBlank()) {
       // mismo patrón que en los demás loaders
-      fails.add(new ConstraintFail("NOT_NULL", field, null) );
+      fails.add(new ConstraintFail("NOT_NULL", field, null));
       return Optional.empty();
     }
 
@@ -54,7 +56,7 @@ public final class BooleanLoad {
     String normalized = Normalizer.normalize(trimmed, Normalizer.Form.NFD);
     return normalized.replaceAll("\\p{M}+", ""); // elimina diacríticos (ej: "sí" -> "si")
   }
-  
+
   private BooleanLoad() {
     /* do nothing */
   }

@@ -108,11 +108,12 @@ public class TenantTermsOfUseDisableUsecase {
           "The policies for tenant terms of use dont allow to disable: " + detail.getDescription());
       throw new NotAllowedException(detail.getDescription());
     }
-    TenantTermsOfUseVisibilityFilter filterWithVisibility =
-        TenantTermsOfUseVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    TenantTermsOfUseVisibilityFilter filterWithVisibility = TenantTermsOfUseVisibilityFilter
+        .builder().uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null)).tenant(filter.getTenant().orElse(null))
+        .tenants(filter.getTenants()).relyingParty(filter.getRelyingParty().orElse(null))
+        .relyingPartys(filter.getRelyingPartys())
+        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     TenantTermsOfUseDisableAllInBatchCommand command = TenantTermsOfUseDisableAllInBatchCommand
         .builder().interaction(query).filter(filterWithVisibility).build();
     return batch.start(command.getInteraction().getActor().getName().orElse("-"),

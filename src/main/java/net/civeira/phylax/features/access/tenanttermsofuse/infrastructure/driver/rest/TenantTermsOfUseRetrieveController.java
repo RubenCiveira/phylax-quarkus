@@ -9,6 +9,7 @@ import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.retrieve.TenantTermsOfUseRetrieveProjection;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.retrieve.TenantTermsOfUseRetrieveUsecase;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
+import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
@@ -49,6 +50,8 @@ public class TenantTermsOfUseRetrieveController {
     TenantTermsOfUseApiDto tenantTermsOfUseApiDto = new TenantTermsOfUseApiDto();
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    tenantTermsOfUseApiDto
+        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String attached = dto.getAttached();

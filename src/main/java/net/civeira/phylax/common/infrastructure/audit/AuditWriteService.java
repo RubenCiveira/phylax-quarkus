@@ -10,18 +10,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.sql.DataSource;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
 /**
  * Persists audit events to the audit store.
  *
- * The service writes audit records to the configured audit table.
- * It is invoked by application services when state changes occur.
- * This provides a durable trail of operations for compliance and debugging.
- * The write path is optimized for append-only audit semantics.
+ * The service writes audit records to the configured audit table. It is invoked by application
+ * services when state changes occur. This provides a durable trail of operations for compliance and
+ * debugging. The write path is optimized for append-only audit semantics.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -34,9 +36,9 @@ public class AuditWriteService {
   /**
    * Records an audit event into the configured audit table.
    *
-   * The table name is resolved from the provided prefix or schema.
-   * Events are stored with actor, timestamp, entity, and payload details.
-   * Use this for mutation operations that require audit trails.
+   * The table name is resolved from the provided prefix or schema. Events are stored with actor,
+   * timestamp, entity, and payload details. Use this for mutation operations that require audit
+   * trails.
    *
    * @param on audit table prefix or schema identifier
    * @param event audit event to persist

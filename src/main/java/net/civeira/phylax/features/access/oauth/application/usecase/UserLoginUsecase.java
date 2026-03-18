@@ -23,9 +23,14 @@ import net.civeira.phylax.features.access.clientidentity.domain.gateway.ClientId
 import net.civeira.phylax.features.access.clientidentity.domain.gateway.ClientIdentityReadRepositoryGateway;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.access.oauth.application.service.RequiredConsentService;
+import net.civeira.phylax.features.access.platformidentity.domain.PlatformIdentity;
+import net.civeira.phylax.features.access.platformidentity.domain.Roles;
+import net.civeira.phylax.features.access.platformidentity.domain.gateway.PlatformIdentityFilter;
+import net.civeira.phylax.features.access.platformidentity.domain.gateway.PlatformIdentityReadRepositoryGateway;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
+import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
@@ -63,6 +68,8 @@ public class UserLoginUsecase {
   private final UserWriteRepositoryGateway users;
 
   private final ClientIdentityReadRepositoryGateway identities;
+
+  private final PlatformIdentityReadRepositoryGateway platformIdentities;
 
   private final UserAccessTemporalCodeWriteRepositoryGateway codes;
 
@@ -149,17 +156,22 @@ public class UserLoginUsecase {
     ud.setTime(Instant.now());
     ud.setAudiences(request.getAudiences());
 
-    List<String> forAll = rolesFromIdentity(
+    List<String> forAllClient = rolesFromIdentity(
         identities.find(ClientIdentityFilter.builder().user(user).forAllAudiences(true).build()),
         tenant);
+    List<String> forAllPlatform = platformRolesFromIdentity(
+        platformIdentities
+            .find(PlatformIdentityFilter.builder().user(user).forAllAudiences(true).build()),
+        tenant);
     request.getAudiences().forEach(aud -> {
-      List<String> audRoles = new ArrayList<>(forAll);
+      List<String> audRoles = new ArrayList<>(forAllClient);
+      audRoles.addAll(forAllPlatform);
       Optional<TrustedClient> isClient =
           clients.find(TrustedClientFilter.builder().code(aud).build());
       if (isClient.isPresent()) {
-        audRoles.addAll(rolesFromIdentity(
-            identities.find(
-                ClientIdentityFilter.builder().user(user).trustedClient(isClient.get()).build()),
+        audRoles.addAll(platformRolesFromIdentity(
+            platformIdentities.find(
+                PlatformIdentityFilter.builder().user(user).trustedClient(isClient.get()).build()),
             tenant));
       }
       Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
@@ -167,6 +179,10 @@ public class UserLoginUsecase {
         audRoles.addAll(rolesFromIdentity(
             identities.find(
                 ClientIdentityFilter.builder().user(user).relyingParty(isParty.get()).build()),
+            tenant));
+        audRoles.addAll(platformRolesFromIdentity(
+            platformIdentities.find(
+                PlatformIdentityFilter.builder().user(user).relyingParty(isParty.get()).build()),
             tenant));
       }
       if (!audRoles.isEmpty()) {
@@ -180,6 +196,20 @@ public class UserLoginUsecase {
     return identity.flatMap(ClientIdentity::getRoles).map(rolesStr -> {
       List<String> roles = Arrays.stream(rolesStr.split(",")).map(String::trim)
           .filter(s -> !s.isEmpty()).map(str -> str.replace(":", "/").toLowerCase())
+          .collect(Collectors.toCollection(ArrayList::new));
+      if (tenant.isRoot()) {
+        roles.addAll(roles.stream().map(role -> "root:" + role).toList());
+      }
+      return (List<String>) roles;
+    }).orElseGet(List::of);
+  }
+
+  private List<String> platformRolesFromIdentity(Optional<PlatformIdentity> identity,
+      Tenant tenant) {
+    return identity.map(pi -> {
+      List<Roles> roleRefs = pi.getRoles();
+      List<String> roles = platformIdentities.resolveRoles(roleRefs).stream()
+          .map(Role::getName).map(name -> "platform:" + name.toLowerCase())
           .collect(Collectors.toCollection(ArrayList::new));
       if (tenant.isRoot()) {
         roles.addAll(roles.stream().map(role -> "root:" + role).toList());

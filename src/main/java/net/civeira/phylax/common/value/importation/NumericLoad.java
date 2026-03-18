@@ -4,13 +4,15 @@ package net.civeira.phylax.common.value.importation;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
+
 import net.civeira.phylax.common.value.validation.AbstractFailList;
 import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 public final class NumericLoad {
 
-  public static <T extends AbstractFailList> Optional<Integer> toInt(String field, String value, T fails) {
+  public static <T extends AbstractFailList> Optional<Integer> toInt(String field, String value,
+      T fails) {
     Optional<BigDecimal> base = parseBigDecimal(field, value, fails, "INVALID_INTEGER");
     if (base.isEmpty()) {
       return Optional.empty();
@@ -25,7 +27,8 @@ public final class NumericLoad {
     }
   }
 
-  public static <T extends AbstractFailList> Optional<Double> toDouble(String field, String value, T fails) {
+  public static <T extends AbstractFailList> Optional<Double> toDouble(String field, String value,
+      T fails) {
     Optional<BigDecimal> base = parseBigDecimal(field, value, fails, "INVALID_DOUBLE");
     if (base.isEmpty()) {
       return Optional.empty();
@@ -40,7 +43,8 @@ public final class NumericLoad {
     return Optional.of(d);
   }
 
-  public static <T extends AbstractFailList> Optional<Long> toLong(String field, String value, T fails) {
+  public static <T extends AbstractFailList> Optional<Long> toLong(String field, String value,
+      T fails) {
     Optional<BigDecimal> base = parseBigDecimal(field, value, fails, "INVALID_LONG");
     if (base.isEmpty()) {
       return Optional.empty();
@@ -54,7 +58,8 @@ public final class NumericLoad {
     }
   }
 
-  public static <T extends AbstractFailList> Optional<Float> toFloat(String field, String value, T fails) {
+  public static <T extends AbstractFailList> Optional<Float> toFloat(String field, String value,
+      T fails) {
     Optional<BigDecimal> base = parseBigDecimal(field, value, fails, "INVALID_FLOAT");
     if (base.isEmpty()) {
       return Optional.empty();
@@ -91,8 +96,8 @@ public final class NumericLoad {
 
   // ===================== helpers =====================
 
-  private static <T extends AbstractFailList> Optional<BigDecimal> parseBigDecimal(String field, String value,
-      T fails, String invalidCode) {
+  private static <T extends AbstractFailList> Optional<BigDecimal> parseBigDecimal(String field,
+      String value, T fails, String invalidCode) {
     if (value == null || value.isBlank()) {
       fails.add(new ConstraintFail("NOT_NULL", field, null));
       return Optional.empty();

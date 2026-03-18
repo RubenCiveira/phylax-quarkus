@@ -9,7 +9,8 @@ import lombok.Getter;
 /**
  * Represents a reference to a stored file in the repository.
  * <p>
- * Provides a unique key for locating the file and an optional public URL if the file is accessible externally.
+ * Provides a unique key for locating the file and an optional public URL if the file is accessible
+ * externally.
  * </p>
  */
 @Getter
@@ -25,7 +26,8 @@ public class RepositoryLink {
   /**
    * Retrieves the public URL of the file if it is available.
    *
-   * @return An {@link Optional} containing the public URL if it exists, or an empty {@link Optional} otherwise.
+   * @return An {@link Optional} containing the public URL if it exists, or an empty
+   *         {@link Optional} otherwise.
    */
   public Optional<String> getPublicUrl() {
     return Optional.ofNullable(publicUrl);

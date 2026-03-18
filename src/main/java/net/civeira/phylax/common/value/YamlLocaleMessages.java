@@ -18,11 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Utility class for loading and retrieving localized messages from YAML files.
  * 
- * <p>This class loads locale-specific messages from YAML files, allowing access to 
- * translation keys and formatted messages based on a given locale.</p>
+ * <p>
+ * This class loads locale-specific messages from YAML files, allowing access to translation keys
+ * and formatted messages based on a given locale.
+ * </p>
  * 
- * <p>It supports hierarchical YAML structures and flattens them into key-value pairs 
- * for easy retrieval.</p>
+ * <p>
+ * It supports hierarchical YAML structures and flattens them into key-value pairs for easy
+ * retrieval.
+ * </p>
  */
 @Slf4j
 public class YamlLocaleMessages {
@@ -43,7 +47,8 @@ public class YamlLocaleMessages {
   private final Map<String, String> loaded;
 
   /**
-   * Constructs an instance of {@code YamlLocaleMessages} and loads messages for the specified locale.
+   * Constructs an instance of {@code YamlLocaleMessages} and loads messages for the specified
+   * locale.
    *
    * @param name The base name of the YAML file.
    * @param locale The locale for which messages should be loaded.
@@ -78,10 +83,8 @@ public class YamlLocaleMessages {
    * @return A list of message keys that match the prefix.
    */
   public List<String> keys(String prefix) {
-    return loaded.keySet().stream()
-        .filter(key -> key.startsWith(prefix + "."))
-        .map(key -> key.substring(prefix.length() + 1))
-        .toList();
+    return loaded.keySet().stream().filter(key -> key.startsWith(prefix + "."))
+        .map(key -> key.substring(prefix.length() + 1)).toList();
   }
 
   /**
@@ -92,8 +95,7 @@ public class YamlLocaleMessages {
    * @return The formatted message if the key exists, otherwise returns the key itself.
    */
   public String get(String pattern, Object... arguments) {
-    return loaded.containsKey(pattern) 
-        ? MessageFormat.format(loaded.get(pattern), arguments) 
+    return loaded.containsKey(pattern) ? MessageFormat.format(loaded.get(pattern), arguments)
         : pattern;
   }
 
@@ -128,9 +130,8 @@ public class YamlLocaleMessages {
   @SuppressWarnings("unchecked")
   private void flattenMap(String prefix, Map<Object, Object> map, Map<String, String> result) {
     for (Map.Entry<Object, Object> entry : map.entrySet()) {
-      String key = prefix.isEmpty() 
-          ? String.valueOf(entry.getKey()) 
-          : prefix + "." + entry.getKey();
+      String key =
+          prefix.isEmpty() ? String.valueOf(entry.getKey()) : prefix + "." + entry.getKey();
       Object value = entry.getValue();
       if (value instanceof Map) {
         // Recursive call for nested maps

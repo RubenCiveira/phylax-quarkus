@@ -116,8 +116,8 @@ public abstract class ExecutorBySteps<T, R, P> implements Executor<P> {
   protected abstract void write(R item, P param);
 
   /**
-   * Returns the sleep service responsible for delaying between execution phases.
-   * Can be overridden for testing.
+   * Returns the sleep service responsible for delaying between execution phases. Can be overridden
+   * for testing.
    *
    * @return the {@link SleepService} implementation used
    */

@@ -108,11 +108,12 @@ public class TenantTermsOfUseDeleteUsecase {
           "The policies for tenant terms of use dont allow to delete: " + detail.getDescription());
       throw new NotAllowedException(detail.getDescription());
     }
-    TenantTermsOfUseVisibilityFilter filterOnVisibles =
-        TenantTermsOfUseVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    TenantTermsOfUseVisibilityFilter filterOnVisibles = TenantTermsOfUseVisibilityFilter.builder()
+        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null)).tenant(filter.getTenant().orElse(null))
+        .tenants(filter.getTenants()).relyingParty(filter.getRelyingParty().orElse(null))
+        .relyingPartys(filter.getRelyingPartys())
+        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     TenantTermsOfUseDeleteAllInBatchCommand command = TenantTermsOfUseDeleteAllInBatchCommand
         .builder().interaction(query).filter(filterOnVisibles).build();
     return batch.start(query.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

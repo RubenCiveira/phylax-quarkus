@@ -4,12 +4,12 @@ package net.civeira.phylax.common.infrastructure.projection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.civeira.phylax.common.infrastructure.connector.RemoteConnector;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.infrastructure.connector.RemoteConnector;
 
 /**
  * Executes projection plans and returns mapped results.

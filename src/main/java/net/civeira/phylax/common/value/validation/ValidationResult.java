@@ -6,8 +6,8 @@ import java.util.List;
 /**
  * Represents the result of a validation operation.
  * <p>
- * This class is used to encapsulate whether a validation process was successful or not,
- * along with a list of error messages if the validation failed.
+ * This class is used to encapsulate whether a validation process was successful or not, along with
+ * a list of error messages if the validation failed.
  * </p>
  */
 public class ValidationResult {
@@ -22,7 +22,8 @@ public class ValidationResult {
   }
 
   /**
-   * Constructs a {@code ValidationResult} representing a failed validation with a single error message.
+   * Constructs a {@code ValidationResult} representing a failed validation with a single error
+   * message.
    *
    * @param message The error message describing the validation failure.
    */
@@ -31,7 +32,8 @@ public class ValidationResult {
   }
 
   /**
-   * Constructs a {@code ValidationResult} with a specified validation status and a list of error messages.
+   * Constructs a {@code ValidationResult} with a specified validation status and a list of error
+   * messages.
    *
    * @param isValid {@code true} if the validation was successful, {@code false} otherwise.
    * @param errors A list of error messages describing the validation failures.

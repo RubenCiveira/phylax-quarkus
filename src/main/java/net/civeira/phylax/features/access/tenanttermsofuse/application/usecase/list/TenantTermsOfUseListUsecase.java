@@ -61,11 +61,12 @@ public class TenantTermsOfUseListUsecase {
           "The policies for tenant terms of use dont allow to list: " + detail.getDescription());
       throw new NotAllowedException(detail.getDescription());
     }
-    TenantTermsOfUseVisibilityFilter visibleFilter =
-        TenantTermsOfUseVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    TenantTermsOfUseVisibilityFilter visibleFilter = TenantTermsOfUseVisibilityFilter.builder()
+        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null)).tenant(filter.getTenant().orElse(null))
+        .tenants(filter.getTenants()).relyingParty(filter.getRelyingParty().orElse(null))
+        .relyingPartys(filter.getRelyingPartys())
+        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     TenantTermsOfUseCursor gatewayCursor = TenantTermsOfUseCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     TenantTermsOfUseCached values =

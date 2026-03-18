@@ -3,7 +3,9 @@ package net.civeira.phylax.common.infrastructure.audit;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.quarkus.vertx.http.ManagementInterface;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,10 +15,9 @@ import lombok.RequiredArgsConstructor;
 /**
  * Registers management routes to inspect audit events.
  *
- * The actuator plugs audit endpoints into the Quarkus management interface.
- * It enables operational access to recent audit records for diagnostics.
- * This is intended for internal or admin-only monitoring use cases.
- * The handler delegates query execution to the read service.
+ * The actuator plugs audit endpoints into the Quarkus management interface. It enables operational
+ * access to recent audit records for diagnostics. This is intended for internal or admin-only
+ * monitoring use cases. The handler delegates query execution to the read service.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -29,9 +30,9 @@ public class AuditActuator {
   /**
    * Registers the audit endpoint on the Quarkus management interface.
    *
-   * The endpoint is exposed under the management port for operational tooling.
-   * It wires the handler to fetch audit records from the read service.
-   * The management interface is provided by Quarkus at startup time.
+   * The endpoint is exposed under the management port for operational tooling. It wires the handler
+   * to fetch audit records from the read service. The management interface is provided by Quarkus
+   * at startup time.
    *
    * @param management management interface to configure
    */

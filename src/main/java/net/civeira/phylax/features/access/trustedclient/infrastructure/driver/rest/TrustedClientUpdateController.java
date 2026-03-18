@@ -55,6 +55,7 @@ public class TrustedClientUpdateController {
     TrustedClientApiDto trustedClientApiDto = new TrustedClientApiDto();
     trustedClientApiDto.setUid(dto.getUid());
     trustedClientApiDto.setCode(dto.getCode());
+    trustedClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     trustedClientApiDto.setPublicAllow(dto.getPublicAllow());
     trustedClientApiDto.setSecretOauth("*****");
     trustedClientApiDto.setEnabled(dto.getEnabled());
@@ -89,6 +90,9 @@ public class TrustedClientUpdateController {
     }
     if (null != trustedClientApiDto.getCode()) {
       dto.setCode(trustedClientApiDto.getCode());
+    }
+    if (null != trustedClientApiDto.getAllowAllScopes()) {
+      dto.setAllowAllScopes(trustedClientApiDto.getAllowAllScopes());
     }
     if (null != trustedClientApiDto.getPublicAllow()) {
       dto.setPublicAllow(trustedClientApiDto.getPublicAllow());

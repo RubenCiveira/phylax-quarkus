@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 class TenantTermsOfUseChangeSetUnitTest {
@@ -17,11 +18,11 @@ class TenantTermsOfUseChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_tenant_terms_of_use_change_set_builder() {
-    TenantTermsOfUseChangeSet one =
-        new TenantTermsOfUseChangeSet().uid("one").tenant(TenantReference.of("one")).text("one")
-            .enabled(true).attached("file_1").activationDate(LocalDateTime.of(1980, 8, 20, 0, 0)
-                .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-            .version(1).newUid();
+    TenantTermsOfUseChangeSet one = new TenantTermsOfUseChangeSet()
+        .uid("one").tenant(TenantReference.of("one")).relyingParty(RelyingPartyReference.of("one"))
+        .text("one").enabled(true).attached("file_1").activationDate(LocalDateTime
+            .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+        .version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -33,6 +34,14 @@ class TenantTermsOfUseChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("tenant");
     Assertions.assertFalse(one.getTenant().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(RelyingPartyReference.of("one"), one.getRelyingParty().get(),
+        "Value must equals to the intial value");
+    one.relyingParty(RelyingPartyReference.of("two"));
+    Assertions.assertEquals(RelyingPartyReference.of("two"), one.getRelyingParty().get(),
+        "Value must equals to the assigned value");
+    one.unset("relyingParty");
+    Assertions.assertFalse(one.getRelyingParty().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getText().get(), "Value must equals to the intial value");
     one.text("two");

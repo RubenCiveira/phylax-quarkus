@@ -4,12 +4,11 @@ package net.civeira.phylax.common.infrastructure.exceptionmapper.sql;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.civeira.phylax.common.infrastructure.sql.OptimistLockException;
-
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.common.infrastructure.sql.OptimistLockException;
 
 /**
  * Maps optimistic lock violations to HTTP 412 responses.

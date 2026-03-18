@@ -11,13 +11,16 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ArcContainer;
 import io.quarkus.arc.InstanceHandle;
@@ -152,7 +155,7 @@ class ExecutorByDeferStepsUnitTest {
     executor.run(progress, monitor, param);
 
     verify(progress).addError(eq("a"), any(ExecutionFail.class));
-  }  
+  }
 
   @Test
   void testContextIsAlreadyActive() {
@@ -161,89 +164,75 @@ class ExecutorByDeferStepsUnitTest {
     when(reader.read(any())).thenReturn(Collections.emptyList());
 
     ExecutorByDeferSteps<String, String, Object, Object> executor = ExecutorByDeferSteps
-        .<String, String, Object, Object>builder()
-        .reader(ItemReader.class)
-        .writer(ItemWriter.class)
-        .processor(ItemProcessor.class)
-        .descriptor(ItemDescriptor.class)
-        .build();
+        .<String, String, Object, Object>builder().reader(ItemReader.class).writer(ItemWriter.class)
+        .processor(ItemProcessor.class).descriptor(ItemDescriptor.class).build();
 
     executor.run(progress, monitor, param);
 
     // Verifica que no se haya activado el contexto manualmente
     verify(managedContext, times(0)).activate();
   }
-  
+
   @Test
   void testDescriptorIsNullUsesFallback() throws Exception {
     when(reader.read(any())).thenReturn(List.of("item")).thenReturn(Collections.emptyList());
     when(processor.process(any(), any())).thenReturn("processed");
 
-    ExecutorByDeferSteps<String, String, Object, Object> executor = ExecutorByDeferSteps
-        .<String, String, Object, Object>builder()
-        .reader(ItemReader.class)
-        .writer(ItemWriter.class)
-        .processor(ItemProcessor.class)
-        .descriptor(null)  // <--- clave: usar descriptor == null
-        .build();
+    ExecutorByDeferSteps<String, String, Object, Object> executor =
+        ExecutorByDeferSteps.<String, String, Object, Object>builder().reader(ItemReader.class)
+            .writer(ItemWriter.class).processor(ItemProcessor.class).descriptor(null) // <--- clave:
+                                                                                      // usar
+                                                                                      // descriptor
+                                                                                      // == null
+            .build();
 
     executor.run(progress, monitor, param);
 
     verify(progress).addOk(eq("item")); // item.toString() será "item"
   }
-  
+
   @Test
   void testReaderReturnsNullList() throws Exception {
     when(reader.read(any())).thenReturn(null); // <--- null list
 
     ExecutorByDeferSteps<String, String, Object, Object> executor = ExecutorByDeferSteps
-        .<String, String, Object, Object>builder()
-        .reader(ItemReader.class)
-        .writer(ItemWriter.class)
-        .processor(ItemProcessor.class)
-        .descriptor(ItemDescriptor.class)
-        .build();
+        .<String, String, Object, Object>builder().reader(ItemReader.class).writer(ItemWriter.class)
+        .processor(ItemProcessor.class).descriptor(ItemDescriptor.class).build();
 
     executor.run(progress, monitor, param);
 
     // Si no hay items, no debe escribirse nada
     verify(writer, times(0)).write(any(), any());
   }
-  
+
   @Test
   void testReaderReturnsEmptyList() throws Exception {
     when(reader.read(any())).thenReturn(Collections.emptyList()); // empty list
 
     ExecutorByDeferSteps<String, String, Object, Object> executor = ExecutorByDeferSteps
-        .<String, String, Object, Object>builder()
-        .reader(ItemReader.class)
-        .writer(ItemWriter.class)
-        .processor(ItemProcessor.class)
-        .descriptor(ItemDescriptor.class)
-        .build();
+        .<String, String, Object, Object>builder().reader(ItemReader.class).writer(ItemWriter.class)
+        .processor(ItemProcessor.class).descriptor(ItemDescriptor.class).build();
 
     executor.run(progress, monitor, param);
 
     // No se procesan ni escriben items
     verify(writer, times(0)).write(any(), any());
   }
-  
+
   @Test
   void testSleepThrowsInterruptedException() throws Exception {
     // Creamos un executor con un sleeper mockeado
     SleepService sleeper = mock(SleepService.class);
     doThrow(new InterruptedException("sleep interrupted")).when(sleeper).sleep(anyLong());
 
-    ExecutorByDeferSteps<String, String, Object, Object> executor = new ExecutorByDeferSteps<>(
-        100, 100, 100, 1,
-        StepInitializer.class, ItemProcessor.class, ItemReader.class, ItemWriter.class,
-        ItemDescriptor.class, null, null
-    ) {
-      @Override
-      protected SleepService sleeper() {
-        return sleeper; // Sobrescribimos el sleeper para forzar la excepción
-      }
-    };
+    ExecutorByDeferSteps<String, String, Object, Object> executor =
+        new ExecutorByDeferSteps<>(100, 100, 100, 1, StepInitializer.class, ItemProcessor.class,
+            ItemReader.class, ItemWriter.class, ItemDescriptor.class, null, null) {
+          @Override
+          protected SleepService sleeper() {
+            return sleeper; // Sobrescribimos el sleeper para forzar la excepción
+          }
+        };
 
     when(reader.read(any())).thenReturn(List.of("x")).thenReturn(Collections.emptyList());
     when(processor.process(any(), any())).thenReturn("X");
@@ -253,7 +242,7 @@ class ExecutorByDeferStepsUnitTest {
 
     assertTrue(Thread.currentThread().isInterrupted()); // <- se marcó como interrumpido
   }
-  
+
   @Test
   void testProcessorThrowsGenericException() throws Exception {
     when(reader.read(any())).thenReturn(List.of("x")).thenReturn(Collections.emptyList());
@@ -261,12 +250,8 @@ class ExecutorByDeferStepsUnitTest {
     when(descriptor.itemDescription(any(), any())).thenReturn("x");
 
     ExecutorByDeferSteps<String, String, Object, Object> executor = ExecutorByDeferSteps
-        .<String, String, Object, Object>builder()
-        .reader(ItemReader.class)
-        .writer(ItemWriter.class)
-        .processor(ItemProcessor.class)
-        .descriptor(ItemDescriptor.class)
-        .build();
+        .<String, String, Object, Object>builder().reader(ItemReader.class).writer(ItemWriter.class)
+        .processor(ItemProcessor.class).descriptor(ItemDescriptor.class).build();
 
     executor.run(progress, monitor, param);
 

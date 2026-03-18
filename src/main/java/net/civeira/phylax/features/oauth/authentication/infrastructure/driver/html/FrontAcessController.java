@@ -336,7 +336,7 @@ public class FrontAcessController {
       @CookieParam(AUTH_SESSION_ID) String cookie, final @Context UriInfo req,
       @Context HttpHeaders headers) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request).flatMap(loadClient -> sessionStore.loadSession(cookie))
+    return loadClient(request).flatMap(_ -> sessionStore.loadSession(cookie))
         .map(sessionInfo -> securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Data",
             "<h1>Ficha de " + sessionInfo.getValidationData().getUsername() + "</h1>",
             request.getLocale()))))
@@ -470,7 +470,7 @@ public class FrontAcessController {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
     return loadClient(request)
-        .map(clientDetails -> recoverController.doPaintWaitRecover(request.getLocale(), null,
+        .map(_ -> recoverController.doPaintWaitRecover(request.getLocale(), null,
             username, recovercode))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
@@ -522,7 +522,7 @@ public class FrontAcessController {
       @Context HttpHeaders headers, @QueryParam("email") String email,
       @QueryParam("regcode") String regcode) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request).map(clientDetails -> registerController
+    return loadClient(request).map(_ -> registerController
         .doPaintVerifyForm(request.getLocale(), email, regcode, null))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }

@@ -182,6 +182,7 @@ public class TrustedClientEnableController {
     TrustedClientApiDto trustedClientApiDto = new TrustedClientApiDto();
     trustedClientApiDto.setUid(dto.getUid());
     trustedClientApiDto.setCode(dto.getCode());
+    trustedClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     trustedClientApiDto.setPublicAllow(dto.getPublicAllow());
     trustedClientApiDto.setSecretOauth("*****");
     trustedClientApiDto.setEnabled(dto.getEnabled());

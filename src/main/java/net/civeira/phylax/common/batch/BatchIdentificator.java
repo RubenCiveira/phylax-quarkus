@@ -10,8 +10,10 @@ import lombok.Data;
 /**
  * Represents the identifier and structure of a batch process.
  *
- * <p>It contains a unique identifier and the list of step names that define
- * the structure and execution order of the batch process.</p>
+ * <p>
+ * It contains a unique identifier and the list of step names that define the structure and
+ * execution order of the batch process.
+ * </p>
  */
 @Data
 @Builder
@@ -19,7 +21,7 @@ import lombok.Data;
 public class BatchIdentificator {
   /** Unique identifier for the batch process. */
   private final String uid;
-  
+
   /** Ordered list of step identifiers. */
   private final List<String> steps;
 }

@@ -26,8 +26,8 @@ public class ApiObservedInterceptor {
     if (observed == null) {
       return context.proceed();
     }
-    return TelemetryInterceptor.around(context, tracerInstance, SpanKind.SERVER,
-        observed.value(), observed.value());
+    return TelemetryInterceptor.around(context, tracerInstance, SpanKind.SERVER, observed.value(),
+        observed.value());
   }
 
   private ApiObserved resolveObserved(final InvocationContext context) {

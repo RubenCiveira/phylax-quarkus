@@ -19,7 +19,7 @@ class TrustedClientChangeSetUnitTest {
   void test_trusted_client_change_set_builder() {
     AesCipherService cypher = Mockito.mock(AesCipherService.class);
     TrustedClientChangeSet one = new TrustedClientChangeSet().uid("one").code("one")
-        .publicAllow(true).secretOauthPlain("one").enabled(true)
+        .allowAllScopes(true).publicAllow(true).secretOauthPlain("one").enabled(true)
         .allowedRedirects(
             List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()))
         .version(1).newUid();
@@ -32,6 +32,14 @@ class TrustedClientChangeSetUnitTest {
     Assertions.assertEquals("two", one.getCode().get(), "Value must equals to the assigned value");
     one.unset("code");
     Assertions.assertFalse(one.getCode().isPresent(), "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getAllowAllScopes().get(),
+        "Value must equals to the intial value");
+    one.allowAllScopes(false);
+    Assertions.assertEquals(false, one.getAllowAllScopes().get(),
+        "Value must equals to the assigned value");
+    one.unset("allowAllScopes");
+    Assertions.assertFalse(one.getAllowAllScopes().isPresent(),
+        "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getPublicAllow().get(),
         "Value must equals to the intial value");
     one.publicAllow(false);

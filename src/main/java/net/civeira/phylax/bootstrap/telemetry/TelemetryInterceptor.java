@@ -10,12 +10,12 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.interceptor.InvocationContext;
 
 final class TelemetryInterceptor {
-  private TelemetryInterceptor() {
-  }
+  private TelemetryInterceptor() {}
 
   static Object around(final InvocationContext context, final Instance<Tracer> tracerInstance,
       final SpanKind kind, final String title, final String value) throws Exception {
-    Tracer tracer = tracerInstance != null && tracerInstance.isResolvable() ? tracerInstance.get() : null;
+    Tracer tracer =
+        tracerInstance != null && tracerInstance.isResolvable() ? tracerInstance.get() : null;
     if (tracer == null) {
       return context.proceed();
     }

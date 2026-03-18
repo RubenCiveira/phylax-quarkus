@@ -4,7 +4,9 @@ package net.civeira.phylax.common.value.validation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,29 +15,29 @@ class ValidationResultUnitTest {
   @Test
   @DisplayName("Default constructor should create valid result")
   void defaultConstructorShouldCreateValidResult() {
-      ValidationResult result = new ValidationResult();
-      assertTrue(result.isValid(), "El resultado debería ser válido por defecto");
-      assertTrue(result.getErrors().isEmpty(), "La lista de errores debería estar vacía");
+    ValidationResult result = new ValidationResult();
+    assertTrue(result.isValid(), "El resultado debería ser válido por defecto");
+    assertTrue(result.getErrors().isEmpty(), "La lista de errores debería estar vacía");
   }
 
   @Test
   @DisplayName("Constructor with message should create invalid result")
   void constructorWithMessageShouldCreateInvalidResult() {
-      String errorMessage = "Error de validación";
-      ValidationResult result = new ValidationResult(errorMessage);
-      assertFalse(result.isValid(), "El resultado no debería ser válido");
-      assertEquals(1, result.getErrors().size(), "Debe haber un único error");
-      assertEquals(errorMessage, result.getErrors().get(0), "El mensaje de error debe coincidir");
+    String errorMessage = "Error de validación";
+    ValidationResult result = new ValidationResult(errorMessage);
+    assertFalse(result.isValid(), "El resultado no debería ser válido");
+    assertEquals(1, result.getErrors().size(), "Debe haber un único error");
+    assertEquals(errorMessage, result.getErrors().get(0), "El mensaje de error debe coincidir");
   }
 
   @Test
   @DisplayName("Constructor with parameters should work correctly")
   void constructorWithParametersShouldWorkCorrectly() {
-      List<String> errors = List.of("Error 1", "Error 2");
-      ValidationResult result = new ValidationResult(false, errors);
-      assertFalse(result.isValid(), "El resultado no debería ser válido");
-      assertEquals(2, result.getErrors().size(), "Debe haber dos errores");
-      assertEquals("Error 1", result.getErrors().get(0), "El primer error debe coincidir");
-      assertEquals("Error 2", result.getErrors().get(1), "El segundo error debe coincidir");
+    List<String> errors = List.of("Error 1", "Error 2");
+    ValidationResult result = new ValidationResult(false, errors);
+    assertFalse(result.isValid(), "El resultado no debería ser válido");
+    assertEquals(2, result.getErrors().size(), "Debe haber dos errores");
+    assertEquals("Error 1", result.getErrors().get(0), "El primer error debe coincidir");
+    assertEquals("Error 2", result.getErrors().get(1), "El segundo error debe coincidir");
   }
 }

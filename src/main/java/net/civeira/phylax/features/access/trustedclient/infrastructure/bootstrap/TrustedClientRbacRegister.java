@@ -54,6 +54,8 @@ public class TrustedClientRbacRegister {
         .description("El identificador de la aplicacion").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
         .description("El código identificativo de la aplicación").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowAllScopes")
+        .description("El allow all scopes de trusted client").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("publicAllow")
             .description("If true, users can use these client to access with public code flow")

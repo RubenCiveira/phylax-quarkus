@@ -7,8 +7,8 @@ import lombok.Data;
 /**
  * Represents a validation error associated with a specific field.
  * <p>
- * This class is used to store details about a validation failure,
- * including the field name, the incorrect value, and an error message.
+ * This class is used to store details about a validation failure, including the field name, the
+ * incorrect value, and an error message.
  * </p>
  */
 @Data

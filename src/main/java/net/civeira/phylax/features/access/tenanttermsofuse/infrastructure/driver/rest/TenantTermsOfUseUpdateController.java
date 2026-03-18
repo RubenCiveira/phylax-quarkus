@@ -9,11 +9,13 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.update.TenantTermsOfUseUpdateInput;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.update.TenantTermsOfUseUpdateProjection;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.update.TenantTermsOfUseUpdateUsecase;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
+import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
@@ -56,6 +58,8 @@ public class TenantTermsOfUseUpdateController {
     TenantTermsOfUseApiDto tenantTermsOfUseApiDto = new TenantTermsOfUseApiDto();
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    tenantTermsOfUseApiDto
+        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String attached = dto.getAttached();
@@ -80,6 +84,10 @@ public class TenantTermsOfUseUpdateController {
     }
     if (null != tenantTermsOfUseApiDto.getTenant()) {
       dto.setTenant(TenantReference.of(tenantTermsOfUseApiDto.getTenant().get$Ref()));
+    }
+    if (null != tenantTermsOfUseApiDto.getRelyingParty()) {
+      dto.setRelyingParty(
+          RelyingPartyReference.of(tenantTermsOfUseApiDto.getRelyingParty().get$Ref()));
     }
     if (null != tenantTermsOfUseApiDto.getText()) {
       dto.setText(tenantTermsOfUseApiDto.getText());

@@ -55,7 +55,7 @@ public class TenantTermsOfUseCacheGatewayAdapter implements TenantTermsOfUseCach
       final TenantTermsOfUseCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at tenantTermsOfUse cache for the key {}", key);
-    return cache.<String, TenantTermsOfUseCached>get(key, k -> null)
+    return cache.<String, TenantTermsOfUseCached>get(key, _ -> null)
         .map(cached -> Optional.ofNullable(cached)).await().indefinitely();
   }
 
@@ -70,7 +70,7 @@ public class TenantTermsOfUseCacheGatewayAdapter implements TenantTermsOfUseCach
       final TenantTermsOfUseCursor cursor, final List<TenantTermsOfUse> tenantTermsOfUses) {
     String key = key(filter, cursor);
     cache.invalidate(key).await().indefinitely();
-    return cache.<String, TenantTermsOfUseCached>get(key, k -> TenantTermsOfUseCached.builder()
+    return cache.<String, TenantTermsOfUseCached>get(key, _ -> TenantTermsOfUseCached.builder()
         .since(OffsetDateTime.now()).value(tenantTermsOfUses).build()).await().indefinitely();
   }
 

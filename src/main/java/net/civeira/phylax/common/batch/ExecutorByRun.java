@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.NonNull;
 
 /**
- * A simple {@link Executor} implementation that delegates to a {@link BiConsumer}
- * to execute the step logic.
+ * A simple {@link Executor} implementation that delegates to a {@link BiConsumer} to execute the
+ * step logic.
  *
  * @param <P> the type of step parameters
  */

@@ -55,7 +55,7 @@ public class TrustedClientCacheGatewayAdapter implements TrustedClientCacheGatew
       final TrustedClientCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at trustedClient cache for the key {}", key);
-    return cache.<String, TrustedClientCached>get(key, k -> null)
+    return cache.<String, TrustedClientCached>get(key, _ -> null)
         .map(cached -> Optional.ofNullable(cached)).await().indefinitely();
   }
 
@@ -70,7 +70,7 @@ public class TrustedClientCacheGatewayAdapter implements TrustedClientCacheGatew
       final TrustedClientCursor cursor, final List<TrustedClient> trustedClients) {
     String key = key(filter, cursor);
     cache.invalidate(key).await().indefinitely();
-    return cache.<String, TrustedClientCached>get(key, k -> TrustedClientCached.builder()
+    return cache.<String, TrustedClientCached>get(key, _ -> TrustedClientCached.builder()
         .since(OffsetDateTime.now()).value(trustedClients).build()).await().indefinitely();
   }
 

@@ -80,24 +80,22 @@ public class Phylax implements RbacStore {
   @SuppressWarnings("unchecked")
   public void registerResourceAction(ResourceDescription resource, ScopeDescription action) {
     if (!scopesToRegister.containsKey(resource.getName())) {
-      scopesToRegister.put(resource.getName(),
-          Map.of(RESOURCE_LITERAL,
-              Map.of(NAME_LITERAL, resource.getName(), DESCRIPTION_LITERAL, resource.getDescription()),
-              "scopes", new ArrayList<>()));
+      scopesToRegister.put(resource.getName(), Map.of(RESOURCE_LITERAL,
+          Map.of(NAME_LITERAL, resource.getName(), DESCRIPTION_LITERAL, resource.getDescription()),
+          "scopes", new ArrayList<>()));
     }
     ((List<Object>) (scopesToRegister.get(resource.getName()).get("scopes")))
-        .add(Map.of(NAME_LITERAL, action.getName(), "kind", action.getKind().toString(), DESCRIPTION_LITERAL,
-            action.getDescription()));
+        .add(Map.of(NAME_LITERAL, action.getName(), "kind", action.getKind().toString(),
+            DESCRIPTION_LITERAL, action.getDescription()));
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public void registerResourceField(ResourceDescription resource, FieldDescription field) {
     if (!propertiesToRegister.containsKey(resource.getName())) {
-      propertiesToRegister.put(resource.getName(),
-          Map.of(RESOURCE_LITERAL,
-              Map.of(NAME_LITERAL, resource.getName(), DESCRIPTION_LITERAL, resource.getDescription()),
-              "properties", new ArrayList<>()));
+      propertiesToRegister.put(resource.getName(), Map.of(RESOURCE_LITERAL,
+          Map.of(NAME_LITERAL, resource.getName(), DESCRIPTION_LITERAL, resource.getDescription()),
+          "properties", new ArrayList<>()));
     }
     ((List<Object>) (propertiesToRegister.get(resource.getName()).get("properties")))
         .add(Map.of(NAME_LITERAL, field.getName(), DESCRIPTION_LITERAL, field.getDescription()));
@@ -108,12 +106,11 @@ public class Phylax implements RbacStore {
     List<PhylaxGrants> grants = cachedCallCheckScopes();
     List<String> roles = Stream.concat(actor.getRoles().stream(), Stream.of("-")).toList();
     ScopeAllowList descriptions = new ScopeAllowList();
-    grants.stream().filter(grant -> roles.contains(grant.getRolename())).forEach(grant -> 
-      grant.getAllowedScopes().forEach(scope -> {
-        String[] parts = scope.split("\\:");
-        descriptions.add(ScopeAllow.builder().name(parts[1]).resource(parts[0]).build());
-      })
-    );
+    grants.stream().filter(grant -> roles.contains(grant.getRolename()))
+        .forEach(grant -> grant.getAllowedScopes().forEach(scope -> {
+          String[] parts = scope.split("\\:");
+          descriptions.add(ScopeAllow.builder().name(parts[1]).resource(parts[0]).build());
+        }));
     return descriptions;
   }
 
@@ -123,24 +120,21 @@ public class Phylax implements RbacStore {
     List<String> roles = Stream.concat(actor.getRoles().stream(), Stream.of("-")).toList();
 
     FieldGrantList descriptions = new FieldGrantList();
-    grants.stream().filter(grant -> roles.contains(grant.getRolename())).forEach(grant -> 
-      grant.getRestrictedFields().entrySet().forEach(entry -> 
-        entry.getValue().forEach(field -> {
+    grants.stream().filter(grant -> roles.contains(grant.getRolename())).forEach(grant -> grant
+        .getRestrictedFields().entrySet().forEach(entry -> entry.getValue().forEach(field -> {
           String[] parts = field.split("\\:");
           descriptions.add(
               FieldGrant.builder().view(entry.getKey()).name(parts[1]).resource(parts[0]).build());
-        })
-      )
-    );
+        })));
     return descriptions;
   }
 
   void complete(@Observes @Priority(100) StartupEvent ev) {
     registerResources();
     registerProperties();
-    
+
   }
-  
+
   private void registerResources() {
     try {
       callRegisterScopes();
@@ -160,7 +154,7 @@ public class Phylax implements RbacStore {
       Thread.currentThread().interrupt();
     }
   }
-  
+
   private void registerProperties() {
     try {
       callRegisterProperties();

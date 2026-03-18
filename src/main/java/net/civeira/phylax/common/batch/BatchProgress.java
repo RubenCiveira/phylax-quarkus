@@ -39,16 +39,16 @@ public class BatchProgress {
 
   /** Unique identifier of the batch process. */
   private final String uid;
-  
+
   /** Global status of the batch execution. */
   private final GlobalStatus status;
-  
+
   /** Timestamp marking the start of execution. */
   private final Instant startTime;
-  
+
   /** Timestamp marking the end of execution, if finished. */
   private final Instant endTime;
-  
+
   /** List of per-step progress records. */
   private final List<BatchStepProgress> steps;
 }

@@ -42,7 +42,7 @@ public class ApiKeyController {
   public Response exchangeApiKey(MultivaluedMap<String, String> paramMap) {
     String key = paramMap.getFirst("api_key");
     return apiKeyStore.apiKey(key)
-        .map(data -> Response.status(501, "API Key token exchange not yet implemented").build())
+        .map(_ -> Response.status(501, "API Key token exchange not yet implemented").build())
         .orElseGet(() -> Response.status(401, "Invalid API key").build());
   }
 }

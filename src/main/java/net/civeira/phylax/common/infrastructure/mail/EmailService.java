@@ -123,7 +123,7 @@ public class EmailService {
       /*
        * @ConfigProperty(name = "quarkus.mailer.from", defaultValue = "5") private final String
        * mailFrom;
-       * 
+       *
        */
       System.setProperty("quarkus.mailer.host", mailHost);
       System.setProperty("quarkus.mailer.from", mailFrom);

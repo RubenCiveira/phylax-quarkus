@@ -8,10 +8,12 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.create.TenantTermsOfUseCreateInput;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.create.TenantTermsOfUseCreateProjection;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.create.TenantTermsOfUseCreateUsecase;
+import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
@@ -51,6 +53,8 @@ public class TenantTermsOfUseCreateController {
     TenantTermsOfUseApiDto tenantTermsOfUseApiDto = new TenantTermsOfUseApiDto();
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    tenantTermsOfUseApiDto
+        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String attached = dto.getAttached();
@@ -75,6 +79,10 @@ public class TenantTermsOfUseCreateController {
     }
     if (null != tenantTermsOfUseApiDto.getTenant()) {
       dto.setTenant(TenantReference.of(tenantTermsOfUseApiDto.getTenant().get$Ref()));
+    }
+    if (null != tenantTermsOfUseApiDto.getRelyingParty()) {
+      dto.setRelyingParty(
+          RelyingPartyReference.of(tenantTermsOfUseApiDto.getRelyingParty().get$Ref()));
     }
     if (null != tenantTermsOfUseApiDto.getText()) {
       dto.setText(tenantTermsOfUseApiDto.getText());

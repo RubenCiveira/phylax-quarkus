@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 class TenantTermsOfUseFilterUnitTest {
@@ -41,6 +42,16 @@ class TenantTermsOfUseFilterUnitTest {
     filter.setTenants(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getTenants(),
         "Tenants must be the same as the assigned");
+    Assertions.assertFalse(filter.getRelyingParty().isPresent(),
+        "RelyingParty must be empty if filter is build without it");
+    filter.setRelyingParty(RelyingPartyReference.of("$ref"));
+    Assertions.assertEquals(RelyingPartyReference.of("$ref"), filter.getRelyingParty().get(),
+        "RelyingParty must be the same as the assigned");
+    Assertions.assertTrue(filter.getRelyingPartys().isEmpty(),
+        "RelyingPartys must be empty if filter is build without it");
+    filter.setRelyingPartys(List.of("one"));
+    Assertions.assertEquals(List.of("one"), filter.getRelyingPartys(),
+        "RelyingPartys must be the same as the assigned");
     Assertions.assertFalse(filter.getTenantTenantAccesible().isPresent(),
         "TenantTenantAccesible must be empty if filter is build without it");
     filter.setTenantTenantAccesible("one");

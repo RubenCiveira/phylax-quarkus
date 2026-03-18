@@ -19,7 +19,6 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.infrastructure.migration.Migrations;
 import net.civeira.phylax.common.infrastructure.sql.UncheckedSqlException;
 
 /**

@@ -2,11 +2,13 @@
 package net.civeira.phylax.common.value.validation.validators;
 
 import java.util.regex.Pattern;
+
 import net.civeira.phylax.common.value.validation.ValidationResult;
 import net.civeira.phylax.common.value.validation.Validator;
 
 /**
- * Validates a phone number to ensure it contains only digits and has a length between 10 and 15 characters.
+ * Validates a phone number to ensure it contains only digits and has a length between 10 and 15
+ * characters.
  */
 public class PhoneNumberValidator implements Validator<String> {
 
@@ -22,8 +24,8 @@ public class PhoneNumberValidator implements Validator<String> {
   }
 
   /**
-   * Validates a phone number to ensure it meets the required format.
-   * The phone number must consist of only digits and be between 10 and 15 characters long.
+   * Validates a phone number to ensure it meets the required format. The phone number must consist
+   * of only digits and be between 10 and 15 characters long.
    *
    * @param phoneNumber The phone number to validate.
    * @return A {@link ValidationResult} indicating whether the phone number is valid.

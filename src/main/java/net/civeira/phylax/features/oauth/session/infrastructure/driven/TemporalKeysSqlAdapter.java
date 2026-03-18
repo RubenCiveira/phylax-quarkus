@@ -243,7 +243,7 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     // FIX: rotar cada hora.... sin schedurle: poniendo un expires en la tabla.
     Optional<KeyWrapper> current = getCurrent();
     String sql =
-        current.map(val -> "UPDATE _oauth_temporal_keys set current = ?, old = ?, expiration = ?")
+        current.map(_ -> "UPDATE _oauth_temporal_keys set current = ?, old = ?, expiration = ?")
             .orElse("INSERT INTO _oauth_temporal_keys (current, old, expiration) VALUES(?,?,?)");
     String oldSecret = current.map(KeyWrapper::getSecret).orElse("");
     String secret = cipher.generateSecureRandomApiSecret().replace('\'', '"');

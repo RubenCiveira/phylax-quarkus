@@ -20,6 +20,7 @@ import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.delete.TenantTermsOfUseCheckBatchDeleteStatus;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.delete.TenantTermsOfUseDeleteFilter;
@@ -54,11 +55,14 @@ public class TenantTermsOfUseDeleteController {
    * @param search
    * @param tenant
    * @param tenants
+   * @param relyingParty
+   * @param relyingPartys
    * @return
    */
   @ApiObserved("Api to delete on massive entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDelete(final List<String> uids, final String search,
-      final String tenant, final List<String> tenants) {
+      final String tenant, final List<String> tenants, final String relyingParty,
+      final List<String> relyingPartys) {
     TenantTermsOfUseDeleteFilter.TenantTermsOfUseDeleteFilterBuilder filterBuilder =
         TenantTermsOfUseDeleteFilter.builder();
     filterBuilder =
@@ -72,6 +76,11 @@ public class TenantTermsOfUseDeleteController {
     }
     filterBuilder = filterBuilder.tenants(null == tenants ? null
         : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    if (null != relyingParty) {
+      filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
+    }
+    filterBuilder = filterBuilder.relyingPartys(null == relyingPartys ? null
+        : relyingPartys.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TenantTermsOfUseDeleteFilter filter = filterBuilder.build();
     BatchIdentificator task = delete.batchDelete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */

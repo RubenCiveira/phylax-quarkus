@@ -8,19 +8,18 @@ import java.util.function.Consumer;
 /**
  * Represents a configurable remote request before execution.
  *
- * It allows setting headers, query parameters, and path parameters on the request.
- * A processor is used to map the response into a {@link RemoteConnection} handle.
- * The resulting connection is executed by a {@link RemoteConnector}.
- * This abstraction keeps request building separate from transport concerns.
+ * It allows setting headers, query parameters, and path parameters on the request. A processor is
+ * used to map the response into a {@link RemoteConnection} handle. The resulting connection is
+ * executed by a {@link RemoteConnector}. This abstraction keeps request building separate from
+ * transport concerns.
  */
 public interface RemoteQuery {
 
   /**
    * Adds a single header to the request.
    *
-   * Use this for common headers like authorization or content type.
-   * The method returns the same query instance for fluent chaining.
-   * Header values are applied when the request is executed.
+   * Use this for common headers like authorization or content type. The method returns the same
+   * query instance for fluent chaining. Header values are applied when the request is executed.
    *
    * @param name header name
    * @param value header value
@@ -31,9 +30,8 @@ public interface RemoteQuery {
   /**
    * Adds a header with multiple values to the request.
    *
-   * This is useful for headers that accept repeated values.
-   * The method returns the same query instance for fluent chaining.
-   * Values are applied when the request is executed.
+   * This is useful for headers that accept repeated values. The method returns the same query
+   * instance for fluent chaining. Values are applied when the request is executed.
    *
    * @param name header name
    * @param values header values
@@ -44,9 +42,8 @@ public interface RemoteQuery {
   /**
    * Adds multiple headers to the request.
    *
-   * This is a convenience method for bulk header assignment.
-   * The method returns the same query instance for fluent chaining.
-   * Values are applied when the request is executed.
+   * This is a convenience method for bulk header assignment. The method returns the same query
+   * instance for fluent chaining. Values are applied when the request is executed.
    *
    * @param headers header map with names and values
    * @return current {@link RemoteQuery} instance for chaining
@@ -56,9 +53,8 @@ public interface RemoteQuery {
   /**
    * Adds a query parameter to the request URL.
    *
-   * Use this to filter or paginate remote queries.
-   * The method returns the same query instance for fluent chaining.
-   * Parameters are applied when the request is executed.
+   * Use this to filter or paginate remote queries. The method returns the same query instance for
+   * fluent chaining. Parameters are applied when the request is executed.
    *
    * @param name query parameter name
    * @param value query parameter value
@@ -69,9 +65,8 @@ public interface RemoteQuery {
   /**
    * Adds multiple query parameters to the request URL.
    *
-   * This is a convenience method for bulk query parameter assignment.
-   * The method returns the same query instance for fluent chaining.
-   * Parameters are applied when the request is executed.
+   * This is a convenience method for bulk query parameter assignment. The method returns the same
+   * query instance for fluent chaining. Parameters are applied when the request is executed.
    *
    * @param params query parameter names and values
    * @return current {@link RemoteQuery} instance for chaining
@@ -81,9 +76,8 @@ public interface RemoteQuery {
   /**
    * Adds a path parameter to the request URL.
    *
-   * Use this to replace URI template variables in the target path.
-   * The method returns the same query instance for fluent chaining.
-   * Parameters are applied when the request is executed.
+   * Use this to replace URI template variables in the target path. The method returns the same
+   * query instance for fluent chaining. Parameters are applied when the request is executed.
    *
    * @param name path parameter name
    * @param value path parameter value
@@ -94,9 +88,8 @@ public interface RemoteQuery {
   /**
    * Adds multiple path parameters to the request URL.
    *
-   * This is a convenience method for bulk path parameter assignment.
-   * The method returns the same query instance for fluent chaining.
-   * Parameters are applied when the request is executed.
+   * This is a convenience method for bulk path parameter assignment. The method returns the same
+   * query instance for fluent chaining. Parameters are applied when the request is executed.
    *
    * @param params path parameter names and values
    * @return current {@link RemoteQuery} instance for chaining
@@ -106,9 +99,9 @@ public interface RemoteQuery {
   /**
    * Defines a processor to handle the response of the request.
    *
-   * The consumer is invoked with the mapped response object on completion.
-   * The returned {@link RemoteConnection} represents the configured request.
-   * Use this to map JSON responses into typed objects.
+   * The consumer is invoked with the mapped response object on completion. The returned
+   * {@link RemoteConnection} represents the configured request. Use this to map JSON responses into
+   * typed objects.
    *
    * @param <T> response type
    * @param type class type of the expected response
@@ -120,9 +113,9 @@ public interface RemoteQuery {
   /**
    * Defines a processor that executes a {@link Runnable} upon receiving the response.
    *
-   * This is useful when the response body is not needed.
-   * The returned {@link RemoteConnection} represents the configured request.
-   * The runnable is executed after a successful response is received.
+   * This is useful when the response body is not needed. The returned {@link RemoteConnection}
+   * represents the configured request. The runnable is executed after a successful response is
+   * received.
    *
    * @param runnable task to be executed after the request is processed
    * @return a {@link RemoteConnection} representing the processed request

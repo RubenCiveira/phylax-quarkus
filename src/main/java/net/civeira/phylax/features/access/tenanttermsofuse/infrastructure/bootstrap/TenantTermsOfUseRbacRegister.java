@@ -57,6 +57,8 @@ public class TenantTermsOfUseRbacRegister {
         .description("A number to identify the db record").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
         .description("La cuenta a la que pertenece").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("relyingParty")
+        .description("La applicación a tener en cuenta").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("text")
         .description("El text de tenant terms of use").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")

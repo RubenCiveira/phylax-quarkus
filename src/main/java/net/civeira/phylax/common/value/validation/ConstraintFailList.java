@@ -7,8 +7,8 @@ import java.util.List;
 /**
  * Represents a list of constraint validation failures.
  * <p>
- * This class extends {@link AbstractFailList} and is used to store multiple 
- * {@link ConstraintFail} instances that indicate validation failures.
+ * This class extends {@link AbstractFailList} and is used to store multiple {@link ConstraintFail}
+ * instances that indicate validation failures.
  * </p>
  */
 public class ConstraintFailList extends AbstractFailList {
@@ -23,8 +23,8 @@ public class ConstraintFailList extends AbstractFailList {
   /**
    * Creates a {@code ConstraintFailList} with a single validation failure.
    *
-   * @param code       The error code representing the type of constraint violation.
-   * @param field      The name of the field that failed value.validation.
+   * @param code The error code representing the type of constraint violation.
+   * @param field The name of the field that failed value.validation.
    * @param wrongValue The incorrect value that caused the validation failure.
    */
   public ConstraintFailList(String code, String field, Object wrongValue) {
@@ -32,11 +32,12 @@ public class ConstraintFailList extends AbstractFailList {
   }
 
   /**
-   * Creates a {@code ConstraintFailList} with a single validation failure including an error message.
+   * Creates a {@code ConstraintFailList} with a single validation failure including an error
+   * message.
    *
-   * @param code         The error code representing the type of constraint violation.
-   * @param field        The name of the field that failed value.validation.
-   * @param wrongValue   The incorrect value that caused the validation failure.
+   * @param code The error code representing the type of constraint violation.
+   * @param field The name of the field that failed value.validation.
+   * @param wrongValue The incorrect value that caused the validation failure.
    * @param errorMessage A descriptive error message explaining the validation failure.
    */
   public ConstraintFailList(String code, String field, Object wrongValue, String errorMessage) {
@@ -53,9 +54,11 @@ public class ConstraintFailList extends AbstractFailList {
   }
 
   /**
-   * Creates a {@code ConstraintFailList} initialized with multiple {@link ConstraintFail} instances.
+   * Creates a {@code ConstraintFailList} initialized with multiple {@link ConstraintFail}
+   * instances.
    *
-   * @param fails A list of {@code ConstraintFail} instances representing multiple validation failures.
+   * @param fails A list of {@code ConstraintFail} instances representing multiple validation
+   *        failures.
    */
   public ConstraintFailList(List<ConstraintFail> fails) {
     super(fails);
@@ -69,7 +72,7 @@ public class ConstraintFailList extends AbstractFailList {
   public void add(ConstraintFail fail) {
     super.add(fail);
   }
-  
+
   /**
    * Add a new {@code ConstraintFail} instance with a validation code, field, and invalid value.
    *

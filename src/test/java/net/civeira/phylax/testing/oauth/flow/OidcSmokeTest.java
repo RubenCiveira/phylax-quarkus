@@ -8,7 +8,7 @@ import io.quarkus.test.junit.QuarkusTest;
 
 /**
  * Smoke test: verifica que el servidor Quarkus arranca correctamente con los beans
- * 
+ *
  * @Alternative del classpath de test. Sirve como punto de entrada mientras se construye la
  *              infraestructura de tests de integración OIDC.
  */

@@ -54,7 +54,7 @@ public class UserCacheGatewayAdapter implements UserCacheGateway {
   public Optional<UserCached> retrieve(final UserFilter filter, final UserCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at user cache for the key {}", key);
-    return cache.<String, UserCached>get(key, k -> null).map(cached -> Optional.ofNullable(cached))
+    return cache.<String, UserCached>get(key, _ -> null).map(cached -> Optional.ofNullable(cached))
         .await().indefinitely();
   }
 
@@ -71,7 +71,7 @@ public class UserCacheGatewayAdapter implements UserCacheGateway {
     cache.invalidate(key).await().indefinitely();
     return cache
         .<String, UserCached>get(key,
-            k -> UserCached.builder().since(OffsetDateTime.now()).value(users).build())
+            _ -> UserCached.builder().since(OffsetDateTime.now()).value(users).build())
         .await().indefinitely();
   }
 

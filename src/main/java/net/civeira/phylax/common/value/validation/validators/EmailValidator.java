@@ -7,8 +7,8 @@ import net.civeira.phylax.common.value.validation.ValidationResult;
 import net.civeira.phylax.common.value.validation.Validator;
 
 /**
- * Validator for email addresses.
- * This class ensures that a given email string follows a valid email format.
+ * Validator for email addresses. This class ensures that a given email string follows a valid email
+ * format.
  */
 public class EmailValidator implements Validator<String> {
   private final String errorMessage;
@@ -32,15 +32,15 @@ public class EmailValidator implements Validator<String> {
   public ValidationResult validate(String email) {
     final Pattern emailPattern =
         Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-    
+
     if (email == null || email.isEmpty()) {
       return new ValidationResult(errorMessage);
     }
-    
+
     if (!emailPattern.matcher(email).matches()) {
       return new ValidationResult(errorMessage);
     }
-    
+
     return new ValidationResult();
   }
 }

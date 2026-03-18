@@ -7,11 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+
 import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.value.validation.AbstractFail;
@@ -99,7 +102,7 @@ class LocalizedBatchStepProgressUnitTest {
   void testFrom_WithNullFails_ReturnsInfoWithNullFailsList() {
     // Arrange
     AbstractFail failMock = mock(AbstractFail.class);
-    BatchStepProgress.ErrorInfo errorInfo = new BatchStepProgress.ErrorInfo( failMock );
+    BatchStepProgress.ErrorInfo errorInfo = new BatchStepProgress.ErrorInfo(failMock);
     errorInfo.setFails(null); // Explicitly set fails to null
 
     // Act

@@ -21,6 +21,7 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.disable.TenantTermsOfUseDisableFilter;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.disable.TenantTermsOfUseDisableProjection;
@@ -35,6 +36,7 @@ import net.civeira.phylax.generated.openapi.model.BatchTaskDetail.DetailStatusEn
 import net.civeira.phylax.generated.openapi.model.BatchTaskLocalizator;
 import net.civeira.phylax.generated.openapi.model.ConstraintFail;
 import net.civeira.phylax.generated.openapi.model.MultipleErrorCodes;
+import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
@@ -58,11 +60,14 @@ public class TenantTermsOfUseDisableController {
    * @param search
    * @param tenant
    * @param tenants
+   * @param relyingParty
+   * @param relyingPartys
    * @return
    */
   @Observed("Api to disable on massive entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDisable(final List<String> uids, final String search,
-      final String tenant, final List<String> tenants) {
+      final String tenant, final List<String> tenants, final String relyingParty,
+      final List<String> relyingPartys) {
     TenantTermsOfUseDisableFilter.TenantTermsOfUseDisableFilterBuilder filterBuilder =
         TenantTermsOfUseDisableFilter.builder();
     filterBuilder =
@@ -76,6 +81,11 @@ public class TenantTermsOfUseDisableController {
     }
     filterBuilder = filterBuilder.tenants(null == tenants ? null
         : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    if (null != relyingParty) {
+      filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
+    }
+    filterBuilder = filterBuilder.relyingPartys(null == relyingPartys ? null
+        : relyingPartys.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TenantTermsOfUseDisableFilter filter = filterBuilder.build();
     BatchIdentificator task = disable.batchDisable(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
@@ -187,6 +197,8 @@ public class TenantTermsOfUseDisableController {
     TenantTermsOfUseApiDto tenantTermsOfUseApiDto = new TenantTermsOfUseApiDto();
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    tenantTermsOfUseApiDto
+        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String attached = dto.getAttached();

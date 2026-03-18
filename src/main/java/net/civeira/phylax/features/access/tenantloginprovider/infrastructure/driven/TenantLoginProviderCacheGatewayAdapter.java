@@ -56,7 +56,7 @@ public class TenantLoginProviderCacheGatewayAdapter implements TenantLoginProvid
       final TenantLoginProviderCursor cursor) {
     String key = key(filter, cursor);
     log.trace("Lookup at tenantLoginProvider cache for the key {}", key);
-    return cache.<String, TenantLoginProviderCached>get(key, k -> null)
+    return cache.<String, TenantLoginProviderCached>get(key, _ -> null)
         .map(cached -> Optional.ofNullable(cached)).await().indefinitely();
   }
 
@@ -73,7 +73,7 @@ public class TenantLoginProviderCacheGatewayAdapter implements TenantLoginProvid
     String key = key(filter, cursor);
     cache.invalidate(key).await().indefinitely();
     return cache
-        .<String, TenantLoginProviderCached>get(key, k -> TenantLoginProviderCached.builder()
+        .<String, TenantLoginProviderCached>get(key, _ -> TenantLoginProviderCached.builder()
             .since(OffsetDateTime.now()).value(tenantLoginProviders).build())
         .await().indefinitely();
   }

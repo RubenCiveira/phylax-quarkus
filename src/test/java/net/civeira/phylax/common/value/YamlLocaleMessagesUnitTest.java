@@ -22,7 +22,7 @@ class YamlLocaleMessagesUnitTest {
 
   @Test
   void without_country() {
-    YamlLocaleMessages locale = YamlLocaleMessages.load("/messages/errors",  Locale.ENGLISH);
+    YamlLocaleMessages locale = YamlLocaleMessages.load("/messages/errors", Locale.ENGLISH);
     Assertions.assertTrue(locale.contains("c1.code"));
     Assertions.assertEquals("001", locale.get("c1.code"));
     Assertions.assertFalse(locale.keys("c1").isEmpty());

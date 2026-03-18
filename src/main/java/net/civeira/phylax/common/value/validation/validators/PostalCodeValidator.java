@@ -7,11 +7,12 @@ import net.civeira.phylax.common.value.validation.Validator;
 /**
  * Validates postal codes ensuring they follow a fixed-length numeric format.
  * 
- * <p>This validator checks if a postal code:
+ * <p>
+ * This validator checks if a postal code:
  * <ul>
- *   <li>Is exactly 5 characters long.</li>
- *   <li>Contains only numeric digits.</li>
- *   <li>Is not null or empty.</li>
+ * <li>Is exactly 5 characters long.</li>
+ * <li>Contains only numeric digits.</li>
+ * <li>Is not null or empty.</li>
  * </ul>
  * If any of these conditions are not met, a validation error is returned.
  */

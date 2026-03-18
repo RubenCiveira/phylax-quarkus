@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.ActivationDateVO;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.AttachedVO;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.EnabledVO;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.RelyingPartyVO;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.TextVO;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.UidVO;
@@ -25,8 +27,10 @@ class TenantTermsOfUseUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_tenant_terms_of_use_builder() {
     TenantTermsOfUse one = TenantTermsOfUse.builder().uidValue(UidVO.from("one"))
-        .tenantValue(TenantVO.from(TenantReference.of("one"))).textValue(TextVO.from("one"))
-        .enabledValue(EnabledVO.from(true)).attachedValue(AttachedVO.from("file_1"))
+        .tenantValue(TenantVO.from(TenantReference.of("one")))
+        .relyingPartyValue(RelyingPartyVO.from(RelyingPartyReference.of("one")))
+        .textValue(TextVO.from("one")).enabledValue(EnabledVO.from(true))
+        .attachedValue(AttachedVO.from("file_1"))
         .activationDateValue(ActivationDateVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .versionValue(VersionVO.from(1)).build();

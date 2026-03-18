@@ -23,10 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Reads audit events from the underlying audit store.
  *
- * The service translates filter criteria into SQL queries against the audit table.
- * It supports pagination and tenant scoping for multi-tenant environments.
- * Results are returned as {@link AuditEvent} records for downstream processing.
- * This is typically used by management endpoints and operational tooling.
+ * The service translates filter criteria into SQL queries against the audit table. It supports
+ * pagination and tenant scoping for multi-tenant environments. Results are returned as
+ * {@link AuditEvent} records for downstream processing. This is typically used by management
+ * endpoints and operational tooling.
  */
 @Slf4j
 @ApplicationScoped
@@ -40,9 +40,9 @@ public class AuditReadService {
   /**
    * Queries audit events using the provided filters and pagination.
    *
-   * The query is scoped to a tenant and can filter by actor, action, or date range.
-   * It applies a limit and offset for paging through large audit logs.
-   * The audit table name can be derived from the provided prefix.
+   * The query is scoped to a tenant and can filter by actor, action, or date range. It applies a
+   * limit and offset for paging through large audit logs. The audit table name can be derived from
+   * the provided prefix.
    *
    * @param on audit table prefix or schema identifier
    * @param entity entity name used for logging or routing

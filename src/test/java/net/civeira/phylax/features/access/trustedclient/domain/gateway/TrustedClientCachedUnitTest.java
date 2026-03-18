@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.EnabledVO;
@@ -26,7 +27,8 @@ class TrustedClientCachedUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_trusted_client_cached_builder() {
     TrustedClient one = TrustedClient.builder().uidValue(UidVO.from("one"))
-        .codeValue(CodeVO.from("one")).publicAllowValue(PublicAllowVO.from(true))
+        .codeValue(CodeVO.from("one")).allowAllScopesValue(AllowAllScopesVO.from(true))
+        .publicAllowValue(PublicAllowVO.from(true))
         .secretOauthValue(SecretOauthVO.fromCyphered("one")).enabledValue(EnabledVO.from(true))
         .allowedRedirectsValue(AllowedRedirectsVO
             .from(List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build())))
