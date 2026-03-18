@@ -33,8 +33,8 @@ public class ChallengesState {
   /**
    * Challenges the user has already passed in this session (PASSWORD, MFA, etc.).
    *
-   * Accepts the legacy field name {@code challenges} when deserializing from JSON so cookies
-   * issued before the rename remain readable.
+   * Accepts the legacy field name {@code challenges} when deserializing from JSON so cookies issued
+   * before the rename remain readable.
    */
   @JsonAlias("challenges")
   @Builder.Default

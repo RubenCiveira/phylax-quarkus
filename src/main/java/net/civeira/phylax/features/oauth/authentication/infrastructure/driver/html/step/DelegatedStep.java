@@ -114,15 +114,16 @@ public class DelegatedStep implements OidcStep {
    */
   public Response doPaintLoginForm(String tenant, String provider, Locale locale, String msg) {
     String back = "/oauth/openid/" + tenant + "/delegated-auth?provider=" + provider + "&code=";
-    return securer.secureHtmlResponse(Response
-        .ok("" + "<script>" + "function setCookie(cname, cvalue, exhours) {"
-            + "const d = new Date();" + "d.setTime(d.getTime() + (exhours*60*60*1000));"
-            + "let expires = \"expires=\"+ d.toUTCString();"
-            + "document.cookie = cname + \"=\" + cvalue + \";\" + expires + \";path=/\";" + "}"
-            + "setCookie(\"post-auth-target\", document.location, 1);"
-            + "document.location = \"/oauth/openid/" + tenant + "/delegated/redirect/" + provider
-            + "?back=" + encode(back) + "\";" + "</script>")
-        .type(FrontAcessController.TEXT_HTML));
+    return securer
+        .secureHtmlResponse(Response
+            .ok("" + "<script>" + "function setCookie(cname, cvalue, exhours) {"
+                + "const d = new Date();" + "d.setTime(d.getTime() + (exhours*60*60*1000));"
+                + "let expires = \"expires=\"+ d.toUTCString();"
+                + "document.cookie = cname + \"=\" + cvalue + \";\" + expires + \";path=/\";" + "}"
+                + "setCookie(\"post-auth-target\", document.location, 1);"
+                + "document.location = \"/oauth/openid/" + tenant + "/delegated/redirect/"
+                + provider + "?back=" + encode(back) + "\";" + "</script>")
+            .type(FrontAcessController.TEXT_HTML));
   }
 
   /**

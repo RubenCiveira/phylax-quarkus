@@ -868,57 +868,22 @@ default Class<? extends AuthenticationException> challengeException() { return n
 ### F11.4 — Conectar OidcStepRouter en FrontAcessController
 
 **Objetivo:** Reemplazar cadena `fillIfEmpty` + `else if` y `loginErrorMappers` por el router.
-**Criterio de fin:** `doExecStep()` tiene menos de 20 líneas.
+**Criterio de fin:** `doExecStep()` tiene menos de 20 líneas. ✅ (~20 líneas)
 
-- [ ] Inyectar `OidcStepRouter router` en `FrontAcessController`
-
-- [ ] Construir `ChallengesState` desde la `Challenge` existente en `doExecStep()`:
-  ```java
-  Optional<ChallengesState> challengeState = preSessionUsername(cookie, request.getTenant())
-      .map(ch -> ChallengesState.builder()
-          .username(ch.getUsername())
-          .completed(ch.getChallenges())
-          .build());
-  StepInput input = StepInput.builder()
-      .clientDetails(clientDetails)
-      .challenges(challengeState)
-      .formParams(paramMap)
-      .build();
-  ```
-
-- [ ] Reemplazar el bloque `fillIfEmpty` + `else if` en `doExecStep()` por:
-  ```java
-  Optional<StepOutcome> outcome = router.process(input);
-  if (outcome.isPresent()) {
-      return handleOutcome(outcome.get(), input);
-  }
-  return doExecLogin(input);
-  ```
-
-- [ ] Crear `handleOutcome(StepOutcome, StepInput)`:
-  ```java
-  private Response handleOutcome(StepOutcome outcome, StepInput input) {
-      return switch (outcome) {
-          case StepOutcome.Render r -> r.response();
-          case StepOutcome.Proceed p -> handleProceed(p, input);
-      };
-  }
-  ```
-
-- [ ] Crear `handleProceed(StepOutcome.Proceed, StepInput)` que:
-  1. Llama `fillPreAuthenticated(request, username, clientDetails, challengesState.getCompleted())`
-  2. Si OK → emite código de autorización (flujo `redirect()` actual)
-  3. Si falla con challenge conocido:
-     - `ch = router.challengeFor(exception.getClass()).orElseThrow()`
-     - `ChallengesState next = proceed.challengesState().withCompleted(ch)`
-     - `NewCookie cookie = sessionCookie(next.getUsername(), next.getCompleted(), tenant)`
-     - `return router.paint(exception.getClass(), input, cookie).orElseGet(...)`
-
-- [ ] Reemplazar `loginErrorMappers` + `map()` por `router.paint(...)` en `revolve()`
-
-- [ ] Convertir `formParams` de campo de instancia a variable local en `doExecStep()`
-
-- [ ] Convertir `currentChallenge` de campo de instancia a variable local en `doExecStep()`
+- [x] Inyectar `OidcStepRouter router`, `RecoverStep`, `RegistrationStep`, `NewMfaStep`, `DelegatedStep` en `FrontAcessController`
+- [x] `preSessionChallengeState()` deserializa directamente en `ChallengesState` (no `Challenge`)
+- [x] `doExecStep()` reemplazado: `router.process(input)` → `handleOutcome()` → `doExecLogin()`
+- [x] `handleOutcome()` creado: switch sealed `Render` | `Proceed`
+- [x] `handleProceed()` creado: `fillPreAuthenticated` + `router.challengeFor()` + `router.paint()`
+- [x] `doExecLogin()` reemplaza `map()` + `loginErrorMappers` por `router.challengeFor()` + `router.paint()`
+- [x] `revolve()` eliminado — `checkRecover` y `checkRegister` usan `StepOutcome` directamente
+- [x] `fillIfEmpty()` eliminado
+- [x] `map()` + `loginErrorMappers` eliminados
+- [x] `formParams` y `currentChallenge` como campos de instancia eliminados
+- [x] `sessionCookie()` reemplazado por `buildPreSessionCookie(ChallengesState, String)`
+- [x] Todos los `*ControllerPart.java` eliminados (solo queda `package-info.java`)
+- [x] Endpoints `checkRecover` y `checkRegister` actualizados para pasar `cookie` param y usar Steps
+- [x] Endpoints `showMfaSelector`, `processDelegated`, `showRecover`, `showRegister` actualizados
 
 ---
 

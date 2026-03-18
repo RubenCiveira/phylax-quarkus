@@ -20,8 +20,8 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.Authent
  * {@code FrontAcessController}. All registered {@link OidcStep} implementations are discovered
  * automatically via CDI — adding a new step only requires creating a new bean.
  *
- * The routing caches are initialized lazily on first use. This bean is
- * {@code @ApplicationScoped} and all per-request data travels through {@link StepInput}.
+ * The routing caches are initialized lazily on first use. This bean is {@code @ApplicationScoped}
+ * and all per-request data travels through {@link StepInput}.
  */
 @Slf4j
 @jakarta.enterprise.context.ApplicationScoped
@@ -56,8 +56,8 @@ public class OidcStepRouter {
    * Renders the form associated with the given authentication exception.
    *
    * @param exceptionClass the exception thrown by {@code fillPreAuthenticated()}
-   * @param input          the current request context
-   * @param preSession     the pre-session cookie to embed in the rendered response
+   * @param input the current request context
+   * @param preSession the pre-session cookie to embed in the rendered response
    * @return the rendered response, or {@code empty} if no step handles this exception
    */
   public Optional<Response> paint(Class<? extends AuthenticationException> exceptionClass,
@@ -73,9 +73,9 @@ public class OidcStepRouter {
   /**
    * Returns the {@link AuthenticationChallege} associated with the given exception.
    *
-   * Used by the controller to build the updated {@link
-   * net.civeira.phylax.features.oauth.authentication.domain.ChallengesState} before writing the
-   * new pre-session cookie.
+   * Used by the controller to build the updated
+   * {@link net.civeira.phylax.features.oauth.authentication.domain.ChallengesState} before writing
+   * the new pre-session cookie.
    *
    * @param exceptionClass the exception thrown by {@code fillPreAuthenticated()}
    * @return the challenge, or {@code empty} if the exception is not mapped to any step

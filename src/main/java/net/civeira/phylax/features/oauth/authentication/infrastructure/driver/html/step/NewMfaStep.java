@@ -70,12 +70,12 @@ public class NewMfaStep implements OidcStep {
     if (verified) {
       ChallengesState state =
           input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
-      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
-          input.getRequest(), state));
+      return Optional.of(
+          new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
       String msg = FrontAcessController.i18n(input.locale(), "newmfa.save-error");
-      return Optional.of(new StepOutcome.Render(
-          securer.secureHtmlResponse(buildForm(input, username, msg))));
+      return Optional
+          .of(new StepOutcome.Render(securer.secureHtmlResponse(buildForm(input, username, msg))));
     }
   }
 
@@ -105,8 +105,8 @@ public class NewMfaStep implements OidcStep {
   }
 
   private ResponseBuilder buildForm(StepInput input, String username, String msg) {
-    PublicLoginMfaBuildResponse config = userMfa.configurationForNewMfa(
-        input.getRequest().getTenant(), username, input.locale());
+    PublicLoginMfaBuildResponse config =
+        userMfa.configurationForNewMfa(input.getRequest().getTenant(), username, input.locale());
 
     String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("otp_code"));
 
@@ -119,27 +119,20 @@ public class NewMfaStep implements OidcStep {
     String backText = FrontAcessController.i18n(input.locale(), "newmfa.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response
-        .ok(decorator.getFullPage("newMfa",
-            js + "<h1>" + title + "</h1><p>" + help + "</p>"
-                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-                + (config.isRequiresImage()
-                    ? "<img style=\"width:50%;margin: 0px 25%;\" src=\"./mfa-setup\" />"
-                    : "")
-                + "<label>" + code
-                + "<input type=\"text\" name=\"otp_code\" id=\"otp_code\" value=\"\" />"
-                + "<input type=\"hidden\" name=\"step\" value=\"valid_new_mfa\" />"
-                + "</label>"
-                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-                + send + "\" />"
-                + "</form>"
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
-                + "<p>" + backText + "</p>"
-                + "</form>",
-            input.locale()))
-        .type(FrontAcessController.TEXT_HTML);
+    return Response.ok(decorator.getFullPage("newMfa",
+        js + "<h1>" + title + "</h1><p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+            + (config.isRequiresImage()
+                ? "<img style=\"width:50%;margin: 0px 25%;\" src=\"./mfa-setup\" />"
+                : "")
+            + "<label>" + code
+            + "<input type=\"text\" name=\"otp_code\" id=\"otp_code\" value=\"\" />"
+            + "<input type=\"hidden\" name=\"step\" value=\"valid_new_mfa\" />" + "</label>"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        input.locale())).type(FrontAcessController.TEXT_HTML);
   }
 }

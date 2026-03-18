@@ -9,16 +9,20 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
  * Typed result of an {@link OidcStep} execution.
  *
  * Replaces the {@code Function<StepResult, Response> resolver} callback that ControllerParts
- * previously received. Instead of calling back into {@code FrontAcessController}, a step returns
- * a {@code StepOutcome} and the controller decides what to do with it.
+ * previously received. Instead of calling back into {@code FrontAcessController}, a step returns a
+ * {@code StepOutcome} and the controller decides what to do with it.
  *
  * <ul>
- *   <li>{@link Render} — the step wants to display an HTML response (e.g. form with errors).</li>
- *   <li>{@link Proceed} — the step completed successfully; the flow may continue to the next
- *       challenge or issue the authorization code.</li>
+ * <li>{@link Render} — the step wants to display an HTML response (e.g. form with errors).</li>
+ * <li>{@link Proceed} — the step completed successfully; the flow may continue to the next
+ * challenge or issue the authorization code.</li>
  * </ul>
  */
-public sealed interface StepOutcome permits StepOutcome.Render, StepOutcome.Proceed {
+public sealed
+
+interface StepOutcome
+permits StepOutcome.Render,StepOutcome.Proceed
+{
 
   /**
    * The step wants to render an HTML response directly.

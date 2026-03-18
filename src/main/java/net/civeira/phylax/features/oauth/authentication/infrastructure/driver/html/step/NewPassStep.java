@@ -69,18 +69,16 @@ public class NewPassStep implements OidcStep {
     if (updated) {
       ChallengesState state =
           input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
-      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
-          input.getRequest(), state));
+      return Optional.of(
+          new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
       String msg = FrontAcessController.i18n(input.locale(), "chpass.save-error");
-      return Optional.of(new StepOutcome.Render(
-          securer.secureHtmlResponse(buildForm(input, msg))));
+      return Optional.of(new StepOutcome.Render(securer.secureHtmlResponse(buildForm(input, msg))));
     }
   }
 
   private ResponseBuilder buildForm(StepInput input, String msg) {
-    String js = securer.configureScripts(
-        securer.addSign("sign"),
+    String js = securer.configureScripts(securer.addSign("sign"),
         securer.cypher(
             Arrays.asList(
                 EncrytFieldTransfer.builder().from("type_old_pass").to("old_pass").build(),
@@ -98,28 +96,20 @@ public class NewPassStep implements OidcStep {
     String backText = FrontAcessController.i18n(input.locale(), "chpass.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response
-        .ok(decorator.getFullPage("password",
-            js + "<h1>" + title + "</h1>"
-                + "<p>" + help + "</p>"
-                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-                + "<form id=\"chpass\" method=\"POST\">"
-                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-                + "<label>" + current
-                + "<input type=\"password\" id=\"type_old_pass\" value=\"\" /></label>"
-                + "<label>" + newpass
-                + "<input type=\"password\" id=\"type_new_pass\" value=\"\" /></label>"
-                + "<input type=\"hidden\" id=\"old_pass\" name=\"old_pass\" value=\"\" />"
-                + "<input type=\"hidden\" id=\"new_pass\" name=\"new_pass\" value=\"\" />"
-                + "<input type=\"hidden\" name=\"step\" value=\"new_pass\" />"
-                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-                + send + "\" />"
-                + "</form>"
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
-                + "<p>" + backText + "</p>"
-                + "</form>",
-            input.locale()))
-        .type(FrontAcessController.TEXT_HTML);
+    return Response.ok(decorator.getFullPage("password",
+        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+            + "<form id=\"chpass\" method=\"POST\">"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + current
+            + "<input type=\"password\" id=\"type_old_pass\" value=\"\" /></label>" + "<label>"
+            + newpass + "<input type=\"password\" id=\"type_new_pass\" value=\"\" /></label>"
+            + "<input type=\"hidden\" id=\"old_pass\" name=\"old_pass\" value=\"\" />"
+            + "<input type=\"hidden\" id=\"new_pass\" name=\"new_pass\" value=\"\" />"
+            + "<input type=\"hidden\" name=\"step\" value=\"new_pass\" />"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        input.locale())).type(FrontAcessController.TEXT_HTML);
   }
 }

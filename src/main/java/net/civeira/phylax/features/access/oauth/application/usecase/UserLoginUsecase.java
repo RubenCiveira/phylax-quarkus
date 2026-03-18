@@ -159,10 +159,8 @@ public class UserLoginUsecase {
     List<String> forAllClient = rolesFromIdentity(
         identities.find(ClientIdentityFilter.builder().user(user).forAllAudiences(true).build()),
         tenant);
-    List<String> forAllPlatform = platformRolesFromIdentity(
-        platformIdentities
-            .find(PlatformIdentityFilter.builder().user(user).forAllAudiences(true).build()),
-        tenant);
+    List<String> forAllPlatform = platformRolesFromIdentity(platformIdentities
+        .find(PlatformIdentityFilter.builder().user(user).forAllAudiences(true).build()), tenant);
     request.getAudiences().forEach(aud -> {
       List<String> audRoles = new ArrayList<>(forAllClient);
       audRoles.addAll(forAllPlatform);
@@ -208,8 +206,8 @@ public class UserLoginUsecase {
       Tenant tenant) {
     return identity.map(pi -> {
       List<Roles> roleRefs = pi.getRoles();
-      List<String> roles = platformIdentities.resolveRoles(roleRefs).stream()
-          .map(Role::getName).map(name -> "platform:" + name.toLowerCase())
+      List<String> roles = platformIdentities.resolveRoles(roleRefs).stream().map(Role::getName)
+          .map(name -> "platform:" + name.toLowerCase())
           .collect(Collectors.toCollection(ArrayList::new));
       if (tenant.isRoot()) {
         roles.addAll(roles.stream().map(role -> "root:" + role).toList());

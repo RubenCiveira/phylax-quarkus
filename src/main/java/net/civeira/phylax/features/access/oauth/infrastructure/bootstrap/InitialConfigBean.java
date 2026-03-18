@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.access.oauth.infrastructure.bootstrap;
 
 import java.util.List;
+
 import lombok.Getter;
 import net.civeira.phylax.features.access.clientidentity.domain.ClientIdentityChangeSet;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
@@ -37,11 +38,11 @@ public class InitialConfigBean {
     UserChangeSet root = new UserChangeSet().newUid().name("ROOT").passwordPlain(password)
         .tenant(tenant).enabled(true).useSecondFactors(false);
 
-    ClientIdentityChangeSet userRelyIdentity = new ClientIdentityChangeSet().newUid().user(root)
-        .relyingParty(party).roles("ROOT");
+    ClientIdentityChangeSet userRelyIdentity =
+        new ClientIdentityChangeSet().newUid().user(root).relyingParty(party).roles("ROOT");
 
-    ClientIdentityChangeSet userClientIdentity = new ClientIdentityChangeSet().newUid().user(root)
-        .trustedClient(client).roles("ROOT");
+    ClientIdentityChangeSet userClientIdentity =
+        new ClientIdentityChangeSet().newUid().user(root).trustedClient(client).roles("ROOT");
 
     tenants = List.of(tenant);
     parties = List.of(party);

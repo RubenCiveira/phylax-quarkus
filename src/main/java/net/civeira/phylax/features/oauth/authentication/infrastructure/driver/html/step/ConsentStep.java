@@ -68,18 +68,18 @@ public class ConsentStep implements OidcStep {
       consentUsecase.storeAcceptedConsent(input.getRequest().getTenant(), username, relyingParty);
       ChallengesState state =
           input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
-      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
-          input.getRequest(), state));
+      return Optional.of(
+          new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
-      return Optional.of(new StepOutcome.Render(
-          securer.secureHtmlResponse(buildForm(input, username, ""))));
+      return Optional
+          .of(new StepOutcome.Render(securer.secureHtmlResponse(buildForm(input, username, ""))));
     }
   }
 
   private ResponseBuilder buildForm(StepInput input, String username, String msg) {
-    Optional<PendingConsent> pending = consentUsecase.getPendingConsent(
-        input.getRequest().getTenant(), username, input.getRequest().getAudiences(),
-        input.locale());
+    Optional<PendingConsent> pending =
+        consentUsecase.getPendingConsent(input.getRequest().getTenant(), username,
+            input.getRequest().getAudiences(), input.locale());
     if (pending.isEmpty()) {
       throw new IllegalStateException("Consent is not required now...");
     }
@@ -96,26 +96,20 @@ public class ConsentStep implements OidcStep {
     String backText = FrontAcessController.i18n(input.locale(), "consent.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response
-        .ok(decorator.getFullPage("Consent",
-            js + "<h1>" + title + "</h1><p>" + help + "</p>"
-                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-                + "<form method=\"POST\">"
-                + "<div style=\"with:100%;height:200px;overflow:auto; border:solid black 1px;\">"
-                + pendingConsent.getConsentText() + "</div>"
-                + "<label>" + code + "<input type=\"checkbox\" name=\"consent\" /></label>"
-                + "<input type=\"hidden\" name=\"relying_party\" value=\""
-                + pendingConsent.getRelyingParty() + "\" />"
-                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-                + "<input type=\"hidden\" name=\"step\" value=\"consent\" />"
-                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-                + send + "\" />"
-                + "</form>"
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
-                + "<p>" + backText + "</p>"
-                + "</form>",
-            input.locale()))
-        .type(FrontAcessController.TEXT_HTML);
+    return Response.ok(decorator.getFullPage("Consent",
+        js + "<h1>" + title + "</h1><p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
+            + "<div style=\"with:100%;height:200px;overflow:auto; border:solid black 1px;\">"
+            + pendingConsent.getConsentText() + "</div>" + "<label>" + code
+            + "<input type=\"checkbox\" name=\"consent\" /></label>"
+            + "<input type=\"hidden\" name=\"relying_party\" value=\""
+            + pendingConsent.getRelyingParty() + "\" />"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+            + "<input type=\"hidden\" name=\"step\" value=\"consent\" />"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        input.locale())).type(FrontAcessController.TEXT_HTML);
   }
 }

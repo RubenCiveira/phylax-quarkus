@@ -67,17 +67,16 @@ public class ScopeConsentStep implements OidcStep {
     List<String> requestedScopes = parseScopes(input.getRequest().getScope().orElse(""));
     clientScopeConsentUsecase.storeAcceptedScopes(input.getRequest().getTenant(), username,
         input.getClientDetails().getClientId(), requestedScopes);
-    ChallengesState state =
-        input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
-    return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
-        input.getRequest(), state));
+    ChallengesState state = input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+    return Optional
+        .of(new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
   }
 
   private ResponseBuilder buildForm(StepInput input, String username, String msg) {
     String clientId = input.getRequest().getClientId().orElse("");
     List<String> requestedScopes = parseScopes(input.getRequest().getScope().orElse(""));
-    List<String> pendingScopes = clientScopeConsentUsecase.getPendingScopes(
-        input.getRequest().getTenant(), username, clientId, requestedScopes);
+    List<String> pendingScopes = clientScopeConsentUsecase
+        .getPendingScopes(input.getRequest().getTenant(), username, clientId, requestedScopes);
 
     String js = securer.configureScripts(securer.addSign("sign"));
 
@@ -92,24 +91,17 @@ public class ScopeConsentStep implements OidcStep {
     String scopeList =
         pendingScopes.stream().map(s -> "<li>" + s + "</li>").collect(Collectors.joining());
 
-    return Response
-        .ok(decorator.getFullPage("scopeConsent",
-            js + "<h1>" + title + "</h1>"
-                + "<p>" + help + "</p>"
-                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-                + "<ul>" + scopeList + "</ul>"
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-                + "<input type=\"hidden\" name=\"step\" value=\"scope_consent\" />"
-                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-                + accept + "\" />"
-                + "</form>"
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
-                + "<p>" + backText + "</p>"
-                + "</form>",
-            input.locale()))
-        .type(FrontAcessController.TEXT_HTML);
+    return Response.ok(decorator.getFullPage("scopeConsent",
+        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<ul>" + scopeList
+            + "</ul>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+            + "<input type=\"hidden\" name=\"step\" value=\"scope_consent\" />"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + accept
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        input.locale())).type(FrontAcessController.TEXT_HTML);
   }
 
   private List<String> parseScopes(String scope) {

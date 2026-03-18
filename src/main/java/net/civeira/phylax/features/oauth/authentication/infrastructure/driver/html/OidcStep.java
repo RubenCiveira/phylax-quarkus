@@ -11,16 +11,17 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.Authent
 /**
  * Common contract for all steps in the OIDC authentication flow.
  *
- * Replaces the inconsistent {@code process()} signatures across the {@code *ControllerPart}
- * classes and the hardcoded dispatch table inside {@code FrontAcessController.doExecStep()}.
+ * Replaces the inconsistent {@code process()} signatures across the {@code *ControllerPart} classes
+ * and the hardcoded dispatch table inside {@code FrontAcessController.doExecStep()}.
  *
  * Each implementation handles one logical step of the flow (MFA, consent, recover, etc.) and
  * self-declares which form step names it owns and which authentication challenge it satisfies.
  * {@link OidcStepRouter} discovers all implementations via CDI {@code Instance<OidcStep>} and
  * routes requests to the right step without any hardcoded if/else.
  *
- * <p><b>CDI scope:</b> implementations must be {@code @ApplicationScoped} (or {@code @Dependent}).
- * All per-request data travels through {@link StepInput} — no mutable instance state is allowed.
+ * <p>
+ * <b>CDI scope:</b> implementations must be {@code @ApplicationScoped} (or {@code @Dependent}). All
+ * per-request data travels through {@link StepInput} — no mutable instance state is allowed.
  */
 public interface OidcStep {
 
@@ -51,9 +52,9 @@ public interface OidcStep {
   /**
    * The set of {@code step} form-parameter values this step can handle.
    *
-   * A POST to the authorize endpoint with {@code step=mfa} will be routed to the step that
-   * returns {@code Set.of("mfa")} here. Steps that expose a "show" page and a "process" page
-   * (e.g. recover) declare both names: {@code Set.of("show-recover", "send-recover")}.
+   * A POST to the authorize endpoint with {@code step=mfa} will be routed to the step that returns
+   * {@code Set.of("mfa")} here. Steps that expose a "show" page and a "process" page (e.g. recover)
+   * declare both names: {@code Set.of("show-recover", "send-recover")}.
    *
    * @return non-null, non-empty set of step names
    */
@@ -65,9 +66,9 @@ public interface OidcStep {
    * Called when an authentication challenge requires this step to be shown, or when a form POST
    * with a {@code show-xxx} step name is received.
    *
-   * @param input      the current request context
+   * @param input the current request context
    * @param preSession the pre-session cookie already built by the controller, ready to attach to
-   *                   the response
+   *        the response
    * @return the JAX-RS response containing the rendered HTML
    */
   Response paint(StepInput input, NewCookie preSession);

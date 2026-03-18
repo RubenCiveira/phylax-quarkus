@@ -29,8 +29,8 @@ public class StepInput {
   ClientDetails clientDetails;
 
   /**
-   * Challenge state loaded from the {@code PRE_SESSION_ID} cookie.
-   * Empty when no pre-session cookie is present (first step in the flow).
+   * Challenge state loaded from the {@code PRE_SESSION_ID} cookie. Empty when no pre-session cookie
+   * is present (first step in the flow).
    */
   Optional<ChallengesState> challenges;
 

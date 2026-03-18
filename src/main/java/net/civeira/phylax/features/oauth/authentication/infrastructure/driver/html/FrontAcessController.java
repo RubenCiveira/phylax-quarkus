@@ -13,8 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
@@ -38,29 +36,20 @@ import jakarta.ws.rs.core.UriInfo;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.authentication.domain.exception.ClientScopeConsentRequiredException;
-import net.civeira.phylax.features.oauth.authentication.domain.exception.ConsentRequiredException;
-import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequiredException;
-import net.civeira.phylax.features.oauth.authentication.domain.exception.NewMfaRequiredException;
-import net.civeira.phylax.features.oauth.authentication.domain.exception.NewPasswordRequiredException;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.ConsentControllerPart;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.DelegatedControllerPart;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.MfaControllerPart;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewMfaControllerPart;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.NewPassControllerPart;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.RecoverControllerPart;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.RegistrationControllerPart;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.part.ScopeConsentControllerPart;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.DelegatedStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.NewMfaStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.RecoverStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step.RegistrationStep;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
@@ -80,8 +69,8 @@ import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
  * Responsibilities: - Render login, consent, MFA, and registration flows. - Manage session and
  * pre-session cookie handling.
  *
- * Design notes: - Orchestrates multiple controller parts for each step. - Uses SecureHtmlBuilder
- * for signing and encryption.
+ * Design notes: - Routes form steps through {@link OidcStepRouter}. - Uses SecureHtmlBuilder for
+ * signing and encryption.
  */
 @Slf4j
 @Path("")
@@ -122,39 +111,16 @@ public class FrontAcessController {
   /**
    * Result wrapper for step execution outcomes.
    *
-   * Carries request context and client details for continuation. Used by controller parts to resume
-   * the flow.
+   * Compatibility shim kept during incremental migration. Will be removed in F11.5 once all
+   * ControllerPart files are deleted.
    */
   public static class StepResult {
-    /**
-     * Challenge session identifier.
-     */
     private final String csid;
-    /**
-     * Username for the flow.
-     */
     private final String username;
-    /**
-     * Auth request context.
-     */
     private final AuthRequest request;
-    /**
-     * Client details for the flow.
-     */
     private final ClientDetails clientDetails;
 
-    /**
-     * Converts this result to a {@link StepOutcome.Proceed} carrying the given challenge state.
-     *
-     * Compatibility bridge used during the incremental migration from ControllerParts to
-     * {@link OidcStep}. Once all parts are migrated this method and {@code StepResult} itself will
-     * be removed.
-     *
-     * @param challengesState the challenges already completed at the time of this step
-     * @return a {@code StepOutcome.Proceed} equivalent to this result
-     */
-    public StepOutcome.Proceed toOutcome(
-        net.civeira.phylax.features.oauth.authentication.domain.ChallengesState challengesState) {
+    public StepOutcome.Proceed toOutcome(ChallengesState challengesState) {
       return new StepOutcome.Proceed(username, clientDetails, request, challengesState);
     }
   }
@@ -162,80 +128,38 @@ public class FrontAcessController {
   @Data
   @Builder
   /**
-   * Initial form flow data used for rendering next steps.
-   *
-   * Contains locale, request, username, challenges, and cookies. Passed to flow handlers when
-   * challenges are required.
+   * Initial form flow data. Kept for F11.5 cleanup — no longer constructed by F11.4 code.
    */
   private static class StartFormFlow {
-    /**
-     * Locale for translations.
-     */
     private final Locale locale;
-    /**
-     * Auth request context.
-     */
     private final AuthRequest request;
-    /**
-     * Username for the flow.
-     */
     private final String username;
-    /**
-     * Challenges already satisfied in the flow.
-     */
     private final List<AuthenticationChallege> challenges;
-    /**
-     * Pre-session cookie to persist the challenge state.
-     */
     private final NewCookie session;
   }
 
   @Data
   @Builder
   /**
-   * Mapping between a challenge and its rendering function.
-   *
-   * Used to route authentication errors to the proper UI. Encapsulates the handler that produces a
-   * response.
+   * Challenge-to-handler mapping. Kept for F11.5 cleanup — no longer populated by F11.4 code.
    */
   private static class FlowInfo {
-    /**
-     * Challenge that should be presented to the user.
-     */
     private final AuthenticationChallege chageller;
-    /**
-     * Function that renders the next response.
-     */
-    private final Function<StartFormFlow, Response> function;
+    private final java.util.function.Function<StartFormFlow, Response> function;
   }
 
   @Data
   @RegisterForReflection
   /**
-   * Serializable challenge state used for pre-session cookies.
+   * Legacy serializable challenge state for pre-session cookies.
    *
-   * Carries the username and the list of satisfied challenges. Used when resuming flows across
-   * requests.
+   * Kept for F11.6 cleanup. Cookie deserialization now uses {@link ChallengesState} directly with
+   * {@code @JsonAlias("challenges")} for backward compatibility.
    */
   public static class Challenge {
-    /**
-     * Username for the challenge state.
-     */
     private String username;
-    /**
-     * Challenges already satisfied.
-     */
     private List<AuthenticationChallege> challenges = new ArrayList<>();
   }
-
-  /**
-   * Form parameters for the current request.
-   */
-  private MultivaluedMap<String, String> formParams;
-  /**
-   * Current challenge state loaded from pre-session cookie.
-   */
-  private Challenge currentChallenge;
 
   /**
    * Use case for credential validation and pre-authenticated flows.
@@ -251,37 +175,26 @@ public class FrontAcessController {
   private final DecoratePageGateway decorator;
 
   /**
-   * Controller part for password recovery flows.
+   * Router that dispatches form steps to the correct {@link OidcStep} implementation.
    */
-  private final RecoverControllerPart recoverController;
+  private final OidcStepRouter router;
+
   /**
-   * Controller part for registration flows.
+   * Step for password recovery flows (also exposes direct controller endpoints).
    */
-  private final RegistrationControllerPart registerController;
+  private final RecoverStep recoverStep;
   /**
-   * Controller part for MFA validation flows.
+   * Step for user registration flows (also exposes direct controller endpoints).
    */
-  private final MfaControllerPart mfaController;
+  private final RegistrationStep registrationStep;
   /**
-   * Controller part for consent handling.
+   * Step for new MFA enrollment (also exposes the QR-image endpoint).
    */
-  private final ConsentControllerPart consentController;
+  private final NewMfaStep newMfaStep;
   /**
-   * Controller part for client scope consent handling.
+   * Step for delegated login callbacks (also exposes back-login form and token parsing).
    */
-  private final ScopeConsentControllerPart scopeConsentController;
-  /**
-   * Controller part for password change flows.
-   */
-  private final NewPassControllerPart newPassController;
-  /**
-   * Controller part for MFA enrollment flows.
-   */
-  private final NewMfaControllerPart newMfaController;
-  /**
-   * Controller part for delegated login flows.
-   */
-  private final DelegatedControllerPart delegatedController;
+  private final DelegatedStep delegatedStep;
 
   /**
    * Gateway to retrieve client details.
@@ -304,22 +217,10 @@ public class FrontAcessController {
    */
   private final DelegateLogin delegateLogin;
 
-  /**
-   * Map of authentication failures to UI flow handlers.
-   */
-  private Map<Class<? extends AuthenticationException>, FlowInfo> loginErrorMappers =
-      new HashMap<>();
-
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
   /**
    * Maps server exceptions to a friendly HTML error response.
-   *
-   * Uses the decorator to render a generic error page. Logs the exception for diagnostics.
-   *
-   * @param ex exception thrown during request handling
-   * @param headers HTTP headers
-   * @return error response
    */
   public Response showError(Exception ex, @Context HttpHeaders headers) {
     Locale locale = headers.getAcceptableLanguages().get(0);
@@ -336,15 +237,6 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/me")
   /**
    * Returns the current session information as HTML.
-   *
-   * Loads the session and renders a simple profile page. Returns forbidden when client or session
-   * is invalid.
-   *
-   * @param tenant tenant identifier
-   * @param cookie session cookie
-   * @param req request URI info
-   * @param headers HTTP headers
-   * @return HTML response with session info
    */
   public Response showInfo(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String cookie, final @Context UriInfo req,
@@ -362,37 +254,18 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/delegated-auth")
   /**
    * Handles delegated login return from external providers.
-   *
-   * Delegates to the delegated controller part to resume the flow. Returns a rendered HTML response
-   * for the next step.
-   *
-   * @param tenant tenant identifier
-   * @param provider provider identifier
-   * @param code delegated code
-   * @param req request URI info
-   * @param headers HTTP headers
-   * @return HTML response for delegated flow
    */
   public Response processDelegated(final @PathParam(TENANT) String tenant,
       @QueryParam("provider") String provider, @QueryParam("code") String code,
       final @Context UriInfo req, @Context HttpHeaders headers) {
     Locale locale = headers.getAcceptableLanguages().get(0);
-    return delegatedController.doBackLoginForm(tenant, provider, code, locale, null);
+    return delegatedStep.doBackLoginForm(tenant, provider, code, locale, null);
   }
 
   @GET
   @Path("oauth/openid/{tenant}/auth")
   /**
    * Displays the login form or validates an existing session.
-   *
-   * Loads the client and checks existing session cookies. Redirects or renders login UI depending
-   * on prompt.
-   *
-   * @param tenant tenant identifier
-   * @param session session cookie
-   * @param req request URI info
-   * @param headers HTTP headers
-   * @return HTML response for login flow
    */
   public Response showForm(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String session, final @Context UriInfo req,
@@ -413,23 +286,10 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/auth")
   /**
    * Processes login form submissions and flow steps.
-   *
-   * Dispatches to controller parts based on step parameter. Manages session and pre-session
-   * cookies.
-   *
-   * @param tenant tenant identifier
-   * @param req request URI info
-   * @param headers HTTP headers
-   * @param paramMap form parameters
-   * @param session session cookie
-   * @param cookie pre-session cookie
-   * @return response for next flow step
    */
   public Response processForm(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap,
       @CookieParam(AUTH_SESSION_ID) String session, @CookieParam(PRE_SESSION_ID) String cookie) {
-    formParams = paramMap;
-
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
     return loadClient(request)
@@ -443,23 +303,14 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/mfa-setup")
   /**
    * Returns the MFA enrollment image when required.
-   *
-   * Loads the pre-session username and delegates to MFA part. Returns forbidden when the client or
-   * session is invalid.
-   *
-   * @param tenant tenant identifier
-   * @param req request URI info
-   * @param headers HTTP headers
-   * @param cookie pre-session cookie
-   * @return response with MFA image or error
    */
   public Response showMfaSelector(final @PathParam(TENANT) String tenant,
       final @Context UriInfo req, @Context HttpHeaders headers,
       @CookieParam(PRE_SESSION_ID) String cookie) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
-    return preSessionUsername(cookie, tenant).map(Challenge::getUsername)
-        .flatMap(user -> newMfaController.mfaSelector(request, user))
+    return preSessionChallengeState(cookie, tenant).map(ChallengesState::getUsername)
+        .flatMap(user -> newMfaStep.mfaImage(tenant, user))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
@@ -467,16 +318,6 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/recover")
   /**
    * Displays the password recovery form for a user.
-   *
-   * Renders the recovery form for a provided username and code. Returns forbidden when the client
-   * is not allowed.
-   *
-   * @param tenant tenant identifier
-   * @param req request URI info
-   * @param headers HTTP headers
-   * @param username username
-   * @param recovercode recovery code
-   * @return HTML response with recovery form
    */
   public Response showRecover(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, @QueryParam(USERNAME) String username,
@@ -484,8 +325,7 @@ public class FrontAcessController {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
     return loadClient(request)
-        .map(_ -> recoverController.doPaintWaitRecover(request.getLocale(), null,
-            username, recovercode))
+        .map(_ -> recoverStep.doPaintWaitRecover(request.getLocale(), null, username, recovercode))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
@@ -493,51 +333,33 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/recover")
   /**
    * Processes recovery form submissions.
-   *
-   * Delegates to the recovery controller part for validation. Returns forbidden when the client is
-   * not allowed.
-   *
-   * @param tenant tenant identifier
-   * @param username username
-   * @param req request URI info
-   * @param paramMap form parameters
-   * @param headers HTTP headers
-   * @return response for next flow step
    */
   public Response checkRecover(final @PathParam(TENANT) String tenant,
       @QueryParam(USERNAME) String username, @Context UriInfo req,
-      final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers) {
-    formParams = paramMap;
-
+      final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers,
+      @CookieParam(PRE_SESSION_ID) String cookie) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
-    return loadClient(request)
-        .map(clientDetails -> recoverController.doExecFinal(clientDetails, request, username,
-            paramMap, this::revolve))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
+    return loadClient(request).map(clientDetails -> {
+      Optional<ChallengesState> challengeState = preSessionChallengeState(cookie, tenant);
+      StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
+          .challenges(challengeState).formParams(paramMap).build();
+      return recoverStep.doExecFinal(input).map(outcome -> handleOutcome(outcome, input, paramMap))
+          .orElseGet(() -> Response.status(400).build());
+    }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
   @GET
   @Path("oauth/openid/{tenant}/register")
   /**
    * Displays the registration verification form.
-   *
-   * Renders the verification form for the given email and code. Returns forbidden when the client
-   * is not allowed.
-   *
-   * @param tenant tenant identifier
-   * @param req request URI info
-   * @param headers HTTP headers
-   * @param email email address
-   * @param regcode registration code
-   * @return HTML response with verification form
    */
   public Response showRegister(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, @QueryParam("email") String email,
       @QueryParam("regcode") String regcode) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request).map(_ -> registerController
-        .doPaintVerifyForm(request.getLocale(), email, regcode, null))
+    return loadClient(request)
+        .map(_ -> registrationStep.doPaintVerifyForm(request.getLocale(), email, regcode, null))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
@@ -545,40 +367,26 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/register")
   /**
    * Processes registration verification submissions.
-   *
-   * Delegates to the registration controller part for validation. Returns forbidden when the client
-   * is not allowed.
-   *
-   * @param tenant tenant identifier
-   * @param email email address
-   * @param req request URI info
-   * @param paramMap form parameters
-   * @param headers HTTP headers
-   * @return response for next flow step
    */
   public Response checkRegister(final @PathParam(TENANT) String tenant,
       @QueryParam("email") String email, @Context UriInfo req,
-      final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers) {
-    formParams = paramMap;
+      final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers,
+      @CookieParam(PRE_SESSION_ID) String cookie) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request)
-        .map(clientDetails -> registerController.doExecVerify(clientDetails, request, email,
-            paramMap, this::revolve))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
+    return loadClient(request).map(clientDetails -> {
+      Optional<ChallengesState> challengeState = preSessionChallengeState(cookie, tenant);
+      StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
+          .challenges(challengeState).formParams(paramMap).build();
+      return registrationStep.doExecVerify(input, email)
+          .map(outcome -> handleOutcome(outcome, input, paramMap))
+          .orElseGet(() -> Response.status(400).build());
+    }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
   @POST
   @Path("oauth/openid/{tenant}/revocation")
   /**
    * Revokes a pre-session by deleting its cookie session.
-   *
-   * Used to invalidate pre-authenticated flows. Returns an OK response on completion.
-   *
-   * @param tenant tenant identifier
-   * @param cookie pre-session cookie
-   * @param paramMap form parameters
-   * @param headers HTTP headers
-   * @return OK response
    */
   public Response revoke(final @PathParam(TENANT) String tenant,
       @CookieParam(PRE_SESSION_ID) String cookie, final MultivaluedMap<String, String> paramMap,
@@ -591,14 +399,6 @@ public class FrontAcessController {
   @Path("oauth/openid/{tenant}/logout")
   /**
    * Logs out the current session and redirects to the post-logout URL.
-   *
-   * Deletes the session cookie and returns a redirect response. Trims query parameters from the
-   * redirect URL.
-   *
-   * @param tenant tenant identifier
-   * @param cookie session cookie
-   * @param redirect post-logout redirect URL
-   * @return redirect response
    */
   public Response logout(final @PathParam(TENANT) String tenant,
       @CookieParam("AUTH_SESSION_ID") String cookie,
@@ -618,11 +418,6 @@ public class FrontAcessController {
   @Produces(TEXT_HTML)
   /**
    * Returns a placeholder HTML for login status iframe checks.
-   *
-   * Currently returns a static placeholder response. Reserved for future session check support.
-   *
-   * @param tenant tenant identifier
-   * @return HTML response placeholder
    */
   public String checkSession(final @PathParam(TENANT) String tenant) {
     return "<h1>Check</h1>";
@@ -630,16 +425,6 @@ public class FrontAcessController {
 
   /**
    * Validates an existing session and decides next step.
-   *
-   * Compares the CSID token and handles prompt=none behavior. Either redirects to success or
-   * renders the login form.
-   *
-   * @param sessionInfo session data
-   * @param loadClient client details
-   * @param request auth request context
-   * @param paramMap form parameters
-   * @param cookie session cookie
-   * @return response for the next step
    */
   private Response doCheckSession(SessionInfo sessionInfo, ClientDetails loadClient,
       AuthRequest request, final MultivaluedMap<String, String> paramMap, String cookie) {
@@ -648,7 +433,7 @@ public class FrontAcessController {
     String csid = securer.verifyToken(first(paramMap, "csid")).orElse("-");
     if (sessionInfo.getCsid().equals(csid)) {
       return redirect(Optional.of(cookie), loadClient, sessionInfo.getGrant(), request,
-          sessionInfo.getValidationData());
+          sessionInfo.getValidationData(), paramMap);
     } else if ("none".equals(prompt)) {
       return redirectError(request, "invalid client");
     } else {
@@ -658,15 +443,6 @@ public class FrontAcessController {
 
   /**
    * Renders a verification form for an existing session.
-   *
-   * Builds a page that signs a CSID token and submits the form. Used when a session needs
-   * confirmation to proceed.
-   *
-   * @param sDDessionInfo session data
-   * @param loadClient client details
-   * @param request auth request context
-   * @param cookie session cookie
-   * @return HTML response for verification
    */
   private Response doPaintVerifySession(SessionInfo sDDessionInfo, ClientDetails loadClient,
       AuthRequest request, String cookie) {
@@ -682,14 +458,6 @@ public class FrontAcessController {
 
   /**
    * Renders the primary login form.
-   *
-   * Builds the HTML content with delegated providers and recovery links. Includes secure scripts
-   * for CSID and encrypted password fields.
-   *
-   * @param request auth request context
-   * @param msg optional error message
-   * @param chagenlle optional challenge label
-   * @return HTML response with login form
    */
   private Response doPaintLoginForm(AuthRequest request, String msg, String chagenlle) {
     Locale locale = request.getLocale();
@@ -728,7 +496,6 @@ public class FrontAcessController {
                 + "document.getElementById(\"social-form-" + info.getId() + "\").submit();" + "});"
                 + "</script>");
       }
-
     }
 
     if (!delegatedLogins.isEmpty()) {
@@ -736,122 +503,126 @@ public class FrontAcessController {
           " <div class=\"social-login-buttons\">\r\n" + "" + delegatedLogins + "" + "</div>");
     }
 
-    return securer.secureHtmlResponse(Response
-        .ok(decorator.getFullPage("Login", js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
-            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-            + "<form id=\"login\" method=\"POST\">"
-            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + username
-            + " <input type=\"text\" id=\"username\" name=\"username\" value=\"" + "\" /></label>"
-            + "<label>" + password + " <input type=\"password\" id=\"type_password\" value=\""
-            + "\" /></label>" + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\""
-            + "\" />" + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-            + enter + "\" />" + "</form>" + delegatedLogins + execAuto
-            + (recoverController.allowRecover(request)
-                ? "<form method=\"POST\">"
-                    + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />" + "<p>"
-                    + recoverText + "</p></form>"
-                : "")
-            + (registerController.allowRegister(request)
-                ? "<form method=\"POST\">"
-                    + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />" + "<p>"
-                    + "<input class=\"inline\" type=\"submit\" value=\""
-                    + i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
-                : ""),
-            locale))
-        .type(TEXT_HTML)
-        .cookie(new NewCookie.Builder(AUTH_SESSION_ID).value(null).sameSite(SameSite.NONE)
-            .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build())
-        .cookie(new NewCookie.Builder(PRE_SESSION_ID).value(null).sameSite(SameSite.NONE)
-            .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
+    return securer
+        .secureHtmlResponse(
+            Response
+                .ok(decorator.getFullPage("Login",
+                    js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+                        + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+                        + "<form id=\"login\" method=\"POST\">"
+                        + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>"
+                        + username
+                        + " <input type=\"text\" id=\"username\" name=\"username\" value=\""
+                        + "\" /></label>" + "<label>" + password
+                        + " <input type=\"password\" id=\"type_password\" value=\""
+                        + "\" /></label>"
+                        + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\""
+                        + "\" />"
+                        + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                        + enter + "\" />" + "</form>" + delegatedLogins + execAuto
+                        + (recoverStep.allowRecover(request.getTenant())
+                            ? "<form method=\"POST\">"
+                                + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />"
+                                + "<p>" + recoverText + "</p></form>"
+                            : "")
+                        + (registrationStep.allowRegister(request.getTenant())
+                            ? "<form method=\"POST\">"
+                                + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />"
+                                + "<p>" + "<input class=\"inline\" type=\"submit\" value=\""
+                                + i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
+                            : ""),
+                    locale))
+                .type(TEXT_HTML)
+                .cookie(new NewCookie.Builder(AUTH_SESSION_ID).value(null).sameSite(SameSite.NONE)
+                    .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build())
+                .cookie(new NewCookie.Builder(PRE_SESSION_ID).value(null).sameSite(SameSite.NONE)
+                    .path(OAUTH_OPENID + request.getTenant()).secure(true).httpOnly(true).build()));
   }
 
   /**
-   * Returns the first present response between two optionals.
-   *
-   * Used to evaluate controller parts in sequence. The supplier is only invoked when needed.
-   *
-   * @param check current optional response
-   * @param supplier supplier for the next optional response
-   * @return the first non-empty optional
-   */
-  private Optional<Response> fillIfEmpty(Optional<Response> check,
-      Supplier<Optional<Response>> supplier) {
-    return check.isPresent() ? check : supplier.get();
-  }
-
-  /**
-   * Executes the next step in the form-based flow.
-   *
-   * Dispatches to specialized controller parts based on the step parameter. Falls back to direct
-   * login when no step is matched.
-   *
-   * @param clientDetails client details
-   * @param request auth request context
-   * @param paramMap form parameters
-   * @param cookie pre-session cookie
-   * @return response for the next step
+   * Executes the next step in the form-based flow via the OidcStepRouter.
    */
   private Response doExecStep(ClientDetails clientDetails, AuthRequest request,
-      MultivaluedMap<String, String> paramMap, @CookieParam(PRE_SESSION_ID) String cookie) {
-    Response response;
-    formParams = paramMap;
+      MultivaluedMap<String, String> paramMap, String cookie) {
     String step = first(paramMap, "step");
-    Optional<Challenge> oCh = preSessionUsername(cookie, request.getTenant());
-    Optional<String> oUser = oCh.map(Challenge::getUsername);
-    Optional<Response> process = Optional.empty();
+    Optional<ChallengesState> challengeState =
+        preSessionChallengeState(cookie, request.getTenant());
 
-    process = fillIfEmpty(process, () -> delegatedController.process(step, oUser, clientDetails,
-        request, paramMap, this::revolve));
-    process = fillIfEmpty(process, () -> recoverController.process(step, oUser, clientDetails,
-        request, paramMap, this::revolve));
-    process = fillIfEmpty(process,
-        () -> mfaController.process(step, oUser, clientDetails, request, paramMap, this::revolve,
-            null == this.currentChallenge ? List.of() : this.currentChallenge.challenges));
-    process = fillIfEmpty(process, () -> consentController.process(step, oUser, clientDetails,
-        request, paramMap, this::revolve));
-    process = fillIfEmpty(process, () -> scopeConsentController.process(step, oUser, clientDetails,
-        request, paramMap, this::revolve));
-    process = fillIfEmpty(process, () -> registerController.process(step, oUser, clientDetails,
-        request, paramMap, this::revolve));
-    process = fillIfEmpty(process, () -> newPassController.process(step, oUser, clientDetails,
-        request, paramMap, this::revolve));
-    process = fillIfEmpty(process, () -> newMfaController.process(step, oUser, clientDetails,
-        request, paramMap, this::revolve));
-
-    if (process.isPresent()) {
-      response = process.get();
-    } else if ("delegated-login".equals(step)) {
-      response = delegatedController.doPaintLoginForm(request.getTenant(),
+    // Direct steps not routed through OidcStepRouter
+    if ("delegated-login".equals(step)) {
+      return delegatedStep.doPaintLoginForm(request.getTenant(),
           first(paramMap, "delegated-provider"), request.getLocale(), null);
-    } else if ("show-recover".equals(step)) {
-      response = recoverController.doPaintRecoverForm(request.getLocale(), null);
-    } else if ("show-register".equals(step)) {
-      response = registerController.allowRegister(request)
-          ? registerController.doPaintRegisterForm(request.getLocale(), null)
-          : doPaintLoginForm(request, null, null);
-    } else if ("start".equals(step) && oUser.isPresent()) {
-      response = doPaintLoginForm(request, null, null);
-    } else {
-      List<AuthenticationChallege> chagenlles = new ArrayList<>();
-      if (null != currentChallenge) {
-        chagenlles.addAll(currentChallenge.getChallenges());
-      }
-      response = doExecLogin(clientDetails, request, paramMap, chagenlles);
     }
-    return response;
+    if ("show-recover".equals(step)) {
+      return recoverStep.doPaintRecoverForm(request.getLocale(), null);
+    }
+    if ("show-register".equals(step)) {
+      return registrationStep.allowRegister(request.getTenant())
+          ? registrationStep.doPaintRegisterForm(request.getLocale(), null)
+          : doPaintLoginForm(request, null, null);
+    }
+    if ("start".equals(step) && challengeState.isPresent()) {
+      return doPaintLoginForm(request, null, null);
+    }
+
+    StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
+        .challenges(challengeState).formParams(paramMap).build();
+
+    Optional<StepOutcome> outcome = router.process(input);
+    if (outcome.isPresent()) {
+      return handleOutcome(outcome.get(), input, paramMap);
+    }
+
+    List<AuthenticationChallege> challenges =
+        challengeState.map(ChallengesState::getCompleted).orElseGet(List::of);
+    return doExecLogin(clientDetails, request, paramMap, challenges);
+  }
+
+  /**
+   * Dispatches a {@link StepOutcome} to either render a response or continue the flow.
+   */
+  private Response handleOutcome(StepOutcome outcome, StepInput input,
+      MultivaluedMap<String, String> paramMap) {
+    return switch (outcome) {
+      case StepOutcome.Render r -> r.response();
+      case StepOutcome.Proceed p -> handleProceed(p, paramMap);
+    };
+  }
+
+  /**
+   * Continues the auth flow after a step signals proceed.
+   *
+   * Calls {@code fillPreAuthenticated} with the already-completed challenges. On success, redirects
+   * with an auth code. On a new challenge, writes the updated pre-session cookie and paints the
+   * next step form.
+   */
+  private Response handleProceed(StepOutcome.Proceed proceed,
+      MultivaluedMap<String, String> paramMap) {
+    List<AuthenticationChallege> alreadyDone = proceed.challengesState().getCompleted();
+    AuthenticationResult result = loginUsecase.fillPreAuthenticated(proceed.request(),
+        proceed.username(), proceed.clientDetails(), alreadyDone);
+
+    if (result.isRight()) {
+      return redirect(Optional.empty(), proceed.clientDetails(), "form", proceed.request(),
+          result.getData(), paramMap);
+    }
+
+    AuthenticationException ex = result.getFail();
+    Optional<AuthenticationChallege> ch = router.challengeFor(ex.getClass());
+    if (ch.isEmpty()) {
+      return doPaintLoginForm(proceed.request(), "Credenciales incorrectas", null);
+    }
+    ChallengesState next = proceed.challengesState().withCompleted(ch.get());
+    NewCookie preSession = buildPreSessionCookie(next, proceed.request().getTenant());
+    StepInput nextInput =
+        StepInput.builder().request(proceed.request()).clientDetails(proceed.clientDetails())
+            .challenges(Optional.of(next)).formParams(paramMap).build();
+    return router.paint(ex.getClass(), nextInput, preSession)
+        .orElseGet(() -> doPaintLoginForm(proceed.request(), "Credenciales incorrectas", null));
   }
 
   /**
    * Executes a username/password login and routes results.
-   *
-   * Validates credentials and handles challenge requirements. On success, redirects to the
-   * authorization response.
-   *
-   * @param clientDetails client details
-   * @param request auth request context
-   * @param paramMap form parameters
-   * @param challenges already satisfied challenges
-   * @return response for the next step
    */
   private Response doExecLogin(ClientDetails clientDetails, AuthRequest request,
       MultivaluedMap<String, String> paramMap, List<AuthenticationChallege> challenges) {
@@ -859,33 +630,29 @@ public class FrontAcessController {
     String password = securer.decrypt(first(paramMap, "password"));
     AuthenticationResult authenticate = loginUsecase.validatedUserData(request,
         first(paramMap, USERNAME), password, clientDetails, challenges);
+
     if (authenticate.isRight()) {
-      return redirect(Optional.empty(), clientDetails, grant, request, authenticate.getData());
-    } else {
-      FlowInfo info = map().get(authenticate.getFail().getClass());
-      if (null == info) {
-        return doPaintLoginForm(request, "Credenciales incorrectas", null);
-      } else {
-        String username = first(paramMap, USERNAME);
-        String tenant = request.getTenant();
-        List<AuthenticationChallege> chagenlles = new ArrayList<>();
-        chagenlles.add(info.getChageller());
-        return info.getFunction()
-            .apply(StartFormFlow.builder().locale(request.getLocale()).username(username)
-                .request(request).challenges(chagenlles)
-                .session(sessionCookie(username, chagenlles, tenant)).build());
-      }
+      return redirect(Optional.empty(), clientDetails, grant, request, authenticate.getData(),
+          paramMap);
     }
+
+    AuthenticationException ex = authenticate.getFail();
+    Optional<AuthenticationChallege> ch = router.challengeFor(ex.getClass());
+    if (ch.isEmpty()) {
+      return doPaintLoginForm(request, "Credenciales incorrectas", null);
+    }
+    String username = first(paramMap, USERNAME);
+    String tenant = request.getTenant();
+    ChallengesState state = ChallengesState.empty(username).withCompleted(ch.get());
+    NewCookie preSession = buildPreSessionCookie(state, tenant);
+    StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
+        .challenges(Optional.of(state)).formParams(paramMap).build();
+    return router.paint(ex.getClass(), input, preSession)
+        .orElseGet(() -> doPaintLoginForm(request, "Credenciales incorrectas", null));
   }
 
   /**
    * Redirects to the client with an error fragment.
-   *
-   * Builds a redirect URI with an encoded error message. Clears session cookies in the response.
-   *
-   * @param request auth request context
-   * @param message error message
-   * @return redirect response
    */
   private Response redirectError(AuthRequest request, String message) {
     String to = request.getRedirect().orElse("") + "#error="
@@ -897,41 +664,32 @@ public class FrontAcessController {
 
   /**
    * Redirects to the client after successful authentication.
-   *
-   * Creates or updates sessions, and builds code or token responses. Sets cookies and constructs
-   * redirect URIs accordingly.
-   *
-   * @param cookie existing session cookie
-   * @param clientDetails client details
-   * @param grant grant type used for authentication
-   * @param request auth request context
-   * @param validationData authentication data
-   * @return redirect response
    */
   private Response redirect(Optional<String> cookie, ClientDetails clientDetails, String grant,
-      AuthRequest request, AuthenticationData validationData) {
+      AuthRequest request, AuthenticationData validationData,
+      MultivaluedMap<String, String> paramMap) {
     String uid = UUID.randomUUID().toString();
     if (cookie.isPresent()) {
       sessionStore.updateSession(uid, cookie.get());
     } else {
-      String csid = securer.verifyToken(first(formParams, "csid")).orElseThrow();
+      String csid = securer.verifyToken(first(paramMap, "csid")).orElseThrow();
       sessionStore.saveSession(uid, clientDetails, grant, validationData, csid);
     }
     validationData.setAudiences(request.getAudiences());
     String type = request.getResponseType().orElse("code");
     String to;
     if ("code".equals(type)) {
-      String redirect = request.getRedirect().orElseThrow();
+      String redirectUri = request.getRedirect().orElseThrow();
       String separator = "?";
-      if (redirect.endsWith("?")) {
+      if (redirectUri.endsWith("?")) {
         separator = "";
-      } else if (redirect.contains("?")) {
+      } else if (redirectUri.contains("?")) {
         separator = "&";
       }
       String code = temporalStore.registerTemporalAuthCode(
           TemporalAuthCode.builder().client(clientDetails).request(request)
               .nonce(request.getNonce().orElse(null)).data(validationData).build());
-      to = redirect + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
+      to = redirectUri + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
     } else {
       IdToken buildIdToken =
           tokenBuilder.buildIdToken(request.getTenant(), request.getState().orElseThrow(),
@@ -949,55 +707,28 @@ public class FrontAcessController {
   }
 
   /**
-   * Builds a pre-session cookie for challenge continuation.
-   *
-   * Encodes the challenge state into a signed token. Used to persist MFA or consent steps between
-   * requests.
-   *
-   * @param username username
-   * @param chagenlles list of completed challenges
-   * @param tenant tenant identifier
-   * @return pre-session cookie
+   * Builds a pre-session cookie carrying the current {@link ChallengesState}.
    */
-  private NewCookie sessionCookie(String username, List<AuthenticationChallege> chagenlles,
-      String tenant) {
-    Challenge ch = new Challenge();
-    ch.setUsername(username);
-    ch.setChallenges(chagenlles);
-    String token = tokenBuilder.buildChallengerToken(tenant, ch, Duration.ofHours(1));
+  private NewCookie buildPreSessionCookie(ChallengesState state, String tenant) {
+    String token = tokenBuilder.buildChallengerToken(tenant, state, Duration.ofHours(1));
     return new NewCookie.Builder(PRE_SESSION_ID).value(token).sameSite(SameSite.NONE)
         .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true).build();
   }
 
   /**
-   * Loads challenge state from the pre-session cookie.
+   * Loads and verifies the pre-session cookie into a {@link ChallengesState}.
    *
-   * Verifies the signed token and updates currentChallenge. Returns an empty optional when the
-   * cookie is missing.
-   *
-   * @param cookie pre-session cookie value
-   * @param tenant tenant identifier
-   * @return optional challenge state
+   * Returns empty when the cookie is absent or invalid.
    */
-  private Optional<Challenge> preSessionUsername(String cookie, String tenant) {
-    Optional<Challenge> verifyChalleger;
+  private Optional<ChallengesState> preSessionChallengeState(String cookie, String tenant) {
     if (StringUtils.isEmpty(cookie)) {
-      verifyChalleger = Optional.empty();
-    } else {
-      verifyChalleger = tokenBuilder.verifyChalleger(Challenge.class, cookie, tenant);
-      verifyChalleger.ifPresent(ch -> currentChallenge = ch);
+      return Optional.empty();
     }
-    return verifyChalleger;
+    return tokenBuilder.verifyChalleger(ChallengesState.class, cookie, tenant);
   }
 
   /**
    * Loads the client details for the request.
-   *
-   * Uses the tenant, client id, and redirect URI for validation. Returns empty when the client is
-   * not authorized.
-   *
-   * @param request auth request context
-   * @return optional client details
    */
   private Optional<ClientDetails> loadClient(final AuthRequest request) {
     return clientRetrieve.loadPublic(request.getTenant(), request.getClientId().orElseThrow(),
@@ -1006,14 +737,6 @@ public class FrontAcessController {
 
   /**
    * Retrieves a localized message for the given key.
-   *
-   * Loads translations on demand and caches by locale. Supports parameterized messages via
-   * arguments.
-   *
-   * @param locale locale for translations
-   * @param key message key
-   * @param arguments message arguments
-   * @return localized message
    */
   public static String i18n(Locale locale, String key, Object... arguments) {
     synchronized (TRANSLATIONS) {
@@ -1024,12 +747,6 @@ public class FrontAcessController {
 
   /**
    * Returns the first value for a parameter key.
-   *
-   * Used to simplify access to form parameters. Returns an empty string when no value exists.
-   *
-   * @param paramMap parameters map
-   * @param key parameter name
-   * @return first value or empty string
    */
   public static String first(Map<String, List<String>> paramMap, String key) {
     List<String> list = paramMap.get(key);
@@ -1038,12 +755,6 @@ public class FrontAcessController {
 
   /**
    * Builds a URI from a raw string.
-   *
-   * Throws an IllegalArgumentException when the URL is invalid. Centralizes URI creation for
-   * redirects.
-   *
-   * @param url raw URL
-   * @return URI instance
    */
   public static URI buildUrl(String url) {
     try {
@@ -1051,80 +762,5 @@ public class FrontAcessController {
     } catch (URISyntaxException ex) {
       throw new IllegalArgumentException("Source url " + url + " is illegal", ex);
     }
-  }
-
-  /**
-   * Continues the flow after completing a controller part step.
-   *
-   * Attempts pre-authenticated login and routes challenges if needed. Returns a redirect response
-   * or a challenge form.
-   *
-   * @param result step result data
-   * @return response for the next step
-   */
-  private Response revolve(StepResult result) {
-    List<AuthenticationChallege> chagenlles = new ArrayList<>();
-    if (null != currentChallenge) {
-      chagenlles.addAll(currentChallenge.getChallenges());
-    }
-    AuthenticationResult fillPreAuthenticated = loginUsecase.fillPreAuthenticated(
-        result.getRequest(), result.getUsername(), result.getClientDetails(), chagenlles);
-    if (fillPreAuthenticated.isRight()) {
-      String grant = "form";
-      return redirect(Optional.empty(), result.getClientDetails(), grant, result.getRequest(),
-          fillPreAuthenticated.getData());
-    } else {
-      FlowInfo info = map().get(fillPreAuthenticated.getFail().getClass());
-      if (null == info) {
-        return doPaintLoginForm(result.getRequest(), "Credenciales incorrectas", null);
-      } else {
-        chagenlles.add(info.getChageller());
-        return info.getFunction().apply(StartFormFlow.builder().username(result.getUsername())
-            .request(result.getRequest()).challenges(chagenlles)
-            .locale(result.getRequest().getLocale())
-            .session(
-                sessionCookie(result.getUsername(), chagenlles, result.getRequest().getTenant()))
-            .build());
-      }
-    }
-  }
-
-  /**
-   * Builds the mapping between authentication exceptions and UI handlers.
-   *
-   * Initializes the map lazily on first access. The map is synchronized to avoid concurrent
-   * mutation.
-   *
-   * @return map of exception types to flow handlers
-   */
-  @Synchronized
-  private Map<Class<? extends AuthenticationException>, FlowInfo> map() {
-    if (loginErrorMappers.isEmpty()) {
-      loginErrorMappers.put(MfaRequiredException.class,
-          FlowInfo.builder().chageller(mfaController.getChallenge())
-              .function(mfa -> mfaController.doPaintMfaForm(mfa.getLocale(), mfa.getSession()))
-              .build());
-      loginErrorMappers.put(ConsentRequiredException.class,
-          FlowInfo.builder().chageller(consentController.getChallenge())
-              .function(mfa -> consentController.doPaintConsent(mfa.getLocale(), mfa.getRequest(),
-                  mfa.getUsername(), mfa.getSession()))
-              .build());
-      loginErrorMappers.put(ClientScopeConsentRequiredException.class,
-          FlowInfo.builder().chageller(scopeConsentController.getChallenge())
-              .function(f -> scopeConsentController.doPaintScopeConsentForm(f.getLocale(),
-                  f.getRequest(), f.getUsername(), f.getSession()))
-              .build());
-      loginErrorMappers.put(NewPasswordRequiredException.class,
-          FlowInfo.builder().chageller(newPassController.getChallenge())
-              .function(
-                  mfa -> newPassController.doPaintNewPassForm(mfa.getLocale(), mfa.getSession()))
-              .build());
-      loginErrorMappers.put(NewMfaRequiredException.class,
-          FlowInfo.builder().chageller(newMfaController.getChallenge())
-              .function(mfa -> newMfaController.doPaintNewMfaForm(mfa.getRequest(),
-                  mfa.getUsername(), mfa.getLocale(), mfa.getSession()))
-              .build());
-    }
-    return loginErrorMappers;
   }
 }

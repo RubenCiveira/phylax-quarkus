@@ -65,18 +65,16 @@ public class MfaStep implements OidcStep {
     if (valid) {
       ChallengesState state =
           input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
-      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
-          input.getRequest(), state));
+      return Optional.of(
+          new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
       String msg = FrontAcessController.i18n(input.locale(), "mfa.wrong-code");
-      return Optional.of(new StepOutcome.Render(
-          securer.secureHtmlResponse(buildForm(input, msg))));
+      return Optional.of(new StepOutcome.Render(securer.secureHtmlResponse(buildForm(input, msg))));
     }
   }
 
   private ResponseBuilder buildForm(StepInput input, String msg) {
-    String js =
-        securer.configureScripts(securer.addSign("sign"), securer.focusOn("mfa_code"));
+    String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("mfa_code"));
 
     String title = FrontAcessController.i18n(input.locale(), "mfa.title");
     String error = FrontAcessController.i18n(input.locale(), "mfa.error-format", msg);
@@ -87,24 +85,17 @@ public class MfaStep implements OidcStep {
     String backText = FrontAcessController.i18n(input.locale(), "mfa.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response
-        .ok(decorator.getFullPage("MFA",
-            js + "<h1>" + title + "</h1>"
-                + "<p>" + help + "</p>"
-                + (null == msg ? "" : "<p class=\"error\"> " + error + "</p>")
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-                + "<label>" + code
-                + "<input type=\"text\" name=\"mfa_code\" id=\"mfa_code\" value=\"\" /></label>"
-                + "<input type=\"hidden\" name=\"step\" value=\"mfa\" />"
-                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-                + send + "\" />"
-                + "</form>"
-                + "<form method=\"POST\">"
-                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
-                + "<p>" + backText + "</p>"
-                + "</form>",
-            input.locale()))
-        .type(FrontAcessController.TEXT_HTML);
+    return Response.ok(decorator.getFullPage("MFA",
+        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\"> " + error + "</p>")
+            + "<form method=\"POST\">" + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+            + "<label>" + code
+            + "<input type=\"text\" name=\"mfa_code\" id=\"mfa_code\" value=\"\" /></label>"
+            + "<input type=\"hidden\" name=\"step\" value=\"mfa\" />"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        input.locale())).type(FrontAcessController.TEXT_HTML);
   }
 }
