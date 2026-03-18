@@ -5,10 +5,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -16,16 +18,16 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.access.clientidentity.domain.ClientIdentity;
+import net.civeira.phylax.features.access.clientidentity.domain.gateway.ClientIdentityFilter;
+import net.civeira.phylax.features.access.clientidentity.domain.gateway.ClientIdentityReadRepositoryGateway;
 import net.civeira.phylax.features.access.oauth.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.access.oauth.application.service.RequiredConsentService;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyRef;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
-import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientRef;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
@@ -34,9 +36,6 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAcce
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useridentity.domain.UserIdentity;
-import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdentityFilter;
-import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdentityReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
@@ -63,7 +62,7 @@ public class UserLoginUsecase {
 
   private final UserWriteRepositoryGateway users;
 
-  private final UserIdentityReadRepositoryGateway identities;
+  private final ClientIdentityReadRepositoryGateway identities;
 
   private final UserAccessTemporalCodeWriteRepositoryGateway codes;
 
@@ -150,37 +149,43 @@ public class UserLoginUsecase {
     ud.setTime(Instant.now());
     ud.setAudiences(request.getAudiences());
 
-    List<UserIdentity> hisIdentities =
-        identities.list(UserIdentityFilter.builder().user(user).build());
+    List<String> forAll = rolesFromIdentity(
+        identities.find(ClientIdentityFilter.builder().user(user).forAllAudiences(true).build()),
+        tenant);
     request.getAudiences().forEach(aud -> {
+      List<String> audRoles = new ArrayList<>(forAll);
+      Optional<TrustedClient> isClient =
+          clients.find(TrustedClientFilter.builder().code(aud).build());
+      if (isClient.isPresent()) {
+        audRoles.addAll(rolesFromIdentity(
+            identities.find(
+                ClientIdentityFilter.builder().user(user).trustedClient(isClient.get()).build()),
+            tenant));
+      }
       Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
       if (isParty.isPresent()) {
-        RelyingParty relyingParty = isParty.get();
-        append(ud, aud, tenant, hisIdentities.stream().filter(identity -> relyingParty.getUid()
-            .equals(identity.getRelyingParty().map(RelyingPartyRef::getUid).orElse(""))));
-      } else {
-        Optional<TrustedClient> isClient =
-            clients.find(TrustedClientFilter.builder().code(aud).build());
-        if (isClient.isPresent()) {
-          TrustedClient trustedClient = isClient.get();
-          append(ud, aud, tenant, hisIdentities.stream().filter(identity -> trustedClient.getUid()
-              .equals(identity.getTrustedClient().map(TrustedClientRef::getUid).orElse(""))));
-        }
+        audRoles.addAll(rolesFromIdentity(
+            identities.find(
+                ClientIdentityFilter.builder().user(user).relyingParty(isParty.get()).build()),
+            tenant));
+      }
+      if (!audRoles.isEmpty()) {
+        ud.addRolesTo(aud, audRoles);
       }
     });
     return AuthenticationResult.right(ud);
   }
 
-  private void append(AuthenticationData ud, String aud, Tenant tenant,
-      Stream<UserIdentity> hisIdentities) {
-    hisIdentities.findFirst().ifPresent(identity -> {
-      List<String> roles = identities.resolveRoles(identity.getRoles()).stream().map(Role::getName)
-          .map(str -> str.replace(":", "/").toLowerCase()).toList();
-      ud.addRolesTo(aud, roles);
+  private List<String> rolesFromIdentity(Optional<ClientIdentity> identity, Tenant tenant) {
+    return identity.flatMap(ClientIdentity::getRoles).map(rolesStr -> {
+      List<String> roles = Arrays.stream(rolesStr.split(",")).map(String::trim)
+          .filter(s -> !s.isEmpty()).map(str -> str.replace(":", "/").toLowerCase())
+          .collect(Collectors.toCollection(ArrayList::new));
       if (tenant.isRoot()) {
-        ud.addRolesTo(aud, roles.stream().map(role -> "root:" + role).toList());
+        roles.addAll(roles.stream().map(role -> "root:" + role).toList());
       }
-    });
+      return (List<String>) roles;
+    }).orElseGet(List::of);
   }
 
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,
@@ -208,7 +213,7 @@ public class UserLoginUsecase {
 
   private Optional<AuthenticationResult> checkTerms(AuthRequest request, User user) {
     return terms.findPendingTerms(user)
-        .map(ignore -> AuthenticationResult.consentRequired(request.getTenant(), user.getName()));
+        .map(_ -> AuthenticationResult.consentRequired(request.getTenant(), user.getName()));
   }
 
   private Optional<AuthenticationResult> checkPassword(AuthRequest request, User user,

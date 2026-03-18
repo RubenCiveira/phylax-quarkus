@@ -2,16 +2,14 @@
 package net.civeira.phylax.features.access.oauth.infrastructure.bootstrap;
 
 import java.util.List;
-
 import lombok.Getter;
+import net.civeira.phylax.features.access.clientidentity.domain.ClientIdentityChangeSet;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
 import net.civeira.phylax.features.access.role.domain.RoleChangeSet;
 import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
-import net.civeira.phylax.features.access.useridentity.domain.Roles;
-import net.civeira.phylax.features.access.useridentity.domain.UserIdentityChangeSet;
 
 @Getter
 public class InitialConfigBean {
@@ -20,7 +18,7 @@ public class InitialConfigBean {
   private final List<TenantChangeSet> tenants;
   private final List<UserChangeSet> users;
   private final List<RoleChangeSet> roles;
-  private final List<UserIdentityChangeSet> identities;
+  private final List<ClientIdentityChangeSet> identities;
 
   public InitialConfigBean(String password) {
     RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("phylax-api")
@@ -39,13 +37,11 @@ public class InitialConfigBean {
     UserChangeSet root = new UserChangeSet().newUid().name("ROOT").passwordPlain(password)
         .tenant(tenant).enabled(true).useSecondFactors(false);
 
-    Roles userRoleRely = Roles.builder().newUid().role(role).build();
-    UserIdentityChangeSet userRelyIdentity = new UserIdentityChangeSet().newUid().user(root)
-        .relyingParty(party).roles(List.of(userRoleRely));
+    ClientIdentityChangeSet userRelyIdentity = new ClientIdentityChangeSet().newUid().user(root)
+        .relyingParty(party).roles("ROOT");
 
-    Roles userRoleClient = Roles.builder().newUid().role(role).build();
-    UserIdentityChangeSet userClientIdentity = new UserIdentityChangeSet().newUid().user(root)
-        .trustedClient(client).roles(List.of(userRoleClient));
+    ClientIdentityChangeSet userClientIdentity = new ClientIdentityChangeSet().newUid().user(root)
+        .trustedClient(client).roles("ROOT");
 
     tenants = List.of(tenant);
     parties = List.of(party);

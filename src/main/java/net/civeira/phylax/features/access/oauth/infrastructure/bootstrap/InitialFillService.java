@@ -7,6 +7,8 @@ import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.migration.Migrations;
+import net.civeira.phylax.features.access.clientidentity.domain.ClientIdentity;
+import net.civeira.phylax.features.access.clientidentity.domain.gateway.ClientIdentityWriteRepositoryGateway;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyWriteRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
@@ -18,8 +20,6 @@ import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedCl
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
-import net.civeira.phylax.features.access.useridentity.domain.UserIdentity;
-import net.civeira.phylax.features.access.useridentity.domain.gateway.UserIdentityWriteRepositoryGateway;
 
 @RequiredArgsConstructor
 public class InitialFillService {
@@ -28,7 +28,7 @@ public class InitialFillService {
   private final TenantWriteRepositoryGateway tenants;
   private final TrustedClientWriteRepositoryGateway clients;
   private final RelyingPartyWriteRepositoryGateway parties;
-  private final UserIdentityWriteRepositoryGateway identities;
+  private final ClientIdentityWriteRepositoryGateway identities;
 
   @Transactional
   void registerResource(
@@ -55,7 +55,7 @@ public class InitialFillService {
         users.create(User.create(proposal).enable());
       });
       bean.getIdentities().forEach(proposal -> {
-        identities.create(UserIdentity.create(proposal));
+        identities.create(ClientIdentity.create(proposal));
       });
     }
   }
