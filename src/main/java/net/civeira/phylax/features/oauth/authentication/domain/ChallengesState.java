@@ -1,0 +1,64 @@
+package net.civeira.phylax.features.oauth.authentication.domain;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
+
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.Builder;
+import lombok.Value;
+
+/**
+ * Immutable snapshot of the challenges already satisfied by the user during the current
+ * authentication session.
+ *
+ * Replaces the mutable inner class {@code FrontAcessController.Challenge}. Designed to be
+ * serialized into the {@code PRE_SESSION_ID} signed cookie so the state survives across HTTP
+ * requests.
+ *
+ * Backward-compatibility: the legacy JSON field name {@code challenges} is accepted on read via
+ * {@code @JsonAlias} so existing cookies issued before the rename continue to deserialize
+ * correctly.
+ */
+@Value
+@Builder(toBuilder = true)
+@RegisterForReflection
+public class ChallengesState {
+
+  /** Username that is progressing through the authentication flow. */
+  String username;
+
+  /**
+   * Challenges the user has already passed in this session (PASSWORD, MFA, etc.).
+   *
+   * Accepts the legacy field name {@code challenges} when deserializing from JSON so cookies
+   * issued before the rename remain readable.
+   */
+  @JsonAlias("challenges")
+  @Builder.Default
+  List<AuthenticationChallege> completed = List.of();
+
+  /**
+   * Factory for a fresh state with no completed challenges.
+   *
+   * @param username the authenticated username
+   * @return a new ChallengesState with an empty completed list
+   */
+  public static ChallengesState empty(String username) {
+    return ChallengesState.builder().username(username).build();
+  }
+
+  /**
+   * Returns a new state with {@code challenge} appended to the completed list.
+   *
+   * @param challenge the challenge that was just satisfied
+   * @return new immutable state with the challenge added
+   */
+  public ChallengesState withCompleted(AuthenticationChallege challenge) {
+    List<AuthenticationChallege> next = new ArrayList<>(completed);
+    next.add(challenge);
+    return toBuilder().completed(Collections.unmodifiableList(next)).build();
+  }
+}

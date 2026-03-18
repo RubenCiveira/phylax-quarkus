@@ -1,0 +1,116 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+
+/**
+ * Routes OIDC authentication flow requests to the appropriate {@link OidcStep}.
+ *
+ * Replaces the hardcoded {@code fillIfEmpty} chain and {@code loginErrorMappers} map in
+ * {@code FrontAcessController}. All registered {@link OidcStep} implementations are discovered
+ * automatically via CDI — adding a new step only requires creating a new bean.
+ *
+ * The routing caches are initialized lazily on first use. This bean is
+ * {@code @ApplicationScoped} and all per-request data travels through {@link StepInput}.
+ */
+@Slf4j
+@jakarta.enterprise.context.ApplicationScoped
+public class OidcStepRouter {
+
+  @Inject
+  @Any
+  Instance<OidcStep> allSteps;
+
+  /** Step name (form param {@code step=xxx}) → OidcStep */
+  private volatile Map<String, OidcStep> byStepName;
+
+  /** AuthenticationException subclass → OidcStep that paints the challenge form */
+  private volatile Map<Class<? extends AuthenticationException>, OidcStep> byException;
+
+  /**
+   * Processes a form submission by delegating to the step that owns the current step name.
+   *
+   * @param input the current request context
+   * @return the step outcome, or {@code empty} if no step handles the current step name
+   */
+  public Optional<StepOutcome> process(StepInput input) {
+    initCache();
+    OidcStep step = byStepName.get(input.step());
+    if (step == null) {
+      return Optional.empty();
+    }
+    return step.process(input);
+  }
+
+  /**
+   * Renders the form associated with the given authentication exception.
+   *
+   * @param exceptionClass the exception thrown by {@code fillPreAuthenticated()}
+   * @param input          the current request context
+   * @param preSession     the pre-session cookie to embed in the rendered response
+   * @return the rendered response, or {@code empty} if no step handles this exception
+   */
+  public Optional<Response> paint(Class<? extends AuthenticationException> exceptionClass,
+      StepInput input, NewCookie preSession) {
+    initCache();
+    OidcStep step = byException.get(exceptionClass);
+    if (step == null) {
+      return Optional.empty();
+    }
+    return Optional.of(step.paint(input, preSession));
+  }
+
+  /**
+   * Returns the {@link AuthenticationChallege} associated with the given exception.
+   *
+   * Used by the controller to build the updated {@link
+   * net.civeira.phylax.features.oauth.authentication.domain.ChallengesState} before writing the
+   * new pre-session cookie.
+   *
+   * @param exceptionClass the exception thrown by {@code fillPreAuthenticated()}
+   * @return the challenge, or {@code empty} if the exception is not mapped to any step
+   */
+  public Optional<AuthenticationChallege> challengeFor(
+      Class<? extends AuthenticationException> exceptionClass) {
+    initCache();
+    OidcStep step = byException.get(exceptionClass);
+    return step != null ? Optional.ofNullable(step.challenge()) : Optional.empty();
+  }
+
+  private synchronized void initCache() {
+    if (byStepName != null) {
+      return;
+    }
+    Map<String, OidcStep> stepNames = new HashMap<>();
+    Map<Class<? extends AuthenticationException>, OidcStep> exceptions = new HashMap<>();
+    allSteps.forEach(step -> {
+      step.stepNames().forEach(name -> {
+        OidcStep previous = stepNames.put(name, step);
+        if (previous != null) {
+          log.warn("Two OidcStep beans claim the same step name '{}': {} and {}", name,
+              previous.getClass().getSimpleName(), step.getClass().getSimpleName());
+        }
+      });
+      if (step.challengeException() != null) {
+        OidcStep previous = exceptions.put(step.challengeException(), step);
+        if (previous != null) {
+          log.warn("Two OidcStep beans claim the same exception '{}': {} and {}",
+              step.challengeException().getSimpleName(), previous.getClass().getSimpleName(),
+              step.getClass().getSimpleName());
+        }
+      }
+    });
+    byStepName = stepNames;
+    byException = exceptions;
+  }
+}

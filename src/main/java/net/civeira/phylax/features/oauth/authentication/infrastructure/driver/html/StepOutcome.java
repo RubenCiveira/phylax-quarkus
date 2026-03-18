@@ -1,0 +1,49 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;
+
+import jakarta.ws.rs.core.Response;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+
+/**
+ * Typed result of an {@link OidcStep} execution.
+ *
+ * Replaces the {@code Function<StepResult, Response> resolver} callback that ControllerParts
+ * previously received. Instead of calling back into {@code FrontAcessController}, a step returns
+ * a {@code StepOutcome} and the controller decides what to do with it.
+ *
+ * <ul>
+ *   <li>{@link Render} — the step wants to display an HTML response (e.g. form with errors).</li>
+ *   <li>{@link Proceed} — the step completed successfully; the flow may continue to the next
+ *       challenge or issue the authorization code.</li>
+ * </ul>
+ */
+public sealed interface StepOutcome permits StepOutcome.Render, StepOutcome.Proceed {
+
+  /**
+   * The step wants to render an HTML response directly.
+   *
+   * Typically used when the step encountered a validation error and needs to redisplay the form
+   * with an error message, or when it needs to show an intermediate page.
+   *
+   * @param response the JAX-RS response to return to the browser
+   */
+  record Render(Response response) implements StepOutcome {}
+
+  /**
+   * The step completed successfully and the authentication flow may proceed.
+   *
+   * {@code challengesState} carries the challenge state that was active when the step executed
+   * (i.e. what was in {@link StepInput#getChallenges()} at that moment). The controller uses it
+   * to call {@code fillPreAuthenticated()} and, if a further challenge is required, extends the
+   * state with {@link ChallengesState#withCompleted(net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege)}
+   * before writing a new {@code PRE_SESSION_ID} cookie.
+   *
+   * @param username         the authenticated username
+   * @param clientDetails    the OAuth client for this authorization request
+   * @param request          the parsed OAuth/OIDC request parameters
+   * @param challengesState  the challenges already completed at the time of this step
+   */
+  record Proceed(String username, ClientDetails clientDetails, AuthRequest request,
+      ChallengesState challengesState) implements StepOutcome {}
+}

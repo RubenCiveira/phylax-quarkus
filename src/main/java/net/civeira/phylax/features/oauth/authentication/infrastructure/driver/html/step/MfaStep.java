@@ -1,0 +1,110 @@
+package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
+
+import java.util.Optional;
+import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequiredException;
+import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.FrontAcessController;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
+
+/**
+ * OIDC step for Multi-Factor Authentication (TOTP) verification.
+ *
+ * Handles the {@code step=mfa} form submission and renders the MFA challenge form when
+ * {@link MfaRequiredException} is thrown by the login use case.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class MfaStep implements OidcStep {
+
+  private final SecureHtmlBuilder securer;
+  private final UserMfa userMfa;
+  private final DecoratePageGateway decorator;
+
+  @Override
+  public AuthenticationChallege challenge() {
+    return AuthenticationChallege.MFA;
+  }
+
+  @Override
+  public Class<? extends AuthenticationException> challengeException() {
+    return MfaRequiredException.class;
+  }
+
+  @Override
+  public Set<String> stepNames() {
+    return Set.of("mfa");
+  }
+
+  @Override
+  public Response paint(StepInput input, NewCookie preSession) {
+    return securer.secureHtmlResponse(buildForm(input, null).cookie(preSession));
+  }
+
+  @Override
+  public Optional<StepOutcome> process(StepInput input) {
+    if (!"mfa".equals(input.step()) || input.currentUser().isEmpty()) {
+      return Optional.empty();
+    }
+    String username = input.currentUser().get();
+    boolean valid = userMfa.verifyOtp(input.tenant(), username,
+        FrontAcessController.first(input.getFormParams(), "mfa_code"));
+    if (valid) {
+      ChallengesState state =
+          input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+      return Optional.of(new StepOutcome.Proceed(username, input.getClientDetails(),
+          input.getRequest(), state));
+    } else {
+      String msg = FrontAcessController.i18n(input.locale(), "mfa.wrong-code");
+      return Optional.of(new StepOutcome.Render(
+          securer.secureHtmlResponse(buildForm(input, msg))));
+    }
+  }
+
+  private ResponseBuilder buildForm(StepInput input, String msg) {
+    String js =
+        securer.configureScripts(securer.addSign("sign"), securer.focusOn("mfa_code"));
+
+    String title = FrontAcessController.i18n(input.locale(), "mfa.title");
+    String error = FrontAcessController.i18n(input.locale(), "mfa.error-format", msg);
+    String help = FrontAcessController.i18n(input.locale(), "mfa.help");
+    String code = FrontAcessController.i18n(input.locale(), "mfa.code");
+    String send = FrontAcessController.i18n(input.locale(), "mfa.send");
+    String backLabel = FrontAcessController.i18n(input.locale(), "mfa.back-label");
+    String backText = FrontAcessController.i18n(input.locale(), "mfa.back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+
+    return Response
+        .ok(decorator.getFullPage("MFA",
+            js + "<h1>" + title + "</h1>"
+                + "<p>" + help + "</p>"
+                + (null == msg ? "" : "<p class=\"error\"> " + error + "</p>")
+                + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<label>" + code
+                + "<input type=\"text\" name=\"mfa_code\" id=\"mfa_code\" value=\"\" /></label>"
+                + "<input type=\"hidden\" name=\"step\" value=\"mfa\" />"
+                + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                + send + "\" />"
+                + "</form>"
+                + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"start\" />"
+                + "<p>" + backText + "</p>"
+                + "</form>",
+            input.locale()))
+        .type(FrontAcessController.TEXT_HTML);
+  }
+}

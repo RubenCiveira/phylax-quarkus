@@ -20,6 +20,7 @@ recover:
 mfa:
   title: "Multi-factor authentication"
   error-format: "{0}"
+  wrong-code: "Incorrect MFA code"
   help: "Enter your authentication code"
   code: "Code"
   send: "Verify"
