@@ -31,7 +31,7 @@ class YamlLocaleMessagesUnitTest {
   @Test
   public void testLoadFileIOException() {
     YamlLocaleMessagesWithError yamlLocaleMessagesWithError = new YamlLocaleMessagesWithError(
-        "/messages/errors", Locale.getDefault(), path -> new ByteArrayError("# empty".getBytes()));
+        "/messages/errors", Locale.getDefault(), _ -> new ByteArrayError("# empty".getBytes()));
     Assertions.assertFalse(yamlLocaleMessagesWithError.contains("c1"));
     Assertions.assertTrue(yamlLocaleMessagesWithError.keys("").isEmpty());
     Assertions.assertEquals("c1.code", yamlLocaleMessagesWithError.get("c1.code"));

@@ -13,14 +13,14 @@ class StaticSqlParameterValueUnitTest {
 
   @Test
   void testValueDescriptionFromObjectConstructor() {
-    StaticSqlParameterValue param = new StaticSqlParameterValue(123, (index, ps) -> {
+    StaticSqlParameterValue param = new StaticSqlParameterValue(123, (_, _) -> {
     });
     assertEquals("123", param.valueDescription());
   }
 
   @Test
   void testValueDescriptionFromStringConstructor() {
-    StaticSqlParameterValue param = new StaticSqlParameterValue("Custom", (index, ps) -> {
+    StaticSqlParameterValue param = new StaticSqlParameterValue("Custom", (_, _) -> {
     });
     assertEquals("Custom", param.valueDescription());
   }
@@ -41,7 +41,7 @@ class StaticSqlParameterValueUnitTest {
   void testAcceptThrowsSQLException() throws SQLException {
     PreparedStatement ps = mock(PreparedStatement.class);
 
-    StaticSqlParameterValue.CustomAccepter failingAccepter = (index, statement) -> {
+    StaticSqlParameterValue.CustomAccepter failingAccepter = (_, _) -> {
       throw new SQLException("Simulated failure");
     };
 

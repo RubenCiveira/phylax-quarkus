@@ -47,7 +47,7 @@ class BatchServiceUnitTest {
     @DisplayName("should initialize batch and run steps asynchronously")
     void testStartInitializesAndRunsBatch() {
       ExecutorPlan<String> plan = ExecutorPlan.<String>builder().name("step1").params("data")
-          .executor((result, monitor, param) -> result.addOk("executed")).build();
+          .executor((result, _, _) -> result.addOk("executed")).build();
 
       when(executor.runAsync(any())).thenAnswer(invocation -> {
         Runnable r = invocation.getArgument(0);
@@ -67,7 +67,7 @@ class BatchServiceUnitTest {
     @DisplayName("should record step as FAILED and continue when executor throws RuntimeException")
     void testStartHandlesExceptionInExecutor() {
       ExecutorPlan<String> plan = ExecutorPlan.<String>builder().name("stepWithError")
-          .params("data").executor((result, monitor, param) -> {
+          .params("data").executor((_, _, _) -> {
             throw new RuntimeException("Failure");
           }).build();
 
@@ -90,11 +90,11 @@ class BatchServiceUnitTest {
       List<String> executionOrder = new ArrayList<>();
 
       ExecutorPlan<String> step1 = ExecutorPlan.<String>builder().name("step-a").params("p1")
-          .executor((result, monitor, param) -> executionOrder.add("step-a")).build();
+          .executor((_, _, _) -> executionOrder.add("step-a")).build();
       ExecutorPlan<String> step2 = ExecutorPlan.<String>builder().name("step-b").params("p2")
-          .executor((result, monitor, param) -> executionOrder.add("step-b")).build();
+          .executor((_, _, _) -> executionOrder.add("step-b")).build();
       ExecutorPlan<String> step3 = ExecutorPlan.<String>builder().name("step-c").params("p3")
-          .executor((result, monitor, param) -> executionOrder.add("step-c")).build();
+          .executor((_, _, _) -> executionOrder.add("step-c")).build();
 
       when(executor.runAsync(any())).thenAnswer(invocation -> {
         Runnable r = invocation.getArgument(0);
@@ -114,11 +114,11 @@ class BatchServiceUnitTest {
     @DisplayName("should always call storage.finish() even when a step fails")
     void testFinishIsAlwaysCalledAfterStepFailure() {
       ExecutorPlan<String> failing = ExecutorPlan.<String>builder().name("failing-step").params("x")
-          .executor((result, monitor, param) -> {
+          .executor((_, _, _) -> {
             throw new RuntimeException("intentional failure");
           }).build();
       ExecutorPlan<String> following = ExecutorPlan.<String>builder().name("following-step")
-          .params("y").executor((result, monitor, param) -> result.addOk("ok")).build();
+          .params("y").executor((result, _, _) -> result.addOk("ok")).build();
 
       when(executor.runAsync(any())).thenAnswer(invocation -> {
         ((Runnable) invocation.getArgument(0)).run();

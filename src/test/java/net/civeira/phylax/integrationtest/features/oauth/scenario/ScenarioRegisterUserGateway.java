@@ -21,7 +21,7 @@ public class ScenarioRegisterUserGateway implements RegisterUserGateway {
   private boolean allowRegister = true;
   private Supplier<RegistrationResult> requestBehavior = () -> RegistrationResult.pending();
   private BiFunction<String, String, Optional<String>> verifyBehavior =
-      (tenant, code) -> OidcTestFixtures.REGISTER_CODE.equals(code)
+      (_, code) -> OidcTestFixtures.REGISTER_CODE.equals(code)
           ? Optional.of(OidcTestFixtures.USERNAME)
           : Optional.empty();
 
@@ -76,7 +76,7 @@ public class ScenarioRegisterUserGateway implements RegisterUserGateway {
   public void reset() {
     allowRegister = true;
     requestBehavior = () -> RegistrationResult.pending();
-    verifyBehavior = (tenant, code) -> OidcTestFixtures.REGISTER_CODE.equals(code)
+    verifyBehavior = (_, code) -> OidcTestFixtures.REGISTER_CODE.equals(code)
         ? Optional.of(OidcTestFixtures.USERNAME)
         : Optional.empty();
     requestCalls.set(0);

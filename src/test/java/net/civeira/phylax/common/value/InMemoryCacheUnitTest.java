@@ -31,7 +31,7 @@ class InMemoryCacheUnitTest {
       InMemoryCache<String, String> cache = new InMemoryCache<>(10);
 
       // Act — Retrieve a missing key, triggering the callback to populate it
-      String result = cache.get("key1", k -> new InMemoryCache.Entry<>("value1", futureTtl()));
+      String result = cache.get("key1", _ -> new InMemoryCache.Entry<>("value1", futureTtl()));
 
       // Assert — The callback-produced value should be returned on cache miss
       assertEquals("value1", result,
@@ -43,10 +43,10 @@ class InMemoryCacheUnitTest {
     void shouldReturnCachedValueOnCacheHit() {
       // Arrange — Create a cache and pre-populate it with key "counter" mapped to value 1
       InMemoryCache<String, Integer> cache = new InMemoryCache<>(10);
-      cache.get("counter", k -> new InMemoryCache.Entry<>(1, futureTtl()));
+      cache.get("counter", _ -> new InMemoryCache.Entry<>(1, futureTtl()));
 
       // Act — Retrieve the same key again with a different callback value
-      Integer result = cache.get("counter", k -> new InMemoryCache.Entry<>(999, futureTtl()));
+      Integer result = cache.get("counter", _ -> new InMemoryCache.Entry<>(999, futureTtl()));
 
       // Assert — The original cached value should be returned, ignoring the new callback
       assertEquals(1, result,
@@ -61,7 +61,7 @@ class InMemoryCacheUnitTest {
 
       // Act / Assert — Calling get with a null key should throw NullPointerException
       assertThrows(NullPointerException.class,
-          () -> cache.get(null, k -> new InMemoryCache.Entry<>("v", futureTtl())),
+          () -> cache.get(null, _ -> new InMemoryCache.Entry<>("v", futureTtl())),
           "Should throw NullPointerException when key is null");
     }
   }
@@ -75,13 +75,13 @@ class InMemoryCacheUnitTest {
     void shouldRemoveEntryFromCache() {
       // Arrange — Create a cache and populate it with one entry
       InMemoryCache<String, String> cache = new InMemoryCache<>(10);
-      cache.get("key", k -> new InMemoryCache.Entry<>("value", futureTtl()));
+      cache.get("key", _ -> new InMemoryCache.Entry<>("value", futureTtl()));
 
       // Act — Remove the previously cached entry by key
       cache.remove("key");
 
       // Assert — After removal, getting the key again should invoke the callback
-      String result = cache.get("key", k -> new InMemoryCache.Entry<>("new-value", futureTtl()));
+      String result = cache.get("key", _ -> new InMemoryCache.Entry<>("new-value", futureTtl()));
       assertEquals("new-value", result,
           "After removal, the callback should be invoked again producing a new value");
     }
@@ -96,8 +96,8 @@ class InMemoryCacheUnitTest {
     void shouldReturnCurrentNumberOfEntries() {
       // Arrange — Create a cache and populate it with two entries
       InMemoryCache<String, String> cache = new InMemoryCache<>(10);
-      cache.get("a", k -> new InMemoryCache.Entry<>("1", futureTtl()));
-      cache.get("b", k -> new InMemoryCache.Entry<>("2", futureTtl()));
+      cache.get("a", _ -> new InMemoryCache.Entry<>("1", futureTtl()));
+      cache.get("b", _ -> new InMemoryCache.Entry<>("2", futureTtl()));
 
       // Act — Query the current cache size
       int size = cache.size();
@@ -126,10 +126,10 @@ class InMemoryCacheUnitTest {
     void shouldExpireEntriesWithPastExpiration() {
       // Arrange — Create a cache and insert an entry with a past expiration (TTL of 1ms)
       InMemoryCache<String, String> cache = new InMemoryCache<>(10);
-      cache.get("key", k -> new InMemoryCache.Entry<>("expired", Duration.ofMillis(1)));
+      cache.get("key", _ -> new InMemoryCache.Entry<>("expired", Duration.ofMillis(1)));
 
       // Act — Access the key again, which should detect the expired entry and invoke the callback
-      String result = cache.get("key", k -> new InMemoryCache.Entry<>("fresh", futureTtl()));
+      String result = cache.get("key", _ -> new InMemoryCache.Entry<>("fresh", futureTtl()));
 
       // Assert — The fresh value from the callback should replace the expired entry
       assertEquals("fresh", result,
@@ -141,10 +141,10 @@ class InMemoryCacheUnitTest {
     void shouldNotExpireEntryWithLongTtl() {
       // Arrange — create a cache and insert an entry with a 60-second TTL
       InMemoryCache<String, String> cache = new InMemoryCache<>(10);
-      cache.get("key", k -> new InMemoryCache.Entry<>("original", Duration.ofSeconds(60)));
+      cache.get("key", _ -> new InMemoryCache.Entry<>("original", Duration.ofSeconds(60)));
 
       // Act — access the same key immediately
-      String result = cache.get("key", k -> new InMemoryCache.Entry<>("replacement", futureTtl()));
+      String result = cache.get("key", _ -> new InMemoryCache.Entry<>("replacement", futureTtl()));
 
       // Assert — the original value should still be cached (TTL computed as currentTime + 60s)
       assertEquals("original", result,
@@ -182,8 +182,8 @@ class InMemoryCacheUnitTest {
     void shouldRemoveExpiredEntriesOnCleanup() {
       // Arrange — Create a cache with one expired entry and one alive entry
       InMemoryCache<String, String> cache = new InMemoryCache<>(10);
-      cache.get("expired", k -> new InMemoryCache.Entry<>("v", Duration.ofMillis(1)));
-      cache.get("alive", k -> new InMemoryCache.Entry<>("v", futureTtl()));
+      cache.get("expired", _ -> new InMemoryCache.Entry<>("v", Duration.ofMillis(1)));
+      cache.get("alive", _ -> new InMemoryCache.Entry<>("v", futureTtl()));
 
       // Act — Trigger cleanup to evict expired entries
       cache.cleanUp();

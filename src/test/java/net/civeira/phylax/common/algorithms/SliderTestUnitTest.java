@@ -145,7 +145,7 @@ class SliderTestUnitTest {
 
     Slider<String> slider = new TestSlider(initialData.iterator(), 4, batches);
 
-    Predicate<String> includeAll = s -> true;
+    Predicate<String> includeAll = _ -> true;
 
     Iterator<String> result = slider.slide(includeAll);
     List<String> collected = new ArrayList<>();

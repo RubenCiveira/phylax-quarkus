@@ -18,7 +18,7 @@ class GenericSqlListParameterValuesUnitTest {
   @Test
   void testSizeReturnsCorrectLength() {
     GenericSqlListParameterValues<String> param =
-        new GenericSqlListParameterValues<>(new String[] {"a", "b", "c"}, (index, value, ps) -> {
+        new GenericSqlListParameterValues<>(new String[] {"a", "b", "c"}, (_, _, _) -> {
         });
 
     assertEquals(3, param.size());
@@ -27,7 +27,7 @@ class GenericSqlListParameterValuesUnitTest {
   @Test
   void testValueDescription() {
     GenericSqlListParameterValues<Integer> param =
-        new GenericSqlListParameterValues<>(new Integer[] {1, 2, 3}, (index, value, ps) -> {
+        new GenericSqlListParameterValues<>(new Integer[] {1, 2, 3}, (_, _, _) -> {
         });
 
     assertEquals("[1,2,3]", param.valueDescription());
@@ -36,7 +36,7 @@ class GenericSqlListParameterValuesUnitTest {
   @Test
   void testValueDescriptionEmptyArray() {
     GenericSqlListParameterValues<Integer> param =
-        new GenericSqlListParameterValues<>(new Integer[] {}, (index, value, ps) -> {
+        new GenericSqlListParameterValues<>(new Integer[] {}, (_, _, _) -> {
         });
 
     assertEquals("[]", param.valueDescription());

@@ -95,7 +95,7 @@ class AllowDecisionUnitTest {
       AllowDecision decision = TestAllowDecision.builder().detail(allow).query(interaction).build();
 
       // Act — apply a mapping function that replaces the Allow detail
-      decision.map(a -> Allow.builder().allowed(false).description("mapped").build());
+      decision.map(_ -> Allow.builder().allowed(false).description("mapped").build());
 
       // Assert — the decision detail reflects the mapped values
       assertFalse(decision.getDetail().isAllowed(),

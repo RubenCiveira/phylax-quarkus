@@ -116,7 +116,7 @@ class AesCipherServiceUnitTest {
   @Test
   void testError() throws Exception {
     try (MockedStatic<Cipher> mockCipher = Mockito.mockStatic(Cipher.class)) {
-      when(Cipher.getInstance("AES/GCM/NoPadding")).thenAnswer(call -> {
+      when(Cipher.getInstance("AES/GCM/NoPadding")).thenAnswer(_ -> {
         throw new GeneralSecurityException("Test exception");
       });
       assertThrows(IllegalStateException.class, () -> aesCipherService.encrypt("uno", "otro"));

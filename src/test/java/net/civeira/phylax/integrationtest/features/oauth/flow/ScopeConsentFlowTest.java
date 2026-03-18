@@ -22,7 +22,7 @@ class ScopeConsentFlowTest extends OidcIntegrationTestBase {
         .whenValidate(() -> AuthenticationResult.clientScopeConsentRequired(OidcTestFixtures.TENANT,
             OidcTestFixtures.USERNAME, OidcTestFixtures.CLIENT_ID,
             List.of("openid", "profile", "email")));
-    scopeConsentGateway.whenPending((clientId, requested) -> List.of("openid", "profile", "email"));
+    scopeConsentGateway.whenPending((_, _) -> List.of("openid", "profile", "email"));
 
     Response response = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null);
@@ -41,7 +41,7 @@ class ScopeConsentFlowTest extends OidcIntegrationTestBase {
     loginGateway
         .whenValidate(() -> AuthenticationResult.clientScopeConsentRequired(OidcTestFixtures.TENANT,
             OidcTestFixtures.USERNAME, OidcTestFixtures.CLIENT_ID, List.of("openid", "profile")));
-    scopeConsentGateway.whenPending((clientId, requested) -> requested);
+    scopeConsentGateway.whenPending((_, requested) -> requested);
 
     Response loginResponse = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null);

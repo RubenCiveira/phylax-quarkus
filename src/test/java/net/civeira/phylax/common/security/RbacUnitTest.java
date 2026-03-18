@@ -159,7 +159,7 @@ class RbacUnitTest {
     void shouldReturnDeniedWhenNoActiveStoresAndDefaultIsFalse() {
       // Arrange — Rbac configured with defaultAllow=false (fail-closed)
       Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
-      doAnswer(invocation -> null).when(managerInstance).forEach(any());
+      doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
       Allow result = rbac.checkAllow(actor, "tenant", "create");
@@ -175,7 +175,7 @@ class RbacUnitTest {
       // Arrange — Rbac configured with defaultAllow=true (fail-open)
       Rbac failOpenRbac = new Rbac(managerInstance, true);
       Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
-      doAnswer(invocation -> null).when(managerInstance).forEach(any());
+      doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
       Allow result = failOpenRbac.checkAllow(actor, "tenant", "create");
@@ -274,7 +274,7 @@ class RbacUnitTest {
     void shouldReturnEmptyListWhenNoActiveStoresExist() {
       // Arrange
       Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
-      doAnswer(invocation -> null).when(managerInstance).forEach(any());
+      doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
       List<String> result = rbac.inaccessibleFields(actor, "tenant", "list");

@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
@@ -90,7 +92,7 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
             OidcTestFixtures.USERNAME, OidcTestFixtures.CLIENT_ID,
             List.of("openid", "profile", "email")));
     loginGateway.whenPreAuth(() -> AuthenticationResult.right(loginGatewayResult()));
-    scopeConsentGateway.whenPending((clientId, requested) -> requested);
+    scopeConsentGateway.whenPending((_, requested) -> requested);
 
     Response login = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null);
@@ -117,7 +119,7 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
         .whenValidate(() -> AuthenticationResult.clientScopeConsentRequired(OidcTestFixtures.TENANT,
             OidcTestFixtures.USERNAME, OidcTestFixtures.CLIENT_ID,
             List.of("openid", "profile", "email")));
-    scopeConsentGateway.whenPending((clientId, requested) -> requested);
+    scopeConsentGateway.whenPending((_, requested) -> requested);
 
     Response login = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null);
@@ -133,14 +135,12 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(0, scopeConsentGateway.getAcceptedCount());
   }
 
-  private net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData loginGatewayResult() {
-    net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData data =
-        new net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData();
+  private AuthenticationData loginGatewayResult() {
+    AuthenticationData data = new AuthenticationData();
     data.setUid("user-1");
     data.setUsername(OidcTestFixtures.USERNAME);
     data.setTenant(OidcTestFixtures.TENANT);
-    data.setMode(
-        net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode.PASSWORD);
+    data.setMode(AuthenticationMode.PASSWORD);
     data.setTime(java.time.Instant.now());
     return data;
   }

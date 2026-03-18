@@ -37,7 +37,7 @@ public class ScenarioScopeConsentGateway implements ScopesConsentGateway, ScopeA
 
   /** Simulates all scopes already authorized (nothing pending). */
   public void whenNoPending() {
-    this.pendingProvider = (_, requested) -> List.of();
+    this.pendingProvider = (_, _) -> List.of();
   }
 
   public void reset() {

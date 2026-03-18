@@ -98,8 +98,8 @@ class DocumentReaderUnitTest {
       when(fileTransformer.canTransform(dataSource)).thenReturn(true);
       when(fileTransformer.transform(dataSource)).thenReturn(List.of(transformedSource));
       when(fileTransformer.canTransform(transformedSource)).thenReturn(false);
-      doAnswer(inv -> List.of(fileReader).iterator()).when(readersInstance).iterator();
-      doAnswer(inv -> List.of(fileTransformer).iterator()).when(transformsInstance).iterator();
+      doAnswer(_ -> List.of(fileReader).iterator()).when(readersInstance).iterator();
+      doAnswer(_ -> List.of(fileTransformer).iterator()).when(transformsInstance).iterator();
 
       // Act — Invoke the document reader which should follow the transformation chain
       List<Map<String, String>> result = documentReader.read(dataSource);
@@ -118,8 +118,8 @@ class DocumentReaderUnitTest {
       when(fileReader.read(dataSource)).thenReturn(List.of(Map.of("k", "v")));
       when(fileTransformer.canTransform(dataSource)).thenReturn(true);
       when(fileTransformer.transform(dataSource)).thenReturn(List.of(dataSource));
-      doAnswer(inv -> List.of(fileReader).iterator()).when(readersInstance).iterator();
-      doAnswer(inv -> List.of(fileTransformer).iterator()).when(transformsInstance).iterator();
+      doAnswer(_ -> List.of(fileReader).iterator()).when(readersInstance).iterator();
+      doAnswer(_ -> List.of(fileTransformer).iterator()).when(transformsInstance).iterator();
 
       // Act — Invoke the document reader with a cyclic transformation
       List<Map<String, String>> result = documentReader.read(dataSource);
@@ -131,10 +131,10 @@ class DocumentReaderUnitTest {
   }
 
   private void mockReaderIterator(List<FileReader> readers) {
-    doAnswer(inv -> readers.iterator()).when(readersInstance).iterator();
+    doAnswer(_ -> readers.iterator()).when(readersInstance).iterator();
   }
 
   private void mockTransformerIterator(List<FileTransformer> transformers) {
-    doAnswer(inv -> transformers.iterator()).when(transformsInstance).iterator();
+    doAnswer(_ -> transformers.iterator()).when(transformsInstance).iterator();
   }
 }

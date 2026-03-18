@@ -18,7 +18,7 @@ public class ScenarioChangePasswordGateway implements ChangePasswordGateway {
   private boolean allowRecover = true;
   private boolean forceUpdatePasswordResult = true;
   private BiFunction<String, String, Optional<String>> validateBehavior =
-      (code, pass) -> OidcTestFixtures.RECOVER_CODE.equals(code)
+      (code, _) -> OidcTestFixtures.RECOVER_CODE.equals(code)
           ? Optional.of(OidcTestFixtures.USERNAME)
           : Optional.empty();
 
@@ -73,7 +73,7 @@ public class ScenarioChangePasswordGateway implements ChangePasswordGateway {
   public void reset() {
     allowRecover = true;
     forceUpdatePasswordResult = true;
-    validateBehavior = (code, pass) -> OidcTestFixtures.RECOVER_CODE.equals(code)
+    validateBehavior = (code, _) -> OidcTestFixtures.RECOVER_CODE.equals(code)
         ? Optional.of(OidcTestFixtures.USERNAME)
         : Optional.empty();
     forceUpdateCalls.set(0);

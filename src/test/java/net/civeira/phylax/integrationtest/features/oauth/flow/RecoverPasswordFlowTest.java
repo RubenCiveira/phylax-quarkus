@@ -49,7 +49,7 @@ class RecoverPasswordFlowTest extends OidcIntegrationTestBase {
 
   @Test
   void recover_invalidCode_showsError() {
-    changePasswordGateway.whenValidateChange((code, pass) -> Optional.empty());
+    changePasswordGateway.whenValidateChange((_, _) -> Optional.empty());
 
     Response response = client.submitRecover(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         "bad-code", "newPass1!");
