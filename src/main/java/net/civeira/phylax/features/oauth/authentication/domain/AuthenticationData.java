@@ -3,7 +3,9 @@ package net.civeira.phylax.features.oauth.authentication.domain;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
@@ -29,9 +31,9 @@ public class AuthenticationData {
    */
   private String username;
   /**
-   * Roles granted to the user. Stored as flattened role names with audience prefixes.
+   * Roles granted to the user, keyed by audience.
    */
-  private List<String> roles = new ArrayList<>();
+  private Map<String, List<String>> roles = new LinkedHashMap<>();
   /**
    * Audiences requested for the token. Used to scope roles and access claims.
    */
@@ -66,8 +68,6 @@ public class AuthenticationData {
    * @param names role names to add
    */
   public void addRolesTo(String audience, List<String> names) {
-    names.stream().forEach(name -> {
-      roles.add(("*".equals(audience) ? "" : audience + ".") + name);
-    });
+    roles.computeIfAbsent(audience, _ -> new ArrayList<>()).addAll(names);
   }
 }

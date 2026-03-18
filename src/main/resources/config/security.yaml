@@ -4,6 +4,8 @@ mp:
       # publickey:
       #   location: ${security.jwt.public.key}
     audiences: phylax-api
+    roles:
+      claim: roles
   rcab:
     # model: phylax
     # phylax:
