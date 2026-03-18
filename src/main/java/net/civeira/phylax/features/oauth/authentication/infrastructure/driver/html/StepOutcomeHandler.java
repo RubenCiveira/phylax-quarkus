@@ -45,14 +45,16 @@ public class StepOutcomeHandler {
    */
   public Response handle(StepOutcome outcome, StepInput input,
       MultivaluedMap<String, String> paramMap) {
-    return switch (outcome) {
-      case StepOutcome.Render r -> r.response();
-      case StepOutcome.Proceed p -> {
+    switch (outcome) {
+      case StepOutcome.Render r:
+        return r.response();
+      case StepOutcome.Proceed p:
         AuthenticationResult result = authenticateUser.preAuthenticate(p.request(),
             p.challengesState().getCompleted(), p.username(), p.clientDetails());
-        yield routeChallenge(result, p.challengesState(), p.clientDetails(), p.request(), paramMap);
-      }
-    };
+        return routeChallenge(result, p.challengesState(), p.clientDetails(), p.request(), paramMap);
+      default:
+        throw new IllegalStateException("Unknown step outcome: " + outcome);
+    }
   }
 
   /**
