@@ -31,10 +31,10 @@ public enum SqlOperator {
   LIKE("LIKE", null),
 
   /** IS NULL operator, checks for null values */
-  IS_NULL("", null),
+  IS_NULL("IS NULL", null),
 
   /** IS NOT NULL operator, checks for non-null values */
-  IS_NOT_NULL("", null);
+  IS_NOT_NULL("IS NOT NULL", null);
 
   /**
    * The SQL symbol or keyword representing the operator.

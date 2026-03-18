@@ -238,10 +238,15 @@ public class PartialWhere {
           }
         }
         case LeafCondition lc -> {
-          String name = "_field_" + (++prefix);
-          parametrized.getParametrized().with(name, lc.value());
-          wheres.add((null == lc.tableAlias() ? "" : parametrized.escape(lc.tableAlias()) + ".")
-              + parametrized.escape(lc.field()) + " " + lc.operator().value + " :" + name);
+          String fieldExpr = (null == lc.tableAlias() ? "" : parametrized.escape(lc.tableAlias()) + ".")
+              + parametrized.escape(lc.field());
+          if (lc.operator() == SqlOperator.IS_NULL || lc.operator() == SqlOperator.IS_NOT_NULL) {
+            wheres.add(fieldExpr + " " + lc.operator().value);
+          } else {
+            String name = "_field_" + (++prefix);
+            parametrized.getParametrized().with(name, lc.value());
+            wheres.add(fieldExpr + " " + lc.operator().value + " :" + name);
+          }
         }
       }
     }
