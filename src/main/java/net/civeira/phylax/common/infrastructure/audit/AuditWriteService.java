@@ -44,7 +44,7 @@ public class AuditWriteService {
    * @param event audit event to persist
    */
   public void record(String on, AuditEvent event) {
-    String sql = "INSERT INTO " + on + "_audit ( " + """
+    String sql = "INSERT INTO " + on + " ( " + """
                 id, operation, usecase, trace_id, entity_id,
                 old_values, new_values,
                 performed_by, tenant, timestamp,

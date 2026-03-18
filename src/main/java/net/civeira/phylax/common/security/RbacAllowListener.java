@@ -11,6 +11,7 @@ public class RbacAllowListener {
   private final Rbac rbac;
 
   public void checkAllow(@Observes AllowDecision event) {
+    System.err.println("HI IM LOOKING");
     event.map(allow -> {
       if (allow.isAllowed()) {
         return rbac.checkAllow(event.getQuery().getActor(), event.resourceName(),

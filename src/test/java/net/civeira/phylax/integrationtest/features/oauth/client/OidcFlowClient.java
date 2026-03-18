@@ -76,7 +76,7 @@ public class OidcFlowClient {
         .formParam("step", "scope_consent").formParam("csid", OidcTestFixtures.CSID)
         .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie));
     if (acceptedScopes != null && !acceptedScopes.isEmpty()) {
-      request.formParam("scope_accepted", (Object[])acceptedScopes.toArray(new String[0]));
+      request.formParam("scope_accepted", (Object[]) acceptedScopes.toArray(new String[0]));
     }
     return request.post("/oauth/openid/" + tenant + "/auth");
   }

@@ -88,7 +88,10 @@ public class TenantListUsecase {
     TenantListAllowDecision proposal = TenantListAllowDecision.builder()
         .detail(Allow.builder().allowed(true).description("Allow by default").build()).query(query)
         .build();
+    System.err.println("=======TENGO A ");
+    System.err.println(" ANTES >> " + proposal.getDetail().isAllowed() );
     listAllowEmitter.fire(proposal);
+    System.err.println(" DESPUES >> " + proposal.getDetail().isAllowed() );
     return proposal.getDetail();
   }
 }

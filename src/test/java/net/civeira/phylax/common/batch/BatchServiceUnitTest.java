@@ -113,8 +113,8 @@ class BatchServiceUnitTest {
     @Test
     @DisplayName("should always call storage.finish() even when a step fails")
     void testFinishIsAlwaysCalledAfterStepFailure() {
-      ExecutorPlan<String> failing = ExecutorPlan.<String>builder().name("failing-step").params("x")
-          .executor((_, _, _) -> {
+      ExecutorPlan<String> failing =
+          ExecutorPlan.<String>builder().name("failing-step").params("x").executor((_, _, _) -> {
             throw new RuntimeException("intentional failure");
           }).build();
       ExecutorPlan<String> following = ExecutorPlan.<String>builder().name("following-step")

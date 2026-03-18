@@ -46,8 +46,7 @@ public class Rbac {
    * switch to fail-open. Fail-closed is strongly recommended for production environments.
    * </p>
    */
-  private final @ConfigProperty(name = "app.security.rbac.default-allow",
-      defaultValue = "false") boolean defaultAllow;
+  private final @ConfigProperty(name = "app.security.rbac.default-allow") boolean defaultAllow;
 
   /**
    * Registers a resource field on all active RBAC stores.

@@ -17,6 +17,8 @@ mp:
 
 app:
   security:
+    rbac:
+      default-allow: true
     encryption:
       key: ${security.encriptation.key:eventual}
 

@@ -6,9 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
-import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import javax.crypto.Cipher;
@@ -116,9 +115,8 @@ class AesCipherServiceUnitTest {
   @Test
   void testError() throws Exception {
     try (MockedStatic<Cipher> mockCipher = Mockito.mockStatic(Cipher.class)) {
-      when(Cipher.getInstance("AES/GCM/NoPadding")).thenAnswer(_ -> {
-        throw new GeneralSecurityException("Test exception");
-      });
+      mockCipher.when(() -> Cipher.getInstance(Mockito.anyString()))
+          .thenThrow(new NoSuchAlgorithmException("Test exception"));
       assertThrows(IllegalStateException.class, () -> aesCipherService.encrypt("uno", "otro"));
     }
   }
