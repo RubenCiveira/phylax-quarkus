@@ -4,14 +4,12 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.h
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 
 /**
@@ -79,15 +77,9 @@ public class SecureHtmlBuilder {
    */
   private final TemporalKeysGateway adapter;
   /**
-   * Cipher service used to encrypt and decrypt fields.
-   */
-  private final AesCipherService cipher;
-  /**
    * Random generator used for snippet identifiers.
    */
-  private final SecureRandom random = new SecureRandom(); // Compliant for security-sensitive use
-                                                          // cases
-
+  private final SecureRandom random = new SecureRandom(); 
 
   /**
    * Builds a snippet that signs a token and submits a form.
@@ -125,8 +117,7 @@ public class SecureHtmlBuilder {
    * @return decrypted value or empty string
    */
   public String decrypt(String value) {
-    String secret = adapter.currentKey();
-    return cipher.decrypt(value, secret).orElse("");
+    return adapter.verifyCypher(value).orElse("");
   }
 
   /**

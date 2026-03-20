@@ -93,9 +93,8 @@ public class RolesValueHolder<T> {
   public T roles(RoleChangeSet... roles) {
     List<Roles> values = new ArrayList<>();
     for (RoleChangeSet change : roles) {
-      values.add(Roles.builder().role(change)
-          .version(change.getVersion().orElse(0))
-          .uid(change.getUid().orElseThrow()).build() );
+      values.add(Roles.builder().role(change).version(change.getVersion().orElse(0))
+          .uid(change.getUid().orElseThrow()).build());
     }
     value = Optional.of(RolesVO.from(values));
     return holder;
