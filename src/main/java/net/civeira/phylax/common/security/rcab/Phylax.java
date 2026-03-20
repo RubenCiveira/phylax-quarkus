@@ -104,7 +104,7 @@ public class Phylax implements RbacStore {
   @Override
   public ScopeAllowList checkRoleScopes(Actor actor) {
     List<PhylaxGrants> grants = cachedCallCheckScopes();
-    List<String> roles = Stream.concat(actor.getRoles().stream(), Stream.of("-")).toList();
+    List<String> roles = Stream.concat(actor.getGroups().stream(), Stream.of("-")).toList();
     ScopeAllowList descriptions = new ScopeAllowList();
     grants.stream().filter(grant -> roles.contains(grant.getRolename()))
         .forEach(grant -> grant.getAllowedScopes().forEach(scope -> {
@@ -117,7 +117,7 @@ public class Phylax implements RbacStore {
   @Override
   public FieldGrantList checkRoleProperties(Actor actor) {
     List<PhylaxGrants> grants = cachedCallCheckScopes();
-    List<String> roles = Stream.concat(actor.getRoles().stream(), Stream.of("-")).toList();
+    List<String> roles = Stream.concat(actor.getGroups().stream(), Stream.of("-")).toList();
 
     FieldGrantList descriptions = new FieldGrantList();
     grants.stream().filter(grant -> roles.contains(grant.getRolename())).forEach(grant -> grant
