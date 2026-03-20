@@ -271,8 +271,7 @@ public class UserLoginUsecase {
 
   private Optional<AuthenticationResult> checkPassword(AuthRequest request, User user,
       String password) {
-    if (null != password
-        && !password.equals(user.getPasswordPlain(cypher))) {
+    if (null != password && !password.equals(user.getPasswordPlain(cypher))) {
       log.error("The provided password for {} is invalid", user.getName());
       markLoginFails(user, true);
       return Optional.of(AuthenticationResult.wrongCredential(request.getTenant(), user.getName()));
