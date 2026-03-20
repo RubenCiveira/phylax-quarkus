@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.apikeyclient.application.usecase.enable.ApiKeyClientEnableFilter;
 import net.civeira.phylax.features.access.apikeyclient.application.usecase.enable.ApiKeyClientEnableProjection;
@@ -57,7 +56,7 @@ public class ApiKeyClientEnableController {
    * @param key
    * @return
    */
-  @Observed("Api to enable on massive entity of api key client")
+  @ApiObserved("Api to enable on massive entity of api key client")
   public Response apiKeyClientApiBatchEnable(final List<String> uids, final String search,
       final String key) {
     ApiKeyClientEnableFilter.ApiKeyClientEnableFilterBuilder filterBuilder =
@@ -83,10 +82,10 @@ public class ApiKeyClientEnableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive enable on entity of api key client")
+  @ApiObserved("Api to check masive enable on entity of api key client")
   public Response apiKeyClientApiBatchEnableQuery(final String batchId) {
-    BatchProgress task = enable.checkProgress(
-        ApiKeyClientEnableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = enable.checkProgress(currentRequest.interaction(),
+        ApiKeyClientEnableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

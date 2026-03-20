@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.application.usecase.enable.TenantEnableFilter;
 import net.civeira.phylax.features.access.tenant.application.usecase.enable.TenantEnableProjection;
@@ -57,7 +56,7 @@ public class TenantEnableController {
    * @param name
    * @return
    */
-  @Observed("Api to enable on massive entity of tenant")
+  @ApiObserved("Api to enable on massive entity of tenant")
   public Response tenantApiBatchEnable(final List<String> uids, final String search,
       final String name) {
     TenantEnableFilter.TenantEnableFilterBuilder filterBuilder = TenantEnableFilter.builder();
@@ -82,10 +81,10 @@ public class TenantEnableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive enable on entity of tenant")
+  @ApiObserved("Api to check masive enable on entity of tenant")
   public Response tenantApiBatchEnableQuery(final String batchId) {
-    BatchProgress task = enable.checkProgress(
-        TenantEnableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = enable.checkProgress(currentRequest.interaction(),
+        TenantEnableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

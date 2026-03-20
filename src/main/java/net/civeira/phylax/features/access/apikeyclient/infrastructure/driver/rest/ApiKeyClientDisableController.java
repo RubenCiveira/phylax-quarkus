@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.apikeyclient.application.usecase.disable.ApiKeyClientDisableFilter;
 import net.civeira.phylax.features.access.apikeyclient.application.usecase.disable.ApiKeyClientDisableProjection;
@@ -57,7 +56,7 @@ public class ApiKeyClientDisableController {
    * @param key
    * @return
    */
-  @Observed("Api to disable on massive entity of api key client")
+  @ApiObserved("Api to disable on massive entity of api key client")
   public Response apiKeyClientApiBatchDisable(final List<String> uids, final String search,
       final String key) {
     ApiKeyClientDisableFilter.ApiKeyClientDisableFilterBuilder filterBuilder =
@@ -83,10 +82,10 @@ public class ApiKeyClientDisableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive disable on entity of api key client")
+  @ApiObserved("Api to check masive disable on entity of api key client")
   public Response apiKeyClientApiBatchDisableQuery(final String batchId) {
-    BatchProgress task = disable.checkProgress(
-        ApiKeyClientDisableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = disable.checkProgress(currentRequest.interaction(),
+        ApiKeyClientDisableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

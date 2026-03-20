@@ -82,8 +82,8 @@ public class ApiKeyClientDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of api key client")
   public Response apiKeyClientApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(ApiKeyClientCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        ApiKeyClientCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

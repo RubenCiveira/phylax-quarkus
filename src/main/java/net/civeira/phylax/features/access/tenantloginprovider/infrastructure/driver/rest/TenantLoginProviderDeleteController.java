@@ -90,8 +90,8 @@ public class TenantLoginProviderDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of tenant login provider")
   public Response tenantLoginProviderApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(TenantLoginProviderCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        TenantLoginProviderCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

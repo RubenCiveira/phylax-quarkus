@@ -19,7 +19,7 @@ import net.civeira.phylax.common.batch.stepper.StepCounter;
 import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
-import net.civeira.phylax.common.security.Allow;
+import net.civeira.phylax.common.security.Permission;
 import net.civeira.phylax.features.access.tenantloginprovider.application.visibility.TenantLoginProvidersVisibility;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProvider;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderAuditGateway;
@@ -89,7 +89,7 @@ class TenantLoginProviderEnablesInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      return visibility.countVisibles(context.getParams().getInteraction(),
+      return visibility.countVisibles(context.getParams().getContext(),
           context.getParams().getFilter());
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);
@@ -146,10 +146,10 @@ class TenantLoginProviderEnablesInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      Allow allowed = usecase.checkAllow(context.getParams().getInteraction(), item);
-      if (!allowed.isAllowed()) {
+      Permission permission = usecase.checkPermission(context.getParams().getContext(), item);
+      if (!permission.isAllowed()) {
         span.addEvent("The policies for tenant login provider dont allow to delete: "
-            + allowed.getDescription());
+            + permission.getDescription());
         throw new ExecutionException("not-allowed", null);
       }
       return item;
@@ -176,7 +176,7 @@ class TenantLoginProviderEnablesInBatchExecutor implements
         .startSpan();
     try {
       List<TenantLoginProvider> page =
-          visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
+          visibility.listVisiblesForUpdate(context.getParams().getContext(),
               context.getParams().getFilter(), TenantLoginProviderCursor.builder().limit(size)
                   .sinceUid(context.getState().getSince()).build());
       context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
@@ -205,9 +205,9 @@ class TenantLoginProviderEnablesInBatchExecutor implements
     try {
       span.setAttribute("size", items.size());
       items.forEach(item -> {
-        TenantLoginProvider changed = usecase.doEnable(context.getParams().getInteraction(), item);
+        TenantLoginProvider changed = usecase.doEnable(context.getParams().getContext(), item);
         usecase.cacheUpdate(changed);
-        audit.updated("batch-enable", changed, item, context.getParams().getInteraction());
+        audit.updated("batch-enable", changed, item, context.getParams().getContext());
       });
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);

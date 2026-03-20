@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.user.application.usecase.reject.UserRejectFilter;
@@ -63,7 +62,7 @@ public class UserRejectController {
    * @param tenants
    * @return
    */
-  @Observed("Api to reject on massive entity of user")
+  @ApiObserved("Api to reject on massive entity of user")
   public Response userApiBatchReject(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     UserRejectFilter.UserRejectFilterBuilder filterBuilder = UserRejectFilter.builder();
@@ -93,10 +92,10 @@ public class UserRejectController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive reject on entity of user")
+  @ApiObserved("Api to check masive reject on entity of user")
   public Response userApiBatchRejectQuery(final String batchId) {
-    BatchProgress task = reject.checkProgress(
-        UserRejectStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = reject.checkProgress(currentRequest.interaction(),
+        UserRejectStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

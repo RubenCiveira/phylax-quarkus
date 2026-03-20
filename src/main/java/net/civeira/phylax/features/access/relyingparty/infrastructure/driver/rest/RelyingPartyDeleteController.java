@@ -84,8 +84,8 @@ public class RelyingPartyDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of relying party")
   public Response relyingPartyApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(RelyingPartyCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        RelyingPartyCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

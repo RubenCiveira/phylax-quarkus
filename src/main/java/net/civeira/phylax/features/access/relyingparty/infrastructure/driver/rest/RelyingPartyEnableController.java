@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.enable.RelyingPartyEnableFilter;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.enable.RelyingPartyEnableProjection;
@@ -58,7 +57,7 @@ public class RelyingPartyEnableController {
    * @param code
    * @return
    */
-  @Observed("Api to enable on massive entity of relying party")
+  @ApiObserved("Api to enable on massive entity of relying party")
   public Response relyingPartyApiBatchEnable(final List<String> uids, final String search,
       final String apiKey, final String code) {
     RelyingPartyEnableFilter.RelyingPartyEnableFilterBuilder filterBuilder =
@@ -85,10 +84,10 @@ public class RelyingPartyEnableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive enable on entity of relying party")
+  @ApiObserved("Api to check masive enable on entity of relying party")
   public Response relyingPartyApiBatchEnableQuery(final String batchId) {
-    BatchProgress task = enable.checkProgress(
-        RelyingPartyEnableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = enable.checkProgress(currentRequest.interaction(),
+        RelyingPartyEnableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

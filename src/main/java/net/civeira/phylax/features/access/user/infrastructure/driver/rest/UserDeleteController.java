@@ -89,8 +89,8 @@ public class UserDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of user")
   public Response userApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(
-        UserCheckBatchDeleteStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        UserCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

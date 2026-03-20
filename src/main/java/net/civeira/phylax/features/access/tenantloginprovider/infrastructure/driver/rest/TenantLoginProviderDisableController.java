@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenantloginprovider.application.usecase.disable.TenantLoginProviderDisableFilter;
@@ -63,7 +62,7 @@ public class TenantLoginProviderDisableController {
    * @param tenants
    * @return
    */
-  @Observed("Api to disable on massive entity of tenant login provider")
+  @ApiObserved("Api to disable on massive entity of tenant login provider")
   public Response tenantLoginProviderApiBatchDisable(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     TenantLoginProviderDisableFilter.TenantLoginProviderDisableFilterBuilder filterBuilder =
@@ -94,10 +93,10 @@ public class TenantLoginProviderDisableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive disable on entity of tenant login provider")
+  @ApiObserved("Api to check masive disable on entity of tenant login provider")
   public Response tenantLoginProviderApiBatchDisableQuery(final String batchId) {
-    BatchProgress task = disable.checkProgress(TenantLoginProviderDisableStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = disable.checkProgress(currentRequest.interaction(),
+        TenantLoginProviderDisableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

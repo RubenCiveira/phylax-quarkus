@@ -19,7 +19,7 @@ import net.civeira.phylax.common.batch.stepper.StepCounter;
 import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
-import net.civeira.phylax.common.security.Allow;
+import net.civeira.phylax.common.security.Permission;
 import net.civeira.phylax.features.access.role.application.visibility.RolesVisibility;
 import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.role.domain.gateway.RoleAuditGateway;
@@ -89,7 +89,7 @@ class RolesInBatchExecutor
             .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
             .startSpan();
     try {
-      return visibility.countVisibles(context.getParams().getInteraction(),
+      return visibility.countVisibles(context.getParams().getContext(),
           context.getParams().getFilter());
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);
@@ -144,9 +144,9 @@ class RolesInBatchExecutor
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      Allow allowed = usecase.checkAllow(context.getParams().getInteraction(), item);
-      if (!allowed.isAllowed()) {
-        span.addEvent("The policies for role dont allow to delete: " + allowed.getDescription());
+      Permission permission = usecase.checkPermission(context.getParams().getContext(), item);
+      if (!permission.isAllowed()) {
+        span.addEvent("The policies for role dont allow to delete: " + permission.getDescription());
         throw new ExecutionException("not-allowed", null);
       }
       return item;
@@ -172,7 +172,7 @@ class RolesInBatchExecutor
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      List<Role> page = visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
+      List<Role> page = visibility.listVisiblesForUpdate(context.getParams().getContext(),
           context.getParams().getFilter(),
           RoleCursor.builder().limit(size).sinceUid(context.getState().getSince()).build());
       context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
@@ -201,9 +201,9 @@ class RolesInBatchExecutor
     try {
       span.setAttribute("size", items.size());
       items.forEach(item -> {
-        usecase.doDelete(context.getParams().getInteraction(), item);
+        usecase.doDelete(context.getParams().getContext(), item);
         usecase.cacheEvict();
-        audit.deleted("batch-delete", item, context.getParams().getInteraction());
+        audit.deleted("batch-delete", item, context.getParams().getContext());
       });
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);

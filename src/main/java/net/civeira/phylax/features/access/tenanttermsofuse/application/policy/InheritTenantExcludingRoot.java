@@ -19,7 +19,7 @@ public class InheritTenantExcludingRoot {
    * @param builder
    */
   public void calculate(@Observes TenantTermsOfUseEntityEnrichment builder) {
-    Actor actor = builder.getInteraction().getActor();
+    Actor actor = builder.getActor();
     if (!actor.hasRole(ROL_PLATFORM_ADMIN)) {
       builder.peek(dto -> dto.tenant(TenantReference.of(actor.getTenant().orElse(null))));
     }

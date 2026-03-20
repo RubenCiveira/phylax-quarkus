@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.user.application.usecase.disable.UserDisableFilter;
@@ -63,7 +62,7 @@ public class UserDisableController {
    * @param tenants
    * @return
    */
-  @Observed("Api to disable on massive entity of user")
+  @ApiObserved("Api to disable on massive entity of user")
   public Response userApiBatchDisable(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     UserDisableFilter.UserDisableFilterBuilder filterBuilder = UserDisableFilter.builder();
@@ -93,10 +92,10 @@ public class UserDisableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive disable on entity of user")
+  @ApiObserved("Api to check masive disable on entity of user")
   public Response userApiBatchDisableQuery(final String batchId) {
-    BatchProgress task = disable.checkProgress(
-        UserDisableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = disable.checkProgress(currentRequest.interaction(),
+        UserDisableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

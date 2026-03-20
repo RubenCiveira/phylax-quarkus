@@ -82,8 +82,8 @@ public class TrustedClientDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of trusted client")
   public Response trustedClientApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(TrustedClientCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        TrustedClientCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

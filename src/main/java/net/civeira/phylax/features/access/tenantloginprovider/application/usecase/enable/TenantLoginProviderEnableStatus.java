@@ -1,15 +1,16 @@
 package net.civeira.phylax.features.access.tenantloginprovider.application.usecase.enable;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.experimental.SuperBuilder;
-import net.civeira.phylax.common.security.Interaction;
+import lombok.With;
 
 @Data
-@SuperBuilder(toBuilder = true)
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-public class TenantLoginProviderEnableStatus extends Interaction {
+@Builder(toBuilder = true)
+@With
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class TenantLoginProviderEnableStatus {
 
   /**
    * The filter to select the results to retrieve

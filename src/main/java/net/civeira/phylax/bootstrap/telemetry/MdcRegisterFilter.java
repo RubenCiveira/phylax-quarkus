@@ -10,7 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Actor;
-import net.civeira.phylax.common.security.Connection;
+import net.civeira.phylax.common.security.InvocationSource;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class MdcRegisterFilter {
   @ServerRequestFilter
   public void getRequestFilter() {
     Actor actor = currentRequest.getActor();
-    Connection connection = currentRequest.getConnection();
+    InvocationSource connection = currentRequest.getInvocationSource();
     Span currentSpan = Span.current();
     if (currentSpan.getSpanContext().isValid()) {
       currentSpan.setAttribute(MDC_KEY_ACTOR, actor.getName().orElse("-"));

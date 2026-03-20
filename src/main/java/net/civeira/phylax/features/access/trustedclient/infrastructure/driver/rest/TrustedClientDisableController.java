@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.disable.TrustedClientDisableFilter;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.disable.TrustedClientDisableProjection;
@@ -59,7 +58,7 @@ public class TrustedClientDisableController {
    * @param code
    * @return
    */
-  @Observed("Api to disable on massive entity of trusted client")
+  @ApiObserved("Api to disable on massive entity of trusted client")
   public Response trustedClientApiBatchDisable(final List<String> uids, final String search,
       final String code) {
     TrustedClientDisableFilter.TrustedClientDisableFilterBuilder filterBuilder =
@@ -85,10 +84,10 @@ public class TrustedClientDisableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive disable on entity of trusted client")
+  @ApiObserved("Api to check masive disable on entity of trusted client")
   public Response trustedClientApiBatchDisableQuery(final String batchId) {
-    BatchProgress task = disable.checkProgress(
-        TrustedClientDisableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = disable.checkProgress(currentRequest.interaction(),
+        TrustedClientDisableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

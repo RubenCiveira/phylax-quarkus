@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
@@ -64,7 +63,7 @@ public class TenantTermsOfUseDisableController {
    * @param relyingPartys
    * @return
    */
-  @Observed("Api to disable on massive entity of tenant terms of use")
+  @ApiObserved("Api to disable on massive entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDisable(final List<String> uids, final String search,
       final String tenant, final List<String> tenants, final String relyingParty,
       final List<String> relyingPartys) {
@@ -100,10 +99,10 @@ public class TenantTermsOfUseDisableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive disable on entity of tenant terms of use")
+  @ApiObserved("Api to check masive disable on entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDisableQuery(final String batchId) {
-    BatchProgress task = disable.checkProgress(TenantTermsOfUseDisableStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = disable.checkProgress(currentRequest.interaction(),
+        TenantTermsOfUseDisableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

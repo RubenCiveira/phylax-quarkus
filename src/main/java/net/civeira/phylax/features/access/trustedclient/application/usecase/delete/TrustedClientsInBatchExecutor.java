@@ -19,7 +19,7 @@ import net.civeira.phylax.common.batch.stepper.StepCounter;
 import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
-import net.civeira.phylax.common.security.Allow;
+import net.civeira.phylax.common.security.Permission;
 import net.civeira.phylax.features.access.trustedclient.application.visibility.TrustedClientsVisibility;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientAuditGateway;
@@ -90,7 +90,7 @@ class TrustedClientsInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      return visibility.countVisibles(context.getParams().getInteraction(),
+      return visibility.countVisibles(context.getParams().getContext(),
           context.getParams().getFilter());
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);
@@ -148,10 +148,10 @@ class TrustedClientsInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      Allow allowed = usecase.checkAllow(context.getParams().getInteraction(), item);
-      if (!allowed.isAllowed()) {
+      Permission permission = usecase.checkPermission(context.getParams().getContext(), item);
+      if (!permission.isAllowed()) {
         span.addEvent(
-            "The policies for trusted client dont allow to delete: " + allowed.getDescription());
+            "The policies for trusted client dont allow to delete: " + permission.getDescription());
         throw new ExecutionException("not-allowed", null);
       }
       return item;
@@ -178,9 +178,9 @@ class TrustedClientsInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      List<TrustedClient> page = visibility.listVisiblesForUpdate(
-          context.getParams().getInteraction(), context.getParams().getFilter(), TrustedClientCursor
-              .builder().limit(size).sinceUid(context.getState().getSince()).build());
+      List<TrustedClient> page = visibility.listVisiblesForUpdate(context.getParams().getContext(),
+          context.getParams().getFilter(), TrustedClientCursor.builder().limit(size)
+              .sinceUid(context.getState().getSince()).build());
       context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
       span.setAttribute("size", page.size());
       return page;
@@ -208,9 +208,9 @@ class TrustedClientsInBatchExecutor implements
     try {
       span.setAttribute("size", items.size());
       items.forEach(item -> {
-        usecase.doDelete(context.getParams().getInteraction(), item);
+        usecase.doDelete(context.getParams().getContext(), item);
         usecase.cacheEvict();
-        audit.deleted("batch-delete", item, context.getParams().getInteraction());
+        audit.deleted("batch-delete", item, context.getParams().getContext());
       });
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);

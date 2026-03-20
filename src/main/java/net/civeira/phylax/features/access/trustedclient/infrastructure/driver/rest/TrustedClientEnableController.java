@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.enable.TrustedClientEnableFilter;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.enable.TrustedClientEnableProjection;
@@ -59,7 +58,7 @@ public class TrustedClientEnableController {
    * @param code
    * @return
    */
-  @Observed("Api to enable on massive entity of trusted client")
+  @ApiObserved("Api to enable on massive entity of trusted client")
   public Response trustedClientApiBatchEnable(final List<String> uids, final String search,
       final String code) {
     TrustedClientEnableFilter.TrustedClientEnableFilterBuilder filterBuilder =
@@ -85,10 +84,10 @@ public class TrustedClientEnableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive enable on entity of trusted client")
+  @ApiObserved("Api to check masive enable on entity of trusted client")
   public Response trustedClientApiBatchEnableQuery(final String batchId) {
-    BatchProgress task = enable.checkProgress(
-        TrustedClientEnableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = enable.checkProgress(currentRequest.interaction(),
+        TrustedClientEnableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

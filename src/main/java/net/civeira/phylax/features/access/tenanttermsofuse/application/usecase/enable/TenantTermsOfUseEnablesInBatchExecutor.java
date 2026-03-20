@@ -19,7 +19,7 @@ import net.civeira.phylax.common.batch.stepper.StepCounter;
 import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
-import net.civeira.phylax.common.security.Allow;
+import net.civeira.phylax.common.security.Permission;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.visibility.TenantTermsOfUsesVisibility;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseAuditGateway;
@@ -90,7 +90,7 @@ class TenantTermsOfUseEnablesInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      return visibility.countVisibles(context.getParams().getInteraction(),
+      return visibility.countVisibles(context.getParams().getContext(),
           context.getParams().getFilter());
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);
@@ -147,10 +147,10 @@ class TenantTermsOfUseEnablesInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      Allow allowed = usecase.checkAllow(context.getParams().getInteraction(), item);
-      if (!allowed.isAllowed()) {
+      Permission permission = usecase.checkPermission(context.getParams().getContext(), item);
+      if (!permission.isAllowed()) {
         span.addEvent("The policies for tenant terms of use dont allow to delete: "
-            + allowed.getDescription());
+            + permission.getDescription());
         throw new ExecutionException("not-allowed", null);
       }
       return item;
@@ -176,10 +176,9 @@ class TenantTermsOfUseEnablesInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      List<TenantTermsOfUse> page =
-          visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
-              context.getParams().getFilter(), TenantTermsOfUseCursor.builder().limit(size)
-                  .sinceUid(context.getState().getSince()).build());
+      List<TenantTermsOfUse> page = visibility.listVisiblesForUpdate(
+          context.getParams().getContext(), context.getParams().getFilter(), TenantTermsOfUseCursor
+              .builder().limit(size).sinceUid(context.getState().getSince()).build());
       context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
       return page;
     } catch (RuntimeException ex) {
@@ -206,9 +205,9 @@ class TenantTermsOfUseEnablesInBatchExecutor implements
     try {
       span.setAttribute("size", items.size());
       items.forEach(item -> {
-        TenantTermsOfUse changed = usecase.doEnable(context.getParams().getInteraction(), item);
+        TenantTermsOfUse changed = usecase.doEnable(context.getParams().getContext(), item);
         usecase.cacheUpdate(changed);
-        audit.updated("batch-enable", changed, item, context.getParams().getInteraction());
+        audit.updated("batch-enable", changed, item, context.getParams().getContext());
       });
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);

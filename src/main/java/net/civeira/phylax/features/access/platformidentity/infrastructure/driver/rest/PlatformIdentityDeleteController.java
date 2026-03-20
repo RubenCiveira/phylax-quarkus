@@ -106,8 +106,8 @@ public class PlatformIdentityDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of platform identity")
   public Response platformIdentityApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(PlatformIdentityCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        PlatformIdentityCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

@@ -28,16 +28,16 @@ import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.algorithms.metadata.Timestamped;
 import net.civeira.phylax.common.security.Actor;
-import net.civeira.phylax.common.security.Connection;
-import net.civeira.phylax.common.security.Interaction;
+import net.civeira.phylax.common.security.InvocationSource;
+import net.civeira.phylax.common.security.OperationContext;
 
 /**
- * Provides helpers to derive actor, connection, and cache metadata from the current request.
+ * Provides helpers to derive actor, InvocationSource, and cache metadata from the current request.
  *
- * It builds {@link Actor} and {@link Connection} objects from security identity and headers. The
- * class also offers cache-aware response building using timestamped payloads. It is request-scoped
- * and relies on HTTP headers and JWT claims for context. Use it in controllers and gateways that
- * need consistent request metadata.
+ * It builds {@link Actor} and {@link InvocationSource} objects from security identity and headers.
+ * The class also offers cache-aware response building using timestamped payloads. It is
+ * request-scoped and relies on HTTP headers and JWT claims for context. Use it in controllers and
+ * gateways that need consistent request metadata.
  */
 @RequestScoped
 @RequiredArgsConstructor
@@ -150,7 +150,7 @@ public class CurrentRequest {
   }
 
   /**
-   * Creates an interaction object using the current actor and connection.
+   * Creates an interaction object using the current actor and InvocationSource.
    *
    * This is a convenience method for passing request metadata into use cases. The interaction
    * captures both user identity and request origin details. Use it when invoking application
@@ -158,10 +158,10 @@ public class CurrentRequest {
    *
    * @return interaction descriptor
    */
-  public Interaction interaction() {
+  public OperationContext interaction() {
     Actor actor = getActor();
-    Connection conn = getConnection();
-    return new Interaction(Interaction.builder().actor(actor).connection(conn)) {};
+    InvocationSource source = getInvocationSource();
+    return new OperationContext(actor, source);
   }
 
   /**
@@ -211,16 +211,16 @@ public class CurrentRequest {
   }
 
   /**
-   * Builds the connection metadata for the current request.
+   * Builds the InvocationSource metadata for the current request.
    *
    * It captures locale, device id, and request path details. This metadata is used for auditing and
    * request tracing. The locale is derived from the Accept-Language header.
    *
-   * @return connection descriptor
+   * @return source descriptor
    */
-  public Connection getConnection() {
+  public InvocationSource getInvocationSource() {
     String device = headers.getHeaderString("X-Device-ID");
-    return Connection.builder().remoteDevice(device).locale(getRequestHeaderLocale())
+    return InvocationSource.builder().remoteDevice(device).locale(getRequestHeaderLocale())
         .request(uriInfo.getPath()).build();
   }
 

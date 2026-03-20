@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.disable.RelyingPartyDisableFilter;
 import net.civeira.phylax.features.access.relyingparty.application.usecase.disable.RelyingPartyDisableProjection;
@@ -58,7 +57,7 @@ public class RelyingPartyDisableController {
    * @param code
    * @return
    */
-  @Observed("Api to disable on massive entity of relying party")
+  @ApiObserved("Api to disable on massive entity of relying party")
   public Response relyingPartyApiBatchDisable(final List<String> uids, final String search,
       final String apiKey, final String code) {
     RelyingPartyDisableFilter.RelyingPartyDisableFilterBuilder filterBuilder =
@@ -85,10 +84,10 @@ public class RelyingPartyDisableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive disable on entity of relying party")
+  @ApiObserved("Api to check masive disable on entity of relying party")
   public Response relyingPartyApiBatchDisableQuery(final String batchId) {
-    BatchProgress task = disable.checkProgress(
-        RelyingPartyDisableStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = disable.checkProgress(currentRequest.interaction(),
+        RelyingPartyDisableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenantloginprovider.application.usecase.enable.TenantLoginProviderEnableFilter;
@@ -63,7 +62,7 @@ public class TenantLoginProviderEnableController {
    * @param tenants
    * @return
    */
-  @Observed("Api to enable on massive entity of tenant login provider")
+  @ApiObserved("Api to enable on massive entity of tenant login provider")
   public Response tenantLoginProviderApiBatchEnable(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     TenantLoginProviderEnableFilter.TenantLoginProviderEnableFilterBuilder filterBuilder =
@@ -94,10 +93,10 @@ public class TenantLoginProviderEnableController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive enable on entity of tenant login provider")
+  @ApiObserved("Api to check masive enable on entity of tenant login provider")
   public Response tenantLoginProviderApiBatchEnableQuery(final String batchId) {
-    BatchProgress task = enable.checkProgress(TenantLoginProviderEnableStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = enable.checkProgress(currentRequest.interaction(),
+        TenantLoginProviderEnableStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

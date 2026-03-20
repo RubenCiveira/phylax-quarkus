@@ -81,8 +81,8 @@ public class TenantDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of tenant")
   public Response tenantApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(
-        TenantCheckBatchDeleteStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        TenantCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

@@ -106,8 +106,8 @@ public class ClientIdentityDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of client identity")
   public Response clientIdentityApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(ClientIdentityCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        ClientIdentityCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

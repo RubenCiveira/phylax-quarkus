@@ -89,8 +89,8 @@ public class RoleDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of role")
   public Response roleApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(
-        RoleCheckBatchDeleteStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        RoleCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

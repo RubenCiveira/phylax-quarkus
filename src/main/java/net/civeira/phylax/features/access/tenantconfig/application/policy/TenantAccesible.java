@@ -18,7 +18,7 @@ public class TenantAccesible {
    * @param filter
    */
   public void filterVisibles(@Observes TenantConfigVisibilityCheck filter) {
-    Actor actor = filter.getInteraction().getActor();
+    Actor actor = filter.getActor();
     if (!actor.hasRole(ROL_PLATFORM)) {
       filter.peek(fl -> fl.setTenantTenantAccesible(actor.getTenant().orElse(null)));
     }

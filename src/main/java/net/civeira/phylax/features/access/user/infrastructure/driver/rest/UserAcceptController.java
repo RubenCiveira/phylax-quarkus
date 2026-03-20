@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.user.application.usecase.accept.UserAcceptFilter;
@@ -77,7 +76,7 @@ public class UserAcceptController {
    * @param tenants
    * @return
    */
-  @Observed("Api to accept on massive entity of user")
+  @ApiObserved("Api to accept on massive entity of user")
   public Response userApiBatchAccept(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     UserAcceptFilter.UserAcceptFilterBuilder filterBuilder = UserAcceptFilter.builder();
@@ -107,10 +106,10 @@ public class UserAcceptController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive accept on entity of user")
+  @ApiObserved("Api to check masive accept on entity of user")
   public Response userApiBatchAcceptQuery(final String batchId) {
-    BatchProgress task = accept.checkProgress(
-        UserAcceptStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = accept.checkProgress(currentRequest.interaction(),
+        UserAcceptStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

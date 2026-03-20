@@ -19,7 +19,7 @@ import net.civeira.phylax.common.batch.stepper.StepCounter;
 import net.civeira.phylax.common.batch.stepper.StepFinalizer;
 import net.civeira.phylax.common.batch.stepper.StepInitializer;
 import net.civeira.phylax.common.exception.ExecutionException;
-import net.civeira.phylax.common.security.Allow;
+import net.civeira.phylax.common.security.Permission;
 import net.civeira.phylax.features.access.platformidentity.application.visibility.PlatformIdentitysVisibility;
 import net.civeira.phylax.features.access.platformidentity.domain.PlatformIdentity;
 import net.civeira.phylax.features.access.platformidentity.domain.gateway.PlatformIdentityAuditGateway;
@@ -90,7 +90,7 @@ class PlatformIdentitysInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      return visibility.countVisibles(context.getParams().getInteraction(),
+      return visibility.countVisibles(context.getParams().getContext(),
           context.getParams().getFilter());
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);
@@ -147,10 +147,10 @@ class PlatformIdentitysInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      Allow allowed = usecase.checkAllow(context.getParams().getInteraction(), item);
-      if (!allowed.isAllowed()) {
-        span.addEvent(
-            "The policies for platform identity dont allow to delete: " + allowed.getDescription());
+      Permission permission = usecase.checkPermission(context.getParams().getContext(), item);
+      if (!permission.isAllowed()) {
+        span.addEvent("The policies for platform identity dont allow to delete: "
+            + permission.getDescription());
         throw new ExecutionException("not-allowed", null);
       }
       return item;
@@ -177,10 +177,9 @@ class PlatformIdentitysInBatchExecutor implements
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.INTERNAL)
         .startSpan();
     try {
-      List<PlatformIdentity> page =
-          visibility.listVisiblesForUpdate(context.getParams().getInteraction(),
-              context.getParams().getFilter(), PlatformIdentityCursor.builder().limit(size)
-                  .sinceUid(context.getState().getSince()).build());
+      List<PlatformIdentity> page = visibility.listVisiblesForUpdate(
+          context.getParams().getContext(), context.getParams().getFilter(), PlatformIdentityCursor
+              .builder().limit(size).sinceUid(context.getState().getSince()).build());
       context.getState().setSince(page.isEmpty() ? null : page.get(page.size() - 1).getUid());
       span.setAttribute("size", page.size());
       return page;
@@ -208,9 +207,9 @@ class PlatformIdentitysInBatchExecutor implements
     try {
       span.setAttribute("size", items.size());
       items.forEach(item -> {
-        usecase.doDelete(context.getParams().getInteraction(), item);
+        usecase.doDelete(context.getParams().getContext(), item);
         usecase.cacheEvict();
-        audit.deleted("batch-delete", item, context.getParams().getInteraction());
+        audit.deleted("batch-delete", item, context.getParams().getContext());
       });
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);

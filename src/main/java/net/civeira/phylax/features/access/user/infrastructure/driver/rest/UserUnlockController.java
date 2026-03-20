@@ -19,7 +19,6 @@ import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
 import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.user.application.usecase.unlock.UserUnlockFilter;
@@ -63,7 +62,7 @@ public class UserUnlockController {
    * @param tenants
    * @return
    */
-  @Observed("Api to unlock on massive entity of user")
+  @ApiObserved("Api to unlock on massive entity of user")
   public Response userApiBatchUnlock(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     UserUnlockFilter.UserUnlockFilterBuilder filterBuilder = UserUnlockFilter.builder();
@@ -93,10 +92,10 @@ public class UserUnlockController {
    * @param batchId
    * @return
    */
-  @Observed("Api to check masive unlock on entity of user")
+  @ApiObserved("Api to check masive unlock on entity of user")
   public Response userApiBatchUnlockQuery(final String batchId) {
-    BatchProgress task = unlock.checkProgress(
-        UserUnlockStatus.builder().taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = unlock.checkProgress(currentRequest.interaction(),
+        UserUnlockStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

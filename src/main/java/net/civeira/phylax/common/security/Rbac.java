@@ -100,14 +100,14 @@ public class Rbac {
    * @param action the name of the action
    * @return an {@link Allow} decision
    */
-  public Allow checkAllow(Actor actor, String resource, String action) {
+  public Permission checkAllow(Actor actor, String resource, String action) {
     List<RbacStore> activeStores = activeStores();
     if (activeStores.isEmpty()) {
-      return Allow.builder().allowed(defaultAllow).build();
+      return defaultAllow ? Permission.allow() : Permission.deny();
     }
     boolean allowed = activeStores.stream()
         .anyMatch(store -> store.checkRoleScopes(actor).allowed(resource, action));
-    return Allow.builder().allowed(allowed).build();
+    return allowed ? Permission.allow() : Permission.deny();
   }
 
   /**

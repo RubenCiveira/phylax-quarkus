@@ -97,8 +97,8 @@ public class TenantTermsOfUseDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(TenantTermsOfUseCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        TenantTermsOfUseCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

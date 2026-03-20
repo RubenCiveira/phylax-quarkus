@@ -88,8 +88,8 @@ public class TenantConfigDeleteController {
    */
   @ApiObserved("Api to check masive delete on entity of tenant config")
   public Response tenantConfigApiBatchDeleteQuery(final String batchId) {
-    BatchProgress task = delete.checkProgress(TenantConfigCheckBatchDeleteStatus.builder()
-        .taskId(batchId).build(currentRequest.interaction()));
+    BatchProgress task = delete.checkProgress(currentRequest.interaction(),
+        TenantConfigCheckBatchDeleteStatus.builder().taskId(batchId).build());
     BatchTaskDetail response = new BatchTaskDetail();
     response.setUid(task.getUid());
     GlobalStatus taskStatus = task.getStatus();

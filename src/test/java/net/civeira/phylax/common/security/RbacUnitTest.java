@@ -148,7 +148,7 @@ class RbacUnitTest {
       }).when(managerInstance).forEach(any());
 
       // Act
-      Allow result = rbac.checkAllow(actor, "tenant", "create");
+      Permission result = rbac.checkAllow(actor, "tenant", "create");
 
       // Assert
       assertTrue(result.isAllowed(), "Allow should be true when the scope is granted");
@@ -162,7 +162,7 @@ class RbacUnitTest {
       doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
-      Allow result = rbac.checkAllow(actor, "tenant", "create");
+      Permission result = rbac.checkAllow(actor, "tenant", "create");
 
       // Assert
       assertFalse(result.isAllowed(),
@@ -178,7 +178,7 @@ class RbacUnitTest {
       doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
-      Allow result = failOpenRbac.checkAllow(actor, "tenant", "create");
+      Permission result = failOpenRbac.checkAllow(actor, "tenant", "create");
 
       // Assert
       assertTrue(result.isAllowed(),
@@ -211,7 +211,7 @@ class RbacUnitTest {
       }).when(managerInstance).forEach(any());
 
       // Act
-      Allow result = rbac.checkAllow(actor, "tenant", "read");
+      Permission result = rbac.checkAllow(actor, "tenant", "read");
 
       // Assert
       assertTrue(result.isAllowed(),
@@ -234,7 +234,7 @@ class RbacUnitTest {
       }).when(managerInstance).forEach(any());
 
       // Act
-      Allow result = rbac.checkAllow(actor, "tenant", "create");
+      Permission result = rbac.checkAllow(actor, "tenant", "create");
 
       // Assert
       assertFalse(result.isAllowed(), "Allow should be false when the scope is not granted");
