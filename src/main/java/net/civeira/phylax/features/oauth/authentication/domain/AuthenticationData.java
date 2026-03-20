@@ -74,7 +74,7 @@ public class AuthenticationData {
   public void addRolesTo(String audience, List<String> names) {
     roles.computeIfAbsent(audience, _ -> new ArrayList<>()).addAll(names);
   }
-  
+
   public void addGroupsTo(String audience, List<String> names) {
     groups.computeIfAbsent(audience, _ -> new ArrayList<>()).addAll(names);
   }

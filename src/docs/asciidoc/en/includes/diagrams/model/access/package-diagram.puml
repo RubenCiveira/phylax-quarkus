@@ -2,6 +2,19 @@
 @startuml Paquete de access
 title Paquete de access
 left to right direction
+class access.UserRoleAssignament{
+uid:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserRoleAssignament: user 
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty 
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient 
+
 class access.Role{
 uid:string
 name:string
@@ -13,6 +26,20 @@ update()
 delete()
 }
 access.RelyingParty "1"  o--  "N*" access.Role: relyingParty 
+
+class access.UserGroupMembership{
+uid:string
+groups:blob
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserGroupMembership: user 
+access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty 
+access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient 
 
 class access.UserAccessTemporalCode{
 uid:string
@@ -164,20 +191,6 @@ disable()
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
 
-class access.ClientIdentity{
-uid:string
-roles:blob
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-access.User "1"  o--  "N*" access.ClientIdentity: user 
-access.RelyingParty "1"  o--  "N*" access.ClientIdentity: relyingParty 
-access.TrustedClient "1"  o--  "N*" access.ClientIdentity: trustedClient 
-
 class access.User{
 uid:string
 name:string
@@ -210,19 +223,6 @@ changePassword()
 }
 access.Tenant "1"  o--  "N*" access.User: tenant 
 
-class access.PlatformIdentity{
-uid:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-access.User "1"  o--  "N*" access.PlatformIdentity: user 
-access.RelyingParty "1"  o--  "N*" access.PlatformIdentity: relyingParty 
-access.TrustedClient "1"  o--  "N*" access.PlatformIdentity: trustedClient 
-
 class access.Tenant{
 uid:string
 name:string
@@ -241,7 +241,14 @@ enable()
 disable()
 }
 
+access.User "1"  o--  "N*" access.UserRoleAssignament: user  
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty  
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient  
+access.UserRoleAssignament "N*"  o--*  "N*" access.Role: roles
 access.RelyingParty "1"  o--  "N*" access.Role: relyingParty  
+access.User "1"  o--  "N*" access.UserGroupMembership: user  
+access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty  
+access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient  
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
 access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
@@ -250,14 +257,7 @@ access.Tenant "1"  o--  "N*" access.TenantConfig: tenant
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
-access.User "1"  o--  "N*" access.ClientIdentity: user  
-access.RelyingParty "1"  o--  "N*" access.ClientIdentity: relyingParty  
-access.TrustedClient "1"  o--  "N*" access.ClientIdentity: trustedClient  
 access.Tenant "1"  o--  "N*" access.User: tenant  
-access.User "1"  o--  "N*" access.PlatformIdentity: user  
-access.RelyingParty "1"  o--  "N*" access.PlatformIdentity: relyingParty  
-access.TrustedClient "1"  o--  "N*" access.PlatformIdentity: trustedClient  
-access.PlatformIdentity "N*"  o--*  "N*" access.Role: roles
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

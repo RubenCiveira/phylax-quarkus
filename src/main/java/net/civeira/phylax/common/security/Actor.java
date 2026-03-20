@@ -33,7 +33,7 @@ public class Actor {
   public String getClaim(String name) {
     return claims.get(name);
   }
-  
+
   public boolean isInGroup(String group) {
     if (group.endsWith(":*")) {
       String prefix = group.substring(0, group.length() - 1);
@@ -42,7 +42,7 @@ public class Actor {
       return groups.contains(group);
     }
   }
-  
+
   public boolean isInAnyGroup(String... groups) {
     for (String group : groups) {
       if (isInGroup(group)) {

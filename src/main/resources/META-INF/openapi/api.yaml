@@ -23,6 +23,14 @@ servers:
 security:
   - BearerAuth: [] # Aplica el esquema de seguridad por defecto a toda la API
 tags:
+  - name: user-role-assignament
+    description: user-role-assignament
+  - name: user-role-assignament-batch
+    description: Massive operations for user role assignament
+  - name: user-role-assignament-audit
+    description: Audit operations for changes on user role assignament
+  - name: user-role-assignament-acl
+    description: Access control for user role assignament
   - name: role
     description: role
   - name: role-batch
@@ -31,6 +39,14 @@ tags:
     description: Audit operations for changes on role
   - name: role-acl
     description: Access control for role
+  - name: user-group-membership
+    description: user-group-membership
+  - name: user-group-membership-batch
+    description: Massive operations for user group membership
+  - name: user-group-membership-audit
+    description: Audit operations for changes on user group membership
+  - name: user-group-membership-acl
+    description: Access control for user group membership
   - name: relying-party
     description: relying-party
   - name: relying-party-batch
@@ -79,14 +95,6 @@ tags:
     description: Audit operations for changes on tenant terms of use
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
-  - name: client-identity
-    description: client-identity
-  - name: client-identity-batch
-    description: Massive operations for client identity
-  - name: client-identity-audit
-    description: Audit operations for changes on client identity
-  - name: client-identity-acl
-    description: Access control for client identity
   - name: user
     description: user
   - name: user-batch
@@ -95,14 +103,6 @@ tags:
     description: Audit operations for changes on user
   - name: user-acl
     description: Access control for user
-  - name: platform-identity
-    description: platform-identity
-  - name: platform-identity-batch
-    description: Massive operations for platform identity
-  - name: platform-identity-audit
-    description: Audit operations for changes on platform identity
-  - name: platform-identity-acl
-    description: Access control for platform identity
   - name: tenant
     description: tenant
   - name: tenant-batch
@@ -113,6 +113,376 @@ tags:
     description: Access control for tenant
 
 paths:
+  /api/access/user-role-assignament:
+    get:
+      tags:
+        - user-role-assignament
+      summary: List of user role assignament
+      operationId: user-role-assignament-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignamentApiDtoList'
+    post:
+      tags:
+        - user-role-assignament
+      summary: Create a new user role assignament
+      operationId: user-role-assignament-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleAssignamentApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignamentApiDto'
+    delete:
+      tags:
+        - user-role-assignament-batch
+      summary: Delete a colection of user role assignament by filter
+      operationId: user-role-assignament-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/user-role-assignament/{uid}:
+    get:
+      tags:
+        - user-role-assignament
+      summary: Retrive on  user role assignament by their uid
+      operationId: user-role-assignament-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignamentApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - user-role-assignament
+      summary: Update a user role assignament by their uid
+      operationId: user-role-assignament-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleAssignamentApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignamentApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - user-role-assignament
+      summary: Delete a  user role assignament by their uid
+      operationId: user-role-assignament-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/user-role-assignament/~/delete-status/{uid}:
+    get:
+      tags:
+        - user-role-assignament-batch
+      summary: Query the result of an massive delete
+      operationId: user-role-assignament-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/user-role-assignament/-/audit/entity/{uid}:
+    get:
+      tags:
+        - user-role-assignament-audit
+      summary: Update a user role assignament by their uid
+      operationId: user-role-assignament-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/user-role-assignament/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - user-role-assignament-audit
+      summary: Update a user role assignament by their uid
+      operationId: user-role-assignament-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/user-role-assignament:
+    get:
+      tags:
+        - user-role-assignament-acl
+      summary: Check for allow permissions for the current user on user role assignament
+      operationId: user-role-assignament-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignamentGenericAcl'
+  /api/me/acl/access/user-role-assignament/{uid}:
+    get:
+      tags:
+        - user-role-assignament-acl
+      summary: Check for allow permissions for the current user on user role assignament by their uid
+      operationId: user-role-assignament-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignamentSpecificAcl'
+        '404':
+          description: The item dont exists
   /api/access/roles:
     get:
       tags:
@@ -441,6 +811,376 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoleSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/access/user-group-membership:
+    get:
+      tags:
+        - user-group-membership
+      summary: List of user group membership
+      operationId: user-group-membership-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipApiDtoList'
+    post:
+      tags:
+        - user-group-membership
+      summary: Create a new user group membership
+      operationId: user-group-membership-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipApiDto'
+    delete:
+      tags:
+        - user-group-membership-batch
+      summary: Delete a colection of user group membership by filter
+      operationId: user-group-membership-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-partys
+          in: query
+          description: relying partys
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/user-group-membership/{uid}:
+    get:
+      tags:
+        - user-group-membership
+      summary: Retrive on  user group membership by their uid
+      operationId: user-group-membership-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - user-group-membership
+      summary: Update a user group membership by their uid
+      operationId: user-group-membership-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - user-group-membership
+      summary: Delete a  user group membership by their uid
+      operationId: user-group-membership-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/user-group-membership/~/delete-status/{uid}:
+    get:
+      tags:
+        - user-group-membership-batch
+      summary: Query the result of an massive delete
+      operationId: user-group-membership-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/user-group-membership/-/audit/entity/{uid}:
+    get:
+      tags:
+        - user-group-membership-audit
+      summary: Update a user group membership by their uid
+      operationId: user-group-membership-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/user-group-membership/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - user-group-membership-audit
+      summary: Update a user group membership by their uid
+      operationId: user-group-membership-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/user-group-membership:
+    get:
+      tags:
+        - user-group-membership-acl
+      summary: Check for allow permissions for the current user on user group membership
+      operationId: user-group-membership-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipGenericAcl'
+  /api/me/acl/access/user-group-membership/{uid}:
+    get:
+      tags:
+        - user-group-membership-acl
+      summary: Check for allow permissions for the current user on user group membership by their uid
+      operationId: user-group-membership-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipSpecificAcl'
         '404':
           description: The item dont exists
   /api/access/relying-parties:
@@ -3355,376 +4095,6 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/client-identity:
-    get:
-      tags:
-        - client-identity
-      summary: List of client identity
-      operationId: client-identity-api-list
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: limit
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientIdentityApiDtoList'
-    post:
-      tags:
-        - client-identity
-      summary: Create a new client identity
-      operationId: client-identity-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ClientIdentityApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientIdentityApiDto'
-    delete:
-      tags:
-        - client-identity-batch
-      summary: Delete a colection of client identity by filter
-      operationId: client-identity-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/client-identity/{uid}:
-    get:
-      tags:
-        - client-identity
-      summary: Retrive on  client identity by their uid
-      operationId: client-identity-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientIdentityApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - client-identity
-      summary: Update a client identity by their uid
-      operationId: client-identity-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ClientIdentityApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientIdentityApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - client-identity
-      summary: Delete a  client identity by their uid
-      operationId: client-identity-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/client-identity/~/delete-status/{uid}:
-    get:
-      tags:
-        - client-identity-batch
-      summary: Query the result of an massive delete
-      operationId: client-identity-api-batch-delete-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/client-identity/-/audit/entity/{uid}:
-    get:
-      tags:
-        - client-identity-audit
-      summary: Update a client identity by their uid
-      operationId: client-identity-api-entity-audit
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/client-identity/-/audit/actor/{actor}/{from}/{to}:
-    get:
-      tags:
-        - client-identity-audit
-      summary: Update a client identity by their uid
-      operationId: client-identity-api-actor-audit
-      parameters:
-        - name: actor
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-        - name: from
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/me/acl/access/client-identity:
-    get:
-      tags:
-        - client-identity-acl
-      summary: Check for allow permissions for the current user on client identity
-      operationId: client-identity-api-generic-acl
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientIdentityGenericAcl'
-  /api/me/acl/access/client-identity/{uid}:
-    get:
-      tags:
-        - client-identity-acl
-      summary: Check for allow permissions for the current user on client identity by their uid
-      operationId: client-identity-api-contextual-acl
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientIdentitySpecificAcl'
-        '404':
-          description: The item dont exists
   /api/access/users:
     get:
       tags:
@@ -4535,376 +4905,6 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
-  /api/access/platform-identity:
-    get:
-      tags:
-        - platform-identity
-      summary: List of platform identity
-      operationId: platform-identity-api-list
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: limit
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformIdentityApiDtoList'
-    post:
-      tags:
-        - platform-identity
-      summary: Create a new platform identity
-      operationId: platform-identity-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PlatformIdentityApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformIdentityApiDto'
-    delete:
-      tags:
-        - platform-identity-batch
-      summary: Delete a colection of platform identity by filter
-      operationId: platform-identity-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/platform-identity/{uid}:
-    get:
-      tags:
-        - platform-identity
-      summary: Retrive on  platform identity by their uid
-      operationId: platform-identity-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformIdentityApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - platform-identity
-      summary: Update a platform identity by their uid
-      operationId: platform-identity-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PlatformIdentityApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformIdentityApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - platform-identity
-      summary: Delete a  platform identity by their uid
-      operationId: platform-identity-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/platform-identity/~/delete-status/{uid}:
-    get:
-      tags:
-        - platform-identity-batch
-      summary: Query the result of an massive delete
-      operationId: platform-identity-api-batch-delete-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/platform-identity/-/audit/entity/{uid}:
-    get:
-      tags:
-        - platform-identity-audit
-      summary: Update a platform identity by their uid
-      operationId: platform-identity-api-entity-audit
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/platform-identity/-/audit/actor/{actor}/{from}/{to}:
-    get:
-      tags:
-        - platform-identity-audit
-      summary: Update a platform identity by their uid
-      operationId: platform-identity-api-actor-audit
-      parameters:
-        - name: actor
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-        - name: from
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/me/acl/access/platform-identity:
-    get:
-      tags:
-        - platform-identity-acl
-      summary: Check for allow permissions for the current user on platform identity
-      operationId: platform-identity-api-generic-acl
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformIdentityGenericAcl'
-  /api/me/acl/access/platform-identity/{uid}:
-    get:
-      tags:
-        - platform-identity-acl
-      summary: Check for allow permissions for the current user on platform identity by their uid
-      operationId: platform-identity-api-contextual-acl
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformIdentitySpecificAcl'
-        '404':
-          description: The item dont exists
   /api/access/tenants:
     get:
       tags:
@@ -5540,6 +5540,19 @@ components:
           example:
             sub: juan.perez
             role: ADMIN
+    UserApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/users"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - user
     RelyingPartyApiRef:
       type: object
       properties:
@@ -5552,7 +5565,148 @@ components:
             batch-query-param: "uids"
       required:
         - uid
-        - name
+        - user
+    TrustedClientApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/trusted-clients"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - user
+    RoleApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/roles"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - role
+    RolesApiDto:
+      type: object
+      description: user-role-assignament-role
+      properties:
+        uid:
+          description: A uid string to identify the entity
+          type: string
+        role:
+          $ref: '#/components/schemas/RoleApiRef'
+        version:
+          description: Campo con el número de version de user role assignament role para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    UserRoleAssignamentApiDto:
+      type: object
+      description: user-role-assignament
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        user:
+          $ref: '#/components/schemas/UserApiRef'
+        relyingParty:
+          $ref: '#/components/schemas/RelyingPartyApiRef'
+        trustedClient:
+          $ref: '#/components/schemas/TrustedClientApiRef'
+        roles:
+          description: El roles de user role assignament
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesApiDto'
+        version:
+          description: Campo con el número de version de user role assignament para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    UserRoleAssignamentApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRoleAssignamentApiDto'
+    CommonAllow:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        reason:
+          type: string
+    UserRoleAssignamentGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserRoleAssignamentAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/UserRoleAssignamentAclFields'
+    UserRoleAssignamentSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserRoleAssignamentAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/UserRoleAssignamentAclFields'
+    UserRoleAssignamentAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    UserRoleAssignamentAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    UserRoleAssignamentAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
     RoleApiDto:
       type: object
       description: role
@@ -5582,13 +5736,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RoleApiDto'
-    CommonAllow:
-      type: object
-      properties:
-        allowed:
-          type: boolean
-        reason:
-          type: string
     RoleGenericAcl:
       type: object
       properties:
@@ -5639,6 +5786,99 @@ components:
         - update
         - delete
     RoleAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    UserGroupMembershipApiDto:
+      type: object
+      description: user-group-membership
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        user:
+          $ref: '#/components/schemas/UserApiRef'
+        relyingParty:
+          $ref: '#/components/schemas/RelyingPartyApiRef'
+        trustedClient:
+          $ref: '#/components/schemas/TrustedClientApiRef'
+        groups:
+          description: El groups de user group membership
+          type: string
+        version:
+          description: Campo con el número de version de user group membership para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    UserGroupMembershipApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserGroupMembershipApiDto'
+    UserGroupMembershipGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserGroupMembershipAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/UserGroupMembershipAclFields'
+    UserGroupMembershipSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserGroupMembershipAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/UserGroupMembershipAclFields'
+    UserGroupMembershipAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    UserGroupMembershipAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    UserGroupMembershipAclFields:
       type: object
       properties:
         noEditables:
@@ -6366,125 +6606,6 @@ components:
           type: array
           items:
             type: string
-    UserApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/users"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - user
-    TrustedClientApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/trusted-clients"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - user
-    ClientIdentityApiDto:
-      type: object
-      description: client-identity
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        user:
-          $ref: '#/components/schemas/UserApiRef'
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        trustedClient:
-          $ref: '#/components/schemas/TrustedClientApiRef'
-        roles:
-          description: El roles de client identity
-          type: string
-        version:
-          description: Campo con el número de version de client identity para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    ClientIdentityApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClientIdentityApiDto'
-    ClientIdentityGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/ClientIdentityAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/ClientIdentityAclFields'
-    ClientIdentitySpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/ClientIdentityAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/ClientIdentityAclFields'
-    ClientIdentityAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - list
-    ClientIdentityAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-    ClientIdentityAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
     UserApiDto:
       type: object
       description: user
@@ -6627,127 +6748,6 @@ components:
         - enable
         - unlock
     UserAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
-    RoleApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/roles"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - role
-    RolesApiDto:
-      type: object
-      description: platform-identity-role
-      properties:
-        uid:
-          description: A uid string to identify the entity
-          type: string
-        role:
-          $ref: '#/components/schemas/RoleApiRef'
-        version:
-          description: Campo con el número de version de platform identity role para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    PlatformIdentityApiDto:
-      type: object
-      description: platform-identity
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        user:
-          $ref: '#/components/schemas/UserApiRef'
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        trustedClient:
-          $ref: '#/components/schemas/TrustedClientApiRef'
-        roles:
-          description: El roles de platform identity
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesApiDto'
-        version:
-          description: Campo con el número de version de platform identity para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    PlatformIdentityApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/PlatformIdentityApiDto'
-    PlatformIdentityGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/PlatformIdentityAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/PlatformIdentityAclFields'
-    PlatformIdentitySpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/PlatformIdentityAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/PlatformIdentityAclFields'
-    PlatformIdentityAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - list
-    PlatformIdentityAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-    PlatformIdentityAclFields:
       type: object
       properties:
         noEditables:

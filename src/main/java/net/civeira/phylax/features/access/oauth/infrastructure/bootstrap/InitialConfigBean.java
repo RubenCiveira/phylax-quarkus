@@ -4,13 +4,14 @@ package net.civeira.phylax.features.access.oauth.infrastructure.bootstrap;
 import java.util.List;
 
 import lombok.Getter;
-import net.civeira.phylax.features.access.clientidentity.domain.ClientIdentityChangeSet;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
 import net.civeira.phylax.features.access.role.domain.RoleChangeSet;
 import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
+import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembershipChangeSet;
+import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignamentChangeSet;
 
 @Getter
 public class InitialConfigBean {
@@ -19,7 +20,8 @@ public class InitialConfigBean {
   private final List<TenantChangeSet> tenants;
   private final List<UserChangeSet> users;
   private final List<RoleChangeSet> roles;
-  private final List<ClientIdentityChangeSet> identities;
+  private final List<UserGroupMembershipChangeSet> userGroups;
+  private final List<UserRoleAssignamentChangeSet> userRoles;
 
   public InitialConfigBean(String password) {
     RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("phylax-api")
@@ -38,17 +40,22 @@ public class InitialConfigBean {
     UserChangeSet root = new UserChangeSet().newUid().name("ROOT").passwordPlain(password)
         .tenant(tenant).enabled(true).useSecondFactors(false);
 
-    ClientIdentityChangeSet userRelyIdentity =
-        new ClientIdentityChangeSet().newUid().user(root).relyingParty(party).roles("ROOT");
+    UserGroupMembershipChangeSet userRelyGroups =
+        new UserGroupMembershipChangeSet().newUid().user(root).relyingParty(party).groups("ROOT");
 
-    ClientIdentityChangeSet userClientIdentity =
-        new ClientIdentityChangeSet().newUid().user(root).trustedClient(client).roles("ROOT");
+    UserGroupMembershipChangeSet userClientGroups =
+        new UserGroupMembershipChangeSet().newUid().user(root).trustedClient(client).groups("ROOT");
+
+    UserRoleAssignamentChangeSet userGenericRole =
+        new UserRoleAssignamentChangeSet().newUid().user(root).roles(role);
+
 
     tenants = List.of(tenant);
     parties = List.of(party);
     clients = List.of(client);
     users = List.of(root);
     roles = List.of(role);
-    identities = List.of(userRelyIdentity, userClientIdentity);
+    userGroups = List.of(userRelyGroups, userClientGroups);
+    userRoles = List.of(userGenericRole);
   }
 }
