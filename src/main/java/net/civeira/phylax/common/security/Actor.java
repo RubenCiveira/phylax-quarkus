@@ -15,6 +15,7 @@ public class Actor {
   private final String tenant;
   private final boolean autenticated;
   private final List<String> roles;
+  private final List<String> groups;
   private final Map<String, String> claims;
 
   public Optional<String> getTenant() {
@@ -32,6 +33,24 @@ public class Actor {
   public String getClaim(String name) {
     return claims.get(name);
   }
+  
+  public boolean isInGroup(String group) {
+    if (group.endsWith(":*")) {
+      String prefix = group.substring(0, group.length() - 1);
+      return groups.stream().anyMatch(has -> has.startsWith(prefix));
+    } else {
+      return groups.contains(group);
+    }
+  }
+  
+  public boolean isInAnyGroup(String... groups) {
+    for (String group : groups) {
+      if (isInGroup(group)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public boolean hasRole(String role) {
     if (role.endsWith(":*")) {
@@ -42,9 +61,9 @@ public class Actor {
     }
   }
 
-  public boolean hasAnyRole(String... strings) {
-    for (String string : strings) {
-      if (hasRole(string)) {
+  public boolean hasAnyRole(String... roles) {
+    for (String role : roles) {
+      if (hasRole(role)) {
         return true;
       }
     }

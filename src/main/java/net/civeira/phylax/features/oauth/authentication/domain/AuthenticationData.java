@@ -35,6 +35,10 @@ public class AuthenticationData {
    */
   private Map<String, List<String>> roles = new LinkedHashMap<>();
   /**
+   * Roles granted to the user, keyed by audience.
+   */
+  private Map<String, List<String>> groups = new LinkedHashMap<>();
+  /**
    * Audiences requested for the token. Used to scope roles and access claims.
    */
   private List<String> audiences = new ArrayList<>();
@@ -69,5 +73,9 @@ public class AuthenticationData {
    */
   public void addRolesTo(String audience, List<String> names) {
     roles.computeIfAbsent(audience, _ -> new ArrayList<>()).addAll(names);
+  }
+  
+  public void addGroupsTo(String audience, List<String> names) {
+    groups.computeIfAbsent(audience, _ -> new ArrayList<>()).addAll(names);
   }
 }

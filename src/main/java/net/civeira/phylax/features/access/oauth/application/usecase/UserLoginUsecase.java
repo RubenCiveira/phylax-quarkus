@@ -167,8 +167,9 @@ public class UserLoginUsecase {
     List<String> forAllPlatform = platformRolesFromIdentity(platformIdentities
         .find(PlatformIdentityFilter.builder().user(user).forAllAudiences(true).build()), tenant);
     request.getAudiences().forEach(aud -> {
-      List<String> audRoles = new ArrayList<>(forAllClient);
-      audRoles.addAll(forAllPlatform);
+      List<String> audRoles = new ArrayList<>(forAllPlatform);
+      List<String> audGroups = new ArrayList<>(forAllClient);
+      
       Optional<TrustedClient> isClient =
           clients.find(TrustedClientFilter.builder().code(aud).build());
       if (isClient.isPresent()) {
@@ -179,7 +180,7 @@ public class UserLoginUsecase {
       }
       Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
       if (isParty.isPresent()) {
-        audRoles.addAll(rolesFromIdentity(
+        audGroups.addAll(rolesFromIdentity(
             identities.find(
                 ClientIdentityFilter.builder().user(user).relyingParty(isParty.get()).build()),
             tenant));
@@ -190,6 +191,9 @@ public class UserLoginUsecase {
       }
       if (!audRoles.isEmpty()) {
         ud.addRolesTo(aud, audRoles);
+      }
+      if( !audGroups.isEmpty() ) {
+        ud.addGroupsTo(aud, audGroups);
       }
     });
     return AuthenticationResult.right(ud);

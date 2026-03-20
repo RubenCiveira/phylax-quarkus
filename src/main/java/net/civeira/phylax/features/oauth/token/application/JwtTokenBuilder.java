@@ -78,7 +78,11 @@ public class JwtTokenBuilder {
   /**
    * Claim name for authorities/roles.
    */
-  private static final String CLAIM_AUTHORITIES = "roles";
+  private static final String CLAIM_ROLES = "roles";
+  /**
+   * Claim name for authorities/roles.
+   */
+  private static final String CLAIM_GROUPS = "groups";
   /**
    * Claim name for scopes.
    */
@@ -433,7 +437,8 @@ public class JwtTokenBuilder {
         .withClaim(CLAIM_GRANT_TYPE, grantType)
         .withClaim(CLAIM_USER_NAME, validationData.getUsername())
         .withClaim(CLAIM_CLIENT_ID, client.getClientId())
-        .withClaim(CLAIM_AUTHORITIES, validationData.getRoles());
+        .withClaim(CLAIM_ROLES, validationData.getRoles())
+        .withClaim(CLAIM_GROUPS, validationData.getGroups());
   }
 
   /**
@@ -491,7 +496,7 @@ public class JwtTokenBuilder {
 
     accessTokenInfo = accessTokenInfo.withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
         .withClaim("aud", validationData.getAudiences())
-        .withClaim(CLAIM_AUTHORITIES, validationData.getRoles())
+        .withClaim(CLAIM_ROLES, validationData.getRoles())
         .withArrayClaim(CLAIM_SCOPE, scopes.toArray(new String[0]));
     return accessTokenInfo;
   }

@@ -48,7 +48,9 @@ public class CurrentRequest {
   private final HttpHeaders headers;
   private final @ConfigProperty(name = "mp.jwt.audiences") String audiences;
   private final @ConfigProperty(name = "mp.jwt.roles.claim",
-      defaultValue = "groups") String rolesClaimName;
+      defaultValue = "roles") String rolesClaimName;
+  private final @ConfigProperty(name = "mp.jwt.groups.claim",
+      defaultValue = "groups") String groupsClaimName;
 
   /**
    * Builds the public host URL using forwarded headers when available.
@@ -176,7 +178,7 @@ public class CurrentRequest {
   public Actor getActor() {
     Actor.ActorBuilder builder = Actor.builder();
     if (security.isAnonymous()) {
-      builder = builder.autenticated(false).roles(List.of());
+      builder = builder.autenticated(false).roles(List.of()).groups(List.of());
     } else {
       List<String> resolvedRoles;
       if ("roles".equals(rolesClaimName)) {
@@ -191,7 +193,15 @@ public class CurrentRequest {
         resolvedRoles =
             security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList();
       }
-      builder = builder.name(security.getPrincipal().getName()).roles(resolvedRoles);
+      JsonObject groupsJson = jwt.getClaim(groupsClaimName);
+      List<String> resolvedGroups =
+          groupsJson != null
+              ? groupsJson.entrySet().stream().flatMap(e -> e.getValue().asJsonArray().stream())
+                  .filter(v -> v.getValueType() == JsonValue.ValueType.STRING)
+                  .map(v -> ((JsonString) v).getString()).toList()
+              : List.of();
+      builder = builder.name(security.getPrincipal().getName()).roles(resolvedRoles)
+          .groups(resolvedGroups);
       Object claim = jwt.getClaim("tid");
       if (null != claim) {
         builder = builder.tenant(String.valueOf(claim));
