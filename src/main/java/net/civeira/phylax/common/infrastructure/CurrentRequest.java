@@ -4,6 +4,7 @@ package net.civeira.phylax.common.infrastructure;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +13,8 @@ import java.util.Locale.LanguageRange;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.json.JsonObject;
@@ -29,6 +28,8 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.algorithms.metadata.Timestamped;
 import net.civeira.phylax.common.security.Actor;
 import net.civeira.phylax.common.security.InvocationSource;
+import net.civeira.phylax.common.security.MagicLinkResult;
+import net.civeira.phylax.common.security.MagicLinkService;
 import net.civeira.phylax.common.security.OperationContext;
 
 /**
@@ -46,11 +47,16 @@ public class CurrentRequest {
   private final JsonWebToken jwt;
   private final UriInfo uriInfo;
   private final HttpHeaders headers;
+  private final MagicLinkService magicLinkService;
   private final @ConfigProperty(name = "mp.jwt.audiences") String audiences;
   private final @ConfigProperty(name = "mp.jwt.roles.claim",
       defaultValue = "roles") String rolesClaimName;
   private final @ConfigProperty(name = "mp.jwt.groups.claim",
       defaultValue = "groups") String groupsClaimName;
+
+  // Consumed at most once per request — subsequent calls return the cached result.
+  private boolean magicLinkConsumed = false;
+  private MagicLinkResult magicLinkResult = null;
 
   /**
    * Builds the public host URL using forwarded headers when available.
@@ -175,7 +181,19 @@ public class CurrentRequest {
    *
    * @return resolved actor
    */
+  /**
+   * Returns the JWT token from the magic link if one was consumed on this request.
+   */
+  public Optional<String> getMagicLinkJwtToken() {
+    return Optional.ofNullable(getMagicLink()).map(MagicLinkResult::jwtToken)
+        .filter(t -> !t.isBlank());
+  }
+
   public Actor getActor() {
+    MagicLinkResult ml = getMagicLink();
+    if (ml != null && ml.actor() != null) {
+      return ml.actor();
+    }
     Actor.ActorBuilder builder = Actor.builder();
     if (security.isAnonymous()) {
       builder = builder.autenticated(false).roles(List.of()).groups(List.of());
@@ -193,13 +211,7 @@ public class CurrentRequest {
         resolvedRoles =
             security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList();
       }
-      JsonObject groupsJson = jwt.getClaim(groupsClaimName);
-      List<String> resolvedGroups =
-          groupsJson != null
-              ? groupsJson.entrySet().stream().flatMap(e -> e.getValue().asJsonArray().stream())
-                  .filter(v -> v.getValueType() == JsonValue.ValueType.STRING)
-                  .map(v -> ((JsonString) v).getString()).toList()
-              : List.of();
+      List<String> resolvedGroups = new ArrayList<>( jwt.getGroups() );
       builder = builder.name(security.getPrincipal().getName()).roles(resolvedRoles)
           .groups(resolvedGroups);
       Object claim = jwt.getClaim("tid");
@@ -229,9 +241,26 @@ public class CurrentRequest {
    * @return source descriptor
    */
   public InvocationSource getInvocationSource() {
+    MagicLinkResult ml = getMagicLink();
+    if (ml != null && ml.source() != null) {
+      return ml.source();
+    }
     String device = headers.getHeaderString("X-Device-ID");
     return InvocationSource.builder().remoteDevice(device).locale(getRequestHeaderLocale())
         .request(uriInfo.getPath()).build();
+  }
+
+  private MagicLinkResult getMagicLink() {
+    if (!magicLinkConsumed) {
+      magicLinkConsumed = true;
+      String token = magicLinkService.extractToken(uriInfo.getQueryParameters());
+      if (token != null) {
+        String normalizedPath =
+            magicLinkService.normalizePathAndQuery(uriInfo.getRequestUri().toString());
+        magicLinkResult = magicLinkService.consume(normalizedPath, token).orElse(null);
+      }
+    }
+    return magicLinkResult;
   }
 
   private String removePrefix(String role) {
