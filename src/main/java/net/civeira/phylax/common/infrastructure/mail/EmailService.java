@@ -38,7 +38,7 @@ public class EmailService {
 
   private ExecutorService executor;
 
-  
+
   /**
    * Sends messages asynchronously using the default configuration.
    *
@@ -76,7 +76,7 @@ public class EmailService {
   public void sendMessage(MailConfiguration config, EmailMessage messages) {
     sendMessage(Optional.of(config), messages);
   }
-  
+
   /**
    * Sends messages asynchronously using the default configuration.
    *

@@ -497,20 +497,20 @@ public class TenantTermsOfUseRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getTenant().ifPresent(
-        tenant -> sq.where(TENANT, SqlOperator.EQ, SqlParameterValue.of(tenant.getUid())));
+    filter.getTenant().ifPresent(tenantParam -> sq.where(TENANT, SqlOperator.EQ,
+        SqlParameterValue.of(tenantParam.getUid())));
     if (!filter.getTenants().isEmpty()) {
       sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
     }
-    filter.getRelyingParty().ifPresent(relyingParty -> sq.where(RELYING_PARTY_SNAKE, SqlOperator.EQ,
-        SqlParameterValue.of(relyingParty.getUid())));
+    filter.getRelyingParty().ifPresent(relyingPartyParam -> sq.where(RELYING_PARTY_SNAKE,
+        SqlOperator.EQ, SqlParameterValue.of(relyingPartyParam.getUid())));
     if (!filter.getRelyingPartys().isEmpty()) {
       sq.where(RELYING_PARTY_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getRelyingPartys()));
     }
     filter.getTenantTenantAccesible()
-        .ifPresent(tenantTenantAccesible -> sq.where(ACCESS_TENANT_TERMS_OF_USE_TENANT,
-            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesible)));
+        .ifPresent(tenantTenantAccesibleParam -> sq.where(ACCESS_TENANT_TERMS_OF_USE_TENANT,
+            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
     return sq;
   }
 

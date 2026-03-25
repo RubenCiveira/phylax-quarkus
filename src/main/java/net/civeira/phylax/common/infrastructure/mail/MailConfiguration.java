@@ -72,8 +72,8 @@ public final class MailConfiguration {
   /**
    * Optional display name used as the sender name in outgoing emails.
    *
-   * When present, combined with {@link #getFromEmail()} to build the From header. When absent,
-   * the mailer uses its globally configured sender name.
+   * When present, combined with {@link #getFromEmail()} to build the From header. When absent, the
+   * mailer uses its globally configured sender name.
    */
   @Getter(lombok.AccessLevel.NONE)
   private final String fromName;
@@ -81,8 +81,8 @@ public final class MailConfiguration {
   /**
    * Optional sender email address.
    *
-   * Overrides the globally configured From address for this configuration. Use a valid address
-   * to avoid SMTP rejection. When absent, the mailer default is used.
+   * Overrides the globally configured From address for this configuration. Use a valid address to
+   * avoid SMTP rejection. When absent, the mailer default is used.
    */
   @Getter(lombok.AccessLevel.NONE)
   private final String fromEmail;

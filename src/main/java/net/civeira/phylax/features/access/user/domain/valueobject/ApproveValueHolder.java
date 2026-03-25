@@ -26,8 +26,8 @@ public class ApproveValueHolder<T> {
    * @return
    */
   public T approve(ApproveVO approve) {
-    value = Optional.of(approve);
-    return holder;
+    this.value = Optional.of(approve);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class ApproveValueHolder<T> {
    * @return
    */
   public T approve(Optional<ApproveVO> approve) {
-    value = approve;
-    return holder;
+    this.value = approve;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class ApproveValueHolder<T> {
    * @return
    */
   public T approve(UserApproveOptions approve) {
-    value = Optional.of(ApproveVO.from(approve));
-    return holder;
+    this.value = Optional.of(ApproveVO.from(approve));
+    return this.holder;
   }
 
   /**
@@ -55,8 +55,8 @@ public class ApproveValueHolder<T> {
    * @return
    */
   public T approveNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

@@ -237,16 +237,28 @@ System_Boundary(c1, "SPA") {
     Container(web_app, "Web Application", "Angular", "Interfaz de usuario SPA", $sprite="angular-icon")
 }
 System_Boundary(c2, "Backend") {
+    Container(group_document, "document", "Java", "Procesamiento de los datos", $sprite="java")
     Container(group_access, "access", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(group_notification, "notification", "Java", "Procesamiento de los datos", $sprite="java")
 }
 ContainerDb(database, "Database", "Maria database", "Almacena la información de base de datos", $sprite="mariadb-icon")
 ContainerDb(redis, "cache", "Redis cache", "genera una cache de bbdd", $sprite="redis")
 SystemQueue(rabbitmq, "queue", "Rabbit Mq", "Notifica eventos", $sprite="rabbitmq")
 
+Rel(web_app, group_document, "Rest connection", "Rest")
+Rel(group_document, database, "Rest connection", "Rest")
+Rel(group_document, redis, "Rest connection", "Rest")
+Rel(group_document, rabbitmq, "Rest connection", "Rest")
 Rel(web_app, group_access, "Rest connection", "Rest")
 Rel(group_access, database, "Rest connection", "Rest")
 Rel(group_access, redis, "Rest connection", "Rest")
 Rel(group_access, rabbitmq, "Rest connection", "Rest")
+Rel(web_app, group_notification, "Rest connection", "Rest")
+Rel(group_notification, database, "Rest connection", "Rest")
+Rel(group_notification, redis, "Rest connection", "Rest")
+Rel(group_notification, rabbitmq, "Rest connection", "Rest")
+Rel_R(group_notification, group_access, "uses", "include")
+Rel_R(group_document, group_access, "uses", "include")
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 
 LAYOUT_WITH_LEGEND()

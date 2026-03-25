@@ -26,8 +26,8 @@ public class AcceptDateValueHolder<T> {
    * @return
    */
   public T acceptDate(AcceptDateVO acceptDate) {
-    value = Optional.of(acceptDate);
-    return holder;
+    this.value = Optional.of(acceptDate);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class AcceptDateValueHolder<T> {
    * @return
    */
   public T acceptDate(Optional<AcceptDateVO> acceptDate) {
-    value = acceptDate;
-    return holder;
+    this.value = acceptDate;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class AcceptDateValueHolder<T> {
    * @return
    */
   public T acceptDate(OffsetDateTime acceptDate) {
-    value = Optional.of(AcceptDateVO.from(acceptDate));
-    return holder;
+    this.value = Optional.of(AcceptDateVO.from(acceptDate));
+    return this.holder;
   }
 
   /**
@@ -55,8 +55,8 @@ public class AcceptDateValueHolder<T> {
    * @return
    */
   public T acceptDateNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

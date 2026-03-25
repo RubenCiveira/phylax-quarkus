@@ -53,8 +53,8 @@ public class RegisterCodeUrlValueHolder<T> {
    * @return
    */
   public T registerCodeUrl(RegisterCodeUrlVO registerCodeUrl) {
-    value = Optional.of(registerCodeUrl);
-    return holder;
+    this.value = Optional.of(registerCodeUrl);
+    return this.holder;
   }
 
   /**
@@ -63,8 +63,8 @@ public class RegisterCodeUrlValueHolder<T> {
    * @return
    */
   public T registerCodeUrl(Optional<RegisterCodeUrlVO> registerCodeUrl) {
-    value = registerCodeUrl;
-    return holder;
+    this.value = registerCodeUrl;
+    return this.holder;
   }
 
   /**
@@ -73,8 +73,8 @@ public class RegisterCodeUrlValueHolder<T> {
    * @return
    */
   public T registerCodeUrl(String registerCodeUrl) {
-    value = Optional.of(RegisterCodeUrlVO.from(registerCodeUrl));
-    return holder;
+    this.value = Optional.of(RegisterCodeUrlVO.from(registerCodeUrl));
+    return this.holder;
   }
 
   /**
@@ -82,8 +82,8 @@ public class RegisterCodeUrlValueHolder<T> {
    * @return
    */
   public T registerCodeUrlNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

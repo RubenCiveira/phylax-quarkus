@@ -13,8 +13,10 @@ import java.util.Locale.LanguageRange;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.json.JsonObject;
@@ -211,7 +213,7 @@ public class CurrentRequest {
         resolvedRoles =
             security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList();
       }
-      List<String> resolvedGroups = new ArrayList<>( jwt.getGroups() );
+      List<String> resolvedGroups = new ArrayList<>(jwt.getGroups());
       builder = builder.name(security.getPrincipal().getName()).roles(resolvedRoles)
           .groups(resolvedGroups);
       Object claim = jwt.getClaim("tid");

@@ -64,8 +64,8 @@ public class TempSecondFactorSeedValueHolder<T> {
    * @return
    */
   public T tempSecondFactorSeed(TempSecondFactorSeedVO tempSecondFactorSeed) {
-    value = Optional.of(tempSecondFactorSeed);
-    return holder;
+    this.value = Optional.of(tempSecondFactorSeed);
+    return this.holder;
   }
 
   /**
@@ -74,8 +74,8 @@ public class TempSecondFactorSeedValueHolder<T> {
    * @return
    */
   public T tempSecondFactorSeed(Optional<TempSecondFactorSeedVO> tempSecondFactorSeed) {
-    value = tempSecondFactorSeed;
-    return holder;
+    this.value = tempSecondFactorSeed;
+    return this.holder;
   }
 
   /**
@@ -84,8 +84,8 @@ public class TempSecondFactorSeedValueHolder<T> {
    * @return
    */
   public T tempSecondFactorSeedCyphered(String tempSecondFactorSeed) {
-    value = Optional.of(TempSecondFactorSeedVO.fromCyphered(tempSecondFactorSeed));
-    return holder;
+    this.value = Optional.of(TempSecondFactorSeedVO.fromCyphered(tempSecondFactorSeed));
+    return this.holder;
   }
 
   /**
@@ -93,8 +93,8 @@ public class TempSecondFactorSeedValueHolder<T> {
    * @return
    */
   public T tempSecondFactorSeedNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**
@@ -103,8 +103,8 @@ public class TempSecondFactorSeedValueHolder<T> {
    * @return
    */
   public T tempSecondFactorSeedPlain(String tempSecondFactorSeed) {
-    value = Optional.of(TempSecondFactorSeedVO.fromPlain(tempSecondFactorSeed));
-    return holder;
+    this.value = Optional.of(TempSecondFactorSeedVO.fromPlain(tempSecondFactorSeed));
+    return this.holder;
   }
 
   /**

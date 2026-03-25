@@ -506,9 +506,10 @@ public class TenantRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("name", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getName().ifPresent(name -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(name)));
-    filter.getTenantAccesible().ifPresent(
-        tenantAccesible -> sq.where(UID, SqlOperator.EQ, SqlParameterValue.of(tenantAccesible)));
+    filter.getName()
+        .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
+    filter.getTenantAccesible().ifPresent(tenantAccesibleParam -> sq.where(UID, SqlOperator.EQ,
+        SqlParameterValue.of(tenantAccesibleParam)));
     return sq;
   }
 

@@ -238,23 +238,49 @@ System_Boundary(c1, "SPA") {
     Container(web_app, "Web Application", "Angular", "Interfaz de usuario SPA", $sprite="angular-icon")
 }
 System_Boundary(c2, "Backend") {
+  System_Boundary(group_document, "document") {
+    Container(backend_api_document, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(backend_domain_document, "Dominio", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(backend_adapter_document, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
+  }
+Container(group_access, "access", "Java", "", $sprite="java")
   System_Boundary(group_access, "access") {
     Container(backend_api_access, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
     Container(backend_domain_access, "Dominio", "Java", "Procesamiento de los datos", $sprite="java")
     Container(backend_adapter_access, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
   }
+  System_Boundary(group_notification, "notification") {
+    Container(backend_api_notification, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(backend_domain_notification, "Dominio", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(backend_adapter_notification, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
+  }
+Container(group_access, "access", "Java", "", $sprite="java")
 }
 ContainerDb(database, "Database", "Maria database", "Almacena la información de base de datos", $sprite="mariadb-icon")
 ContainerDb(redis, "cache", "Redis cache", "genera una cache de bbdd", $sprite="redis")
 SystemQueue(rabbitmq, "queue", "Rabbit Mq", "Notifica eventos", $sprite="rabbitmq")
 
 Rel(user, web_app, "User", "http")
+Rel(web_app, backend_api_document, "Rest connection", "Rest")
+Rel(backend_adapter_document, database, "Read/Write data", "jpa")
+Rel(backend_adapter_document, redis, "Cache de datos", "jpa")
+Rel(backend_adapter_document, backend_domain_document, "Consumes", "port.api")
+Rel(backend_api_document, backend_domain_document, "Support", "port.spi")
+Rel(group_document, rabbitmq, "Rest connection", "Rest")
+Rel_R(group_document, group_access, "uses", "include")
 Rel(web_app, backend_api_access, "Rest connection", "Rest")
 Rel(backend_adapter_access, database, "Read/Write data", "jpa")
 Rel(backend_adapter_access, redis, "Cache de datos", "jpa")
 Rel(backend_adapter_access, backend_domain_access, "Consumes", "port.api")
 Rel(backend_api_access, backend_domain_access, "Support", "port.spi")
 Rel(group_access, rabbitmq, "Rest connection", "Rest")
+Rel(web_app, backend_api_notification, "Rest connection", "Rest")
+Rel(backend_adapter_notification, database, "Read/Write data", "jpa")
+Rel(backend_adapter_notification, redis, "Cache de datos", "jpa")
+Rel(backend_adapter_notification, backend_domain_notification, "Consumes", "port.api")
+Rel(backend_api_notification, backend_domain_notification, "Support", "port.spi")
+Rel(group_notification, rabbitmq, "Rest connection", "Rest")
+Rel_R(group_notification, group_access, "uses", "include")
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 
 LAYOUT_WITH_LEGEND()

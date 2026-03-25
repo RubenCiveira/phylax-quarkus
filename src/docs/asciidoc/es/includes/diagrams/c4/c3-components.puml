@@ -238,6 +238,19 @@ System_Boundary(c1, "SPA") {
     Container(web_app, "Web Application", "Angular", "Interfaz de usuario SPA", $sprite="angular-icon")
 }
 System_Boundary(c2, "Backend") {
+  System_Boundary(group_document, "document") {
+    Container(backend_api_document, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(backend_adapter_document, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
+    System_Boundary(backend_domain_document, "Dominio") {
+      Container(entity_template, "template", "Java", "template")
+      Container(entity_template_version, "template version", "Java", "template-version")
+      Container(entity_template_snippet, "template snippet", "Java", "template-snippet")
+      Container(entity_template_variable, "template variable", "Java", "template-variable")
+      Container(entity_theme, "theme", "Java", "theme")
+      Container(entity_template_asset, "template asset", "Java", "template-asset")
+    }
+  Container(group_access, "access", "Java", "", $sprite="java")
+  }
   System_Boundary(group_access, "access") {
     Container(backend_api_access, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
     Container(backend_adapter_access, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
@@ -257,12 +270,33 @@ System_Boundary(c2, "Backend") {
       Container(entity_tenant, "tenant", "Java", "tenant")
     }
   }
+  System_Boundary(group_notification, "notification") {
+    Container(backend_api_notification, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(backend_adapter_notification, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
+    System_Boundary(backend_domain_notification, "Dominio") {
+      Container(entity_message, "message", "Java", "message")
+    }
+  Container(group_access, "access", "Java", "", $sprite="java")
+  }
 }
 ContainerDb(database, "Database", "Maria database", "Almacena la información de base de datos", $sprite="mariadb-icon")
 ContainerDb(redis, "cache", "Redis cache", "genera una cache de bbdd", $sprite="redis")
 SystemQueue(rabbitmq, "queue", "Rabbit Mq", "Notifica eventos", $sprite="rabbitmq")
 
 Rel(user, web_app, "User", "http")
+Rel_R(entity_template, group_access, "uses", "include")
+Rel(entity_template, entity_theme, "theme", "include")
+Rel(entity_template_version, entity_template, "template", "include")
+Rel_R(entity_template_snippet, group_access, "uses", "include")
+Rel_R(entity_template_variable, group_access, "uses", "include")
+Rel_R(entity_theme, group_access, "uses", "include")
+Rel_R(entity_template_asset, group_access, "uses", "include")
+Rel(web_app, backend_api_document, "Rest connection", "Rest")
+Rel(backend_adapter_document, database, "Read/Write data", "jpa")
+Rel(backend_adapter_document, redis, "Cache for data", "jpa")
+Rel(backend_adapter_document, backend_domain_document, "Consumes", "port.api")
+Rel(backend_api_document, backend_domain_document, "Support", "port.spi")
+Rel(backend_adapter_document, rabbitmq, "Eventos de mensajes", "Rest")
 Rel(entity_user_role_assignament, entity_user, "user", "include")
 Rel(entity_user_role_assignament, entity_relying_party, "relying_party", "include")
 Rel(entity_user_role_assignament, entity_trusted_client, "trusted_client", "include")
@@ -285,6 +319,13 @@ Rel(backend_adapter_access, redis, "Cache for data", "jpa")
 Rel(backend_adapter_access, backend_domain_access, "Consumes", "port.api")
 Rel(backend_api_access, backend_domain_access, "Support", "port.spi")
 Rel(backend_adapter_access, rabbitmq, "Eventos de mensajes", "Rest")
+Rel_R(entity_message, group_access, "uses", "include")
+Rel(web_app, backend_api_notification, "Rest connection", "Rest")
+Rel(backend_adapter_notification, database, "Read/Write data", "jpa")
+Rel(backend_adapter_notification, redis, "Cache for data", "jpa")
+Rel(backend_adapter_notification, backend_domain_notification, "Consumes", "port.api")
+Rel(backend_api_notification, backend_domain_notification, "Support", "port.spi")
+Rel(backend_adapter_notification, rabbitmq, "Eventos de mensajes", "Rest")
 caption Diagrama de componentes de net.civeira.phylax
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 

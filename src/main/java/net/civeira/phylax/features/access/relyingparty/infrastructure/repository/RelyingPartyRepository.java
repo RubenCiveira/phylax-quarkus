@@ -451,9 +451,10 @@ public class RelyingPartyRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("code", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getApiKey()
-        .ifPresent(apiKey -> sq.where(API_KEY_SNAKE, SqlOperator.EQ, SqlParameterValue.of(apiKey)));
-    filter.getCode().ifPresent(code -> sq.where(CODE, SqlOperator.EQ, SqlParameterValue.of(code)));
+    filter.getApiKey().ifPresent(
+        apiKeyParam -> sq.where(API_KEY_SNAKE, SqlOperator.EQ, SqlParameterValue.of(apiKeyParam)));
+    filter.getCode()
+        .ifPresent(codeParam -> sq.where(CODE, SqlOperator.EQ, SqlParameterValue.of(codeParam)));
     return sq;
   }
 

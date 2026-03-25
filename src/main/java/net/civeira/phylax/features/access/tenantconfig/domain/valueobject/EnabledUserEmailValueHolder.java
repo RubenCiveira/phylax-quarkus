@@ -25,8 +25,8 @@ public class EnabledUserEmailValueHolder<T> {
    * @return
    */
   public T enabledUserEmail(EnabledUserEmailVO enabledUserEmail) {
-    value = Optional.of(enabledUserEmail);
-    return holder;
+    this.value = Optional.of(enabledUserEmail);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class EnabledUserEmailValueHolder<T> {
    * @return
    */
   public T enabledUserEmail(Optional<EnabledUserEmailVO> enabledUserEmail) {
-    value = enabledUserEmail;
-    return holder;
+    this.value = enabledUserEmail;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class EnabledUserEmailValueHolder<T> {
    * @return
    */
   public T enabledUserEmail(String enabledUserEmail) {
-    value = Optional.of(EnabledUserEmailVO.from(enabledUserEmail));
-    return holder;
+    this.value = Optional.of(EnabledUserEmailVO.from(enabledUserEmail));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class EnabledUserEmailValueHolder<T> {
    * @return
    */
   public T enabledUserEmailNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

@@ -74,8 +74,8 @@ public class WellcomeEmailValueHolder<T> {
    * @return
    */
   public T wellcomeEmail(WellcomeEmailVO wellcomeEmail) {
-    value = Optional.of(wellcomeEmail);
-    return holder;
+    this.value = Optional.of(wellcomeEmail);
+    return this.holder;
   }
 
   /**
@@ -84,8 +84,8 @@ public class WellcomeEmailValueHolder<T> {
    * @return
    */
   public T wellcomeEmail(Optional<WellcomeEmailVO> wellcomeEmail) {
-    value = wellcomeEmail;
-    return holder;
+    this.value = wellcomeEmail;
+    return this.holder;
   }
 
   /**
@@ -94,8 +94,8 @@ public class WellcomeEmailValueHolder<T> {
    * @return
    */
   public T wellcomeEmail(String wellcomeEmail) {
-    value = Optional.of(WellcomeEmailVO.from(wellcomeEmail));
-    return holder;
+    this.value = Optional.of(WellcomeEmailVO.from(wellcomeEmail));
+    return this.holder;
   }
 
   /**
@@ -103,7 +103,7 @@ public class WellcomeEmailValueHolder<T> {
    * @return
    */
   public T wellcomeEmailNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 }

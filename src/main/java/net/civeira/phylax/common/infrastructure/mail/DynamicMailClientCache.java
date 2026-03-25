@@ -30,13 +30,11 @@ public class DynamicMailClientCache {
   }
 
   private MailClient createClient(MailConfiguration config) {
-    MailConfig mailConfig = new MailConfig()
-        .setHostname(config.getSmtpHost())
-        .setPort(config.getSmtpPort())
-        .setUsername(config.getSmtpLogin())
-        .setPassword(config.getSmtpPass())
-        .setStarttls(config.isUseTtls() ? StartTLSOptions.REQUIRED : StartTLSOptions.DISABLED)
-        .setConnectTimeout(config.getConnectionTimeout() * 1000);
+    MailConfig mailConfig =
+        new MailConfig().setHostname(config.getSmtpHost()).setPort(config.getSmtpPort())
+            .setUsername(config.getSmtpLogin()).setPassword(config.getSmtpPass())
+            .setStarttls(config.isUseTtls() ? StartTLSOptions.REQUIRED : StartTLSOptions.DISABLED)
+            .setConnectTimeout(config.getConnectionTimeout() * 1000);
     return MailClient.create(vertx, mailConfig);
   }
 

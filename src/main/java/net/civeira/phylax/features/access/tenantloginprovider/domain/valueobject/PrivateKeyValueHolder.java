@@ -41,8 +41,8 @@ public class PrivateKeyValueHolder<T> {
    * @return
    */
   public T privateKey(PrivateKeyVO privateKey) {
-    value = Optional.of(privateKey);
-    return holder;
+    this.value = Optional.of(privateKey);
+    return this.holder;
   }
 
   /**
@@ -51,8 +51,8 @@ public class PrivateKeyValueHolder<T> {
    * @return
    */
   public T privateKey(Optional<PrivateKeyVO> privateKey) {
-    value = privateKey;
-    return holder;
+    this.value = privateKey;
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class PrivateKeyValueHolder<T> {
    * @return
    */
   public T privateKey(String privateKey) {
-    value = Optional.of(PrivateKeyVO.from(privateKey));
-    return holder;
+    this.value = Optional.of(PrivateKeyVO.from(privateKey));
+    return this.holder;
   }
 
   /**
@@ -70,8 +70,8 @@ public class PrivateKeyValueHolder<T> {
    * @return
    */
   public T privateKeyNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

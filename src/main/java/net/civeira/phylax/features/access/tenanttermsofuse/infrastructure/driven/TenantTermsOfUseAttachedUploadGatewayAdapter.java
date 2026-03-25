@@ -43,7 +43,7 @@ public class TenantTermsOfUseAttachedUploadGatewayAdapter
       return Optional
           .of(store.commitReplace(theNew, RepositoryLink.builder().key(theOld).build()).getKey());
     } else {
-      return Optional.empty();
+      return Optional.ofNullable(theNew);
     }
   }
 

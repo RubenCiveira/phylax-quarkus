@@ -42,8 +42,8 @@ public class MarkForDeleteValueHolder<T> {
    * @return
    */
   public T markForDelete(MarkForDeleteVO markForDelete) {
-    value = Optional.of(markForDelete);
-    return holder;
+    this.value = Optional.of(markForDelete);
+    return this.holder;
   }
 
   /**
@@ -52,8 +52,8 @@ public class MarkForDeleteValueHolder<T> {
    * @return
    */
   public T markForDelete(Optional<MarkForDeleteVO> markForDelete) {
-    value = markForDelete;
-    return holder;
+    this.value = markForDelete;
+    return this.holder;
   }
 
   /**
@@ -62,8 +62,8 @@ public class MarkForDeleteValueHolder<T> {
    * @return
    */
   public T markForDelete(Boolean markForDelete) {
-    value = Optional.of(MarkForDeleteVO.from(markForDelete));
-    return holder;
+    this.value = Optional.of(MarkForDeleteVO.from(markForDelete));
+    return this.holder;
   }
 
   /**

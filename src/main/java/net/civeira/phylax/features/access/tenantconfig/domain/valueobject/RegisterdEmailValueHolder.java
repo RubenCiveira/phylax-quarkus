@@ -53,8 +53,8 @@ public class RegisterdEmailValueHolder<T> {
    * @return
    */
   public T registerdEmail(RegisterdEmailVO registerdEmail) {
-    value = Optional.of(registerdEmail);
-    return holder;
+    this.value = Optional.of(registerdEmail);
+    return this.holder;
   }
 
   /**
@@ -63,8 +63,8 @@ public class RegisterdEmailValueHolder<T> {
    * @return
    */
   public T registerdEmail(Optional<RegisterdEmailVO> registerdEmail) {
-    value = registerdEmail;
-    return holder;
+    this.value = registerdEmail;
+    return this.holder;
   }
 
   /**
@@ -73,8 +73,8 @@ public class RegisterdEmailValueHolder<T> {
    * @return
    */
   public T registerdEmail(String registerdEmail) {
-    value = Optional.of(RegisterdEmailVO.from(registerdEmail));
-    return holder;
+    this.value = Optional.of(RegisterdEmailVO.from(registerdEmail));
+    return this.holder;
   }
 
   /**
@@ -82,8 +82,8 @@ public class RegisterdEmailValueHolder<T> {
    * @return
    */
   public T registerdEmailNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

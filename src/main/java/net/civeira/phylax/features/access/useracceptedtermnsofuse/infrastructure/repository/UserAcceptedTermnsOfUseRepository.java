@@ -461,21 +461,21 @@ public class UserAcceptedTermnsOfUseRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getUser()
-        .ifPresent(user -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(user.getUid())));
+    filter.getUser().ifPresent(
+        userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
     if (!filter.getUsers().isEmpty()) {
       sq.where(USER, SqlOperator.IN, SqlListParameterValue.strings(filter.getUsers()));
     }
-    filter.getConditions().ifPresent(conditions -> sq.where(CONDITIONS, SqlOperator.EQ,
-        SqlParameterValue.of(conditions.getUid())));
+    filter.getConditions().ifPresent(conditionsParam -> sq.where(CONDITIONS, SqlOperator.EQ,
+        SqlParameterValue.of(conditionsParam.getUid())));
     if (!filter.getConditionss().isEmpty()) {
       sq.where(CONDITIONS, SqlOperator.IN, SqlListParameterValue.strings(filter.getConditionss()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesible -> {
+    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
       sq.join("access_user", "access_user_accepted_termns_of_use_user",
           "access_user_accepted_termns_of_use.user", "access_user_accepted_termns_of_use_user.uid");
       sq.where(ACCESS_USER_ACCEPTED_TERMNS_OF_USE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesible));
+          SqlParameterValue.of(userTenantTenantAccesibleParam));
     });
     return sq;
   }

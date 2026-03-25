@@ -25,8 +25,8 @@ public class FailedLoginAttemptsValueHolder<T> {
    * @return
    */
   public T failedLoginAttempts(FailedLoginAttemptsVO failedLoginAttempts) {
-    value = Optional.of(failedLoginAttempts);
-    return holder;
+    this.value = Optional.of(failedLoginAttempts);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class FailedLoginAttemptsValueHolder<T> {
    * @return
    */
   public T failedLoginAttempts(Optional<FailedLoginAttemptsVO> failedLoginAttempts) {
-    value = failedLoginAttempts;
-    return holder;
+    this.value = failedLoginAttempts;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class FailedLoginAttemptsValueHolder<T> {
    * @return
    */
   public T failedLoginAttempts(Integer failedLoginAttempts) {
-    value = Optional.of(FailedLoginAttemptsVO.from(failedLoginAttempts));
-    return holder;
+    this.value = Optional.of(FailedLoginAttemptsVO.from(failedLoginAttempts));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class FailedLoginAttemptsValueHolder<T> {
    * @return
    */
   public T failedLoginAttemptsNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

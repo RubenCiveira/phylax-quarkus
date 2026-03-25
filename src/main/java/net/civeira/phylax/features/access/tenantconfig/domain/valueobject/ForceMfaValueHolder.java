@@ -26,8 +26,8 @@ public class ForceMfaValueHolder<T> {
    * @return
    */
   public T forceMfa(ForceMfaVO forceMfa) {
-    value = Optional.of(forceMfa);
-    return holder;
+    this.value = Optional.of(forceMfa);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class ForceMfaValueHolder<T> {
    * @return
    */
   public T forceMfa(Optional<ForceMfaVO> forceMfa) {
-    value = forceMfa;
-    return holder;
+    this.value = forceMfa;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class ForceMfaValueHolder<T> {
    * @return
    */
   public T forceMfa(Boolean forceMfa) {
-    value = Optional.of(ForceMfaVO.from(forceMfa));
-    return holder;
+    this.value = Optional.of(ForceMfaVO.from(forceMfa));
+    return this.holder;
   }
 
   /**

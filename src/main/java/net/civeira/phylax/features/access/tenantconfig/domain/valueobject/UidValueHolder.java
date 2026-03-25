@@ -56,8 +56,8 @@ public class UidValueHolder<T> {
    * @return
    */
   public T uid(UidVO uid) {
-    value = Optional.of(uid);
-    return holder;
+    this.value = Optional.of(uid);
+    return this.holder;
   }
 
   /**
@@ -66,8 +66,8 @@ public class UidValueHolder<T> {
    * @return
    */
   public T uid(Optional<UidVO> uid) {
-    value = uid;
-    return holder;
+    this.value = uid;
+    return this.holder;
   }
 
   /**
@@ -76,8 +76,8 @@ public class UidValueHolder<T> {
    * @return
    */
   public T uid(String uid) {
-    value = Optional.of(UidVO.from(uid));
-    return holder;
+    this.value = Optional.of(UidVO.from(uid));
+    return this.holder;
   }
 
   /**

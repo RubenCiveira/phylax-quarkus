@@ -42,8 +42,8 @@ public class PublicAllowValueHolder<T> {
    * @return
    */
   public T publicAllow(PublicAllowVO publicAllow) {
-    value = Optional.of(publicAllow);
-    return holder;
+    this.value = Optional.of(publicAllow);
+    return this.holder;
   }
 
   /**
@@ -52,8 +52,8 @@ public class PublicAllowValueHolder<T> {
    * @return
    */
   public T publicAllow(Optional<PublicAllowVO> publicAllow) {
-    value = publicAllow;
-    return holder;
+    this.value = publicAllow;
+    return this.holder;
   }
 
   /**
@@ -62,8 +62,8 @@ public class PublicAllowValueHolder<T> {
    * @return
    */
   public T publicAllow(Boolean publicAllow) {
-    value = Optional.of(PublicAllowVO.from(publicAllow));
-    return holder;
+    this.value = Optional.of(PublicAllowVO.from(publicAllow));
+    return this.holder;
   }
 
   /**

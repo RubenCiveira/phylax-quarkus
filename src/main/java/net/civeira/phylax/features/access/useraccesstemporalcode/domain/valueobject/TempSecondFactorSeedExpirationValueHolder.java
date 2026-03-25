@@ -55,8 +55,8 @@ public class TempSecondFactorSeedExpirationValueHolder<T> {
    */
   public T tempSecondFactorSeedExpiration(
       TempSecondFactorSeedExpirationVO tempSecondFactorSeedExpiration) {
-    value = Optional.of(tempSecondFactorSeedExpiration);
-    return holder;
+    this.value = Optional.of(tempSecondFactorSeedExpiration);
+    return this.holder;
   }
 
   /**
@@ -66,8 +66,8 @@ public class TempSecondFactorSeedExpirationValueHolder<T> {
    */
   public T tempSecondFactorSeedExpiration(
       Optional<TempSecondFactorSeedExpirationVO> tempSecondFactorSeedExpiration) {
-    value = tempSecondFactorSeedExpiration;
-    return holder;
+    this.value = tempSecondFactorSeedExpiration;
+    return this.holder;
   }
 
   /**
@@ -76,8 +76,8 @@ public class TempSecondFactorSeedExpirationValueHolder<T> {
    * @return
    */
   public T tempSecondFactorSeedExpiration(OffsetDateTime tempSecondFactorSeedExpiration) {
-    value = Optional.of(TempSecondFactorSeedExpirationVO.from(tempSecondFactorSeedExpiration));
-    return holder;
+    this.value = Optional.of(TempSecondFactorSeedExpirationVO.from(tempSecondFactorSeedExpiration));
+    return this.holder;
   }
 
   /**
@@ -85,8 +85,8 @@ public class TempSecondFactorSeedExpirationValueHolder<T> {
    * @return
    */
   public T tempSecondFactorSeedExpirationNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

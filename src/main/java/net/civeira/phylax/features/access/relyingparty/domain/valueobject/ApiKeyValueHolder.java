@@ -26,8 +26,8 @@ public class ApiKeyValueHolder<T> {
    * @return
    */
   public T apiKey(ApiKeyVO apiKey) {
-    value = Optional.of(apiKey);
-    return holder;
+    this.value = Optional.of(apiKey);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class ApiKeyValueHolder<T> {
    * @return
    */
   public T apiKey(Optional<ApiKeyVO> apiKey) {
-    value = apiKey;
-    return holder;
+    this.value = apiKey;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class ApiKeyValueHolder<T> {
    * @return
    */
   public T apiKey(String apiKey) {
-    value = Optional.of(ApiKeyVO.from(apiKey));
-    return holder;
+    this.value = Optional.of(ApiKeyVO.from(apiKey));
+    return this.holder;
   }
 
   /**

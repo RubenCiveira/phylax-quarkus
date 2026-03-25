@@ -53,8 +53,8 @@ public class RecoveryCodeValueHolder<T> {
    * @return
    */
   public T recoveryCode(RecoveryCodeVO recoveryCode) {
-    value = Optional.of(recoveryCode);
-    return holder;
+    this.value = Optional.of(recoveryCode);
+    return this.holder;
   }
 
   /**
@@ -63,8 +63,8 @@ public class RecoveryCodeValueHolder<T> {
    * @return
    */
   public T recoveryCode(Optional<RecoveryCodeVO> recoveryCode) {
-    value = recoveryCode;
-    return holder;
+    this.value = recoveryCode;
+    return this.holder;
   }
 
   /**
@@ -73,8 +73,8 @@ public class RecoveryCodeValueHolder<T> {
    * @return
    */
   public T recoveryCode(String recoveryCode) {
-    value = Optional.of(RecoveryCodeVO.from(recoveryCode));
-    return holder;
+    this.value = Optional.of(RecoveryCodeVO.from(recoveryCode));
+    return this.holder;
   }
 
   /**
@@ -82,8 +82,8 @@ public class RecoveryCodeValueHolder<T> {
    * @return
    */
   public T recoveryCodeNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

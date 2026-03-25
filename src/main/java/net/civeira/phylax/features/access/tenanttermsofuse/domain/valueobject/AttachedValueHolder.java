@@ -25,8 +25,8 @@ public class AttachedValueHolder<T> {
    * @return
    */
   public T attached(AttachedVO attached) {
-    value = Optional.of(attached);
-    return holder;
+    this.value = Optional.of(attached);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class AttachedValueHolder<T> {
    * @return
    */
   public T attached(Optional<AttachedVO> attached) {
-    value = attached;
-    return holder;
+    this.value = attached;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class AttachedValueHolder<T> {
    * @return
    */
   public T attached(String attached) {
-    value = Optional.of(AttachedVO.from(attached));
-    return holder;
+    this.value = Optional.of(AttachedVO.from(attached));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class AttachedValueHolder<T> {
    * @return
    */
   public T attachedNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

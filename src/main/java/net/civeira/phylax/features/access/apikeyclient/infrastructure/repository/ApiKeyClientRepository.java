@@ -440,7 +440,8 @@ public class ApiKeyClientRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getKey().ifPresent(key -> sq.where(KEY, SqlOperator.EQ, SqlParameterValue.of(key)));
+    filter.getKey()
+        .ifPresent(keyParam -> sq.where(KEY, SqlOperator.EQ, SqlParameterValue.of(keyParam)));
     return sq;
   }
 

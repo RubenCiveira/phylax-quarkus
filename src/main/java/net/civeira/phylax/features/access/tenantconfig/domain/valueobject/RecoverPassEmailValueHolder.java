@@ -53,8 +53,8 @@ public class RecoverPassEmailValueHolder<T> {
    * @return
    */
   public T recoverPassEmail(RecoverPassEmailVO recoverPassEmail) {
-    value = Optional.of(recoverPassEmail);
-    return holder;
+    this.value = Optional.of(recoverPassEmail);
+    return this.holder;
   }
 
   /**
@@ -63,8 +63,8 @@ public class RecoverPassEmailValueHolder<T> {
    * @return
    */
   public T recoverPassEmail(Optional<RecoverPassEmailVO> recoverPassEmail) {
-    value = recoverPassEmail;
-    return holder;
+    this.value = recoverPassEmail;
+    return this.holder;
   }
 
   /**
@@ -73,8 +73,8 @@ public class RecoverPassEmailValueHolder<T> {
    * @return
    */
   public T recoverPassEmail(String recoverPassEmail) {
-    value = Optional.of(RecoverPassEmailVO.from(recoverPassEmail));
-    return holder;
+    this.value = Optional.of(RecoverPassEmailVO.from(recoverPassEmail));
+    return this.holder;
   }
 
   /**
@@ -82,8 +82,8 @@ public class RecoverPassEmailValueHolder<T> {
    * @return
    */
   public T recoverPassEmailNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

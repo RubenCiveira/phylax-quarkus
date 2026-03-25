@@ -81,8 +81,8 @@ public class UserValueHolder<T> {
    * @return
    */
   public T user(UserVO user) {
-    value = Optional.of(user);
-    return holder;
+    this.value = Optional.of(user);
+    return this.holder;
   }
 
   /**
@@ -91,8 +91,8 @@ public class UserValueHolder<T> {
    * @return
    */
   public T user(Optional<UserVO> user) {
-    value = user;
-    return holder;
+    this.value = user;
+    return this.holder;
   }
 
   /**
@@ -101,8 +101,8 @@ public class UserValueHolder<T> {
    * @return
    */
   public T user(UserRef user) {
-    value = Optional.of(UserVO.from(user));
-    return holder;
+    this.value = Optional.of(UserVO.from(user));
+    return this.holder;
   }
 
   /**

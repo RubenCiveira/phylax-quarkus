@@ -26,8 +26,8 @@ public class DomainValueHolder<T> {
    * @return
    */
   public T domain(DomainVO domain) {
-    value = Optional.of(domain);
-    return holder;
+    this.value = Optional.of(domain);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class DomainValueHolder<T> {
    * @return
    */
   public T domain(Optional<DomainVO> domain) {
-    value = domain;
-    return holder;
+    this.value = domain;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class DomainValueHolder<T> {
    * @return
    */
   public T domain(String domain) {
-    value = Optional.of(DomainVO.from(domain));
-    return holder;
+    this.value = Optional.of(DomainVO.from(domain));
+    return this.holder;
   }
 
   /**

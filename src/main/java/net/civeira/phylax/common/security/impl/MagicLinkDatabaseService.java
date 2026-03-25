@@ -41,7 +41,7 @@ import net.civeira.phylax.common.security.OperationContext;
 @Slf4j
 public class MagicLinkDatabaseService implements MagicLinkService {
 
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private final SecureRandom random = new SecureRandom();
 
   private final DataSource datasource;
   private final ObjectMapper mapper;
@@ -304,7 +304,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
 
   private String generateToken() {
     byte[] bytes = new byte[24];
-    RANDOM.nextBytes(bytes);
+    random.nextBytes(bytes);
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
   }
 }

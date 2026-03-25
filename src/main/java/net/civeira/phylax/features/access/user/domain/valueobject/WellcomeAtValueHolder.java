@@ -74,8 +74,8 @@ public class WellcomeAtValueHolder<T> {
    * @return
    */
   public T wellcomeAt(WellcomeAtVO wellcomeAt) {
-    value = Optional.of(wellcomeAt);
-    return holder;
+    this.value = Optional.of(wellcomeAt);
+    return this.holder;
   }
 
   /**
@@ -84,8 +84,8 @@ public class WellcomeAtValueHolder<T> {
    * @return
    */
   public T wellcomeAt(Optional<WellcomeAtVO> wellcomeAt) {
-    value = wellcomeAt;
-    return holder;
+    this.value = wellcomeAt;
+    return this.holder;
   }
 
   /**
@@ -94,8 +94,8 @@ public class WellcomeAtValueHolder<T> {
    * @return
    */
   public T wellcomeAt(OffsetDateTime wellcomeAt) {
-    value = Optional.of(WellcomeAtVO.from(wellcomeAt));
-    return holder;
+    this.value = Optional.of(WellcomeAtVO.from(wellcomeAt));
+    return this.holder;
   }
 
   /**
@@ -103,7 +103,7 @@ public class WellcomeAtValueHolder<T> {
    * @return
    */
   public T wellcomeAtNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 }

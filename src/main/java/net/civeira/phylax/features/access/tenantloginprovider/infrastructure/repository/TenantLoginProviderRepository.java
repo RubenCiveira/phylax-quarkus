@@ -586,15 +586,16 @@ public class TenantLoginProviderRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("name", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getName().ifPresent(name -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(name)));
-    filter.getTenant().ifPresent(
-        tenant -> sq.where(TENANT, SqlOperator.EQ, SqlParameterValue.of(tenant.getUid())));
+    filter.getName()
+        .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
+    filter.getTenant().ifPresent(tenantParam -> sq.where(TENANT, SqlOperator.EQ,
+        SqlParameterValue.of(tenantParam.getUid())));
     if (!filter.getTenants().isEmpty()) {
       sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
     }
     filter.getTenantTenantAccesible()
-        .ifPresent(tenantTenantAccesible -> sq.where(ACCESS_TENANT_LOGIN_PROVIDER_TENANT,
-            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesible)));
+        .ifPresent(tenantTenantAccesibleParam -> sq.where(ACCESS_TENANT_LOGIN_PROVIDER_TENANT,
+            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
     return sq;
   }
 

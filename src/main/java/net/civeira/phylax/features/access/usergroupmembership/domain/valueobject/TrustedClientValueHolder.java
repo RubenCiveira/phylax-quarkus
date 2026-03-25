@@ -56,8 +56,8 @@ public class TrustedClientValueHolder<T> {
    * @return
    */
   public T trustedClient(TrustedClientVO trustedClient) {
-    value = Optional.of(trustedClient);
-    return holder;
+    this.value = Optional.of(trustedClient);
+    return this.holder;
   }
 
   /**
@@ -66,8 +66,8 @@ public class TrustedClientValueHolder<T> {
    * @return
    */
   public T trustedClient(Optional<TrustedClientVO> trustedClient) {
-    value = trustedClient;
-    return holder;
+    this.value = trustedClient;
+    return this.holder;
   }
 
   /**
@@ -76,8 +76,8 @@ public class TrustedClientValueHolder<T> {
    * @return
    */
   public T trustedClient(TrustedClientRef trustedClient) {
-    value = Optional.of(TrustedClientVO.from(trustedClient));
-    return holder;
+    this.value = Optional.of(TrustedClientVO.from(trustedClient));
+    return this.holder;
   }
 
   /**
@@ -96,8 +96,8 @@ public class TrustedClientValueHolder<T> {
    * @return
    */
   public T trustedClientNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

@@ -26,8 +26,8 @@ public class BlockedUntilValueHolder<T> {
    * @return
    */
   public T blockedUntil(BlockedUntilVO blockedUntil) {
-    value = Optional.of(blockedUntil);
-    return holder;
+    this.value = Optional.of(blockedUntil);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class BlockedUntilValueHolder<T> {
    * @return
    */
   public T blockedUntil(Optional<BlockedUntilVO> blockedUntil) {
-    value = blockedUntil;
-    return holder;
+    this.value = blockedUntil;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class BlockedUntilValueHolder<T> {
    * @return
    */
   public T blockedUntil(OffsetDateTime blockedUntil) {
-    value = Optional.of(BlockedUntilVO.from(blockedUntil));
-    return holder;
+    this.value = Optional.of(BlockedUntilVO.from(blockedUntil));
+    return this.holder;
   }
 
   /**
@@ -55,8 +55,8 @@ public class BlockedUntilValueHolder<T> {
    * @return
    */
   public T blockedUntilNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

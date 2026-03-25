@@ -41,8 +41,8 @@ public class KeyValueHolder<T> {
    * @return
    */
   public T key(KeyVO key) {
-    value = Optional.of(key);
-    return holder;
+    this.value = Optional.of(key);
+    return this.holder;
   }
 
   /**
@@ -51,8 +51,8 @@ public class KeyValueHolder<T> {
    * @return
    */
   public T key(Optional<KeyVO> key) {
-    value = key;
-    return holder;
+    this.value = key;
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class KeyValueHolder<T> {
    * @return
    */
   public T key(String key) {
-    value = Optional.of(KeyVO.from(key));
-    return holder;
+    this.value = Optional.of(KeyVO.from(key));
+    return this.holder;
   }
 
   /**
@@ -70,8 +70,8 @@ public class KeyValueHolder<T> {
    * @return
    */
   public T keyNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

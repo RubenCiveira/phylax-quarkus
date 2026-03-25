@@ -79,8 +79,8 @@ public class UsersEnabledByDefaultValueHolder<T> {
    * @return
    */
   public T usersEnabledByDefault(UsersEnabledByDefaultVO usersEnabledByDefault) {
-    value = Optional.of(usersEnabledByDefault);
-    return holder;
+    this.value = Optional.of(usersEnabledByDefault);
+    return this.holder;
   }
 
   /**
@@ -89,8 +89,8 @@ public class UsersEnabledByDefaultValueHolder<T> {
    * @return
    */
   public T usersEnabledByDefault(Optional<UsersEnabledByDefaultVO> usersEnabledByDefault) {
-    value = usersEnabledByDefault;
-    return holder;
+    this.value = usersEnabledByDefault;
+    return this.holder;
   }
 
   /**
@@ -99,7 +99,7 @@ public class UsersEnabledByDefaultValueHolder<T> {
    * @return
    */
   public T usersEnabledByDefault(Boolean usersEnabledByDefault) {
-    value = Optional.of(UsersEnabledByDefaultVO.from(usersEnabledByDefault));
-    return holder;
+    this.value = Optional.of(UsersEnabledByDefaultVO.from(usersEnabledByDefault));
+    return this.holder;
   }
 }

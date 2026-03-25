@@ -25,8 +25,8 @@ public class DisabledUserEmailValueHolder<T> {
    * @return
    */
   public T disabledUserEmail(DisabledUserEmailVO disabledUserEmail) {
-    value = Optional.of(disabledUserEmail);
-    return holder;
+    this.value = Optional.of(disabledUserEmail);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class DisabledUserEmailValueHolder<T> {
    * @return
    */
   public T disabledUserEmail(Optional<DisabledUserEmailVO> disabledUserEmail) {
-    value = disabledUserEmail;
-    return holder;
+    this.value = disabledUserEmail;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class DisabledUserEmailValueHolder<T> {
    * @return
    */
   public T disabledUserEmail(String disabledUserEmail) {
-    value = Optional.of(DisabledUserEmailVO.from(disabledUserEmail));
-    return holder;
+    this.value = Optional.of(DisabledUserEmailVO.from(disabledUserEmail));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class DisabledUserEmailValueHolder<T> {
    * @return
    */
   public T disabledUserEmailNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

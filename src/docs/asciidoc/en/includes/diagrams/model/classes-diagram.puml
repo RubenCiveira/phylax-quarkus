@@ -2,6 +2,23 @@
 @startuml Clases
 title Clases
 left to right direction
+class document.Template{
+uid:string
+code:string
+channel:TemplateChannelOptions
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.Template: tenant 
+document.Theme "1"  o--  "N*" document.Template: theme 
+
 class access.UserRoleAssignament{
 uid:string
 version:integer
@@ -69,6 +86,22 @@ resetPasswordRecover()
 }
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user 
 
+class notification.Message{
+uid:string
+target:string
+content:blob
+retries:integer
+createdAt:datetime
+sendAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.Tenant "1"  o--  "N*" notification.Message: tenant 
+
 class access.RelyingParty{
 uid:string
 code:string
@@ -114,6 +147,20 @@ delete()
 access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
 access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
 
+class document.TemplateVersion{
+uid:string
+subject:string
+contentHtml:string
+contentText:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+document.Template "1"  o--  "N*" document.TemplateVersion: template 
+
 class access.TenantConfig{
 uid:string
 innerLabel:string
@@ -134,6 +181,22 @@ update()
 delete()
 }
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant 
+
+class document.TemplateSnippet{
+uid:string
+code:string
+contentHtml:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant 
 
 class access.ApiKeyClient{
 uid:string
@@ -191,6 +254,57 @@ disable()
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
 
+class document.TemplateVariable{
+uid:string
+code:string
+type:string
+value:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant 
+
+class document.Theme{
+uid:string
+name:string
+isDefault:boolean
+enabled:boolean
+customCss:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.Theme: tenant 
+
+class document.TemplateAsset{
+uid:string
+code:string
+type:string
+content:binary
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant 
+
 class access.User{
 uid:string
 name:string
@@ -241,6 +355,8 @@ enable()
 disable()
 }
 
+access.Tenant "1"  o--  "N*" document.Template: tenant  
+document.Theme "1"  o--  "N*" document.Template: theme  
 access.User "1"  o--  "N*" access.UserRoleAssignament: user  
 access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty  
 access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient  
@@ -250,13 +366,19 @@ access.User "1"  o--  "N*" access.UserGroupMembership: user
 access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty  
 access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient  
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
+access.Tenant "1"  o--  "N*" notification.Message: tenant  
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
 access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
 access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions  
+document.Template "1"  o--  "N*" document.TemplateVersion: template  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
+access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant  
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
+access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant  
+access.Tenant "1"  o--  "N*" document.Theme: tenant  
+access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant  
 access.Tenant "1"  o--  "N*" access.User: tenant  
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")

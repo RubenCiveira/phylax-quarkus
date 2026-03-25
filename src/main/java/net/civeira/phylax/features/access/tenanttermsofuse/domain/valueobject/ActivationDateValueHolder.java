@@ -26,8 +26,8 @@ public class ActivationDateValueHolder<T> {
    * @return
    */
   public T activationDate(ActivationDateVO activationDate) {
-    value = Optional.of(activationDate);
-    return holder;
+    this.value = Optional.of(activationDate);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class ActivationDateValueHolder<T> {
    * @return
    */
   public T activationDate(Optional<ActivationDateVO> activationDate) {
-    value = activationDate;
-    return holder;
+    this.value = activationDate;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class ActivationDateValueHolder<T> {
    * @return
    */
   public T activationDate(OffsetDateTime activationDate) {
-    value = Optional.of(ActivationDateVO.from(activationDate));
-    return holder;
+    this.value = Optional.of(ActivationDateVO.from(activationDate));
+    return this.holder;
   }
 
   /**
@@ -55,8 +55,8 @@ public class ActivationDateValueHolder<T> {
    * @return
    */
   public T activationDateNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

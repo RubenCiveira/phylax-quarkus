@@ -29,8 +29,8 @@ public class ConditionsValueHolder<T> {
    * @return
    */
   public T conditions(ConditionsVO conditions) {
-    value = Optional.of(conditions);
-    return holder;
+    this.value = Optional.of(conditions);
+    return this.holder;
   }
 
   /**
@@ -39,8 +39,8 @@ public class ConditionsValueHolder<T> {
    * @return
    */
   public T conditions(Optional<ConditionsVO> conditions) {
-    value = conditions;
-    return holder;
+    this.value = conditions;
+    return this.holder;
   }
 
   /**
@@ -49,8 +49,8 @@ public class ConditionsValueHolder<T> {
    * @return
    */
   public T conditions(TenantTermsOfUseRef conditions) {
-    value = Optional.of(ConditionsVO.from(conditions));
-    return holder;
+    this.value = Optional.of(ConditionsVO.from(conditions));
+    return this.holder;
   }
 
   /**

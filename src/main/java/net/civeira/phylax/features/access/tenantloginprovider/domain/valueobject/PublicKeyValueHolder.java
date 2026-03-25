@@ -41,8 +41,8 @@ public class PublicKeyValueHolder<T> {
    * @return
    */
   public T publicKey(PublicKeyVO publicKey) {
-    value = Optional.of(publicKey);
-    return holder;
+    this.value = Optional.of(publicKey);
+    return this.holder;
   }
 
   /**
@@ -51,8 +51,8 @@ public class PublicKeyValueHolder<T> {
    * @return
    */
   public T publicKey(Optional<PublicKeyVO> publicKey) {
-    value = publicKey;
-    return holder;
+    this.value = publicKey;
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class PublicKeyValueHolder<T> {
    * @return
    */
   public T publicKey(String publicKey) {
-    value = Optional.of(PublicKeyVO.from(publicKey));
-    return holder;
+    this.value = Optional.of(PublicKeyVO.from(publicKey));
+    return this.holder;
   }
 
   /**
@@ -70,8 +70,8 @@ public class PublicKeyValueHolder<T> {
    * @return
    */
   public T publicKeyNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

@@ -51,8 +51,8 @@ public class RootValueHolder<T> {
    * @return
    */
   public T root(RootVO root) {
-    value = Optional.of(root);
-    return holder;
+    this.value = Optional.of(root);
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class RootValueHolder<T> {
    * @return
    */
   public T root(Optional<RootVO> root) {
-    value = root;
-    return holder;
+    this.value = root;
+    return this.holder;
   }
 
   /**
@@ -71,8 +71,8 @@ public class RootValueHolder<T> {
    * @return
    */
   public T root(Boolean root) {
-    value = Optional.of(RootVO.from(root));
-    return holder;
+    this.value = Optional.of(RootVO.from(root));
+    return this.holder;
   }
 
   /**
@@ -80,8 +80,8 @@ public class RootValueHolder<T> {
    * @return
    */
   public T rootNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

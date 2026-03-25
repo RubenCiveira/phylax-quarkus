@@ -42,8 +42,8 @@ public class NameValueHolder<T> {
    * @return
    */
   public T name(NameVO name) {
-    value = Optional.of(name);
-    return holder;
+    this.value = Optional.of(name);
+    return this.holder;
   }
 
   /**
@@ -52,8 +52,8 @@ public class NameValueHolder<T> {
    * @return
    */
   public T name(Optional<NameVO> name) {
-    value = name;
-    return holder;
+    this.value = name;
+    return this.holder;
   }
 
   /**
@@ -62,8 +62,8 @@ public class NameValueHolder<T> {
    * @return
    */
   public T name(String name) {
-    value = Optional.of(NameVO.from(name));
-    return holder;
+    this.value = Optional.of(NameVO.from(name));
+    return this.holder;
   }
 
   /**

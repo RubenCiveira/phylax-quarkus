@@ -25,8 +25,8 @@ public class CertificateValueHolder<T> {
    * @return
    */
   public T certificate(CertificateVO certificate) {
-    value = Optional.of(certificate);
-    return holder;
+    this.value = Optional.of(certificate);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class CertificateValueHolder<T> {
    * @return
    */
   public T certificate(Optional<CertificateVO> certificate) {
-    value = certificate;
-    return holder;
+    this.value = certificate;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class CertificateValueHolder<T> {
    * @return
    */
   public T certificate(String certificate) {
-    value = Optional.of(CertificateVO.from(certificate));
-    return holder;
+    this.value = Optional.of(CertificateVO.from(certificate));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class CertificateValueHolder<T> {
    * @return
    */
   public T certificateNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

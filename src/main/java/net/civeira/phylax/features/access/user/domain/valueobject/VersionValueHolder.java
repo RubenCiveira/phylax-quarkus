@@ -72,8 +72,8 @@ public class VersionValueHolder<T> {
    * @return
    */
   public T version(VersionVO version) {
-    value = Optional.of(version);
-    return holder;
+    this.value = Optional.of(version);
+    return this.holder;
   }
 
   /**
@@ -82,8 +82,8 @@ public class VersionValueHolder<T> {
    * @return
    */
   public T version(Optional<VersionVO> version) {
-    value = version;
-    return holder;
+    this.value = version;
+    return this.holder;
   }
 
   /**
@@ -92,8 +92,8 @@ public class VersionValueHolder<T> {
    * @return
    */
   public T version(Integer version) {
-    value = Optional.of(VersionVO.from(version));
-    return holder;
+    this.value = Optional.of(VersionVO.from(version));
+    return this.holder;
   }
 
   /**
@@ -101,7 +101,7 @@ public class VersionValueHolder<T> {
    * @return
    */
   public T versionNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 }

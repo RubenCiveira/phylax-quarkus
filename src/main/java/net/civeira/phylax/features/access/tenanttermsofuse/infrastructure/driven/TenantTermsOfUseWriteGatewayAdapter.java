@@ -16,6 +16,7 @@ import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfU
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseCursor;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseFilter;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseWriteRepositoryGateway;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.AttachedVO;
 import net.civeira.phylax.features.access.tenanttermsofuse.infrastructure.event.TenantTermsOfUseEventDispatcher;
 import net.civeira.phylax.features.access.tenanttermsofuse.infrastructure.repository.TenantTermsOfUseRepository;
 
@@ -75,7 +76,9 @@ public class TenantTermsOfUseWriteGatewayAdapter implements TenantTermsOfUseWrit
     Span span = tracer.spanBuilder("Create on the repository an entity of tenant terms of use")
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.SERVER).startSpan();
     try {
-      tenantTermsOfUseAttachedUploadGatewayAdapter.commitAttached(entity, Optional.empty());
+      entity = entity.withAttachedValue(
+          tenantTermsOfUseAttachedUploadGatewayAdapter.commitAttached(entity, Optional.empty())
+              .map(AttachedVO::from).orElseGet(AttachedVO::nullValue));
       TenantTermsOfUse result = repository.create(entity);
       eventDispatcher.dispatch(entity);
       return result;
@@ -101,7 +104,9 @@ public class TenantTermsOfUseWriteGatewayAdapter implements TenantTermsOfUseWrit
             "Create on the repository an entity of tenant terms of use and verify its visibility")
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.SERVER).startSpan();
     try {
-      tenantTermsOfUseAttachedUploadGatewayAdapter.commitAttached(entity, Optional.empty());
+      entity = entity.withAttachedValue(
+          tenantTermsOfUseAttachedUploadGatewayAdapter.commitAttached(entity, Optional.empty())
+              .map(AttachedVO::from).orElseGet(AttachedVO::nullValue));
       TenantTermsOfUse result = repository.create(entity, verifier);
       eventDispatcher.dispatch(entity);
       return result;
@@ -278,7 +283,9 @@ public class TenantTermsOfUseWriteGatewayAdapter implements TenantTermsOfUseWrit
   @Override
   public TenantTermsOfUse update(TenantTermsOfUseRef reference, TenantTermsOfUse entity) {
     TenantTermsOfUse stored = resolveForUpdate(reference);
-    tenantTermsOfUseAttachedUploadGatewayAdapter.commitAttached(entity, Optional.of(stored));
+    entity = entity.withAttachedValue(
+        tenantTermsOfUseAttachedUploadGatewayAdapter.commitAttached(entity, Optional.of(stored))
+            .map(AttachedVO::from).orElseGet(AttachedVO::nullValue));
     TenantTermsOfUse result = repository.update(entity);
     eventDispatcher.dispatch(entity);
     return result;

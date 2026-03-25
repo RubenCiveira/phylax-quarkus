@@ -61,8 +61,8 @@ public class RolesValueHolder<T> {
    * @return
    */
   public T roles(RolesVO roles) {
-    value = Optional.of(roles);
-    return holder;
+    this.value = Optional.of(roles);
+    return this.holder;
   }
 
   /**
@@ -71,8 +71,8 @@ public class RolesValueHolder<T> {
    * @return
    */
   public T roles(Optional<RolesVO> roles) {
-    value = roles;
-    return holder;
+    this.value = roles;
+    return this.holder;
   }
 
   /**
@@ -81,8 +81,8 @@ public class RolesValueHolder<T> {
    * @return
    */
   public T roles(List<Roles> roles) {
-    value = Optional.of(RolesVO.from(roles));
-    return holder;
+    this.value = Optional.of(RolesVO.from(roles));
+    return this.holder;
   }
 
   /**

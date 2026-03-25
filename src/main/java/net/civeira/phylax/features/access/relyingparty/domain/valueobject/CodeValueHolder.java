@@ -26,8 +26,8 @@ public class CodeValueHolder<T> {
    * @return
    */
   public T code(CodeVO code) {
-    value = Optional.of(code);
-    return holder;
+    this.value = Optional.of(code);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class CodeValueHolder<T> {
    * @return
    */
   public T code(Optional<CodeVO> code) {
-    value = code;
-    return holder;
+    this.value = code;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class CodeValueHolder<T> {
    * @return
    */
   public T code(String code) {
-    value = Optional.of(CodeVO.from(code));
-    return holder;
+    this.value = Optional.of(CodeVO.from(code));
+    return this.holder;
   }
 
   /**

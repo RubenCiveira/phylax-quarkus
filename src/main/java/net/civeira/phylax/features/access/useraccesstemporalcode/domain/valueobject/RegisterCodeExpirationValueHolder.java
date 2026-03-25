@@ -54,8 +54,8 @@ public class RegisterCodeExpirationValueHolder<T> {
    * @return
    */
   public T registerCodeExpiration(RegisterCodeExpirationVO registerCodeExpiration) {
-    value = Optional.of(registerCodeExpiration);
-    return holder;
+    this.value = Optional.of(registerCodeExpiration);
+    return this.holder;
   }
 
   /**
@@ -64,8 +64,8 @@ public class RegisterCodeExpirationValueHolder<T> {
    * @return
    */
   public T registerCodeExpiration(Optional<RegisterCodeExpirationVO> registerCodeExpiration) {
-    value = registerCodeExpiration;
-    return holder;
+    this.value = registerCodeExpiration;
+    return this.holder;
   }
 
   /**
@@ -74,8 +74,8 @@ public class RegisterCodeExpirationValueHolder<T> {
    * @return
    */
   public T registerCodeExpiration(OffsetDateTime registerCodeExpiration) {
-    value = Optional.of(RegisterCodeExpirationVO.from(registerCodeExpiration));
-    return holder;
+    this.value = Optional.of(RegisterCodeExpirationVO.from(registerCodeExpiration));
+    return this.holder;
   }
 
   /**
@@ -83,8 +83,8 @@ public class RegisterCodeExpirationValueHolder<T> {
    * @return
    */
   public T registerCodeExpirationNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

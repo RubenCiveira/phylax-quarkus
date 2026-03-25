@@ -25,8 +25,8 @@ public class AllowAllScopesValueHolder<T> {
    * @return
    */
   public T allowAllScopes(AllowAllScopesVO allowAllScopes) {
-    value = Optional.of(allowAllScopes);
-    return holder;
+    this.value = Optional.of(allowAllScopes);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class AllowAllScopesValueHolder<T> {
    * @return
    */
   public T allowAllScopes(Optional<AllowAllScopesVO> allowAllScopes) {
-    value = allowAllScopes;
-    return holder;
+    this.value = allowAllScopes;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class AllowAllScopesValueHolder<T> {
    * @return
    */
   public T allowAllScopes(Boolean allowAllScopes) {
-    value = Optional.of(AllowAllScopesVO.from(allowAllScopes));
-    return holder;
+    this.value = Optional.of(AllowAllScopesVO.from(allowAllScopes));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class AllowAllScopesValueHolder<T> {
    * @return
    */
   public T allowAllScopesNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

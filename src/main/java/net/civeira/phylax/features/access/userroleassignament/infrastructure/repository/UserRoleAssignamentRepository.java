@@ -530,28 +530,28 @@ public class UserRoleAssignamentRepository {
                 SqlParameterValue.ofNullString())),
         filter.getForAllAudiences().filter(Boolean.TRUE::equals).map(_ -> PartialWhere
             .where("trusted_client", SqlOperator.IS_NULL, SqlParameterValue.ofNullString()))));
-    filter.getUser()
-        .ifPresent(user -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(user.getUid())));
+    filter.getUser().ifPresent(
+        userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
     if (!filter.getUsers().isEmpty()) {
       sq.where(USER, SqlOperator.IN, SqlListParameterValue.strings(filter.getUsers()));
     }
-    filter.getRelyingParty().ifPresent(relyingParty -> sq.where(RELYING_PARTY_SNAKE, SqlOperator.EQ,
-        SqlParameterValue.of(relyingParty.getUid())));
+    filter.getRelyingParty().ifPresent(relyingPartyParam -> sq.where(RELYING_PARTY_SNAKE,
+        SqlOperator.EQ, SqlParameterValue.of(relyingPartyParam.getUid())));
     if (!filter.getRelyingPartys().isEmpty()) {
       sq.where(RELYING_PARTY_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getRelyingPartys()));
     }
-    filter.getTrustedClient().ifPresent(trustedClient -> sq.where(TRUSTED_CLIENT_SNAKE,
-        SqlOperator.EQ, SqlParameterValue.of(trustedClient.getUid())));
+    filter.getTrustedClient().ifPresent(trustedClientParam -> sq.where(TRUSTED_CLIENT_SNAKE,
+        SqlOperator.EQ, SqlParameterValue.of(trustedClientParam.getUid())));
     if (!filter.getTrustedClients().isEmpty()) {
       sq.where(TRUSTED_CLIENT_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getTrustedClients()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesible -> {
+    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
       sq.join("access_user", "access_user_role_assignament_user",
           "access_user_role_assignament.user", "access_user_role_assignament_user.uid");
       sq.where(ACCESS_USER_ROLE_ASSIGNAMENT_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesible));
+          SqlParameterValue.of(userTenantTenantAccesibleParam));
     });
     return sq;
   }

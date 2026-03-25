@@ -56,8 +56,8 @@ public class RelyingPartyValueHolder<T> {
    * @return
    */
   public T relyingParty(RelyingPartyVO relyingParty) {
-    value = Optional.of(relyingParty);
-    return holder;
+    this.value = Optional.of(relyingParty);
+    return this.holder;
   }
 
   /**
@@ -66,8 +66,8 @@ public class RelyingPartyValueHolder<T> {
    * @return
    */
   public T relyingParty(Optional<RelyingPartyVO> relyingParty) {
-    value = relyingParty;
-    return holder;
+    this.value = relyingParty;
+    return this.holder;
   }
 
   /**
@@ -76,8 +76,8 @@ public class RelyingPartyValueHolder<T> {
    * @return
    */
   public T relyingParty(RelyingPartyRef relyingParty) {
-    value = Optional.of(RelyingPartyVO.from(relyingParty));
-    return holder;
+    this.value = Optional.of(RelyingPartyVO.from(relyingParty));
+    return this.holder;
   }
 
   /**
@@ -96,8 +96,8 @@ public class RelyingPartyValueHolder<T> {
    * @return
    */
   public T relyingPartyNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

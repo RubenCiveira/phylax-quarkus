@@ -25,8 +25,8 @@ public class EmailValueHolder<T> {
    * @return
    */
   public T email(EmailVO email) {
-    value = Optional.of(email);
-    return holder;
+    this.value = Optional.of(email);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class EmailValueHolder<T> {
    * @return
    */
   public T email(Optional<EmailVO> email) {
-    value = email;
-    return holder;
+    this.value = email;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class EmailValueHolder<T> {
    * @return
    */
   public T email(String email) {
-    value = Optional.of(EmailVO.from(email));
-    return holder;
+    this.value = Optional.of(EmailVO.from(email));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class EmailValueHolder<T> {
    * @return
    */
   public T emailNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

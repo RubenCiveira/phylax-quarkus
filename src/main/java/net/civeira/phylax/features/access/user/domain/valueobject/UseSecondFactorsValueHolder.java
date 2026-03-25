@@ -74,8 +74,8 @@ public class UseSecondFactorsValueHolder<T> {
    * @return
    */
   public T useSecondFactors(UseSecondFactorsVO useSecondFactors) {
-    value = Optional.of(useSecondFactors);
-    return holder;
+    this.value = Optional.of(useSecondFactors);
+    return this.holder;
   }
 
   /**
@@ -84,8 +84,8 @@ public class UseSecondFactorsValueHolder<T> {
    * @return
    */
   public T useSecondFactors(Optional<UseSecondFactorsVO> useSecondFactors) {
-    value = useSecondFactors;
-    return holder;
+    this.value = useSecondFactors;
+    return this.holder;
   }
 
   /**
@@ -94,8 +94,8 @@ public class UseSecondFactorsValueHolder<T> {
    * @return
    */
   public T useSecondFactors(Boolean useSecondFactors) {
-    value = Optional.of(UseSecondFactorsVO.from(useSecondFactors));
-    return holder;
+    this.value = Optional.of(UseSecondFactorsVO.from(useSecondFactors));
+    return this.holder;
   }
 
   /**
@@ -103,7 +103,7 @@ public class UseSecondFactorsValueHolder<T> {
    * @return
    */
   public T useSecondFactorsNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 }

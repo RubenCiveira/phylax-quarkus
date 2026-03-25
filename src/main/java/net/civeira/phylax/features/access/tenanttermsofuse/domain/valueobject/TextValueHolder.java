@@ -57,8 +57,8 @@ public class TextValueHolder<T> {
    * @return
    */
   public T text(TextVO text) {
-    value = Optional.of(text);
-    return holder;
+    this.value = Optional.of(text);
+    return this.holder;
   }
 
   /**
@@ -67,8 +67,8 @@ public class TextValueHolder<T> {
    * @return
    */
   public T text(Optional<TextVO> text) {
-    value = text;
-    return holder;
+    this.value = text;
+    return this.holder;
   }
 
   /**
@@ -77,8 +77,8 @@ public class TextValueHolder<T> {
    * @return
    */
   public T text(String text) {
-    value = Optional.of(TextVO.from(text));
-    return holder;
+    this.value = Optional.of(TextVO.from(text));
+    return this.holder;
   }
 
   /**

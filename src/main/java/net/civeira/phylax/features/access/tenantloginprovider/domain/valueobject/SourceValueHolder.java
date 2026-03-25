@@ -58,8 +58,8 @@ public class SourceValueHolder<T> {
    * @return
    */
   public T source(SourceVO source) {
-    value = Optional.of(source);
-    return holder;
+    this.value = Optional.of(source);
+    return this.holder;
   }
 
   /**
@@ -68,8 +68,8 @@ public class SourceValueHolder<T> {
    * @return
    */
   public T source(Optional<SourceVO> source) {
-    value = source;
-    return holder;
+    this.value = source;
+    return this.holder;
   }
 
   /**
@@ -78,8 +78,8 @@ public class SourceValueHolder<T> {
    * @return
    */
   public T source(TenantLoginProviderSourceOptions source) {
-    value = Optional.of(SourceVO.from(source));
-    return holder;
+    this.value = Optional.of(SourceVO.from(source));
+    return this.holder;
   }
 
   /**

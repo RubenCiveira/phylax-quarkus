@@ -25,8 +25,8 @@ public class AllowRegisterValueHolder<T> {
    * @return
    */
   public T allowRegister(AllowRegisterVO allowRegister) {
-    value = Optional.of(allowRegister);
-    return holder;
+    this.value = Optional.of(allowRegister);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class AllowRegisterValueHolder<T> {
    * @return
    */
   public T allowRegister(Optional<AllowRegisterVO> allowRegister) {
-    value = allowRegister;
-    return holder;
+    this.value = allowRegister;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class AllowRegisterValueHolder<T> {
    * @return
    */
   public T allowRegister(Boolean allowRegister) {
-    value = Optional.of(AllowRegisterVO.from(allowRegister));
-    return holder;
+    this.value = Optional.of(AllowRegisterVO.from(allowRegister));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class AllowRegisterValueHolder<T> {
    * @return
    */
   public T allowRegisterNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

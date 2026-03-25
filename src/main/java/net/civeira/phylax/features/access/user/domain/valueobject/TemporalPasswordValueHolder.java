@@ -53,8 +53,8 @@ public class TemporalPasswordValueHolder<T> {
    * @return
    */
   public T temporalPassword(TemporalPasswordVO temporalPassword) {
-    value = Optional.of(temporalPassword);
-    return holder;
+    this.value = Optional.of(temporalPassword);
+    return this.holder;
   }
 
   /**
@@ -63,8 +63,8 @@ public class TemporalPasswordValueHolder<T> {
    * @return
    */
   public T temporalPassword(Optional<TemporalPasswordVO> temporalPassword) {
-    value = temporalPassword;
-    return holder;
+    this.value = temporalPassword;
+    return this.holder;
   }
 
   /**
@@ -73,8 +73,8 @@ public class TemporalPasswordValueHolder<T> {
    * @return
    */
   public T temporalPassword(Boolean temporalPassword) {
-    value = Optional.of(TemporalPasswordVO.from(temporalPassword));
-    return holder;
+    this.value = Optional.of(TemporalPasswordVO.from(temporalPassword));
+    return this.holder;
   }
 
   /**
@@ -82,8 +82,8 @@ public class TemporalPasswordValueHolder<T> {
    * @return
    */
   public T temporalPasswordNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

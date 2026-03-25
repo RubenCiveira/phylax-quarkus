@@ -64,8 +64,8 @@ public class SecretOauthValueHolder<T> {
    * @return
    */
   public T secretOauth(SecretOauthVO secretOauth) {
-    value = Optional.of(secretOauth);
-    return holder;
+    this.value = Optional.of(secretOauth);
+    return this.holder;
   }
 
   /**
@@ -74,8 +74,8 @@ public class SecretOauthValueHolder<T> {
    * @return
    */
   public T secretOauth(Optional<SecretOauthVO> secretOauth) {
-    value = secretOauth;
-    return holder;
+    this.value = secretOauth;
+    return this.holder;
   }
 
   /**
@@ -84,8 +84,8 @@ public class SecretOauthValueHolder<T> {
    * @return
    */
   public T secretOauthCyphered(String secretOauth) {
-    value = Optional.of(SecretOauthVO.fromCyphered(secretOauth));
-    return holder;
+    this.value = Optional.of(SecretOauthVO.fromCyphered(secretOauth));
+    return this.holder;
   }
 
   /**
@@ -93,8 +93,8 @@ public class SecretOauthValueHolder<T> {
    * @return
    */
   public T secretOauthNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**
@@ -103,8 +103,8 @@ public class SecretOauthValueHolder<T> {
    * @return
    */
   public T secretOauthPlain(String secretOauth) {
-    value = Optional.of(SecretOauthVO.fromPlain(secretOauth));
-    return holder;
+    this.value = Optional.of(SecretOauthVO.fromPlain(secretOauth));
+    return this.holder;
   }
 
   /**

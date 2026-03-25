@@ -25,8 +25,8 @@ public class DisabledValueHolder<T> {
    * @return
    */
   public T disabled(DisabledVO disabled) {
-    value = Optional.of(disabled);
-    return holder;
+    this.value = Optional.of(disabled);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class DisabledValueHolder<T> {
    * @return
    */
   public T disabled(Optional<DisabledVO> disabled) {
-    value = disabled;
-    return holder;
+    this.value = disabled;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class DisabledValueHolder<T> {
    * @return
    */
   public T disabled(Boolean disabled) {
-    value = Optional.of(DisabledVO.from(disabled));
-    return holder;
+    this.value = Optional.of(DisabledVO.from(disabled));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class DisabledValueHolder<T> {
    * @return
    */
   public T disabledNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

@@ -26,8 +26,8 @@ public class EnabledValueHolder<T> {
    * @return
    */
   public T enabled(EnabledVO enabled) {
-    value = Optional.of(enabled);
-    return holder;
+    this.value = Optional.of(enabled);
+    return this.holder;
   }
 
   /**
@@ -36,8 +36,8 @@ public class EnabledValueHolder<T> {
    * @return
    */
   public T enabled(Optional<EnabledVO> enabled) {
-    value = enabled;
-    return holder;
+    this.value = enabled;
+    return this.holder;
   }
 
   /**
@@ -46,8 +46,8 @@ public class EnabledValueHolder<T> {
    * @return
    */
   public T enabled(Boolean enabled) {
-    value = Optional.of(EnabledVO.from(enabled));
-    return holder;
+    this.value = Optional.of(EnabledVO.from(enabled));
+    return this.holder;
   }
 
   /**

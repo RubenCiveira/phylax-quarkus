@@ -436,9 +436,10 @@ public class RoleRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("name", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getName().ifPresent(name -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(name)));
-    filter.getRelyingParty().ifPresent(relyingParty -> sq.where(RELYING_PARTY_SNAKE, SqlOperator.EQ,
-        SqlParameterValue.of(relyingParty.getUid())));
+    filter.getName()
+        .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
+    filter.getRelyingParty().ifPresent(relyingPartyParam -> sq.where(RELYING_PARTY_SNAKE,
+        SqlOperator.EQ, SqlParameterValue.of(relyingPartyParam.getUid())));
     if (!filter.getRelyingPartys().isEmpty()) {
       sq.where(RELYING_PARTY_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getRelyingPartys()));

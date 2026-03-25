@@ -619,14 +619,16 @@ public class UserRepository {
                 SqlParameterValue.of(nameOrEmail))),
         filter.getNameOrEmail().map(nameOrEmail -> PartialWhere.where("name", SqlOperator.EQ,
             SqlParameterValue.of(nameOrEmail)))));
-    filter.getName().ifPresent(name -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(name)));
-    filter.getTenant().ifPresent(
-        tenant -> sq.where(TENANT, SqlOperator.EQ, SqlParameterValue.of(tenant.getUid())));
+    filter.getName()
+        .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
+    filter.getTenant().ifPresent(tenantParam -> sq.where(TENANT, SqlOperator.EQ,
+        SqlParameterValue.of(tenantParam.getUid())));
     if (!filter.getTenants().isEmpty()) {
       sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
     }
-    filter.getTenantTenantAccesible().ifPresent(tenantTenantAccesible -> sq
-        .where(ACCESS_USER_TENANT, SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesible)));
+    filter.getTenantTenantAccesible()
+        .ifPresent(tenantTenantAccesibleParam -> sq.where(ACCESS_USER_TENANT, SqlOperator.EQ,
+            SqlParameterValue.of(tenantTenantAccesibleParam)));
     return sq;
   }
 

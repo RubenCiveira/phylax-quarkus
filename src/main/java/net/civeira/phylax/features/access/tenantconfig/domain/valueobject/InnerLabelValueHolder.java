@@ -41,8 +41,8 @@ public class InnerLabelValueHolder<T> {
    * @return
    */
   public T innerLabel(InnerLabelVO innerLabel) {
-    value = Optional.of(innerLabel);
-    return holder;
+    this.value = Optional.of(innerLabel);
+    return this.holder;
   }
 
   /**
@@ -51,8 +51,8 @@ public class InnerLabelValueHolder<T> {
    * @return
    */
   public T innerLabel(Optional<InnerLabelVO> innerLabel) {
-    value = innerLabel;
-    return holder;
+    this.value = innerLabel;
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class InnerLabelValueHolder<T> {
    * @return
    */
   public T innerLabel(String innerLabel) {
-    value = Optional.of(InnerLabelVO.from(innerLabel));
-    return holder;
+    this.value = Optional.of(InnerLabelVO.from(innerLabel));
+    return this.holder;
   }
 
   /**
@@ -70,8 +70,8 @@ public class InnerLabelValueHolder<T> {
    * @return
    */
   public T innerLabelNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

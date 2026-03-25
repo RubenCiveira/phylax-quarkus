@@ -41,8 +41,8 @@ public class ProviderValueHolder<T> {
    * @return
    */
   public T provider(ProviderVO provider) {
-    value = Optional.of(provider);
-    return holder;
+    this.value = Optional.of(provider);
+    return this.holder;
   }
 
   /**
@@ -51,8 +51,8 @@ public class ProviderValueHolder<T> {
    * @return
    */
   public T provider(Optional<ProviderVO> provider) {
-    value = provider;
-    return holder;
+    this.value = provider;
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class ProviderValueHolder<T> {
    * @return
    */
   public T provider(String provider) {
-    value = Optional.of(ProviderVO.from(provider));
-    return holder;
+    this.value = Optional.of(ProviderVO.from(provider));
+    return this.holder;
   }
 
   /**
@@ -70,8 +70,8 @@ public class ProviderValueHolder<T> {
    * @return
    */
   public T providerNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

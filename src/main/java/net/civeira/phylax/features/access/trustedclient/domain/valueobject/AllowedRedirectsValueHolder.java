@@ -28,8 +28,8 @@ public class AllowedRedirectsValueHolder<T> {
    * @return
    */
   public T allowedRedirects(AllowedRedirectsVO allowedRedirects) {
-    value = Optional.of(allowedRedirects);
-    return holder;
+    this.value = Optional.of(allowedRedirects);
+    return this.holder;
   }
 
   /**
@@ -38,8 +38,8 @@ public class AllowedRedirectsValueHolder<T> {
    * @return
    */
   public T allowedRedirects(Optional<AllowedRedirectsVO> allowedRedirects) {
-    value = allowedRedirects;
-    return holder;
+    this.value = allowedRedirects;
+    return this.holder;
   }
 
   /**
@@ -48,8 +48,8 @@ public class AllowedRedirectsValueHolder<T> {
    * @return
    */
   public T allowedRedirects(List<AllowedRedirects> allowedRedirects) {
-    value = Optional.of(AllowedRedirectsVO.from(allowedRedirects));
-    return holder;
+    this.value = Optional.of(AllowedRedirectsVO.from(allowedRedirects));
+    return this.holder;
   }
 
   /**

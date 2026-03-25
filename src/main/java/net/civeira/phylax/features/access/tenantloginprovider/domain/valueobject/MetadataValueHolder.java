@@ -41,8 +41,8 @@ public class MetadataValueHolder<T> {
    * @return
    */
   public T metadata(MetadataVO metadata) {
-    value = Optional.of(metadata);
-    return holder;
+    this.value = Optional.of(metadata);
+    return this.holder;
   }
 
   /**
@@ -51,8 +51,8 @@ public class MetadataValueHolder<T> {
    * @return
    */
   public T metadata(Optional<MetadataVO> metadata) {
-    value = metadata;
-    return holder;
+    this.value = metadata;
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class MetadataValueHolder<T> {
    * @return
    */
   public T metadata(String metadata) {
-    value = Optional.of(MetadataVO.from(metadata));
-    return holder;
+    this.value = Optional.of(MetadataVO.from(metadata));
+    return this.holder;
   }
 
   /**
@@ -70,8 +70,8 @@ public class MetadataValueHolder<T> {
    * @return
    */
   public T metadataNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

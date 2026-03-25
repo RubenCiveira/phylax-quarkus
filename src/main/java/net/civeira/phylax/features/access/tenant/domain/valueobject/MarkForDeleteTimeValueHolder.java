@@ -42,8 +42,8 @@ public class MarkForDeleteTimeValueHolder<T> {
    * @return
    */
   public T markForDeleteTime(MarkForDeleteTimeVO markForDeleteTime) {
-    value = Optional.of(markForDeleteTime);
-    return holder;
+    this.value = Optional.of(markForDeleteTime);
+    return this.holder;
   }
 
   /**
@@ -52,8 +52,8 @@ public class MarkForDeleteTimeValueHolder<T> {
    * @return
    */
   public T markForDeleteTime(Optional<MarkForDeleteTimeVO> markForDeleteTime) {
-    value = markForDeleteTime;
-    return holder;
+    this.value = markForDeleteTime;
+    return this.holder;
   }
 
   /**
@@ -62,8 +62,8 @@ public class MarkForDeleteTimeValueHolder<T> {
    * @return
    */
   public T markForDeleteTime(OffsetDateTime markForDeleteTime) {
-    value = Optional.of(MarkForDeleteTimeVO.from(markForDeleteTime));
-    return holder;
+    this.value = Optional.of(MarkForDeleteTimeVO.from(markForDeleteTime));
+    return this.holder;
   }
 
   /**
@@ -71,8 +71,8 @@ public class MarkForDeleteTimeValueHolder<T> {
    * @return
    */
   public T markForDeleteTimeNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

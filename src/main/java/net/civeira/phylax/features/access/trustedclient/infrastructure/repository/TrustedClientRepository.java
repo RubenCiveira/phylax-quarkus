@@ -542,7 +542,8 @@ public class TrustedClientRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("code", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getCode().ifPresent(code -> sq.where(CODE, SqlOperator.EQ, SqlParameterValue.of(code)));
+    filter.getCode()
+        .ifPresent(codeParam -> sq.where(CODE, SqlOperator.EQ, SqlParameterValue.of(codeParam)));
     return sq;
   }
 

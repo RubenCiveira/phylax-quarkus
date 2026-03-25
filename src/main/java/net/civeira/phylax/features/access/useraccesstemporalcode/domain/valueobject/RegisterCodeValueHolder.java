@@ -53,8 +53,8 @@ public class RegisterCodeValueHolder<T> {
    * @return
    */
   public T registerCode(RegisterCodeVO registerCode) {
-    value = Optional.of(registerCode);
-    return holder;
+    this.value = Optional.of(registerCode);
+    return this.holder;
   }
 
   /**
@@ -63,8 +63,8 @@ public class RegisterCodeValueHolder<T> {
    * @return
    */
   public T registerCode(Optional<RegisterCodeVO> registerCode) {
-    value = registerCode;
-    return holder;
+    this.value = registerCode;
+    return this.holder;
   }
 
   /**
@@ -73,8 +73,8 @@ public class RegisterCodeValueHolder<T> {
    * @return
    */
   public T registerCode(String registerCode) {
-    value = Optional.of(RegisterCodeVO.from(registerCode));
-    return holder;
+    this.value = Optional.of(RegisterCodeVO.from(registerCode));
+    return this.holder;
   }
 
   /**
@@ -82,8 +82,8 @@ public class RegisterCodeValueHolder<T> {
    * @return
    */
   public T registerCodeNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

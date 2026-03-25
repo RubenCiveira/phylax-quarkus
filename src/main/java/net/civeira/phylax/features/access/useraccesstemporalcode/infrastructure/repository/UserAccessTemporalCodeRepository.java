@@ -614,16 +614,16 @@ public class UserAccessTemporalCodeRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    filter.getUser()
-        .ifPresent(user -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(user.getUid())));
+    filter.getUser().ifPresent(
+        userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
     if (!filter.getUsers().isEmpty()) {
       sq.where(USER, SqlOperator.IN, SqlListParameterValue.strings(filter.getUsers()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesible -> {
+    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
       sq.join("access_user", "access_user_access_temporal_code_user",
           "access_user_access_temporal_code.user", "access_user_access_temporal_code_user.uid");
       sq.where(ACCESS_USER_ACCESS_TEMPORAL_CODE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesible));
+          SqlParameterValue.of(userTenantTenantAccesibleParam));
     });
     return sq;
   }

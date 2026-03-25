@@ -25,8 +25,8 @@ public class EnableRegisterUsersValueHolder<T> {
    * @return
    */
   public T enableRegisterUsers(EnableRegisterUsersVO enableRegisterUsers) {
-    value = Optional.of(enableRegisterUsers);
-    return holder;
+    this.value = Optional.of(enableRegisterUsers);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class EnableRegisterUsersValueHolder<T> {
    * @return
    */
   public T enableRegisterUsers(Optional<EnableRegisterUsersVO> enableRegisterUsers) {
-    value = enableRegisterUsers;
-    return holder;
+    this.value = enableRegisterUsers;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class EnableRegisterUsersValueHolder<T> {
    * @return
    */
   public T enableRegisterUsers(Boolean enableRegisterUsers) {
-    value = Optional.of(EnableRegisterUsersVO.from(enableRegisterUsers));
-    return holder;
+    this.value = Optional.of(EnableRegisterUsersVO.from(enableRegisterUsers));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class EnableRegisterUsersValueHolder<T> {
    * @return
    */
   public T enableRegisterUsersNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

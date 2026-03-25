@@ -54,8 +54,8 @@ public class RecoveryCodeExpirationValueHolder<T> {
    * @return
    */
   public T recoveryCodeExpiration(RecoveryCodeExpirationVO recoveryCodeExpiration) {
-    value = Optional.of(recoveryCodeExpiration);
-    return holder;
+    this.value = Optional.of(recoveryCodeExpiration);
+    return this.holder;
   }
 
   /**
@@ -64,8 +64,8 @@ public class RecoveryCodeExpirationValueHolder<T> {
    * @return
    */
   public T recoveryCodeExpiration(Optional<RecoveryCodeExpirationVO> recoveryCodeExpiration) {
-    value = recoveryCodeExpiration;
-    return holder;
+    this.value = recoveryCodeExpiration;
+    return this.holder;
   }
 
   /**
@@ -74,8 +74,8 @@ public class RecoveryCodeExpirationValueHolder<T> {
    * @return
    */
   public T recoveryCodeExpiration(OffsetDateTime recoveryCodeExpiration) {
-    value = Optional.of(RecoveryCodeExpirationVO.from(recoveryCodeExpiration));
-    return holder;
+    this.value = Optional.of(RecoveryCodeExpirationVO.from(recoveryCodeExpiration));
+    return this.holder;
   }
 
   /**
@@ -83,8 +83,8 @@ public class RecoveryCodeExpirationValueHolder<T> {
    * @return
    */
   public T recoveryCodeExpirationNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

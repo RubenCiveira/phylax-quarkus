@@ -53,8 +53,8 @@ public class PasswordValueHolder<T> {
    * @return
    */
   public T password(PasswordVO password) {
-    value = Optional.of(password);
-    return holder;
+    this.value = Optional.of(password);
+    return this.holder;
   }
 
   /**
@@ -63,8 +63,8 @@ public class PasswordValueHolder<T> {
    * @return
    */
   public T password(Optional<PasswordVO> password) {
-    value = password;
-    return holder;
+    this.value = password;
+    return this.holder;
   }
 
   /**
@@ -73,8 +73,8 @@ public class PasswordValueHolder<T> {
    * @return
    */
   public T passwordCyphered(String password) {
-    value = Optional.of(PasswordVO.fromCyphered(password));
-    return holder;
+    this.value = Optional.of(PasswordVO.fromCyphered(password));
+    return this.holder;
   }
 
   /**
@@ -83,8 +83,8 @@ public class PasswordValueHolder<T> {
    * @return
    */
   public T passwordPlain(String password) {
-    value = Optional.of(PasswordVO.fromPlain(password));
-    return holder;
+    this.value = Optional.of(PasswordVO.fromPlain(password));
+    return this.holder;
   }
 
   /**

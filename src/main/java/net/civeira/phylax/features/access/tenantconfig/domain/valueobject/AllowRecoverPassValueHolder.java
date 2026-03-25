@@ -25,8 +25,8 @@ public class AllowRecoverPassValueHolder<T> {
    * @return
    */
   public T allowRecoverPass(AllowRecoverPassVO allowRecoverPass) {
-    value = Optional.of(allowRecoverPass);
-    return holder;
+    this.value = Optional.of(allowRecoverPass);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class AllowRecoverPassValueHolder<T> {
    * @return
    */
   public T allowRecoverPass(Optional<AllowRecoverPassVO> allowRecoverPass) {
-    value = allowRecoverPass;
-    return holder;
+    this.value = allowRecoverPass;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class AllowRecoverPassValueHolder<T> {
    * @return
    */
   public T allowRecoverPass(Boolean allowRecoverPass) {
-    value = Optional.of(AllowRecoverPassVO.from(allowRecoverPass));
-    return holder;
+    this.value = Optional.of(AllowRecoverPassVO.from(allowRecoverPass));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class AllowRecoverPassValueHolder<T> {
    * @return
    */
   public T allowRecoverPassNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

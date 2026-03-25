@@ -37,3 +37,36 @@ include::access/user-role-assignament-role/entity-user-role-assignament-role.asc
 
 :leveloffset: -2
 
+== Document
+
+.Entidades
+[plantuml]
+....
+include::../diagrams/model/document/package-diagram.puml[]
+....
+
+:leveloffset: +2
+
+include::document/template/entity-template.asciidoc[]
+include::document/template-asset/entity-template-asset.asciidoc[]
+include::document/template-snippet/entity-template-snippet.asciidoc[]
+include::document/template-variable/entity-template-variable.asciidoc[]
+include::document/template-version/entity-template-version.asciidoc[]
+include::document/theme/entity-theme.asciidoc[]
+
+:leveloffset: -2
+
+== Notification
+
+.Entidades
+[plantuml]
+....
+include::../diagrams/model/notification/package-diagram.puml[]
+....
+
+:leveloffset: +2
+
+include::notification/message/entity-message.asciidoc[]
+
+:leveloffset: -2
+

@@ -25,8 +25,8 @@ public class DirectAccessValueHolder<T> {
    * @return
    */
   public T directAccess(DirectAccessVO directAccess) {
-    value = Optional.of(directAccess);
-    return holder;
+    this.value = Optional.of(directAccess);
+    return this.holder;
   }
 
   /**
@@ -35,8 +35,8 @@ public class DirectAccessValueHolder<T> {
    * @return
    */
   public T directAccess(Optional<DirectAccessVO> directAccess) {
-    value = directAccess;
-    return holder;
+    this.value = directAccess;
+    return this.holder;
   }
 
   /**
@@ -45,8 +45,8 @@ public class DirectAccessValueHolder<T> {
    * @return
    */
   public T directAccess(Boolean directAccess) {
-    value = Optional.of(DirectAccessVO.from(directAccess));
-    return holder;
+    this.value = Optional.of(DirectAccessVO.from(directAccess));
+    return this.holder;
   }
 
   /**
@@ -54,8 +54,8 @@ public class DirectAccessValueHolder<T> {
    * @return
    */
   public T directAccessNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

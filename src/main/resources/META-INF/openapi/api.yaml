@@ -23,6 +23,14 @@ servers:
 security:
   - BearerAuth: [] # Aplica el esquema de seguridad por defecto a toda la API
 tags:
+  - name: template
+    description: template
+  - name: template-batch
+    description: Massive operations for template
+  - name: template-audit
+    description: Audit operations for changes on template
+  - name: template-acl
+    description: Access control for template
   - name: user-role-assignament
     description: user-role-assignament
   - name: user-role-assignament-batch
@@ -47,6 +55,14 @@ tags:
     description: Audit operations for changes on user group membership
   - name: user-group-membership-acl
     description: Access control for user group membership
+  - name: message
+    description: message
+  - name: message-batch
+    description: Massive operations for message
+  - name: message-audit
+    description: Audit operations for changes on message
+  - name: message-acl
+    description: Access control for message
   - name: relying-party
     description: relying-party
   - name: relying-party-batch
@@ -63,6 +79,14 @@ tags:
     description: Audit operations for changes on trusted client
   - name: trusted-client-acl
     description: Access control for trusted client
+  - name: template-version
+    description: template-version
+  - name: template-version-batch
+    description: Massive operations for template version
+  - name: template-version-audit
+    description: Audit operations for changes on template version
+  - name: template-version-acl
+    description: Access control for template version
   - name: tenant-config
     description: tenant-config
   - name: tenant-config-batch
@@ -71,6 +95,14 @@ tags:
     description: Audit operations for changes on tenant config
   - name: tenant-config-acl
     description: Access control for tenant config
+  - name: template-snippet
+    description: template-snippet
+  - name: template-snippet-batch
+    description: Massive operations for template snippet
+  - name: template-snippet-audit
+    description: Audit operations for changes on template snippet
+  - name: template-snippet-acl
+    description: Access control for template snippet
   - name: api-key-client
     description: Las diferentes aplicaciones que pueden usar el sistema a través de un api.
   - name: api-key-client-batch
@@ -95,6 +127,30 @@ tags:
     description: Audit operations for changes on tenant terms of use
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
+  - name: template-variable
+    description: template-variable
+  - name: template-variable-batch
+    description: Massive operations for template variable
+  - name: template-variable-audit
+    description: Audit operations for changes on template variable
+  - name: template-variable-acl
+    description: Access control for template variable
+  - name: theme
+    description: theme
+  - name: theme-batch
+    description: Massive operations for theme
+  - name: theme-audit
+    description: Audit operations for changes on theme
+  - name: theme-acl
+    description: Access control for theme
+  - name: template-asset
+    description: template-asset
+  - name: template-asset-batch
+    description: Massive operations for template asset
+  - name: template-asset-audit
+    description: Audit operations for changes on template asset
+  - name: template-asset-acl
+    description: Access control for template asset
   - name: user
     description: user
   - name: user-batch
@@ -113,6 +169,592 @@ tags:
     description: Access control for tenant
 
 paths:
+  /api/document/template:
+    get:
+      tags:
+        - template
+      summary: List of template
+      operationId: template-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: theme
+          in: query
+          description: theme
+          required: false
+          schema:
+            type: string
+        - name: themes
+          in: query
+          description: themes
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateApiDtoList'
+    post:
+      tags:
+        - template
+      summary: Create a new template
+      operationId: template-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateApiDto'
+    delete:
+      tags:
+        - template-batch
+      summary: Delete a colection of template by filter
+      operationId: template-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: theme
+          in: query
+          description: theme
+          required: false
+          schema:
+            type: string
+        - name: themes
+          in: query
+          description: themes
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template/{uid}:
+    get:
+      tags:
+        - template
+      summary: Retrive on  template by their uid
+      operationId: template-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - template
+      summary: Update a template by their uid
+      operationId: template-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - template
+      summary: Delete a  template by their uid
+      operationId: template-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/document/template/~/delete-status/{uid}:
+    get:
+      tags:
+        - template-batch
+      summary: Query the result of an massive delete
+      operationId: template-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template/-/audit/entity/{uid}:
+    get:
+      tags:
+        - template-audit
+      summary: Update a template by their uid
+      operationId: template-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - template-audit
+      summary: Update a template by their uid
+      operationId: template-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template/{uid}/enable:
+    patch:
+      tags:
+        - template
+      summary: Update a template by their uid
+      operationId: template-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateApiDto'
+        '404':
+          description: The item dont exists
+  /api/document/template/{uid}/disable:
+    patch:
+      tags:
+        - template
+      summary: Update a template by their uid
+      operationId: template-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/document/template:
+    get:
+      tags:
+        - template-acl
+      summary: Check for allow permissions for the current user on template
+      operationId: template-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateGenericAcl'
+  /api/me/acl/document/template/{uid}:
+    get:
+      tags:
+        - template-acl
+      summary: Check for allow permissions for the current user on template by their uid
+      operationId: template-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/document/template/~/enable:
+    patch:
+      tags:
+        - template-batch
+      summary: enable a colection of template by filter
+      operationId: template-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: theme
+          in: query
+          description: theme
+          required: false
+          schema:
+            type: string
+        - name: themes
+          in: query
+          description: themes
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template/~/enable-status/{uid}:
+    get:
+      tags:
+        - template-batch
+      summary: Query the result of an massive delete
+      operationId: template-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template/~/disable:
+    patch:
+      tags:
+        - template-batch
+      summary: disable a colection of template by filter
+      operationId: template-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: theme
+          in: query
+          description: theme
+          required: false
+          schema:
+            type: string
+        - name: themes
+          in: query
+          description: themes
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template/~/disable-status/{uid}:
+    get:
+      tags:
+        - template-batch
+      summary: Query the result of an massive delete
+      operationId: template-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
   /api/access/user-role-assignament:
     get:
       tags:
@@ -1183,6 +1825,312 @@ paths:
                 $ref: '#/components/schemas/UserGroupMembershipSpecificAcl'
         '404':
           description: The item dont exists
+  /api/template/template:
+    get:
+      tags:
+        - message
+      summary: List of message
+      operationId: message-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageApiDtoList'
+    post:
+      tags:
+        - message
+      summary: Create a new message
+      operationId: message-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageApiDto'
+    delete:
+      tags:
+        - message-batch
+      summary: Delete a colection of message by filter
+      operationId: message-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/template/template/{uid}:
+    get:
+      tags:
+        - message
+      summary: Retrive on  message by their uid
+      operationId: message-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - message
+      summary: Update a message by their uid
+      operationId: message-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - message
+      summary: Delete a  message by their uid
+      operationId: message-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/template/template/~/delete-status/{uid}:
+    get:
+      tags:
+        - message-batch
+      summary: Query the result of an massive delete
+      operationId: message-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/template/template/-/audit/entity/{uid}:
+    get:
+      tags:
+        - message-audit
+      summary: Update a message by their uid
+      operationId: message-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/template/template/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - message-audit
+      summary: Update a message by their uid
+      operationId: message-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/template/template:
+    get:
+      tags:
+        - message-acl
+      summary: Check for allow permissions for the current user on message
+      operationId: message-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageGenericAcl'
+  /api/me/acl/template/template/{uid}:
+    get:
+      tags:
+        - message-acl
+      summary: Check for allow permissions for the current user on message by their uid
+      operationId: message-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSpecificAcl'
+        '404':
+          description: The item dont exists
   /api/access/relying-parties:
     get:
       tags:
@@ -2123,6 +3071,312 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/document/template-versions:
+    get:
+      tags:
+        - template-version
+      summary: List of template version
+      operationId: template-version-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: template
+          in: query
+          description: template
+          required: false
+          schema:
+            type: string
+        - name: templates
+          in: query
+          description: templates
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVersionApiDtoList'
+    post:
+      tags:
+        - template-version
+      summary: Create a new template version
+      operationId: template-version-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateVersionApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVersionApiDto'
+    delete:
+      tags:
+        - template-version-batch
+      summary: Delete a colection of template version by filter
+      operationId: template-version-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: template
+          in: query
+          description: template
+          required: false
+          schema:
+            type: string
+        - name: templates
+          in: query
+          description: templates
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-versions/{uid}:
+    get:
+      tags:
+        - template-version
+      summary: Retrive on  template version by their uid
+      operationId: template-version-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVersionApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - template-version
+      summary: Update a template version by their uid
+      operationId: template-version-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateVersionApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVersionApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - template-version
+      summary: Delete a  template version by their uid
+      operationId: template-version-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/document/template-versions/~/delete-status/{uid}:
+    get:
+      tags:
+        - template-version-batch
+      summary: Query the result of an massive delete
+      operationId: template-version-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-versions/-/audit/entity/{uid}:
+    get:
+      tags:
+        - template-version-audit
+      summary: Update a template version by their uid
+      operationId: template-version-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-versions/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - template-version-audit
+      summary: Update a template version by their uid
+      operationId: template-version-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/document/template-versions:
+    get:
+      tags:
+        - template-version-acl
+      summary: Check for allow permissions for the current user on template version
+      operationId: template-version-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVersionGenericAcl'
+  /api/me/acl/document/template-versions/{uid}:
+    get:
+      tags:
+        - template-version-acl
+      summary: Check for allow permissions for the current user on template version by their uid
+      operationId: template-version-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVersionSpecificAcl'
+        '404':
+          description: The item dont exists
   /api/access/tenants-config:
     get:
       tags:
@@ -2427,6 +3681,528 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantConfigSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet:
+    get:
+      tags:
+        - template-snippet
+      summary: List of template snippet
+      operationId: template-snippet-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetApiDtoList'
+    post:
+      tags:
+        - template-snippet
+      summary: Create a new template snippet
+      operationId: template-snippet-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateSnippetApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetApiDto'
+    delete:
+      tags:
+        - template-snippet-batch
+      summary: Delete a colection of template snippet by filter
+      operationId: template-snippet-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-snippet/{uid}:
+    get:
+      tags:
+        - template-snippet
+      summary: Retrive on  template snippet by their uid
+      operationId: template-snippet-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - template-snippet
+      summary: Update a template snippet by their uid
+      operationId: template-snippet-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateSnippetApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - template-snippet
+      summary: Delete a  template snippet by their uid
+      operationId: template-snippet-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet/~/delete-status/{uid}:
+    get:
+      tags:
+        - template-snippet-batch
+      summary: Query the result of an massive delete
+      operationId: template-snippet-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet/-/audit/entity/{uid}:
+    get:
+      tags:
+        - template-snippet-audit
+      summary: Update a template snippet by their uid
+      operationId: template-snippet-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - template-snippet-audit
+      summary: Update a template snippet by their uid
+      operationId: template-snippet-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet/{uid}/enable:
+    patch:
+      tags:
+        - template-snippet
+      summary: Update a template snippet by their uid
+      operationId: template-snippet-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetApiDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet/{uid}/disable:
+    patch:
+      tags:
+        - template-snippet
+      summary: Update a template snippet by their uid
+      operationId: template-snippet-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/document/template-snippet:
+    get:
+      tags:
+        - template-snippet-acl
+      summary: Check for allow permissions for the current user on template snippet
+      operationId: template-snippet-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetGenericAcl'
+  /api/me/acl/document/template-snippet/{uid}:
+    get:
+      tags:
+        - template-snippet-acl
+      summary: Check for allow permissions for the current user on template snippet by their uid
+      operationId: template-snippet-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSnippetSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet/~/enable:
+    patch:
+      tags:
+        - template-snippet-batch
+      summary: enable a colection of template snippet by filter
+      operationId: template-snippet-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-snippet/~/enable-status/{uid}:
+    get:
+      tags:
+        - template-snippet-batch
+      summary: Query the result of an massive delete
+      operationId: template-snippet-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-snippet/~/disable:
+    patch:
+      tags:
+        - template-snippet-batch
+      summary: disable a colection of template snippet by filter
+      operationId: template-snippet-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-snippet/~/disable-status/{uid}:
+    get:
+      tags:
+        - template-snippet-batch
+      summary: Query the result of an massive delete
+      operationId: template-snippet-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
   /api/access/api-key-clients:
@@ -4095,6 +5871,1646 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/document/template-variable:
+    get:
+      tags:
+        - template-variable
+      summary: List of template variable
+      operationId: template-variable-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableApiDtoList'
+    post:
+      tags:
+        - template-variable
+      summary: Create a new template variable
+      operationId: template-variable-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateVariableApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableApiDto'
+    delete:
+      tags:
+        - template-variable-batch
+      summary: Delete a colection of template variable by filter
+      operationId: template-variable-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-variable/{uid}:
+    get:
+      tags:
+        - template-variable
+      summary: Retrive on  template variable by their uid
+      operationId: template-variable-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - template-variable
+      summary: Update a template variable by their uid
+      operationId: template-variable-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateVariableApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - template-variable
+      summary: Delete a  template variable by their uid
+      operationId: template-variable-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/document/template-variable/~/delete-status/{uid}:
+    get:
+      tags:
+        - template-variable-batch
+      summary: Query the result of an massive delete
+      operationId: template-variable-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-variable/-/audit/entity/{uid}:
+    get:
+      tags:
+        - template-variable-audit
+      summary: Update a template variable by their uid
+      operationId: template-variable-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-variable/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - template-variable-audit
+      summary: Update a template variable by their uid
+      operationId: template-variable-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-variable/{uid}/enable:
+    patch:
+      tags:
+        - template-variable
+      summary: Update a template variable by their uid
+      operationId: template-variable-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableApiDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-variable/{uid}/disable:
+    patch:
+      tags:
+        - template-variable
+      summary: Update a template variable by their uid
+      operationId: template-variable-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/document/template-variable:
+    get:
+      tags:
+        - template-variable-acl
+      summary: Check for allow permissions for the current user on template variable
+      operationId: template-variable-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableGenericAcl'
+  /api/me/acl/document/template-variable/{uid}:
+    get:
+      tags:
+        - template-variable-acl
+      summary: Check for allow permissions for the current user on template variable by their uid
+      operationId: template-variable-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/document/template-variable/~/enable:
+    patch:
+      tags:
+        - template-variable-batch
+      summary: enable a colection of template variable by filter
+      operationId: template-variable-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-variable/~/enable-status/{uid}:
+    get:
+      tags:
+        - template-variable-batch
+      summary: Query the result of an massive delete
+      operationId: template-variable-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-variable/~/disable:
+    patch:
+      tags:
+        - template-variable-batch
+      summary: disable a colection of template variable by filter
+      operationId: template-variable-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-variable/~/disable-status/{uid}:
+    get:
+      tags:
+        - template-variable-batch
+      summary: Query the result of an massive delete
+      operationId: template-variable-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/theme:
+    get:
+      tags:
+        - theme
+      summary: List of theme
+      operationId: theme-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+        - name: since-name
+          in: query
+          description: Order by name asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeApiDtoList'
+    post:
+      tags:
+        - theme
+      summary: Create a new theme
+      operationId: theme-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThemeApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeApiDto'
+    delete:
+      tags:
+        - theme-batch
+      summary: Delete a colection of theme by filter
+      operationId: theme-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/theme/{uid}:
+    get:
+      tags:
+        - theme
+      summary: Retrive on  theme by their uid
+      operationId: theme-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - theme
+      summary: Update a theme by their uid
+      operationId: theme-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThemeApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - theme
+      summary: Delete a  theme by their uid
+      operationId: theme-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/document/theme/~/delete-status/{uid}:
+    get:
+      tags:
+        - theme-batch
+      summary: Query the result of an massive delete
+      operationId: theme-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/theme/-/audit/entity/{uid}:
+    get:
+      tags:
+        - theme-audit
+      summary: Update a theme by their uid
+      operationId: theme-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/theme/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - theme-audit
+      summary: Update a theme by their uid
+      operationId: theme-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/theme/{uid}/enable:
+    patch:
+      tags:
+        - theme
+      summary: Update a theme by their uid
+      operationId: theme-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeApiDto'
+        '404':
+          description: The item dont exists
+  /api/document/theme/{uid}/disable:
+    patch:
+      tags:
+        - theme
+      summary: Update a theme by their uid
+      operationId: theme-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/document/theme:
+    get:
+      tags:
+        - theme-acl
+      summary: Check for allow permissions for the current user on theme
+      operationId: theme-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeGenericAcl'
+  /api/me/acl/document/theme/{uid}:
+    get:
+      tags:
+        - theme-acl
+      summary: Check for allow permissions for the current user on theme by their uid
+      operationId: theme-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/document/theme/~/enable:
+    patch:
+      tags:
+        - theme-batch
+      summary: enable a colection of theme by filter
+      operationId: theme-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/theme/~/enable-status/{uid}:
+    get:
+      tags:
+        - theme-batch
+      summary: Query the result of an massive delete
+      operationId: theme-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/theme/~/disable:
+    patch:
+      tags:
+        - theme-batch
+      summary: disable a colection of theme by filter
+      operationId: theme-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/theme/~/disable-status/{uid}:
+    get:
+      tags:
+        - theme-batch
+      summary: Query the result of an massive delete
+      operationId: theme-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-asset:
+    get:
+      tags:
+        - template-asset
+      summary: List of template asset
+      operationId: template-asset-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetApiDtoList'
+    post:
+      tags:
+        - template-asset
+      summary: Create a new template asset
+      operationId: template-asset-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateAssetApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetApiDto'
+    delete:
+      tags:
+        - template-asset-batch
+      summary: Delete a colection of template asset by filter
+      operationId: template-asset-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-asset/{uid}:
+    get:
+      tags:
+        - template-asset
+      summary: Retrive on  template asset by their uid
+      operationId: template-asset-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - template-asset
+      summary: Update a template asset by their uid
+      operationId: template-asset-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateAssetApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - template-asset
+      summary: Delete a  template asset by their uid
+      operationId: template-asset-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/document/template-asset/~/delete-status/{uid}:
+    get:
+      tags:
+        - template-asset-batch
+      summary: Query the result of an massive delete
+      operationId: template-asset-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-asset/-/audit/entity/{uid}:
+    get:
+      tags:
+        - template-asset-audit
+      summary: Update a template asset by their uid
+      operationId: template-asset-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-asset/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - template-asset-audit
+      summary: Update a template asset by their uid
+      operationId: template-asset-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-asset/{uid}/enable:
+    patch:
+      tags:
+        - template-asset
+      summary: Update a template asset by their uid
+      operationId: template-asset-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetApiDto'
+        '404':
+          description: The item dont exists
+  /api/document/template-asset/{uid}/disable:
+    patch:
+      tags:
+        - template-asset
+      summary: Update a template asset by their uid
+      operationId: template-asset-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/document/template-asset:
+    get:
+      tags:
+        - template-asset-acl
+      summary: Check for allow permissions for the current user on template asset
+      operationId: template-asset-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetGenericAcl'
+  /api/me/acl/document/template-asset/{uid}:
+    get:
+      tags:
+        - template-asset-acl
+      summary: Check for allow permissions for the current user on template asset by their uid
+      operationId: template-asset-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateAssetSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/document/template-asset/{uid}/content:
+    get:
+      tags:
+        - template-asset
+      summary: Retrieve binary content for content of template asset
+      operationId: template-asset-api-retrieve-content
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /api/document/template-asset/-/temp-content:
+    get:
+      tags:
+        - template-asset
+      summary: Retrieve binary content of a temporal upload for content of template asset
+      operationId: template-asset-api-retrieve-temp-upload-content
+      parameters:
+        - name: temp
+          in: query
+          description: The temp code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+    post:
+      tags:
+        - template-asset
+      summary: Retrieve binary content of a temporal upload for content of template asset
+      operationId: template-asset-api-upload-temp-upload-content
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload
+                fileName:
+                  type: string
+                  description: The file name
+                fileType:
+                  type: string
+                  description: The content type
+              required:
+                - file
+      responses:
+        '200':
+          description: File uploaded successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Invalid input or missing file
+  /api/document/template-asset/~/enable:
+    patch:
+      tags:
+        - template-asset-batch
+      summary: enable a colection of template asset by filter
+      operationId: template-asset-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-asset/~/enable-status/{uid}:
+    get:
+      tags:
+        - template-asset-batch
+      summary: Query the result of an massive delete
+      operationId: template-asset-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/document/template-asset/~/disable:
+    patch:
+      tags:
+        - template-asset-batch
+      summary: disable a colection of template asset by filter
+      operationId: template-asset-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/document/template-asset/~/disable-status/{uid}:
+    get:
+      tags:
+        - template-asset-batch
+      summary: Query the result of an massive delete
+      operationId: template-asset-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
   /api/access/users:
     get:
       tags:
@@ -5540,6 +8956,149 @@ components:
           example:
             sub: juan.perez
             role: ADMIN
+    TenantApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/tenants"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - code
+    ThemeApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/document/theme"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - code
+    TemplateApiDto:
+      type: object
+      description: template
+      properties:
+        uid:
+          description: El uid de template
+          type: string
+        code:
+          description: LOGIN_MAGIC_LINK, RESET_PASSWORD...
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        theme:
+          $ref: '#/components/schemas/ThemeApiRef'
+        channel:
+          description: El channel de template
+          type: string
+          enum: [mail,sms]
+        enabled:
+          description: El enabled de template
+          type: boolean
+        version:
+          description: Campo con el número de version de template para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    TemplateApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateApiDto'
+    CommonAllow:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        reason:
+          type: string
+    TemplateGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateAclFields'
+    TemplateSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateAclFields'
+    TemplateAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    TemplateAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    TemplateAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
     UserApiRef:
       type: object
       properties:
@@ -5640,13 +9199,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserRoleAssignamentApiDto'
-    CommonAllow:
-      type: object
-      properties:
-        allowed:
-          type: boolean
-        reason:
-          type: string
     UserRoleAssignamentGenericAcl:
       type: object
       properties:
@@ -5879,6 +9431,110 @@ components:
         - update
         - delete
     UserGroupMembershipAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    MessageApiDto:
+      type: object
+      description: message
+      properties:
+        uid:
+          description: El uid de message
+          type: string
+        target:
+          description: name
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        content:
+          description: El content de message
+          type: string
+        retries:
+          description: El retries de message
+          type: integer
+          format: int32
+        createdAt:
+          description: El created at de message
+          type: string
+          format: date-time
+        sendAt:
+          description: El send at de message
+          type: string
+          format: date-time
+        version:
+          description: Campo con el número de version de message para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    MessageApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageApiDto'
+    MessageGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/MessageAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/MessageAclFields'
+    MessageSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/MessageAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/MessageAclFields'
+    MessageAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    MessageAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    MessageAclFields:
       type: object
       properties:
         noEditables:
@@ -6124,19 +9780,114 @@ components:
           type: array
           items:
             type: string
-    TenantApiRef:
+    TemplateApiRef:
       type: object
       properties:
         $ref:
           type: string
           x-relationship:
-            url: "/api/access/tenants"
+            url: "/api/document/template"
             method: "GET"
             reference: "uid"
             batch-query-param: "uids"
       required:
         - uid
-        - tenant
+        - template
+    TemplateVersionApiDto:
+      type: object
+      description: template-version
+      properties:
+        uid:
+          description: El uid de template version
+          type: string
+        template:
+          $ref: '#/components/schemas/TemplateApiRef'
+        subject:
+          description: El subject de template version
+          type: string
+        contentHtml:
+          description: El content html de template version
+          type: string
+        contentText:
+          description: El content text de template version
+          type: string
+        version:
+          description: Campo con el número de version de template version para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    TemplateVersionApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateVersionApiDto'
+    TemplateVersionGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateVersionAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateVersionAclFields'
+    TemplateVersionSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateVersionAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateVersionAclFields'
+    TemplateVersionAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    TemplateVersionAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    TemplateVersionAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
     TenantConfigApiDto:
       type: object
       description: tenant-config
@@ -6243,6 +9994,113 @@ components:
         - update
         - delete
     TenantConfigAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    TemplateSnippetApiDto:
+      type: object
+      description: template-snippet
+      properties:
+        uid:
+          description: El uid de template snippet
+          type: string
+        code:
+          description: HEADER, FOOTER...
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        contentHtml:
+          description: El content html de template snippet
+          type: string
+        enabled:
+          description: El enabled de template snippet
+          type: boolean
+        version:
+          description: Campo con el número de version de template snippet para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    TemplateSnippetApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateSnippetApiDto'
+    TemplateSnippetGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateSnippetAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateSnippetAclFields'
+    TemplateSnippetSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateSnippetAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateSnippetAclFields'
+    TemplateSnippetAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    TemplateSnippetAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    TemplateSnippetAclFields:
       type: object
       properties:
         noEditables:
@@ -6596,6 +10454,339 @@ components:
         - enable
         - disable
     TenantTermsOfUseAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    TemplateVariableApiDto:
+      type: object
+      description: template-variable
+      properties:
+        uid:
+          description: El uid de template variable
+          type: string
+        code:
+          description: user.name, login.link...
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        type:
+          description: STRING, NUMBER, DATE, URL...
+          type: string
+        value:
+          description: El value de template variable
+          type: string
+        enabled:
+          description: El enabled de template variable
+          type: boolean
+        version:
+          description: Campo con el número de version de template variable para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    TemplateVariableApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateVariableApiDto'
+    TemplateVariableGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateVariableAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateVariableAclFields'
+    TemplateVariableSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateVariableAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateVariableAclFields'
+    TemplateVariableAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    TemplateVariableAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    TemplateVariableAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    ThemeApiDto:
+      type: object
+      description: theme
+      properties:
+        uid:
+          description: El uid de theme
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        name:
+          description: El name de theme
+          type: string
+        isDefault:
+          description: El is default de theme
+          type: boolean
+        enabled:
+          description: El enabled de theme
+          type: boolean
+        customCss:
+          description: El custom css de theme
+          type: string
+        version:
+          description: Campo con el número de version de theme para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ThemeApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThemeApiDto'
+    ThemeGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ThemeAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ThemeAclFields'
+    ThemeSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ThemeAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ThemeAclFields'
+    ThemeAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    ThemeAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    ThemeAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    TemplateAssetApiDto:
+      type: object
+      description: template-asset
+      properties:
+        uid:
+          description: El uid de template asset
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        code:
+          description: logo, background...
+          type: string
+        type:
+          description: IMAGE, CSS, FONT...
+          type: string
+        content:
+          description: El content de template asset
+          type: string
+        enabled:
+          description: El enabled de template asset
+          type: boolean
+        version:
+          description: Campo con el número de version de template asset para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    TemplateAssetApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateAssetApiDto'
+    TemplateAssetGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateAssetAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateAssetAclFields'
+    TemplateAssetSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/TemplateAssetAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/TemplateAssetAclFields'
+    TemplateAssetAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+        uploadContent:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+        - uploadContent
+    TemplateAssetAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    TemplateAssetAclFields:
       type: object
       properties:
         noEditables:

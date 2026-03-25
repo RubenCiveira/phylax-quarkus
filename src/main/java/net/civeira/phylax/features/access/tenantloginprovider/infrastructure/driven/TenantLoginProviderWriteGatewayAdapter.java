@@ -16,6 +16,7 @@ import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLogin
 import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderCursor;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderFilter;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderWriteRepositoryGateway;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.MetadataVO;
 import net.civeira.phylax.features.access.tenantloginprovider.infrastructure.event.TenantLoginProviderEventDispatcher;
 import net.civeira.phylax.features.access.tenantloginprovider.infrastructure.repository.TenantLoginProviderRepository;
 
@@ -76,7 +77,9 @@ public class TenantLoginProviderWriteGatewayAdapter
     Span span = tracer.spanBuilder("Create on the repository an entity of tenant login provider")
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.SERVER).startSpan();
     try {
-      tenantLoginProviderMetadataUploadGatewayAdapter.commitMetadata(entity, Optional.empty());
+      entity = entity.withMetadataValue(
+          tenantLoginProviderMetadataUploadGatewayAdapter.commitMetadata(entity, Optional.empty())
+              .map(MetadataVO::from).orElseGet(MetadataVO::nullValue));
       TenantLoginProvider result = repository.create(entity);
       eventDispatcher.dispatch(entity);
       return result;
@@ -103,7 +106,9 @@ public class TenantLoginProviderWriteGatewayAdapter
             "Create on the repository an entity of tenant login provider and verify its visibility")
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.SERVER).startSpan();
     try {
-      tenantLoginProviderMetadataUploadGatewayAdapter.commitMetadata(entity, Optional.empty());
+      entity = entity.withMetadataValue(
+          tenantLoginProviderMetadataUploadGatewayAdapter.commitMetadata(entity, Optional.empty())
+              .map(MetadataVO::from).orElseGet(MetadataVO::nullValue));
       TenantLoginProvider result = repository.create(entity, verifier);
       eventDispatcher.dispatch(entity);
       return result;
@@ -281,7 +286,9 @@ public class TenantLoginProviderWriteGatewayAdapter
   @Override
   public TenantLoginProvider update(TenantLoginProviderRef reference, TenantLoginProvider entity) {
     TenantLoginProvider stored = resolveForUpdate(reference);
-    tenantLoginProviderMetadataUploadGatewayAdapter.commitMetadata(entity, Optional.of(stored));
+    entity = entity.withMetadataValue(
+        tenantLoginProviderMetadataUploadGatewayAdapter.commitMetadata(entity, Optional.of(stored))
+            .map(MetadataVO::from).orElseGet(MetadataVO::nullValue));
     TenantLoginProvider result = repository.update(entity);
     eventDispatcher.dispatch(entity);
     return result;

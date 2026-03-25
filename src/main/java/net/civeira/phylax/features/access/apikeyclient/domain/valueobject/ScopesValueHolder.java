@@ -52,8 +52,8 @@ public class ScopesValueHolder<T> {
    * @return
    */
   public T scopes(ScopesVO scopes) {
-    value = Optional.of(scopes);
-    return holder;
+    this.value = Optional.of(scopes);
+    return this.holder;
   }
 
   /**
@@ -62,8 +62,8 @@ public class ScopesValueHolder<T> {
    * @return
    */
   public T scopes(Optional<ScopesVO> scopes) {
-    value = scopes;
-    return holder;
+    this.value = scopes;
+    return this.holder;
   }
 
   /**
@@ -72,8 +72,8 @@ public class ScopesValueHolder<T> {
    * @return
    */
   public T scopes(String scopes) {
-    value = Optional.of(ScopesVO.from(scopes));
-    return holder;
+    this.value = Optional.of(ScopesVO.from(scopes));
+    return this.holder;
   }
 
   /**
@@ -81,8 +81,8 @@ public class ScopesValueHolder<T> {
    * @return
    */
   public T scopesNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

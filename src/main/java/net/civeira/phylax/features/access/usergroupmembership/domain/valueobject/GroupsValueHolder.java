@@ -41,8 +41,8 @@ public class GroupsValueHolder<T> {
    * @return
    */
   public T groups(GroupsVO groups) {
-    value = Optional.of(groups);
-    return holder;
+    this.value = Optional.of(groups);
+    return this.holder;
   }
 
   /**
@@ -51,8 +51,8 @@ public class GroupsValueHolder<T> {
    * @return
    */
   public T groups(Optional<GroupsVO> groups) {
-    value = groups;
-    return holder;
+    this.value = groups;
+    return this.holder;
   }
 
   /**
@@ -61,8 +61,8 @@ public class GroupsValueHolder<T> {
    * @return
    */
   public T groups(String groups) {
-    value = Optional.of(GroupsVO.from(groups));
-    return holder;
+    this.value = Optional.of(GroupsVO.from(groups));
+    return this.holder;
   }
 
   /**
@@ -70,8 +70,8 @@ public class GroupsValueHolder<T> {
    * @return
    */
   public T groupsNull() {
-    value = Optional.empty();
-    return holder;
+    this.value = Optional.empty();
+    return this.holder;
   }
 
   /**

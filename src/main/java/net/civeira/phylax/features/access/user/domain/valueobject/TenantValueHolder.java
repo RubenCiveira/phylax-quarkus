@@ -59,8 +59,8 @@ public class TenantValueHolder<T> {
    * @return
    */
   public T tenant(TenantVO tenant) {
-    value = Optional.of(tenant);
-    return holder;
+    this.value = Optional.of(tenant);
+    return this.holder;
   }
 
   /**
@@ -69,8 +69,8 @@ public class TenantValueHolder<T> {
    * @return
    */
   public T tenant(Optional<TenantVO> tenant) {
-    value = tenant;
-    return holder;
+    this.value = tenant;
+    return this.holder;
   }
 
   /**
@@ -79,8 +79,8 @@ public class TenantValueHolder<T> {
    * @return
    */
   public T tenant(TenantRef tenant) {
-    value = Optional.of(TenantVO.from(tenant));
-    return holder;
+    this.value = Optional.of(TenantVO.from(tenant));
+    return this.holder;
   }
 
   /**
