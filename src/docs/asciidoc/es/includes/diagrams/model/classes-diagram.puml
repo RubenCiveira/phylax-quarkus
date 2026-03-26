@@ -150,8 +150,8 @@ access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: condition
 class document.TemplateVersion{
 uid:string
 subject:string
-contentHtml:string
-contentText:string
+contentHtml:blob
+contentText:blob
 version:integer
 list()
 retrieve()
@@ -503,8 +503,8 @@ access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: condition
 class document.TemplateVersion{
 uid:string
 subject:string
-contentHtml:string
-contentText:string
+contentHtml:blob
+contentText:blob
 version:integer
 list()
 retrieve()

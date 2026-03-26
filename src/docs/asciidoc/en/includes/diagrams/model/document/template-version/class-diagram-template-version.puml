@@ -19,8 +19,8 @@ disable()
 class document.TemplateVersion{
 uid:string
 subject:string
-contentHtml:string
-contentText:string
+contentHtml:blob
+contentText:blob
 version:integer
 list()
 retrieve()

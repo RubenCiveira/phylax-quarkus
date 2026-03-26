@@ -5,9 +5,9 @@ Template* (xref:#entidad-template[Template])::
 El template de template version
 Subject (string)::
 El subject de template version
-Content html* (string)::
+Content html* (blob)::
 El content html de template version
-Content text (string)::
+Content text (blob)::
 El content text de template version
 Version (integer)::
 Campo con el número de version de template version para controlar bloqueos optimistas

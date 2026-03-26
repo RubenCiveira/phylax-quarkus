@@ -22,8 +22,8 @@ document.Theme "1"  o--  "N*" document.Template: theme
 class document.TemplateVersion{
 uid:string
 subject:string
-contentHtml:string
-contentText:string
+contentHtml:blob
+contentText:blob
 version:integer
 list()
 retrieve()
