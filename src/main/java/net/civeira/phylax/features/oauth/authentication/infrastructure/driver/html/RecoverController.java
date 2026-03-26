@@ -12,6 +12,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -49,9 +50,11 @@ public class RecoverController {
       @Context HttpHeaders headers, @QueryParam(USERNAME) String username,
       @QueryParam("recovercode") String recovercode) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request)
-        .map(_ -> recoverStep.doPaintWaitRecover(request.getLocale(), null, username, recovercode))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
+    return loadClient(request).map(clientDetails -> {
+      StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
+          .challenges(Optional.empty()).formParams(new MultivaluedHashMap<>()).build();
+      return recoverStep.doPaintWaitRecover(input, null, username, recovercode);
+    }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
   @POST

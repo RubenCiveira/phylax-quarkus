@@ -86,7 +86,7 @@ public class MfaStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(input.locale(), "mfa.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response.ok(decorator.getFullPage("MFA",
+    return Response.ok(decorator.getFullPage(input.tenant(), "MFA",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\"> " + error + "</p>")
             + "<form method=\"POST\">" + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"

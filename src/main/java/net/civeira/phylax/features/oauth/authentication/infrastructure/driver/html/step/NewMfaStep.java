@@ -120,7 +120,7 @@ public class NewMfaStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(input.locale(), "newmfa.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response.ok(decorator.getFullPage("newMfa",
+    return Response.ok(decorator.getFullPage(input.tenant(), "newMfa",
         js + "<h1>" + title + "</h1><p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"

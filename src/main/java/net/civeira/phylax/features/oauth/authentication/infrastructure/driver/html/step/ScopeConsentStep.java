@@ -115,7 +115,7 @@ public class ScopeConsentStep implements OidcStep {
 
     String scopeList = "<ul>" + mandatoryInputs + optionalCheckboxes + "</ul>";
 
-    return Response.ok(decorator.getFullPage("scopeConsent",
+    return Response.ok(decorator.getFullPage(input.tenant(), "scopeConsent",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"

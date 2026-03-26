@@ -22,6 +22,12 @@ import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMe
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipWriteRepositoryGateway;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
 import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentWriteRepositoryGateway;
+import net.civeira.phylax.features.document.template.domain.Template;
+import net.civeira.phylax.features.document.template.domain.gateway.TemplateWriteRepositoryGateway;
+import net.civeira.phylax.features.document.templateversion.domain.TemplateVersion;
+import net.civeira.phylax.features.document.templateversion.domain.gateway.TemplateVersionWriteRepositoryGateway;
+import net.civeira.phylax.features.document.theme.domain.Theme;
+import net.civeira.phylax.features.document.theme.domain.gateway.ThemeWriteRepositoryGateway;
 
 @RequiredArgsConstructor
 public class InitialFillService {
@@ -32,6 +38,9 @@ public class InitialFillService {
   private final RelyingPartyWriteRepositoryGateway parties;
   private final UserRoleAssignamentWriteRepositoryGateway rolesAssignament;
   private final UserGroupMembershipWriteRepositoryGateway groupsMembership;
+  private final ThemeWriteRepositoryGateway themes;
+  private final TemplateWriteRepositoryGateway templates;
+  private final TemplateVersionWriteRepositoryGateway templateVersions;
 
   @Transactional
   void registerResource(
@@ -62,6 +71,15 @@ public class InitialFillService {
       });
       bean.getUserGroups().forEach(proposal -> {
         groupsMembership.create(UserGroupMembership.create(proposal));
+      });
+      bean.getThemes().forEach(proposal -> {
+        themes.create(Theme.create(proposal));
+      });
+      bean.getTemplates().forEach(proposal -> {
+        templates.create(Template.create(proposal));
+      });
+      bean.getTemplateVersions().forEach(proposal -> {
+        templateVersions.create(TemplateVersion.create(proposal));
       });
     }
   }

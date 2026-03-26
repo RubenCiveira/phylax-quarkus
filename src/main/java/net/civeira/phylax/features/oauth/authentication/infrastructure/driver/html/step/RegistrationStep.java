@@ -69,7 +69,7 @@ public class RegistrationStep implements OidcStep {
     if (!allowRegister(input.tenant())) {
       return Optional.empty();
     }
-    return Optional.of(doPaintRegisterForm(input.locale(), null));
+    return Optional.of(doPaintRegisterForm(input, null));
   }
 
   @Override
@@ -83,7 +83,7 @@ public class RegistrationStep implements OidcStep {
       return Optional.empty();
     }
     if (!registerUserUsecase.allowRegister(input.getRequest().getTenant())) {
-      return Optional.of(new StepOutcome.Render(doPaintRegisterForm(input.locale(), AuthorizeHtml
+      return Optional.of(new StepOutcome.Render(doPaintRegisterForm(input, AuthorizeHtml
           .i18n(input.locale(), "register.error-format", "Registration not allowed"))));
     }
     String email = AuthorizeHtml.first(input.getFormParams(), "reg_email");
@@ -101,10 +101,10 @@ public class RegistrationStep implements OidcStep {
       return Optional.of(
           new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else if (RegistrationResult.Status.PENDING.equals(result.getStatus())) {
-      return Optional.of(new StepOutcome.Render(doPaintPendingPage(input.locale(), email)));
+      return Optional.of(new StepOutcome.Render(doPaintPendingPage(input, email)));
     } else {
-      return Optional.of(new StepOutcome.Render(doPaintRegisterForm(input.locale(),
-          AuthorizeHtml.i18n(input.locale(), "register.error-cancel"))));
+      return Optional.of(new StepOutcome.Render(
+          doPaintRegisterForm(input, AuthorizeHtml.i18n(input.locale(), "register.error-cancel"))));
     }
   }
 
@@ -118,13 +118,14 @@ public class RegistrationStep implements OidcStep {
   /**
    * Renders the registration form.
    */
-  public Response doPaintRegisterForm(Locale locale, String msg) {
+  private Response doPaintRegisterForm(StepInput input, String msg) {
     String js =
         securer.configureScripts(securer.addSign("sign"),
             securer.cypher(Arrays.asList(
                 EncrytFieldTransfer.builder().from("type_reg_password").to("reg_password").build()),
                 "register"),
             securer.focusOn("reg_email"));
+    Locale locale = input.locale();
 
     String title = AuthorizeHtml.i18n(locale, "register.title");
     String error = AuthorizeHtml.i18n(locale, "register.error-format", msg);
@@ -136,7 +137,7 @@ public class RegistrationStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(locale, "register.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Register",
+    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Register",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
             + "<form id=\"register\" method=\"POST\">"
@@ -157,23 +158,23 @@ public class RegistrationStep implements OidcStep {
   /**
    * Renders the pending registration confirmation page.
    */
-  public Response doPaintPendingPage(Locale locale, String email) {
+  private Response doPaintPendingPage(StepInput input, String email) {
+    Locale locale = input.locale();
     String title = AuthorizeHtml.i18n(locale, "register.pending-title");
     String help = AuthorizeHtml.i18n(locale, "register.pending-help", email);
 
-    return securer
-        .secureHtmlResponse(
-            Response
-                .ok(decorator.getFullPage("Register",
-                    "<h1>" + title + "</h1>" + "<p>" + help + "</p>", locale))
-                .type(AuthorizeHtml.TEXT_HTML));
+    return securer.secureHtmlResponse(Response
+        .ok(decorator.getFullPage(input.tenant(), "Register",
+            "<h1>" + title + "</h1>" + "<p>" + help + "</p>", locale))
+        .type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
    * Renders the registration verification form (user enters code from email).
    */
-  public Response doPaintVerifyForm(Locale locale, String email, String regcode, String msg) {
+  public Response doPaintVerifyForm(StepInput input, String email, String regcode, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"));
+    Locale locale = input.locale();
 
     String title = AuthorizeHtml.i18n(locale, "register-verify.title");
     String error = AuthorizeHtml.i18n(locale, "register-verify.error-format", msg);
@@ -184,17 +185,18 @@ public class RegistrationStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(locale, "register-verify.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Verify Registration",
-        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
-            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
-            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + codeLabel
-            + " <input type=\"text\" name=\"regcode\" value=\"" + nullToEmpty(regcode)
-            + "\" /></label>"
-            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
-            + "\" />" + "</form>" + "<form method=\"POST\">"
-            + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
-            + "</form>",
-        locale)).type(AuthorizeHtml.TEXT_HTML));
+    return securer
+        .secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Verify Registration",
+            js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+                + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
+                + "<form method=\"POST\">" + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<label>" + codeLabel + " <input type=\"text\" name=\"regcode\" value=\""
+                + nullToEmpty(regcode) + "\" /></label>"
+                + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+                + "\" />" + "</form>" + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText
+                + "</p>" + "</form>",
+            locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
@@ -211,7 +213,7 @@ public class RegistrationStep implements OidcStep {
       return Optional.of(
           new StepOutcome.Proceed(username, input.getClientDetails(), input.getRequest(), state));
     } else {
-      return Optional.of(new StepOutcome.Render(doPaintVerifyForm(input.locale(), email, code,
+      return Optional.of(new StepOutcome.Render(doPaintVerifyForm(input, email, code,
           AuthorizeHtml.i18n(input.locale(), "register-verify.error-format", "Invalid code"))));
     }
   }

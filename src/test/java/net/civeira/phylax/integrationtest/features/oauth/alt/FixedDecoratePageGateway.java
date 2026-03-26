@@ -13,7 +13,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecorateP
 @ApplicationScoped
 public class FixedDecoratePageGateway implements DecoratePageGateway {
   @Override
-  public String getFullPage(String title, String innerContent, Locale locale) {
+  public String getFullPage(String tenant, String title, String innerContent, Locale locale) {
     return innerContent;
   }
 }

@@ -12,6 +12,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -48,9 +49,11 @@ public class RegisterController {
       @Context HttpHeaders headers, @QueryParam("email") String email,
       @QueryParam("regcode") String regcode) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request)
-        .map(_ -> registrationStep.doPaintVerifyForm(request.getLocale(), email, regcode, null))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
+    return loadClient(request).map(clientDetails -> {
+      StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
+          .challenges(Optional.empty()).formParams(new MultivaluedHashMap<>()).build();
+      return registrationStep.doPaintVerifyForm(input, email, regcode, null);
+    }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
   @POST
@@ -60,6 +63,7 @@ public class RegisterController {
       final MultivaluedMap<String, String> paramMap, @Context HttpHeaders headers,
       @CookieParam(OidcCookieManager.PRE_SESSION_ID) String cookie) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
+
     return loadClient(request).map(clientDetails -> {
       Optional<ChallengesState> challengeState = cookieManager.readPreSession(cookie, tenant);
       StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)

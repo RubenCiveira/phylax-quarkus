@@ -12,9 +12,16 @@ import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChan
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembershipChangeSet;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignamentChangeSet;
+import net.civeira.phylax.features.document.template.domain.TemplateChangeSet;
+import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
+import net.civeira.phylax.features.document.templateversion.domain.TemplateVersionChangeSet;
+import net.civeira.phylax.features.document.theme.domain.ThemeChangeSet;
 
 @Getter
 public class InitialConfigBean {
+  private static final String TEMPLATE_CODE = "OAUTH_PAGE_WRAPPER";
+  private static final String DEFAULT_THEME = "blue";
+
   private final List<RelyingPartyChangeSet> parties;
   private final List<TrustedClientChangeSet> clients;
   private final List<TenantChangeSet> tenants;
@@ -22,6 +29,9 @@ public class InitialConfigBean {
   private final List<RoleChangeSet> roles;
   private final List<UserGroupMembershipChangeSet> userGroups;
   private final List<UserRoleAssignamentChangeSet> userRoles;
+  private final List<ThemeChangeSet> themes;
+  private final List<TemplateChangeSet> templates;
+  private final List<TemplateVersionChangeSet> templateVersions;
 
   public InitialConfigBean(String password) {
     RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("phylax-api")
@@ -49,6 +59,17 @@ public class InitialConfigBean {
     UserRoleAssignamentChangeSet userGenericRole =
         new UserRoleAssignamentChangeSet().newUid().user(root).roles(role);
 
+    // Default theme for the main tenant
+    ThemeChangeSet blueTheme = new ThemeChangeSet().newUid().name(DEFAULT_THEME).tenant(tenant)
+        .isDefault(Boolean.TRUE).enabled(Boolean.TRUE);
+
+    // Global OIDC page-wrapper template (no tenant = applies to all tenants as fallback)
+    TemplateChangeSet pageWrapperTemplate = new TemplateChangeSet().newUid().code(TEMPLATE_CODE)
+        .channel(TemplateChannelOptions.HTML).enabled(Boolean.TRUE);
+    // intentionally no .tenant() call → global template
+
+    TemplateVersionChangeSet pageWrapperVersion = new TemplateVersionChangeSet().newUid()
+        .template(pageWrapperTemplate).contentHtml(DEFAULT_PAGE_WRAPPER_HTML);
 
     tenants = List.of(tenant);
     parties = List.of(party);
@@ -57,5 +78,80 @@ public class InitialConfigBean {
     roles = List.of(role);
     userGroups = List.of(userRelyGroups, userClientGroups);
     userRoles = List.of(userGenericRole);
+    themes = List.of(blueTheme);
+    templates = List.of(pageWrapperTemplate);
+    templateVersions = List.of(pageWrapperVersion);
   }
+
+  // ---------------------------------------------------------------------------
+  // Default Handlebars template for the OIDC page shell.
+  //
+  // Variables available at render time:
+  // {{page.title}} – page title (HTML-escaped)
+  // {{theme.name}} – resolved theme name for asset paths (HTML-escaped)
+  // {{{page.content}}} – inner HTML form content (raw, unescaped)
+  // ---------------------------------------------------------------------------
+  // @formatter:off
+  private static final String DEFAULT_PAGE_WRAPPER_HTML =
+      "<html>\n"
+    + "<head>\n"
+    + "  <meta charset=\"UTF-8\">\n"
+    + "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+    + "  <title>{{page.title}}</title>\n"
+    + "  <link rel=\"icon\" type=\"image/png\" href=\"/oauth/themes/{{theme.name}}/favicon.png\">\n"
+    + "  <link rel=\"stylesheet\" href=\"/oauth/themes/{{theme.name}}/styles.css\">\n"
+    + "</head>\n"
+    + "<body>\n"
+    + "<div class=\"container\">\n"
+    + "  <div class=\"background-image\">\n"
+    + "    <picture>\n"
+    + "      <source srcset=\"/oauth/themes/{{theme.name}}/background-720.jpg\" media=\"(max-width: 720px)\">\n"
+    + "      <source srcset=\"/oauth/themes/{{theme.name}}/background-1280.jpg\" media=\"(max-width: 1280px)\">\n"
+    + "      <source srcset=\"/oauth/themes/{{theme.name}}/background-1620.jpg\" media=\"(max-width: 1620px)\">\n"
+    + "      <source srcset=\"/oauth/themes/{{theme.name}}/background-5224.jpg\" media=\"(min-width: 1281px)\">\n"
+    + "      <img src=\"/oauth/themes/{{theme.name}}/background-1280.jpg\" alt=\"Fondo\" class=\"background-img\">\n"
+    + "    </picture>\n"
+    + "    <div class=\"overlay-content\">\n"
+    + "      <img src=\"/oauth/themes/{{theme.name}}/logo.png\" alt=\"Logotipo\" class=\"logo\">\n"
+    + "      <h2>Hello</h2>\n"
+    + "    </div>\n"
+    + "  </div>\n"
+    + "  <div class=\"form-content\">\n"
+    + "    <div class=\"loading\"></div>\n"
+    + "    <div class=\"in-form\">{{{page.content}}}</div>\n"
+    + "  </div>\n"
+    + "</div>\n"
+    + "<script>\n"
+    + "document.addEventListener('DOMContentLoaded', function() {\n"
+    + "  const formContent = document.querySelector('.form-content');\n"
+    + "  const loadingIndicator = document.querySelector('.loading');\n"
+    + "  formContent.classList.add('slide-in');\n"
+    + "  setTimeout(function() {\n"
+    + "    const form = formContent.querySelector('form');\n"
+    + "    if (form) {\n"
+    + "      function handleFormSubmit(event) {\n"
+    + "        event.preventDefault();\n"
+    + "        formContent.classList.add('slide-out');\n"
+    + "        loadingIndicator.style.display = 'block';\n"
+    + "        setTimeout(function() {\n"
+    + "          form.removeEventListener('submit', handleFormSubmit);\n"
+    + "          form.submit();\n"
+    + "        }, 500);\n"
+    + "      }\n"
+    + "      const existingSubmitListener = form.onsubmit;\n"
+    + "      if (existingSubmitListener) {\n"
+    + "        form.addEventListener('submit', function(event) {\n"
+    + "          existingSubmitListener.call(form, event);\n"
+    + "          handleFormSubmit(event);\n"
+    + "        });\n"
+    + "      } else {\n"
+    + "        form.addEventListener('submit', handleFormSubmit);\n"
+    + "      }\n"
+    + "    }\n"
+    + "  }, 1000);\n"
+    + "});\n"
+    + "</script>\n"
+    + "</body>\n"
+    + "</html>";
+  // @formatter:on
 }

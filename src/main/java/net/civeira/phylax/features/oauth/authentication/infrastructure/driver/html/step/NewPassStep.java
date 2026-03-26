@@ -97,7 +97,7 @@ public class NewPassStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(input.locale(), "chpass.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response.ok(decorator.getFullPage("password",
+    return Response.ok(decorator.getFullPage(input.tenant(), "password",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
             + "<form id=\"chpass\" method=\"POST\">"

@@ -135,7 +135,8 @@ public class LoginStep implements OidcStep {
     }
 
     return securer.secureHtmlResponse(Response
-        .ok(decorator.getFullPage("Login", js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+        .ok(decorator.getFullPage(request.getTenant(), "Login", js + "<h1>" + title + "</h1>"
+            + "<p>" + help + "</p>"
             + (null == error ? "" : "<p class=\"error\">" + errorMsg + "</p>")
             + "<form id=\"login\" method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + usernameLabel

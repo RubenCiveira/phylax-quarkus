@@ -123,7 +123,7 @@ public class AuthorizeHtml {
   public Response showError(Exception ex, @Context HttpHeaders headers) {
     Locale locale = headers.getAcceptableLanguages().get(0);
     log.error("There was an error with son outh step", ex);
-    return Response.ok(decorator.getFullPage("Error",
+    return Response.ok(decorator.getGenericFullPage("Error",
         "" + "<h1>There was an error</h1>"
             + "<p>Please, <a href=\"#\" click=\"window.history.back();\">go back</a> and again</p>"
             + "",
@@ -140,10 +140,13 @@ public class AuthorizeHtml {
       @CookieParam(AUTH_SESSION_ID) String cookie, final @Context UriInfo req,
       @Context HttpHeaders headers) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request).flatMap(_ -> sessionManager.loadSession(cookie))
-        .map(sessionInfo -> securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Data",
-            "<h1>Ficha de " + sessionInfo.getValidationData().getUsername() + "</h1>",
-            request.getLocale()))))
+    return loadClient(request)
+        .flatMap(
+            _ -> sessionManager.loadSession(cookie))
+        .map(sessionInfo -> securer
+            .secureHtmlResponse(Response.ok(decorator.getFullPage(request.getTenant(), "Data",
+                "<h1>Ficha de " + sessionInfo.getValidationData().getUsername() + "</h1>",
+                request.getLocale()))))
         .orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
@@ -254,7 +257,7 @@ public class AuthorizeHtml {
       AuthRequest request, String cookie) {
     String js = securer.configureScripts(securer.addSignAndSend("sign", "enter"));
     return securer.secureHtmlResponse(Response
-        .ok(decorator.getFullPage("Login",
+        .ok(decorator.getFullPage(request.getTenant(), "Login",
             js + "<form id=\"enter\" method=\"POST\">"
                 + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
                 + "<input type=\"submit\" />" + "</form>" + "",

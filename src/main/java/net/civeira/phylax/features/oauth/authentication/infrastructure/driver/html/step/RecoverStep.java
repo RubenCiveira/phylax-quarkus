@@ -65,7 +65,7 @@ public class RecoverStep implements OidcStep {
 
   @Override
   public Optional<Response> paintInitial(StepInput input, String error) {
-    return Optional.of(doPaintRecoverForm(input.locale(), null));
+    return Optional.of(doPaintRecoverForm(input, null));
   }
 
   @Override
@@ -79,8 +79,8 @@ public class RecoverStep implements OidcStep {
       return Optional.empty();
     }
     if (!changePasswordUsecase.allowRecover(input.getRequest().getTenant())) {
-      return Optional.of(new StepOutcome.Render(doPaintRecoverForm(input.locale(),
-          AuthorizeHtml.i18n(input.locale(), "recover.save-error"))));
+      return Optional.of(new StepOutcome.Render(
+          doPaintRecoverForm(input, AuthorizeHtml.i18n(input.locale(), "recover.save-error"))));
     }
     String username = AuthorizeHtml.first(input.getFormParams(), "username");
     String url = issuer(input.getRequest().getTenant()) + "/recover" + "?username="
@@ -102,8 +102,9 @@ public class RecoverStep implements OidcStep {
   /**
    * Renders the initial recovery request form (user enters email/username).
    */
-  public Response doPaintRecoverForm(Locale locale, String msg) {
+  private Response doPaintRecoverForm(StepInput input, String msg) {
     String js = securer.configureScripts(securer.addSign("sign"), securer.focusOn("username"));
+    Locale locale = input.locale();
 
     String title = AuthorizeHtml.i18n(locale, "recover.title");
     String error = AuthorizeHtml.i18n(locale, "recover.error-format", msg);
@@ -114,7 +115,7 @@ public class RecoverStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(locale, "recover.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Recover",
+    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Recover",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + email
@@ -130,7 +131,7 @@ public class RecoverStep implements OidcStep {
   /**
    * Renders the recovery code form (user enters new password after clicking email link).
    */
-  public Response doPaintWaitRecover(Locale locale, String msg, String username,
+  public Response doPaintWaitRecover(StepInput input, String msg, String username,
       String recoverCode) {
     String js = securer.configureScripts(securer.addSign("sign"),
         securer.cypher(
@@ -138,7 +139,7 @@ public class RecoverStep implements OidcStep {
                 .asList(EncrytFieldTransfer.builder().from("type_password").to("password").build()),
             "recover"),
         securer.focusOn("password"));
-    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage("Recover",
+    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Recover",
         js + "<h1>Code for Recover</h1>" + (null == msg ? "" : "<p>Error: " + msg + "</p>")
             + "<form id=\"recover\" method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
@@ -148,7 +149,7 @@ public class RecoverStep implements OidcStep {
             + "<label>New pass: <input type=\"password\" id=\"type_password\" value=\"\" /></label>"
             + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"\" />"
             + "<input type=\"submit\" />" + "</form>",
-        locale)).type(AuthorizeHtml.TEXT_HTML));
+        input.locale())).type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
@@ -168,7 +169,7 @@ public class RecoverStep implements OidcStep {
     } else {
       String recoverCode = AuthorizeHtml.first(input.getFormParams(), "recovercode");
       String username = AuthorizeHtml.first(input.getFormParams(), "username");
-      return Optional.of(new StepOutcome.Render(doPaintWaitRecover(input.locale(),
+      return Optional.of(new StepOutcome.Render(doPaintWaitRecover(input,
           AuthorizeHtml.i18n(input.locale(), "recover.wrong-code"), username, recoverCode)));
     }
   }

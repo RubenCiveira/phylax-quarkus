@@ -97,7 +97,7 @@ public class ConsentStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(input.locale(), "consent.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
-    return Response.ok(decorator.getFullPage("Consent",
+    return Response.ok(decorator.getFullPage(input.tenant(), "Consent",
         js + "<h1>" + title + "</h1><p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\">" + error + "</p>") + "<form method=\"POST\">"
             + "<div style=\"with:100%;height:200px;overflow:auto; border:solid black 1px;\">"
