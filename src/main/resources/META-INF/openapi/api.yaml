@@ -10567,6 +10567,18 @@ components:
         useTls:
           description: El use tls de smtp outbound config
           type: boolean
+        maxRetries:
+          description: El max retries de smtp outbound config
+          type: integer
+          format: int32
+        retryDelay:
+          description: El retry delay de smtp outbound config
+          type: integer
+          format: int32
+        rateLimit:
+          description: El rate limit de smtp outbound config
+          type: integer
+          format: int32
         version:
           description: Campo con el número de version de smtp outbound config para controlar bloqueos optimistas
           type: integer

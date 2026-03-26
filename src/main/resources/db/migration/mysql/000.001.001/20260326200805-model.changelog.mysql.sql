@@ -18,3 +18,12 @@ CREATE INDEX idx_audit_user ON notification_smtp_outbound_config_audit(performed
 -- changeset auto.generated:1825492372-6
 ALTER TABLE notification_smtp_outbound_config ADD CONSTRAINT FK_NOTIFICATION_SMTP_OUTBOUND_CONFIG_TENANT FOREIGN KEY (tenant) REFERENCES access_tenant (uid) ON UPDATE RESTRICT ON DELETE RESTRICT;
 
+-- changeset auto.generated:1825492372-7
+ALTER TABLE notification_smtp_outbound_config ADD COLUMN max_retries INT NOT NULL DEFAULT 1;
+
+-- changeset auto.generated:1825492372-8
+ALTER TABLE notification_smtp_outbound_config ADD COLUMN retry_delay INT NOT NULL DEFAULT 30;
+
+-- changeset auto.generated:1825492372-9
+ALTER TABLE notification_smtp_outbound_config ADD COLUMN rate_limit INT NOT NULL DEFAULT 0;
+

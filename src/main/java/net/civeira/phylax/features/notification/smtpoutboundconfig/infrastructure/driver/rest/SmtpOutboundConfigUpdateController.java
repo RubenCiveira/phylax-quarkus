@@ -62,6 +62,9 @@ public class SmtpOutboundConfigUpdateController {
     smtpOutboundConfigApiDto.setSenderEmail(dto.getSenderEmail());
     smtpOutboundConfigApiDto.setTimeout(dto.getTimeout());
     smtpOutboundConfigApiDto.setUseTls(dto.getUseTls());
+    smtpOutboundConfigApiDto.setMaxRetries(dto.getMaxRetries());
+    smtpOutboundConfigApiDto.setRetryDelay(dto.getRetryDelay());
+    smtpOutboundConfigApiDto.setRateLimit(dto.getRateLimit());
     smtpOutboundConfigApiDto.setVersion(dto.getVersion());
     return smtpOutboundConfigApiDto;
   }
@@ -104,6 +107,15 @@ public class SmtpOutboundConfigUpdateController {
     }
     if (null != smtpOutboundConfigApiDto.getUseTls()) {
       dto.setUseTls(smtpOutboundConfigApiDto.getUseTls());
+    }
+    if (null != smtpOutboundConfigApiDto.getMaxRetries()) {
+      dto.setMaxRetries(smtpOutboundConfigApiDto.getMaxRetries());
+    }
+    if (null != smtpOutboundConfigApiDto.getRetryDelay()) {
+      dto.setRetryDelay(smtpOutboundConfigApiDto.getRetryDelay());
+    }
+    if (null != smtpOutboundConfigApiDto.getRateLimit()) {
+      dto.setRateLimit(smtpOutboundConfigApiDto.getRateLimit());
     }
     if (null != smtpOutboundConfigApiDto.getVersion()) {
       dto.setVersion(smtpOutboundConfigApiDto.getVersion());

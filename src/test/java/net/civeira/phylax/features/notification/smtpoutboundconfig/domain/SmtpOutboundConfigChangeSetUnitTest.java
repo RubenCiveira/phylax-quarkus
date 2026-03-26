@@ -17,9 +17,10 @@ class SmtpOutboundConfigChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_smtp_outbound_config_change_set_builder() {
     AesCipherService cypher = Mockito.mock(AesCipherService.class);
-    SmtpOutboundConfigChangeSet one = new SmtpOutboundConfigChangeSet().uid("one")
-        .tenant(TenantReference.of("one")).host("one").port(true).login("one").passwordPlain("one")
-        .senderName("one").senderEmail("one").timeout(1).useTls(true).version(1).newUid();
+    SmtpOutboundConfigChangeSet one =
+        new SmtpOutboundConfigChangeSet().uid("one").tenant(TenantReference.of("one")).host("one")
+            .port(true).login("one").passwordPlain("one").senderName("one").senderEmail("one")
+            .timeout(1).useTls(true).maxRetries(1).retryDelay(1).rateLimit(1).version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -83,6 +84,26 @@ class SmtpOutboundConfigChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("useTls");
     Assertions.assertFalse(one.getUseTls().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getMaxRetries().get(), "Value must equals to the intial value");
+    one.maxRetries(2);
+    Assertions.assertEquals(2, one.getMaxRetries().get(),
+        "Value must equals to the assigned value");
+    one.unset("maxRetries");
+    Assertions.assertFalse(one.getMaxRetries().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getRetryDelay().get(), "Value must equals to the intial value");
+    one.retryDelay(2);
+    Assertions.assertEquals(2, one.getRetryDelay().get(),
+        "Value must equals to the assigned value");
+    one.unset("retryDelay");
+    Assertions.assertFalse(one.getRetryDelay().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getRateLimit().get(), "Value must equals to the intial value");
+    one.rateLimit(2);
+    Assertions.assertEquals(2, one.getRateLimit().get(), "Value must equals to the assigned value");
+    one.unset("rateLimit");
+    Assertions.assertFalse(one.getRateLimit().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(0, one.getVersion().get(), "Value must equals to the intial value");
     one.version(2);

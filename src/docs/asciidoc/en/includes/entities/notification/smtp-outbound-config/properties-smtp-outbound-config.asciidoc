@@ -19,5 +19,11 @@ Timeout* (integer)::
 El timeout de smtp outbound config
 Use tls* (boolean)::
 El use tls de smtp outbound config
+Max retries* (integer)::
+El max retries de smtp outbound config
+Retry delay* (integer)::
+El retry delay de smtp outbound config
+Rate limit* (integer)::
+El rate limit de smtp outbound config
 Version (integer)::
 Campo con el número de version de smtp outbound config para controlar bloqueos optimistas

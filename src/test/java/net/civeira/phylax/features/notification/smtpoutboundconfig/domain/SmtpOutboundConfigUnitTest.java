@@ -7,8 +7,11 @@ import org.junit.jupiter.api.Test;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.HostVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.LoginVO;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.MaxRetriesVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.PasswordVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.PortVO;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.RateLimitVO;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.RetryDelayVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.SenderEmailVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.SenderNameVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.TenantVO;
@@ -30,7 +33,9 @@ class SmtpOutboundConfigUnitTest {
         .portValue(PortVO.from(true)).loginValue(LoginVO.from("one"))
         .passwordValue(PasswordVO.fromCyphered("one")).senderNameValue(SenderNameVO.from("one"))
         .senderEmailValue(SenderEmailVO.from("one")).timeoutValue(TimeoutVO.from(1))
-        .useTlsValue(UseTlsVO.from(true)).versionValue(VersionVO.from(1)).build();
+        .useTlsValue(UseTlsVO.from(true)).maxRetriesValue(MaxRetriesVO.from(1))
+        .retryDelayValue(RetryDelayVO.from(1)).rateLimitValue(RateLimitVO.from(1))
+        .versionValue(VersionVO.from(1)).build();
     SmtpOutboundConfig withOne = one.withVersionValue(VersionVO.from(1));
     Assertions.assertEquals(2, withOne.withNextVersion().getVersion().get());
     SmtpOutboundConfig deleted = one.delete();

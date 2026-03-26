@@ -11,8 +11,11 @@ import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfig;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.HostVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.LoginVO;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.MaxRetriesVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.PasswordVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.PortVO;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.RateLimitVO;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.RetryDelayVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.SenderEmailVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.SenderNameVO;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.TenantVO;
@@ -34,7 +37,9 @@ class SmtpOutboundConfigCachedUnitTest {
         .portValue(PortVO.from(true)).loginValue(LoginVO.from("one"))
         .passwordValue(PasswordVO.fromCyphered("one")).senderNameValue(SenderNameVO.from("one"))
         .senderEmailValue(SenderEmailVO.from("one")).timeoutValue(TimeoutVO.from(1))
-        .useTlsValue(UseTlsVO.from(true)).versionValue(VersionVO.from(1)).build();
+        .useTlsValue(UseTlsVO.from(true)).maxRetriesValue(MaxRetriesVO.from(1))
+        .retryDelayValue(RetryDelayVO.from(1)).rateLimitValue(RateLimitVO.from(1))
+        .versionValue(VersionVO.from(1)).build();
     OffsetDateTime now = OffsetDateTime.now();
     List<SmtpOutboundConfig> empty = List.of();
     List<SmtpOutboundConfig> some = List.of(one);

@@ -118,6 +118,9 @@ public class SmtpOutboundConfigListController {
     smtpOutboundConfigApiDto.setSenderEmail(dto.getSenderEmail());
     smtpOutboundConfigApiDto.setTimeout(dto.getTimeout());
     smtpOutboundConfigApiDto.setUseTls(dto.getUseTls());
+    smtpOutboundConfigApiDto.setMaxRetries(dto.getMaxRetries());
+    smtpOutboundConfigApiDto.setRetryDelay(dto.getRetryDelay());
+    smtpOutboundConfigApiDto.setRateLimit(dto.getRateLimit());
     smtpOutboundConfigApiDto.setVersion(dto.getVersion());
     return smtpOutboundConfigApiDto;
   }

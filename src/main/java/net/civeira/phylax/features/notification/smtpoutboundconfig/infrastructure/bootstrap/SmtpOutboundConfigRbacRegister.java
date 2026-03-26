@@ -63,6 +63,12 @@ public class SmtpOutboundConfigRbacRegister {
         .description("El timeout de smtp outbound config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("useTls")
         .description("El use tls de smtp outbound config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("maxRetries")
+        .description("El max retries de smtp outbound config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("retryDelay")
+        .description("El retry delay de smtp outbound config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("rateLimit")
+        .description("El rate limit de smtp outbound config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("version").description(
         "Campo con el número de version de smtp outbound config para controlar bloqueos optimistas")
         .build());

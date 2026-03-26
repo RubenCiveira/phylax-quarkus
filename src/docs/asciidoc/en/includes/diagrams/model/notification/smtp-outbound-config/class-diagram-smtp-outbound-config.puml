@@ -29,6 +29,9 @@ senderName:string
 senderEmail:string
 timeout:integer
 useTls:boolean
+maxRetries:integer
+retryDelay:integer
+rateLimit:integer
 version:integer
 list()
 retrieve()
