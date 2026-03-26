@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.application.granter.TokenGranter;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
@@ -150,8 +151,9 @@ public class TokenController {
           return Response.status(401).build();
         }
         AuthRequest request = code.request;
-        AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request,
-            code.data.getUsername(), code.client, Arrays.asList());
+        AuthenticationResult auth =
+            loginUsecase.fillPreAuthenticated(request, code.data.getUsername(), code.client,
+                Arrays.asList(), AuthenticationMode.CODE_EXCHANGE);
         return auth.isRight()
             ? Response.status(200)
                 .entity(tokenBuilder.buildToken(tenant, code.client,
@@ -168,7 +170,7 @@ public class TokenController {
                 .clientId(Optional.of(client.getClientId()))
                 .scope(Optional.ofNullable(paramMap.getFirst("scope"))).build();
             AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request,
-                info.getUsername(), client, Arrays.asList());
+                info.getUsername(), client, Arrays.asList(), AuthenticationMode.REFRESH);
             return auth.isRight()
                 ? Response.status(200).entity(tokenBuilder.buildToken(tenant, client,
                     paramMap.getFirst("grant_type"), auth.getData(), request)).build()

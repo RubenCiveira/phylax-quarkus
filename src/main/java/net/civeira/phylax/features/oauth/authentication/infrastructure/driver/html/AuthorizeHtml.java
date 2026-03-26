@@ -32,9 +32,11 @@ import net.civeira.phylax.features.oauth.authentication.application.Authenticate
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
@@ -114,6 +116,10 @@ public class AuthorizeHtml {
    * Application service for authenticated session lifecycle.
    */
   private final SessionManager sessionManager;
+  /**
+   * Dispatcher for OIDC domain events.
+   */
+  private final OidcEventDispatcher oidcEventDispatcher;
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
@@ -239,6 +245,8 @@ public class AuthorizeHtml {
 
     String csid = securer.verifyToken(first(paramMap, "csid")).orElse("-");
     if (sessionInfo.getCsid().equals(csid)) {
+      oidcEventDispatcher.dispatchSuccess(sessionInfo.getValidationData(),
+          AuthenticationMode.SESSION);
       return responseBuilder.successRedirect(Optional.of(cookie), loadClient,
           sessionInfo.getGrant(), request, sessionInfo.getValidationData(), paramMap);
     } else if ("none".equals(prompt)) {

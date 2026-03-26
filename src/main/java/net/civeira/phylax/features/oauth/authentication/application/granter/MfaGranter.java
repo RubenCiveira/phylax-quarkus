@@ -9,6 +9,7 @@ import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
@@ -75,7 +76,7 @@ public class MfaGranter implements TokenGranter {
           userMfa.verifyOtp(request.getTenant(), username, first(paramMap, "mfa_code"));
       result = otpValid
           ? loginUsecase.fillPreAuthenticated(request, username, client,
-              List.of(AuthenticationChallege.MFA))
+              List.of(AuthenticationChallege.MFA), AuthenticationMode.MFA)
           : AuthenticationResult.notAllowed(request.getTenant(), username, "invalid mfa code");
     } else {
       result = AuthenticationResult.notAllowed(request.getTenant(), "", "invalid token");

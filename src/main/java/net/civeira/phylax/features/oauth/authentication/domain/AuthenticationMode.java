@@ -12,7 +12,7 @@ package net.civeira.phylax.features.oauth.authentication.domain;
  */
 public enum AuthenticationMode {
 
-  SESSION("0"), PASSWORD("1"), MFA("2");
+  SESSION("0"), PASSWORD("1"), MFA("2"), REFRESH("0"), CODE_EXCHANGE("0");
 
   /**
    * Authentication context class reference value.

@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
@@ -48,5 +49,5 @@ public interface LoginGateway {
    * @return authentication result
    */
   AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails client, List<AuthenticationChallege> challenges);
+      ClientDetails client, List<AuthenticationChallege> challenges, AuthenticationMode mode);
 }

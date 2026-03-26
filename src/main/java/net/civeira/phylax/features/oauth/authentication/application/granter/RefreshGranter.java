@@ -9,6 +9,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
@@ -67,7 +68,8 @@ public class RefreshGranter implements TokenGranter {
         verifier.verifyRefresh(first(paramMap, "refresh_token"), request.getTenant());
     if (verifyRefresh.isPresent()) {
       String username = verifyRefresh.get();
-      result = loginUsecase.fillPreAuthenticated(request, username, client, Arrays.asList());
+      result = loginUsecase.fillPreAuthenticated(request, username, client, Arrays.asList(),
+          AuthenticationMode.REFRESH);
     } else {
       result = AuthenticationResult.notAllowed(request.getTenant(), "", "invalid token");
     }

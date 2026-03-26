@@ -8,6 +8,7 @@ import java.util.Map;
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
@@ -66,11 +67,11 @@ public class DelegatedAccessGranter implements TokenGranter {
     String tenant = request.getTenant();
     String token = first(paramMap, "token");
     return delegateLogin.resolveUsername(request, token).map(username -> {
-      AuthenticationResult result =
-          loginUsecase.fillPreAuthenticated(request, username, client, Arrays.asList());
+      AuthenticationResult result = loginUsecase.fillPreAuthenticated(request, username, client,
+          Arrays.asList(), AuthenticationMode.SESSION);
       if (result.isRight()) {
         return loginUsecase.fillPreAuthenticated(request, result.getData().getUsername(), client,
-            Arrays.asList());
+            Arrays.asList(), AuthenticationMode.SESSION);
       }
       return AuthenticationResult.unknownName(tenant, token);
     }).orElse(AuthenticationResult.unknownName(tenant, token));

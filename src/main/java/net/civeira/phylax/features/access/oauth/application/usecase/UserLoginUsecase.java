@@ -46,7 +46,6 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.EventNotifierGateway;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.scopes.application.ScopesConsentUsecase;
 import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
@@ -64,8 +63,6 @@ public class UserLoginUsecase {
   private final RequiredConsentService terms;
 
   private final ActiveUserFindService activeUser;
-
-  private final EventNotifierGateway eventNotifier;
 
   private final UserWriteRepositoryGateway users;
 
@@ -86,11 +83,11 @@ public class UserLoginUsecase {
   private final ScopesConsentUsecase scopesConsent;
 
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails appkey, List<AuthenticationChallege> challenges) {
+      ClientDetails appkey, List<AuthenticationChallege> challenges, AuthenticationMode mode) {
     if (log.isInfoEnabled()) {
       log.info("preAuth throught app {}, after {}", appkey, challenges);
     }
-    return send(userData(request, username, null, AuthenticationMode.SESSION));
+    return userData(request, username, null, mode);
   }
 
   public AuthenticationResult validateUserData(AuthRequest request, String username,
@@ -98,13 +95,13 @@ public class UserLoginUsecase {
     if (log.isInfoEnabled()) {
       log.info("validate throught app {}, after {}", appkey, challenges);
     }
-    return send(userData(request, username, password, AuthenticationMode.PASSWORD));
+    return userData(request, username, password, AuthenticationMode.PASSWORD);
   }
 
   public AuthenticationResult validateMfa(AuthRequest request, String username, String secreto,
       ClientDetails client, List<AuthenticationChallege> challenges) {
     if (otp.validateOtp(request.getTenant(), username, request.getAudiences(), secreto)) {
-      return send(userData(request, username, null, AuthenticationMode.MFA));
+      return userData(request, username, null, AuthenticationMode.MFA);
     } else {
       return AuthenticationResult.wrongCredential(request.getTenant(), username);
     }
@@ -121,15 +118,6 @@ public class UserLoginUsecase {
             return false;
           }
         }).orElse(false);
-  }
-
-  private AuthenticationResult send(AuthenticationResult result) {
-    if (result.isRight()) {
-      eventNotifier.loginOk(result.getData());
-    } else {
-      eventNotifier.loginFail(result.getFail());
-    }
-    return result;
   }
 
   private AuthenticationResult userData(AuthRequest request, String name, String password,

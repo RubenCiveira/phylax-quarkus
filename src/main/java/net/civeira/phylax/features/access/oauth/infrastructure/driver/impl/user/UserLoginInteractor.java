@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.usecase.UserLoginUsecase;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.domain.gateway.LoginGateway;
 
@@ -18,17 +20,23 @@ import net.civeira.phylax.features.oauth.user.domain.gateway.LoginGateway;
 @RequiredArgsConstructor
 public class UserLoginInteractor implements LoginGateway {
   private final UserLoginUsecase login;
+  private final OidcEventDispatcher eventDispatcher;
 
   @Override
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails appkey, List<AuthenticationChallege> challenges) {
-    return login.validatePreAuthenticated(request, username, appkey, challenges);
+      ClientDetails appkey, List<AuthenticationChallege> challenges, AuthenticationMode mode) {
+    AuthenticationResult result =
+        login.validatePreAuthenticated(request, username, appkey, challenges, mode);
+    eventDispatcher.dispatch(result);
+    return result;
   }
 
   @Override
   public AuthenticationResult validateUserData(AuthRequest request, String username,
       String password, ClientDetails appkey, List<AuthenticationChallege> challenges) {
-    return login.validateUserData(request, username, password, appkey, challenges);
+    AuthenticationResult result =
+        login.validateUserData(request, username, password, appkey, challenges);
+    eventDispatcher.dispatch(result);
+    return result;
   }
-
 }

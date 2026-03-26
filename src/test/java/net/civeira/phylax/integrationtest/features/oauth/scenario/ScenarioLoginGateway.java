@@ -47,7 +47,7 @@ public class ScenarioLoginGateway implements LoginGateway {
 
   @Override
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails client, List<AuthenticationChallege> challenges) {
+      ClientDetails client, List<AuthenticationChallege> challenges, AuthenticationMode mode) {
     return onPreAuth.get();
   }
 

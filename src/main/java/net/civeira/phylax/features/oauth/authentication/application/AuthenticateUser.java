@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
@@ -63,6 +64,7 @@ public class AuthenticateUser {
    */
   public AuthenticationResult preAuthenticate(AuthRequest request,
       List<AuthenticationChallege> challenges, String username, ClientDetails client) {
-    return loginUsecase.fillPreAuthenticated(request, username, client, challenges);
+    return loginUsecase.fillPreAuthenticated(request, username, client, challenges,
+        AuthenticationMode.SESSION);
   }
 }
