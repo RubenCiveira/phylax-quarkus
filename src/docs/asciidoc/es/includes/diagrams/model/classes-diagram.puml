@@ -214,6 +214,25 @@ enable()
 disable()
 }
 
+class notification.SmtpOutboundConfig{
+uid:string
+host:string
+port:boolean
+login:string
+password:string
+senderName:string
+senderEmail:string
+timeout:integer
+useTls:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant 
+
 class access.TenantLoginProvider{
 uid:string
 name:string
@@ -567,6 +586,25 @@ enable()
 disable()
 }
 
+class notification.SmtpOutboundConfig{
+uid:string
+host:string
+port:boolean
+login:string
+password:string
+senderName:string
+senderEmail:string
+timeout:integer
+useTls:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant 
+
 class access.TenantLoginProvider{
 uid:string
 name:string
@@ -726,6 +764,7 @@ access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: condition
 document.Template "1"  o--  "N*" document.TemplateVersion: template  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
 access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant  
+access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant  
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
@@ -751,6 +790,7 @@ access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: condition
 document.Template "1"  o--  "N*" document.TemplateVersion: template  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
 access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant  
+access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant  
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  

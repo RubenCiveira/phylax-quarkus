@@ -275,6 +275,7 @@ System_Boundary(c2, "Backend") {
     Container(backend_adapter_notification, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
     System_Boundary(backend_domain_notification, "Dominio") {
       Container(entity_message, "message", "Java", "message")
+      Container(entity_smtp_outbound_config, "smtp outbound config", "Java", "smtp-outbound-config")
     }
   Container(group_access, "access", "Java", "", $sprite="java")
   }
@@ -320,6 +321,7 @@ Rel(backend_adapter_access, backend_domain_access, "Consumes", "port.api")
 Rel(backend_api_access, backend_domain_access, "Support", "port.spi")
 Rel(backend_adapter_access, rabbitmq, "Eventos de mensajes", "Rest")
 Rel_R(entity_message, group_access, "uses", "include")
+Rel_R(entity_smtp_outbound_config, group_access, "uses", "include")
 Rel(web_app, backend_api_notification, "Rest connection", "Rest")
 Rel(backend_adapter_notification, database, "Read/Write data", "jpa")
 Rel(backend_adapter_notification, redis, "Cache for data", "jpa")

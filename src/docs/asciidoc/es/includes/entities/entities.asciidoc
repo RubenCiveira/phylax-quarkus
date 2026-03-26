@@ -67,6 +67,7 @@ include::../diagrams/model/notification/package-diagram.puml[]
 :leveloffset: +2
 
 include::notification/message/entity-message.asciidoc[]
+include::notification/smtp-outbound-config/entity-smtp-outbound-config.asciidoc[]
 
 :leveloffset: -2
 
