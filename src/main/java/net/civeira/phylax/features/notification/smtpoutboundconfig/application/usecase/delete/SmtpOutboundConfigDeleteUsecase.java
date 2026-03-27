@@ -108,11 +108,11 @@ public class SmtpOutboundConfigDeleteUsecase {
           + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    SmtpOutboundConfigVisibilityFilter filterOnVisibles =
-        SmtpOutboundConfigVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    SmtpOutboundConfigVisibilityFilter filterOnVisibles = SmtpOutboundConfigVisibilityFilter
+        .builder().uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null)).globalOnly(filter.getGlobalOnly().orElse(null))
+        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
+        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     SmtpOutboundConfigDeleteAllInBatchCommand command =
         new SmtpOutboundConfigDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

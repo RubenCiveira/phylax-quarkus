@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.document.templateversion.infrastructure.bootstrap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -215,9 +216,11 @@ public class TemplateVersionProjectionDescriptor implements ProjectionDescriptor
    * @return
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
-    return Map.of("template",
+    Map<String, RelationshipDefinition> relations = new HashMap<>();
+    relations.put("template",
         RelationshipDefinition.builder().list(false).id("/api/document/template")
             .url(baseServer + "/api/document/template").method("GET").batchParam("uids").on("$ref")
             .referenceField("uid").build());
+    return relations;
   }
 }

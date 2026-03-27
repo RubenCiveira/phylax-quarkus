@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.access.relyingparty.infrastructure.bootstrap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -348,21 +349,23 @@ public class RelyingPartyProjectionDescriptor implements ProjectionDescriptor {
    * @return
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
-    return Map.of("userRoleAssignament",
+    Map<String, RelationshipDefinition> relations = new HashMap<>();
+    relations.put("userRoleAssignament",
         RelationshipDefinition.builder().list(true).id("/api/access/user-role-assignament")
             .url(baseServer + "/api/access/user-role-assignament").method("GET")
-            .batchParam("relying-partys").referenceField("relying-party").build(),
-        "role",
-        RelationshipDefinition
-            .builder().list(true).id("/api/access/roles").url(baseServer + "/api/access/roles")
-            .method("GET").batchParam("relying-partys").referenceField("relying-party").build(),
-        "userGroupMembership",
+            .batchParam("relying-partys").referenceField("relying-party").build());
+    relations.put("role",
+        RelationshipDefinition.builder().list(true).id("/api/access/roles")
+            .url(baseServer + "/api/access/roles").method("GET").batchParam("relying-partys")
+            .referenceField("relying-party").build());
+    relations.put("userGroupMembership",
         RelationshipDefinition.builder().list(true).id("/api/access/user-group-membership")
             .url(baseServer + "/api/access/user-group-membership").method("GET")
-            .batchParam("relying-partys").referenceField("relying-party").build(),
-        "tenantTermsOfUse",
+            .batchParam("relying-partys").referenceField("relying-party").build());
+    relations.put("tenantTermsOfUse",
         RelationshipDefinition.builder().list(true).id("/api/access/tenants-terms-of-use")
             .url(baseServer + "/api/access/tenants-terms-of-use").method("GET")
             .batchParam("relying-partys").referenceField("relying-party").build());
+    return relations;
   }
 }

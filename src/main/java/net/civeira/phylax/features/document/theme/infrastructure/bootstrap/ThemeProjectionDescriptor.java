@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.document.theme.infrastructure.bootstrap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -278,13 +279,15 @@ public class ThemeProjectionDescriptor implements ProjectionDescriptor {
    * @return
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
-    return Map.of("tenant",
+    Map<String, RelationshipDefinition> relations = new HashMap<>();
+    relations.put("tenant",
         RelationshipDefinition.builder().list(false).id("/api/access/tenants")
             .url(baseServer + "/api/access/tenants").method("GET").batchParam("uids").on("$ref")
-            .referenceField("uid").build(),
-        "template",
+            .referenceField("uid").build());
+    relations.put("template",
         RelationshipDefinition.builder().list(true).id("/api/document/template")
             .url(baseServer + "/api/document/template").method("GET").batchParam("themes")
             .referenceField("theme").build());
+    return relations;
   }
 }

@@ -609,18 +609,16 @@ public class SmtpOutboundConfigRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
-    if (filter.isGlobalOnly()) {
-      sq.where(PartialWhere.where(TENANT, SqlOperator.IS_NULL, null));
-    } else {
-      filter.getTenant().ifPresent(tenantParam -> sq.where(TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(tenantParam.getUid())));
-      if (!filter.getTenants().isEmpty()) {
-        sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
-      }
-      filter.getTenantTenantAccesible()
-          .ifPresent(tenantTenantAccesibleParam -> sq.where(NOTIFICATION_SMTP_OUTBOUND_CONFIG_TENANT,
-              SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
+    filter.getGlobalOnly().filter(Boolean.TRUE::equals)
+        .ifPresent(_ -> sq.where(TENANT, SqlOperator.IS_NULL, SqlParameterValue.ofNullString()));
+    filter.getTenant().ifPresent(tenantParam -> sq.where(TENANT, SqlOperator.EQ,
+        SqlParameterValue.of(tenantParam.getUid())));
+    if (!filter.getTenants().isEmpty()) {
+      sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
     }
+    filter.getTenantTenantAccesible()
+        .ifPresent(tenantTenantAccesibleParam -> sq.where(NOTIFICATION_SMTP_OUTBOUND_CONFIG_TENANT,
+            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
     return sq;
   }
 

@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.access.role.infrastructure.bootstrap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -176,9 +177,11 @@ public class RoleProjectionDescriptor implements ProjectionDescriptor {
    * @return
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
-    return Map.of("relyingParty",
+    Map<String, RelationshipDefinition> relations = new HashMap<>();
+    relations.put("relyingParty",
         RelationshipDefinition.builder().list(false).id("/api/access/relying-parties")
             .url(baseServer + "/api/access/relying-parties").method("GET").batchParam("uids")
             .on("$ref").referenceField("uid").build());
+    return relations;
   }
 }

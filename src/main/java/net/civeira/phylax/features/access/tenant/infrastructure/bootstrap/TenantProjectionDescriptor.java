@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.access.tenant.infrastructure.bootstrap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -713,47 +714,51 @@ public class TenantProjectionDescriptor implements ProjectionDescriptor {
    * @return
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
-    return Map.of("template",
+    Map<String, RelationshipDefinition> relations = new HashMap<>();
+    relations.put("template",
         RelationshipDefinition.builder().list(true).id("/api/document/template")
             .url(baseServer + "/api/document/template").method("GET").batchParam("tenants")
-            .referenceField("tenant").build(),
-        "message",
+            .referenceField("tenant").build());
+    relations.put("message",
         RelationshipDefinition.builder().list(true).id("/api/template/template")
             .url(baseServer + "/api/template/template").method("GET").batchParam("tenants")
-            .referenceField("tenant").build(),
-        "tenantConfig",
+            .referenceField("tenant").build());
+    relations.put("tenantConfig",
         RelationshipDefinition.builder().list(true).id("/api/access/tenants-config")
             .url(baseServer + "/api/access/tenants-config").method("GET").batchParam("tenants")
-            .referenceField("tenant").build(),
-        "templateSnippet", RelationshipDefinition.builder().list(true)
-            .id("/api/document/template-snippet").url(baseServer + "/api/document/template-snippet")
-            .method("GET").batchParam("tenants").referenceField("tenant").build(),
-        "smtpOutboundConfig",
+            .referenceField("tenant").build());
+    relations.put("templateSnippet",
+        RelationshipDefinition.builder().list(true).id("/api/document/template-snippet")
+            .url(baseServer + "/api/document/template-snippet").method("GET").batchParam("tenants")
+            .referenceField("tenant").build());
+    relations.put("smtpOutboundConfig",
         RelationshipDefinition.builder().list(true).id("/api/template/smtp-outbound-config")
             .url(baseServer + "/api/template/smtp-outbound-config").method("GET")
-            .batchParam("tenants").referenceField("tenant").build(),
-        "tenantLoginProvider", RelationshipDefinition.builder().list(true)
-            .id("/api/access/login-providers").url(baseServer + "/api/access/login-providers")
-            .method("GET").batchParam("tenants").referenceField("tenant").build(),
-        "tenantTermsOfUse",
+            .batchParam("tenants").referenceField("tenant").build());
+    relations.put("tenantLoginProvider",
+        RelationshipDefinition.builder().list(true).id("/api/access/login-providers")
+            .url(baseServer + "/api/access/login-providers").method("GET").batchParam("tenants")
+            .referenceField("tenant").build());
+    relations.put("tenantTermsOfUse",
         RelationshipDefinition.builder().list(true).id("/api/access/tenants-terms-of-use")
             .url(baseServer + "/api/access/tenants-terms-of-use").method("GET")
-            .batchParam("tenants").referenceField("tenant").build(),
-        "templateVariable",
+            .batchParam("tenants").referenceField("tenant").build());
+    relations.put("templateVariable",
         RelationshipDefinition.builder().list(true).id("/api/document/template-variable")
             .url(baseServer + "/api/document/template-variable").method("GET").batchParam("tenants")
-            .referenceField("tenant").build(),
-        "theme",
+            .referenceField("tenant").build());
+    relations.put("theme",
         RelationshipDefinition.builder().list(true).id("/api/document/theme")
             .url(baseServer + "/api/document/theme").method("GET").batchParam("tenants")
-            .referenceField("tenant").build(),
-        "templateAsset",
+            .referenceField("tenant").build());
+    relations.put("templateAsset",
         RelationshipDefinition.builder().list(true).id("/api/document/template-asset")
             .url(baseServer + "/api/document/template-asset").method("GET").batchParam("tenants")
-            .referenceField("tenant").build(),
-        "user",
+            .referenceField("tenant").build());
+    relations.put("user",
         RelationshipDefinition.builder().list(true).id("/api/access/users")
             .url(baseServer + "/api/access/users").method("GET").batchParam("tenants")
             .referenceField("tenant").build());
+    return relations;
   }
 }

@@ -31,6 +31,11 @@ class SmtpOutboundConfigFilterUnitTest {
     filter.setSearch("lookup");
     Assertions.assertEquals("lookup", filter.getSearch().get(),
         "Search must be the same as the assigned");
+    Assertions.assertFalse(filter.getGlobalOnly().isPresent(),
+        "GlobalOnly must be empty if filter is build without it");
+    filter.setGlobalOnly(true);
+    Assertions.assertEquals(true, filter.getGlobalOnly().get(),
+        "GlobalOnly must be the same as the assigned");
     Assertions.assertFalse(filter.getTenant().isPresent(),
         "Tenant must be empty if filter is build without it");
     filter.setTenant(TenantReference.of("$ref"));

@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.access.userroleassignament.infrastructure.bootstrap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -266,16 +267,19 @@ public class UserRoleAssignamentProjectionDescriptor implements ProjectionDescri
    * @return
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
-    return Map.of("user",
-        RelationshipDefinition
-            .builder().list(false).id("/api/access/users").url(baseServer + "/api/access/users")
-            .method("GET").batchParam("uids").on("$ref").referenceField("uid").build(),
-        "relyingParty", RelationshipDefinition.builder().list(false)
-            .id("/api/access/relying-parties").url(baseServer + "/api/access/relying-parties")
-            .method("GET").batchParam("uids").on("$ref").referenceField("uid").build(),
-        "trustedClient",
+    Map<String, RelationshipDefinition> relations = new HashMap<>();
+    relations.put("user",
+        RelationshipDefinition.builder().list(false).id("/api/access/users")
+            .url(baseServer + "/api/access/users").method("GET").batchParam("uids").on("$ref")
+            .referenceField("uid").build());
+    relations.put("relyingParty",
+        RelationshipDefinition.builder().list(false).id("/api/access/relying-parties")
+            .url(baseServer + "/api/access/relying-parties").method("GET").batchParam("uids")
+            .on("$ref").referenceField("uid").build());
+    relations.put("trustedClient",
         RelationshipDefinition.builder().list(false).id("/api/access/trusted-clients")
             .url(baseServer + "/api/access/trusted-clients").method("GET").batchParam("uids")
             .on("$ref").referenceField("uid").build());
+    return relations;
   }
 }

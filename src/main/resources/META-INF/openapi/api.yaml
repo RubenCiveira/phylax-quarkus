@@ -4682,6 +4682,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: global-only
+          in: query
+          description: global only
+          required: false
+          schema:
+            type: boolean
         - name: tenant
           in: query
           description: tenant
@@ -4757,6 +4763,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: global-only
+          in: query
+          description: global only
+          required: false
+          schema:
+            type: boolean
         - name: tenant
           in: query
           description: tenant

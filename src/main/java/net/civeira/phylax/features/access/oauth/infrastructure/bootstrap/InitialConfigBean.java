@@ -20,6 +20,9 @@ import net.civeira.phylax.features.document.theme.domain.ThemeChangeSet;
 @Getter
 public class InitialConfigBean {
   private static final String TEMPLATE_CODE = "OAUTH_PAGE_WRAPPER";
+  private static final String TEMPLATE_LOGIN_NOTIFICATION = "OAUTH_LOGIN_NOTIFICATION";
+  private static final String TEMPLATE_PASSWORD_RECOVERY = "OAUTH_PASSWORD_RECOVERY";
+  private static final String TEMPLATE_USER_REGISTRATION = "OAUTH_USER_REGISTRATION";
   private static final String DEFAULT_THEME = "blue";
 
   private final List<RelyingPartyChangeSet> parties;
@@ -71,6 +74,37 @@ public class InitialConfigBean {
     TemplateVersionChangeSet pageWrapperVersion = new TemplateVersionChangeSet().newUid()
         .template(pageWrapperTemplate).contentHtml(DEFAULT_PAGE_WRAPPER_HTML);
 
+    // Global email notification templates — no .tenant() call → applies to all tenants
+    TemplateChangeSet loginNotificationTemplate = new TemplateChangeSet().newUid()
+        .code(TEMPLATE_LOGIN_NOTIFICATION).channel(TemplateChannelOptions.MAIL)
+        .enabled(Boolean.TRUE);
+
+    TemplateVersionChangeSet loginNotificationVersion = new TemplateVersionChangeSet().newUid()
+        .template(loginNotificationTemplate)
+        .subject("Security alert: new sign-in to your account")
+        .contentHtml(LOGIN_NOTIFICATION_HTML)
+        .contentText(LOGIN_NOTIFICATION_TEXT);
+
+    TemplateChangeSet passwordRecoveryTemplate = new TemplateChangeSet().newUid()
+        .code(TEMPLATE_PASSWORD_RECOVERY).channel(TemplateChannelOptions.MAIL)
+        .enabled(Boolean.TRUE);
+
+    TemplateVersionChangeSet passwordRecoveryVersion = new TemplateVersionChangeSet().newUid()
+        .template(passwordRecoveryTemplate)
+        .subject("Reset your password")
+        .contentHtml(PASSWORD_RECOVERY_HTML)
+        .contentText(PASSWORD_RECOVERY_TEXT);
+
+    TemplateChangeSet userRegistrationTemplate = new TemplateChangeSet().newUid()
+        .code(TEMPLATE_USER_REGISTRATION).channel(TemplateChannelOptions.MAIL)
+        .enabled(Boolean.TRUE);
+
+    TemplateVersionChangeSet userRegistrationVersion = new TemplateVersionChangeSet().newUid()
+        .template(userRegistrationTemplate)
+        .subject("Welcome to {{app.name}}")
+        .contentHtml(USER_REGISTRATION_HTML)
+        .contentText(USER_REGISTRATION_TEXT);
+
     tenants = List.of(tenant);
     parties = List.of(party);
     clients = List.of(client);
@@ -79,8 +113,10 @@ public class InitialConfigBean {
     userGroups = List.of(userRelyGroups, userClientGroups);
     userRoles = List.of(userGenericRole);
     themes = List.of(blueTheme);
-    templates = List.of(pageWrapperTemplate);
-    templateVersions = List.of(pageWrapperVersion);
+    templates = List.of(pageWrapperTemplate, loginNotificationTemplate, passwordRecoveryTemplate,
+        userRegistrationTemplate);
+    templateVersions = List.of(pageWrapperVersion, loginNotificationVersion,
+        passwordRecoveryVersion, userRegistrationVersion);
   }
 
   // ---------------------------------------------------------------------------
@@ -153,5 +189,152 @@ public class InitialConfigBean {
     + "</script>\n"
     + "</body>\n"
     + "</html>";
+  // @formatter:on
+
+  // ---------------------------------------------------------------------------
+  // Email: login security notification
+  //
+  // Variables:
+  // {{user.name}}  – display name of the user who logged in
+  // {{login.time}} – human-readable timestamp of the sign-in event
+  // {{login.ip}}   – originating IP address
+  // {{app.name}}   – application name shown in the footer
+  // ---------------------------------------------------------------------------
+  // @formatter:off
+  private static final String LOGIN_NOTIFICATION_HTML =
+      "<!DOCTYPE html>\n"
+    + "<html lang=\"en\">\n"
+    + "<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n"
+    + "<body style=\"font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0\">\n"
+    + "  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:32px 0\">\n"
+    + "    <tr><td align=\"center\">\n"
+    + "      <table width=\"520\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:6px;padding:32px\">\n"
+    + "        <tr><td>\n"
+    + "          <h2 style=\"margin:0 0 16px;color:#1a1a1a\">New sign-in detected</h2>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">Hi {{user.name}},</p>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">We detected a new sign-in to your account:</p>\n"
+    + "          <table style=\"width:100%;border-collapse:collapse;margin:16px 0\">\n"
+    + "            <tr><td style=\"padding:8px;border:1px solid #e0e0e0;color:#666\">Time</td>"
+    +              "<td style=\"padding:8px;border:1px solid #e0e0e0\">{{login.time}}</td></tr>\n"
+    + "            <tr><td style=\"padding:8px;border:1px solid #e0e0e0;color:#666\">IP address</td>"
+    +              "<td style=\"padding:8px;border:1px solid #e0e0e0\">{{login.ip}}</td></tr>\n"
+    + "          </table>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">If this was you, no action is needed.</p>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">If you did not sign in, please change your password immediately and contact support.</p>\n"
+    + "          <hr style=\"border:none;border-top:1px solid #e0e0e0;margin:24px 0\">\n"
+    + "          <p style=\"color:#999;font-size:12px\">{{app.name}}</p>\n"
+    + "        </td></tr>\n"
+    + "      </table>\n"
+    + "    </td></tr>\n"
+    + "  </table>\n"
+    + "</body>\n"
+    + "</html>";
+
+  private static final String LOGIN_NOTIFICATION_TEXT =
+      "New sign-in detected\n\n"
+    + "Hi {{user.name}},\n\n"
+    + "We detected a new sign-in to your account:\n\n"
+    + "  Time:       {{login.time}}\n"
+    + "  IP address: {{login.ip}}\n\n"
+    + "If this was you, no action is needed.\n"
+    + "If you did not sign in, please change your password immediately and contact support.\n\n"
+    + "{{app.name}}";
+  // @formatter:on
+
+  // ---------------------------------------------------------------------------
+  // Email: password recovery
+  //
+  // Variables:
+  // {{user.name}}       – display name of the user requesting recovery
+  // {{recovery.link}}   – one-time URL the user must follow to reset their password
+  // {{expiry.minutes}}  – validity period of the link in minutes
+  // {{app.name}}        – application name shown in the footer
+  // ---------------------------------------------------------------------------
+  // @formatter:off
+  private static final String PASSWORD_RECOVERY_HTML =
+      "<!DOCTYPE html>\n"
+    + "<html lang=\"en\">\n"
+    + "<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n"
+    + "<body style=\"font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0\">\n"
+    + "  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:32px 0\">\n"
+    + "    <tr><td align=\"center\">\n"
+    + "      <table width=\"520\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:6px;padding:32px\">\n"
+    + "        <tr><td>\n"
+    + "          <h2 style=\"margin:0 0 16px;color:#1a1a1a\">Reset your password</h2>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">Hi {{user.name}},</p>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">We received a request to reset your password. "
+    +              "Click the button below to choose a new one. This link expires in {{expiry.minutes}} minutes.</p>\n"
+    + "          <div style=\"text-align:center;margin:28px 0\">\n"
+    + "            <a href=\"{{recovery.link}}\" style=\"background:#2563eb;color:#fff;padding:12px 28px;"
+    +              "border-radius:4px;text-decoration:none;font-weight:bold;display:inline-block\">Reset password</a>\n"
+    + "          </div>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">If you did not request a password reset, you can ignore this email.</p>\n"
+    + "          <p style=\"color:#777;font-size:13px\">Or copy this link into your browser:<br>"
+    +              "<a href=\"{{recovery.link}}\" style=\"color:#2563eb\">{{recovery.link}}</a></p>\n"
+    + "          <hr style=\"border:none;border-top:1px solid #e0e0e0;margin:24px 0\">\n"
+    + "          <p style=\"color:#999;font-size:12px\">{{app.name}}</p>\n"
+    + "        </td></tr>\n"
+    + "      </table>\n"
+    + "    </td></tr>\n"
+    + "  </table>\n"
+    + "</body>\n"
+    + "</html>";
+
+  private static final String PASSWORD_RECOVERY_TEXT =
+      "Reset your password\n\n"
+    + "Hi {{user.name}},\n\n"
+    + "We received a request to reset your password.\n"
+    + "Follow the link below to choose a new one (expires in {{expiry.minutes}} minutes):\n\n"
+    + "  {{recovery.link}}\n\n"
+    + "If you did not request a password reset, you can ignore this email.\n\n"
+    + "{{app.name}}";
+  // @formatter:on
+
+  // ---------------------------------------------------------------------------
+  // Email: user registration / welcome
+  //
+  // Variables:
+  // {{user.name}}       – display name of the newly registered user
+  // {{activation.link}} – one-time URL to activate / verify the account
+  // {{app.name}}        – application name
+  // ---------------------------------------------------------------------------
+  // @formatter:off
+  private static final String USER_REGISTRATION_HTML =
+      "<!DOCTYPE html>\n"
+    + "<html lang=\"en\">\n"
+    + "<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n"
+    + "<body style=\"font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0\">\n"
+    + "  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:32px 0\">\n"
+    + "    <tr><td align=\"center\">\n"
+    + "      <table width=\"520\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:6px;padding:32px\">\n"
+    + "        <tr><td>\n"
+    + "          <h2 style=\"margin:0 0 16px;color:#1a1a1a\">Welcome to {{app.name}}!</h2>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">Hi {{user.name}},</p>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">Your account has been created successfully. "
+    +              "Click the button below to activate it and get started.</p>\n"
+    + "          <div style=\"text-align:center;margin:28px 0\">\n"
+    + "            <a href=\"{{activation.link}}\" style=\"background:#16a34a;color:#fff;padding:12px 28px;"
+    +              "border-radius:4px;text-decoration:none;font-weight:bold;display:inline-block\">Activate my account</a>\n"
+    + "          </div>\n"
+    + "          <p style=\"color:#777;font-size:13px\">Or copy this link into your browser:<br>"
+    +              "<a href=\"{{activation.link}}\" style=\"color:#16a34a\">{{activation.link}}</a></p>\n"
+    + "          <p style=\"color:#444;line-height:1.6\">If you did not create this account, please ignore this email.</p>\n"
+    + "          <hr style=\"border:none;border-top:1px solid #e0e0e0;margin:24px 0\">\n"
+    + "          <p style=\"color:#999;font-size:12px\">{{app.name}}</p>\n"
+    + "        </td></tr>\n"
+    + "      </table>\n"
+    + "    </td></tr>\n"
+    + "  </table>\n"
+    + "</body>\n"
+    + "</html>";
+
+  private static final String USER_REGISTRATION_TEXT =
+      "Welcome to {{app.name}}!\n\n"
+    + "Hi {{user.name}},\n\n"
+    + "Your account has been created successfully.\n"
+    + "Follow the link below to activate it:\n\n"
+    + "  {{activation.link}}\n\n"
+    + "If you did not create this account, please ignore this email.\n\n"
+    + "{{app.name}}";
   // @formatter:on
 }

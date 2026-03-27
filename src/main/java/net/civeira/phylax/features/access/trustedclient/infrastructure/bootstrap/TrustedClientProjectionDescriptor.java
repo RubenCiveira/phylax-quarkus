@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.access.trustedclient.infrastructure.bootstrap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -316,13 +317,15 @@ public class TrustedClientProjectionDescriptor implements ProjectionDescriptor {
    * @return
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
-    return Map.of("userRoleAssignament",
+    Map<String, RelationshipDefinition> relations = new HashMap<>();
+    relations.put("userRoleAssignament",
         RelationshipDefinition.builder().list(true).id("/api/access/user-role-assignament")
             .url(baseServer + "/api/access/user-role-assignament").method("GET")
-            .batchParam("trusted-clients").referenceField("trusted-client").build(),
-        "userGroupMembership",
+            .batchParam("trusted-clients").referenceField("trusted-client").build());
+    relations.put("userGroupMembership",
         RelationshipDefinition.builder().list(true).id("/api/access/user-group-membership")
             .url(baseServer + "/api/access/user-group-membership").method("GET")
             .batchParam("trusted-clients").referenceField("trusted-client").build());
+    return relations;
   }
 }
