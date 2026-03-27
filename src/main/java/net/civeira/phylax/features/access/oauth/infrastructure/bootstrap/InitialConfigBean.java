@@ -75,35 +75,29 @@ public class InitialConfigBean {
         .template(pageWrapperTemplate).contentHtml(DEFAULT_PAGE_WRAPPER_HTML);
 
     // Global email notification templates — no .tenant() call → applies to all tenants
-    TemplateChangeSet loginNotificationTemplate = new TemplateChangeSet().newUid()
-        .code(TEMPLATE_LOGIN_NOTIFICATION).channel(TemplateChannelOptions.MAIL)
-        .enabled(Boolean.TRUE);
+    TemplateChangeSet loginNotificationTemplate =
+        new TemplateChangeSet().newUid().code(TEMPLATE_LOGIN_NOTIFICATION)
+            .channel(TemplateChannelOptions.MAIL).enabled(Boolean.TRUE);
 
     TemplateVersionChangeSet loginNotificationVersion = new TemplateVersionChangeSet().newUid()
-        .template(loginNotificationTemplate)
-        .subject("Security alert: new sign-in to your account")
-        .contentHtml(LOGIN_NOTIFICATION_HTML)
-        .contentText(LOGIN_NOTIFICATION_TEXT);
+        .template(loginNotificationTemplate).subject("Security alert: new sign-in to your account")
+        .contentHtml(LOGIN_NOTIFICATION_HTML).contentText(LOGIN_NOTIFICATION_TEXT);
 
-    TemplateChangeSet passwordRecoveryTemplate = new TemplateChangeSet().newUid()
-        .code(TEMPLATE_PASSWORD_RECOVERY).channel(TemplateChannelOptions.MAIL)
-        .enabled(Boolean.TRUE);
+    TemplateChangeSet passwordRecoveryTemplate =
+        new TemplateChangeSet().newUid().code(TEMPLATE_PASSWORD_RECOVERY)
+            .channel(TemplateChannelOptions.MAIL).enabled(Boolean.TRUE);
 
     TemplateVersionChangeSet passwordRecoveryVersion = new TemplateVersionChangeSet().newUid()
-        .template(passwordRecoveryTemplate)
-        .subject("Reset your password")
-        .contentHtml(PASSWORD_RECOVERY_HTML)
-        .contentText(PASSWORD_RECOVERY_TEXT);
+        .template(passwordRecoveryTemplate).subject("Reset your password")
+        .contentHtml(PASSWORD_RECOVERY_HTML).contentText(PASSWORD_RECOVERY_TEXT);
 
-    TemplateChangeSet userRegistrationTemplate = new TemplateChangeSet().newUid()
-        .code(TEMPLATE_USER_REGISTRATION).channel(TemplateChannelOptions.MAIL)
-        .enabled(Boolean.TRUE);
+    TemplateChangeSet userRegistrationTemplate =
+        new TemplateChangeSet().newUid().code(TEMPLATE_USER_REGISTRATION)
+            .channel(TemplateChannelOptions.MAIL).enabled(Boolean.TRUE);
 
     TemplateVersionChangeSet userRegistrationVersion = new TemplateVersionChangeSet().newUid()
-        .template(userRegistrationTemplate)
-        .subject("Welcome to {{app.name}}")
-        .contentHtml(USER_REGISTRATION_HTML)
-        .contentText(USER_REGISTRATION_TEXT);
+        .template(userRegistrationTemplate).subject("Welcome to {{app.name}}")
+        .contentHtml(USER_REGISTRATION_HTML).contentText(USER_REGISTRATION_TEXT);
 
     tenants = List.of(tenant);
     parties = List.of(party);
@@ -195,10 +189,10 @@ public class InitialConfigBean {
   // Email: login security notification
   //
   // Variables:
-  // {{user.name}}  – display name of the user who logged in
+  // {{user.name}} – display name of the user who logged in
   // {{login.time}} – human-readable timestamp of the sign-in event
-  // {{login.ip}}   – originating IP address
-  // {{app.name}}   – application name shown in the footer
+  // {{login.ip}} – originating IP address
+  // {{app.name}} – application name shown in the footer
   // ---------------------------------------------------------------------------
   // @formatter:off
   private static final String LOGIN_NOTIFICATION_HTML =
@@ -245,10 +239,10 @@ public class InitialConfigBean {
   // Email: password recovery
   //
   // Variables:
-  // {{user.name}}       – display name of the user requesting recovery
-  // {{recovery.link}}   – one-time URL the user must follow to reset their password
-  // {{expiry.minutes}}  – validity period of the link in minutes
-  // {{app.name}}        – application name shown in the footer
+  // {{user.name}} – display name of the user requesting recovery
+  // {{recovery.link}} – one-time URL the user must follow to reset their password
+  // {{expiry.minutes}} – validity period of the link in minutes
+  // {{app.name}} – application name shown in the footer
   // ---------------------------------------------------------------------------
   // @formatter:off
   private static final String PASSWORD_RECOVERY_HTML =
@@ -294,9 +288,9 @@ public class InitialConfigBean {
   // Email: user registration / welcome
   //
   // Variables:
-  // {{user.name}}       – display name of the newly registered user
+  // {{user.name}} – display name of the newly registered user
   // {{activation.link}} – one-time URL to activate / verify the account
-  // {{app.name}}        – application name
+  // {{app.name}} – application name
   // ---------------------------------------------------------------------------
   // @formatter:off
   private static final String USER_REGISTRATION_HTML =
