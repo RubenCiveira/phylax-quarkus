@@ -29,7 +29,7 @@ public class LoginMail {
     try {
       EnqueueNotificationCommand cmd =
           EnqueueNotificationCommand.builder().templateCode(TEMPLATE_CODE).channel(CHANNEL)
-              .tenant(login.getTenant()).recipient(login.getUsername())
+              .tenant(login.getTenant()).recipient("rubenciveira@gmail.com")// (login.getUsername())
               .variables(Map.of("user", Map.of("name", login.getUsername()), "login",
                   Map.of("time", login.getTime().toString())))
               .build();

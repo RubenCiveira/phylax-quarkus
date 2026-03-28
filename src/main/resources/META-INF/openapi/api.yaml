@@ -9779,6 +9779,9 @@ components:
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
+        urgent:
+          description: El urgent de message
+          type: boolean
         content:
           description: El content de message
           type: string

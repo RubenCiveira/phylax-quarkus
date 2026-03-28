@@ -5,6 +5,7 @@ left to right direction
 class notification.Message{
 uid:string
 target:string
+urgent:boolean
 content:blob
 retries:integer
 createdAt:datetime

@@ -18,7 +18,7 @@ class MessageChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_message_change_set_builder() {
     MessageChangeSet one = new MessageChangeSet().uid("one").target("one")
-        .tenant(TenantReference.of("one")).content("one").retries(1)
+        .tenant(TenantReference.of("one")).urgent(true).content("one").retries(1)
         .createdAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
             .toOffsetDateTime())
         .sendAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
@@ -44,6 +44,13 @@ class MessageChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("tenant");
     Assertions.assertFalse(one.getTenant().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getUrgent().get(), "Value must equals to the intial value");
+    one.urgent(false);
+    Assertions.assertEquals(false, one.getUrgent().get(),
+        "Value must equals to the assigned value");
+    one.unset("urgent");
+    Assertions.assertFalse(one.getUrgent().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getContent().get(), "Value must equals to the intial value");
     one.content("two");

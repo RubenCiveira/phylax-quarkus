@@ -50,6 +50,8 @@ public class MessageRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
         .description("null = global, valor = override").build());
     rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("urgent").description("El urgent de message").build());
+    rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("content").description("El content de message").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("retries").description("El retries de message").build());

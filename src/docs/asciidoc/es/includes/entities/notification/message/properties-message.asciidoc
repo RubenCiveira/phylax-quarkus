@@ -5,6 +5,8 @@ Target* (string)::
 name
 Tenant (xref:#entidad-tenant[Tenant])::
 null = global, valor = override
+Urgent* (boolean)::
+El urgent de message
 Content* (blob)::
 El content de message
 Retries* (integer)::

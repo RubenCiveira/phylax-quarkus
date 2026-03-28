@@ -16,6 +16,7 @@ import net.civeira.phylax.features.notification.message.domain.valueobject.SendA
 import net.civeira.phylax.features.notification.message.domain.valueobject.TargetVO;
 import net.civeira.phylax.features.notification.message.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.notification.message.domain.valueobject.UidVO;
+import net.civeira.phylax.features.notification.message.domain.valueobject.UrgentVO;
 import net.civeira.phylax.features.notification.message.domain.valueobject.VersionVO;
 
 class MessageUnitTest {
@@ -27,8 +28,8 @@ class MessageUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_message_builder() {
     Message one = Message.builder().uidValue(UidVO.from("one")).targetValue(TargetVO.from("one"))
-        .tenantValue(TenantVO.from(TenantReference.of("one"))).contentValue(ContentVO.from("one"))
-        .retriesValue(RetriesVO.from(1))
+        .tenantValue(TenantVO.from(TenantReference.of("one"))).urgentValue(UrgentVO.from(true))
+        .contentValue(ContentVO.from("one")).retriesValue(RetriesVO.from(1))
         .createdAtValue(CreatedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .sendAtValue(SendAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)

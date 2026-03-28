@@ -108,6 +108,7 @@ public class MessageListController {
     messageApiDto.setUid(dto.getUid());
     messageApiDto.setTarget(dto.getTarget());
     messageApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    messageApiDto.setUrgent(dto.getUrgent());
     messageApiDto.setContent(dto.getContent());
     messageApiDto.setRetries(dto.getRetries());
     messageApiDto.setCreatedAt(dto.getCreatedAt());
