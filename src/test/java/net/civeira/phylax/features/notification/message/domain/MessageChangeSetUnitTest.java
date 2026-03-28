@@ -23,6 +23,8 @@ class MessageChangeSetUnitTest {
             .toOffsetDateTime())
         .sendAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
             .toOffsetDateTime())
+        .lockAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+            .toOffsetDateTime())
         .version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
@@ -77,6 +79,17 @@ class MessageChangeSetUnitTest {
         one.getSendAt().get(), "Value must equals to the assigned value");
     one.unset("sendAt");
     Assertions.assertFalse(one.getSendAt().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(
+        LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
+        one.getLockAt().get(), "Value must equals to the intial value");
+    one.lockAt(
+        LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime());
+    Assertions.assertEquals(
+        LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
+        one.getLockAt().get(), "Value must equals to the assigned value");
+    one.unset("lockAt");
+    Assertions.assertFalse(one.getLockAt().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(0, one.getVersion().get(), "Value must equals to the intial value");
     one.version(2);

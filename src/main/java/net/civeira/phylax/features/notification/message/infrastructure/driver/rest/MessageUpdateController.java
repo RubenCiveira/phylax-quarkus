@@ -58,6 +58,7 @@ public class MessageUpdateController {
     messageApiDto.setRetries(dto.getRetries());
     messageApiDto.setCreatedAt(dto.getCreatedAt());
     messageApiDto.setSendAt(dto.getSendAt());
+    messageApiDto.setLockAt(dto.getLockAt());
     messageApiDto.setVersion(dto.getVersion());
     return messageApiDto;
   }
@@ -89,6 +90,9 @@ public class MessageUpdateController {
     }
     if (null != messageApiDto.getSendAt()) {
       dto.setSendAt(messageApiDto.getSendAt());
+    }
+    if (null != messageApiDto.getLockAt()) {
+      dto.setLockAt(messageApiDto.getLockAt());
     }
     if (null != messageApiDto.getVersion()) {
       dto.setVersion(messageApiDto.getVersion());

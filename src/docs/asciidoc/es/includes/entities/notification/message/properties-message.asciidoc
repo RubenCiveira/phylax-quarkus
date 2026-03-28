@@ -13,5 +13,7 @@ Created at* (datetime)::
 El created at de message
 Send at (datetime)::
 El send at de message
+Lock at (datetime)::
+El lock at de message
 Version (integer)::
 Campo con el número de version de message para controlar bloqueos optimistas

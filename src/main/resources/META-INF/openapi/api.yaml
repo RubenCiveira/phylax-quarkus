@@ -9794,6 +9794,10 @@ components:
           description: El send at de message
           type: string
           format: date-time
+        lockAt:
+          description: El lock at de message
+          type: string
+          format: date-time
         version:
           description: Campo con el número de version de message para controlar bloqueos optimistas
           type: integer

@@ -54,6 +54,7 @@ public class MessageRetrieveController {
     messageApiDto.setRetries(dto.getRetries());
     messageApiDto.setCreatedAt(dto.getCreatedAt());
     messageApiDto.setSendAt(dto.getSendAt());
+    messageApiDto.setLockAt(dto.getLockAt());
     messageApiDto.setVersion(dto.getVersion());
     return messageApiDto;
   }

@@ -26,6 +26,7 @@ content:blob
 retries:integer
 createdAt:datetime
 sendAt:datetime
+lockAt:datetime
 version:integer
 list()
 retrieve()

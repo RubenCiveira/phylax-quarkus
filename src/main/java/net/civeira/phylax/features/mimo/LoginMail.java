@@ -27,15 +27,12 @@ public class LoginMail {
       return;
     }
     try {
-      EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder()
-          .templateCode(TEMPLATE_CODE)
-          .channel(CHANNEL)
-          .tenant(login.getTenant())
-          .recipient(login.getUsername())
-          .variables(Map.of(
-              "user", Map.of("name", login.getUsername()),
-              "login", Map.of("time", login.getTime().toString())))
-          .build();
+      EnqueueNotificationCommand cmd =
+          EnqueueNotificationCommand.builder().templateCode(TEMPLATE_CODE).channel(CHANNEL)
+              .tenant(login.getTenant()).recipient(login.getUsername())
+              .variables(Map.of("user", Map.of("name", login.getUsername()), "login",
+                  Map.of("time", login.getTime().toString())))
+              .build();
       enqueueNotification.enqueue(cmd);
     } catch (Exception e) {
       log.warn("Failed to enqueue login notification for user={}", login.getUsername(), e);

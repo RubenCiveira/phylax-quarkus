@@ -47,7 +47,9 @@ import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gatewa
 @Slf4j
 public class NotificationDispatchService {
 
-  /** Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used. */
+  /**
+   * Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used.
+   */
   private static final int DEFAULT_MAX_RETRIES = 3;
 
   private final MessageReadRepositoryGateway messageReader;
@@ -93,8 +95,8 @@ public class NotificationDispatchService {
    * Resolves the SMTP configuration for the message's tenant. When a configuration is found it is
    * used to build a per-tenant {@link MailConfiguration} and the message is sent through the
    * dynamic SMTP client. When no configuration exists the default Quarkus mailer is used instead
-   * (configured via {@code application.properties}) with {@link #DEFAULT_MAX_RETRIES} as the
-   * retry limit. On success the message is removed from the outbox and a domain event is fired. On
+   * (configured via {@code application.properties}) with {@link #DEFAULT_MAX_RETRIES} as the retry
+   * limit. On success the message is removed from the outbox and a domain event is fired. On
    * failure the retry counter is incremented via {@link #incrementRetries(Message)}.
    * </p>
    *

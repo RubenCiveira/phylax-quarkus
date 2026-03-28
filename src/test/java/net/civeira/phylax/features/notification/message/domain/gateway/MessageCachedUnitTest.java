@@ -13,6 +13,7 @@ import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.notification.message.domain.Message;
 import net.civeira.phylax.features.notification.message.domain.valueobject.ContentVO;
 import net.civeira.phylax.features.notification.message.domain.valueobject.CreatedAtVO;
+import net.civeira.phylax.features.notification.message.domain.valueobject.LockAtVO;
 import net.civeira.phylax.features.notification.message.domain.valueobject.RetriesVO;
 import net.civeira.phylax.features.notification.message.domain.valueobject.SendAtVO;
 import net.civeira.phylax.features.notification.message.domain.valueobject.TargetVO;
@@ -34,6 +35,8 @@ class MessageCachedUnitTest {
         .createdAtValue(CreatedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .sendAtValue(SendAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
+            .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
+        .lockAtValue(LockAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .versionValue(VersionVO.from(1)).build();
     OffsetDateTime now = OffsetDateTime.now();

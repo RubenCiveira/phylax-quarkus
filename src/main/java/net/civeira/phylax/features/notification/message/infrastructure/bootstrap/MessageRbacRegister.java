@@ -58,6 +58,8 @@ public class MessageRbacRegister {
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("sendAt").description("El send at de message").build());
     rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("lockAt").description("El lock at de message").build());
+    rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version")
             .description(
                 "Campo con el número de version de message para controlar bloqueos optimistas")
