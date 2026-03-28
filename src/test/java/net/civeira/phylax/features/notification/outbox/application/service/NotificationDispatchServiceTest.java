@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.infrastructure.mail.MailConfiguration;
 import net.civeira.phylax.features.notification.message.domain.Message;
 import net.civeira.phylax.features.notification.message.domain.MessageChangeSet;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageReadRepositoryGateway;
@@ -117,15 +118,33 @@ class NotificationDispatchServiceTest {
   // ---------------------------------------------------------------------------
 
   @Test
-  @DisplayName("dispatch skips message when no SMTP config is available")
-  void dispatch_skipsWhenNoSmtpConfig() {
-    Message msg = pendingMessage("uid-1", 0, Optional.empty(), Optional.empty(), "<p>Hi</p>");
+  @DisplayName("dispatch uses default mailer when no SMTP config is available")
+  void dispatch_usesDefaultMailerWhenNoSmtpConfig() {
+    Message msg = pendingMessage("uid-1", 0, Optional.empty(), Optional.empty(),
+        "{\"subject\":\"S\",\"html\":\"<p>H</p>\",\"text\":null}");
+    when(messageReader.list(any())).thenReturn(List.of(msg));
+    when(smtpConfigReader.find(any())).thenReturn(Optional.empty());
+    Message deleted = mock(Message.class);
+    when(msg.delete()).thenReturn(deleted);
+
+    service.dispatch();
+
+    verify(mailSender).send(any(OutboundMail.class));
+    verify(mailSender, never()).send(any(MailConfiguration.class), any(OutboundMail.class));
+    verify(messageWriter).delete(msg);
+  }
+
+  @Test
+  @DisplayName("dispatch skips message with no SMTP config when retries are exhausted")
+  void dispatch_skipsWhenNoSmtpConfigAndRetriesExhausted() {
+    Message msg = pendingMessage("uid-1", 3, Optional.empty(), Optional.empty(), "<p>Hi</p>");
     when(messageReader.list(any())).thenReturn(List.of(msg));
     when(smtpConfigReader.find(any())).thenReturn(Optional.empty());
 
     service.dispatch();
 
-    verify(mailSender, never()).send(any(), any(OutboundMail.class));
+    verify(mailSender, never()).send(any(OutboundMail.class));
+    verify(mailSender, never()).send(any(MailConfiguration.class), any(OutboundMail.class));
   }
 
   @Test

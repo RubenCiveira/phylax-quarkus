@@ -31,20 +31,24 @@ import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gatewa
  *
  * <p>
  * On each execution it fetches all messages whose {@code sendAt} is in the past (or null), and
- * whose retry count is below the limit defined by the matching SMTP configuration. SMTP
- * configuration is resolved per tenant: tenant-specific config first, then global fallback. If no
- * config is found the message is skipped with a warning.
+ * whose retry count is below the configured limit. SMTP configuration is resolved per tenant:
+ * tenant-specific config first, then global fallback. When no {@code SmtpOutboundConfig} is found
+ * in the database the message is sent via the default Quarkus mailer (configured in
+ * {@code application.properties}) using {@link #DEFAULT_MAX_RETRIES} as the retry limit.
  * </p>
  *
  * <p>
  * On success the message is deleted from the outbox. On failure the retry counter is incremented;
- * messages that exceed the limit of the config are left in the queue for operator review.
+ * messages that exceed the retry limit are left in the queue for operator review.
  * </p>
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationDispatchService {
+
+  /** Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used. */
+  private static final int DEFAULT_MAX_RETRIES = 3;
 
   private final MessageReadRepositoryGateway messageReader;
   private final MessageWriteRepositoryGateway messageWriter;
@@ -86,24 +90,19 @@ public class NotificationDispatchService {
    * Attempts to send a single outbox message.
    *
    * <p>
-   * Resolves the SMTP configuration for the message's tenant, checks the retry limit, builds the
-   * {@link OutboundMail}, and delegates sending to the gateway. On success the message is removed
-   * from the outbox and a domain event is fired. On failure the retry counter is incremented via
-   * {@link #incrementRetries(Message)}.
+   * Resolves the SMTP configuration for the message's tenant. When a configuration is found it is
+   * used to build a per-tenant {@link MailConfiguration} and the message is sent through the
+   * dynamic SMTP client. When no configuration exists the default Quarkus mailer is used instead
+   * (configured via {@code application.properties}) with {@link #DEFAULT_MAX_RETRIES} as the
+   * retry limit. On success the message is removed from the outbox and a domain event is fired. On
+   * failure the retry counter is incremented via {@link #incrementRetries(Message)}.
    * </p>
    *
    * @param message the pending outbox message to dispatch
    */
   private void dispatchMessage(Message message) {
     Optional<SmtpOutboundConfig> config = resolveSmtpConfig(message.getTenantUid());
-    if (config.isEmpty()) {
-      log.warn("No SMTP config found for message uid={} tenant={}, skipping", message.getUid(),
-          message.getTenantUid().orElse("global"));
-      return;
-    }
-
-    SmtpOutboundConfig smtp = config.get();
-    int maxRetries = smtp.getMaxRetries();
+    int maxRetries = config.map(SmtpOutboundConfig::getMaxRetries).orElse(DEFAULT_MAX_RETRIES);
 
     if (message.getRetries() >= maxRetries) {
       log.warn("Message uid={} exceeded max retries ({}), leaving in queue for review",
@@ -113,8 +112,12 @@ public class NotificationDispatchService {
 
     try {
       OutboundMail mail = buildMail(message);
-      MailConfiguration mailConfig = toMailConfiguration(smtp);
-      mailSender.send(mailConfig, mail);
+      if (config.isPresent()) {
+        mailSender.send(toMailConfiguration(config.get()), mail);
+      } else {
+        log.debug("No SMTP config for message uid={}, using default mailer", message.getUid());
+        mailSender.send(mail);
+      }
 
       // On success: remove from outbox
       Message deleted = message.delete();
