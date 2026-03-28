@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import net.civeira.phylax.features.notification.message.domain.Message;
 import net.civeira.phylax.features.notification.message.domain.MessageChangeSet;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageWriteRepositoryGateway;
 import net.civeira.phylax.features.notification.message.infrastructure.event.MessageEventDispatcher;
+import net.civeira.phylax.features.notification.outbox.domain.event.UrgentMessageEnqueuedEvent;
 
 /**
  * Creates a {@link Message} in the outbox by rendering the requested template and persisting the
@@ -45,6 +47,7 @@ public class EnqueueNotificationUseCase {
   private final MessageWriteRepositoryGateway messageGateway;
   private final MessageEventDispatcher eventDispatcher;
   private final ObjectMapper objectMapper;
+  private final Event<UrgentMessageEnqueuedEvent> urgentEvents;
 
   /**
    * Renders the template and persists the resulting message in the outbox queue.
@@ -69,13 +72,19 @@ public class EnqueueNotificationUseCase {
 
     MessageChangeSet changeSet =
         new MessageChangeSet().newUid().target(cmd.getRecipient()).content(content).retries(0)
-            .createdAt(OffsetDateTime.now(ZoneOffset.UTC)).sendAt(cmd.getSendAt());
+            .urgent(cmd.isUrgent()).createdAt(OffsetDateTime.now(ZoneOffset.UTC))
+            .sendAt(cmd.getSendAt());
 
     cmd.getTenantOptional().map(TenantReference::of).ifPresent(changeSet::tenant);
 
     Message message = Message.create(changeSet);
     Message saved = messageGateway.create(message);
     eventDispatcher.dispatch(saved);
+
+    if (cmd.isUrgent()) {
+      urgentEvents.fire(new UrgentMessageEnqueuedEvent(saved.getUid()));
+    }
+
     return saved;
   }
 

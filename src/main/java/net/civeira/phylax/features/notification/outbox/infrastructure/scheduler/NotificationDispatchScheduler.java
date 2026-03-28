@@ -8,11 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.notification.outbox.application.service.NotificationDispatchService;
 
 /**
- * Triggers periodic outbox dispatch using the Quarkus scheduler.
+ * Triggers periodic outbox dispatch and cleanup using the Quarkus scheduler.
  *
  * <p>
- * The interval is configurable via {@code phylax.notification.dispatch.interval} (default:
- * {@code 1m}). The initial delay avoids competing with application startup.
+ * Dispatch interval: {@code phylax.notification.dispatch.interval} (default {@code 1m}).
+ * Cleanup interval: {@code phylax.notification.cleanup.interval} (default {@code 24h}).
+ * Both jobs have an initial delay to avoid competing with application startup.
  * </p>
  */
 @ApplicationScoped
@@ -22,7 +23,10 @@ public class NotificationDispatchScheduler {
 
   private final NotificationDispatchService dispatchService;
 
-  @Scheduled(every = "${phylax.notification.dispatch.interval:1m}", delay = 30,
+  /**
+   * Processes all pending outbox messages whose scheduled delivery time has arrived.
+   */
+  @Scheduled(every = "${app.notification.dispatch.interval:1m}", delay = 30,
       delayUnit = java.util.concurrent.TimeUnit.SECONDS)
   public void dispatch() {
     log.debug("Running outbox notification dispatch");
@@ -30,6 +34,20 @@ public class NotificationDispatchScheduler {
       dispatchService.dispatch();
     } catch (Exception e) {
       log.error("Outbox dispatch failed", e);
+    }
+  }
+
+  /**
+   * Deletes sent messages that have exceeded the configured retention period.
+   */
+  @Scheduled(every = "${app.notification.cleanup.interval:24h}", delay = 1,
+      delayUnit = java.util.concurrent.TimeUnit.HOURS)
+  public void cleanup() {
+    log.debug("Running outbox notification cleanup");
+    try {
+      dispatchService.cleanup();
+    } catch (Exception e) {
+      log.error("Outbox cleanup failed", e);
     }
   }
 }

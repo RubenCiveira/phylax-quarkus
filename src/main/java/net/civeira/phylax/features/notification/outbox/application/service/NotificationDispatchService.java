@@ -19,6 +19,7 @@ import net.civeira.phylax.features.notification.message.domain.MessageChangeSet;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageFilter;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageReadRepositoryGateway;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageWriteRepositoryGateway;
+import net.civeira.phylax.features.notification.message.domain.valueobject.LockAtVO;
 import net.civeira.phylax.features.notification.message.infrastructure.event.MessageEventDispatcher;
 import net.civeira.phylax.features.notification.outbox.domain.gateway.SmtpMailSenderGateway;
 import net.civeira.phylax.features.notification.outbox.domain.model.OutboundMail;
@@ -26,20 +27,29 @@ import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOu
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigFilter;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigReadRepositoryGateway;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 /**
- * Dispatches pending outbox messages via SMTP.
+ * Dispatches pending outbox messages via SMTP and cleans up sent messages past the retention
+ * period.
  *
- * <p>
- * On each execution it fetches all messages whose {@code sendAt} is in the past (or null), and
- * whose retry count is below the configured limit. SMTP configuration is resolved per tenant:
- * tenant-specific config first, then global fallback. When no {@code SmtpOutboundConfig} is found
- * in the database the message is sent via the default Quarkus mailer (configured in
- * {@code application.properties}) using {@link #DEFAULT_MAX_RETRIES} as the retry limit.
- * </p>
+ * <h3>Message lifecycle</h3>
+ * <ol>
+ *   <li><b>Pending</b> — {@code retries >= 0}, {@code lockAt IS NULL}, {@code sendAt IS NULL} (or
+ *       {@code sendAt <= now} for scheduled messages).</li>
+ *   <li><b>Locked</b> — {@code lockAt IS NOT NULL} and fresh ({@code < now - STALE_LOCK_MINUTES}).
+ *       Another instance is processing the message; skip.</li>
+ *   <li><b>Stale lock</b> — {@code lockAt IS NOT NULL} and old ({@code >= now - STALE_LOCK_MINUTES}).
+ *       The processing instance crashed; the lock is cleared so the message can be retried.</li>
+ *   <li><b>Sent</b> — {@code retries == SENT_MARKER (-1)}, {@code sendAt} = actual sent timestamp,
+ *       {@code lockAt IS NULL}. Retained until the configured retention period expires.</li>
+ * </ol>
  *
+ * <h3>Rate limiting</h3>
  * <p>
- * On success the message is deleted from the outbox. On failure the retry counter is incremented;
- * messages that exceed the retry limit are left in the queue for operator review.
+ * Before picking up new messages the number of currently active locks is compared against
+ * {@code phylax.notification.dispatch.rate} (default 10). If the limit is reached the cycle is
+ * skipped entirely, throttling throughput in multi-instance deployments.
  * </p>
  */
 @ApplicationScoped
@@ -48,9 +58,27 @@ import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gatewa
 public class NotificationDispatchService {
 
   /**
-   * Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used.
+   * Value stored in {@code retries} to mark a message as successfully sent.
+   * Negative so it can never be confused with a real retry count.
    */
+  static final int SENT_MARKER = -1;
+
+  /** Minutes after which a non-cleared lock is considered stale (instance crash). */
+  private static final int STALE_LOCK_MINUTES = 10;
+
+  /** Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used. */
   private static final int DEFAULT_MAX_RETRIES = 3;
+
+  /** Maximum number of messages dispatched per cycle (rate limiting). */
+  @ConfigProperty(name = "phylax.notification.dispatch.rate", defaultValue = "10")
+  int dispatchRate;
+
+  /**
+   * Hours after which a sent message is eligible for deletion.
+   * Default: 168 h (7 days).
+   */
+  @ConfigProperty(name = "phylax.notification.retention.hours", defaultValue = "168")
+  long retentionHours;
 
   private final MessageReadRepositoryGateway messageReader;
   private final MessageWriteRepositoryGateway messageWriter;
@@ -61,54 +89,139 @@ public class NotificationDispatchService {
   private final AesCipherService cipher;
 
   /**
-   * Processes all pending outbox messages in a single transaction. Each message is dispatched
-   * independently; a failure on one does not prevent the others.
+   * Processes pending outbox messages in a single transaction.
+   *
+   * <p>
+   * Steps:
+   * <ol>
+   *   <li>Auto-unlock stale locks.</li>
+   *   <li>Count active locks; skip cycle if {@code >= dispatchRate}.</li>
+   *   <li>Dispatch up to {@code dispatchRate - activeLocks} pending messages.</li>
+   * </ol>
+   * Each dispatched message is locked before sending and unlocked (or marked sent) afterwards.
+   * Optimistic locking on the {@code version} field prevents two instances from processing the
+   * same message simultaneously.
+   * </p>
    */
   @Transactional
   public void dispatch() {
-    List<Message> pending = messageReader.list(MessageFilter.builder().build());
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    List<Message> all = messageReader.list(MessageFilter.builder().build());
 
-    pending.stream().filter(m -> isPending(m, now)).forEach(this::dispatchMessage);
+    // Step 1: release stale locks left by crashed instances
+    all.stream().filter(m -> isStale(m, now)).forEach(this::unlock);
+
+    // Step 2: rate limit check
+    long activeLocks = all.stream().filter(m -> isActiveLock(m, now)).count();
+    if (activeLocks >= dispatchRate) {
+      log.debug("Rate limit reached ({}/{}), skipping dispatch cycle", activeLocks, dispatchRate);
+      return;
+    }
+
+    // Step 3: dispatch pending messages up to the remaining slots
+    long slots = dispatchRate - activeLocks;
+    all.stream().filter(m -> isPending(m, now)).limit(slots).forEach(this::dispatchMessage);
   }
 
   /**
-   * Returns {@code true} when the message is eligible for dispatch at the given instant.
+   * Deletes sent messages whose {@code sendAt} timestamp is older than the configured retention
+   * period ({@code phylax.notification.retention.hours}, default 7 days).
+   */
+  @Transactional
+  public void cleanup() {
+    OffsetDateTime cutoff = OffsetDateTime.now(ZoneOffset.UTC).minusHours(retentionHours);
+    messageReader.list(MessageFilter.builder().build()).stream()
+        .filter(m -> isSent(m) && m.getSendAt().map(sa -> sa.isBefore(cutoff)).orElse(false))
+        .forEach(messageWriter::delete);
+    log.debug("Outbox cleanup finished; retention cutoff={}", cutoff);
+  }
+
+  // ---------------------------------------------------------------------------
+  // State predicates
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Returns {@code true} if the message should be dispatched now.
    *
-   * <p>
-   * A message is pending if its {@code sendAt} timestamp is absent (immediate delivery) or is not
-   * after {@code now}.
-   * </p>
-   *
-   * @param m the message to evaluate
-   * @param now the current UTC instant used as the reference
-   * @return {@code true} if the message should be dispatched now
+   * @param m   the message to evaluate
+   * @param now the current UTC instant
    */
   private boolean isPending(Message m, OffsetDateTime now) {
-    return m.getSendAt().map(sa -> !sa.isAfter(now)).orElse(true);
+    return !isSent(m)
+        && m.getLockAt().isEmpty()
+        && m.getSendAt().map(sa -> !sa.isAfter(now)).orElse(true);
   }
 
   /**
-   * Attempts to send a single outbox message.
+   * Returns {@code true} if the message has been successfully sent ({@code retries == SENT_MARKER}).
+   *
+   * @param m the message to check
+   */
+  private boolean isSent(Message m) {
+    return m.getRetries() == SENT_MARKER;
+  }
+
+  /**
+   * Returns {@code true} if the message holds a fresh (non-stale) lock.
+   *
+   * @param m   the message to check
+   * @param now the current UTC instant
+   */
+  private boolean isActiveLock(Message m, OffsetDateTime now) {
+    return m.getLockAt()
+        .map(la -> la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES)))
+        .orElse(false);
+  }
+
+  /**
+   * Returns {@code true} if the message has a lock that is old enough to be considered stale.
+   *
+   * @param m   the message to check
+   * @param now the current UTC instant
+   */
+  private boolean isStale(Message m, OffsetDateTime now) {
+    return m.getLockAt()
+        .map(la -> !la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES)))
+        .orElse(false);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Dispatch logic
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Attempts to lock and send a single outbox message.
    *
    * <p>
-   * Resolves the SMTP configuration for the message's tenant. When a configuration is found it is
-   * used to build a per-tenant {@link MailConfiguration} and the message is sent through the
-   * dynamic SMTP client. When no configuration exists the default Quarkus mailer is used instead
-   * (configured via {@code application.properties}) with {@link #DEFAULT_MAX_RETRIES} as the retry
-   * limit. On success the message is removed from the outbox and a domain event is fired. On
-   * failure the retry counter is incremented via {@link #incrementRetries(Message)}.
+   * The message is first locked by setting {@code lockAt = now}. If locking fails (e.g. due to an
+   * optimistic-lock conflict with another instance) the message is skipped silently. On a
+   * successful send {@code retries} is set to {@link #SENT_MARKER}, {@code sendAt} is updated to
+   * the actual sent timestamp, and {@code lockAt} is cleared. On failure the retry counter is
+   * incremented and the lock is released.
    * </p>
    *
    * @param message the pending outbox message to dispatch
    */
   private void dispatchMessage(Message message) {
+    OffsetDateTime lockTime = OffsetDateTime.now(ZoneOffset.UTC);
+
+    // Acquire lock
+    Message locked;
+    try {
+      locked = message.update(new MessageChangeSet().lockAt(lockTime));
+      messageWriter.update(message, locked);
+    } catch (Exception e) {
+      log.debug("Could not lock message uid={} (likely taken by another instance)", message.getUid());
+      return;
+    }
+
     Optional<SmtpOutboundConfig> config = resolveSmtpConfig(message.getTenantUid());
     int maxRetries = config.map(SmtpOutboundConfig::getMaxRetries).orElse(DEFAULT_MAX_RETRIES);
 
-    if (message.getRetries() >= maxRetries) {
-      log.warn("Message uid={} exceeded max retries ({}), leaving in queue for review",
+    if (locked.getRetries() >= maxRetries) {
+      log.warn("Message uid={} exceeded max retries ({}), unlocking for operator review",
           message.getUid(), maxRetries);
+      unlock(locked);
       return;
     }
 
@@ -121,20 +234,63 @@ public class NotificationDispatchService {
         mailSender.send(mail);
       }
 
-      // On success: remove from outbox
-      Message deleted = message.delete();
-      messageWriter.delete(message);
-      eventDispatcher.dispatch(deleted);
+      // Success: mark as sent, record timestamp, release lock
+      OffsetDateTime sentAt = OffsetDateTime.now(ZoneOffset.UTC);
+      Message sent = locked.update(
+          new MessageChangeSet().retries(SENT_MARKER).sendAt(sentAt).lockAt(LockAtVO.nullValue()));
+      messageWriter.update(locked, sent);
+      eventDispatcher.dispatch(sent);
       log.debug("Dispatched message uid={}", message.getUid());
 
     } catch (Exception e) {
       log.warn("Failed to dispatch message uid={}, incrementing retries", message.getUid(), e);
-      incrementRetries(message);
+      incrementRetriesAndUnlock(locked);
     }
   }
 
   /**
+   * Clears the {@code lockAt} field of the given message (stale-lock recovery).
+   *
+   * @param message the message whose lock should be released
+   */
+  private void unlock(Message message) {
+    try {
+      Message unlocked = message.update(new MessageChangeSet().lockAt(LockAtVO.nullValue()));
+      messageWriter.update(message, unlocked);
+    } catch (Exception ex) {
+      log.error("Failed to unlock stale message uid={}", message.getUid(), ex);
+    }
+  }
+
+  /**
+   * Increments the retry counter by one and releases the lock.
+   *
+   * <p>
+   * Exceptions during the update are caught and logged so that a broken retry-increment does not
+   * mask the original send failure.
+   * </p>
+   *
+   * @param message the message whose retry counter should be incremented
+   */
+  private void incrementRetriesAndUnlock(Message message) {
+    try {
+      Message updated = message.update(new MessageChangeSet()
+          .retries(message.getRetries() + 1).lockAt(LockAtVO.nullValue()));
+      messageWriter.update(message, updated);
+    } catch (Exception ex) {
+      log.error("Failed to increment retries for message uid={}", message.getUid(), ex);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // SMTP resolution and mail building
+  // ---------------------------------------------------------------------------
+
+  /**
    * Resolves the SMTP config: tenant-specific first, then global (tenant IS NULL).
+   *
+   * @param tenantUid the optional tenant uid of the message
+   * @return the resolved {@link SmtpOutboundConfig}, or empty if none is configured
    */
   private Optional<SmtpOutboundConfig> resolveSmtpConfig(Optional<String> tenantUid) {
     if (tenantUid.isPresent()) {
@@ -145,7 +301,6 @@ public class NotificationDispatchService {
         return tenantConfig;
       }
     }
-    // Fallback: global config (tenant IS NULL)
     return smtpConfigReader.find(SmtpOutboundConfigFilter.builder().globalOnly(true).build());
   }
 
@@ -154,8 +309,7 @@ public class NotificationDispatchService {
    *
    * <p>
    * The content field is expected to be a JSON object with {@code subject}, {@code html}, and
-   * {@code text} keys (as written by {@code EnqueueNotificationUseCase}). When the content cannot
-   * be parsed as JSON it is treated as raw HTML.
+   * {@code text} keys. When parsing fails the content is treated as raw HTML.
    * </p>
    *
    * @param message the outbox message whose {@code content} field holds the email body
@@ -168,7 +322,6 @@ public class NotificationDispatchService {
       return OutboundMail.builder().recipient(message.getTarget()).subject(rc.subject())
           .htmlContent(rc.html()).textContent(rc.text()).build();
     } catch (Exception e) {
-      // Fallback: treat content as raw HTML
       return OutboundMail.builder().recipient(message.getTarget()).subject("").htmlContent(content)
           .build();
     }
@@ -187,8 +340,6 @@ public class NotificationDispatchService {
    * @return a {@link MailConfiguration} ready to pass to the mail sender
    */
   private MailConfiguration toMailConfiguration(SmtpOutboundConfig smtp) {
-    // NOTE: PortVO is currently typed as Boolean due to a codegen issue (DB column is BIT).
-    // Until fixed, derive the port from the useTls flag as a fallback heuristic.
     int smtpPort = smtp.isUseTls() ? 465 : 587;
     return MailConfiguration.builder().smtpHost(smtp.getHost()).smtpPort(smtpPort)
         .smtpLogin(smtp.getLogin()).smtpPass(smtp.getPasswordPlain(cipher)).useTtls(smtp.isUseTls())
@@ -197,31 +348,11 @@ public class NotificationDispatchService {
   }
 
   /**
-   * Increments the retry counter of the given message by one.
-   *
-   * <p>
-   * Failures during the update are caught and logged so that a broken retry-increment does not mask
-   * the original send failure.
-   * </p>
-   *
-   * @param message the message whose retry counter should be incremented
-   */
-  private void incrementRetries(Message message) {
-    try {
-      MessageChangeSet changeSet = new MessageChangeSet().retries(message.getRetries() + 1);
-      Message updated = message.update(changeSet);
-      messageWriter.update(message, updated);
-    } catch (Exception ex) {
-      log.error("Failed to increment retries for message uid={}", message.getUid(), ex);
-    }
-  }
-
-  /**
    * JSON-deserialisation target matching the content written by {@code EnqueueNotificationUseCase}.
    *
    * @param subject email subject line (may be empty but never null after deserialisation)
-   * @param html HTML body of the email
-   * @param text plain-text alternative; null when the template has no text variant
+   * @param html    HTML body of the email
+   * @param text    plain-text alternative; null when the template has no text variant
    */
   record RenderedContent(String subject, String html, String text) {}
 }

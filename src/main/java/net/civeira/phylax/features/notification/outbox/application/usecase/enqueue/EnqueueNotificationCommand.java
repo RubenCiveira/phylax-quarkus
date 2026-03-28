@@ -44,6 +44,13 @@ public class EnqueueNotificationCommand {
    */
   private final OffsetDateTime sendAt;
 
+  /**
+   * When {@code true} the message bypasses the scheduler and is dispatched immediately after the
+   * enqueue transaction commits. Defaults to {@code false}.
+   */
+  @Builder.Default
+  private final boolean urgent = false;
+
   /** Returns the tenant uid wrapped in an {@link Optional}. */
   public Optional<String> getTenantOptional() {
     return Optional.ofNullable(tenant);
