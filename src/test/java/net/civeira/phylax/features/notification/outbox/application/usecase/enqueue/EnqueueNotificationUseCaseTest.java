@@ -26,12 +26,14 @@ import org.mockito.MockitoAnnotations;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.enterprise.event.Event;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderUsecase;
 import net.civeira.phylax.features.document.rendering.domain.RenderedTemplate;
 import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.notification.message.domain.Message;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageWriteRepositoryGateway;
 import net.civeira.phylax.features.notification.message.infrastructure.event.MessageEventDispatcher;
+import net.civeira.phylax.features.notification.outbox.domain.event.UrgentMessageEnqueuedEvent;
 
 /**
  * Unit tests for {@link EnqueueNotificationUseCase}.
@@ -49,11 +51,14 @@ class EnqueueNotificationUseCaseTest {
 
   private EnqueueNotificationUseCase useCase;
 
+  @Mock
+  private Event<UrgentMessageEnqueuedEvent> events;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
     useCase = new EnqueueNotificationUseCase(renderUsecase, messageGateway, eventDispatcher,
-        new ObjectMapper());
+        new ObjectMapper(), events);
   }
 
   @Test
@@ -117,7 +122,7 @@ class EnqueueNotificationUseCaseTest {
     doThrow(new JsonProcessingException("forced") {}).when(failingMapper).writeValueAsString(any());
 
     EnqueueNotificationUseCase useCaseWithBrokenMapper = new EnqueueNotificationUseCase(
-        renderUsecase, messageGateway, eventDispatcher, failingMapper);
+        renderUsecase, messageGateway, eventDispatcher, failingMapper, events);
 
     useCaseWithBrokenMapper.enqueue(EnqueueNotificationCommand.builder().templateCode("T")
         .channel("EMAIL").recipient("u@e.com").build());
