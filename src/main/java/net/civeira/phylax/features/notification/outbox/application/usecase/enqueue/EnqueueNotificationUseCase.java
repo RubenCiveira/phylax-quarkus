@@ -70,10 +70,9 @@ public class EnqueueNotificationUseCase {
 
     String content = encodeContent(rendered);
 
-    MessageChangeSet changeSet =
-        new MessageChangeSet().newUid().target(cmd.getRecipient()).content(content).retries(0)
-            .urgent(cmd.isUrgent()).createdAt(OffsetDateTime.now(ZoneOffset.UTC))
-            .sendAt(cmd.getSendAt());
+    MessageChangeSet changeSet = new MessageChangeSet().newUid().target(cmd.getRecipient())
+        .content(content).retries(0).urgent(cmd.isUrgent())
+        .createdAt(OffsetDateTime.now(ZoneOffset.UTC)).sendAt(cmd.getSendAt());
 
     cmd.getTenantOptional().map(TenantReference::of).ifPresent(changeSet::tenant);
 

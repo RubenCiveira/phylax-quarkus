@@ -11,9 +11,9 @@ import net.civeira.phylax.features.notification.outbox.application.service.Notif
  * Triggers periodic outbox dispatch and cleanup using the Quarkus scheduler.
  *
  * <p>
- * Dispatch interval: {@code phylax.notification.dispatch.interval} (default {@code 1m}).
- * Cleanup interval: {@code phylax.notification.cleanup.interval} (default {@code 24h}).
- * Both jobs have an initial delay to avoid competing with application startup.
+ * Dispatch interval: {@code phylax.notification.dispatch.interval} (default {@code 1m}). Cleanup
+ * interval: {@code phylax.notification.cleanup.interval} (default {@code 24h}). Both jobs have an
+ * initial delay to avoid competing with application startup.
  * </p>
  */
 @ApplicationScoped

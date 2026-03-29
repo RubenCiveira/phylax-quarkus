@@ -52,6 +52,9 @@ public class Message implements MessageRef {
    * @return A well formed message.
    */
   public static Message create(final MessageChangeSet change) throws ConstraintException {
+    change.createdAtNull();
+    change.sendAtNull();
+    change.lockAtNull();
     Message instance = new Message(change, Optional.empty());
     instance.addEvent(MessageCreateEvent.builder().payload(instance).build());
     return instance;
@@ -218,6 +221,9 @@ public class Message implements MessageRef {
    * @return A modified instance of message
    */
   public Message update(final MessageChangeSet change) throws ConstraintException {
+    change.unsetCreatedAt();
+    change.unsetSendAt();
+    change.unsetLockAt();
     Message instance = new Message(change, Optional.of(this));
     instance.addEvent(MessageUpdateEvent.builder().payload(instance).build());
     return instance;

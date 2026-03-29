@@ -6,6 +6,8 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -27,22 +29,20 @@ import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOu
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigFilter;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigReadRepositoryGateway;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 /**
  * Dispatches pending outbox messages via SMTP and cleans up sent messages past the retention
  * period.
  *
  * <h3>Message lifecycle</h3>
  * <ol>
- *   <li><b>Pending</b> — {@code retries >= 0}, {@code lockAt IS NULL}, {@code sendAt IS NULL} (or
- *       {@code sendAt <= now} for scheduled messages).</li>
- *   <li><b>Locked</b> — {@code lockAt IS NOT NULL} and fresh ({@code < now - STALE_LOCK_MINUTES}).
- *       Another instance is processing the message; skip.</li>
- *   <li><b>Stale lock</b> — {@code lockAt IS NOT NULL} and old ({@code >= now - STALE_LOCK_MINUTES}).
- *       The processing instance crashed; the lock is cleared so the message can be retried.</li>
- *   <li><b>Sent</b> — {@code retries == SENT_MARKER (-1)}, {@code sendAt} = actual sent timestamp,
- *       {@code lockAt IS NULL}. Retained until the configured retention period expires.</li>
+ * <li><b>Pending</b> — {@code retries >= 0}, {@code lockAt IS NULL}, {@code sendAt IS NULL} (or
+ * {@code sendAt <= now} for scheduled messages).</li>
+ * <li><b>Locked</b> — {@code lockAt IS NOT NULL} and fresh ({@code < now - STALE_LOCK_MINUTES}).
+ * Another instance is processing the message; skip.</li>
+ * <li><b>Stale lock</b> — {@code lockAt IS NOT NULL} and old ({@code >= now - STALE_LOCK_MINUTES}).
+ * The processing instance crashed; the lock is cleared so the message can be retried.</li>
+ * <li><b>Sent</b> — {@code retries == SENT_MARKER (-1)}, {@code sendAt} = actual sent timestamp,
+ * {@code lockAt IS NULL}. Retained until the configured retention period expires.</li>
  * </ol>
  *
  * <h3>Rate limiting</h3>
@@ -58,15 +58,17 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class NotificationDispatchService {
 
   /**
-   * Value stored in {@code retries} to mark a message as successfully sent.
-   * Negative so it can never be confused with a real retry count.
+   * Value stored in {@code retries} to mark a message as successfully sent. Negative so it can
+   * never be confused with a real retry count.
    */
   static final int SENT_MARKER = -1;
 
   /** Minutes after which a non-cleared lock is considered stale (instance crash). */
   private static final int STALE_LOCK_MINUTES = 10;
 
-  /** Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used. */
+  /**
+   * Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used.
+   */
   private static final int DEFAULT_MAX_RETRIES = 3;
 
   /** Maximum number of messages dispatched per cycle (rate limiting). */
@@ -74,8 +76,7 @@ public class NotificationDispatchService {
   int dispatchRate;
 
   /**
-   * Hours after which a sent message is eligible for deletion.
-   * Default: 168 h (7 days).
+   * Hours after which a sent message is eligible for deletion. Default: 168 h (7 days).
    */
   @ConfigProperty(name = "phylax.notification.retention.hours", defaultValue = "168")
   long retentionHours;
@@ -94,13 +95,13 @@ public class NotificationDispatchService {
    * <p>
    * Steps:
    * <ol>
-   *   <li>Auto-unlock stale locks.</li>
-   *   <li>Count active locks; skip cycle if {@code >= dispatchRate}.</li>
-   *   <li>Dispatch up to {@code dispatchRate - activeLocks} pending messages.</li>
+   * <li>Auto-unlock stale locks.</li>
+   * <li>Count active locks; skip cycle if {@code >= dispatchRate}.</li>
+   * <li>Dispatch up to {@code dispatchRate - activeLocks} pending messages.</li>
    * </ol>
    * Each dispatched message is locked before sending and unlocked (or marked sent) afterwards.
-   * Optimistic locking on the {@code version} field prevents two instances from processing the
-   * same message simultaneously.
+   * Optimistic locking on the {@code version} field prevents two instances from processing the same
+   * message simultaneously.
    * </p>
    */
   @Transactional
@@ -143,17 +144,17 @@ public class NotificationDispatchService {
   /**
    * Returns {@code true} if the message should be dispatched now.
    *
-   * @param m   the message to evaluate
+   * @param m the message to evaluate
    * @param now the current UTC instant
    */
   private boolean isPending(Message m, OffsetDateTime now) {
-    return !isSent(m)
-        && m.getLockAt().isEmpty()
+    return !isSent(m) && m.getLockAt().isEmpty()
         && m.getSendAt().map(sa -> !sa.isAfter(now)).orElse(true);
   }
 
   /**
-   * Returns {@code true} if the message has been successfully sent ({@code retries == SENT_MARKER}).
+   * Returns {@code true} if the message has been successfully sent
+   * ({@code retries == SENT_MARKER}).
    *
    * @param m the message to check
    */
@@ -164,25 +165,21 @@ public class NotificationDispatchService {
   /**
    * Returns {@code true} if the message holds a fresh (non-stale) lock.
    *
-   * @param m   the message to check
+   * @param m the message to check
    * @param now the current UTC instant
    */
   private boolean isActiveLock(Message m, OffsetDateTime now) {
-    return m.getLockAt()
-        .map(la -> la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES)))
-        .orElse(false);
+    return m.getLockAt().map(la -> la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES))).orElse(false);
   }
 
   /**
    * Returns {@code true} if the message has a lock that is old enough to be considered stale.
    *
-   * @param m   the message to check
+   * @param m the message to check
    * @param now the current UTC instant
    */
   private boolean isStale(Message m, OffsetDateTime now) {
-    return m.getLockAt()
-        .map(la -> !la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES)))
-        .orElse(false);
+    return m.getLockAt().map(la -> !la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES))).orElse(false);
   }
 
   // ---------------------------------------------------------------------------
@@ -211,7 +208,8 @@ public class NotificationDispatchService {
       locked = message.update(new MessageChangeSet().lockAt(lockTime));
       messageWriter.update(message, locked);
     } catch (Exception e) {
-      log.debug("Could not lock message uid={} (likely taken by another instance)", message.getUid());
+      log.debug("Could not lock message uid={} (likely taken by another instance)",
+          message.getUid());
       return;
     }
 
@@ -274,8 +272,8 @@ public class NotificationDispatchService {
    */
   private void incrementRetriesAndUnlock(Message message) {
     try {
-      Message updated = message.update(new MessageChangeSet()
-          .retries(message.getRetries() + 1).lockAt(LockAtVO.nullValue()));
+      Message updated = message.update(
+          new MessageChangeSet().retries(message.getRetries() + 1).lockAt(LockAtVO.nullValue()));
       messageWriter.update(message, updated);
     } catch (Exception ex) {
       log.error("Failed to increment retries for message uid={}", message.getUid(), ex);
@@ -351,8 +349,8 @@ public class NotificationDispatchService {
    * JSON-deserialisation target matching the content written by {@code EnqueueNotificationUseCase}.
    *
    * @param subject email subject line (may be empty but never null after deserialisation)
-   * @param html    HTML body of the email
-   * @param text    plain-text alternative; null when the template has no text variant
+   * @param html HTML body of the email
+   * @param text plain-text alternative; null when the template has no text variant
    */
   record RenderedContent(String subject, String html, String text) {}
 }
