@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.notification.message.domain;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ public class Message implements MessageRef {
    * @return A well formed message.
    */
   public static Message create(final MessageChangeSet change) throws ConstraintException {
-    change.createdAtNull();
+    change.createdAt(OffsetDateTime.now());
     change.sendAtNull();
     change.lockAtNull();
     Message instance = new Message(change, Optional.empty());
