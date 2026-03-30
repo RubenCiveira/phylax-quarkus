@@ -145,7 +145,7 @@ public class RecoverStep implements OidcStep {
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
             + "<label>The username: <input type=\"text\" name=\"username\" value=\"" + username
             + "\" /></label>" + "<label>The code: <input type=\"text\" name=\"code\" value=\""
-            + (null==recoverCode ? "" : recoverCode) + "\" /></label>"
+            + (null == recoverCode ? "" : recoverCode) + "\" /></label>"
             + "<label>New pass: <input type=\"password\" id=\"type_password\" value=\"\" /></label>"
             + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"\" />"
             + "<input type=\"submit\" />" + "</form>",

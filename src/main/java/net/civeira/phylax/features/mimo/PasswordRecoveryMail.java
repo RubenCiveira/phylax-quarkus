@@ -52,8 +52,9 @@ public class PasswordRecoveryMail {
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder()
         .templateCode(TEMPLATE_CODE).channel(CHANNEL).tenant(user.getTenant()).recipient(recipient)
         .variables(Map.of("user", Map.of("name", user.getName()), "recovery",
-            Map.of("link", event.getRecoveryLink() + event.getPayload().getRecoveryCode().orElse("-")), "expiry",
-            Map.of("minutes", String.valueOf(EXPIRY_MINUTES))))
+            Map.of("link",
+                event.getRecoveryLink() + event.getPayload().getRecoveryCode().orElse("-")),
+            "expiry", Map.of("minutes", String.valueOf(EXPIRY_MINUTES))))
         .urgent(true).build();
     enqueueNotification.enqueue(cmd);
   }
