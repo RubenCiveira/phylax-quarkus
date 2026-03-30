@@ -13,4 +13,3 @@ package net.civeira.phylax.features.notification.outbox.domain.event;
  * @param messageUid the uid of the newly created urgent message
  */
 public record UrgentMessageEnqueuedEvent(String messageUid) {}
-
