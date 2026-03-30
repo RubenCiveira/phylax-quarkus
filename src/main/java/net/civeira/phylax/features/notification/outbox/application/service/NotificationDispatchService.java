@@ -21,7 +21,6 @@ import net.civeira.phylax.features.notification.message.domain.MessageChangeSet;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageFilter;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageReadRepositoryGateway;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageWriteRepositoryGateway;
-import net.civeira.phylax.features.notification.message.domain.valueobject.LockAtVO;
 import net.civeira.phylax.features.notification.message.infrastructure.event.MessageEventDispatcher;
 import net.civeira.phylax.features.notification.outbox.domain.gateway.SmtpMailSenderGateway;
 import net.civeira.phylax.features.notification.outbox.domain.model.OutboundMail;
@@ -30,26 +29,20 @@ import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gatewa
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigReadRepositoryGateway;
 
 /**
- * Dispatches pending outbox messages via SMTP and cleans up sent messages past the retention
- * period.
+ * Dispatches pending outbox messages via SMTP and cleans up old messages past the retention period.
  *
  * <h3>Message lifecycle</h3>
  * <ol>
- * <li><b>Pending</b> — {@code retries >= 0}, {@code lockAt IS NULL}, {@code sendAt IS NULL} (or
- * {@code sendAt <= now} for scheduled messages).</li>
- * <li><b>Locked</b> — {@code lockAt IS NOT NULL} and fresh ({@code < now - STALE_LOCK_MINUTES}).
- * Another instance is processing the message; skip.</li>
- * <li><b>Stale lock</b> — {@code lockAt IS NOT NULL} and old ({@code >= now - STALE_LOCK_MINUTES}).
- * The processing instance crashed; the lock is cleared so the message can be retried.</li>
- * <li><b>Sent</b> — {@code retries == SENT_MARKER (-1)}, {@code sendAt} = actual sent timestamp,
- * {@code lockAt IS NULL}. Retained until the configured retention period expires.</li>
+ * <li><b>Pending</b> — {@code retries >= 0}, {@code sendAt IS NULL} (or {@code sendAt <= now} for
+ * scheduled messages).</li>
+ * <li><b>Sent</b> — deleted immediately after a successful send; an event is fired for downstream
+ * processing.</li>
+ * <li><b>Failed</b> — retry counter incremented; retried until {@code retries >= maxRetries}.</li>
  * </ol>
  *
  * <h3>Rate limiting</h3>
  * <p>
- * Before picking up new messages the number of currently active locks is compared against
- * {@code phylax.notification.dispatch.rate} (default 10). If the limit is reached the cycle is
- * skipped entirely, throttling throughput in multi-instance deployments.
+ * At most {@code phylax.notification.dispatch.rate} (default 10) messages are dispatched per cycle.
  * </p>
  */
 @ApplicationScoped
@@ -58,28 +51,19 @@ import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gatewa
 public class NotificationDispatchService {
 
   /**
-   * Value stored in {@code retries} to mark a message as successfully sent. Negative so it can
-   * never be confused with a real retry count.
-   */
-  static final int SENT_MARKER = -1;
-
-  /** Minutes after which a non-cleared lock is considered stale (instance crash). */
-  private static final int STALE_LOCK_MINUTES = 10;
-
-  /**
    * Retry limit used when no {@code SmtpOutboundConfig} is found and the default mailer is used.
    */
   private static final int DEFAULT_MAX_RETRIES = 3;
 
   /** Maximum number of messages dispatched per cycle (rate limiting). */
   @ConfigProperty(name = "phylax.notification.dispatch.rate", defaultValue = "10")
-  int dispatchRate;
+  int dispatchRate = 10;
 
   /**
    * Hours after which a sent message is eligible for deletion. Default: 168 h (7 days).
    */
   @ConfigProperty(name = "phylax.notification.retention.hours", defaultValue = "168")
-  long retentionHours;
+  long retentionHours = 168;
 
   private final MessageReadRepositoryGateway messageReader;
   private final MessageWriteRepositoryGateway messageWriter;
@@ -90,38 +74,14 @@ public class NotificationDispatchService {
   private final AesCipherService cipher;
 
   /**
-   * Processes pending outbox messages in a single transaction.
-   *
-   * <p>
-   * Steps:
-   * <ol>
-   * <li>Auto-unlock stale locks.</li>
-   * <li>Count active locks; skip cycle if {@code >= dispatchRate}.</li>
-   * <li>Dispatch up to {@code dispatchRate - activeLocks} pending messages.</li>
-   * </ol>
-   * Each dispatched message is locked before sending and unlocked (or marked sent) afterwards.
-   * Optimistic locking on the {@code version} field prevents two instances from processing the same
-   * message simultaneously.
-   * </p>
+   * Processes pending outbox messages in a single transaction, up to {@link #dispatchRate} messages
+   * per cycle.
    */
   @Transactional
   public void dispatch() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     List<Message> all = messageReader.list(MessageFilter.builder().build());
-
-    // Step 1: release stale locks left by crashed instances
-    all.stream().filter(m -> isStale(m, now)).forEach(this::unlock);
-
-    // Step 2: rate limit check
-    long activeLocks = all.stream().filter(m -> isActiveLock(m, now)).count();
-    if (activeLocks >= dispatchRate) {
-      log.debug("Rate limit reached ({}/{}), skipping dispatch cycle", activeLocks, dispatchRate);
-      return;
-    }
-
-    // Step 3: dispatch pending messages up to the remaining slots
-    long slots = dispatchRate - activeLocks;
-    all.stream().filter(m -> isPending(m, now)).limit(slots).forEach(this::dispatchMessage);
+    all.stream().filter(m -> isPending(m, now)).limit(dispatchRate).forEach(this::dispatchMessage);
   }
 
   /**
@@ -132,8 +92,7 @@ public class NotificationDispatchService {
   public void cleanup() {
     OffsetDateTime cutoff = OffsetDateTime.now(ZoneOffset.UTC).minusHours(retentionHours);
     messageReader.list(MessageFilter.builder().build()).stream()
-        .filter(m -> isSent(m) && m.getSendAt().map(sa -> sa.isBefore(cutoff)).orElse(false))
-        .forEach(messageWriter::delete);
+        .filter(m -> m.getCreatedAt().isBefore(cutoff)).forEach(messageWriter::delete);
     log.debug("Outbox cleanup finished; retention cutoff={}", cutoff);
   }
 
@@ -148,38 +107,7 @@ public class NotificationDispatchService {
    * @param now the current UTC instant
    */
   private boolean isPending(Message m, OffsetDateTime now) {
-    return !isSent(m) && m.getLockAt().isEmpty()
-        && m.getSendAt().map(sa -> !sa.isAfter(now)).orElse(true);
-  }
-
-  /**
-   * Returns {@code true} if the message has been successfully sent
-   * ({@code retries == SENT_MARKER}).
-   *
-   * @param m the message to check
-   */
-  private boolean isSent(Message m) {
-    return m.getRetries() == SENT_MARKER;
-  }
-
-  /**
-   * Returns {@code true} if the message holds a fresh (non-stale) lock.
-   *
-   * @param m the message to check
-   * @param now the current UTC instant
-   */
-  private boolean isActiveLock(Message m, OffsetDateTime now) {
-    return m.getLockAt().map(la -> la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES))).orElse(false);
-  }
-
-  /**
-   * Returns {@code true} if the message has a lock that is old enough to be considered stale.
-   *
-   * @param m the message to check
-   * @param now the current UTC instant
-   */
-  private boolean isStale(Message m, OffsetDateTime now) {
-    return m.getLockAt().map(la -> !la.isAfter(now.minusMinutes(STALE_LOCK_MINUTES))).orElse(false);
+    return m.getSendAt().map(sa -> !sa.isAfter(now)).orElse(true);
   }
 
   // ---------------------------------------------------------------------------
@@ -187,39 +115,21 @@ public class NotificationDispatchService {
   // ---------------------------------------------------------------------------
 
   /**
-   * Attempts to lock and send a single outbox message.
+   * Sends a single pending outbox message.
    *
    * <p>
-   * The message is first locked by setting {@code lockAt = now}. If locking fails (e.g. due to an
-   * optimistic-lock conflict with another instance) the message is skipped silently. On a
-   * successful send {@code retries} is set to {@link #SENT_MARKER}, {@code sendAt} is updated to
-   * the actual sent timestamp, and {@code lockAt} is cleared. On failure the retry counter is
-   * incremented and the lock is released.
+   * On successful send the message is deleted and an event is fired. On failure the retry counter
+   * is incremented so the message will be retried up to the configured maximum.
    * </p>
    *
    * @param message the pending outbox message to dispatch
    */
   private void dispatchMessage(Message message) {
-    OffsetDateTime lockTime = OffsetDateTime.now(ZoneOffset.UTC);
-
-    // Acquire lock
-    Message locked;
-    try {
-      locked = message.update(new MessageChangeSet().lockAt(lockTime));
-      messageWriter.update(message, locked);
-    } catch (Exception e) {
-      log.debug("Could not lock message uid={} (likely taken by another instance)",
-          message.getUid());
-      return;
-    }
-
     Optional<SmtpOutboundConfig> config = resolveSmtpConfig(message.getTenantUid());
     int maxRetries = config.map(SmtpOutboundConfig::getMaxRetries).orElse(DEFAULT_MAX_RETRIES);
 
-    if (locked.getRetries() >= maxRetries) {
-      log.warn("Message uid={} exceeded max retries ({}), unlocking for operator review",
-          message.getUid(), maxRetries);
-      unlock(locked);
+    if (message.getRetries() >= maxRetries) {
+      log.warn("Message uid={} exceeded max retries ({}), skipping", message.getUid(), maxRetries);
       return;
     }
 
@@ -232,36 +142,20 @@ public class NotificationDispatchService {
         mailSender.send(mail);
       }
 
-      // Success: mark as sent, record timestamp, release lock
-      OffsetDateTime sentAt = OffsetDateTime.now(ZoneOffset.UTC);
-      Message sent = locked.update(
-          new MessageChangeSet().retries(SENT_MARKER).sendAt(sentAt).lockAt(LockAtVO.nullValue()));
-      messageWriter.update(locked, sent);
-      eventDispatcher.dispatch(sent);
+      // Success: delete message and fire event
+      Message deleted = message.delete();
+      messageWriter.delete(message);
+      eventDispatcher.dispatch(deleted);
       log.debug("Dispatched message uid={}", message.getUid());
 
     } catch (Exception e) {
       log.warn("Failed to dispatch message uid={}, incrementing retries", message.getUid(), e);
-      incrementRetriesAndUnlock(locked);
+      incrementRetries(message);
     }
   }
 
   /**
-   * Clears the {@code lockAt} field of the given message (stale-lock recovery).
-   *
-   * @param message the message whose lock should be released
-   */
-  private void unlock(Message message) {
-    try {
-      Message unlocked = message.update(new MessageChangeSet().lockAt(LockAtVO.nullValue()));
-      messageWriter.update(message, unlocked);
-    } catch (Exception ex) {
-      log.error("Failed to unlock stale message uid={}", message.getUid(), ex);
-    }
-  }
-
-  /**
-   * Increments the retry counter by one and releases the lock.
+   * Increments the retry counter by one.
    *
    * <p>
    * Exceptions during the update are caught and logged so that a broken retry-increment does not
@@ -270,10 +164,9 @@ public class NotificationDispatchService {
    *
    * @param message the message whose retry counter should be incremented
    */
-  private void incrementRetriesAndUnlock(Message message) {
+  private void incrementRetries(Message message) {
     try {
-      Message updated = message.update(
-          new MessageChangeSet().retries(message.getRetries() + 1).lockAt(LockAtVO.nullValue()));
+      Message updated = message.update(new MessageChangeSet().retries(message.getRetries() + 1));
       messageWriter.update(message, updated);
     } catch (Exception ex) {
       log.error("Failed to increment retries for message uid={}", message.getUid(), ex);

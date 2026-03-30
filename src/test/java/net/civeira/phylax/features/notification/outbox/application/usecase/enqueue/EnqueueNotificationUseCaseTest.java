@@ -70,7 +70,7 @@ class EnqueueNotificationUseCaseTest {
     when(messageGateway.create(any())).thenReturn(saved);
 
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder().templateCode("WELCOME")
-        .channel("EMAIL").tenant("tenant-1").recipient("user@example.com")
+        .channel("MAIL").tenant("tenant-1").recipient("user@example.com")
         .variables(Map.of("name", "Alice")).build();
 
     Message result = useCase.enqueue(cmd);
@@ -92,7 +92,7 @@ class EnqueueNotificationUseCaseTest {
     when(messageGateway.create(any())).thenReturn(saved);
 
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder().templateCode("WELCOME")
-        .channel("EMAIL").recipient("user@example.com").build();
+        .channel("MAIL").recipient("user@example.com").build();
 
     useCase.enqueue(cmd);
 
@@ -105,7 +105,7 @@ class EnqueueNotificationUseCaseTest {
     when(renderUsecase.render(any())).thenReturn(Optional.empty());
 
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder().templateCode("MISSING")
-        .channel("EMAIL").recipient("user@example.com").build();
+        .channel("MAIL").recipient("user@example.com").build();
 
     assertThrows(NoSuchElementException.class, () -> useCase.enqueue(cmd));
   }
@@ -125,7 +125,7 @@ class EnqueueNotificationUseCaseTest {
         renderUsecase, messageGateway, eventDispatcher, failingMapper, events);
 
     useCaseWithBrokenMapper.enqueue(EnqueueNotificationCommand.builder().templateCode("T")
-        .channel("EMAIL").recipient("u@e.com").build());
+        .channel("MAIL").recipient("u@e.com").build());
 
     // Verify content stored is raw HTML (not JSON)
     ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
@@ -145,7 +145,7 @@ class EnqueueNotificationUseCaseTest {
     Map<String, Object> nested = Map.of("user", Map.of("name", "Alice", "age", 30));
 
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder().templateCode("T")
-        .channel("EMAIL").recipient("u@e.com").variables(nested).build();
+        .channel("MAIL").recipient("u@e.com").variables(nested).build();
 
     useCase.enqueue(cmd);
 
@@ -164,7 +164,7 @@ class EnqueueNotificationUseCaseTest {
     when(messageGateway.create(any())).thenReturn(mock(Message.class));
 
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder().templateCode("T")
-        .channel("EMAIL").recipient("u@e.com").sendAt(sendAt).build();
+        .channel("MAIL").recipient("u@e.com").sendAt(sendAt).build();
 
     useCase.enqueue(cmd);
 
@@ -183,7 +183,7 @@ class EnqueueNotificationUseCaseTest {
     vars.put("other", "value");
 
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder().templateCode("T")
-        .channel("EMAIL").recipient("u@e.com").variables(vars).build();
+        .channel("MAIL").recipient("u@e.com").variables(vars).build();
 
     useCase.enqueue(cmd);
 

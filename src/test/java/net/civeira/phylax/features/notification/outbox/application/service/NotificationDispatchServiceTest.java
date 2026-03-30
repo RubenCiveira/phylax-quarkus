@@ -155,7 +155,7 @@ class NotificationDispatchServiceTest {
     SmtpOutboundConfig tenantSmtp = smtpConfig(3, false);
     when(messageReader.list(any())).thenReturn(List.of(msg));
     // tenant-specific lookup returns config
-    when(smtpConfigReader.find(argThat(f -> !f.getGlobalOnly().orElse(false))))
+    when(smtpConfigReader.find(argThat(f -> f != null && !f.getGlobalOnly().orElse(false))))
         .thenReturn(Optional.of(tenantSmtp));
     Message deleted = mock(Message.class);
     when(msg.delete()).thenReturn(deleted);
@@ -164,7 +164,8 @@ class NotificationDispatchServiceTest {
 
     verify(mailSender).send(any(), any(OutboundMail.class));
     // global lookup should NOT be called since tenant config was found
-    verify(smtpConfigReader, never()).find(argThat(f -> f.getGlobalOnly().orElse(false)));
+    verify(smtpConfigReader, never())
+        .find(argThat(f -> f != null && f.getGlobalOnly().orElse(false)));
   }
 
   @Test
@@ -174,9 +175,9 @@ class NotificationDispatchServiceTest {
         "{\"subject\":\"S\",\"html\":\"<p>H</p>\",\"text\":null}");
     SmtpOutboundConfig globalSmtp = smtpConfig(3, false);
     when(messageReader.list(any())).thenReturn(List.of(msg));
-    when(smtpConfigReader.find(argThat(f -> !f.getGlobalOnly().orElse(false))))
+    when(smtpConfigReader.find(argThat(f -> f != null && !f.getGlobalOnly().orElse(false))))
         .thenReturn(Optional.empty());
-    when(smtpConfigReader.find(argThat(f -> f.getGlobalOnly().orElse(false))))
+    when(smtpConfigReader.find(argThat(f -> f != null && f.getGlobalOnly().orElse(false))))
         .thenReturn(Optional.of(globalSmtp));
     Message deleted = mock(Message.class);
     when(msg.delete()).thenReturn(deleted);
@@ -193,7 +194,7 @@ class NotificationDispatchServiceTest {
         "{\"subject\":\"S\",\"html\":\"<p>H</p>\",\"text\":null}");
     SmtpOutboundConfig globalSmtp = smtpConfig(3, false);
     when(messageReader.list(any())).thenReturn(List.of(msg));
-    when(smtpConfigReader.find(argThat(f -> f.getGlobalOnly().orElse(false))))
+    when(smtpConfigReader.find(argThat(f -> f != null && f.getGlobalOnly().orElse(false))))
         .thenReturn(Optional.of(globalSmtp));
     Message deleted = mock(Message.class);
     when(msg.delete()).thenReturn(deleted);
