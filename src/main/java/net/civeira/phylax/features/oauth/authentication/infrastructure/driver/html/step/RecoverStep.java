@@ -158,8 +158,9 @@ public class RecoverStep implements OidcStep {
   public Optional<StepOutcome> doExecFinal(StepInput input) {
     String pass = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "password"));
     String code = AuthorizeHtml.first(input.getFormParams(), "code");
-    Optional<String> validatedUsername =
-        changePasswordUsecase.validateChangeRequest(input.getRequest().getTenant(), code, pass);
+    String usernameParam = AuthorizeHtml.first(input.getFormParams(), "username");
+    Optional<String> validatedUsername = changePasswordUsecase
+        .validateChangeRequest(input.getRequest().getTenant(), usernameParam, code, pass);
     if (validatedUsername.isPresent()) {
       String username = validatedUsername.get();
       ChallengesState state =

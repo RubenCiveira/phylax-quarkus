@@ -56,12 +56,14 @@ public class ChangePasswordUsecase {
    * Returns the username when the code is valid. Returns empty when the code is invalid or expired.
    *
    * @param tenant tenant identifier
+   * @param username username or email of the account being recovered
    * @param code recovery code
    * @param newPassword new password value
    * @return optional username
    */
-  public Optional<String> validateChangeRequest(String tenant, String code, String newPassword) {
-    return gateway.validateChangeRequest(tenant, code, newPassword);
+  public Optional<String> validateChangeRequest(String tenant, String username, String code,
+      String newPassword) {
+    return gateway.validateChangeRequest(tenant, username, code, newPassword);
   }
 
   /**

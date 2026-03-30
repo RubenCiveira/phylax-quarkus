@@ -30,10 +30,10 @@ public class ChangePasswordGatewayInteractor implements ChangePasswordGateway {
   }
 
   @Override
-  public Optional<String> validateChangeRequest(String tenant, String code, String newPassword) {
+  public Optional<String> validateChangeRequest(String tenant, String username, String code,
+      String newPassword) {
     AuthRequest request = AuthRequest.builder().tenant(tenant).build();
-    boolean ok = recoverUsecase.checkRecoverCode(request, null, code, newPassword);
-    return ok ? Optional.of(code) : Optional.empty();
+    return recoverUsecase.checkRecoverCode(request, username, code, newPassword);
   }
 
   @Override

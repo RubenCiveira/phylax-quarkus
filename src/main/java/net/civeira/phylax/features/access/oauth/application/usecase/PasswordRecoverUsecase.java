@@ -26,18 +26,18 @@ public class PasswordRecoverUsecase {
   private final UserWriteRepositoryGateway users;
   private final UserAccessTemporalCodeWriteRepositoryGateway codes;
 
-  public boolean checkRecoverCode(AuthRequest request, String email, String code,
+  public Optional<String> checkRecoverCode(AuthRequest request, String email, String code,
       String newPassoword) {
     return activeUser
         .findEnabledUserByNameOrEmail(request.getTenant(), email, request.getAudiences())
-        .map(user -> {
+        .flatMap(user -> {
           if (user.getProvider().isPresent()) {
-            return false;
+            return Optional.empty();
           }
           Optional<UserAccessTemporalCode> find =
               codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
           if (!find.isPresent()) {
-            return false;
+            return Optional.empty();
           }
           UserAccessTemporalCode tempCode = find.get();
           if (!"".equals(code) && code.equals(tempCode.getRecoveryCode().orElse(""))) {
@@ -45,11 +45,11 @@ public class PasswordRecoverUsecase {
             // codes.update(tempCode, tempCode.withNullRecoveryCode());
             users.update(user, user.changePassword(newPassoword));
             // users.update(user, user.withPlainPassword(newPassoword));
-            return true;
+            return Optional.of(user.getName());
           } else {
-            return false;
+            return Optional.empty();
           }
-        }).orElse(false);
+        });
   }
 
   public void recover(AuthRequest request, String email, String urlWithParams) {

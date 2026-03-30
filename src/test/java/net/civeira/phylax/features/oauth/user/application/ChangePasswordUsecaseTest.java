@@ -52,11 +52,11 @@ class ChangePasswordUsecaseTest {
   // T2.3.3
   @Test
   void validateChangeRequest_valid_returnsUsername() {
-    when(gateway.validateChangeRequest("test-tenant", "valid-code", "newPass1!"))
+    when(gateway.validateChangeRequest("test-tenant", "alice@example.com", "valid-code", "newPass1!"))
         .thenReturn(Optional.of("alice@example.com"));
 
     Optional<String> result =
-        usecase.validateChangeRequest("test-tenant", "valid-code", "newPass1!");
+        usecase.validateChangeRequest("test-tenant", "alice@example.com", "valid-code", "newPass1!");
 
     assertTrue(result.isPresent());
     assertTrue(result.get().equals("alice@example.com"));
@@ -65,10 +65,11 @@ class ChangePasswordUsecaseTest {
   // T2.3.4
   @Test
   void validateChangeRequest_invalid_returnsEmpty() {
-    when(gateway.validateChangeRequest("test-tenant", "bad-code", "newPass1!"))
+    when(gateway.validateChangeRequest("test-tenant", "alice@example.com", "bad-code", "newPass1!"))
         .thenReturn(Optional.empty());
 
-    Optional<String> result = usecase.validateChangeRequest("test-tenant", "bad-code", "newPass1!");
+    Optional<String> result =
+        usecase.validateChangeRequest("test-tenant", "alice@example.com", "bad-code", "newPass1!");
 
     assertFalse(result.isPresent());
   }

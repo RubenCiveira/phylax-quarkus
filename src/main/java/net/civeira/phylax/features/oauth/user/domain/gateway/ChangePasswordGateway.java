@@ -41,11 +41,13 @@ public interface ChangePasswordGateway {
    * Returns the username when the code is valid. Returns empty when the code is invalid.
    *
    * @param tenant tenant identifier
+   * @param username username or email of the account being recovered
    * @param code recovery code
    * @param newPassword new password value
    * @return optional username
    */
-  Optional<String> validateChangeRequest(String tenant, String code, String newPassword);
+  Optional<String> validateChangeRequest(String tenant, String username, String code,
+      String newPassword);
 
   /**
    * Updates the password by verifying the old password.
