@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import lombok.Builder;
 import lombok.Getter;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 
 /**
  * Command to enqueue a notification generated from a template.
@@ -30,7 +31,7 @@ public class EnqueueNotificationCommand {
    * Tenant uid for template resolution and SMTP config lookup. {@code null} means the global
    * (non-tenant-specific) template and config are used.
    */
-  private final String tenant;
+  private final TenantRef tenant;
 
   /** Recipient address (email). */
   private final String recipient;
@@ -52,7 +53,7 @@ public class EnqueueNotificationCommand {
   private final boolean urgent = false;
 
   /** Returns the tenant uid wrapped in an {@link Optional}. */
-  public Optional<String> getTenantOptional() {
+  public Optional<TenantRef> getTenantOptional() {
     return Optional.ofNullable(tenant);
   }
 

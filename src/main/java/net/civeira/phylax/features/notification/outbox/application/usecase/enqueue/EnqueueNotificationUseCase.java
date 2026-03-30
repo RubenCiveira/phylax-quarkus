@@ -16,7 +16,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.TenantRef;
-import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderInput;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderUsecase;
 import net.civeira.phylax.features.document.rendering.domain.RenderedTemplate;
@@ -57,7 +56,7 @@ public class EnqueueNotificationUseCase {
    */
   @Transactional
   public Message enqueue(EnqueueNotificationCommand cmd) {
-    TenantRef tenantRef = cmd.getTenantOptional().map(uid -> (TenantRef) () -> uid).orElse(null);
+    TenantRef tenantRef = cmd.getTenantOptional().orElse(null);
 
     TemplateRenderInput renderInput = TemplateRenderInput.builder().code(cmd.getTemplateCode())
         .channel(TemplateChannelOptions.valueOf(cmd.getChannel())).tenant(tenantRef)
@@ -74,7 +73,7 @@ public class EnqueueNotificationUseCase {
         .content(content).retries(0).urgent(cmd.isUrgent())
         .createdAt(OffsetDateTime.now(ZoneOffset.UTC)).sendAt(cmd.getSendAt());
 
-    cmd.getTenantOptional().map(TenantReference::of).ifPresent(changeSet::tenant);
+    cmd.getTenantOptional().ifPresent(changeSet::tenant);
 
     Message message = Message.create(changeSet);
     Message saved = messageGateway.create(message);

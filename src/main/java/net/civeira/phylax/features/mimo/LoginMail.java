@@ -6,6 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationCommand;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationUseCase;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
@@ -29,7 +30,7 @@ public class LoginMail {
     try {
       EnqueueNotificationCommand cmd =
           EnqueueNotificationCommand.builder().templateCode(TEMPLATE_CODE).channel(CHANNEL)
-              .tenant(login.getTenant()).recipient("rubenciveira@gmail.com")// (login.getUsername())
+              .tenant(TenantReference.of(login.getTenant())).recipient("rubenciveira@gmail.com")// (login.getUsername())
               .variables(Map.of("user", Map.of("name", login.getUsername()), "login",
                   Map.of("time", login.getTime().toString())))
               .build();

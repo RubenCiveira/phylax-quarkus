@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.event.Event;
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderUsecase;
 import net.civeira.phylax.features.document.rendering.domain.RenderedTemplate;
 import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
@@ -70,7 +71,7 @@ class EnqueueNotificationUseCaseTest {
     when(messageGateway.create(any())).thenReturn(saved);
 
     EnqueueNotificationCommand cmd = EnqueueNotificationCommand.builder().templateCode("WELCOME")
-        .channel("MAIL").tenant("tenant-1").recipient("user@example.com")
+        .channel("MAIL").tenant(TenantReference.of("tenant-1")).recipient("user@example.com")
         .variables(Map.of("name", "Alice")).build();
 
     Message result = useCase.enqueue(cmd);
