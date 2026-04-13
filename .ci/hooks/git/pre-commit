@@ -1,0 +1,60 @@
+#!/bin/sh
+# =============================================================================
+# pre-commit — Validates code formatting on staged Java files
+#
+# Installed via: .ci/hooks/install.sh
+#
+# Strategy: check-only (does not modify files).
+# If formatting is wrong, the commit is aborted and the user is told
+# to run .ci/scripts/lifecycle/format.sh before committing again.
+#
+# To skip in exceptional cases:
+#   git commit --no-verify
+# =============================================================================
+
+# Only run if there are staged Java files
+STAGED_JAVA="$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$' || true)"
+
+if [ -z "$STAGED_JAVA" ]; then
+  exit 0
+fi
+
+# Resolve repo root (hooks run from repo root, but be explicit)
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+FORMAT_SCRIPT="$REPO_ROOT/.ci/scripts/lifecycle/format.sh"
+if [ ! -x "$FORMAT_SCRIPT" ]; then
+  # No format script found — skip silently (hook is optional)
+  exit 0
+fi
+
+echo "" >&2
+echo "  Checking code format on staged Java files..." >&2
+
+# Run format in check mode via Maven goals (no file modification)
+# formatter:validate exits non-zero if any file would be reformatted
+# impsort:check    exits non-zero if imports are not sorted
+CI_DIR="$REPO_ROOT/.ci"
+source "$CI_DIR/env/config.env" 2>/dev/null || true
+[ -f "$CI_DIR/env/.env" ] && source "$CI_DIR/env/.env" 2>/dev/null || true
+source "$CI_DIR/scripts/lib/common.sh" 2>/dev/null || true
+source "$CI_DIR/scripts/lib/maven.sh" 2>/dev/null || true
+
+TMPOM="$(mktemp /tmp/pre-commit-pom-XXXXXX.xml)"
+_mvn_inject_profile "pom.xml" "$CI_DIR/scripts/lib/maven/format-profile.xml" "$TMPOM" 2>/dev/null
+
+if $MVN formatter:validate impsort:check -f "$TMPOM" -Pci-format -q "$MVN_CI_OPTS" 2>/dev/null; then
+  rm -f "$TMPOM"
+  echo "  ✓ Format OK" >&2
+  exit 0
+else
+  rm -f "$TMPOM"
+  echo "" >&2
+  echo "  ✗ Formatting issues detected in staged files." >&2
+  echo "  Run the following and re-stage your changes:" >&2
+  echo "" >&2
+  echo "    .ci/scripts/lifecycle/format.sh" >&2
+  echo "    git add <files>" >&2
+  echo "" >&2
+  exit 1
+fi

@@ -1,0 +1,41 @@
+<!--
+  CI profile: SAST (OWASP dependency-check)
+  Scans project dependencies for known CVEs.
+  Activated by: mvn verify -Pci-sast
+
+  Optional env var (speeds up scan, avoids rate-limiting):
+    NVD_API_KEY — passed as -DnvdApiKey=$NVD_API_KEY
+
+  Fails build on CVSS >= 7 (high severity).
+  Reports written to: target/sast/
+
+  Owned by CI team — do not add to pom.xml profiles.
+-->
+<profile>
+  <id>ci-sast</id>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.owasp</groupId>
+        <artifactId>dependency-check-maven</artifactId>
+        <version>12.1.0</version>
+        <executions>
+          <execution>
+            <id>ci-owasp-check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <format>CSV</format>
+          <failBuildOnCVSS>7</failBuildOnCVSS>
+          <suppressionFiles>
+            <!-- Optional: .ci/conf/maven/owasp-suppressions.xml -->
+          </suppressionFiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</profile>

@@ -1,0 +1,37 @@
+#!/bin/sh
+# =============================================================================
+# commit-msg — Validates commit message against Conventional Commits spec
+#
+# Installed via: .ci/hooks/install.sh
+# Spec: https://www.conventionalcommits.org
+#
+# Valid types: feat, fix, chore, docs, test, style, refactor,
+#              remove, perf, build, ci, revert
+# Max length:  88 characters (first line)
+# =============================================================================
+
+COMMIT_MSG_FILE="$1"
+FIRST_LINE="$(head -1 "$COMMIT_MSG_FILE")"
+
+PATTERN="^(feat|fix|chore|docs|test|style|refactor|remove|perf|build|ci|revert)(\([a-zA-Z0-9_/-]+\))?!?: .+"
+
+if ! echo "$FIRST_LINE" | grep -qE "$PATTERN"; then
+  echo "" >&2
+  echo "  ✗ Invalid commit message format." >&2
+  echo "" >&2
+  echo "  Expected: <type>(<scope>): <description>" >&2
+  echo "  Example:  feat(auth): add OAuth2 PKCE flow" >&2
+  echo "" >&2
+  echo "  Valid types: feat fix chore docs test style refactor remove perf build ci revert" >&2
+  echo "  Breaking change: add ! before colon — feat(auth)!: remove legacy login" >&2
+  echo "" >&2
+  exit 1
+fi
+
+if ! echo "$FIRST_LINE" | grep -qE "^.{1,88}$"; then
+  echo "" >&2
+  echo "  ✗ Commit message too long (max 88 characters)." >&2
+  echo "  Current length: $(echo "$FIRST_LINE" | wc -c | tr -d ' ') characters." >&2
+  echo "" >&2
+  exit 1
+fi
