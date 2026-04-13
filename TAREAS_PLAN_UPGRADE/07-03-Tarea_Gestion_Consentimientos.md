@@ -1,194 +1,216 @@
-# Tarea 07-03 — Gestión de consentimientos (GDPR Art. 7)
+# Tarea 07-03 — Gestión de consentimientos (GDPR Art. 7) — Página unificada
 
 > **Fase:** 07 — Cumplimiento GDPR
 > **Artículo GDPR:** 7 (consentimiento), 13 (transparencia)
 > **Prioridad:** P3
 > **Esfuerzo estimado:** Medio
-> **Prerequisito:** 02-03 (Scope Consent — es la base del sistema de consentimientos)
+> **Prerequisito:** 02-03 (BC `userconsentedscopes` creado), `UserAcceptedTermnsOfUse` existente
 
 ---
 
 ## Descripción
 
-Gestión de consentimientos de **procesamiento de datos** (diferente del
-scope consent de OAuth). Permite a los usuarios controlar para qué
-finalidades se procesan sus datos: marketing, analytics, terceros, etc.
+Página HTML unificada donde el usuario puede ver y gestionar **todos sus
+consentimientos** en un solo lugar:
 
-La tabla `access_user_accepted_termns_of_use` ya rastrea aceptación de T&C
-pero no gestiona consentimientos de procesamiento con revocabilidad.
+1. **Términos y condiciones** aceptados (BC `UserAcceptedTermnsOfUse` — ya existe)
+2. **Scopes OAuth concedidos** por cliente (BC `UserConsentedScope` — tarea 02-03)
+
+El GDPR exige que el usuario pueda retirar el consentimiento con la misma
+facilidad con que lo otorgó (Art. 7.3). Esta página es la interfaz para ello.
+
+**Esta tarea no crea nuevos BCs.** Orquesta los dos ya existentes en un
+driver HTML dentro de `userconsentedscopes/infrastructure/driver/html/`.
 
 ---
 
-## Pasos de implementación
+## Ruta y controller
 
-### 1. Tabla `access_user_consent`
-
-```sql
--- liquibase formatted sql
-
--- changeset phylax-dev:create-user-consent-table
-CREATE TABLE access_user_consent (
-  uid         VARCHAR(36)  NOT NULL,
-  user_uid    VARCHAR(36)  NOT NULL,
-  tenant_id   VARCHAR(36)  NOT NULL,
-  purpose     VARCHAR(100) NOT NULL COMMENT 'marketing, analytics, third_party_sharing, etc.',
-  granted     TINYINT(1)   NOT NULL,
-  version     VARCHAR(20)  NOT NULL COMMENT 'Versión del texto de consentimiento',
-  granted_at  TIMESTAMP    NULL,
-  revoked_at  TIMESTAMP    NULL,
-  CONSTRAINT PK_ACCESS_USER_CONSENT PRIMARY KEY (uid),
-  UNIQUE KEY uq_user_consent_purpose (user_uid, tenant_id, purpose),
-  INDEX idx_user_consent_user (user_uid, tenant_id)
-);
+```
+GET  /account/{tenant}/consents              → pantalla principal
+POST /account/{tenant}/consents/revoke-client → revocar todos los scopes de un cliente
 ```
 
-### 2. Tabla de versiones de texto de consentimiento
+El controller vive en:
+`features/access/userconsentedscopes/infrastructure/driver/html/ConsentManagementController.java`
 
-```sql
--- changeset phylax-dev:create-consent-definition-table
-CREATE TABLE access_consent_definition (
-  uid         VARCHAR(36)  NOT NULL,
-  tenant_id   VARCHAR(36)  NOT NULL,
-  purpose     VARCHAR(100) NOT NULL,
-  version     VARCHAR(20)  NOT NULL,
-  title       VARCHAR(255) NOT NULL,
-  description TEXT         NOT NULL,
-  mandatory   TINYINT(1)   DEFAULT 0,
-  active      TINYINT(1)   DEFAULT 1,
-  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT PK_ACCESS_CONSENT_DEFINITION PRIMARY KEY (uid),
-  UNIQUE KEY uq_consent_def (tenant_id, purpose, version)
-);
-```
+> **Separación importante:** esta ruta está **fuera del flujo de autorización**.
+> El formulario de consentimiento en-flujo (`/openid/{tenant}/authorize` → paso
+> `scopes-consent`) sigue viviendo en `features/oauth/authentication/`.
+> Son dos drivers distintos para dos momentos distintos.
 
-### 3. Propósitos predefinidos
+---
 
-| Purpose | Descripción | ¿Obligatorio? |
-|---------|-------------|---------------|
-| `terms_of_service` | Aceptación de Términos y Condiciones | Sí |
-| `privacy_policy` | Política de Privacidad | Sí |
-| `marketing_email` | Emails de marketing y novedades | No |
-| `analytics` | Análisis de uso para mejorar el servicio | No |
-| `third_party_sharing` | Compartir datos con terceros | No |
-
-### 4. Value objects del dominio
+## Implementación del controller
 
 ```java
-public record UserConsent(
-    UUID uid,
-    UUID userUid,
-    String tenantId,
-    String purpose,
-    boolean granted,
-    String version,
-    Optional<Instant> grantedAt,
-    Optional<Instant> revokedAt
-) {
-    public boolean isActive() {
-        return granted && revokedAt.isEmpty();
-    }
-}
+@Path("/account/{tenant}/consents")
+@ApplicationScoped
+public class ConsentManagementController {
 
-public record ConsentDefinition(
-    UUID uid,
-    String tenantId,
-    String purpose,
-    String version,
-    String title,
-    String description,
-    boolean mandatory,
-    boolean active
-) {}
-```
+    @Inject
+    ListConsentedScopesUseCase listScopes;
 
-### 5. Port de salida — `UserConsentGateway`
+    @Inject
+    RevokeScopeConsentUseCase revokeScopes;
 
-```java
-public interface UserConsentGateway {
-    List<UserConsent> findByUser(UUID userUid, String tenantId);
-    Optional<UserConsent> findByUserAndPurpose(UUID userUid, String tenantId, String purpose);
-    void grantConsent(UserConsent consent);
-    void revokeConsent(UUID userUid, String tenantId, String purpose);
-}
-```
+    @Inject
+    UserAcceptedTermnsOfUseReadRepositoryGateway termsGateway;
 
-### 6. Integración en el registro de usuario
-
-Añadir paso de consentimientos en el authorize flow cuando el usuario
-se registra por primera vez:
-
-```
-Paso: consent-collection
-  → Mostrar formulario con las ConsentDefinitions activas del tenant
-  → Obligatorios: deben marcarse para continuar
-  → Opcionales: pre-marcados o no según config del tenant
-  → Al submit: persistir UserConsent para cada propósito
-```
-
-### 7. Endpoints
-
-```java
-@Path("/api/me/consents")
-@Tag(name = "GDPR Consents")
-public class UserConsentController {
+    @Inject
+    @Location("consent-management")
+    Template consentManagementTemplate;
 
     @GET
-    @Operation(summary = "Get current consent status for all purposes")
-    public List<ConsentStatusDto> getConsents(@Context SecurityContext security) { ... }
-    // Response: [{ purpose, granted, version, granted_at, revoked_at, definition }]
-
-    @PUT
-    @Path("/{purpose}")
-    @Operation(summary = "Grant or revoke consent for a specific purpose")
-    public Response updateConsent(
-        @PathParam("purpose") String purpose,
-        @Valid ConsentUpdateRequest request,
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance showConsents(
+        @PathParam("tenant") String tenant,
         @Context SecurityContext security
-    ) { ... }
-    // Body: { granted: true/false }
-    // 409 si el purpose es mandatory y granted=false
-}
+    ) {
+        UUID userUid = extractUserUid(security);
 
-// Endpoint admin para gestionar definiciones
-@Path("/api/admin/consent-definitions")
-public class ConsentDefinitionController { ... }
+        // Scopes agrupados por cliente
+        Map<ClientRef, Set<ScopeGrantDto>> scopesByClient =
+            listScopes.execute(userUid, tenant)
+                .stream()
+                .collect(groupingBy(
+                    c -> new ClientRef(c.clientUid(), c.clientName()),
+                    mapping(c -> new ScopeGrantDto(c.scope(), c.grantDate()), toSet())
+                ));
+
+        // Términos aceptados
+        List<UserAcceptedTermnsOfUse> acceptedTerms =
+            termsGateway.findByUser(userUid, tenant);
+
+        return consentManagementTemplate
+            .data("scopesByClient", scopesByClient)
+            .data("acceptedTerms", acceptedTerms)
+            .data("tenant", tenant);
+    }
+
+    @POST
+    @Path("/revoke-client")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response revokeClient(
+        @PathParam("tenant") String tenant,
+        @FormParam("client_uid") UUID clientUid,
+        @Context SecurityContext security
+    ) {
+        UUID userUid = extractUserUid(security);
+        revokeScopes.executeForClient(userUid, clientUid, tenant);
+        // Redirect-after-POST
+        return Response.seeOther(URI.create("/account/" + tenant + "/consents")).build();
+    }
+}
 ```
 
-### 8. Verificación de consentimientos obligatorios
+---
 
-En el token endpoint y en el authorize flow, verificar que el usuario
-ha aceptado los consentimientos obligatorios:
+## Template Qute — `consent-management.html`
 
-```java
-boolean hasRequiredConsents = consentDefinitions.stream()
-    .filter(ConsentDefinition::mandatory)
-    .allMatch(def -> userConsentGateway
-        .findByUserAndPurpose(userUid, tenantId, def.purpose())
-        .map(UserConsent::isActive)
-        .orElse(false));
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Mis consentimientos</title></head>
+<body>
+  <h1>Mis consentimientos</h1>
 
-if (!hasRequiredConsents) {
-    // Redirigir al paso de recogida de consentimientos
-}
+  <!-- SECCIÓN 1: Términos y condiciones -->
+  <section>
+    <h2>Términos y condiciones aceptados</h2>
+    {#if acceptedTerms.isEmpty}
+      <p>No has aceptado ningún documento todavía.</p>
+    {#else}
+      <ul>
+        {#for term in acceptedTerms}
+          <li>
+            <strong>{term.conditionsTitle}</strong>
+            — aceptado el {term.acceptDate.format("dd/MM/yyyy")}
+          </li>
+        {/for}
+      </ul>
+    {/if}
+  </section>
+
+  <!-- SECCIÓN 2: Aplicaciones autorizadas -->
+  <section>
+    <h2>Aplicaciones autorizadas</h2>
+    {#if scopesByClient.isEmpty}
+      <p>No has autorizado ninguna aplicación todavía.</p>
+    {#else}
+      {#for entry in scopesByClient.entrySet}
+        <div class="client-consent">
+          <h3>{entry.key.name}</h3>
+          <ul>
+            {#for grant in entry.value}
+              <li>
+                <code>{grant.scope}</code>
+                <span class="date">desde {grant.grantDate.format("dd/MM/yyyy")}</span>
+              </li>
+            {/for}
+          </ul>
+          <form method="POST" action="/account/{tenant}/consents/revoke-client">
+            <input type="hidden" name="client_uid" value="{entry.key.uid}">
+            <button type="submit" onclick="return confirm('¿Revocar todo acceso a {entry.key.name}?')">
+              Revocar todo acceso
+            </button>
+          </form>
+        </div>
+      {/for}
+    {/if}
+  </section>
+</body>
+</html>
 ```
 
-### 9. Tests de integración
+---
 
-- Usuario sin consentimientos obligatorios → redirigido al formulario ✓
-- Conceder `terms_of_service` + `privacy_policy` → registro completa ✓
-- Revocar `marketing_email` → 200, consent marcado como revocado ✓
-- Intentar revocar `terms_of_service` (mandatory) → 409 ✗
-- `GET /api/me/consents` → devuelve estado completo de todos los propósitos ✓
+## Nota sobre consentimientos GDPR adicionales (marketing, analytics…)
+
+Si en el futuro se quiere gestionar también consentimientos de propósito
+GDPR (marketing, analytics, etc.), hay dos opciones:
+
+**Opción A — BC separado `UserGdprConsent`** (análogo a `UserConsentedScope`):
+- Misma estructura pero con campo `purpose` en lugar de `client`+`scope`
+- Se añade una tercera sección a esta misma página
+- Más limpio si los propósitos GDPR tienen lifecycle propio (versiones de texto, etc.)
+
+**Opción B — Extender `UserConsentedScope`** con un tipo enum `consentType`:
+- No recomendado: mezcla semántica OAuth (client/scope) con semántica GDPR (purpose)
+
+La recomendación es **Opción A** cuando llegue el momento. Esta tarea deja
+la puerta abierta añadiendo una tercera sección en el template.
+
+---
+
+## Acceso a la página
+
+La página requiere que el usuario esté autenticado. Añadir al link de "Mi cuenta"
+en la UI del authorize flow tras el login exitoso.
+
+Opcionalmente, enlazar desde la pantalla de logout: "Antes de irte, puedes
+revisar qué aplicaciones tienen acceso a tu cuenta →".
+
+---
+
+## Tests de integración
+
+- `GET /account/{tenant}/consents` con usuario autenticado → renderiza secciones ✓
+- Página muestra scopes agrupados por cliente ✓
+- Página muestra términos aceptados ✓
+- `POST /revoke-client` → scopes revocados, redirect a la misma página ✓
+- Tras revocar, el cliente ya no aparece en la lista ✓
+- Sin autenticación → redirect al login ✓
 
 ---
 
 ## Criterios de aceptación
 
-- [ ] Tablas `access_user_consent` y `access_consent_definition` con migraciones
-- [ ] 5 propósitos predefinidos con definiciones base
-- [ ] Paso de recogida de consentimientos en el flujo de registro
-- [ ] Consentimientos obligatorios verificados en el authorize flow
-- [ ] `GET /api/me/consents` devuelve estado de todos los propósitos
-- [ ] `PUT /api/me/consents/{purpose}` permite conceder/revocar
-- [ ] No se puede revocar un consentimiento marcado como mandatory
-- [ ] 5 tests de integración
+- [ ] `GET /account/{tenant}/consents` renderiza las dos secciones con datos reales
+- [ ] Scopes agrupados por cliente con nombre y fecha de concesión
+- [ ] Términos aceptados con fecha de aceptación
+- [ ] `POST /revoke-client` revoca todos los scopes del cliente (Redirect-after-POST)
+- [ ] Tras revocar, el authorize flow volverá a pedir consent al siguiente login
+- [ ] `UserConsentedScopeDeleteEvent` publicado al revocar (para webhooks y audit)
+- [ ] Acceso protegido — requiere sesión autenticada del usuario
+- [ ] 6 tests de integración

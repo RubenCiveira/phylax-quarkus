@@ -2,7 +2,7 @@
 
 > Adaptado del `UPGRADE_PLAN.md` para el proyecto Quarkus/Java.
 > Stack: **Quarkus 3.x · Java · CDI · RESTEasy Reactive · SmallRye OpenAPI · Liquibase · MySQL**
-> Última revisión: **2026-04-13**
+> Última revisión: **2026-04-13** — v1.1 (decisión arquitectónica: `UserConsentedScope` en BC Access)
 
 ---
 
@@ -104,6 +104,33 @@ Fase 01 (Refactoring)
          └──→ Fase 06 (Infraestructura Reactiva)
                 └──→ Fase 08 (Developer Experience)
 ```
+
+---
+
+## Decisiones arquitectónicas registradas
+
+### ADR-01 — `UserConsentedScope` vive en `features/access/`, no en `features/oauth/`
+
+**Contexto:** La tarea 02-03 (Scope Consent Tracking) necesita persistir las
+decisiones de consentimiento de scopes OAuth del usuario.
+
+**Decisión:** Se crea `features/access/userconsentedscopes/` como bounded context
+propio, análogo exacto a `features/access/useracceptedtermnsofuse/`. El módulo
+`features/oauth/oidc/scopes/` actúa como capa anti-corrupción (ACL adapter) que
+delega en los use cases del BC Access.
+
+**Motivo:** La persistencia del consentimiento es un dato del usuario (ownership
+de Access), no del protocolo (ownership de OIDC). El protocolo no debe poseer
+la tabla ni el modelo.
+
+**Consecuencias:**
+- `ScopesConsentGateway` en OIDC pasa a ser `ScopesConsentAclAdapter`
+- La página de gestión en `/account/{tenant}/consents` (tarea 07-03) orquesta
+  `UserConsentedScope` + `UserAcceptedTermnsOfUse` en una vista unificada
+- El formulario en-flujo del authorize sigue en `features/oauth/authentication/`
+
+**Scopes como:** strings libres (`"openid"`, `"email"`, `"profile"`…), sin FK a tabla
+de scopes. No hay BC `TenantScope`.
 
 ---
 
