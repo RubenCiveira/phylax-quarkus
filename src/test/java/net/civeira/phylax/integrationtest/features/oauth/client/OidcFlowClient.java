@@ -173,6 +173,50 @@ public class OidcFlowClient {
     return emptyToNull(cookie);
   }
 
+  public Response submitLoginWithPkce(String tenant, String username, String password,
+      String preSessionCookie, String codeChallenge, String codeChallengeMethod) {
+    return RestAssured.given().redirects().follow(false).header("Accept-Language", "es-ES")
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("response_type", "code").queryParam("scope", OidcTestFixtures.SCOPE)
+        .queryParam("state", OidcTestFixtures.STATE)
+        .queryParam("code_challenge", codeChallenge)
+        .queryParam("code_challenge_method", codeChallengeMethod)
+        .contentType(ContentType.URLENC).formParam("username", username)
+        .formParam("password", password).formParam("csid", OidcTestFixtures.CSID)
+        .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
+        .post("/oauth/openid/" + tenant + "/auth");
+  }
+
+  public Response submitLoginWithoutPkce(String tenant, String username, String password,
+      String preSessionCookie) {
+    return RestAssured.given().redirects().follow(false).header("Accept-Language", "es-ES")
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("response_type", "code").queryParam("scope", OidcTestFixtures.SCOPE)
+        .queryParam("state", OidcTestFixtures.STATE).contentType(ContentType.URLENC)
+        .formParam("username", username).formParam("password", password)
+        .formParam("csid", OidcTestFixtures.CSID)
+        .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
+        .post("/oauth/openid/" + tenant + "/auth");
+  }
+
+  public Response exchangeCodeWithVerifier(String tenant, String code, String redirectUri,
+      String clientId, String codeVerifier) {
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .formParam("grant_type", "authorization_code").formParam("code", code)
+        .formParam("code_verifier", codeVerifier).formParam("redirect_uri", redirectUri)
+        .formParam("client_id", clientId).post("/oauth/openid/" + tenant + "/token");
+  }
+
+  public Response exchangeCodeWithoutVerifier(String tenant, String code, String redirectUri,
+      String clientId) {
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .formParam("grant_type", "authorization_code").formParam("code", code)
+        .formParam("redirect_uri", redirectUri).formParam("client_id", clientId)
+        .post("/oauth/openid/" + tenant + "/token");
+  }
+
   public Response exchangeCode(String tenant, String code, String redirectUri, String clientId) {
     return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
         .formParam("grant_type", "authorization_code").formParam("code", code)

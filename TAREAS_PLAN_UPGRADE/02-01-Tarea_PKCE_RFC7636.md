@@ -1,5 +1,7 @@
 # Tarea 02-01 — PKCE — Proof Key for Code Exchange (RFC 7636)
 
+[x] Done
+
 > **Fase:** 02 — Cumplimiento OIDC Obligatorio
 > **RFC:** 7636
 > **Prioridad:** P0

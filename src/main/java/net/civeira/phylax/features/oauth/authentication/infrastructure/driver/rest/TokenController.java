@@ -141,14 +141,21 @@ public class TokenController {
       Optional<TemporalAuthCode> retrieve =
           temporalStore.retrieveTemporalAuthCode(paramMap.getFirst("code"));
       return retrieve.map(code -> {
-        String expected;
-        if ("S256".equals(code.request.getCodeChallengeMethod().orElse(""))) {
-          expected = generateCodeChallenge(paramMap.getFirst("code_verifier"));
-        } else {
-          expected = paramMap.getFirst("code_verifier");
-        }
-        if (!expected.equals(code.request.getCodeChallenge().orElse(""))) {
-          return Response.status(401).build();
+        String storedChallenge = code.request.getCodeChallenge().orElse(null);
+        if (storedChallenge != null) {
+          String codeVerifier = paramMap.getFirst("code_verifier");
+          if (codeVerifier == null || codeVerifier.isBlank()) {
+            return Response.status(401).build();
+          }
+          String expected;
+          if ("S256".equals(code.request.getCodeChallengeMethod().orElse(""))) {
+            expected = generateCodeChallenge(codeVerifier);
+          } else {
+            expected = codeVerifier;
+          }
+          if (!expected.equals(storedChallenge)) {
+            return Response.status(401).build();
+          }
         }
         AuthRequest request = code.request;
         AuthenticationResult auth =
