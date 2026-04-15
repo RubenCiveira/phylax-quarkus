@@ -1,7 +1,7 @@
 # Fase 01 — Refactoring y Deuda Técnica
 
 > **Prioridad:** P0 — Prerequisito bloqueante para el resto del roadmap
-> **Estado:** Pendiente
+> **Estado:** Done
 > **Fecha objetivo:** Sprint actual
 
 ---
