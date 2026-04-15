@@ -51,9 +51,9 @@ class AuthCodeExchangeTest extends OidcIntegrationTestBase {
   }
 
   @Test
-  void introspect_returns403() {
+  void introspect_withoutCredentials_returns401() {
     Response response = client.introspect(OidcTestFixtures.TENANT);
 
-    Assertions.assertEquals(403, response.statusCode());
+    Assertions.assertEquals(401, response.statusCode());
   }
 }

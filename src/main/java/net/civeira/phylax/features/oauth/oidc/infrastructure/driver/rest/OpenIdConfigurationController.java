@@ -114,9 +114,9 @@ public class OpenIdConfigurationController {
         .claimTypesSupported(Arrays.asList("normal")).claimsParameterSupported(true)
         .scopesSupported(Arrays.asList("roles", "profile", "email", "phone"))
         .requestParameterSupported(true).requestUriParameterSupported(true)
-        .requireRequestUriRegistration(true).codeChallengeMethodsSupported(Arrays.asList("S256", "plain"))
-        .tlsClientCertificateBoundAccessTokens(true)
-        .revocationEndpoint(base + "revocation")
+        .requireRequestUriRegistration(true)
+        .codeChallengeMethodsSupported(Arrays.asList("S256", "plain"))
+        .tlsClientCertificateBoundAccessTokens(true).revocationEndpoint(base + "revocation")
         .revocationEndpointAuthMethodsSupported(Arrays.asList("private_key_jwt",
             "client_secret_basic", "client_secret_post", "tls_client_auth", "client_secret_jwt"))
         .revocationEndpointAuthSigningAlgValuesSupported(Arrays.asList("RS256"))

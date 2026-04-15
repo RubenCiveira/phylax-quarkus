@@ -179,11 +179,10 @@ public class OidcFlowClient {
         .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
         .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
         .queryParam("response_type", "code").queryParam("scope", OidcTestFixtures.SCOPE)
-        .queryParam("state", OidcTestFixtures.STATE)
-        .queryParam("code_challenge", codeChallenge)
-        .queryParam("code_challenge_method", codeChallengeMethod)
-        .contentType(ContentType.URLENC).formParam("username", username)
-        .formParam("password", password).formParam("csid", OidcTestFixtures.CSID)
+        .queryParam("state", OidcTestFixtures.STATE).queryParam("code_challenge", codeChallenge)
+        .queryParam("code_challenge_method", codeChallengeMethod).contentType(ContentType.URLENC)
+        .formParam("username", username).formParam("password", password)
+        .formParam("csid", OidcTestFixtures.CSID)
         .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
         .post("/oauth/openid/" + tenant + "/auth");
   }
@@ -306,6 +305,15 @@ public class OidcFlowClient {
 
   public Response introspect(String tenant) {
     return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .post("/oauth/openid/" + tenant + "/introspect");
+  }
+
+  public Response introspect(String tenant, String token, String clientId, String secret) {
+    String basic = Base64.getEncoder()
+        .encodeToString((clientId + ":" + secret).getBytes(StandardCharsets.UTF_8));
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .header("Authorization", "Basic " + basic).formParam("token", token)
+        .formParam("token_type_hint", "access_token")
         .post("/oauth/openid/" + tenant + "/introspect");
   }
 

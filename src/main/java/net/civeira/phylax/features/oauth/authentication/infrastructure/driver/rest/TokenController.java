@@ -220,22 +220,6 @@ public class TokenController {
   }
 
   /**
-   * Introspection endpoint placeholder.
-   *
-   * Currently returns forbidden for client access. Reserved for future introspection support.
-   *
-   * @param tenant tenant identifier
-   * @param paramMap request parameters
-   * @return forbidden response
-   */
-  @POST
-  @Path("oauth/openid/{tenant}/introspect")
-  public Response introspect(final @PathParam("tenant") String tenant,
-      final MultivaluedMap<String, String> paramMap) {
-    return Response.status(403, "Client not allowed.").build();
-  }
-
-  /**
    * Processes a grant type using the provided granter.
    *
    * Builds the AuthRequest and delegates to the granter. Handles scope intersection for token

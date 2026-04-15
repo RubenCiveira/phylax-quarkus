@@ -60,8 +60,8 @@ class PkceFlowTest extends OidcIntegrationTestBase {
   }
 
   /**
-   * Verifier incorrecto con método S256: el challenge fue calculado para un verifier diferente.
-   * El token endpoint debe rechazar con 401.
+   * Verifier incorrecto con método S256: el challenge fue calculado para un verifier diferente. El
+   * token endpoint debe rechazar con 401.
    */
   @Test
   void pkce_s256_wrongVerifier_returns401() {

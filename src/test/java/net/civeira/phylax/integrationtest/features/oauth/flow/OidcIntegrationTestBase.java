@@ -17,6 +17,7 @@ import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedClientStoreGateway;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedSessionStore;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTemporalKeysGateway;
+import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTokenLookupGateway;
 import net.civeira.phylax.integrationtest.features.oauth.client.OidcFlowClient;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioChangePasswordGateway;
@@ -52,6 +53,8 @@ public abstract class OidcIntegrationTestBase {
   @Inject
   ScenarioDelegateGateway delegateGateway;
   @Inject
+  FixedTokenLookupGateway tokenLookupGateway;
+  @Inject
   TokenSigner tokenSigner;
   @Inject
   JwtTokenBuilder tokenBuilder;
@@ -68,6 +71,7 @@ public abstract class OidcIntegrationTestBase {
     scopeConsentGateway.reset();
     registerGateway.reset();
     delegateGateway.reset();
+    tokenLookupGateway.clear();
   }
 
   protected Map<String, Object> decodeToken(String token) {
