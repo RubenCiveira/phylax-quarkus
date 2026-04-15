@@ -9,6 +9,14 @@ Public allow* (boolean)::
 If true, users can use these client to access with public code flow
 Secret oauth (string)::
 If the user is not delegated, the phrasse to identify
+Back channel logout uri (string)::
+El back channel logout uri de trusted client
+Back channel logout session required (boolean)::
+El back channel logout session required de trusted client
+Front channel logout uri (string)::
+El front channel logout uri de trusted client
+Front channel logout session required (boolean)::
+El front channel logout session required de trusted client
 Enabled* (boolean)::
 The indicator to allow the account be used without deleting it
 Allowed redirects (xref:#entidad-trusted-client-allowed-redirect[TrustedClientAllowedRedirect])::

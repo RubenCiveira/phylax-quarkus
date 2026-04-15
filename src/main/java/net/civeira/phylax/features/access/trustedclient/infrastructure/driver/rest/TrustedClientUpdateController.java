@@ -58,6 +58,12 @@ public class TrustedClientUpdateController {
     trustedClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     trustedClientApiDto.setPublicAllow(dto.getPublicAllow());
     trustedClientApiDto.setSecretOauth("*****");
+    trustedClientApiDto.setBackChannelLogoutUri(dto.getBackChannelLogoutUri());
+    trustedClientApiDto
+        .setBackChannelLogoutSessionRequired(dto.getBackChannelLogoutSessionRequired());
+    trustedClientApiDto.setFrontChannelLogoutUri(dto.getFrontChannelLogoutUri());
+    trustedClientApiDto
+        .setFrontChannelLogoutSessionRequired(dto.getFrontChannelLogoutSessionRequired());
     trustedClientApiDto.setEnabled(dto.getEnabled());
     trustedClientApiDto.setAllowedRedirects(
         dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
@@ -100,6 +106,20 @@ public class TrustedClientUpdateController {
     if (null != trustedClientApiDto.getSecretOauth()
         && !"*****".equals(trustedClientApiDto.getSecretOauth())) {
       dto.setSecretOauth(trustedClientApiDto.getSecretOauth());
+    }
+    if (null != trustedClientApiDto.getBackChannelLogoutUri()) {
+      dto.setBackChannelLogoutUri(trustedClientApiDto.getBackChannelLogoutUri());
+    }
+    if (null != trustedClientApiDto.getBackChannelLogoutSessionRequired()) {
+      dto.setBackChannelLogoutSessionRequired(
+          trustedClientApiDto.getBackChannelLogoutSessionRequired());
+    }
+    if (null != trustedClientApiDto.getFrontChannelLogoutUri()) {
+      dto.setFrontChannelLogoutUri(trustedClientApiDto.getFrontChannelLogoutUri());
+    }
+    if (null != trustedClientApiDto.getFrontChannelLogoutSessionRequired()) {
+      dto.setFrontChannelLogoutSessionRequired(
+          trustedClientApiDto.getFrontChannelLogoutSessionRequired());
     }
     if (null != trustedClientApiDto.getEnabled()) {
       dto.setEnabled(trustedClientApiDto.getEnabled());

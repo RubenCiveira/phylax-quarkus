@@ -53,6 +53,12 @@ public class TrustedClientRetrieveController {
     trustedClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     trustedClientApiDto.setPublicAllow(dto.getPublicAllow());
     trustedClientApiDto.setSecretOauth("*****");
+    trustedClientApiDto.setBackChannelLogoutUri(dto.getBackChannelLogoutUri());
+    trustedClientApiDto
+        .setBackChannelLogoutSessionRequired(dto.getBackChannelLogoutSessionRequired());
+    trustedClientApiDto.setFrontChannelLogoutUri(dto.getFrontChannelLogoutUri());
+    trustedClientApiDto
+        .setFrontChannelLogoutSessionRequired(dto.getFrontChannelLogoutSessionRequired());
     trustedClientApiDto.setEnabled(dto.getEnabled());
     trustedClientApiDto.setAllowedRedirects(
         dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());

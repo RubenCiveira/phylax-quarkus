@@ -62,6 +62,16 @@ public class TrustedClientRbacRegister {
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
         .description("If the user is not delegated, the phrasse to identify").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("backChannelLogoutUri")
+        .description("El back channel logout uri de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("backChannelLogoutSessionRequired")
+            .description("El back channel logout session required de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("frontChannelLogoutUri")
+        .description("El front channel logout uri de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("frontChannelLogoutSessionRequired")
+            .description("El front channel logout session required de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
         .description("The indicator to allow the account be used without deleting it").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedRedirects")

@@ -294,6 +294,8 @@ public class TrustedClientsVisibility {
     TrustedClientVisibilityFilter modified = proposal.getFilter();
     return TrustedClientFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
+        .withBackChannelUrl(modified.getWithBackChannelUrl().orElse(null))
+        .withFrontChannelUrl(modified.getWithFrontChannelUrl().orElse(null))
         .code(modified.getCode().orElse(null)).build();
   }
 

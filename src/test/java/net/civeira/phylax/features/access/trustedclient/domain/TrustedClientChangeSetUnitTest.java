@@ -19,7 +19,9 @@ class TrustedClientChangeSetUnitTest {
   void test_trusted_client_change_set_builder() {
     AesCipherService cypher = Mockito.mock(AesCipherService.class);
     TrustedClientChangeSet one = new TrustedClientChangeSet().uid("one").code("one")
-        .allowAllScopes(true).publicAllow(true).secretOauthPlain("one").enabled(true)
+        .allowAllScopes(true).publicAllow(true).secretOauthPlain("one").backChannelLogoutUri("one")
+        .backChannelLogoutSessionRequired(true).frontChannelLogoutUri("one")
+        .frontChannelLogoutSessionRequired(true).enabled(true)
         .allowedRedirects(
             List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()))
         .version(1).newUid();
@@ -55,6 +57,38 @@ class TrustedClientChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("secretOauth");
     Assertions.assertFalse(one.getSecretOauthPlain(cypher).isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getBackChannelLogoutUri().get(),
+        "Value must equals to the intial value");
+    one.backChannelLogoutUri("two");
+    Assertions.assertEquals("two", one.getBackChannelLogoutUri().get(),
+        "Value must equals to the assigned value");
+    one.unset("backChannelLogoutUri");
+    Assertions.assertFalse(one.getBackChannelLogoutUri().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getBackChannelLogoutSessionRequired().get(),
+        "Value must equals to the intial value");
+    one.backChannelLogoutSessionRequired(false);
+    Assertions.assertEquals(false, one.getBackChannelLogoutSessionRequired().get(),
+        "Value must equals to the assigned value");
+    one.unset("backChannelLogoutSessionRequired");
+    Assertions.assertFalse(one.getBackChannelLogoutSessionRequired().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getFrontChannelLogoutUri().get(),
+        "Value must equals to the intial value");
+    one.frontChannelLogoutUri("two");
+    Assertions.assertEquals("two", one.getFrontChannelLogoutUri().get(),
+        "Value must equals to the assigned value");
+    one.unset("frontChannelLogoutUri");
+    Assertions.assertFalse(one.getFrontChannelLogoutUri().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getFrontChannelLogoutSessionRequired().get(),
+        "Value must equals to the intial value");
+    one.frontChannelLogoutSessionRequired(false);
+    Assertions.assertEquals(false, one.getFrontChannelLogoutSessionRequired().get(),
+        "Value must equals to the assigned value");
+    one.unset("frontChannelLogoutSessionRequired");
+    Assertions.assertFalse(one.getFrontChannelLogoutSessionRequired().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getEnabled().get(), "Value must equals to the intial value");
     one.enabled(false);

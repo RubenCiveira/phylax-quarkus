@@ -108,9 +108,12 @@ public class TrustedClientDisableUsecase {
           "The policies for trusted client dont allow to disable: " + detail.getDescription());
       throw new NotAllowedException(detail.getDescription());
     }
-    TrustedClientVisibilityFilter filterWithVisibility = TrustedClientVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null)).build();
+    TrustedClientVisibilityFilter filterWithVisibility =
+        TrustedClientVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .withBackChannelUrl(filter.getWithBackChannelUrl().orElse(null))
+            .withFrontChannelUrl(filter.getWithFrontChannelUrl().orElse(null))
+            .code(filter.getCode().orElse(null)).build();
     TrustedClientDisableAllInBatchCommand command =
         new TrustedClientDisableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

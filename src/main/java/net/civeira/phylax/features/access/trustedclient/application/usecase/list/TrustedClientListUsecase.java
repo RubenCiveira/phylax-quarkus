@@ -62,9 +62,12 @@ public class TrustedClientListUsecase {
           "The policies for trusted client dont allow to list: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    TrustedClientVisibilityFilter visibleFilter = TrustedClientVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null)).build();
+    TrustedClientVisibilityFilter visibleFilter =
+        TrustedClientVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .withBackChannelUrl(filter.getWithBackChannelUrl().orElse(null))
+            .withFrontChannelUrl(filter.getWithFrontChannelUrl().orElse(null))
+            .code(filter.getCode().orElse(null)).build();
     TrustedClientCursor gatewayCursor = TrustedClientCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(TrustedClientOrder::valueOf)

@@ -108,9 +108,12 @@ public class TrustedClientDeleteUsecase {
           "The policies for trusted client dont allow to delete: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    TrustedClientVisibilityFilter filterOnVisibles = TrustedClientVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null)).build();
+    TrustedClientVisibilityFilter filterOnVisibles =
+        TrustedClientVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .withBackChannelUrl(filter.getWithBackChannelUrl().orElse(null))
+            .withFrontChannelUrl(filter.getWithFrontChannelUrl().orElse(null))
+            .code(filter.getCode().orElse(null)).build();
     TrustedClientDeleteAllInBatchCommand command =
         new TrustedClientDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

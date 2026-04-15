@@ -2644,6 +2644,18 @@ paths:
           required: false
           schema:
             type: string
+        - name: with-back-channel-url
+          in: query
+          description: with back channel url
+          required: false
+          schema:
+            type: string
+        - name: with-front-channel-url
+          in: query
+          description: with front channel url
+          required: false
+          schema:
+            type: string
         - name: code
           in: query
           description: code
@@ -2718,6 +2730,18 @@ paths:
         - name: search
           in: query
           description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: with-back-channel-url
+          in: query
+          description: with back channel url
+          required: false
+          schema:
+            type: string
+        - name: with-front-channel-url
+          in: query
+          description: with front channel url
           required: false
           schema:
             type: string
@@ -2986,6 +3010,18 @@ paths:
           required: false
           schema:
             type: string
+        - name: with-back-channel-url
+          in: query
+          description: with back channel url
+          required: false
+          schema:
+            type: string
+        - name: with-front-channel-url
+          in: query
+          description: with front channel url
+          required: false
+          schema:
+            type: string
         - name: code
           in: query
           description: code
@@ -3041,6 +3077,18 @@ paths:
         - name: search
           in: query
           description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: with-back-channel-url
+          in: query
+          description: with back channel url
+          required: false
+          schema:
+            type: string
+        - name: with-front-channel-url
+          in: query
+          description: with front channel url
           required: false
           schema:
             type: string
@@ -10016,6 +10064,18 @@ components:
         secretOauth:
           description: If the user is not delegated, the phrasse to identify
           type: string
+        backChannelLogoutUri:
+          description: El back channel logout uri de trusted client
+          type: string
+        backChannelLogoutSessionRequired:
+          description: El back channel logout session required de trusted client
+          type: boolean
+        frontChannelLogoutUri:
+          description: El front channel logout uri de trusted client
+          type: string
+        frontChannelLogoutSessionRequired:
+          description: El front channel logout session required de trusted client
+          type: boolean
         enabled:
           description: The indicator to allow the account be used without deleting it
           type: boolean

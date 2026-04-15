@@ -11,8 +11,12 @@ import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutSessionRequiredVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.EnabledVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutSessionRequiredVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.PublicAllowVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UidVO;
@@ -29,7 +33,12 @@ class TrustedClientCachedUnitTest {
     TrustedClient one = TrustedClient.builder().uidValue(UidVO.from("one"))
         .codeValue(CodeVO.from("one")).allowAllScopesValue(AllowAllScopesVO.from(true))
         .publicAllowValue(PublicAllowVO.from(true))
-        .secretOauthValue(SecretOauthVO.fromCyphered("one")).enabledValue(EnabledVO.from(true))
+        .secretOauthValue(SecretOauthVO.fromCyphered("one"))
+        .backChannelLogoutUriValue(BackChannelLogoutUriVO.from("one"))
+        .backChannelLogoutSessionRequiredValue(BackChannelLogoutSessionRequiredVO.from(true))
+        .frontChannelLogoutUriValue(FrontChannelLogoutUriVO.from("one"))
+        .frontChannelLogoutSessionRequiredValue(FrontChannelLogoutSessionRequiredVO.from(true))
+        .enabledValue(EnabledVO.from(true))
         .allowedRedirectsValue(AllowedRedirectsVO
             .from(List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build())))
         .versionValue(VersionVO.from(1)).build();

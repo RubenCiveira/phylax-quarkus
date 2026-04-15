@@ -29,6 +29,16 @@ class TrustedClientFilterUnitTest {
     filter.setSearch("lookup");
     Assertions.assertEquals("lookup", filter.getSearch().get(),
         "Search must be the same as the assigned");
+    Assertions.assertFalse(filter.getWithBackChannelUrl().isPresent(),
+        "WithBackChannelUrl must be empty if filter is build without it");
+    filter.setWithBackChannelUrl("one");
+    Assertions.assertEquals("one", filter.getWithBackChannelUrl().get(),
+        "WithBackChannelUrl must be the same as the assigned");
+    Assertions.assertFalse(filter.getWithFrontChannelUrl().isPresent(),
+        "WithFrontChannelUrl must be empty if filter is build without it");
+    filter.setWithFrontChannelUrl("one");
+    Assertions.assertEquals("one", filter.getWithFrontChannelUrl().get(),
+        "WithFrontChannelUrl must be the same as the assigned");
     Assertions.assertFalse(filter.getCode().isPresent(),
         "Code must be empty if filter is build without it");
     filter.setCode("one");

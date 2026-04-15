@@ -90,6 +90,10 @@ code:string
 allowAllScopes:boolean
 publicAllow:boolean
 secretOauth:string
+backChannelLogoutUri:string
+backChannelLogoutSessionRequired:boolean
+frontChannelLogoutUri:string
+frontChannelLogoutSessionRequired:boolean
 enabled:boolean
 version:integer
 list()
@@ -191,6 +195,21 @@ disable()
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
 
+class access.UserConsentedScopes{
+uid:string
+scope:string
+granted:boolean
+decisionAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserConsentedScopes: user 
+access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient 
+
 class access.User{
 uid:string
 name:string
@@ -257,6 +276,8 @@ access.Tenant "1"  o--  "N*" access.TenantConfig: tenant
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
+access.User "1"  o--  "N*" access.UserConsentedScopes: user  
+access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient  
 access.Tenant "1"  o--  "N*" access.User: tenant  
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")

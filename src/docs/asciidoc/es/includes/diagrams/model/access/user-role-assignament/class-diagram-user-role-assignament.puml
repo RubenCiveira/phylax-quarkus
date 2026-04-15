@@ -52,6 +52,10 @@ code:string
 allowAllScopes:boolean
 publicAllow:boolean
 secretOauth:string
+backChannelLogoutUri:string
+backChannelLogoutSessionRequired:boolean
+frontChannelLogoutUri:string
+frontChannelLogoutSessionRequired:boolean
 enabled:boolean
 version:integer
 list()

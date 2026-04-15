@@ -31,6 +31,7 @@ include::access/trusted-client-allowed-redirect/entity-trusted-client-allowed-re
 include::access/user/entity-user.asciidoc[]
 include::access/user-accepted-termns-of-use/entity-user-accepted-termns-of-use.asciidoc[]
 include::access/user-access-temporal-code/entity-user-access-temporal-code.asciidoc[]
+include::access/user-consented-scopes/entity-user-consented-scopes.asciidoc[]
 include::access/user-group-membership/entity-user-group-membership.asciidoc[]
 include::access/user-role-assignament/entity-user-role-assignament.asciidoc[]
 include::access/user-role-assignament-role/entity-user-role-assignament-role.asciidoc[]
