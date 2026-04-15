@@ -1,5 +1,7 @@
 # Tarea 02-02 — Token Introspection (RFC 7662)
 
+[x] Done
+
 > **Fase:** 02 — Cumplimiento OIDC Obligatorio
 > **RFC:** 7662
 > **Prioridad:** P1
