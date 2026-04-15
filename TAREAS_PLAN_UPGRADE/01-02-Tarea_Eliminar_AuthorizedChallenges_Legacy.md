@@ -1,5 +1,7 @@
 # Tarea 01-02 — Eliminar `AuthorizedChallenges` legacy y conversiones `toLegacy()`
 
+[x] Done
+
 > **Fase:** 01 — Refactoring y Deuda Técnica
 > **Prioridad:** P0
 > **Esfuerzo estimado:** Medio
