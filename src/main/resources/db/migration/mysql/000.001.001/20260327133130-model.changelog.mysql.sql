@@ -13,7 +13,7 @@ CREATE TABLE _oauth_delegated_codes (expiration timestamp NOT NULL, code TEXT NO
 CREATE TABLE _oauth_jwt_keys (expiration timestamp NOT NULL, since timestamp NOT NULL, keyid VARCHAR(255) NOT NULL, private TEXT NOT NULL, public TEXT NOT NULL);
 
 -- changeset auto.generated:1825492372-5
-CREATE TABLE _oauth_sessions (session VARCHAR(255) NOT NULL, expiration timestamp NOT NULL, client_id VARCHAR(250) NOT NULL, grant_type VARCHAR(20) NOT NULL, auth_data TEXT NOT NULL, csid TEXT NOT NULL);
+CREATE TABLE _oauth_sessions (session VARCHAR(255) NOT NULL, jti VARCHAR(36) NULL, expiration timestamp NOT NULL, client_id VARCHAR(250) NOT NULL, grant_type VARCHAR(20) NOT NULL, auth_data TEXT NOT NULL, csid TEXT NOT NULL, INDEX idx_oauth_sessions_jti (jti));
 
 -- changeset auto.generated:1825492372-6
 CREATE TABLE _oauth_temporal_codes (code VARCHAR(255) NOT NULL, code_data TEXT NOT NULL, expiration timestamp NOT NULL);

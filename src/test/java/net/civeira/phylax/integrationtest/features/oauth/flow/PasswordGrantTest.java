@@ -31,6 +31,8 @@ class PasswordGrantTest extends OidcIntegrationTestBase {
 
     Map<String, Object> claims = decodeToken(json.getString("access_token"));
     Assertions.assertEquals(OidcTestFixtures.USERNAME, String.valueOf(claims.get("sub")));
+    Assertions.assertNotNull(claims.get("jti"), "access_token debe contener claim jti");
+    Assertions.assertFalse(String.valueOf(claims.get("jti")).isBlank(), "jti no debe estar vacío");
   }
 
   @Test

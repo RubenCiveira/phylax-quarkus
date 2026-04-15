@@ -1,5 +1,7 @@
 # Tarea 01-06 — Cleanup jobs para `_oauth_temporal_codes` y `_oauth_sessions` expirados
 
+[x] Done
+
 > **Fase:** 01 — Refactoring y Deuda Técnica
 > **Prioridad:** P0
 > **Esfuerzo estimado:** Bajo
@@ -127,8 +129,8 @@ void cleanupJobDeletesExpiredRecords() {
 
 ## Criterios de aceptación
 
-- [ ] `OAuthExpiredRecordsCleaner` existe y está anotado con `@ApplicationScoped`
-- [ ] Dos métodos `@Scheduled`: uno para `_oauth_temporal_codes`, otro para `_oauth_sessions`
-- [ ] Índices sobre columna `expiration` en ambas tablas (migración Liquibase)
-- [ ] Test que verifica el comportamiento del cleanup
-- [ ] Log de registros eliminados en cada ejecución
+- [x] `OAuthExpiredRecordsCleaner` existe y está anotado con `@ApplicationScoped`
+- [x] Dos métodos `@Scheduled`: uno para `_oauth_temporal_codes`, otro para `_oauth_sessions`
+- [x] Índices sobre columna `expiration` en ambas tablas (migración Liquibase)
+- [x] Test que verifica el comportamiento del cleanup
+- [x] Log de registros eliminados en cada ejecución

@@ -1,5 +1,7 @@
 # Tarea 01-05 — Añadir `jti` a todos los JWT emitidos
 
+[x] Done
+
 > **Fase:** 01 — Refactoring y Deuda Técnica
 > **Prioridad:** P0
 > **Esfuerzo estimado:** Bajo
