@@ -66,9 +66,13 @@ public class NewMfaStep implements OidcStep {
       return Optional.empty();
     }
     String username = input.currentUser().get();
-    boolean verified = userMfa.verifyNewOtp(input.getRequest().getTenant(), username,
+    String tenant = input.getRequest().getTenant();
+    boolean verified = userMfa.verifyNewOtp(tenant, username,
         AuthorizeHtml.first(input.getFormParams(), "otp_code"));
     if (verified) {
+      PublicLoginMfaBuildResponse config =
+          userMfa.configurationForNewMfa(tenant, username, input.locale());
+      userMfa.storeSeed(tenant, username, config.getSeed());
       ChallengesState state =
           input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
       return Optional.of(

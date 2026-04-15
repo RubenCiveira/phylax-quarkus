@@ -72,5 +72,7 @@ class NewMfaFlowTest extends OidcIntegrationTestBase {
 
     Assertions.assertEquals(302, submit.statusCode());
     Assertions.assertNotNull(client.extractAuthCode(submit));
+    Assertions.assertEquals(OidcTestFixtures.USERNAME, mfaGateway.getLastUsername());
+    Assertions.assertEquals("seed", mfaGateway.getLastSeed());
   }
 }

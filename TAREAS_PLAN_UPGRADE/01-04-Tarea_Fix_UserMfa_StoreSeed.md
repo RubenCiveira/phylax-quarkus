@@ -1,5 +1,7 @@
 # Tarea 01-04 — Corregir orden de parámetros en `UserMfa.storeSeed()`
 
+[x] Done
+
 > **Fase:** 01 — Refactoring y Deuda Técnica
 > **Prioridad:** P0
 > **Esfuerzo estimado:** Bajo
@@ -60,7 +62,7 @@ mvn test -Dgroups="oidc-flow"
 
 ## Criterios de aceptación
 
-- [ ] La firma de `storeSeed()` tiene `userUid` como primer parámetro y `seed` como segundo
-- [ ] Todos los callers coinciden con la firma
-- [ ] Test que valida que el seed guardado es el seed correcto (no invertido)
-- [ ] `mvn test` verde
+- [x] La firma de `storeSeed()` tiene `tenant, username, seed` — orden correcto (la firma ya era correcta)
+- [x] Todos los callers coinciden con la firma — `storeSeed()` ahora se llama en `NewMfaStep.process()` tras verificar el OTP
+- [x] Test que valida que el seed guardado es el seed correcto (no invertido)
+- [x] `mvn test` verde
