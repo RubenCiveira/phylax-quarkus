@@ -72,7 +72,7 @@ class RbacAuthorizationDecisionListenerUnitTest {
     mocks = MockitoAnnotations.openMocks(this);
     listener = new RbacAuthorizationDecisionListener(rbac);
     Actor actor =
-        Actor.builder().autenticated(true).roles(List.of("admin")).claims(Map.of()).build();
+        Actor.builder().authenticated(true).roles(List.of("admin")).claims(Map.of()).build();
     InvocationSource conn = InvocationSource.builder().request("/test").build();
     interaction = new OperationContext(actor, conn);
   }

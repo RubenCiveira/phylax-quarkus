@@ -198,7 +198,7 @@ public class CurrentRequest {
     }
     Actor.ActorBuilder builder = Actor.builder();
     if (security.isAnonymous()) {
-      builder = builder.autenticated(false).roles(List.of()).groups(List.of());
+      builder = builder.authenticated(false).roles(List.of()).groups(List.of());
     } else {
       List<String> resolvedRoles;
       if ("roles".equals(rolesClaimName)) {

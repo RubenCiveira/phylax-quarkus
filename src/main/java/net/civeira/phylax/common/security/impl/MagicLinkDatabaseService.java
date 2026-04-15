@@ -213,7 +213,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
     Map<String, Object> data = new LinkedHashMap<>();
     data.put("name", actor.getName().orElse(null));
     data.put("tenant", actor.getTenant().orElse(null));
-    data.put("autenticated", actor.isAutenticated());
+    data.put("authenticated", actor.isAuthenticated());
     data.put("roles", actor.getRoles());
     data.put("groups", actor.getGroups());
     data.put("claims", actor.getClaims());
@@ -232,7 +232,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
     Map<String, String> claims = new LinkedHashMap<>();
     node.path("claims").properties().forEach(e -> claims.put(e.getKey(), e.getValue().asText()));
     return Actor.builder().name(textOrNull(node, "name")).tenant(textOrNull(node, "tenant"))
-        .autenticated(node.path("autenticated").asBoolean(false)).roles(roles).groups(groups)
+        .authenticated(node.path("authenticated").asBoolean(false)).roles(roles).groups(groups)
         .claims(claims).build();
   }
 

@@ -21,7 +21,7 @@ class OperationContextUnitTest {
     @DisplayName("Should hold actor and InvocationSource")
     void shouldHoldActorAndInvocationSource() {
       // Arrange — create an Actor and a InvocationSource to compose the Interaction
-      Actor actor = Actor.builder().autenticated(true).roles(List.of("admin")).claims(Map.of())
+      Actor actor = Actor.builder().authenticated(true).roles(List.of("admin")).claims(Map.of())
           .name("john").build();
       InvocationSource conn = InvocationSource.builder().request("/api/test").build();
 
@@ -50,7 +50,7 @@ class OperationContextUnitTest {
     @DisplayName("Should throw when InvocationSource is null")
     void shouldThrowWhenInvocationSourceIsNull() {
       // Arrange — create a valid Actor but no InvocationSource
-      Actor actor = Actor.builder().autenticated(false).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(false).roles(List.of()).claims(Map.of()).build();
 
       // Act / Assert — constructing an Interaction with null InvocationSource throws
       // NullPointerException

@@ -136,7 +136,7 @@ class RbacUnitTest {
     void shouldReturnAllowedWhenStoreGrantsScope() {
       // Arrange
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("admin")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("admin")).claims(Map.of()).build();
       when(store.isActive()).thenReturn(true);
       ScopeAllowList scopeList = new ScopeAllowList();
       scopeList.add(ScopeAllow.builder().resource("tenant").name("create").build());
@@ -158,7 +158,7 @@ class RbacUnitTest {
     @DisplayName("Should return denied (fail-closed) when no active stores exist and default is false")
     void shouldReturnDeniedWhenNoActiveStoresAndDefaultIsFalse() {
       // Arrange — Rbac configured with defaultAllow=false (fail-closed)
-      Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(true).roles(List.of()).claims(Map.of()).build();
       doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
@@ -174,7 +174,7 @@ class RbacUnitTest {
     void shouldReturnAllowedWhenNoActiveStoresAndDefaultIsTrue() {
       // Arrange — Rbac configured with defaultAllow=true (fail-open)
       Rbac failOpenRbac = new Rbac(managerInstance, true);
-      Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(true).roles(List.of()).claims(Map.of()).build();
       doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
@@ -192,7 +192,7 @@ class RbacUnitTest {
       RbacStore grantingStore = mock(RbacStore.class);
       RbacStore denyingStore = mock(RbacStore.class);
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("reader")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("reader")).claims(Map.of()).build();
 
       ScopeAllowList allowedList = new ScopeAllowList();
       allowedList.add(ScopeAllow.builder().resource("tenant").name("read").build());
@@ -223,7 +223,7 @@ class RbacUnitTest {
     void shouldReturnNotAllowedWhenStoreDeniesScope() {
       // Arrange
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
       when(store.isActive()).thenReturn(true);
       ScopeAllowList scopeList = new ScopeAllowList();
       when(store.checkRoleScopes(actor)).thenReturn(scopeList);
@@ -250,7 +250,7 @@ class RbacUnitTest {
     void shouldReturnInaccessibleFieldsFromStore() {
       // Arrange
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
       when(store.isActive()).thenReturn(true);
       FieldGrantList fieldList = new FieldGrantList();
       fieldList.add(FieldGrant.builder().resource("tenant").view("list").name("secret").build());
@@ -273,7 +273,7 @@ class RbacUnitTest {
     @DisplayName("Should return empty list when no active stores exist")
     void shouldReturnEmptyListWhenNoActiveStoresExist() {
       // Arrange
-      Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(true).roles(List.of()).claims(Map.of()).build();
       doAnswer(_ -> null).when(managerInstance).forEach(any());
 
       // Act
@@ -290,7 +290,7 @@ class RbacUnitTest {
       RbacStore storeA = mock(RbacStore.class);
       RbacStore storeB = mock(RbacStore.class);
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
 
       FieldGrantList listA = new FieldGrantList();
       listA.add(FieldGrant.builder().resource("tenant").view("detail").name("secret").build());

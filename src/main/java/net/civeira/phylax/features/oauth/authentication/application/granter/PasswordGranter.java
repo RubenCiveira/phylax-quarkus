@@ -53,14 +53,14 @@ public class PasswordGranter implements TokenGranter {
    * @return the authentication result
    */
   @Override
-  public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
+  public AuthenticationResult authenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     if (client.isProtectedWithSecret()) {
       return loginUsecase.validatedUserData(request, first(paramMap, "username"),
           first(paramMap, "password"), client, List.of());
     } else {
       return AuthenticationResult.notAllowed(request.getTenant(), "",
-          "Password autentication is only allowed for autenticated clients");
+          "Password authentication is only allowed for authenticated clients");
     }
   }
 

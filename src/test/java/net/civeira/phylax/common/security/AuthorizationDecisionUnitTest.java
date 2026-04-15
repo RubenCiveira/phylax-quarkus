@@ -39,7 +39,7 @@ class AuthorizationDecisionUnitTest {
 
   @BeforeEach
   void setUp() {
-    Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
+    Actor actor = Actor.builder().authenticated(true).roles(List.of()).claims(Map.of()).build();
     InvocationSource conn = InvocationSource.builder().request("/test").build();
     interaction = new OperationContext(actor, conn);
   }

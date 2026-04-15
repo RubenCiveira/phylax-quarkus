@@ -65,7 +65,7 @@ public class MfaGranter implements TokenGranter {
    * @return the authentication result
    */
   @Override
-  public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
+  public AuthenticationResult authenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     Optional<String> verifyMfa =
         verifier.verifyMfa(first(paramMap, "mfa_token"), request.getTenant());

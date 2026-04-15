@@ -61,7 +61,7 @@ public class RefreshGranter implements TokenGranter {
    * @return the authentication result
    */
   @Override
-  public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
+  public AuthenticationResult authenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     AuthenticationResult result;
     Optional<String> verifyRefresh =

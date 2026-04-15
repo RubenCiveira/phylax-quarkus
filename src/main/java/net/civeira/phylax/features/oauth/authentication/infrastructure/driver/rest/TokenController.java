@@ -248,7 +248,7 @@ public class TokenController {
 
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
-    AuthenticationResult authenticate = granter.autenticate(request, clientDetails, paramMap);
+    AuthenticationResult authenticate = granter.authenticate(request, clientDetails, paramMap);
     if (authenticate.isRight()) {
       // For POST token requests the scope comes in the body, not in query params.
       // Apply intersection here so buildToken has the correct scopes available.

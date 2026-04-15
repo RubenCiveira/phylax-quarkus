@@ -13,7 +13,7 @@ import lombok.Getter;
 public class Actor {
   private final String name;
   private final String tenant;
-  private final boolean autenticated;
+  private final boolean authenticated;
   private final List<String> roles;
   private final List<String> groups;
   private final Map<String, String> claims;
@@ -26,8 +26,8 @@ public class Actor {
     return Optional.ofNullable(name);
   }
 
-  public boolean isAutenticated() {
-    return autenticated;
+  public boolean isAuthenticated() {
+    return authenticated;
   }
 
   public String getClaim(String name) {

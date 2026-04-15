@@ -62,7 +62,7 @@ public class DelegatedAccessGranter implements TokenGranter {
    * @return the authentication result
    */
   @Override
-  public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
+  public AuthenticationResult authenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     String tenant = request.getTenant();
     String token = first(paramMap, "token");

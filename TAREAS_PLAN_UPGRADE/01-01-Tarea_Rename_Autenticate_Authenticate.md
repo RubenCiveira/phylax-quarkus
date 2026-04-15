@@ -1,5 +1,7 @@
 # Tarea 01-01 — Renombrar `autenticate` → `authenticate`
 
+[x] - DONE
+
 > **Fase:** 01 — Refactoring y Deuda Técnica
 > **Prioridad:** P0
 > **Esfuerzo estimado:** Medio (rename global + verificación de tests)

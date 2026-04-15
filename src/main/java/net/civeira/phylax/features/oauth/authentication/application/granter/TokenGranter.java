@@ -41,6 +41,6 @@ public interface TokenGranter {
    * @param paramMap request parameters
    * @return the authentication result
    */
-  public AuthenticationResult autenticate(final AuthRequest request, ClientDetails client,
+  public AuthenticationResult authenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap);
 }

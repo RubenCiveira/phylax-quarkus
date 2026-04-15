@@ -21,7 +21,7 @@ class ActorUnitTest {
     @DisplayName("Should build actor with all fields")
     void shouldBuildActorWithAllFields() {
       // Arrange / Act — build an Actor with all fields populated
-      Actor actor = Actor.builder().name("john").tenant("acme").autenticated(true)
+      Actor actor = Actor.builder().name("john").tenant("acme").authenticated(true)
           .roles(List.of("admin", "user")).claims(Map.of("iss", "keycloak")).build();
 
       // Assert — all getter values match the builder inputs
@@ -29,7 +29,7 @@ class ActorUnitTest {
       assertEquals("john", actor.getName().get(), "Name should match the value set in builder");
       assertTrue(actor.getTenant().isPresent(), "Tenant should be present when set");
       assertEquals("acme", actor.getTenant().get(), "Tenant should match the value set in builder");
-      assertTrue(actor.isAutenticated(), "Actor should be authenticated");
+      assertTrue(actor.isAuthenticated(), "Actor should be authenticated");
       assertEquals(2, actor.getRoles().size(), "Actor should have exactly 2 roles");
     }
 
@@ -37,7 +37,7 @@ class ActorUnitTest {
     @DisplayName("Should return empty optional when name is null")
     void shouldReturnEmptyOptionalWhenNameIsNull() {
       // Arrange / Act — build an Actor without setting a name
-      Actor actor = Actor.builder().autenticated(false).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(false).roles(List.of()).claims(Map.of()).build();
 
       // Assert — getName() returns an empty Optional
       assertTrue(actor.getName().isEmpty(), "Name should be empty when not set");
@@ -47,7 +47,7 @@ class ActorUnitTest {
     @DisplayName("Should return empty optional when tenant is null")
     void shouldReturnEmptyOptionalWhenTenantIsNull() {
       // Arrange / Act — build an Actor without setting a tenant
-      Actor actor = Actor.builder().autenticated(false).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(false).roles(List.of()).claims(Map.of()).build();
 
       // Assert — getTenant() returns an empty Optional
       assertTrue(actor.getTenant().isEmpty(), "Tenant should be empty when not set");
@@ -62,7 +62,7 @@ class ActorUnitTest {
     @DisplayName("Should return claim value when key exists")
     void shouldReturnClaimValueWhenKeyExists() {
       // Arrange — build an Actor with two claims
-      Actor actor = Actor.builder().autenticated(true).roles(List.of())
+      Actor actor = Actor.builder().authenticated(true).roles(List.of())
           .claims(Map.of("iss", "keycloak", "tid", "tenant-1")).build();
 
       // Act — retrieve an existing claim by key
@@ -76,7 +76,7 @@ class ActorUnitTest {
     @DisplayName("Should return null when claim key does not exist")
     void shouldReturnNullWhenClaimKeyDoesNotExist() {
       // Arrange — build an Actor with an empty claims map
-      Actor actor = Actor.builder().autenticated(true).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(true).roles(List.of()).claims(Map.of()).build();
 
       // Act — request a claim key that does not exist
       String claim = actor.getClaim("nonexistent");
@@ -94,7 +94,7 @@ class ActorUnitTest {
     @DisplayName("Should return true when actor has the role")
     void shouldReturnTrueWhenActorHasTheRole() {
       // Arrange — build an Actor with admin and user roles
-      Actor actor = Actor.builder().autenticated(true).roles(List.of("admin", "user"))
+      Actor actor = Actor.builder().authenticated(true).roles(List.of("admin", "user"))
           .claims(Map.of()).build();
 
       // Act / Assert — hasRole returns true for an assigned role
@@ -106,7 +106,7 @@ class ActorUnitTest {
     void shouldReturnFalseWhenActorDoesNotHaveTheRole() {
       // Arrange — build an Actor with only the user role
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("user")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("user")).claims(Map.of()).build();
 
       // Act / Assert — hasRole returns false for an unassigned role
       assertFalse(actor.hasRole("admin"), "Actor should NOT have the 'admin' role");
@@ -122,7 +122,7 @@ class ActorUnitTest {
     void shouldReturnTrueWhenActorHasAtLeastOneRole() {
       // Arrange — build an Actor with the viewer role
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
 
       // Act / Assert — hasAnyRole returns true when at least one role matches
       assertTrue(actor.hasAnyRole("admin", "viewer"),
@@ -134,7 +134,7 @@ class ActorUnitTest {
     void shouldReturnFalseWhenActorHasNoneOfTheRoles() {
       // Arrange — build an Actor whose role does not overlap with the checked roles
       Actor actor =
-          Actor.builder().autenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
+          Actor.builder().authenticated(true).roles(List.of("viewer")).claims(Map.of()).build();
 
       // Act / Assert — hasAnyRole returns false when no role matches
       assertFalse(actor.hasAnyRole("admin", "superadmin"),
@@ -145,7 +145,7 @@ class ActorUnitTest {
     @DisplayName("Should return false when actor has no roles")
     void shouldReturnFalseWhenActorHasNoRoles() {
       // Arrange — build an Actor with no roles at all
-      Actor actor = Actor.builder().autenticated(false).roles(List.of()).claims(Map.of()).build();
+      Actor actor = Actor.builder().authenticated(false).roles(List.of()).claims(Map.of()).build();
 
       // Act / Assert — hasAnyRole returns false for an Actor with an empty role list
       assertFalse(actor.hasAnyRole("admin"), "Actor with no roles should not match any role");
