@@ -111,6 +111,7 @@ public class TemplateVersionListController {
     TemplateVersionApiDto templateVersionApiDto = new TemplateVersionApiDto();
     templateVersionApiDto.setUid(dto.getUid());
     templateVersionApiDto.setTemplate(new TemplateApiRef().$ref(dto.getTemplateReference()));
+    templateVersionApiDto.setLocale(dto.getLocale());
     templateVersionApiDto.setSubject(dto.getSubject());
     templateVersionApiDto.setContentHtml(dto.getContentHtml());
     templateVersionApiDto.setContentText(dto.getContentText());

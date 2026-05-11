@@ -403,8 +403,8 @@ public class TemplateRepository {
       sq.with(CODE, SqlParameterValue.of(entity.getCode()));
       sq.with(TENANT, entity.getTenantUid().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
-      sq.with(THEME, entity.getThemeUid().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullString));
+      sq.with(THEME,
+          entity.getTheme().map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(CHANNEL, SqlParameterValue.of(entity.getChannel().toString()));
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
       sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
@@ -446,7 +446,7 @@ public class TemplateRepository {
         return Optional.of(Template.builder().uidValue(UidVO.from(row.getString(UID)))
             .codeValue(CodeVO.from(row.getString(CODE)))
             .tenantValue(TenantVO.fromReference(row.getString(TENANT)))
-            .themeValue(ThemeVO.fromReference(row.getString(THEME)))
+            .themeValue(ThemeVO.from(row.getString(THEME)))
             .channelValue(ChannelVO.tryFrom(row.getString(CHANNEL)))
             .enabledValue(EnabledVO.from(row.getBoolean(ENABLED)))
             .versionValue(VersionVO.from(row.getInt(VERSION))).build());
@@ -474,17 +474,14 @@ public class TemplateRepository {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("code", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
+    filter.getGlobal().filter(Boolean.TRUE::equals)
+        .ifPresent(_ -> sq.where(TENANT, SqlOperator.IS_NULL, SqlParameterValue.ofNullString()));
     filter.getCode()
         .ifPresent(codeParam -> sq.where(CODE, SqlOperator.EQ, SqlParameterValue.of(codeParam)));
     filter.getTenant().ifPresent(tenantParam -> sq.where(TENANT, SqlOperator.EQ,
         SqlParameterValue.of(tenantParam.getUid())));
     if (!filter.getTenants().isEmpty()) {
       sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
-    }
-    filter.getTheme().ifPresent(
-        themeParam -> sq.where(THEME, SqlOperator.EQ, SqlParameterValue.of(themeParam.getUid())));
-    if (!filter.getThemes().isEmpty()) {
-      sq.where(THEME, SqlOperator.IN, SqlListParameterValue.strings(filter.getThemes()));
     }
     filter.getTenantTenantAccesible()
         .ifPresent(tenantTenantAccesibleParam -> sq.where(DOCUMENT_TEMPLATE_TENANT, SqlOperator.EQ,
@@ -527,8 +524,8 @@ public class TemplateRepository {
       sq.with(CODE, SqlParameterValue.of(entity.getCode()));
       sq.with(TENANT, entity.getTenantUid().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
-      sq.with(THEME, entity.getThemeUid().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullString));
+      sq.with(THEME,
+          entity.getTheme().map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(CHANNEL, SqlParameterValue.of(entity.getChannel().toString()));
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
       sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)

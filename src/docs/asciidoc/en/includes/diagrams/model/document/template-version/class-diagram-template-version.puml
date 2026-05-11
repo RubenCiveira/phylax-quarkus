@@ -5,6 +5,7 @@ title Clases para template version
 class document.Template{
 uid:string
 code:string
+theme:string
 channel:TemplateChannelOptions
 enabled:boolean
 version:integer
@@ -18,6 +19,7 @@ disable()
 }
 class document.TemplateVersion{
 uid:string
+locale:string
 subject:string
 contentHtml:blob
 contentText:blob

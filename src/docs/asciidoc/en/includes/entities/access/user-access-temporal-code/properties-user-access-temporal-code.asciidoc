@@ -11,7 +11,7 @@ Failed login attempts (integer)::
 The amount login attempts failed since the last right login.
 Register code (string)::
 El codigo de registro para verificar enviado por email
-Register code url (string)::
+Register code url (blob)::
 La url de retorno para verificar el codigo de registro
 Register code expiration (datetime)::
 El codigo de registro para verificar enviado por email

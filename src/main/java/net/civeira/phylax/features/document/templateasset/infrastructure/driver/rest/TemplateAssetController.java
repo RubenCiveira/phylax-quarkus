@@ -114,6 +114,8 @@ public class TemplateAssetController implements TemplateAssetApi {
    * @param uids
    * @param search
    * @param code
+   * @param template
+   * @param templates
    * @param tenant
    * @param tenants
    * @param limit
@@ -124,10 +126,11 @@ public class TemplateAssetController implements TemplateAssetApi {
    */
   @Override
   public Response templateAssetApiList(final List<String> uids, final String search,
-      final String code, final String tenant, final List<String> tenants, final Integer limit,
-      final String sinceUid, final String sinceCode, final String order) {
-    return listController.templateAssetApiList(uids, search, code, tenant, tenants, limit, sinceUid,
-        sinceCode, order);
+      final String code, final String template, final List<String> templates, final String tenant,
+      final List<String> tenants, final Integer limit, final String sinceUid,
+      final String sinceCode, final String order) {
+    return listController.templateAssetApiList(uids, search, code, template, templates, tenant,
+        tenants, limit, sinceUid, sinceCode, order);
   }
 
   /**

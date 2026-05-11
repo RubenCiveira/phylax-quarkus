@@ -13,7 +13,7 @@ import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 /**
- * Value Object representing null = global, valor = override of template.
+ * Value Object representing null = global, valor = override por tenant of template.
  * <p>
  * This class ensures that the tenant is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

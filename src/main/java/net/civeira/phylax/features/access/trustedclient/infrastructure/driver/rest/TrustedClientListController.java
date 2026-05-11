@@ -89,7 +89,7 @@ public class TrustedClientListController {
    */
   @ApiObserved("Api to list an entity of trusted client")
   public Response trustedClientApiList(final List<String> uids, final String search,
-      final String withBackChannelUrl, final String withFrontChannelUrl, final String code,
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code,
       final Integer limit, final String sinceUid, final String sinceCode, final String order) {
     List<TrustedClientListOrder> orderSteps = null == order ? List.of()
         : Arrays.asList(order.split(",")).stream().map(this::mapOrder).filter(Objects::nonNull)
@@ -144,6 +144,8 @@ public class TrustedClientListController {
     trustedClientApiDto.setCode(dto.getCode());
     trustedClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     trustedClientApiDto.setPublicAllow(dto.getPublicAllow());
+    trustedClientApiDto.setAllowedRedirects(
+        dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
     trustedClientApiDto.setSecretOauth("*****");
     trustedClientApiDto.setBackChannelLogoutUri(dto.getBackChannelLogoutUri());
     trustedClientApiDto
@@ -152,8 +154,22 @@ public class TrustedClientListController {
     trustedClientApiDto
         .setFrontChannelLogoutSessionRequired(dto.getFrontChannelLogoutSessionRequired());
     trustedClientApiDto.setEnabled(dto.getEnabled());
-    trustedClientApiDto.setAllowedRedirects(
-        dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
+    trustedClientApiDto.setRegistrationAccess(dto.getRegistrationAccess());
+    trustedClientApiDto.setClientName(dto.getClientName());
+    trustedClientApiDto.setLogoUri(dto.getLogoUri());
+    trustedClientApiDto.setClientUri(dto.getClientUri());
+    trustedClientApiDto.setPolicyUri(dto.getPolicyUri());
+    trustedClientApiDto.setTosUri(dto.getTosUri());
+    trustedClientApiDto.setTokenEndpointAuthMethod(dto.getTokenEndpointAuthMethod());
+    trustedClientApiDto.setGrantTypesJson(dto.getGrantTypesJson());
+    trustedClientApiDto.setResponseTypesJson(dto.getResponseTypesJson());
+    trustedClientApiDto.setDynamicallyRegistered(dto.getDynamicallyRegistered());
+    trustedClientApiDto.setRegisteredAt(dto.getRegisteredAt());
+    trustedClientApiDto.setAllowedScopesM2m(dto.getAllowedScopesM2m());
+    trustedClientApiDto.setM2mTokenTtlSeconds(dto.getM2mTokenTtlSeconds());
+    trustedClientApiDto.setRequestObjectSigningAlg(dto.getRequestObjectSigningAlg());
+    trustedClientApiDto.setJwksUri(dto.getJwksUri());
+    trustedClientApiDto.setJwksJson(dto.getJwksJson());
     trustedClientApiDto.setVersion(dto.getVersion());
     return trustedClientApiDto;
   }
@@ -199,15 +215,16 @@ public class TrustedClientListController {
       first.append(SEARCH_APPEND + searchValue);
     });
     filter.getWithBackChannelUrl().ifPresent(filterWithBackChannelUrl -> {
-      String withBackChannelUrlValue =
-          URLEncoder.encode(String.valueOf(filterWithBackChannelUrl), StandardCharsets.UTF_8);
+      String withBackChannelUrlValue = URLEncoder.encode(
+          Boolean.TRUE.equals(filterWithBackChannelUrl) ? "true" : "false", StandardCharsets.UTF_8);
       self.append(WITH_BACK_CHANNEL_URL_APPEND + withBackChannelUrlValue);
       next.append(WITH_BACK_CHANNEL_URL_APPEND + withBackChannelUrlValue);
       first.append(WITH_BACK_CHANNEL_URL_APPEND + withBackChannelUrlValue);
     });
     filter.getWithFrontChannelUrl().ifPresent(filterWithFrontChannelUrl -> {
       String withFrontChannelUrlValue =
-          URLEncoder.encode(String.valueOf(filterWithFrontChannelUrl), StandardCharsets.UTF_8);
+          URLEncoder.encode(Boolean.TRUE.equals(filterWithFrontChannelUrl) ? "true" : "false",
+              StandardCharsets.UTF_8);
       self.append(WITH_FRONT_CHANNEL_URL_APPEND + withFrontChannelUrlValue);
       next.append(WITH_FRONT_CHANNEL_URL_APPEND + withFrontChannelUrlValue);
       first.append(WITH_FRONT_CHANNEL_URL_APPEND + withFrontChannelUrlValue);

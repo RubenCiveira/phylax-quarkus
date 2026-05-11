@@ -7,14 +7,28 @@ Inner label (string)::
 Tenant could use these field to label the application for the users
 Force mfa* (boolean)::
 El force mfa de tenant config
+Dynamic registration policy (TenantConfigDynamicRegistrationPolicyOptions)::
+El dynamic registration policy de tenant configLos posibles valores que toma el campo son:
+ * open
+ * token_required
+ * disabled
+
 Allow register (boolean)::
 El allow register de tenant config
 Enable register users (boolean)::
 El enable register users de tenant config
+Magic link enabled (boolean)::
+El magic link enabled de tenant config
+Webauthn enabled (boolean)::
+El webauthn enabled de tenant config
+Webauthn rp id (string)::
+El webauthn rp id de tenant config
+Webauthn rp name (string)::
+El webauthn rp name de tenant config
 Wellcome email (blob)::
 Email send to the enabled user
 Registerd email (blob)::
-El registerd email de tenant config
+Email send when a user register
 Disabled user email (blob)::
 Email send when a user is disabled
 Enabled user email (blob)::

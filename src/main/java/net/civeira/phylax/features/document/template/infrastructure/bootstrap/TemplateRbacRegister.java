@@ -50,11 +50,12 @@ public class TemplateRbacRegister {
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("uid").description("El uid de template").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
-        .description("LOGIN_MAGIC_LINK, RESET_PASSWORD...").build());
+        .description("LOGIN_MAGIC_LINK, RESET_PASSWORD, page.profile...").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
-        .description("null = global, valor = override").build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("theme").description("El theme de template").build());
+        .description("null = global, valor = override por tenant").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("theme").description(
+        "Nombre del theme layout (full-window, index-page...). Resuelto contra el tenant activo en render time.")
+        .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("channel").description("El channel de template").build());
     rbac.registerResourceField(RESOURCE,

@@ -21,6 +21,7 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.document.template.domain.TemplateReference;
 import net.civeira.phylax.features.document.templateasset.application.usecase.delete.TemplateAssetCheckBatchDeleteStatus;
 import net.civeira.phylax.features.document.templateasset.application.usecase.delete.TemplateAssetDeleteFilter;
 import net.civeira.phylax.features.document.templateasset.application.usecase.delete.TemplateAssetDeleteUsecase;
@@ -53,13 +54,16 @@ public class TemplateAssetDeleteController {
    * @param uids
    * @param search
    * @param code
+   * @param template
+   * @param templates
    * @param tenant
    * @param tenants
    * @return
    */
   @ApiObserved("Api to delete on massive entity of template asset")
   public Response templateAssetApiBatchDelete(final List<String> uids, final String search,
-      final String code, final String tenant, final List<String> tenants) {
+      final String code, final String template, final List<String> templates, final String tenant,
+      final List<String> tenants) {
     TemplateAssetDeleteFilter.TemplateAssetDeleteFilterBuilder filterBuilder =
         TemplateAssetDeleteFilter.builder();
     filterBuilder =
@@ -69,6 +73,11 @@ public class TemplateAssetDeleteController {
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.code(code);
+    if (null != template) {
+      filterBuilder = filterBuilder.template(TemplateReference.of(template));
+    }
+    filterBuilder = filterBuilder.templates(null == templates ? null
+        : templates.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     if (null != tenant) {
       filterBuilder = filterBuilder.tenant(TenantReference.of(tenant));
     }

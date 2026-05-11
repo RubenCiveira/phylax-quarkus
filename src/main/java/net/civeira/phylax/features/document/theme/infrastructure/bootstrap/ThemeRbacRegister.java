@@ -49,16 +49,16 @@ public class ThemeRbacRegister {
         .name("disable").description("").required(List.of()).build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("uid").description("El uid de theme").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
+        .description("null = theme global fallback, valor = override por tenant").build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("tenant").description("El tenant de theme").build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("name").description("El name de theme").build());
+        FieldDescription.builder().name("name")
+            .description("Nombre de resolución desde template.theme full-window, index-page...")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("isDefault").description("El is default de theme").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("enabled").description("El enabled de theme").build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("customCss").description("El custom css de theme").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version")
             .description(

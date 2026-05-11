@@ -62,7 +62,7 @@ public class TrustedClientDisableController {
    */
   @ApiObserved("Api to disable on massive entity of trusted client")
   public Response trustedClientApiBatchDisable(final List<String> uids, final String search,
-      final String withBackChannelUrl, final String withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
     TrustedClientDisableFilter.TrustedClientDisableFilterBuilder filterBuilder =
         TrustedClientDisableFilter.builder();
     filterBuilder =
@@ -187,6 +187,8 @@ public class TrustedClientDisableController {
     trustedClientApiDto.setCode(dto.getCode());
     trustedClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     trustedClientApiDto.setPublicAllow(dto.getPublicAllow());
+    trustedClientApiDto.setAllowedRedirects(
+        dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
     trustedClientApiDto.setSecretOauth("*****");
     trustedClientApiDto.setBackChannelLogoutUri(dto.getBackChannelLogoutUri());
     trustedClientApiDto
@@ -195,8 +197,22 @@ public class TrustedClientDisableController {
     trustedClientApiDto
         .setFrontChannelLogoutSessionRequired(dto.getFrontChannelLogoutSessionRequired());
     trustedClientApiDto.setEnabled(dto.getEnabled());
-    trustedClientApiDto.setAllowedRedirects(
-        dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
+    trustedClientApiDto.setRegistrationAccess(dto.getRegistrationAccess());
+    trustedClientApiDto.setClientName(dto.getClientName());
+    trustedClientApiDto.setLogoUri(dto.getLogoUri());
+    trustedClientApiDto.setClientUri(dto.getClientUri());
+    trustedClientApiDto.setPolicyUri(dto.getPolicyUri());
+    trustedClientApiDto.setTosUri(dto.getTosUri());
+    trustedClientApiDto.setTokenEndpointAuthMethod(dto.getTokenEndpointAuthMethod());
+    trustedClientApiDto.setGrantTypesJson(dto.getGrantTypesJson());
+    trustedClientApiDto.setResponseTypesJson(dto.getResponseTypesJson());
+    trustedClientApiDto.setDynamicallyRegistered(dto.getDynamicallyRegistered());
+    trustedClientApiDto.setRegisteredAt(dto.getRegisteredAt());
+    trustedClientApiDto.setAllowedScopesM2m(dto.getAllowedScopesM2m());
+    trustedClientApiDto.setM2mTokenTtlSeconds(dto.getM2mTokenTtlSeconds());
+    trustedClientApiDto.setRequestObjectSigningAlg(dto.getRequestObjectSigningAlg());
+    trustedClientApiDto.setJwksUri(dto.getJwksUri());
+    trustedClientApiDto.setJwksJson(dto.getJwksJson());
     trustedClientApiDto.setVersion(dto.getVersion());
     return trustedClientApiDto;
   }

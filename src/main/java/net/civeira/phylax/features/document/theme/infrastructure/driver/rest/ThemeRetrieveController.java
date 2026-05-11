@@ -52,7 +52,6 @@ public class ThemeRetrieveController {
     themeApiDto.setName(dto.getName());
     themeApiDto.setIsDefault(dto.getIsDefault());
     themeApiDto.setEnabled(dto.getEnabled());
-    themeApiDto.setCustomCss(dto.getCustomCss());
     themeApiDto.setVersion(dto.getVersion());
     return themeApiDto;
   }

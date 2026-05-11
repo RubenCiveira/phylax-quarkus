@@ -2,6 +2,21 @@
 @startuml
 left to right direction
 title Clases para template asset
+class document.Template{
+uid:string
+code:string
+theme:string
+channel:TemplateChannelOptions
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
 class access.Tenant{
 uid:string
 name:string
@@ -34,6 +49,7 @@ delete()
 enable()
 disable()
 }
+document.Template "1"  o--  "N*" document.TemplateAsset: template
 access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")

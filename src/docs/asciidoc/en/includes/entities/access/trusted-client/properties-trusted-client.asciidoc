@@ -7,6 +7,8 @@ Allow all scopes (boolean)::
 El allow all scopes de trusted client
 Public allow* (boolean)::
 If true, users can use these client to access with public code flow
+Allowed redirects (xref:#entidad-trusted-client-allowed-redirect[TrustedClientAllowedRedirect])::
+El allowed redirects de trusted client
 Secret oauth (string)::
 If the user is not delegated, the phrasse to identify
 Back channel logout uri (string)::
@@ -19,7 +21,37 @@ Front channel logout session required (boolean)::
 El front channel logout session required de trusted client
 Enabled* (boolean)::
 The indicator to allow the account be used without deleting it
-Allowed redirects (xref:#entidad-trusted-client-allowed-redirect[TrustedClientAllowedRedirect])::
-El allowed redirects de trusted client
+Registration access (string)::
+El registration access de trusted client
+Client name (string)::
+El client name de trusted client
+Logo uri (string)::
+El logo uri de trusted client
+Client uri (string)::
+El client uri de trusted client
+Policy uri (string)::
+El policy uri de trusted client
+Tos uri (string)::
+El tos uri de trusted client
+Token endpoint auth method* (string)::
+El token endpoint auth method de trusted client
+Grant types json (blob)::
+El grant types json de trusted client
+Response types json (blob)::
+El response types json de trusted client
+Dynamically registered (boolean)::
+El dynamically registered de trusted client
+Registered at (datetime)::
+El registered at de trusted client
+Allowed scopes m 2m (blob)::
+El allowed scopes m 2m de trusted client
+M 2m token ttl seconds* (integer)::
+El m 2m token ttl seconds de trusted client
+Request object signing alg (string)::
+El request object signing alg de trusted client
+Jwks uri (blob)::
+El jwks uri de trusted client
+Jwks json (blob)::
+El jwks json de trusted client
 Version (integer)::
 Campo con el número de version de trusted client para controlar bloqueos optimistas

@@ -20,6 +20,7 @@ include::../diagrams/model/access/package-diagram.puml[]
 :leveloffset: +2
 
 include::access/api-key-client/entity-api-key-client.asciidoc[]
+include::access/consent-purpose/entity-consent-purpose.asciidoc[]
 include::access/relying-party/entity-relying-party.asciidoc[]
 include::access/role/entity-role.asciidoc[]
 include::access/tenant/entity-tenant.asciidoc[]
@@ -31,10 +32,14 @@ include::access/trusted-client-allowed-redirect/entity-trusted-client-allowed-re
 include::access/user/entity-user.asciidoc[]
 include::access/user-accepted-termns-of-use/entity-user-accepted-termns-of-use.asciidoc[]
 include::access/user-access-temporal-code/entity-user-access-temporal-code.asciidoc[]
+include::access/user-consent-purposes/entity-user-consent-purposes.asciidoc[]
 include::access/user-consented-scopes/entity-user-consented-scopes.asciidoc[]
 include::access/user-group-membership/entity-user-group-membership.asciidoc[]
+include::access/user-invitation/entity-user-invitation.asciidoc[]
+include::access/user-profile/entity-user-profile.asciidoc[]
 include::access/user-role-assignament/entity-user-role-assignament.asciidoc[]
 include::access/user-role-assignament-role/entity-user-role-assignament-role.asciidoc[]
+include::access/user-webauthn-credential/entity-user-webauthn-credential.asciidoc[]
 
 :leveloffset: -2
 
@@ -48,12 +53,16 @@ include::../diagrams/model/document/package-diagram.puml[]
 
 :leveloffset: +2
 
+include::document/snippet/entity-snippet.asciidoc[]
+include::document/snippet-asset/entity-snippet-asset.asciidoc[]
+include::document/snippet-version/entity-snippet-version.asciidoc[]
 include::document/template/entity-template.asciidoc[]
 include::document/template-asset/entity-template-asset.asciidoc[]
-include::document/template-snippet/entity-template-snippet.asciidoc[]
 include::document/template-variable/entity-template-variable.asciidoc[]
 include::document/template-version/entity-template-version.asciidoc[]
 include::document/theme/entity-theme.asciidoc[]
+include::document/theme-asset/entity-theme-asset.asciidoc[]
+include::document/theme-version/entity-theme-version.asciidoc[]
 
 :leveloffset: -2
 

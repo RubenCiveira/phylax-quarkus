@@ -3,17 +3,17 @@ package net.civeira.phylax.features.access.useraccesstemporalcode.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.FailedLoginAttemptsValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.RecoveryCodeExpirationValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.RecoveryCodeValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.RegisterCodeExpirationValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.RegisterCodeUrlValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.RegisterCodeValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.TempSecondFactorSeedExpirationValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.TempSecondFactorSeedValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.UserValueHolder;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.FailedLoginAttemptsValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.RecoveryCodeExpirationValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.RecoveryCodeValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.RegisterCodeExpirationValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.RegisterCodeUrlValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.RegisterCodeValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.TempSecondFactorSeedExpirationValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.TempSecondFactorSeedValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.UserValueHolder;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold user access temporal code attribute values

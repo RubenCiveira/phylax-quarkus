@@ -23,8 +23,13 @@ class access.TenantConfig{
 uid:string
 innerLabel:string
 forceMfa:boolean
+dynamicRegistrationPolicy:TenantConfigDynamicRegistrationPolicyOptions
 allowRegister:boolean
 enableRegisterUsers:boolean
+magicLinkEnabled:boolean
+webauthnEnabled:boolean
+webauthnRpId:string
+webauthnRpName:string
 wellcomeEmail:blob
 registerdEmail:blob
 disabledUserEmail:blob

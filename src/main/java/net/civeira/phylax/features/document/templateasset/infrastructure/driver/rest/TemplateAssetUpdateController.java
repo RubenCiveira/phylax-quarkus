@@ -11,10 +11,12 @@ import net.civeira.phylax.common.security.MagicLinkService;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.document.template.domain.TemplateReference;
 import net.civeira.phylax.features.document.templateasset.application.usecase.update.TemplateAssetUpdateInput;
 import net.civeira.phylax.features.document.templateasset.application.usecase.update.TemplateAssetUpdateProjection;
 import net.civeira.phylax.features.document.templateasset.application.usecase.update.TemplateAssetUpdateUsecase;
 import net.civeira.phylax.features.document.templateasset.domain.TemplateAssetReference;
+import net.civeira.phylax.generated.openapi.model.TemplateApiRef;
 import net.civeira.phylax.generated.openapi.model.TemplateAssetApiDto;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 
@@ -61,6 +63,7 @@ public class TemplateAssetUpdateController {
   private TemplateAssetApiDto toApiModel(TemplateAssetUpdateProjection dto) {
     TemplateAssetApiDto templateAssetApiDto = new TemplateAssetApiDto();
     templateAssetApiDto.setUid(dto.getUid());
+    templateAssetApiDto.setTemplate(new TemplateApiRef().$ref(dto.getTemplateReference()));
     templateAssetApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     templateAssetApiDto.setCode(dto.getCode());
     templateAssetApiDto.setType(dto.getType());
@@ -84,6 +87,9 @@ public class TemplateAssetUpdateController {
     TemplateAssetUpdateInput dto = new TemplateAssetUpdateInput();
     if (null != templateAssetApiDto.getUid()) {
       dto.setUid(templateAssetApiDto.getUid());
+    }
+    if (null != templateAssetApiDto.getTemplate()) {
+      dto.setTemplate(TemplateReference.of(templateAssetApiDto.getTemplate().get$Ref()));
     }
     if (null != templateAssetApiDto.getTenant()) {
       dto.setTenant(TenantReference.of(templateAssetApiDto.getTenant().get$Ref()));

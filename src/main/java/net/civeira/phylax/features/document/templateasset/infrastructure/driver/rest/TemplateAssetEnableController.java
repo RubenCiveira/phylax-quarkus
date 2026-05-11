@@ -22,6 +22,7 @@ import net.civeira.phylax.common.security.MagicLinkService;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.document.template.domain.TemplateReference;
 import net.civeira.phylax.features.document.templateasset.application.usecase.enable.TemplateAssetEnableFilter;
 import net.civeira.phylax.features.document.templateasset.application.usecase.enable.TemplateAssetEnableProjection;
 import net.civeira.phylax.features.document.templateasset.application.usecase.enable.TemplateAssetEnableStatus;
@@ -35,6 +36,7 @@ import net.civeira.phylax.generated.openapi.model.BatchTaskDetail.DetailStatusEn
 import net.civeira.phylax.generated.openapi.model.BatchTaskLocalizator;
 import net.civeira.phylax.generated.openapi.model.ConstraintFail;
 import net.civeira.phylax.generated.openapi.model.MultipleErrorCodes;
+import net.civeira.phylax.generated.openapi.model.TemplateApiRef;
 import net.civeira.phylax.generated.openapi.model.TemplateAssetApiDto;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 
@@ -62,13 +64,16 @@ public class TemplateAssetEnableController {
    * @param uids
    * @param search
    * @param code
+   * @param template
+   * @param templates
    * @param tenant
    * @param tenants
    * @return
    */
   @ApiObserved("Api to enable on massive entity of template asset")
   public Response templateAssetApiBatchEnable(final List<String> uids, final String search,
-      final String code, final String tenant, final List<String> tenants) {
+      final String code, final String template, final List<String> templates, final String tenant,
+      final List<String> tenants) {
     TemplateAssetEnableFilter.TemplateAssetEnableFilterBuilder filterBuilder =
         TemplateAssetEnableFilter.builder();
     filterBuilder =
@@ -78,6 +83,11 @@ public class TemplateAssetEnableController {
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.code(code);
+    if (null != template) {
+      filterBuilder = filterBuilder.template(TemplateReference.of(template));
+    }
+    filterBuilder = filterBuilder.templates(null == templates ? null
+        : templates.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     if (null != tenant) {
       filterBuilder = filterBuilder.tenant(TenantReference.of(tenant));
     }
@@ -193,6 +203,7 @@ public class TemplateAssetEnableController {
   private TemplateAssetApiDto toApiModel(TemplateAssetEnableProjection dto) {
     TemplateAssetApiDto templateAssetApiDto = new TemplateAssetApiDto();
     templateAssetApiDto.setUid(dto.getUid());
+    templateAssetApiDto.setTemplate(new TemplateApiRef().$ref(dto.getTemplateReference()));
     templateAssetApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     templateAssetApiDto.setCode(dto.getCode());
     templateAssetApiDto.setType(dto.getType());

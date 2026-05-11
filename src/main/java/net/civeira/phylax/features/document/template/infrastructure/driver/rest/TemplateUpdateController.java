@@ -13,11 +13,9 @@ import net.civeira.phylax.features.document.template.application.usecase.update.
 import net.civeira.phylax.features.document.template.application.usecase.update.TemplateUpdateUsecase;
 import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.document.template.domain.TemplateReference;
-import net.civeira.phylax.features.document.theme.domain.ThemeReference;
 import net.civeira.phylax.generated.openapi.model.TemplateApiDto;
 import net.civeira.phylax.generated.openapi.model.TemplateApiDto.ChannelEnum;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
-import net.civeira.phylax.generated.openapi.model.ThemeApiRef;
 
 @RequiredArgsConstructor
 @ApplicationScoped
@@ -59,6 +57,8 @@ public class TemplateUpdateController {
       result = ChannelEnum.MAIL;
     } else if (domainEnum == TemplateChannelOptions.SMS) {
       result = ChannelEnum.SMS;
+    } else if (domainEnum == TemplateChannelOptions.HTML) {
+      result = ChannelEnum.HTML;
     } else {
       result = null;
     }
@@ -76,6 +76,8 @@ public class TemplateUpdateController {
       result = TemplateChannelOptions.MAIL;
     } else if (apiEnum == ChannelEnum.SMS) {
       result = TemplateChannelOptions.SMS;
+    } else if (apiEnum == ChannelEnum.HTML) {
+      result = TemplateChannelOptions.HTML;
     } else if (null == apiEnum) {
       result = null;
     } else {
@@ -94,7 +96,7 @@ public class TemplateUpdateController {
     templateApiDto.setUid(dto.getUid());
     templateApiDto.setCode(dto.getCode());
     templateApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
-    templateApiDto.setTheme(new ThemeApiRef().$ref(dto.getThemeReference()));
+    templateApiDto.setTheme(dto.getTheme());
     templateApiDto.setChannel(channelEnumToApi(dto.getChannel()));
     templateApiDto.setEnabled(dto.getEnabled());
     templateApiDto.setVersion(dto.getVersion());
@@ -118,7 +120,7 @@ public class TemplateUpdateController {
       dto.setTenant(TenantReference.of(templateApiDto.getTenant().get$Ref()));
     }
     if (null != templateApiDto.getTheme()) {
-      dto.setTheme(ThemeReference.of(templateApiDto.getTheme().get$Ref()));
+      dto.setTheme(templateApiDto.getTheme());
     }
     if (null != templateApiDto.getChannel()) {
       dto.setChannel(channelEnumToDomain(templateApiDto.getChannel()));

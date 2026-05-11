@@ -62,6 +62,14 @@ public class TenantLoginProviderRbacRegister {
         ScopeDescription.builder().kind(Kind.WRITE).name("temp-upload-metadata").description(
             "A metadata file required by some providers for configuration (e.g., SAML descriptor).")
             .required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.READ).name("retrieve-upload-saml-idp-idp-cert")
+            .description("El saml idp idp cert de tenant login provider").required(List.of())
+            .build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("temp-upload-saml-idp-idp-cert")
+            .description("El saml idp idp cert de tenant login provider").required(List.of())
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
         .description("A uid string to identify the entity").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
@@ -95,6 +103,14 @@ public class TenantLoginProviderRbacRegister {
         FieldDescription.builder().name("metadata").description(
             "A metadata file required by some providers for configuration (e.g., SAML descriptor).")
             .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpMetadataUrl")
+        .description("El saml idp metadata url de tenant login provider").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpEntityId")
+        .description("El saml idp entity id de tenant login provider").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpSsoUrl")
+        .description("El saml idp sso url de tenant login provider").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpIdpCert")
+        .description("El saml idp idp cert de tenant login provider").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("usersEnabledByDefault")
             .description(

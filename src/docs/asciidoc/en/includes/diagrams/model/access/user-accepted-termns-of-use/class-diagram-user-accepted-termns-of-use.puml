@@ -50,6 +50,8 @@ disable()
 class access.UserAcceptedTermnsOfUse{
 uid:string
 acceptDate:datetime
+ipAddress:string
+userAgent:string
 version:integer
 list()
 retrieve()

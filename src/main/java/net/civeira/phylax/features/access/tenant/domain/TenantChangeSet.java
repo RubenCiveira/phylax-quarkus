@@ -3,14 +3,14 @@ package net.civeira.phylax.features.access.tenant.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.DomainValueHolder;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.EnabledValueHolder;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.MarkForDeleteTimeValueHolder;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.MarkForDeleteValueHolder;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.NameValueHolder;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.RootValueHolder;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.tenant.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.DomainValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.EnabledValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.MarkForDeleteTimeValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.MarkForDeleteValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.NameValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.RootValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.tenant.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold tenant attribute values

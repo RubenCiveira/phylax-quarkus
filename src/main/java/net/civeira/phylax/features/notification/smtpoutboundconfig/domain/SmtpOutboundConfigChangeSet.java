@@ -3,20 +3,20 @@ package net.civeira.phylax.features.notification.smtpoutboundconfig.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.HostValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.LoginValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.MaxRetriesValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.PasswordValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.PortValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.RateLimitValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.RetryDelayValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.SenderEmailValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.SenderNameValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.TenantValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.TimeoutValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.UseTlsValueHolder;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.HostValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.LoginValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.MaxRetriesValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.PasswordValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.PortValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.RateLimitValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.RetryDelayValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.SenderEmailValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.SenderNameValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.TenantValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.TimeoutValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.UseTlsValueHolder;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold smtp outbound config attribute values

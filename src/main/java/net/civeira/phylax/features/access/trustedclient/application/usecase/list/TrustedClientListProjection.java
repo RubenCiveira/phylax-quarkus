@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.access.trustedclient.application.usecase.list;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,14 +13,30 @@ import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedScopesM2mVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientNameVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DynamicallyRegisteredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.GrantTypesJsonVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksJsonVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.LogoUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.M2mTokenTtlSecondsVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.PolicyUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.PublicAllowVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegisteredAtVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegistrationAccessVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequestObjectSigningAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ResponseTypesJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthMethodVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TosUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.VersionVO;
 
@@ -43,6 +60,7 @@ public class TrustedClientListProjection {
     instance.codeValue = visible.getCode();
     instance.allowAllScopesValue = visible.getAllowAllScopes();
     instance.publicAllowValue = visible.getPublicAllow();
+    instance.allowedRedirectsValue = visible.getAllowedRedirects();
     instance.secretOauthValue = visible.getSecretOauth();
     instance.backChannelLogoutUriValue = visible.getBackChannelLogoutUri();
     instance.backChannelLogoutSessionRequiredValue = visible.getBackChannelLogoutSessionRequired();
@@ -50,7 +68,22 @@ public class TrustedClientListProjection {
     instance.frontChannelLogoutSessionRequiredValue =
         visible.getFrontChannelLogoutSessionRequired();
     instance.enabledValue = visible.getEnabled();
-    instance.allowedRedirectsValue = visible.getAllowedRedirects();
+    instance.registrationAccessValue = visible.getRegistrationAccess();
+    instance.clientNameValue = visible.getClientName();
+    instance.logoUriValue = visible.getLogoUri();
+    instance.clientUriValue = visible.getClientUri();
+    instance.policyUriValue = visible.getPolicyUri();
+    instance.tosUriValue = visible.getTosUri();
+    instance.tokenEndpointAuthMethodValue = visible.getTokenEndpointAuthMethod();
+    instance.grantTypesJsonValue = visible.getGrantTypesJson();
+    instance.responseTypesJsonValue = visible.getResponseTypesJson();
+    instance.dynamicallyRegisteredValue = visible.getDynamicallyRegistered();
+    instance.registeredAtValue = visible.getRegisteredAt();
+    instance.allowedScopesM2mValue = visible.getAllowedScopesM2m();
+    instance.m2mTokenTtlSecondsValue = visible.getM2mTokenTtlSeconds();
+    instance.requestObjectSigningAlgValue = visible.getRequestObjectSigningAlg();
+    instance.jwksUriValue = visible.getJwksUri();
+    instance.jwksJsonValue = visible.getJwksJson();
     instance.versionValue = visible.getVersion();
     return instance;
   }
@@ -70,6 +103,13 @@ public class TrustedClientListProjection {
   private Optional<AllowedRedirectsVO> allowedRedirectsValue;
 
   /**
+   * El allowed scopes m 2m de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<AllowedScopesM2mVO> allowedScopesM2mValue;
+
+  /**
    * El back channel logout session required de trusted client
    *
    * @autogenerated ListProjectionGenerator
@@ -84,11 +124,32 @@ public class TrustedClientListProjection {
   private Optional<BackChannelLogoutUriVO> backChannelLogoutUriValue;
 
   /**
+   * El client name de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<ClientNameVO> clientNameValue;
+
+  /**
+   * El client uri de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<ClientUriVO> clientUriValue;
+
+  /**
    * El código identificativo de la aplicación
    *
    * @autogenerated ListProjectionGenerator
    */
   private Optional<CodeVO> codeValue;
+
+  /**
+   * El dynamically registered de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<DynamicallyRegisteredVO> dynamicallyRegisteredValue;
 
   /**
    * The indicator to allow the account be used without deleting it
@@ -112,6 +173,48 @@ public class TrustedClientListProjection {
   private Optional<FrontChannelLogoutUriVO> frontChannelLogoutUriValue;
 
   /**
+   * El grant types json de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<GrantTypesJsonVO> grantTypesJsonValue;
+
+  /**
+   * El jwks json de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<JwksJsonVO> jwksJsonValue;
+
+  /**
+   * El jwks uri de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<JwksUriVO> jwksUriValue;
+
+  /**
+   * El logo uri de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<LogoUriVO> logoUriValue;
+
+  /**
+   * El m 2m token ttl seconds de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<M2mTokenTtlSecondsVO> m2mTokenTtlSecondsValue;
+
+  /**
+   * El policy uri de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<PolicyUriVO> policyUriValue;
+
+  /**
    * If true, users can use these client to access with public code flow
    *
    * @autogenerated ListProjectionGenerator
@@ -119,11 +222,53 @@ public class TrustedClientListProjection {
   private Optional<PublicAllowVO> publicAllowValue;
 
   /**
+   * El registered at de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<RegisteredAtVO> registeredAtValue;
+
+  /**
+   * El registration access de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<RegistrationAccessVO> registrationAccessValue;
+
+  /**
+   * El request object signing alg de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<RequestObjectSigningAlgVO> requestObjectSigningAlgValue;
+
+  /**
+   * El response types json de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<ResponseTypesJsonVO> responseTypesJsonValue;
+
+  /**
    * If the user is not delegated, the phrasse to identify
    *
    * @autogenerated ListProjectionGenerator
    */
   private Optional<SecretOauthVO> secretOauthValue;
+
+  /**
+   * El token endpoint auth method de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<TokenEndpointAuthMethodVO> tokenEndpointAuthMethodValue;
+
+  /**
+   * El tos uri de trusted client
+   *
+   * @autogenerated ListProjectionGenerator
+   */
+  private Optional<TosUriVO> tosUriValue;
 
   /**
    * El identificador de la aplicacion
@@ -150,6 +295,7 @@ public class TrustedClientListProjection {
     codeValue = Optional.of(entity.getCodeValue());
     allowAllScopesValue = Optional.of(entity.getAllowAllScopesValue());
     publicAllowValue = Optional.of(entity.getPublicAllowValue());
+    allowedRedirectsValue = Optional.of(entity.getAllowedRedirectsValue());
     secretOauthValue = Optional.of(entity.getSecretOauthValue());
     backChannelLogoutUriValue = Optional.of(entity.getBackChannelLogoutUriValue());
     backChannelLogoutSessionRequiredValue =
@@ -158,7 +304,22 @@ public class TrustedClientListProjection {
     frontChannelLogoutSessionRequiredValue =
         Optional.of(entity.getFrontChannelLogoutSessionRequiredValue());
     enabledValue = Optional.of(entity.getEnabledValue());
-    allowedRedirectsValue = Optional.of(entity.getAllowedRedirectsValue());
+    registrationAccessValue = Optional.of(entity.getRegistrationAccessValue());
+    clientNameValue = Optional.of(entity.getClientNameValue());
+    logoUriValue = Optional.of(entity.getLogoUriValue());
+    clientUriValue = Optional.of(entity.getClientUriValue());
+    policyUriValue = Optional.of(entity.getPolicyUriValue());
+    tosUriValue = Optional.of(entity.getTosUriValue());
+    tokenEndpointAuthMethodValue = Optional.of(entity.getTokenEndpointAuthMethodValue());
+    grantTypesJsonValue = Optional.of(entity.getGrantTypesJsonValue());
+    responseTypesJsonValue = Optional.of(entity.getResponseTypesJsonValue());
+    dynamicallyRegisteredValue = Optional.of(entity.getDynamicallyRegisteredValue());
+    registeredAtValue = Optional.of(entity.getRegisteredAtValue());
+    allowedScopesM2mValue = Optional.of(entity.getAllowedScopesM2mValue());
+    m2mTokenTtlSecondsValue = Optional.of(entity.getM2mTokenTtlSecondsValue());
+    requestObjectSigningAlgValue = Optional.of(entity.getRequestObjectSigningAlgValue());
+    jwksUriValue = Optional.of(entity.getJwksUriValue());
+    jwksJsonValue = Optional.of(entity.getJwksJsonValue());
     versionValue = Optional.of(entity.getVersionValue());
   }
 
@@ -194,6 +355,29 @@ public class TrustedClientListProjection {
    */
   public List<AllowedRedirects> getAllowedRedirects() {
     return allowedRedirectsValue.map(AllowedRedirectsVO::getAllowedRedirects).orElseGet(List::of);
+  }
+
+  /**
+   * Inform for a possible change propolsal in AllowedScopesM2m
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for AllowedScopesM2m, otherwise the value for
+   *         AllowedScopesM2m
+   */
+  public String getAllowedScopesM2m() {
+    return getAllowedScopesM2mOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in AllowedScopesM2m
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for AllowedScopesM2m, otherwise the value for
+   *         AllowedScopesM2m
+   */
+  public String getAllowedScopesM2mOrDefault(final String orDefault) {
+    return allowedScopesM2mValue.flatMap(AllowedScopesM2mVO::getAllowedScopesM2m).orElse(orDefault);
   }
 
   /**
@@ -246,6 +430,48 @@ public class TrustedClientListProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in ClientName
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for ClientName, otherwise the value for ClientName
+   */
+  public String getClientName() {
+    return getClientNameOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in ClientName
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for ClientName, otherwise the value for ClientName
+   */
+  public String getClientNameOrDefault(final String orDefault) {
+    return clientNameValue.flatMap(ClientNameVO::getClientName).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in ClientUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for ClientUri, otherwise the value for ClientUri
+   */
+  public String getClientUri() {
+    return getClientUriOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in ClientUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for ClientUri, otherwise the value for ClientUri
+   */
+  public String getClientUriOrDefault(final String orDefault) {
+    return clientUriValue.flatMap(ClientUriVO::getClientUri).orElse(orDefault);
+  }
+
+  /**
    * Inform for a possible change propolsal in Code
    *
    * @autogenerated ListProjectionGenerator
@@ -264,6 +490,30 @@ public class TrustedClientListProjection {
    */
   public String getCodeOrDefault(final String orDefault) {
     return codeValue.map(CodeVO::getCode).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DynamicallyRegistered
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for DynamicallyRegistered, otherwise the value for
+   *         DynamicallyRegistered
+   */
+  public Boolean getDynamicallyRegistered() {
+    return getDynamicallyRegisteredOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DynamicallyRegistered
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for DynamicallyRegistered, otherwise the value for
+   *         DynamicallyRegistered
+   */
+  public Boolean getDynamicallyRegisteredOrDefault(final Boolean orDefault) {
+    return dynamicallyRegisteredValue.map(DynamicallyRegisteredVO::isDynamicallyRegistered)
+        .orElse(orDefault);
   }
 
   /**
@@ -337,6 +587,137 @@ public class TrustedClientListProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in GrantTypesJson
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for GrantTypesJson, otherwise the value for
+   *         GrantTypesJson
+   */
+  public String getGrantTypesJson() {
+    return getGrantTypesJsonOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in GrantTypesJson
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for GrantTypesJson, otherwise the value for
+   *         GrantTypesJson
+   */
+  public String getGrantTypesJsonOrDefault(final String orDefault) {
+    return grantTypesJsonValue.flatMap(GrantTypesJsonVO::getGrantTypesJson).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in JwksJson
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for JwksJson, otherwise the value for JwksJson
+   */
+  public String getJwksJson() {
+    return getJwksJsonOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in JwksJson
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for JwksJson, otherwise the value for JwksJson
+   */
+  public String getJwksJsonOrDefault(final String orDefault) {
+    return jwksJsonValue.flatMap(JwksJsonVO::getJwksJson).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in JwksUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for JwksUri, otherwise the value for JwksUri
+   */
+  public String getJwksUri() {
+    return getJwksUriOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in JwksUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for JwksUri, otherwise the value for JwksUri
+   */
+  public String getJwksUriOrDefault(final String orDefault) {
+    return jwksUriValue.flatMap(JwksUriVO::getJwksUri).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in LogoUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for LogoUri, otherwise the value for LogoUri
+   */
+  public String getLogoUri() {
+    return getLogoUriOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in LogoUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for LogoUri, otherwise the value for LogoUri
+   */
+  public String getLogoUriOrDefault(final String orDefault) {
+    return logoUriValue.flatMap(LogoUriVO::getLogoUri).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in M2mTokenTtlSeconds
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for M2mTokenTtlSeconds, otherwise the value for
+   *         M2mTokenTtlSeconds
+   */
+  public Integer getM2mTokenTtlSeconds() {
+    return getM2mTokenTtlSecondsOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in M2mTokenTtlSeconds
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for M2mTokenTtlSeconds, otherwise the value for
+   *         M2mTokenTtlSeconds
+   */
+  public Integer getM2mTokenTtlSecondsOrDefault(final Integer orDefault) {
+    return m2mTokenTtlSecondsValue.map(M2mTokenTtlSecondsVO::getM2mTokenTtlSeconds)
+        .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in PolicyUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for PolicyUri, otherwise the value for PolicyUri
+   */
+  public String getPolicyUri() {
+    return getPolicyUriOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in PolicyUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for PolicyUri, otherwise the value for PolicyUri
+   */
+  public String getPolicyUriOrDefault(final String orDefault) {
+    return policyUriValue.flatMap(PolicyUriVO::getPolicyUri).orElse(orDefault);
+  }
+
+  /**
    * Inform for a possible change propolsal in PublicAllow
    *
    * @autogenerated ListProjectionGenerator
@@ -357,6 +738,101 @@ public class TrustedClientListProjection {
    */
   public Boolean getPublicAllowOrDefault(final Boolean orDefault) {
     return publicAllowValue.map(PublicAllowVO::isPublicAllow).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RegisteredAt
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for RegisteredAt, otherwise the value for
+   *         RegisteredAt
+   */
+  public OffsetDateTime getRegisteredAt() {
+    return getRegisteredAtOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RegisteredAt
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for RegisteredAt, otherwise the value for
+   *         RegisteredAt
+   */
+  public OffsetDateTime getRegisteredAtOrDefault(final OffsetDateTime orDefault) {
+    return registeredAtValue.flatMap(RegisteredAtVO::getRegisteredAt).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RegistrationAccess
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for RegistrationAccess, otherwise the value for
+   *         RegistrationAccess
+   */
+  public String getRegistrationAccess() {
+    return getRegistrationAccessOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RegistrationAccess
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for RegistrationAccess, otherwise the value for
+   *         RegistrationAccess
+   */
+  public String getRegistrationAccessOrDefault(final String orDefault) {
+    return registrationAccessValue.flatMap(RegistrationAccessVO::getRegistrationAccess)
+        .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RequestObjectSigningAlg
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for RequestObjectSigningAlg, otherwise the value
+   *         for RequestObjectSigningAlg
+   */
+  public String getRequestObjectSigningAlg() {
+    return getRequestObjectSigningAlgOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RequestObjectSigningAlg
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for RequestObjectSigningAlg, otherwise the value
+   *         for RequestObjectSigningAlg
+   */
+  public String getRequestObjectSigningAlgOrDefault(final String orDefault) {
+    return requestObjectSigningAlgValue
+        .flatMap(RequestObjectSigningAlgVO::getRequestObjectSigningAlg).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in ResponseTypesJson
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for ResponseTypesJson, otherwise the value for
+   *         ResponseTypesJson
+   */
+  public String getResponseTypesJson() {
+    return getResponseTypesJsonOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in ResponseTypesJson
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for ResponseTypesJson, otherwise the value for
+   *         ResponseTypesJson
+   */
+  public String getResponseTypesJsonOrDefault(final String orDefault) {
+    return responseTypesJsonValue.flatMap(ResponseTypesJsonVO::getResponseTypesJson)
+        .orElse(orDefault);
   }
 
   /**
@@ -409,6 +885,51 @@ public class TrustedClientListProjection {
   public String getSecretOauthPlainOrDefault(final AesCipherService cypher,
       final String orDefault) {
     return secretOauthValue.flatMap(vo -> vo.getSecretOauthPlain(cypher)).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TokenEndpointAuthMethod
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for TokenEndpointAuthMethod, otherwise the value
+   *         for TokenEndpointAuthMethod
+   */
+  public String getTokenEndpointAuthMethod() {
+    return getTokenEndpointAuthMethodOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TokenEndpointAuthMethod
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for TokenEndpointAuthMethod, otherwise the value
+   *         for TokenEndpointAuthMethod
+   */
+  public String getTokenEndpointAuthMethodOrDefault(final String orDefault) {
+    return tokenEndpointAuthMethodValue.map(TokenEndpointAuthMethodVO::getTokenEndpointAuthMethod)
+        .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TosUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @return empty if there is no change proposal for TosUri, otherwise the value for TosUri
+   */
+  public String getTosUri() {
+    return getTosUriOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TosUri
+   *
+   * @autogenerated ListProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for TosUri, otherwise the value for TosUri
+   */
+  public String getTosUriOrDefault(final String orDefault) {
+    return tosUriValue.flatMap(TosUriVO::getTosUri).orElse(orDefault);
   }
 
   /**

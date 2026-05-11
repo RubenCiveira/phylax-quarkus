@@ -1,5 +1,1 @@
-/db/migration/mysql/000.001.001/20260327133130-model.changelog.mysql.sql
-/db/migration/mysql/000.001.001/20260328102606-model.changelog.mysql.sql
-/db/migration/mysql/000.001.001/20260328105227-model.changelog.mysql.sql
-/db/migration/mysql/000.001.001/20260415114459-model.changelog.mysql.sql
-/db/migration/mysql/000.001.002/20260415130000-pkce-columns.changelog.mysql.sql
+/db/migration/mysql/000.001.001/20260511114304-model.changelog.mysql.sql

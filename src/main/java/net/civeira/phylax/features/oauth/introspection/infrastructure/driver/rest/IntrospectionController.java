@@ -4,9 +4,6 @@ package net.civeira.phylax.features.oauth.introspection.infrastructure.driver.re
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -64,9 +61,6 @@ public class IntrospectionController {
   @Path("oauth/openid/{tenant}/introspect")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Token introspection (RFC 7662)")
-  @APIResponse(responseCode = "200", description = "Introspection result")
-  @APIResponse(responseCode = "401", description = "Missing or invalid client credentials")
   public Response introspect(final @PathParam("tenant") String tenant,
       final @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap) {
 

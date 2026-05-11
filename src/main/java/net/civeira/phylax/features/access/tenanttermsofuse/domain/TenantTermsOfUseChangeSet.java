@@ -3,14 +3,14 @@ package net.civeira.phylax.features.access.tenanttermsofuse.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.ActivationDateValueHolder;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.AttachedValueHolder;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.EnabledValueHolder;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.RelyingPartyValueHolder;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.TenantValueHolder;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.TextValueHolder;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.ActivationDateValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.AttachedValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.EnabledValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.RelyingPartyValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.TenantValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.TextValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold tenant terms of use attribute values

@@ -3,12 +3,12 @@ package net.civeira.phylax.features.access.usergroupmembership.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.GroupsValueHolder;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.RelyingPartyValueHolder;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.TrustedClientValueHolder;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.UserValueHolder;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueholder.GroupsValueHolder;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueholder.RelyingPartyValueHolder;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueholder.TrustedClientValueHolder;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueholder.UserValueHolder;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold user group membership attribute values

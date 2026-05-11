@@ -3,20 +3,20 @@ package net.civeira.phylax.features.access.user.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.user.domain.valueobject.ApproveValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.BlockedUntilValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.EmailValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.EnabledValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.NameValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.PasswordValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.ProviderValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.SecondFactorSeedValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.TemporalPasswordValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.TenantValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.UseSecondFactorsValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.VersionValueHolder;
-import net.civeira.phylax.features.access.user.domain.valueobject.WellcomeAtValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.ApproveValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.BlockedUntilValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.EmailValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.EnabledValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.NameValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.PasswordValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.ProviderValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.SecondFactorSeedValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.TemporalPasswordValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.TenantValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.UseSecondFactorsValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.VersionValueHolder;
+import net.civeira.phylax.features.access.user.domain.valueholder.WellcomeAtValueHolder;
 
 /**
  * A dto transfer to hold user attribute values

@@ -52,7 +52,6 @@ public class ThemeCreateController {
     themeApiDto.setName(dto.getName());
     themeApiDto.setIsDefault(dto.getIsDefault());
     themeApiDto.setEnabled(dto.getEnabled());
-    themeApiDto.setCustomCss(dto.getCustomCss());
     themeApiDto.setVersion(dto.getVersion());
     return themeApiDto;
   }
@@ -78,9 +77,6 @@ public class ThemeCreateController {
     }
     if (null != themeApiDto.getEnabled()) {
       dto.setEnabled(themeApiDto.getEnabled());
-    }
-    if (null != themeApiDto.getCustomCss()) {
-      dto.setCustomCss(themeApiDto.getCustomCss());
     }
     if (null != themeApiDto.getVersion()) {
       dto.setVersion(themeApiDto.getVersion());

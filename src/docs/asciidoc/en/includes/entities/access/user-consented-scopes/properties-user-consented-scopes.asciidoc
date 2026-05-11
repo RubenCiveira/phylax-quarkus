@@ -11,5 +11,9 @@ Granted (boolean)::
 El granted de user consented scopes
 Decision at (datetime)::
 El decision at de user consented scopes
+Ip address (string)::
+El ip address de user consented scopes
+User agent (string)::
+El user agent de user consented scopes
 Version (integer)::
 Campo con el número de version de user consented scopes para controlar bloqueos optimistas

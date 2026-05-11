@@ -198,6 +198,10 @@ public class TenantLoginProviderEnableController {
       result = SourceEnum.GOOGLE;
     } else if (domainEnum == TenantLoginProviderSourceOptions.GITHUB) {
       result = SourceEnum.GITHUB;
+    } else if (domainEnum == TenantLoginProviderSourceOptions.MICROSOFT) {
+      result = SourceEnum.MICROSOFT;
+    } else if (domainEnum == TenantLoginProviderSourceOptions.APPLE) {
+      result = SourceEnum.APPLE;
     } else if (domainEnum == TenantLoginProviderSourceOptions.SAML) {
       result = SourceEnum.SAML;
     } else {
@@ -227,6 +231,16 @@ public class TenantLoginProviderEnableController {
       String url = currentRequest.getPublicHost() + "/api/access/login-providers/"
           + dto.getUidOrDefault("-") + "/metadata";
       tenantLoginProviderApiDto.setMetadata(magicLink.create(url, currentRequest.interaction()));
+    }
+    tenantLoginProviderApiDto.setSamlIdpMetadataUrl(dto.getSamlIdpMetadataUrl());
+    tenantLoginProviderApiDto.setSamlIdpEntityId(dto.getSamlIdpEntityId());
+    tenantLoginProviderApiDto.setSamlIdpSsoUrl(dto.getSamlIdpSsoUrl());
+    String samlIdpIdpCert = dto.getSamlIdpIdpCert();
+    if (null != samlIdpIdpCert) {
+      String url = currentRequest.getPublicHost() + "/api/access/login-providers/"
+          + dto.getUidOrDefault("-") + "/saml-idp-idp-cert";
+      tenantLoginProviderApiDto
+          .setSamlIdpIdpCert(magicLink.create(url, currentRequest.interaction()));
     }
     tenantLoginProviderApiDto.setUsersEnabledByDefault(dto.getUsersEnabledByDefault());
     tenantLoginProviderApiDto.setVersion(dto.getVersion());

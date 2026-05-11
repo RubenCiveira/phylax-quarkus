@@ -38,7 +38,7 @@ tempSecondFactorSeed:string
 tempSecondFactorSeedExpiration:datetime
 failedLoginAttempts:integer
 registerCode:string
-registerCodeUrl:string
+registerCodeUrl:blob
 registerCodeExpiration:datetime
 recoveryCode:string
 recoveryCodeExpiration:datetime

@@ -5,6 +5,7 @@ import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.mfa.infrastructure.driven.OAuthCleanupService;
 
 /**
  * Quarkus scheduler that periodically removes expired OAuth records from the database.

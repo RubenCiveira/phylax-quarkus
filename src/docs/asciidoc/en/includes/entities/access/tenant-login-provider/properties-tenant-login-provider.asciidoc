@@ -9,6 +9,8 @@ Source* (TenantLoginProviderSourceOptions)::
 The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAML).Los posibles valores que toma el campo son:
  * GOOGLE
  * GITHUB
+ * MICROSOFT
+ * APPLE
  * SAML
 
 Disabled (boolean)::
@@ -23,6 +25,14 @@ Certificate (blob)::
 The provider certificate used for signature verification, if required.
 Metadata (binary)::
 A metadata file required by some providers for configuration (e.g., SAML descriptor).
+Saml idp metadata url (string)::
+El saml idp metadata url de tenant login provider
+Saml idp entity id (string)::
+El saml idp entity id de tenant login provider
+Saml idp sso url (string)::
+El saml idp sso url de tenant login provider
+Saml idp idp cert (binary)::
+El saml idp idp cert de tenant login provider
 Users enabled by default* (boolean)::
 Defines whether the users created with this provider are enabled by default.
 Version (integer)::

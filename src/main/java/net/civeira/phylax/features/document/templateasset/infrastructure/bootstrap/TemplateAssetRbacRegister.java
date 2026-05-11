@@ -55,10 +55,13 @@ public class TemplateAssetRbacRegister {
             .description("El content de template asset").required(List.of()).build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("uid").description("El uid de template asset").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
-        .description("El tenant de template asset").build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("code").description("logo, background...").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("template")
+        .description("El template de template asset").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant").description(
+        "null = asset global del template. Valor = override por tenant (logo distinto por tenant en template global).")
+        .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
+        .description("logo, background, corporate.css...").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("type").description("IMAGE, CSS, FONT...").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("content")

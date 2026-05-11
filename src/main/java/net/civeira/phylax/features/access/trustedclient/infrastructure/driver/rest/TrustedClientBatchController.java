@@ -43,7 +43,7 @@ public class TrustedClientBatchController implements TrustedClientBatchApi {
    */
   @Override
   public Response trustedClientApiBatchDelete(final List<String> uids, final String search,
-      final String withBackChannelUrl, final String withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
     return deleteController.trustedClientApiBatchDelete(uids, search, withBackChannelUrl,
         withFrontChannelUrl, code);
   }
@@ -69,7 +69,7 @@ public class TrustedClientBatchController implements TrustedClientBatchApi {
    */
   @Override
   public Response trustedClientApiBatchDisable(final List<String> uids, final String search,
-      final String withBackChannelUrl, final String withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
     return disableController.trustedClientApiBatchDisable(uids, search, withBackChannelUrl,
         withFrontChannelUrl, code);
   }
@@ -95,7 +95,7 @@ public class TrustedClientBatchController implements TrustedClientBatchApi {
    */
   @Override
   public Response trustedClientApiBatchEnable(final List<String> uids, final String search,
-      final String withBackChannelUrl, final String withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
     return enableController.trustedClientApiBatchEnable(uids, search, withBackChannelUrl,
         withFrontChannelUrl, code);
   }

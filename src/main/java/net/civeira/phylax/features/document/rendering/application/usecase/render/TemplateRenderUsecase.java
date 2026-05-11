@@ -20,8 +20,6 @@ import net.civeira.phylax.features.document.template.domain.Template;
 import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.document.template.domain.gateway.TemplateFilter;
 import net.civeira.phylax.features.document.template.domain.gateway.TemplateReadRepositoryGateway;
-import net.civeira.phylax.features.document.templatesnippet.domain.gateway.TemplateSnippetFilter;
-import net.civeira.phylax.features.document.templatesnippet.domain.gateway.TemplateSnippetReadRepositoryGateway;
 import net.civeira.phylax.features.document.templatevariable.domain.gateway.TemplateVariableFilter;
 import net.civeira.phylax.features.document.templatevariable.domain.gateway.TemplateVariableReadRepositoryGateway;
 import net.civeira.phylax.features.document.templateversion.domain.TemplateVersion;
@@ -51,7 +49,7 @@ public class TemplateRenderUsecase {
   private final TemplateReadRepositoryGateway templateGateway;
   private final TemplateVersionReadRepositoryGateway versionGateway;
   private final TemplateVariableReadRepositoryGateway variableGateway;
-  private final TemplateSnippetReadRepositoryGateway snippetGateway;
+//  private final TemplateSnippetReadRepositoryGateway snippetGateway;
   private final TemplateRenderGateway renderGateway;
   private final ThemeReadRepositoryGateway themeGateway;
 
@@ -145,24 +143,26 @@ public class TemplateRenderUsecase {
    * when the template has no theme or the theme has no custom CSS.
    */
   private List<RenderedAsset> loadThemeAssets(final Template template) {
-    Optional<ThemeRef> themeRef = template.getTheme();
-    if (themeRef.isEmpty()) {
-      return List.of();
-    }
-    List<RenderedAsset> assets = new ArrayList<>();
-    themeGateway.resolve(themeRef.get()).getCustomCss().ifPresent(css -> assets.add(RenderedAsset
-        .builder().code("theme-css").contentType("text/css").content(css).embedded(false).build()));
-    return assets;
+    return List.of();
+//    Optional<ThemeRef> themeRef = template.getTheme();
+//    if (themeRef.isEmpty()) {
+//      return List.of();
+//    }
+//    List<RenderedAsset> assets = new ArrayList<>();
+//    themeGateway.resolve(themeRef.get()).getCustomCss().ifPresent(css -> assets.add(RenderedAsset
+//        .builder().code("theme-css").contentType("text/css").content(css).embedded(false).build()));
+//    return assets;
   }
 
   /** Loads all enabled snippets for the tenant, indexed by code. */
   private Map<String, String> loadSnippets(final TenantRef tenant) {
-    if (tenant == null) {
-      return Map.of();
-    }
-    Map<String, String> snippets = new HashMap<>();
-    snippetGateway.list(TemplateSnippetFilter.builder().tenant(tenant).build()).stream()
-        .filter(s -> s.isEnabled()).forEach(s -> snippets.put(s.getCode(), s.getContentHtml()));
-    return snippets;
+    return Map.of();
+//    if (tenant == null) {
+//      return Map.of();
+//    }
+//    Map<String, String> snippets = new HashMap<>();
+//    snippetGateway.list(TemplateSnippetFilter.builder().tenant(tenant).build()).stream()
+//        .filter(s -> s.isEnabled()).forEach(s -> snippets.put(s.getCode(), s.getContentHtml()));
+//    return snippets;
   }
 }

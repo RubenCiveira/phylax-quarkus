@@ -3,10 +3,10 @@ package net.civeira.phylax.features.access.role.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.role.domain.valueobject.NameValueHolder;
-import net.civeira.phylax.features.access.role.domain.valueobject.RelyingPartyValueHolder;
-import net.civeira.phylax.features.access.role.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.role.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.access.role.domain.valueholder.NameValueHolder;
+import net.civeira.phylax.features.access.role.domain.valueholder.RelyingPartyValueHolder;
+import net.civeira.phylax.features.access.role.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.role.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold role attribute values

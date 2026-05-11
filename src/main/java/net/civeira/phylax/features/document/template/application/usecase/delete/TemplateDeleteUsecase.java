@@ -108,12 +108,12 @@ public class TemplateDeleteUsecase {
           "The policies for template dont allow to delete: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    TemplateVisibilityFilter filterOnVisibles = TemplateVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
-        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    TemplateVisibilityFilter filterOnVisibles =
+        TemplateVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .global(filter.getGlobal().orElse(null)).code(filter.getCode().orElse(null))
+            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
+            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     TemplateDeleteAllInBatchCommand command =
         new TemplateDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

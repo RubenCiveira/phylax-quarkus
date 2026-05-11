@@ -53,14 +53,25 @@ public class TenantConfigRbacRegister {
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("forceMfa")
         .description("El force mfa de tenant config").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("dynamicRegistrationPolicy")
+            .description("El dynamic registration policy de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowRegister")
         .description("El allow register de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enableRegisterUsers")
         .description("El enable register users de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("magicLinkEnabled")
+        .description("El magic link enabled de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnEnabled")
+        .description("El webauthn enabled de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnRpId")
+        .description("El webauthn rp id de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnRpName")
+        .description("El webauthn rp name de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("wellcomeEmail")
         .description("Email send to the enabled user").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registerdEmail")
-        .description("El registerd email de tenant config").build());
+        .description("Email send when a user register").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("disabledUserEmail")
         .description("Email send when a user is disabled").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabledUserEmail")

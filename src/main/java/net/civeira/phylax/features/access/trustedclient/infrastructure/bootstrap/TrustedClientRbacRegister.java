@@ -60,6 +60,8 @@ public class TrustedClientRbacRegister {
         FieldDescription.builder().name("publicAllow")
             .description("If true, users can use these client to access with public code flow")
             .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedRedirects")
+        .description("El allowed redirects de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
         .description("If the user is not delegated, the phrasse to identify").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("backChannelLogoutUri")
@@ -74,8 +76,38 @@ public class TrustedClientRbacRegister {
             .description("El front channel logout session required de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
         .description("The indicator to allow the account be used without deleting it").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedRedirects")
-        .description("El allowed redirects de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registrationAccess")
+        .description("El registration access de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("clientName")
+        .description("El client name de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("logoUri")
+        .description("El logo uri de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("clientUri")
+        .description("El client uri de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("policyUri")
+        .description("El policy uri de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tosUri")
+        .description("El tos uri de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tokenEndpointAuthMethod")
+        .description("El token endpoint auth method de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("grantTypesJson")
+        .description("El grant types json de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("responseTypesJson")
+        .description("El response types json de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("dynamicallyRegistered")
+        .description("El dynamically registered de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registeredAt")
+        .description("El registered at de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedScopesM2m")
+        .description("El allowed scopes m 2m de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("m2mTokenTtlSeconds")
+        .description("El m 2m token ttl seconds de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("requestObjectSigningAlg")
+        .description("El request object signing alg de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("jwksUri")
+        .description("El jwks uri de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("jwksJson")
+        .description("El jwks json de trusted client").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version").description(
             "Campo con el número de version de trusted client para controlar bloqueos optimistas")

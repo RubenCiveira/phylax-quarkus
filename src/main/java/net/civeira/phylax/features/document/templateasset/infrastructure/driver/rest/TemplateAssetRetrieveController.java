@@ -10,6 +10,7 @@ import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.document.templateasset.application.usecase.retrieve.TemplateAssetRetrieveProjection;
 import net.civeira.phylax.features.document.templateasset.application.usecase.retrieve.TemplateAssetRetrieveUsecase;
 import net.civeira.phylax.features.document.templateasset.domain.TemplateAssetReference;
+import net.civeira.phylax.generated.openapi.model.TemplateApiRef;
 import net.civeira.phylax.generated.openapi.model.TemplateAssetApiDto;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 
@@ -54,6 +55,7 @@ public class TemplateAssetRetrieveController {
   private TemplateAssetApiDto toApiModel(TemplateAssetRetrieveProjection dto) {
     TemplateAssetApiDto templateAssetApiDto = new TemplateAssetApiDto();
     templateAssetApiDto.setUid(dto.getUid());
+    templateAssetApiDto.setTemplate(new TemplateApiRef().$ref(dto.getTemplateReference()));
     templateAssetApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     templateAssetApiDto.setCode(dto.getCode());
     templateAssetApiDto.setType(dto.getType());

@@ -5,6 +5,7 @@ left to right direction
 class document.Template{
 uid:string
 code:string
+theme:string
 channel:TemplateChannelOptions
 enabled:boolean
 version:integer
@@ -17,7 +18,21 @@ enable()
 disable()
 }
 access.Tenant "1"  o--  "N*" document.Template: tenant 
-document.Theme "1"  o--  "N*" document.Template: theme 
+
+class document.Snippet{
+uid:string
+code:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.Snippet: tenant 
 
 class access.UserRoleAssignament{
 uid:string
@@ -31,6 +46,22 @@ delete()
 access.User "1"  o--  "N*" access.UserRoleAssignament: user 
 access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty 
 access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient 
+
+class access.UserConsentPurposes{
+uid:string
+granted:boolean
+decisionAt:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserConsentPurposes: user 
+access.ConsentPurpose "1"  o--  "N*" access.UserConsentPurposes: consentPurpose 
 
 class access.Role{
 uid:string
@@ -58,13 +89,28 @@ access.User "1"  o--  "N*" access.UserGroupMembership: user
 access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty 
 access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient 
 
+class document.ThemeVersion{
+uid:string
+channel:ThemeVersionChannelOptions
+locale:string
+contentHtml:blob
+contentText:blob
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+document.Theme "1"  o--  "N*" document.ThemeVersion: theme 
+
 class access.UserAccessTemporalCode{
 uid:string
 tempSecondFactorSeed:string
 tempSecondFactorSeedExpiration:datetime
 failedLoginAttempts:integer
 registerCode:string
-registerCodeUrl:string
+registerCodeUrl:blob
 registerCodeExpiration:datetime
 recoveryCode:string
 recoveryCodeExpiration:datetime
@@ -86,6 +132,194 @@ resetPasswordRecover()
 }
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user 
 
+class access.RelyingParty{
+uid:string
+code:string
+apiKey:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+
+class document.SnippetVersion{
+uid:string
+locale:string
+subject:string
+contentHtml:blob
+contentText:blob
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet 
+
+class access.UserAcceptedTermnsOfUse{
+uid:string
+acceptDate:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
+
+class document.TemplateVersion{
+uid:string
+locale:string
+subject:string
+contentHtml:blob
+contentText:blob
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+document.Template "1"  o--  "N*" document.TemplateVersion: template 
+
+class document.SnippetAsset{
+uid:string
+code:string
+type:string
+content:binary
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet 
+
+class access.ApiKeyClient{
+uid:string
+code:string
+key:string
+enabled:boolean
+scopes:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+
+class document.TemplateVariable{
+uid:string
+code:string
+type:string
+value:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant 
+
+class document.Theme{
+uid:string
+name:string
+isDefault:boolean
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.Theme: tenant 
+
+class document.TemplateAsset{
+uid:string
+code:string
+type:string
+content:binary
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+document.Template "1"  o--  "N*" document.TemplateAsset: template 
+access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant 
+
+class access.Tenant{
+uid:string
+name:string
+root:boolean
+domain:string
+enabled:boolean
+markForDelete:boolean
+markForDeleteTime:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+
+class access.UserProfile{
+uid:string
+givenName:string
+familyName:string
+middleName:string
+nickname:string
+preferredUsername:string
+pictureUrl:string
+websiteUrl:string
+gender:string
+birthdate:string
+zoneinfo:string
+locale:string
+phoneNumber:string
+phoneNumberVerified:boolean
+addressJson:blob
+updatedAt:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserProfile: user 
+
 class notification.Message{
 uid:string
 target:string
@@ -104,21 +338,6 @@ delete()
 }
 access.Tenant "1"  o--  "N*" notification.Message: tenant 
 
-class access.RelyingParty{
-uid:string
-code:string
-apiKey:string
-enabled:boolean
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-
 class access.TrustedClient{
 uid:string
 code:string
@@ -130,6 +349,22 @@ backChannelLogoutSessionRequired:boolean
 frontChannelLogoutUri:string
 frontChannelLogoutSessionRequired:boolean
 enabled:boolean
+registrationAccess:string
+clientName:string
+logoUri:string
+clientUri:string
+policyUri:string
+tosUri:string
+tokenEndpointAuthMethod:string
+grantTypesJson:blob
+responseTypesJson:blob
+dynamicallyRegistered:boolean
+registeredAt:datetime
+allowedScopesM2m:blob
+m2mTokenTtlSeconds:integer
+requestObjectSigningAlg:string
+jwksUri:blob
+jwksJson:blob
 version:integer
 list()
 retrieve()
@@ -140,39 +375,34 @@ enable()
 disable()
 }
 
-class access.UserAcceptedTermnsOfUse{
+class document.ThemeAsset{
 uid:string
-acceptDate:datetime
+code:string
+type:string
+content:binary
+enabled:boolean
 version:integer
 list()
 retrieve()
 create()
 update()
 delete()
+enable()
+disable()
 }
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
-
-class document.TemplateVersion{
-uid:string
-subject:string
-contentHtml:blob
-contentText:blob
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-document.Template "1"  o--  "N*" document.TemplateVersion: template 
+document.Theme "1"  o--  "N*" document.ThemeAsset: theme 
 
 class access.TenantConfig{
 uid:string
 innerLabel:string
 forceMfa:boolean
+dynamicRegistrationPolicy:TenantConfigDynamicRegistrationPolicyOptions
 allowRegister:boolean
 enableRegisterUsers:boolean
+magicLinkEnabled:boolean
+webauthnEnabled:boolean
+webauthnRpId:string
+webauthnRpName:string
 wellcomeEmail:blob
 registerdEmail:blob
 disabledUserEmail:blob
@@ -188,37 +418,42 @@ delete()
 }
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant 
 
-class document.TemplateSnippet{
+class access.ConsentPurpose{
 uid:string
-code:string
-contentHtml:string
-enabled:boolean
+key:ConsentPurposeKeyOptions
+title:string
+description:blob
+required:boolean
+activationDate:datetime
 version:integer
 list()
 retrieve()
 create()
 update()
 delete()
-enable()
-disable()
 }
-access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant 
+access.Tenant "1"  o--  "N*" access.ConsentPurpose: tenant 
 
-class access.ApiKeyClient{
+class access.UserInvitation{
 uid:string
-code:string
-key:string
-enabled:boolean
-scopes:string
+email:string
+roles:string
+tokenHash:string
+metadataJson:blob
+status:UserInvitationStatusOptions
+createdAt:datetime
+expiredAt:datetime
+acceptedAt:datetime
 version:integer
 list()
 retrieve()
 create()
 update()
 delete()
-enable()
-disable()
 }
+access.Tenant "1"  o--  "N*" access.UserInvitation: tenant 
+access.User "1"  o--  "N*" access.UserInvitation: invitedBy 
+access.User "1"  o--  "N*" access.UserInvitation: acceptedBy 
 
 class notification.SmtpOutboundConfig{
 uid:string
@@ -252,6 +487,10 @@ publicKey:string
 privateKey:string
 certificate:blob
 metadata:binary
+samlIdpMetadataUrl:string
+samlIdpEntityId:string
+samlIdpSsoUrl:string
+samlIdpIdpCert:binary
 usersEnabledByDefault:boolean
 version:integer
 list()
@@ -282,45 +521,13 @@ disable()
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
 
-class document.TemplateVariable{
-uid:string
-code:string
-type:string
-value:string
-enabled:boolean
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant 
-
-class document.Theme{
-uid:string
-name:string
-isDefault:boolean
-enabled:boolean
-customCss:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-access.Tenant "1"  o--  "N*" document.Theme: tenant 
-
 class access.UserConsentedScopes{
 uid:string
 scope:string
 granted:boolean
 decisionAt:datetime
+ipAddress:string
+userAgent:string
 version:integer
 list()
 retrieve()
@@ -331,11 +538,17 @@ delete()
 access.User "1"  o--  "N*" access.UserConsentedScopes: user 
 access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient 
 
-class document.TemplateAsset{
+class access.UserWebauthnCredential{
 uid:string
-code:string
-type:string
-content:binary
+autenticator:string
+name:string
+publicKey:blob
+signCount:integer
+aaguid:string
+deviceName:string
+transportsJson:blob
+createdAt:datetime
+lastUsedAt:datetime
 enabled:boolean
 version:integer
 list()
@@ -346,7 +559,7 @@ delete()
 enable()
 disable()
 }
-access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant 
+access.User "1"  o--  "N*" access.UserWebauthnCredential: user 
 
 class access.User{
 uid:string
@@ -379,28 +592,11 @@ setMfaSeed()
 changePassword()
 }
 access.Tenant "1"  o--  "N*" access.User: tenant 
-
-class access.Tenant{
-uid:string
-name:string
-root:boolean
-domain:string
-enabled:boolean
-markForDelete:boolean
-markForDeleteTime:datetime
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
 
 class document.Template{
 uid:string
 code:string
+theme:string
 channel:TemplateChannelOptions
 enabled:boolean
 version:integer
@@ -413,7 +609,21 @@ enable()
 disable()
 }
 access.Tenant "1"  o--  "N*" document.Template: tenant 
-document.Theme "1"  o--  "N*" document.Template: theme 
+
+class document.Snippet{
+uid:string
+code:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.Snippet: tenant 
 
 class access.UserRoleAssignament{
 uid:string
@@ -427,6 +637,22 @@ delete()
 access.User "1"  o--  "N*" access.UserRoleAssignament: user 
 access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty 
 access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient 
+
+class access.UserConsentPurposes{
+uid:string
+granted:boolean
+decisionAt:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserConsentPurposes: user 
+access.ConsentPurpose "1"  o--  "N*" access.UserConsentPurposes: consentPurpose 
 
 class access.Role{
 uid:string
@@ -454,13 +680,28 @@ access.User "1"  o--  "N*" access.UserGroupMembership: user
 access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty 
 access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient 
 
+class document.ThemeVersion{
+uid:string
+channel:ThemeVersionChannelOptions
+locale:string
+contentHtml:blob
+contentText:blob
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+document.Theme "1"  o--  "N*" document.ThemeVersion: theme 
+
 class access.UserAccessTemporalCode{
 uid:string
 tempSecondFactorSeed:string
 tempSecondFactorSeedExpiration:datetime
 failedLoginAttempts:integer
 registerCode:string
-registerCodeUrl:string
+registerCodeUrl:blob
 registerCodeExpiration:datetime
 recoveryCode:string
 recoveryCodeExpiration:datetime
@@ -482,6 +723,194 @@ resetPasswordRecover()
 }
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user 
 
+class access.RelyingParty{
+uid:string
+code:string
+apiKey:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+
+class document.SnippetVersion{
+uid:string
+locale:string
+subject:string
+contentHtml:blob
+contentText:blob
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet 
+
+class access.UserAcceptedTermnsOfUse{
+uid:string
+acceptDate:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
+
+class document.TemplateVersion{
+uid:string
+locale:string
+subject:string
+contentHtml:blob
+contentText:blob
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+document.Template "1"  o--  "N*" document.TemplateVersion: template 
+
+class document.SnippetAsset{
+uid:string
+code:string
+type:string
+content:binary
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet 
+
+class access.ApiKeyClient{
+uid:string
+code:string
+key:string
+enabled:boolean
+scopes:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+
+class document.TemplateVariable{
+uid:string
+code:string
+type:string
+value:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant 
+
+class document.Theme{
+uid:string
+name:string
+isDefault:boolean
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+access.Tenant "1"  o--  "N*" document.Theme: tenant 
+
+class document.TemplateAsset{
+uid:string
+code:string
+type:string
+content:binary
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+document.Template "1"  o--  "N*" document.TemplateAsset: template 
+access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant 
+
+class access.Tenant{
+uid:string
+name:string
+root:boolean
+domain:string
+enabled:boolean
+markForDelete:boolean
+markForDeleteTime:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+
+class access.UserProfile{
+uid:string
+givenName:string
+familyName:string
+middleName:string
+nickname:string
+preferredUsername:string
+pictureUrl:string
+websiteUrl:string
+gender:string
+birthdate:string
+zoneinfo:string
+locale:string
+phoneNumber:string
+phoneNumberVerified:boolean
+addressJson:blob
+updatedAt:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserProfile: user 
+
 class notification.Message{
 uid:string
 target:string
@@ -500,21 +929,6 @@ delete()
 }
 access.Tenant "1"  o--  "N*" notification.Message: tenant 
 
-class access.RelyingParty{
-uid:string
-code:string
-apiKey:string
-enabled:boolean
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-
 class access.TrustedClient{
 uid:string
 code:string
@@ -526,6 +940,22 @@ backChannelLogoutSessionRequired:boolean
 frontChannelLogoutUri:string
 frontChannelLogoutSessionRequired:boolean
 enabled:boolean
+registrationAccess:string
+clientName:string
+logoUri:string
+clientUri:string
+policyUri:string
+tosUri:string
+tokenEndpointAuthMethod:string
+grantTypesJson:blob
+responseTypesJson:blob
+dynamicallyRegistered:boolean
+registeredAt:datetime
+allowedScopesM2m:blob
+m2mTokenTtlSeconds:integer
+requestObjectSigningAlg:string
+jwksUri:blob
+jwksJson:blob
 version:integer
 list()
 retrieve()
@@ -536,39 +966,34 @@ enable()
 disable()
 }
 
-class access.UserAcceptedTermnsOfUse{
+class document.ThemeAsset{
 uid:string
-acceptDate:datetime
+code:string
+type:string
+content:binary
+enabled:boolean
 version:integer
 list()
 retrieve()
 create()
 update()
 delete()
+enable()
+disable()
 }
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
-
-class document.TemplateVersion{
-uid:string
-subject:string
-contentHtml:blob
-contentText:blob
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-document.Template "1"  o--  "N*" document.TemplateVersion: template 
+document.Theme "1"  o--  "N*" document.ThemeAsset: theme 
 
 class access.TenantConfig{
 uid:string
 innerLabel:string
 forceMfa:boolean
+dynamicRegistrationPolicy:TenantConfigDynamicRegistrationPolicyOptions
 allowRegister:boolean
 enableRegisterUsers:boolean
+magicLinkEnabled:boolean
+webauthnEnabled:boolean
+webauthnRpId:string
+webauthnRpName:string
 wellcomeEmail:blob
 registerdEmail:blob
 disabledUserEmail:blob
@@ -584,37 +1009,42 @@ delete()
 }
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant 
 
-class document.TemplateSnippet{
+class access.ConsentPurpose{
 uid:string
-code:string
-contentHtml:string
-enabled:boolean
+key:ConsentPurposeKeyOptions
+title:string
+description:blob
+required:boolean
+activationDate:datetime
 version:integer
 list()
 retrieve()
 create()
 update()
 delete()
-enable()
-disable()
 }
-access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant 
+access.Tenant "1"  o--  "N*" access.ConsentPurpose: tenant 
 
-class access.ApiKeyClient{
+class access.UserInvitation{
 uid:string
-code:string
-key:string
-enabled:boolean
-scopes:string
+email:string
+roles:string
+tokenHash:string
+metadataJson:blob
+status:UserInvitationStatusOptions
+createdAt:datetime
+expiredAt:datetime
+acceptedAt:datetime
 version:integer
 list()
 retrieve()
 create()
 update()
 delete()
-enable()
-disable()
 }
+access.Tenant "1"  o--  "N*" access.UserInvitation: tenant 
+access.User "1"  o--  "N*" access.UserInvitation: invitedBy 
+access.User "1"  o--  "N*" access.UserInvitation: acceptedBy 
 
 class notification.SmtpOutboundConfig{
 uid:string
@@ -648,6 +1078,10 @@ publicKey:string
 privateKey:string
 certificate:blob
 metadata:binary
+samlIdpMetadataUrl:string
+samlIdpEntityId:string
+samlIdpSsoUrl:string
+samlIdpIdpCert:binary
 usersEnabledByDefault:boolean
 version:integer
 list()
@@ -678,45 +1112,13 @@ disable()
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
 
-class document.TemplateVariable{
-uid:string
-code:string
-type:string
-value:string
-enabled:boolean
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant 
-
-class document.Theme{
-uid:string
-name:string
-isDefault:boolean
-enabled:boolean
-customCss:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-access.Tenant "1"  o--  "N*" document.Theme: tenant 
-
 class access.UserConsentedScopes{
 uid:string
 scope:string
 granted:boolean
 decisionAt:datetime
+ipAddress:string
+userAgent:string
 version:integer
 list()
 retrieve()
@@ -727,11 +1129,17 @@ delete()
 access.User "1"  o--  "N*" access.UserConsentedScopes: user 
 access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient 
 
-class document.TemplateAsset{
+class access.UserWebauthnCredential{
 uid:string
-code:string
-type:string
-content:binary
+autenticator:string
+name:string
+publicKey:blob
+signCount:integer
+aaguid:string
+deviceName:string
+transportsJson:blob
+createdAt:datetime
+lastUsedAt:datetime
 enabled:boolean
 version:integer
 list()
@@ -742,7 +1150,7 @@ delete()
 enable()
 disable()
 }
-access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant 
+access.User "1"  o--  "N*" access.UserWebauthnCredential: user 
 
 class access.User{
 uid:string
@@ -776,79 +1184,85 @@ changePassword()
 }
 access.Tenant "1"  o--  "N*" access.User: tenant 
 
-class access.Tenant{
-uid:string
-name:string
-root:boolean
-domain:string
-enabled:boolean
-markForDelete:boolean
-markForDeleteTime:datetime
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-
 access.Tenant "1"  o--  "N*" document.Template: tenant  
-document.Theme "1"  o--  "N*" document.Template: theme  
+access.Tenant "1"  o--  "N*" document.Snippet: tenant  
 access.User "1"  o--  "N*" access.UserRoleAssignament: user  
 access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty  
 access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient  
 access.UserRoleAssignament "N*"  o--*  "N*" access.Role: roles
+access.User "1"  o--  "N*" access.UserConsentPurposes: user  
+access.ConsentPurpose "1"  o--  "N*" access.UserConsentPurposes: consentPurpose  
 access.RelyingParty "1"  o--  "N*" access.Role: relyingParty  
 access.User "1"  o--  "N*" access.UserGroupMembership: user  
 access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty  
 access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient  
+document.Theme "1"  o--  "N*" document.ThemeVersion: theme  
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
-access.Tenant "1"  o--  "N*" notification.Message: tenant  
-access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
+document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet  
 access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
 access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions  
 document.Template "1"  o--  "N*" document.TemplateVersion: template  
+document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet  
+access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant  
+access.Tenant "1"  o--  "N*" document.Theme: tenant  
+document.Template "1"  o--  "N*" document.TemplateAsset: template  
+access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant  
+access.User "1"  o--  "N*" access.UserProfile: user  
+access.Tenant "1"  o--  "N*" notification.Message: tenant  
+access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
+document.Theme "1"  o--  "N*" document.ThemeAsset: theme  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
-access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant  
+access.Tenant "1"  o--  "N*" access.ConsentPurpose: tenant  
+access.Tenant "1"  o--  "N*" access.UserInvitation: tenant  
+access.User "1"  o--  "N*" access.UserInvitation: invitedBy  
+access.User "1"  o--  "N*" access.UserInvitation: acceptedBy  
 access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant  
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
-access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant  
-access.Tenant "1"  o--  "N*" document.Theme: tenant  
 access.User "1"  o--  "N*" access.UserConsentedScopes: user  
 access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient  
-access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant  
+access.User "1"  o--  "N*" access.UserWebauthnCredential: user  
 access.Tenant "1"  o--  "N*" access.User: tenant  
 access.Tenant "1"  o--  "N*" document.Template: tenant  
-document.Theme "1"  o--  "N*" document.Template: theme  
+access.Tenant "1"  o--  "N*" document.Snippet: tenant  
 access.User "1"  o--  "N*" access.UserRoleAssignament: user  
 access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty  
 access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient  
 access.UserRoleAssignament "N*"  o--*  "N*" access.Role: roles
+access.User "1"  o--  "N*" access.UserConsentPurposes: user  
+access.ConsentPurpose "1"  o--  "N*" access.UserConsentPurposes: consentPurpose  
 access.RelyingParty "1"  o--  "N*" access.Role: relyingParty  
 access.User "1"  o--  "N*" access.UserGroupMembership: user  
 access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty  
 access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient  
+document.Theme "1"  o--  "N*" document.ThemeVersion: theme  
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
-access.Tenant "1"  o--  "N*" notification.Message: tenant  
-access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
+document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet  
 access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
 access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions  
 document.Template "1"  o--  "N*" document.TemplateVersion: template  
+document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet  
+access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant  
+access.Tenant "1"  o--  "N*" document.Theme: tenant  
+document.Template "1"  o--  "N*" document.TemplateAsset: template  
+access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant  
+access.User "1"  o--  "N*" access.UserProfile: user  
+access.Tenant "1"  o--  "N*" notification.Message: tenant  
+access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
+document.Theme "1"  o--  "N*" document.ThemeAsset: theme  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
-access.Tenant "1"  o--  "N*" document.TemplateSnippet: tenant  
+access.Tenant "1"  o--  "N*" access.ConsentPurpose: tenant  
+access.Tenant "1"  o--  "N*" access.UserInvitation: tenant  
+access.User "1"  o--  "N*" access.UserInvitation: invitedBy  
+access.User "1"  o--  "N*" access.UserInvitation: acceptedBy  
 access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant  
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
-access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant  
-access.Tenant "1"  o--  "N*" document.Theme: tenant  
 access.User "1"  o--  "N*" access.UserConsentedScopes: user  
 access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient  
-access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant  
+access.User "1"  o--  "N*" access.UserWebauthnCredential: user  
 access.Tenant "1"  o--  "N*" access.User: tenant  
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")

@@ -111,6 +111,7 @@ public class TemplateAssetDeleteUsecase {
     TemplateAssetVisibilityFilter filterOnVisibles = TemplateAssetVisibilityFilter.builder()
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
+        .template(filter.getTemplate().orElse(null)).templates(filter.getTemplates())
         .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
         .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     TemplateAssetDeleteAllInBatchCommand command =

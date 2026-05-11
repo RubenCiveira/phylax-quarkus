@@ -3,16 +3,16 @@ package net.civeira.phylax.features.notification.message.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.notification.message.domain.valueobject.ContentValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.CreatedAtValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.LockAtValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.RetriesValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.SendAtValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.TargetValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.TenantValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.UrgentValueHolder;
-import net.civeira.phylax.features.notification.message.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.ContentValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.CreatedAtValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.LockAtValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.RetriesValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.SendAtValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.TargetValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.TenantValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.UrgentValueHolder;
+import net.civeira.phylax.features.notification.message.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold message attribute values

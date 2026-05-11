@@ -3,13 +3,13 @@ package net.civeira.phylax.features.document.templatevariable.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.document.templatevariable.domain.valueobject.CodeValueHolder;
-import net.civeira.phylax.features.document.templatevariable.domain.valueobject.EnabledValueHolder;
-import net.civeira.phylax.features.document.templatevariable.domain.valueobject.TenantValueHolder;
-import net.civeira.phylax.features.document.templatevariable.domain.valueobject.TypeValueHolder;
-import net.civeira.phylax.features.document.templatevariable.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.document.templatevariable.domain.valueobject.ValueValueHolder;
-import net.civeira.phylax.features.document.templatevariable.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.document.templatevariable.domain.valueholder.CodeValueHolder;
+import net.civeira.phylax.features.document.templatevariable.domain.valueholder.EnabledValueHolder;
+import net.civeira.phylax.features.document.templatevariable.domain.valueholder.TenantValueHolder;
+import net.civeira.phylax.features.document.templatevariable.domain.valueholder.TypeValueHolder;
+import net.civeira.phylax.features.document.templatevariable.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.document.templatevariable.domain.valueholder.ValueValueHolder;
+import net.civeira.phylax.features.document.templatevariable.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold template variable attribute values

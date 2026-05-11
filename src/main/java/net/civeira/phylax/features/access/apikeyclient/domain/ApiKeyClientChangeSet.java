@@ -3,12 +3,12 @@ package net.civeira.phylax.features.access.apikeyclient.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.apikeyclient.domain.valueobject.CodeValueHolder;
-import net.civeira.phylax.features.access.apikeyclient.domain.valueobject.EnabledValueHolder;
-import net.civeira.phylax.features.access.apikeyclient.domain.valueobject.KeyValueHolder;
-import net.civeira.phylax.features.access.apikeyclient.domain.valueobject.ScopesValueHolder;
-import net.civeira.phylax.features.access.apikeyclient.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.apikeyclient.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.access.apikeyclient.domain.valueholder.CodeValueHolder;
+import net.civeira.phylax.features.access.apikeyclient.domain.valueholder.EnabledValueHolder;
+import net.civeira.phylax.features.access.apikeyclient.domain.valueholder.KeyValueHolder;
+import net.civeira.phylax.features.access.apikeyclient.domain.valueholder.ScopesValueHolder;
+import net.civeira.phylax.features.access.apikeyclient.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.apikeyclient.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold api key client attribute values

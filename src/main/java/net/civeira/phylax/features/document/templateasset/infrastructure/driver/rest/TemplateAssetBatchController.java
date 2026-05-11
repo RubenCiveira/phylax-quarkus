@@ -37,14 +37,18 @@ public class TemplateAssetBatchController implements TemplateAssetBatchApi {
    * @param uids
    * @param search
    * @param code
+   * @param template
+   * @param templates
    * @param tenant
    * @param tenants
    * @return
    */
   @Override
   public Response templateAssetApiBatchDelete(final List<String> uids, final String search,
-      final String code, final String tenant, final List<String> tenants) {
-    return deleteController.templateAssetApiBatchDelete(uids, search, code, tenant, tenants);
+      final String code, final String template, final List<String> templates, final String tenant,
+      final List<String> tenants) {
+    return deleteController.templateAssetApiBatchDelete(uids, search, code, template, templates,
+        tenant, tenants);
   }
 
   /**
@@ -62,14 +66,18 @@ public class TemplateAssetBatchController implements TemplateAssetBatchApi {
    * @param uids
    * @param search
    * @param code
+   * @param template
+   * @param templates
    * @param tenant
    * @param tenants
    * @return
    */
   @Override
   public Response templateAssetApiBatchDisable(final List<String> uids, final String search,
-      final String code, final String tenant, final List<String> tenants) {
-    return disableController.templateAssetApiBatchDisable(uids, search, code, tenant, tenants);
+      final String code, final String template, final List<String> templates, final String tenant,
+      final List<String> tenants) {
+    return disableController.templateAssetApiBatchDisable(uids, search, code, template, templates,
+        tenant, tenants);
   }
 
   /**
@@ -87,14 +95,18 @@ public class TemplateAssetBatchController implements TemplateAssetBatchApi {
    * @param uids
    * @param search
    * @param code
+   * @param template
+   * @param templates
    * @param tenant
    * @param tenants
    * @return
    */
   @Override
   public Response templateAssetApiBatchEnable(final List<String> uids, final String search,
-      final String code, final String tenant, final List<String> tenants) {
-    return enableController.templateAssetApiBatchEnable(uids, search, code, tenant, tenants);
+      final String code, final String template, final List<String> templates, final String tenant,
+      final List<String> tenants) {
+    return enableController.templateAssetApiBatchEnable(uids, search, code, template, templates,
+        tenant, tenants);
   }
 
   /**

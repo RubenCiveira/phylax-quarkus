@@ -57,6 +57,8 @@ public class TrustedClientUpdateController {
     trustedClientApiDto.setCode(dto.getCode());
     trustedClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     trustedClientApiDto.setPublicAllow(dto.getPublicAllow());
+    trustedClientApiDto.setAllowedRedirects(
+        dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
     trustedClientApiDto.setSecretOauth("*****");
     trustedClientApiDto.setBackChannelLogoutUri(dto.getBackChannelLogoutUri());
     trustedClientApiDto
@@ -65,8 +67,22 @@ public class TrustedClientUpdateController {
     trustedClientApiDto
         .setFrontChannelLogoutSessionRequired(dto.getFrontChannelLogoutSessionRequired());
     trustedClientApiDto.setEnabled(dto.getEnabled());
-    trustedClientApiDto.setAllowedRedirects(
-        dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
+    trustedClientApiDto.setRegistrationAccess(dto.getRegistrationAccess());
+    trustedClientApiDto.setClientName(dto.getClientName());
+    trustedClientApiDto.setLogoUri(dto.getLogoUri());
+    trustedClientApiDto.setClientUri(dto.getClientUri());
+    trustedClientApiDto.setPolicyUri(dto.getPolicyUri());
+    trustedClientApiDto.setTosUri(dto.getTosUri());
+    trustedClientApiDto.setTokenEndpointAuthMethod(dto.getTokenEndpointAuthMethod());
+    trustedClientApiDto.setGrantTypesJson(dto.getGrantTypesJson());
+    trustedClientApiDto.setResponseTypesJson(dto.getResponseTypesJson());
+    trustedClientApiDto.setDynamicallyRegistered(dto.getDynamicallyRegistered());
+    trustedClientApiDto.setRegisteredAt(dto.getRegisteredAt());
+    trustedClientApiDto.setAllowedScopesM2m(dto.getAllowedScopesM2m());
+    trustedClientApiDto.setM2mTokenTtlSeconds(dto.getM2mTokenTtlSeconds());
+    trustedClientApiDto.setRequestObjectSigningAlg(dto.getRequestObjectSigningAlg());
+    trustedClientApiDto.setJwksUri(dto.getJwksUri());
+    trustedClientApiDto.setJwksJson(dto.getJwksJson());
     trustedClientApiDto.setVersion(dto.getVersion());
     return trustedClientApiDto;
   }
@@ -103,6 +119,10 @@ public class TrustedClientUpdateController {
     if (null != trustedClientApiDto.getPublicAllow()) {
       dto.setPublicAllow(trustedClientApiDto.getPublicAllow());
     }
+    if (null != trustedClientApiDto.getAllowedRedirects()) {
+      dto.setAllowedRedirects(trustedClientApiDto.getAllowedRedirects().stream()
+          .map(this::toDomainModelAllowedRedirects).toList());
+    }
     if (null != trustedClientApiDto.getSecretOauth()
         && !"*****".equals(trustedClientApiDto.getSecretOauth())) {
       dto.setSecretOauth(trustedClientApiDto.getSecretOauth());
@@ -124,9 +144,53 @@ public class TrustedClientUpdateController {
     if (null != trustedClientApiDto.getEnabled()) {
       dto.setEnabled(trustedClientApiDto.getEnabled());
     }
-    if (null != trustedClientApiDto.getAllowedRedirects()) {
-      dto.setAllowedRedirects(trustedClientApiDto.getAllowedRedirects().stream()
-          .map(this::toDomainModelAllowedRedirects).toList());
+    if (null != trustedClientApiDto.getRegistrationAccess()) {
+      dto.setRegistrationAccess(trustedClientApiDto.getRegistrationAccess());
+    }
+    if (null != trustedClientApiDto.getClientName()) {
+      dto.setClientName(trustedClientApiDto.getClientName());
+    }
+    if (null != trustedClientApiDto.getLogoUri()) {
+      dto.setLogoUri(trustedClientApiDto.getLogoUri());
+    }
+    if (null != trustedClientApiDto.getClientUri()) {
+      dto.setClientUri(trustedClientApiDto.getClientUri());
+    }
+    if (null != trustedClientApiDto.getPolicyUri()) {
+      dto.setPolicyUri(trustedClientApiDto.getPolicyUri());
+    }
+    if (null != trustedClientApiDto.getTosUri()) {
+      dto.setTosUri(trustedClientApiDto.getTosUri());
+    }
+    if (null != trustedClientApiDto.getTokenEndpointAuthMethod()) {
+      dto.setTokenEndpointAuthMethod(trustedClientApiDto.getTokenEndpointAuthMethod());
+    }
+    if (null != trustedClientApiDto.getGrantTypesJson()) {
+      dto.setGrantTypesJson(trustedClientApiDto.getGrantTypesJson());
+    }
+    if (null != trustedClientApiDto.getResponseTypesJson()) {
+      dto.setResponseTypesJson(trustedClientApiDto.getResponseTypesJson());
+    }
+    if (null != trustedClientApiDto.getDynamicallyRegistered()) {
+      dto.setDynamicallyRegistered(trustedClientApiDto.getDynamicallyRegistered());
+    }
+    if (null != trustedClientApiDto.getRegisteredAt()) {
+      dto.setRegisteredAt(trustedClientApiDto.getRegisteredAt());
+    }
+    if (null != trustedClientApiDto.getAllowedScopesM2m()) {
+      dto.setAllowedScopesM2m(trustedClientApiDto.getAllowedScopesM2m());
+    }
+    if (null != trustedClientApiDto.getM2mTokenTtlSeconds()) {
+      dto.setM2mTokenTtlSeconds(trustedClientApiDto.getM2mTokenTtlSeconds());
+    }
+    if (null != trustedClientApiDto.getRequestObjectSigningAlg()) {
+      dto.setRequestObjectSigningAlg(trustedClientApiDto.getRequestObjectSigningAlg());
+    }
+    if (null != trustedClientApiDto.getJwksUri()) {
+      dto.setJwksUri(trustedClientApiDto.getJwksUri());
+    }
+    if (null != trustedClientApiDto.getJwksJson()) {
+      dto.setJwksJson(trustedClientApiDto.getJwksJson());
     }
     if (null != trustedClientApiDto.getVersion()) {
       dto.setVersion(trustedClientApiDto.getVersion());

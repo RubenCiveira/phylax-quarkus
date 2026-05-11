@@ -62,12 +62,12 @@ public class TemplateListUsecase {
           .addEvent("The policies for template dont allow to list: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    TemplateVisibilityFilter visibleFilter = TemplateVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
-        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    TemplateVisibilityFilter visibleFilter =
+        TemplateVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .global(filter.getGlobal().orElse(null)).code(filter.getCode().orElse(null))
+            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
+            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     TemplateCursor gatewayCursor = TemplateCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(

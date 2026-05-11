@@ -47,8 +47,10 @@ public class TemplateVersionRbacRegister {
         FieldDescription.builder().name("uid").description("El uid de template version").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("template")
         .description("El template de template version").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("locale")
+        .description("BCP 47 es, en, fr... null = versión por defecto").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("subject")
-        .description("El subject de template version").build());
+        .description("Asunto del email. Ignorado en canal HTML/SMS.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("contentHtml")
         .description("El content html de template version").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("contentText")

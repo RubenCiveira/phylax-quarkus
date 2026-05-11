@@ -107,12 +107,12 @@ public class TemplateEnableUsecase {
       Trace.addEvent("The policies for template dont allow to enable: " + detail.getDescription());
       throw new NotAllowedException(detail.getDescription());
     }
-    TemplateVisibilityFilter filterWithVisibility = TemplateVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
-        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+    TemplateVisibilityFilter filterWithVisibility =
+        TemplateVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .global(filter.getGlobal().orElse(null)).code(filter.getCode().orElse(null))
+            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
+            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
     TemplateEnableAllInBatchCommand command =
         new TemplateEnableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

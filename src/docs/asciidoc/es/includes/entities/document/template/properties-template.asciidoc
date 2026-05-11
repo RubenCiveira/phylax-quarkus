@@ -2,15 +2,16 @@
 Uid* (string)::
 El uid de template
 Code* (string)::
-LOGIN_MAGIC_LINK, RESET_PASSWORD...
+LOGIN_MAGIC_LINK, RESET_PASSWORD, page.profile...
 Tenant (xref:#entidad-tenant[Tenant])::
-null = global, valor = override
-Theme (xref:#entidad-theme[Theme])::
-El theme de template
+null = global, valor = override por tenant
+Theme (string)::
+Nombre del theme layout (full-window, index-page...). Resuelto contra el tenant activo en render time.
 Channel* (TemplateChannelOptions)::
 El channel de templateLos posibles valores que toma el campo son:
  * MAIL
  * SMS
+ * HTML
 
 Enabled (boolean)::
 El enabled de template

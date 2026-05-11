@@ -58,7 +58,7 @@ public class TrustedClientDeleteController {
    */
   @ApiObserved("Api to delete on massive entity of trusted client")
   public Response trustedClientApiBatchDelete(final List<String> uids, final String search,
-      final String withBackChannelUrl, final String withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
     TrustedClientDeleteFilter.TrustedClientDeleteFilterBuilder filterBuilder =
         TrustedClientDeleteFilter.builder();
     filterBuilder =

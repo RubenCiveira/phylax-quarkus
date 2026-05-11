@@ -295,8 +295,8 @@ public class ThemesVisibility {
     ThemeVisibilityFilter modified = proposal.getFilter();
     return ThemeFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
-        .name(modified.getName().orElse(null)).tenant(modified.getTenant().orElse(null))
-        .tenants(modified.getTenants())
+        .global(modified.getGlobal().orElse(null)).name(modified.getName().orElse(null))
+        .tenant(modified.getTenant().orElse(null)).tenants(modified.getTenants())
         .tenantTenantAccesible(modified.getTenantTenantAccesible().orElse(null)).build();
   }
 
@@ -381,10 +381,10 @@ public class ThemesVisibility {
    * @return The input entity with the copy values without hidden
    */
   private ThemeChangeSet visiblesReferences(OperationContext prev, ThemeChangeSet source) {
-    source.getTenantValue().map(TenantVO::getTenantUid).ifPresent(tenant -> {
-      boolean visible = tenantsVisibility.checkVisibility(prev, tenant);
+    source.getTenantValue().flatMap(TenantVO::getTenantUid).ifPresent(ref -> {
+      boolean visible = tenantsVisibility.checkVisibility(prev, ref);
       if (!visible) {
-        throw new NotFoundException("No tenant - " + tenant);
+        throw new NotFoundException("No tenant - " + ref);
       }
     });
     return source;

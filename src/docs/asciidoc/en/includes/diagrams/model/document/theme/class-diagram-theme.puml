@@ -24,7 +24,6 @@ uid:string
 name:string
 isDefault:boolean
 enabled:boolean
-customCss:string
 version:integer
 list()
 retrieve()

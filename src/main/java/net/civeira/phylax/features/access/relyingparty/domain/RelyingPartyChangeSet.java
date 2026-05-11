@@ -3,11 +3,11 @@ package net.civeira.phylax.features.access.relyingparty.domain;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
-import net.civeira.phylax.features.access.relyingparty.domain.valueobject.ApiKeyValueHolder;
-import net.civeira.phylax.features.access.relyingparty.domain.valueobject.CodeValueHolder;
-import net.civeira.phylax.features.access.relyingparty.domain.valueobject.EnabledValueHolder;
-import net.civeira.phylax.features.access.relyingparty.domain.valueobject.UidValueHolder;
-import net.civeira.phylax.features.access.relyingparty.domain.valueobject.VersionValueHolder;
+import net.civeira.phylax.features.access.relyingparty.domain.valueholder.ApiKeyValueHolder;
+import net.civeira.phylax.features.access.relyingparty.domain.valueholder.CodeValueHolder;
+import net.civeira.phylax.features.access.relyingparty.domain.valueholder.EnabledValueHolder;
+import net.civeira.phylax.features.access.relyingparty.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.relyingparty.domain.valueholder.VersionValueHolder;
 
 /**
  * A dto transfer to hold relying party attribute values
