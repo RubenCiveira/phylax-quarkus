@@ -55,6 +55,9 @@ public class NotificationDispatchService {
    */
   private static final int DEFAULT_MAX_RETRIES = 3;
 
+  /** Seconds after which a locked message is considered abandoned and eligible for retry. */
+  private static final int LOCK_TTL_SECONDS = 120;
+
   /** Maximum number of messages dispatched per cycle (rate limiting). */
   @ConfigProperty(name = "phylax.notification.dispatch.rate", defaultValue = "10")
   int dispatchRate = 10;
@@ -107,7 +110,10 @@ public class NotificationDispatchService {
    * @param now the current UTC instant
    */
   private boolean isPending(Message m, OffsetDateTime now) {
-    return m.getSendAt().map(sa -> !sa.isAfter(now)).orElse(true);
+    if (m.getSendAt().map(sa -> sa.isAfter(now)).orElse(false)) {
+      return false;
+    }
+    return m.getLockAt().map(la -> !la.isAfter(now.minusSeconds(LOCK_TTL_SECONDS))).orElse(true);
   }
 
   // ---------------------------------------------------------------------------

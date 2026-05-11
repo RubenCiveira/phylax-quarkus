@@ -20,7 +20,6 @@ import net.civeira.phylax.features.document.rendering.application.usecase.render
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderUsecase;
 import net.civeira.phylax.features.document.rendering.domain.RenderedTemplate;
 import net.civeira.phylax.features.document.rendering.domain.TemplateOutputFormat;
-import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.notification.message.domain.Message;
 import net.civeira.phylax.features.notification.message.domain.MessageChangeSet;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageWriteRepositoryGateway;
@@ -59,7 +58,7 @@ public class EnqueueNotificationUseCase {
     TenantRef tenantRef = cmd.getTenantOptional().orElse(null);
 
     TemplateRenderInput renderInput = TemplateRenderInput.builder().code(cmd.getTemplateCode())
-        .channel(TemplateChannelOptions.valueOf(cmd.getChannel())).tenant(tenantRef)
+        .channel(cmd.getChannel()).tenant(tenantRef)
         .variables(flattenVariables("", cmd.getVariables()))
         .outputFormat(TemplateOutputFormat.HTML_EMBEDDED).build();
 
