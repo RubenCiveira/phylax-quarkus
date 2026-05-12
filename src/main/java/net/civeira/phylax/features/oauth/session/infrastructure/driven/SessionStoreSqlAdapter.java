@@ -29,7 +29,7 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGate
  * Responsibilities: - Persist and load session information in SQL tables. - Clean expired sessions
  * on access.
  *
- * Design notes: - Uses _oauth_sessions table for storage. - Serializes AuthenticationData as JSON.
+ * Design notes: - Uses _oauth_session table for storage. - Serializes AuthenticationData as JSON.
  */
 @Slf4j
 @ApplicationScoped
@@ -57,7 +57,7 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
     cleanTemp();
     try (Connection connection = source.getConnection()) {
       try (PreparedStatement prepareStatement = connection.prepareStatement(
-          "SELECT client_id, grant_type, auth_data, csid FROM _oauth_sessions where session=? and expiration > ?")) {
+          "SELECT client_id, issuer, auth_data, csid FROM _oauth_session where session=? and expiration > ?")) {
         prepareStatement.setString(1, state);
         prepareStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
         try (ResultSet executeQuery = prepareStatement.executeQuery()) {
@@ -96,7 +96,7 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
       AuthenticationData validationData, String csid) {
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(
-            "INSERT INTO _oauth_sessions (session, expiration, client_id, grant_type, auth_data, csid) VALUES (?, ?, ?, ?, ?, ?)")) {
+            "INSERT INTO _oauth_session (session, expiration, client_id, issuer, auth_data, csid) VALUES (?, ?, ?, ?, ?, ?)")) {
       stat.setString(1, state);
       stat.setTimestamp(2, new Timestamp(System.currentTimeMillis() + 360000000));
       stat.setString(3, clientDetails.getClientId());
@@ -120,7 +120,7 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
   public void deleteSession(String state) {
     try (Connection conn = source.getConnection();
         PreparedStatement stat =
-            conn.prepareStatement("DELETE FROM _oauth_sessions where session = ?")) {
+            conn.prepareStatement("DELETE FROM _oauth_session where session = ?")) {
       stat.setString(1, state);
       stat.execute();
     } catch (SQLException ex) {
@@ -140,7 +140,7 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
   public void updateSession(String newState, String oldState) {
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(
-            "UPDATE _oauth_sessions set session=?, expiration = ? where session = ?")) {
+            "UPDATE _oauth_session set session=?, expiration = ? where session = ?")) {
       stat.setString(1, newState);
       stat.setTimestamp(2, new Timestamp(System.currentTimeMillis() + 360000000));
       stat.setString(3, oldState);
@@ -160,7 +160,7 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
   private void cleanTemp() {
     try (Connection connection = source.getConnection()) {
       try (PreparedStatement prepareStatement =
-          connection.prepareStatement("DELETE FROM _oauth_sessions where expiration < ?")) {
+          connection.prepareStatement("DELETE FROM _oauth_session where expiration < ?")) {
         prepareStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis() - 60000));
         prepareStatement.execute();
       }

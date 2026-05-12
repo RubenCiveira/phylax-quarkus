@@ -22,8 +22,8 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenLooku
 /**
  * JDBC adapter for token lookup during introspection.
  *
- * Responsibilities: - Query {@code _oauth_sessions} by JTI to resolve JWT tokens. - Return empty
- * for opaque tokens (not yet supported via raw token lookup).
+ * Responsibilities: - Query {@code _oauth_session} by JTI to resolve JWT tokens. - Return empty for
+ * opaque tokens (not yet supported via raw token lookup).
  *
  * Design notes: - Only non-expired sessions are returned ({@code expiration > NOW()}). - The
  * {@code jti} column must be indexed for efficient lookups (added in task 01-05). - Opaque token
@@ -46,7 +46,7 @@ public class TokenLookupSqlAdapter implements TokenLookupGateway {
   /**
    * Looks up an active session by its JWT ID.
    *
-   * Queries {@code _oauth_sessions} for a non-expired row whose {@code jti} matches. Deserializes
+   * Queries {@code _oauth_session} for a non-expired row whose {@code jti} matches. Deserializes
    * the stored {@code auth_data} JSON to extract subject and scope.
    *
    * @param tenantSlug tenant identifier (reserved for future multi-tenant filtering)
@@ -57,7 +57,7 @@ public class TokenLookupSqlAdapter implements TokenLookupGateway {
   public Optional<TokenIntrospectionResult> lookupByJti(String tenantSlug, String jti) {
     try (Connection conn = source.getConnection();
         PreparedStatement stmt = conn.prepareStatement(
-            "SELECT jti, expiration, client_id, auth_data FROM _oauth_sessions WHERE jti = ? AND expiration > ?")) {
+            "SELECT jti, expiration, client_id, auth_data FROM _oauth_session WHERE jti = ? AND expiration > ?")) {
       stmt.setString(1, jti);
       stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
       try (ResultSet rs = stmt.executeQuery()) {

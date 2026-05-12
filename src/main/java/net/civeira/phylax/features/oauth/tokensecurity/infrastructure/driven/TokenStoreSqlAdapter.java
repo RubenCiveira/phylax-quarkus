@@ -47,10 +47,11 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
   @Override
   public Optional<KeyInformation> currentKey(String tenant) {
     try (Connection connection = datasource.getConnection()) {
-      deleteOldKeys(connection);
+      deleteOldKeys(connection, tenant);
       try (PreparedStatement prepareStatement = connection.prepareStatement(
-          "select private, keyid, public from _oauth_jwt_keys where since <= ? order by expiration desc")) {
-        prepareStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+          "select `private`, keyid, `public` from _oauth_keys_storer where tenant = ? and since <= ? order by expiration desc")) {
+        prepareStatement.setString(1, tenant);
+        prepareStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
         try (ResultSet executeQuery = prepareStatement.executeQuery()) {
           return executeQuery.next() ? Optional.of(KeyInformation.builder()
               .publicKey(executeQuery.getString(3)).privateKey(executeQuery.getString(1))
@@ -71,10 +72,11 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
    * @param connection SQL connection
    * @throws SQLException when deletion fails
    */
-  private void deleteOldKeys(Connection connection) throws SQLException {
-    try (PreparedStatement prepareStatement =
-        connection.prepareStatement("delete from _oauth_jwt_keys where expiration < ?")) {
-      prepareStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+  private void deleteOldKeys(Connection connection, String tenant) throws SQLException {
+    try (PreparedStatement prepareStatement = connection
+        .prepareStatement("delete from _oauth_keys_storer where tenant = ? and expiration < ?")) {
+      prepareStatement.setString(1, tenant);
+      prepareStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
       prepareStatement.execute();
     }
   }
@@ -92,8 +94,9 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
   public Instant nextKeysExpiration(String tenant) {
     try (Connection connection = datasource.getConnection()) {
       try (PreparedStatement prepareStatement = connection.prepareStatement(
-          "select expiration from _oauth_jwt_keys where since > ? order by expiration desc")) {
-        prepareStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+          "select expiration from _oauth_keys_storer where tenant = ? and since > ? order by expiration desc")) {
+        prepareStatement.setString(1, tenant);
+        prepareStatement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
         try (ResultSet executeQuery = prepareStatement.executeQuery()) {
           return executeQuery.next() ? Instant.ofEpochMilli(executeQuery.getTimestamp(1).getTime())
               : Instant.now().minusSeconds(3600);
@@ -116,13 +119,14 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
   public List<PublicKeyInformation> listPublicKeys(String tenant) {
     try (Connection connection = datasource.getConnection()) {
       List<PublicKeyInformation> data = new ArrayList<>();
-      try (
-          PreparedStatement prepareStatement = connection.prepareStatement(
-              "select keyid,public from _oauth_jwt_keys order by expiration desc");
-          ResultSet executeQuery = prepareStatement.executeQuery()) {
-        while (executeQuery.next()) {
-          data.add(PublicKeyInformation.builder().keyId(executeQuery.getString(1))
-              .publicKey(executeQuery.getString(2)).build());
+      try (PreparedStatement prepareStatement = connection.prepareStatement(
+          "select keyid, `public` from _oauth_keys_storer where tenant = ? order by expiration desc");) {
+        prepareStatement.setString(1, tenant);
+        try (ResultSet executeQuery = prepareStatement.executeQuery()) {
+          while (executeQuery.next()) {
+            data.add(PublicKeyInformation.builder().keyId(executeQuery.getString(1))
+                .publicKey(executeQuery.getString(2)).build());
+          }
         }
       }
       return data;
@@ -143,14 +147,15 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
   public List<KeyInformation> listKeys(String tenant) {
     try (Connection connection = datasource.getConnection()) {
       List<KeyInformation> data = new ArrayList<>();
-      try (
-          PreparedStatement prepareStatement = connection.prepareStatement(
-              "select private, keyid, public from _oauth_jwt_keys order by expiration desc");
-          ResultSet executeQuery = prepareStatement.executeQuery()) {
-        while (executeQuery.next()) {
-          data.add(KeyInformation.builder().publicKey(executeQuery.getString(3))
-              .privateKey(executeQuery.getString(1)).keyUse("sig").alg("RS256")
-              .keyId(executeQuery.getString(2)).build());
+      try (PreparedStatement prepareStatement = connection.prepareStatement(
+          "select `private`, keyid, `public` from _oauth_keys_storer where tenant = ? order by expiration desc");) {
+        prepareStatement.setString(1, tenant);
+        try (ResultSet executeQuery = prepareStatement.executeQuery()) {
+          while (executeQuery.next()) {
+            data.add(KeyInformation.builder().publicKey(executeQuery.getString(3))
+                .privateKey(executeQuery.getString(1)).keyUse("sig").alg("RS256")
+                .keyId(executeQuery.getString(2)).build());
+          }
         }
       }
       return data;
@@ -173,12 +178,13 @@ public class TokenStoreSqlAdapter implements TokenStoreGateway {
   public void saveKey(String tenant, KeyInformation key, Instant since, Duration caducidad) {
     try (Connection connection = datasource.getConnection()) {
       try (PreparedStatement prepareStatement = connection.prepareStatement(
-          "INSERT INTO _oauth_jwt_keys (expiration, private, public, since, keyid) VALUES (?, ?, ?, ?, ?)")) {
+          "INSERT INTO _oauth_keys_storer (expiration, `private`, `public`, since, keyid, tenant) VALUES (?, ?, ?, ?, ?, ?)")) {
         prepareStatement.setTimestamp(1, new Timestamp(since.plus(caducidad).toEpochMilli()));
         prepareStatement.setString(2, key.getPrivateKey());
         prepareStatement.setString(3, key.getPublicKey());
         prepareStatement.setTimestamp(4, new Timestamp(since.toEpochMilli()));
         prepareStatement.setString(5, key.getKeyId());
+        prepareStatement.setString(6, tenant);
         if (prepareStatement.executeUpdate() != 1) {
           throw new SQLException("Imposible insertar valores");
         }
