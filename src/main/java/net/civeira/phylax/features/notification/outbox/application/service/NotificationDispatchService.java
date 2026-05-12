@@ -5,11 +5,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +19,8 @@ import net.civeira.phylax.features.notification.message.domain.gateway.MessageFi
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageReadRepositoryGateway;
 import net.civeira.phylax.features.notification.message.domain.gateway.MessageWriteRepositoryGateway;
 import net.civeira.phylax.features.notification.message.infrastructure.event.MessageEventDispatcher;
+import net.civeira.phylax.features.notification.outbox.domain.OutboundMail;
 import net.civeira.phylax.features.notification.outbox.domain.gateway.SmtpMailSenderGateway;
-import net.civeira.phylax.features.notification.outbox.domain.model.OutboundMail;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfig;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigFilter;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigReadRepositoryGateway;
