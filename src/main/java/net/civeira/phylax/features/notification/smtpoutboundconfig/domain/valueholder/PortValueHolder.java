@@ -63,6 +63,7 @@ public class PortValueHolder<T> {
    * @return
    */
   public T port(Integer port) {
+    this.value = Optional.of(PortVO.from(port));
     return this.holder;
   }
 

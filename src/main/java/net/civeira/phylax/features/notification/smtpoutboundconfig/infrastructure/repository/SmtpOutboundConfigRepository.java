@@ -536,7 +536,7 @@ public class SmtpOutboundConfigRepository {
       sq.with(TENANT, entity.getTenantUid().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
       sq.with(HOST, SqlParameterValue.of(entity.getHost()));
-      sq.with(PORT, SqlParameterValue.of(entity.isPort()));
+      sq.with(PORT, SqlParameterValue.of(entity.getPort()));
       sq.with(LOGIN, SqlParameterValue.of(entity.getLogin()));
       sq.with(PASSWORD, SqlParameterValue.of(entity.getPasswordCyphered(cypher)));
       sq.with(SENDER_NAME, entity.getSenderName().map(SqlParameterValue::of)
@@ -566,8 +566,7 @@ public class SmtpOutboundConfigRepository {
       try {
         return Optional.of(SmtpOutboundConfig.builder().uidValue(UidVO.from(row.getString(UID)))
             .tenantValue(TenantVO.fromReference(row.getString(TENANT)))
-            .hostValue(HostVO.from(row.getString(HOST)))
-            .portValue(PortVO.from(row.getBoolean(PORT)))
+            .hostValue(HostVO.from(row.getString(HOST))).portValue(PortVO.from(row.getInt(PORT)))
             .loginValue(LoginVO.from(row.getString(LOGIN)))
             .passwordValue(PasswordVO.fromCyphered(row.getString(PASSWORD)))
             .senderNameValue(SenderNameVO.from(row.getString(SENDER_NAME_SNAKE)))
@@ -658,7 +657,7 @@ public class SmtpOutboundConfigRepository {
       sq.with(TENANT, entity.getTenantUid().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
       sq.with(HOST, SqlParameterValue.of(entity.getHost()));
-      sq.with(PORT, SqlParameterValue.of(entity.isPort()));
+      sq.with(PORT, SqlParameterValue.of(entity.getPort()));
       sq.with(LOGIN, SqlParameterValue.of(entity.getLogin()));
       sq.with(PASSWORD, SqlParameterValue.of(entity.getPasswordCyphered(cypher)));
       sq.with(SENDER_NAME, entity.getSenderName().map(SqlParameterValue::of)

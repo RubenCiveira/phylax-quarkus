@@ -377,7 +377,7 @@ public class SmtpOutboundConfigVisibleProjection {
    * @param value The proposal value for SmtpOutboundConfigVisibleProjection
    * @return self instance to enable a flow code
    */
-  public SmtpOutboundConfigVisibleProjection setPort(final Boolean value) {
+  public SmtpOutboundConfigVisibleProjection setPort(final Integer value) {
     this.port = Optional.of(PortVO.from(value));
     return this;
   }

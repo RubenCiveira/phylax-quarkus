@@ -148,7 +148,7 @@ public class SmtpOutboundConfigCreateInput {
      * @param port The Port value to wrap in a value object.
      * @return Self instance to continue with a flow build
      */
-    public SmtpOutboundConfigCreateInputBuilder port(final Boolean port) {
+    public SmtpOutboundConfigCreateInputBuilder port(final Integer port) {
       return port(Optional.of(PortVO.from(port)));
     }
 
@@ -708,7 +708,7 @@ public class SmtpOutboundConfigCreateInput {
    * @param value The proposal value for SmtpOutboundConfigCreateInput
    * @return self instance to enable a flow code
    */
-  public SmtpOutboundConfigCreateInput setPort(final Boolean value) {
+  public SmtpOutboundConfigCreateInput setPort(final Integer value) {
     this.port = Optional.of(PortVO.from(value));
     return this;
   }
