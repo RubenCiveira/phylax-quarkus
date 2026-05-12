@@ -8,3 +8,4 @@ package net.civeira.phylax.features.oauth.consent.domain;
  */
 public record TermsOfUseAcceptance(String id, String text) {
 }
+

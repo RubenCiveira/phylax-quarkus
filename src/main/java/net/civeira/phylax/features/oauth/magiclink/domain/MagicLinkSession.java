@@ -4,3 +4,4 @@ import java.time.Duration;
 
 public record MagicLinkSession(String sessionId, Duration expiration) {
 }
+

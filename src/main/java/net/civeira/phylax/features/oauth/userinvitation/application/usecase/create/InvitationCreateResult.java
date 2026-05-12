@@ -4,3 +4,4 @@ import java.time.OffsetDateTime;
 
 public record InvitationCreateResult(String uid, OffsetDateTime expiresAt) {
 }
+

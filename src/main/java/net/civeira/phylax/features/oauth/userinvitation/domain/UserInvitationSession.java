@@ -4,3 +4,4 @@ import java.time.Duration;
 
 public record UserInvitationSession(String sessionId, Duration expiration) {
 }
+

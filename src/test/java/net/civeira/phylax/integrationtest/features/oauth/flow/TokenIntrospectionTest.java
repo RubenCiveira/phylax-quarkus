@@ -4,11 +4,14 @@ package net.civeira.phylax.integrationtest.features.oauth.flow;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator.Builder;
+
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;

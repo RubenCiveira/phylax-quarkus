@@ -8,3 +8,4 @@ public record MfaSetup(String seed, String qrImage) {
     return Optional.ofNullable(qrImage);
   }
 }
+

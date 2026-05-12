@@ -16,3 +16,4 @@ public record RegistrationNotificationData(
     TenantRef tenant,
     String activateUrl) {
 }
+

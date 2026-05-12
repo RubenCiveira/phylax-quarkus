@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;

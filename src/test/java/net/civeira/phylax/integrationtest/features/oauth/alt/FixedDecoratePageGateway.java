@@ -2,6 +2,7 @@
 package net.civeira.phylax.integrationtest.features.oauth.alt;
 
 import java.util.Locale;
+
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;

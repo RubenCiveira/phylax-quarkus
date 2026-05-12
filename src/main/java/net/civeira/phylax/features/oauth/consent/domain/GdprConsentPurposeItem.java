@@ -16,3 +16,4 @@ public record GdprConsentPurposeItem(
     String description,
     boolean required) {
 }
+

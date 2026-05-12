@@ -18,3 +18,4 @@ public record RecoveryNotificationData(
     String recoveryUrl,
     OffsetDateTime expiresAt) {
 }
+

@@ -2,3 +2,4 @@ package net.civeira.phylax.features.oauth.webauthn.application.usecase.finishaut
 
 public record FinishAuthenticationResult(String userUid, String username) {
 }
+
