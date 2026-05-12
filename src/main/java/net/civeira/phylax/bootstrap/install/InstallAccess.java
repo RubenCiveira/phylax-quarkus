@@ -105,15 +105,15 @@ public class InstallAccess {
 
 
     UserRoleAssignamentChangeSet adminAssign = new UserRoleAssignamentChangeSet().newUid()
-        .user(createdRoot).roles(List.of(Roles.builder().role(createdAdminRole).build()));
+        .user(createdRoot).roles(List.of(Roles.builder().newUid().role(createdAdminRole).build()));
     rolesAssignament.create(UserRoleAssignament.create(adminAssign));
 
     UserRoleAssignamentChangeSet rootAssign = new UserRoleAssignamentChangeSet().newUid()
-        .user(createdRoot).roles(List.of(Roles.builder().role(createdRootRole).build()));
+        .user(createdRoot).roles(List.of(Roles.builder().newUid().role(createdRootRole).build()));
     rolesAssignament.create(UserRoleAssignament.create(rootAssign));
 
     UserRoleAssignamentChangeSet iamAssign = new UserRoleAssignamentChangeSet().newUid()
-        .user(createdRoot).roles(List.of(Roles.builder().role(createdIamRole).build()));
+        .user(createdRoot).roles(List.of(Roles.builder().newUid().role(createdIamRole).build()));
     rolesAssignament.create(UserRoleAssignament.create(iamAssign));
 
     ApiKeyClientChangeSet collectorApiKey =
