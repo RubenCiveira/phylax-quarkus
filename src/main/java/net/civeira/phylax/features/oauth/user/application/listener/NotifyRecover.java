@@ -1,0 +1,24 @@
+package net.civeira.phylax.features.oauth.user.application.listener;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.event.UserAccessTemporalCodeGeneratePasswordRecoverEvent;
+
+/**
+ * Extension point for side-effects triggered by password recovery code generation.
+ *
+ * <p>
+ * The recovery email is sent directly by
+ * {@link net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase} via
+ * {@link net.civeira.phylax.features.oauth.user.domain.gateway.PasswordRecoveryMailGateway}. This
+ * listener exists for future cross-cutting concerns (e.g. audit, security alerts).
+ * </p>
+ */
+@ApplicationScoped
+public class NotifyRecover {
+
+  public void onPasswordRecoveryRequested(
+      @Observes UserAccessTemporalCodeGeneratePasswordRecoverEvent event) {
+    // Extension point — no action by default.
+  }
+}

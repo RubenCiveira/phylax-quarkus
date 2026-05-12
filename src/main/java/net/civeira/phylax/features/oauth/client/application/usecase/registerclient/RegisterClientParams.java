@@ -1,0 +1,28 @@
+package net.civeira.phylax.features.oauth.client.application.usecase.registerclient;
+
+import lombok.Builder;
+import lombok.Getter;
+import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
+
+/**
+ * Input parameters for dynamic client registration.
+ */
+@Builder
+@Getter
+public class RegisterClientParams {
+
+  /** Tenant for which the client is being registered. */
+  private final String tenant;
+
+  /** Public base URL of the authorization server (used to build the registration_client_uri). */
+  private final String issuer;
+
+  /** Metadata provided by the registering party. */
+  private final DynamicClientRequest request;
+
+  /**
+   * Optional initial access token required when the registration policy is {@code token-required}.
+   * May be null when the policy is {@code open}.
+   */
+  private final String initialAccessToken;
+}

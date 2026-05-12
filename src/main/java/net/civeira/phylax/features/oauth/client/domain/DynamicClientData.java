@@ -1,0 +1,47 @@
+package net.civeira.phylax.features.oauth.client.domain;
+
+import java.util.List;
+import java.util.Optional;
+
+import lombok.Builder;
+import lombok.Getter;
+
+/**
+ * Registered dynamic client metadata (RFC 7591 / RFC 7592 read response).
+ */
+@Builder
+@Getter
+public class DynamicClientData {
+
+  private final String clientId;
+  private final List<String> redirectUris;
+  private final List<String> grantTypes;
+  private final List<String> responseTypes;
+  private final String scope;
+  private final String tokenEndpointAuthMethod;
+  private final String clientName;
+  private final String logoUri;
+  private final String clientUri;
+  private final String policyUri;
+  private final String tosUri;
+  private final String backchannelLogoutUri;
+  private final String frontchannelLogoutUri;
+  private final long clientIdIssuedAt;
+  private final String registrationClientUri;
+
+  public Optional<String> getClientName() {
+    return Optional.ofNullable(clientName);
+  }
+
+  public Optional<String> getScope() {
+    return Optional.ofNullable(scope);
+  }
+
+  public Optional<String> getBackchannelLogoutUri() {
+    return Optional.ofNullable(backchannelLogoutUri);
+  }
+
+  public Optional<String> getFrontchannelLogoutUri() {
+    return Optional.ofNullable(frontchannelLogoutUri);
+  }
+}

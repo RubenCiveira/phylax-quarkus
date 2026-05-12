@@ -25,8 +25,10 @@ import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioConsen
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioDelegateGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioLoginGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioMfaGateway;
+import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioPasswordRecoveryMailGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioRegisterUserGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioScopeConsentGateway;
+import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioUserRegistrationMailGateway;
 
 @QuarkusTest
 public abstract class OidcIntegrationTestBase {
@@ -55,6 +57,10 @@ public abstract class OidcIntegrationTestBase {
   @Inject
   FixedTokenLookupGateway tokenLookupGateway;
   @Inject
+  ScenarioPasswordRecoveryMailGateway passwordRecoveryMailGateway;
+  @Inject
+  ScenarioUserRegistrationMailGateway userRegistrationMailGateway;
+  @Inject
   TokenSigner tokenSigner;
   @Inject
   JwtTokenBuilder tokenBuilder;
@@ -72,6 +78,8 @@ public abstract class OidcIntegrationTestBase {
     registerGateway.reset();
     delegateGateway.reset();
     tokenLookupGateway.clear();
+    passwordRecoveryMailGateway.reset();
+    userRegistrationMailGateway.reset();
   }
 
   protected Map<String, Object> decodeToken(String token) {

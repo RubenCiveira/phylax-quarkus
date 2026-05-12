@@ -25,8 +25,8 @@ public class ScopesConsentAdapter implements ScopesConsentGateway {
 
   private final UserReadRepositoryGateway users;
   private final TrustedClientReadRepositoryGateway clients;
-//  private final CheckScopeConsentUseCase checkConsent;
-//  private final GrantScopeConsentUseCase grantConsent;
+  // private final CheckScopeConsentUseCase checkConsent;
+  // private final GrantScopeConsentUseCase grantConsent;
 
   /**
    * Returns the subset of {@code scopes} not yet consented by the user for this client.
@@ -50,8 +50,8 @@ public class ScopesConsentAdapter implements ScopesConsentGateway {
       return toPermissions(scopes);
     }
     return List.of();
-//    List<String> pending = checkConsent.execute(user.getUid(), client.getUid(), scopes);
-//    return toPermissions(pending);
+    // List<String> pending = checkConsent.execute(user.getUid(), client.getUid(), scopes);
+    // return toPermissions(pending);
   }
 
   /**
@@ -74,7 +74,7 @@ public class ScopesConsentAdapter implements ScopesConsentGateway {
     if (client == null) {
       return;
     }
-//    scopes.forEach(scope -> grantConsent.execute(user.getUid(), client.getUid(), scope));
+    // scopes.forEach(scope -> grantConsent.execute(user.getUid(), client.getUid(), scope));
   }
 
   private List<ScopePermission> toPermissions(List<String> scopes) {

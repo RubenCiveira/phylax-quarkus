@@ -1,0 +1,50 @@
+package net.civeira.phylax.features.oauth.device.domain.exception;
+
+public final class DeviceAuthorizationException extends RuntimeException {
+  private static final long serialVersionUID = 7886918070342250696L;
+
+  private final String error;
+  private final int statusCode;
+
+  private DeviceAuthorizationException(String error, String description, int statusCode) {
+    super(description);
+    this.error = error;
+    this.statusCode = statusCode;
+  }
+
+  public String getError() {
+    return error;
+  }
+
+  public int getStatusCode() {
+    return statusCode;
+  }
+
+  public static DeviceAuthorizationException authorizationPending() {
+    return new DeviceAuthorizationException("authorization_pending", "Authorization pending", 400);
+  }
+
+  public static DeviceAuthorizationException slowDown() {
+    return new DeviceAuthorizationException("slow_down", "Polling too fast", 400);
+  }
+
+  public static DeviceAuthorizationException accessDenied() {
+    return new DeviceAuthorizationException("access_denied", "Access denied", 400);
+  }
+
+  public static DeviceAuthorizationException expiredToken() {
+    return new DeviceAuthorizationException("expired_token", "Expired device code", 400);
+  }
+
+  public static DeviceAuthorizationException invalidGrant() {
+    return new DeviceAuthorizationException("invalid_grant", "Invalid device code", 400);
+  }
+
+  public static DeviceAuthorizationException invalidRequest(String detail) {
+    return new DeviceAuthorizationException("invalid_request", detail, 400);
+  }
+
+  public static DeviceAuthorizationException invalidClient() {
+    return new DeviceAuthorizationException("invalid_client", "Invalid client", 401);
+  }
+}

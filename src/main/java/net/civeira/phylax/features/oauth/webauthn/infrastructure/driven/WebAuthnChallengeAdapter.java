@@ -1,0 +1,43 @@
+package net.civeira.phylax.features.oauth.webauthn.infrastructure.driven;
+
+import java.util.Optional;
+
+import jakarta.enterprise.inject.Vetoed;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnChallenge;
+import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallengeGateway;
+
+/**
+ * Stub adapter for WebAuthn challenge persistence.
+ *
+ * <p>
+ * Marked {@code @Vetoed} — replace with a real implementation backed by a database or cache store
+ * with TTL support.
+ * </p>
+ */
+@Vetoed
+@Slf4j
+public class WebAuthnChallengeAdapter implements WebAuthnChallengeGateway {
+
+  @Override
+  public void store(WebAuthnChallenge challenge) {
+    log.warn("WebAuthnChallengeAdapter is a stub — challenge {} not persisted",
+        challenge.getChallengeId());
+  }
+
+  @Override
+  public Optional<WebAuthnChallenge> findById(String challengeId, String tenantId) {
+    return Optional.empty();
+  }
+
+  @Override
+  public void markVerified(WebAuthnChallenge challenge) {
+    log.warn("WebAuthnChallengeAdapter is a stub — challenge {} not marked verified",
+        challenge.getChallengeId());
+  }
+
+  @Override
+  public void purgeExpired() {
+    log.warn("WebAuthnChallengeAdapter is a stub — no challenges to purge");
+  }
+}

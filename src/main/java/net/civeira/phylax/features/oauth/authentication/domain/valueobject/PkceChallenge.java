@@ -1,0 +1,82 @@
+package net.civeira.phylax.features.oauth.authentication.domain.valueobject;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+/**
+ * Proof Key for Code Exchange (PKCE) challenge — RFC 7636.
+ *
+ * <p>
+ * Stores the {@code code_challenge} and {@code code_challenge_method} received in the authorization
+ * request, and verifies the {@code code_verifier} supplied at the token endpoint.
+ * </p>
+ */
+public final class PkceChallenge {
+
+  private final String challenge;
+  private final String method;
+
+  private PkceChallenge(String challenge, String method) {
+    this.challenge = challenge;
+    this.method = method;
+  }
+
+  /**
+   * Parses a PKCE challenge from authorization request parameters.
+   *
+   * <p>
+   * Returns {@code null} when {@code challenge} is null (PKCE not used). Defaults the method to
+   * {@code plain} when omitted. Throws {@link IllegalArgumentException} for unknown methods.
+   * </p>
+   *
+   * @param challenge raw {@code code_challenge} parameter, may be null
+   * @param method raw {@code code_challenge_method} parameter, may be null
+   * @return parsed instance, or {@code null} when PKCE is absent
+   */
+  public static PkceChallenge fromRequest(String challenge, String method) {
+    if (challenge == null) {
+      return null;
+    }
+    String resolvedMethod = (method != null) ? method : "plain";
+    if (!"S256".equals(resolvedMethod) && !"plain".equals(resolvedMethod)) {
+      throw new IllegalArgumentException("Unsupported code_challenge_method: " + resolvedMethod);
+    }
+    return new PkceChallenge(challenge, resolvedMethod);
+  }
+
+  /**
+   * Verifies the {@code code_verifier} against the stored challenge.
+   *
+   * @param verifier {@code code_verifier} from the token request
+   * @return true when the verifier matches the challenge
+   */
+  public boolean verify(String verifier) {
+    return switch (method) {
+      case "S256" -> MessageDigest.isEqual(challenge.getBytes(StandardCharsets.US_ASCII),
+          s256(verifier).getBytes(StandardCharsets.US_ASCII));
+      case "plain" -> MessageDigest.isEqual(challenge.getBytes(StandardCharsets.US_ASCII),
+          verifier.getBytes(StandardCharsets.US_ASCII));
+      default -> false;
+    };
+  }
+
+  public String getChallenge() {
+    return challenge;
+  }
+
+  public String getMethod() {
+    return method;
+  }
+
+  private static String s256(String verifier) {
+    try {
+      byte[] digest =
+          MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII));
+      return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 not available", e);
+    }
+  }
+}

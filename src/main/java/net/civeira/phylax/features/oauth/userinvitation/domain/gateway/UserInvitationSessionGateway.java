@@ -1,0 +1,11 @@
+package net.civeira.phylax.features.oauth.userinvitation.domain.gateway;
+
+import java.util.Optional;
+
+import net.civeira.phylax.features.oauth.userinvitation.domain.UserInvitationSession;
+
+public interface UserInvitationSessionGateway {
+
+  Optional<UserInvitationSession> createSession(String userUid, String email, String tenantUid,
+      String tenantName, String clientId);
+}

@@ -1,0 +1,11 @@
+package net.civeira.phylax.features.oauth.magiclink.domain.gateway;
+
+import java.util.Optional;
+
+import net.civeira.phylax.features.oauth.magiclink.domain.MagicLinkSession;
+
+public interface MagicLinkSessionGateway {
+
+  Optional<MagicLinkSession> createSession(String userUid, String email, String tenantUid,
+      String tenantName, String clientId);
+}

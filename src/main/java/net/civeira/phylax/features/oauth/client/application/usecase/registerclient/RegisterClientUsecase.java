@@ -1,0 +1,88 @@
+package net.civeira.phylax.features.oauth.client.application.usecase.registerclient;
+
+import java.net.URI;
+import java.security.SecureRandom;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
+import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
+import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGateway;
+
+/**
+ * Registers a new OAuth client via Dynamic Client Registration (RFC 7591).
+ *
+ * <p>
+ * Validates the registration policy, sanitises redirect URIs, generates credentials, and delegates
+ * persistence to {@link DynamicClientGateway}.
+ * </p>
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class RegisterClientUsecase {
+
+  private static final List<String> FORBIDDEN_SCHEMES = List.of("javascript", "data", "vbscript");
+
+  private final DynamicClientGateway gateway;
+
+  /**
+   * Registers a new dynamic client.
+   *
+   * @param params registration parameters
+   * @return registration result with credentials
+   */
+  public RegisterClientResult register(RegisterClientParams params) {
+    String policy = gateway.readRegistrationPolicy(params.getTenant());
+
+    switch (policy) {
+      case "disabled" -> throw DynamicClientException.registrationNotAllowed();
+      case "token-required", "token_required" -> requireInitialAccessToken(
+          params.getInitialAccessToken());
+      default -> {
+        /* open — no extra check */ }
+    }
+
+    for (String uri : params.getRequest().getRedirectUris()) {
+      validateRedirectUri(uri);
+    }
+
+    String clientId = UUID.randomUUID().toString();
+    String clientSecret = HexFormat.of().formatHex(randomBytes(32));
+    String registrationAccessToken = HexFormat.of().formatHex(randomBytes(32));
+
+    DynamicClientData meta =
+        gateway.create(clientId, clientSecret, registrationAccessToken, params.getRequest());
+
+    return RegisterClientResult.builder().clientId(meta.getClientId()).clientSecret(clientSecret)
+        .clientIdIssuedAt(meta.getClientIdIssuedAt()).clientSecretExpiresAt(0)
+        .registrationAccessToken(registrationAccessToken)
+        .registrationClientUri(params.getIssuer() + "/register/" + meta.getClientId())
+        .request(params.getRequest()).build();
+  }
+
+  private void requireInitialAccessToken(String token) {
+    if (token == null || token.isBlank()) {
+      throw DynamicClientException.tokenRequired();
+    }
+  }
+
+  private void validateRedirectUri(String uri) {
+    try {
+      String scheme = URI.create(uri).getScheme();
+      if (scheme == null || FORBIDDEN_SCHEMES.contains(scheme.toLowerCase())) {
+        throw DynamicClientException.invalidRedirectUri(uri);
+      }
+    } catch (IllegalArgumentException e) {
+      throw DynamicClientException.invalidRedirectUri(uri);
+    }
+  }
+
+  private static byte[] randomBytes(int n) {
+    byte[] bytes = new byte[n];
+    new SecureRandom().nextBytes(bytes);
+    return bytes;
+  }
+}

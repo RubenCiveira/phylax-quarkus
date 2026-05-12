@@ -3,6 +3,8 @@ package net.civeira.phylax.features.oauth.user.domain.gateway;
 
 import java.util.Optional;
 
+import net.civeira.phylax.features.oauth.user.domain.RecoveryNotificationData;
+
 /**
  * Domain port for password change and recovery.
  *
@@ -26,14 +28,17 @@ public interface ChangePasswordGateway {
   /**
    * Requests a password recovery operation for a user.
    *
-   * Uses urlBase to build recovery links for email delivery. Implementations should handle
-   * notification delivery.
+   * Returns the notification data when the user exists and recovery is possible, so that the
+   * application layer can send the email via {@link PasswordRecoveryMailGateway}. Returns empty
+   * when the user is not found or recovery cannot proceed.
    *
    * @param urlBase base URL for recovery links
    * @param tenant tenant identifier
    * @param username username
+   * @return notification data, or empty if the user cannot be recovered
    */
-  void requestForChange(String urlBase, String tenant, String username);
+  Optional<RecoveryNotificationData> requestForChange(String urlBase, String tenant,
+      String username);
 
   /**
    * Validates a recovery code and updates the password.

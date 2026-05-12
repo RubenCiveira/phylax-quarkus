@@ -1,0 +1,11 @@
+package net.civeira.phylax.features.oauth.userinvitation.domain.gateway;
+
+import java.time.OffsetDateTime;
+
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
+
+public interface UserInvitationMailGateway {
+
+  void sendInvitation(String toEmail, TenantRef tenant, String acceptUrl, String invitedByEmail,
+      OffsetDateTime expiresAt);
+}

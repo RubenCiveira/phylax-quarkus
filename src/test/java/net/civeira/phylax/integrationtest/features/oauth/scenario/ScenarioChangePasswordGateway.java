@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import net.civeira.phylax.features.oauth.user.domain.RecoveryNotificationData;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
@@ -91,10 +92,12 @@ public class ScenarioChangePasswordGateway implements ChangePasswordGateway {
   }
 
   @Override
-  public void requestForChange(String urlBase, String tenant, String username) {
+  public Optional<RecoveryNotificationData> requestForChange(String urlBase, String tenant,
+      String username) {
     lastRecoverUrl = urlBase;
     lastTenant = tenant;
     lastUsername = username;
+    return Optional.empty();
   }
 
   @Override

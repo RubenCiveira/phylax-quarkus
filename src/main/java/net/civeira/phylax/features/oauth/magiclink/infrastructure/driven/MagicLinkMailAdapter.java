@@ -1,0 +1,28 @@
+package net.civeira.phylax.features.oauth.magiclink.infrastructure.driven;
+
+import java.time.OffsetDateTime;
+
+import jakarta.enterprise.inject.Vetoed;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
+import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkMailGateway;
+
+/**
+ * Stub adapter for magic link mail delivery.
+ *
+ * <p>
+ * Marked {@code @Vetoed} — the real adapter lives in the notification infrastructure. Replace with
+ * an implementation that enqueues via
+ * {@link net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationUseCase}.
+ * </p>
+ */
+@Vetoed
+@Slf4j
+public class MagicLinkMailAdapter implements MagicLinkMailGateway {
+
+  @Override
+  public void sendMagicLink(String email, String name, TenantRef tenant, String verifyUrl,
+      OffsetDateTime expiresAt) {
+    log.warn("MagicLinkMailAdapter is a stub — magic link email not sent to {}", email);
+  }
+}

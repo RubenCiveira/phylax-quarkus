@@ -1,0 +1,39 @@
+package net.civeira.phylax.features.oauth.client.domain.exception;
+
+/**
+ * Domain exception for Dynamic Client Registration errors (RFC 7591).
+ */
+public class DynamicClientException extends RuntimeException {
+  private static final long serialVersionUID = -3859531151560728159L;
+
+  private final String errorCode;
+
+  private DynamicClientException(String errorCode, String message) {
+    super(message);
+    this.errorCode = errorCode;
+  }
+
+  public String getErrorCode() {
+    return errorCode;
+  }
+
+  public static DynamicClientException registrationNotAllowed() {
+    return new DynamicClientException("registration_not_allowed",
+        "Dynamic client registration is disabled for this tenant");
+  }
+
+  public static DynamicClientException tokenRequired() {
+    return new DynamicClientException("invalid_initial_access_token",
+        "A valid initial_access_token is required to register clients");
+  }
+
+  public static DynamicClientException invalidRedirectUri(String uri) {
+    return new DynamicClientException("invalid_redirect_uri",
+        "Redirect URI scheme is not allowed: " + uri);
+  }
+
+  public static DynamicClientException notFound(String clientId) {
+    return new DynamicClientException("invalid_client_metadata",
+        "Dynamic client not found: " + clientId);
+  }
+}

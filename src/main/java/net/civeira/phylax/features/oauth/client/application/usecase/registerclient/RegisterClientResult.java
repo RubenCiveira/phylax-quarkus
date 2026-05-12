@@ -1,0 +1,22 @@
+package net.civeira.phylax.features.oauth.client.application.usecase.registerclient;
+
+import lombok.Builder;
+import lombok.Getter;
+import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
+
+/**
+ * Result of a successful dynamic client registration (RFC 7591 §3.2.1).
+ */
+@Builder
+@Getter
+public class RegisterClientResult {
+
+  private final String clientId;
+  private final String clientSecret;
+  private final long clientIdIssuedAt;
+  /** 0 means the secret does not expire. */
+  private final long clientSecretExpiresAt;
+  private final String registrationAccessToken;
+  private final String registrationClientUri;
+  private final DynamicClientRequest request;
+}

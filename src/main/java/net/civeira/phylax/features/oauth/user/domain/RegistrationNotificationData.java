@@ -1,0 +1,18 @@
+package net.civeira.phylax.features.oauth.user.domain;
+
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
+
+/**
+ * Data needed to send a registration verification email to the user.
+ *
+ * Returned by {@link gateway.RegisterUserGateway#requestForRegister} (embedded in
+ * {@link RegistrationResult}) so that the application layer can delegate delivery to
+ * {@link gateway.UserRegistrationMailGateway} without coupling the domain gateway to notification
+ * infrastructure.
+ */
+public record RegistrationNotificationData(
+    String email,
+    String name,
+    TenantRef tenant,
+    String activateUrl) {
+}

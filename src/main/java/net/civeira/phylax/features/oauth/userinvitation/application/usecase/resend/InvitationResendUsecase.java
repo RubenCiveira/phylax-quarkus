@@ -1,0 +1,52 @@
+package net.civeira.phylax.features.oauth.userinvitation.application.usecase.resend;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.HexFormat;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.InvitationStoreGateway;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationMailGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class InvitationResendUsecase {
+
+  private static final int EXPIRES_DAYS = 7;
+
+  private final InvitationStoreGateway store;
+  private final UserInvitationMailGateway mailer;
+
+  public void resend(String uid, String tenantName, String tenantId, String baseUrl) {
+    byte[] rawBytes = new byte[32];
+    new SecureRandom().nextBytes(rawBytes);
+    String rawToken = HexFormat.of().formatHex(rawBytes);
+    String tokenHash = sha256(rawToken);
+    OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(EXPIRES_DAYS);
+
+    var refreshData = store.refresh(uid, tokenHash, expiresAt);
+
+    String acceptUrl = baseUrl.replaceAll("/+$", "") + "/oauth/openid/"
+        + java.net.URLEncoder.encode(tenantName, java.nio.charset.StandardCharsets.UTF_8)
+        + "/invitation/accept?token="
+        + java.net.URLEncoder.encode(rawToken, java.nio.charset.StandardCharsets.UTF_8);
+
+    mailer.sendInvitation(refreshData.inviteeEmail(), TenantReference.of(tenantId), acceptUrl,
+        refreshData.inviterEmail(), expiresAt);
+  }
+
+  private static String sha256(String value) {
+    try {
+      byte[] hash = MessageDigest.getInstance("SHA-256")
+          .digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      return HexFormat.of().formatHex(hash);
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 not available", e);
+    }
+  }
+}

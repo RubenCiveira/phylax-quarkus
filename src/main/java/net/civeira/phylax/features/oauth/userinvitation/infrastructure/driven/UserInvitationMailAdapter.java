@@ -1,0 +1,27 @@
+package net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven;
+
+import java.time.OffsetDateTime;
+
+import jakarta.enterprise.inject.Vetoed;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationMailGateway;
+
+/**
+ * Stub adapter for user invitation email delivery.
+ *
+ * <p>
+ * Marked {@code @Vetoed} — replace with a real implementation that enqueues via
+ * {@link net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationUseCase}.
+ * </p>
+ */
+@Vetoed
+@Slf4j
+public class UserInvitationMailAdapter implements UserInvitationMailGateway {
+
+  @Override
+  public void sendInvitation(String toEmail, TenantRef tenant, String acceptUrl,
+      String invitedByEmail, OffsetDateTime expiresAt) {
+    log.warn("UserInvitationMailAdapter is a stub — invitation email not sent to {}", toEmail);
+  }
+}

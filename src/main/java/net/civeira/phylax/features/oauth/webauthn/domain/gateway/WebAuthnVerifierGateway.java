@@ -1,0 +1,32 @@
+package net.civeira.phylax.features.oauth.webauthn.domain.gateway;
+
+import java.util.Map;
+
+/**
+ * Port for the WebAuthn cryptographic verification service.
+ *
+ * <p>
+ * The implementation performs CBOR decoding, attestation verification, and assertion validation.
+ * Keep all WebAuthn library dependencies behind this port so the domain stays clean.
+ * </p>
+ */
+public interface WebAuthnVerifierGateway {
+
+  /**
+   * Verifies a registration response and returns credential data.
+   *
+   * @return map with keys: credentialId, publicKey, signCount, aaguid (optional), transports
+   *         (optional)
+   */
+  Map<String, Object> verifyRegistration(Map<String, Object> clientCredential, String challenge,
+      String origin, String rpId);
+
+  /**
+   * Verifies an assertion response and returns the new sign count.
+   *
+   * @throws net.civeira.phylax.features.oauth.webauthn.domain.exception.WebAuthnException on replay
+   *         attack or verification failure
+   */
+  int verifyAssertion(Map<String, Object> clientCredential, String challenge, String origin,
+      String rpId, String storedPublicKey, int storedSignCount);
+}

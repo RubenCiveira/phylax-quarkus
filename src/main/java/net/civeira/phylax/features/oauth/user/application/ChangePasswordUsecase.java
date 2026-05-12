@@ -6,6 +6,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
+import net.civeira.phylax.features.oauth.user.domain.gateway.PasswordRecoveryMailGateway;
 
 /**
  * Application service for password change and recovery.
@@ -20,10 +21,8 @@ import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGatew
 @RequiredArgsConstructor
 public class ChangePasswordUsecase {
 
-  /**
-   * Gateway used for password change operations.
-   */
   private final ChangePasswordGateway gateway;
+  private final PasswordRecoveryMailGateway mailer;
 
   /**
    * Indicates whether password recovery is allowed for a tenant.
@@ -40,14 +39,15 @@ public class ChangePasswordUsecase {
   /**
    * Requests a password recovery flow for a user.
    *
-   * Builds a recovery URL and triggers a recovery email. Delegates the request to the gateway.
+   * The gateway builds the recovery link and returns notification data. When data is present, the
+   * mail gateway sends the recovery email. When the user is not found, the method returns silently.
    *
    * @param urlBase base URL for recovery links
    * @param tenant tenant identifier
    * @param username username
    */
   public void requestForChange(String urlBase, String tenant, String username) {
-    gateway.requestForChange(urlBase, tenant, username);
+    gateway.requestForChange(urlBase, tenant, username).ifPresent(mailer::sendPasswordRecovery);
   }
 
   /**

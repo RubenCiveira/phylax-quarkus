@@ -1,0 +1,7 @@
+package net.civeira.phylax.features.oauth.magiclink.domain.gateway;
+
+/** Returns whether magic link login is enabled for a tenant. */
+public interface MagicLinkEnabledGateway {
+
+  boolean isEnabled(String tenantName);
+}

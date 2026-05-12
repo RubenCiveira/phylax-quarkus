@@ -1,0 +1,27 @@
+package net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven;
+
+import java.util.Optional;
+
+import jakarta.enterprise.inject.Vetoed;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.userinvitation.domain.UserInvitationSession;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationSessionGateway;
+
+/**
+ * Stub adapter for session creation after invitation acceptance.
+ *
+ * <p>
+ * Marked {@code @Vetoed} — replace with a real implementation that creates a persistent session.
+ * </p>
+ */
+@Vetoed
+@Slf4j
+public class UserInvitationSessionAdapter implements UserInvitationSessionGateway {
+
+  @Override
+  public Optional<UserInvitationSession> createSession(String userUid, String email,
+      String tenantUid, String tenantName, String clientId) {
+    log.warn("UserInvitationSessionAdapter is a stub — session not created for user {}", userUid);
+    return Optional.empty();
+  }
+}

@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
+import net.civeira.phylax.features.oauth.user.domain.gateway.UserRegistrationMailGateway;
 
 /**
  * Application service for user registration flows.
@@ -21,10 +22,8 @@ import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway
 @RequiredArgsConstructor
 public class RegisterUserUsecase {
 
-  /**
-   * Gateway for registration operations.
-   */
   private final RegisterUserGateway gateway;
+  private final UserRegistrationMailGateway mailer;
 
   /**
    * Indicates whether self-registration is allowed for a tenant.
@@ -64,7 +63,9 @@ public class RegisterUserUsecase {
    */
   public RegistrationResult requestForRegister(String urlBase, String tenant, String email,
       String password) {
-    return gateway.requestForRegister(urlBase, tenant, email, password);
+    RegistrationResult result = gateway.requestForRegister(urlBase, tenant, email, password);
+    result.getNotificationData().ifPresent(mailer::sendRegistrationVerification);
+    return result;
   }
 
   /**

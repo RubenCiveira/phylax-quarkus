@@ -1,0 +1,20 @@
+package net.civeira.phylax.features.oauth.userinvitation.domain.gateway;
+
+import java.time.OffsetDateTime;
+
+/**
+ * Write operations on invitations that require locking or cross-field updates.
+ */
+public interface InvitationStoreGateway {
+
+  void cancel(String uid);
+
+  /**
+   * Refreshes the invitation token and expiry. Returns email data needed to send the resend
+   * notification: invitee email and inviter email (inviterEmail may be empty if unknown).
+   */
+  RefreshData refresh(String uid, String newTokenHash, OffsetDateTime newExpiresAt);
+
+  record RefreshData(String inviteeEmail, String inviterEmail) {
+  }
+}

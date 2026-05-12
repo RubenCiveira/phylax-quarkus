@@ -1,0 +1,7 @@
+package net.civeira.phylax.features.oauth.userinvitation.domain.gateway;
+
+public interface UserInvitationCodeGateway {
+
+  String createAuthCode(String userUid, String clientId, String scope, String redirectUri,
+      String tenant);
+}

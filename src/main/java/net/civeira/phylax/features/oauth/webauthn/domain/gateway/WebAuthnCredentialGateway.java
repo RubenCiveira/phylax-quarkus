@@ -1,0 +1,19 @@
+package net.civeira.phylax.features.oauth.webauthn.domain.gateway;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnCredential;
+
+public interface WebAuthnCredentialGateway {
+
+  void store(WebAuthnCredential credential);
+
+  Optional<WebAuthnCredential> findByCredentialId(String credentialId, String tenantId);
+
+  List<WebAuthnCredential> findByUser(String userUid, String tenantId);
+
+  void updateSignCount(String credentialId, String tenantId, int signCount,
+      OffsetDateTime lastUsedAt);
+}

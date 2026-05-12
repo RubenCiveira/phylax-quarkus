@@ -1,0 +1,34 @@
+package net.civeira.phylax.features.oauth.par.domain.exception;
+
+public final class ParException extends RuntimeException {
+  private static final long serialVersionUID = -7144573213612655686L;
+  private final String error;
+  private final int statusCode;
+
+  private ParException(String error, String description, int statusCode) {
+    super(description);
+    this.error = error;
+    this.statusCode = statusCode;
+  }
+
+  public String getError() {
+    return error;
+  }
+
+  public int getStatusCode() {
+    return statusCode;
+  }
+
+  public static ParException invalidClient() {
+    return new ParException("invalid_client", "Client authentication failed", 401);
+  }
+
+  public static ParException invalidRequest(String detail) {
+    return new ParException("invalid_request", detail, 400);
+  }
+
+  public static ParException invalidRequestUri() {
+    return new ParException("invalid_request_uri",
+        "The request_uri is invalid, expired, or already used", 400);
+  }
+}

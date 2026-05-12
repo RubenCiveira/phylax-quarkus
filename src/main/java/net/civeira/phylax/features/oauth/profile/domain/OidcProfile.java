@@ -1,0 +1,94 @@
+package net.civeira.phylax.features.oauth.profile.domain;
+
+import java.util.Optional;
+
+import lombok.Builder;
+import lombok.Getter;
+
+@Builder
+@Getter
+public final class OidcProfile {
+
+  private final String uid;
+  private final String userUid;
+  private final String givenName;
+  private final String familyName;
+  private final String middleName;
+  private final String nickname;
+  private final String preferredUsername;
+  private final String pictureUrl;
+  private final String websiteUrl;
+  private final String gender;
+  private final String birthdate;
+  private final String zoneinfo;
+  private final String locale;
+  private final String phoneNumber;
+  private final Boolean phoneNumberVerified;
+  private final String addressJson;
+  private final String updatedAt;
+  private final Integer version;
+
+  public Optional<String> getGivenName() {
+    return Optional.ofNullable(givenName);
+  }
+
+  public Optional<String> getFamilyName() {
+    return Optional.ofNullable(familyName);
+  }
+
+  public Optional<String> getMiddleName() {
+    return Optional.ofNullable(middleName);
+  }
+
+  public Optional<String> getNickname() {
+    return Optional.ofNullable(nickname);
+  }
+
+  public Optional<String> getPreferredUsername() {
+    return Optional.ofNullable(preferredUsername);
+  }
+
+  public Optional<String> getPictureUrl() {
+    return Optional.ofNullable(pictureUrl);
+  }
+
+  public Optional<String> getWebsiteUrl() {
+    return Optional.ofNullable(websiteUrl);
+  }
+
+  public Optional<String> getGender() {
+    return Optional.ofNullable(gender);
+  }
+
+  public Optional<String> getBirthdate() {
+    return Optional.ofNullable(birthdate);
+  }
+
+  public Optional<String> getZoneinfo() {
+    return Optional.ofNullable(zoneinfo);
+  }
+
+  public Optional<String> getLocale() {
+    return Optional.ofNullable(locale);
+  }
+
+  public Optional<String> getPhoneNumber() {
+    return Optional.ofNullable(phoneNumber);
+  }
+
+  public Optional<Boolean> getPhoneNumberVerified() {
+    return Optional.ofNullable(phoneNumberVerified);
+  }
+
+  public Optional<String> getAddressJson() {
+    return Optional.ofNullable(addressJson);
+  }
+
+  public Optional<String> getUpdatedAt() {
+    return Optional.ofNullable(updatedAt);
+  }
+
+  public Optional<Integer> getVersion() {
+    return Optional.ofNullable(version);
+  }
+}

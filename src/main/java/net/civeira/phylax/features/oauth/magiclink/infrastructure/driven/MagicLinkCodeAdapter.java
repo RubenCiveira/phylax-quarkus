@@ -1,0 +1,25 @@
+package net.civeira.phylax.features.oauth.magiclink.infrastructure.driven;
+
+import jakarta.enterprise.inject.Vetoed;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkCodeGateway;
+
+/**
+ * Stub adapter for authorization code generation after magic link verification.
+ *
+ * <p>
+ * Marked {@code @Vetoed} — replace with a real implementation that stores an authorization code in
+ * the same store used by the authorization endpoint.
+ * </p>
+ */
+@Vetoed
+@Slf4j
+public class MagicLinkCodeAdapter implements MagicLinkCodeGateway {
+
+  @Override
+  public String createAuthCode(String userUid, String clientId, String scope, String redirectUri,
+      String tenant, String nonce) {
+    log.warn("MagicLinkCodeAdapter is a stub — returning placeholder auth code");
+    return "stub-code";
+  }
+}

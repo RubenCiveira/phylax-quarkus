@@ -1,0 +1,22 @@
+package net.civeira.phylax.features.oauth.user.domain.gateway;
+
+import net.civeira.phylax.features.oauth.user.domain.RegistrationNotificationData;
+
+/**
+ * Domain port for sending registration verification emails.
+ *
+ * <p>
+ * Implemented by infrastructure adapters that use the notification outbox. Keeping this gateway in
+ * the domain allows the use case to orchestrate notification without importing notification
+ * infrastructure.
+ * </p>
+ */
+public interface UserRegistrationMailGateway {
+
+  /**
+   * Sends a registration verification email to the new user.
+   *
+   * @param data registration details (recipient, name, tenant, activation link)
+   */
+  void sendRegistrationVerification(RegistrationNotificationData data);
+}

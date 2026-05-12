@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.oauth.application.usecase.PasswordRecoverUsecase;
 import net.civeira.phylax.features.access.oauth.application.usecase.UserLoginUsecase;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.user.domain.RecoveryNotificationData;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
 
 @Transactional
@@ -24,9 +25,12 @@ public class ChangePasswordGatewayInteractor implements ChangePasswordGateway {
   }
 
   @Override
-  public void requestForChange(String urlBase, String tenant, String username) {
+  public Optional<RecoveryNotificationData> requestForChange(String urlBase, String tenant,
+      String username) {
     AuthRequest request = AuthRequest.builder().tenant(tenant).build();
     recoverUsecase.recover(request, username, urlBase);
+    // Notification is handled internally by PasswordRecoverUsecase — no data to return.
+    return Optional.empty();
   }
 
   @Override

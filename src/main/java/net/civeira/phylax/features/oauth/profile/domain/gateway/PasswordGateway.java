@@ -1,0 +1,6 @@
+package net.civeira.phylax.features.oauth.profile.domain.gateway;
+
+public interface PasswordGateway {
+
+  boolean changePassword(String userUid, String tenant, String oldPass, String newPass);
+}

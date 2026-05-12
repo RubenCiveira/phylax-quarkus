@@ -1,0 +1,79 @@
+package net.civeira.phylax.features.oauth.magiclink.application.usecase.verifymagiclink;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.magiclink.domain.MagicLink;
+import net.civeira.phylax.features.oauth.magiclink.domain.MagicLinkSession;
+import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkCodeGateway;
+import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkEnabledGateway;
+import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkGateway;
+import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkSessionGateway;
+
+/**
+ * Validates a magic link token and exchanges it for an OAuth authorization code.
+ *
+ * <p>
+ * Invalid, expired, or already-used tokens return {@code Optional.empty()} to avoid revealing
+ * whether a link ever existed (anti-enumeration).
+ * </p>
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class VerifyMagicLinkUsecase {
+
+  private final MagicLinkGateway gateway;
+  private final MagicLinkCodeGateway codeGateway;
+  private final MagicLinkSessionGateway sessionGateway;
+  private final MagicLinkEnabledGateway enabled;
+
+  public Optional<MagicLinkVerifyResult> verify(String rawToken, String clientId,
+      String tenantName) {
+    if (!enabled.isEnabled(tenantName)) {
+      return Optional.empty();
+    }
+
+    String tokenHash = sha256(rawToken);
+    Optional<MagicLink> found = gateway.findByHash(tokenHash, tenantName);
+    if (found.isEmpty()) {
+      return Optional.empty();
+    }
+
+    MagicLink link = found.get();
+    if (!link.isValid() || !link.getClientId().equals(clientId)) {
+      return Optional.empty();
+    }
+
+    gateway.markUsed(link.getUid());
+
+    String code = codeGateway.createAuthCode(link.getUserUid(), link.getClientId(), link.getScope(),
+        link.getRedirectUri(), link.getTenantId(), link.getNonce());
+
+    StringBuilder redirectUrl = new StringBuilder(link.getRedirectUri());
+    redirectUrl.append(link.getRedirectUri().contains("?") ? "&" : "?");
+    redirectUrl.append("code=")
+        .append(java.net.URLEncoder.encode(code, java.nio.charset.StandardCharsets.UTF_8));
+    link.getState().ifPresent(state -> redirectUrl.append("&state=")
+        .append(java.net.URLEncoder.encode(state, java.nio.charset.StandardCharsets.UTF_8)));
+
+    Optional<MagicLinkSession> session = sessionGateway.createSession(link.getUserUid(), null, null,
+        link.getTenantId(), link.getClientId());
+
+    return Optional.of(session.map(s -> MagicLinkVerifyResult.of(redirectUrl.toString(), s))
+        .orElseGet(() -> MagicLinkVerifyResult.of(redirectUrl.toString())));
+  }
+
+  private static String sha256(String value) {
+    try {
+      byte[] hash = MessageDigest.getInstance("SHA-256")
+          .digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      return HexFormat.of().formatHex(hash);
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 not available", e);
+    }
+  }
+}

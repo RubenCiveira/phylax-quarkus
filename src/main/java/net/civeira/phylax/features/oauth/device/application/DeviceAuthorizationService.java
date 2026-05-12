@@ -1,0 +1,127 @@
+package net.civeira.phylax.features.oauth.device.application;
+
+import java.security.SecureRandom;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.device.domain.DeviceAuthorization;
+import net.civeira.phylax.features.oauth.device.domain.DeviceAuthorizationStatus;
+import net.civeira.phylax.features.oauth.device.domain.exception.DeviceAuthorizationException;
+import net.civeira.phylax.features.oauth.device.domain.gateway.DeviceAuthorizationGateway;
+
+/**
+ * Manages the Device Authorization grant lifecycle — RFC 8628.
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class DeviceAuthorizationService {
+
+  public static final int DEFAULT_INTERVAL = 5;
+  public static final int DEFAULT_TTL_SECONDS = 600;
+
+  private static final String USER_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  private final DeviceAuthorizationGateway gateway;
+
+  /**
+   * Creates and stores a new device authorization, returning the record for the device endpoint
+   * response.
+   */
+  public DeviceAuthorization createAuthorization(String tenant, ClientDetails client, String scope,
+      List<String> audiences) {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    String deviceCode = UUID.randomUUID().toString();
+    String userCode = generateUserCode(tenant);
+
+    DeviceAuthorization authorization = DeviceAuthorization.builder().deviceCode(deviceCode)
+        .userCode(userCode).tenant(tenant).clientId(client.getClientId()).scope(scope)
+        .audiences(audiences).interval(DEFAULT_INTERVAL).requestedAt(now)
+        .expiresAt(now.plusSeconds(DEFAULT_TTL_SECONDS)).status(DeviceAuthorizationStatus.PENDING)
+        .build();
+
+    gateway.create(authorization);
+    return authorization;
+  }
+
+  public DeviceAuthorization findByUserCode(String tenant, String userCode) {
+    return gateway.findByUserCode(tenant, userCode).orElse(null);
+  }
+
+  public DeviceAuthorization findByDeviceCode(String deviceCode) {
+    return gateway.findByDeviceCode(deviceCode).orElse(null);
+  }
+
+  /** Approves the device associated with the user code. */
+  public boolean approveByUserCode(String tenant, String userCode, AuthenticationData auth) {
+    return gateway.findByUserCode(tenant, userCode).filter(r -> !r.isExpired())
+        .filter(r -> r.getStatus() == DeviceAuthorizationStatus.PENDING)
+        .map(r -> gateway.approve(r.getDeviceCode(), auth)).orElse(false);
+  }
+
+  /**
+   * Exchanges a device_code for authentication data.
+   *
+   * @throws DeviceAuthorizationException on any grant error (pending, slow-down, denied, expired)
+   */
+  public AuthenticationData exchangeDeviceCode(String deviceCode) {
+    if (deviceCode == null || deviceCode.isBlank()) {
+      throw DeviceAuthorizationException.invalidRequest("device_code is required");
+    }
+
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    DeviceAuthorization record = gateway.findByDeviceCode(deviceCode)
+        .orElseThrow(DeviceAuthorizationException::invalidGrant);
+
+    if (record.isExpired()) {
+      gateway.consume(deviceCode);
+      throw DeviceAuthorizationException.expiredToken();
+    }
+
+    switch (record.getStatus()) {
+      case DENIED -> throw DeviceAuthorizationException.accessDenied();
+      case PENDING -> {
+        record.getLastPollAt().ifPresent(lastPoll -> {
+          long nextPollAt = lastPoll.toEpochSecond() + record.getInterval();
+          if (now.toEpochSecond() < nextPollAt) {
+            throw DeviceAuthorizationException.slowDown();
+          }
+        });
+        gateway.touchPoll(deviceCode, now);
+        throw DeviceAuthorizationException.authorizationPending();
+      }
+      case APPROVED -> {
+        AuthenticationData auth =
+            record.getAuth().orElseThrow(DeviceAuthorizationException::invalidGrant);
+        gateway.consume(deviceCode);
+        return auth;
+      }
+    }
+    throw DeviceAuthorizationException.invalidGrant();
+  }
+
+  public static String grantType() {
+    return "urn:ietf:params:oauth:grant-type:device_code";
+  }
+
+  private String generateUserCode(String tenant) {
+    SecureRandom rng = new SecureRandom();
+    int len = USER_CODE_ALPHABET.length();
+    for (int attempt = 0; attempt < 5; attempt++) {
+      char[] raw = new char[8];
+      for (int i = 0; i < 8; i++) {
+        raw[i] = USER_CODE_ALPHABET.charAt(rng.nextInt(len));
+      }
+      String userCode = new String(raw, 0, 4) + "-" + new String(raw, 4, 4);
+      if (gateway.findByUserCode(tenant, userCode).isEmpty()) {
+        return userCode;
+      }
+    }
+    return UUID.randomUUID().toString().substring(0, 9).toUpperCase();
+  }
+}

@@ -1,0 +1,31 @@
+package net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven;
+
+import java.util.Optional;
+
+import jakarta.enterprise.inject.Vetoed;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationQueryGateway;
+
+/**
+ * Stub adapter for invitation token and email lookups.
+ *
+ * <p>
+ * Marked {@code @Vetoed} — replace with a real implementation backed by
+ * {@link net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationReadRepositoryGateway}.
+ * </p>
+ */
+@Vetoed
+@Slf4j
+public class UserInvitationQueryAdapter implements UserInvitationQueryGateway {
+
+  @Override
+  public Optional<UserInvitation> findByTokenHash(String tokenHash, String tenantId) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<UserInvitation> findPendingByEmail(String email, String tenantId) {
+    return Optional.empty();
+  }
+}

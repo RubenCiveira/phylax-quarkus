@@ -1,0 +1,26 @@
+package net.civeira.phylax.features.oauth.client.application.usecase.deletedynamicclient;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGateway;
+
+/**
+ * Deletes a registered dynamic client (RFC 7592 DELETE).
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class DeleteDynamicClientUsecase {
+
+  private final DynamicClientGateway gateway;
+
+  /**
+   * Deletes the client identified by the given credentials.
+   *
+   * @param clientId client_id
+   * @param registrationAccessToken registration management token
+   * @return true when deleted, false when not found or unauthorized
+   */
+  public boolean delete(String clientId, String registrationAccessToken) {
+    return gateway.delete(clientId, registrationAccessToken);
+  }
+}

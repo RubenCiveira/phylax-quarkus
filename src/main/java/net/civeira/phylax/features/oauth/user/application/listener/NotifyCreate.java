@@ -1,0 +1,23 @@
+package net.civeira.phylax.features.oauth.user.application.listener;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import net.civeira.phylax.features.access.user.domain.event.UserCreateEvent;
+
+/**
+ * Extension point for side-effects triggered by user creation.
+ *
+ * <p>
+ * Registration verification email is sent directly by
+ * {@link net.civeira.phylax.features.oauth.user.application.RegisterUserUsecase} via
+ * {@link net.civeira.phylax.features.oauth.user.domain.gateway.UserRegistrationMailGateway}. This
+ * listener exists for future cross-cutting concerns (e.g. audit, CRM sync).
+ * </p>
+ */
+@ApplicationScoped
+public class NotifyCreate {
+
+  public void onUserCreated(@Observes UserCreateEvent event) {
+    // Extension point — no action by default.
+  }
+}

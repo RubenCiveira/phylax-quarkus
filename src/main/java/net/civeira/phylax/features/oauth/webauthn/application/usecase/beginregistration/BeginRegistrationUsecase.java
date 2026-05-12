@@ -1,0 +1,69 @@
+package net.civeira.phylax.features.oauth.webauthn.application.usecase.beginregistration;
+
+import java.security.SecureRandom;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnChallenge;
+import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallengeGateway;
+import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnCredentialGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class BeginRegistrationUsecase {
+
+  private final TenantReadRepositoryGateway tenants;
+  private final UserReadRepositoryGateway users;
+  private final WebAuthnChallengeGateway challengeGateway;
+  private final WebAuthnCredentialGateway credentialGateway;
+
+  public Map<String, Object> begin(String userUid, String tenantName, String rpId, String rpName) {
+    var tenant =
+        tenants.find(TenantFilter.builder().name(tenantName).build()).filter(t -> t.isEnabled())
+            .orElseThrow(() -> new IllegalArgumentException("tenant " + tenantName));
+
+    String tenantId = tenant.getUid();
+
+    var user = users.find(UserFilter.builder().tenant(tenant).uid(userUid).build())
+        .orElseThrow(() -> new IllegalArgumentException("user " + userUid));
+
+    byte[] challengeBytes = new byte[32];
+    new SecureRandom().nextBytes(challengeBytes);
+    String challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes);
+    String challengeId = UUID.randomUUID().toString();
+
+    challengeGateway.store(
+        WebAuthnChallenge.builder().challengeId(challengeId).tenantId(tenantId).userUid(userUid)
+            .challenge(challenge).type("register").createdAt(OffsetDateTime.now(ZoneOffset.UTC))
+            .expiresAt(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5)).verified(false).build());
+
+    var existingCredentials = credentialGateway.findByUser(userUid, tenantId);
+
+    String displayName = user.getName();
+    String loginName = user.getEmail().orElseGet(() -> user.getName());
+    String userIdentifier = Base64.getUrlEncoder().withoutPadding()
+        .encodeToString(userUid.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+    return Map.of("challengeId", challengeId, "challenge", challenge, "rp",
+        Map.of("name", rpName, "id", rpId), "user",
+        Map.of("id", userIdentifier, "name", loginName, "displayName", displayName),
+        "pubKeyCredParams",
+        List.of(Map.of("alg", -7, "type", "public-key"), Map.of("alg", -257, "type", "public-key")),
+        "authenticatorSelection",
+        Map.of("residentKey", "preferred", "userVerification", "preferred"), "excludeCredentials",
+        existingCredentials.stream()
+            .map(c -> Map.<String, Object>of("id", c.getCredentialId(), "type", "public-key"))
+            .toList(),
+        "timeout", 60000, "attestation", "none");
+  }
+}

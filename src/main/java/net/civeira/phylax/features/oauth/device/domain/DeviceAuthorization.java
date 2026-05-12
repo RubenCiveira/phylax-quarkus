@@ -1,0 +1,48 @@
+package net.civeira.phylax.features.oauth.device.domain;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+
+import lombok.Builder;
+import lombok.Getter;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+
+/**
+ * A Device Authorization grant record — RFC 8628.
+ */
+@Builder
+@Getter
+public class DeviceAuthorization {
+
+  private final String deviceCode;
+  private final String userCode;
+  private final String tenant;
+  private final String clientId;
+  private final String scope;
+  private final List<String> audiences;
+  private final int interval;
+  private final OffsetDateTime requestedAt;
+  private final OffsetDateTime expiresAt;
+  private final DeviceAuthorizationStatus status;
+  private final AuthenticationData auth;
+  private final OffsetDateTime lastPollAt;
+
+  public boolean isExpired() {
+    return expiresAt.isBefore(OffsetDateTime.now(ZoneOffset.UTC));
+  }
+
+  public long expiresInSeconds() {
+    long diff = expiresAt.toEpochSecond() - OffsetDateTime.now(ZoneOffset.UTC).toEpochSecond();
+    return Math.max(0, diff);
+  }
+
+  public Optional<AuthenticationData> getAuth() {
+    return Optional.ofNullable(auth);
+  }
+
+  public Optional<OffsetDateTime> getLastPollAt() {
+    return Optional.ofNullable(lastPollAt);
+  }
+}

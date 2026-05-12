@@ -1,0 +1,5 @@
+package net.civeira.phylax.features.oauth.device.domain;
+
+public enum DeviceAuthorizationStatus {
+  PENDING, APPROVED, DENIED
+}

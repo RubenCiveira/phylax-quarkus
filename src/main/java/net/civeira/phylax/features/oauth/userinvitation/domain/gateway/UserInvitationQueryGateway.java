@@ -1,0 +1,12 @@
+package net.civeira.phylax.features.oauth.userinvitation.domain.gateway;
+
+import java.util.Optional;
+
+import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
+
+public interface UserInvitationQueryGateway {
+
+  Optional<UserInvitation> findByTokenHash(String tokenHash, String tenantId);
+
+  Optional<UserInvitation> findPendingByEmail(String email, String tenantId);
+}

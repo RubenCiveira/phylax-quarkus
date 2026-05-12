@@ -1,0 +1,13 @@
+package net.civeira.phylax.features.oauth.profile.domain.gateway;
+
+import java.util.Optional;
+
+import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
+import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
+
+public interface ProfileGateway {
+
+  Optional<OidcProfile> findByUser(String userUid);
+
+  OidcProfile save(String userUid, OidcProfileData data);
+}

@@ -57,10 +57,10 @@ public class EnqueueNotificationUseCase {
   public Message enqueue(EnqueueNotificationCommand cmd) {
     TenantRef tenantRef = cmd.getTenantOptional().orElse(null);
 
-    TemplateRenderInput renderInput = TemplateRenderInput.builder().code(cmd.getTemplateCode())
-        .channel(cmd.getChannel()).tenant(tenantRef)
-        .variables(flattenVariables("", cmd.getVariables()))
-        .outputFormat(TemplateOutputFormat.HTML_EMBEDDED).build();
+    TemplateRenderInput renderInput =
+        TemplateRenderInput.builder().code(cmd.getTemplateCode()).channel(cmd.getChannel())
+            .tenant(tenantRef).variables(flattenVariables("", cmd.getVariables()))
+            .outputFormat(TemplateOutputFormat.HTML_EMBEDDED).build();
 
     RenderedTemplate rendered = renderUsecase.render(renderInput)
         .orElseThrow(() -> new NoSuchElementException("No enabled template found for code="

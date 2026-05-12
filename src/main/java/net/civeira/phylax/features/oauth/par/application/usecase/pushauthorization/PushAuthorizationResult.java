@@ -1,0 +1,4 @@
+package net.civeira.phylax.features.oauth.par.application.usecase.pushauthorization;
+
+public record PushAuthorizationResult(String requestUri, int expiresIn) {
+}

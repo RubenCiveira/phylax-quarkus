@@ -1,0 +1,24 @@
+package net.civeira.phylax.features.oauth.userinvitation.application.usecase.accept;
+
+import java.util.Optional;
+
+import net.civeira.phylax.features.oauth.userinvitation.domain.UserInvitationSession;
+
+public final class InvitationAcceptResult {
+
+  private final String email;
+  private final UserInvitationSession session;
+
+  public InvitationAcceptResult(String email, UserInvitationSession session) {
+    this.email = email;
+    this.session = session;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public Optional<UserInvitationSession> getSession() {
+    return Optional.ofNullable(session);
+  }
+}

@@ -1,0 +1,69 @@
+package net.civeira.phylax.features.oauth.profile.application;
+
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.profile.domain.ActiveSession;
+import net.civeira.phylax.features.oauth.profile.domain.MfaSetup;
+import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
+import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
+import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
+import net.civeira.phylax.features.oauth.profile.domain.gateway.PasswordGateway;
+import net.civeira.phylax.features.oauth.profile.domain.gateway.ProfileGateway;
+import net.civeira.phylax.features.oauth.profile.domain.gateway.SessionsGateway;
+
+/**
+ * Application facade for user profile self-service operations.
+ *
+ * <p>
+ * Profile editing, MFA management, password change, and session revocation all live here. Each
+ * operation is delegated to the appropriate domain gateway.
+ * </p>
+ */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class ProfileService {
+
+  private final ProfileGateway profileGateway;
+  private final MfaGateway mfaGateway;
+  private final PasswordGateway passwordGateway;
+  private final SessionsGateway sessionsGateway;
+
+  public Optional<OidcProfile> getProfile(String userUid) {
+    return profileGateway.findByUser(userUid);
+  }
+
+  public OidcProfile saveProfile(String userUid, OidcProfileData data) {
+    return profileGateway.save(userUid, data);
+  }
+
+  public boolean isMfaEnabled(String userUid, String tenant) {
+    return mfaGateway.isEnabled(userUid, tenant);
+  }
+
+  public MfaSetup buildMfaSetup(String userUid, String tenant) {
+    return mfaGateway.buildSetup(userUid, tenant);
+  }
+
+  public void enableMfa(String userUid, String tenant, String seed, String otp) {
+    mfaGateway.enable(userUid, tenant, seed, otp);
+  }
+
+  public void disableMfa(String userUid, String tenant) {
+    mfaGateway.disable(userUid, tenant);
+  }
+
+  public boolean changePassword(String userUid, String tenant, String oldPass, String newPass) {
+    return passwordGateway.changePassword(userUid, tenant, oldPass, newPass);
+  }
+
+  public List<ActiveSession> listSessions(String userUid) {
+    return sessionsGateway.listByUser(userUid);
+  }
+
+  public void revokeSession(String sessionId) {
+    sessionsGateway.revoke(sessionId);
+  }
+}
