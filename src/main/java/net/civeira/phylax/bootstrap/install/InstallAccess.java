@@ -74,6 +74,7 @@ public class InstallAccess {
 
     TrustedClientChangeSet client = new TrustedClientChangeSet().newUid().code("lughauth-ui")
         .allowAllScopes(Boolean.TRUE).secretOauthPlain("123456").publicAllow(Boolean.TRUE)
+        .tokenEndpointAuthMethod("client_secret_post").m2mTokenTtlSeconds(3600)
         .allowedRedirects(List.of(localhost)).enabled(Boolean.TRUE);
 
     RoleChangeSet adminRole = new RoleChangeSet().newUid().name("ADMIN");

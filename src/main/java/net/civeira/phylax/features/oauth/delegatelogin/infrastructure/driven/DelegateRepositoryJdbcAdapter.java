@@ -61,7 +61,17 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
         prepareStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis() - 60000));
         prepareStatement.execute();
       }
+    } catch (SQLException ex) {
+      if (isMissingTable(ex)) {
+        log.debug("Skipping delegated token cleanup, table _oauth_delegated_codes is missing");
+        return;
+      }
+      throw ex;
     }
+  }
+
+  private static boolean isMissingTable(SQLException ex) {
+    return "42S02".equals(ex.getSQLState()) || ex.getErrorCode() == 1146;
   }
 
   /**
