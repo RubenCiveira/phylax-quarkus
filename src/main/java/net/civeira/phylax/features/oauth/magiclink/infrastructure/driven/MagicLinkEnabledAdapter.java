@@ -1,6 +1,6 @@
 package net.civeira.phylax.features.oauth.magiclink.infrastructure.driven;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkEnabledGateway;
 
 /**
@@ -11,7 +11,7 @@ import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkEnabl
  * feature flag store. Returns {@code false} to disable the feature by default.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 public class MagicLinkEnabledAdapter implements MagicLinkEnabledGateway {
 
   @Override

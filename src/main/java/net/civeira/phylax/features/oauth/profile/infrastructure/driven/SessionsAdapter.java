@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.profile.infrastructure.driven;
 
 import java.util.List;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.profile.domain.ActiveSession;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.SessionsGateway;
@@ -14,7 +14,7 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.SessionsGateway;
  * Marked {@code @Vetoed} — replace with a real implementation backed by the session store.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class SessionsAdapter implements SessionsGateway {
 

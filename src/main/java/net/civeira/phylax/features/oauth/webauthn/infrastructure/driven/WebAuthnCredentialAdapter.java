@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnCredential;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnCredentialGateway;
@@ -16,7 +16,7 @@ import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnCredent
  * Marked {@code @Vetoed} — replace with a real database-backed implementation.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
 

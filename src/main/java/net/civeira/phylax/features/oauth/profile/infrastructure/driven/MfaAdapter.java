@@ -1,6 +1,6 @@
 package net.civeira.phylax.features.oauth.profile.infrastructure.driven;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.profile.domain.MfaSetup;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
@@ -12,7 +12,7 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
  * Marked {@code @Vetoed} — replace with a real implementation that stores and verifies TOTP seeds.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class MfaAdapter implements MfaGateway {
 

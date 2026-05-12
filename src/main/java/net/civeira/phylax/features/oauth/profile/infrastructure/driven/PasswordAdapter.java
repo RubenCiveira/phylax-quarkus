@@ -1,6 +1,6 @@
 package net.civeira.phylax.features.oauth.profile.infrastructure.driven;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.PasswordGateway;
 
@@ -12,7 +12,7 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.PasswordGateway;
  * updates the hash via the access/user BC.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class PasswordAdapter implements PasswordGateway {
 

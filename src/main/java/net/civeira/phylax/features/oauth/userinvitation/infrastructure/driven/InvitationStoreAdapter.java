@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven;
 
 import java.time.OffsetDateTime;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.InvitationStoreGateway;
 
@@ -14,7 +14,7 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.Invitatio
  * {@link net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationWriteRepositoryGateway}.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class InvitationStoreAdapter implements InvitationStoreGateway {
 

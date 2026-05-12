@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.webauthn.infrastructure.driven;
 
 import java.util.Map;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.webauthn.domain.exception.WebAuthnException;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnVerifierGateway;
@@ -15,7 +15,7 @@ import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnVerifie
  * webauthn4j or Yubico java-webauthn-server.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class WebAuthnVerifierAdapter implements WebAuthnVerifierGateway {
 

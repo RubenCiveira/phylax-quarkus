@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.magiclink.infrastructure.driven;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.magiclink.domain.MagicLinkSession;
 import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkSessionGateway;
@@ -15,7 +15,7 @@ import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkSessi
  * returns the session identifier and cookie TTL.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class MagicLinkSessionAdapter implements MagicLinkSessionGateway {
 

@@ -1,6 +1,6 @@
 package net.civeira.phylax.features.oauth.magiclink.infrastructure.driven;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkCodeGateway;
 
@@ -12,7 +12,7 @@ import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkCodeG
  * the same store used by the authorization endpoint.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class MagicLinkCodeAdapter implements MagicLinkCodeGateway {
 

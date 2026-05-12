@@ -1,0 +1,116 @@
+package net.civeira.phylax.features.oauth.par.infrastructure.driven;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.par.domain.ParRequest;
+import net.civeira.phylax.features.oauth.par.domain.gateway.ParRequestGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class ParRequestSqlAdapter implements ParRequestGateway {
+
+  private static final TypeReference<Map<String, String>> MAP_TYPE = new TypeReference<>() {};
+
+  private final DataSource source;
+  private final ObjectMapper mapper;
+
+  @Override
+  public void store(ParRequest request) {
+    purgeExpired();
+    String sql =
+        "INSERT INTO _oauth_par_request (request_uri, tenant_id, client_id, params_json, created_at, expires_at, used_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, request.getRequestUri());
+      stat.setString(2, request.getTenant());
+      stat.setString(3, request.getClientId());
+      stat.setString(4, mapper.writeValueAsString(request.getParams()));
+      stat.setTimestamp(5, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()));
+      stat.setTimestamp(6, Timestamp.from(request.getExpiresAt().toInstant()));
+      stat.setTimestamp(7,
+          request.getUsedAt().map(it -> Timestamp.from(it.toInstant())).orElse(null));
+      stat.execute();
+    } catch (SQLException | JsonProcessingException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public Optional<ParRequest> findByUri(String requestUri, String tenant) {
+    purgeExpired();
+    String sql =
+        "SELECT request_uri, tenant_id, client_id, params_json, expires_at, used_at FROM _oauth_par_request WHERE request_uri = ? AND tenant_id = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, requestUri);
+      stat.setString(2, tenant);
+      try (ResultSet rs = stat.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapRow(rs));
+        }
+      }
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public void markUsed(String requestUri, String tenant) {
+    String sql =
+        "UPDATE _oauth_par_request SET used_at = ? WHERE request_uri = ? AND tenant_id = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setTimestamp(1, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()));
+      stat.setString(2, requestUri);
+      stat.setString(3, tenant);
+      stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  private ParRequest mapRow(ResultSet rs) throws SQLException {
+    String paramsJson = rs.getString("params_json");
+    Map<String, String> params = Map.of();
+    if (paramsJson != null && !paramsJson.isBlank()) {
+      try {
+        params = mapper.readValue(paramsJson, MAP_TYPE);
+      } catch (JsonProcessingException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+    Timestamp usedAt = rs.getTimestamp("used_at");
+    return ParRequest.reconstitute(rs.getString("request_uri"), rs.getString("tenant_id"),
+        rs.getString("client_id"), params,
+        rs.getTimestamp("expires_at").toInstant().atOffset(ZoneOffset.UTC),
+        usedAt != null ? usedAt.toInstant().atOffset(ZoneOffset.UTC) : null);
+  }
+
+  private void purgeExpired() {
+    String sql = "DELETE FROM _oauth_par_request WHERE expires_at < ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setTimestamp(1, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()));
+      stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+}

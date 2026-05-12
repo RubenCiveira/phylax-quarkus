@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.magiclink.infrastructure.driven;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.magiclink.domain.MagicLink;
 import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkGateway;
@@ -15,7 +15,7 @@ import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkGatew
  * cache store with TTL support.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class MagicLinkGatewayAdapter implements MagicLinkGateway {
 

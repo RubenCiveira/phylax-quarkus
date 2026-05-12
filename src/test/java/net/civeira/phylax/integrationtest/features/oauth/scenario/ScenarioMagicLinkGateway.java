@@ -1,0 +1,37 @@
+package net.civeira.phylax.integrationtest.features.oauth.scenario;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import net.civeira.phylax.features.oauth.magiclink.domain.MagicLink;
+import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkGateway;
+
+@Alternative
+@Priority(1)
+@ApplicationScoped
+public class ScenarioMagicLinkGateway implements MagicLinkGateway {
+  private final Map<String, MagicLink> links = new ConcurrentHashMap<>();
+
+  @Override
+  public void store(MagicLink magicLink) {
+    links.put(magicLink.getTokenHash(), magicLink);
+  }
+
+  @Override
+  public Optional<MagicLink> findByHash(String tokenHash, String tenantId) {
+    MagicLink link = links.get(tokenHash);
+    if (link == null) {
+      return Optional.empty();
+    }
+    return Optional.of(link);
+  }
+
+  @Override
+  public void markUsed(String uid) {
+    links.entrySet().removeIf(e -> uid.equals(e.getValue().getUid()));
+  }
+}

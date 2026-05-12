@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.userinvitation.domain.UserInvitationSession;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationSessionGateway;
@@ -14,7 +14,7 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvit
  * Marked {@code @Vetoed} — replace with a real implementation that creates a persistent session.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class UserInvitationSessionAdapter implements UserInvitationSessionGateway {
 

@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven;
 
 import java.time.OffsetDateTime;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationMailGateway;
@@ -15,7 +15,7 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvit
  * {@link net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationUseCase}.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class UserInvitationMailAdapter implements UserInvitationMailGateway {
 

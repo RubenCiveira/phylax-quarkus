@@ -3,7 +3,7 @@ package net.civeira.phylax.features.oauth.profile.infrastructure.driven;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
@@ -17,7 +17,7 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.ProfileGateway;
  * read-model.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class ProfileAdapter implements ProfileGateway {
 

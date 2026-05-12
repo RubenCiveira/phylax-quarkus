@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationQueryGateway;
@@ -15,7 +15,7 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvit
  * {@link net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationReadRepositoryGateway}.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class UserInvitationQueryAdapter implements UserInvitationQueryGateway {
 

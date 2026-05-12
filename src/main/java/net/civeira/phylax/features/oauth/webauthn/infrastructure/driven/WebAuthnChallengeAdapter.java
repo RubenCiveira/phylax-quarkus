@@ -2,7 +2,7 @@ package net.civeira.phylax.features.oauth.webauthn.infrastructure.driven;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnChallenge;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallengeGateway;
@@ -15,7 +15,7 @@ import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallen
  * with TTL support.
  * </p>
  */
-@Vetoed
+@ApplicationScoped
 @Slf4j
 public class WebAuthnChallengeAdapter implements WebAuthnChallengeGateway {
 

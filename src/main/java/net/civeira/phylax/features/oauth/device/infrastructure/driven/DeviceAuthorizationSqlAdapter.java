@@ -1,0 +1,190 @@
+package net.civeira.phylax.features.oauth.device.infrastructure.driven;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.device.domain.DeviceAuthorization;
+import net.civeira.phylax.features.oauth.device.domain.DeviceAuthorizationStatus;
+import net.civeira.phylax.features.oauth.device.domain.gateway.DeviceAuthorizationGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class DeviceAuthorizationSqlAdapter implements DeviceAuthorizationGateway {
+
+  private static final TypeReference<List<String>> LIST_TYPE = new TypeReference<>() {};
+
+  private final DataSource source;
+  private final ObjectMapper mapper;
+
+  @Override
+  public void create(DeviceAuthorization authorization) {
+    purgeExpired();
+    String sql =
+        "INSERT INTO _oauth_device_codes (device_code, user_code, tenant, client_id, scope, audiences, status, auth_data, requested_at, expires_at, last_poll_at, interval_sec) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, authorization.getDeviceCode());
+      stat.setString(2, authorization.getUserCode());
+      stat.setString(3, authorization.getTenant());
+      stat.setString(4, authorization.getClientId());
+      stat.setString(5, authorization.getScope());
+      stat.setString(6, mapper.writeValueAsString(authorization.getAudiences()));
+      stat.setString(7, authorization.getStatus().name());
+      stat.setString(8, null);
+      stat.setTimestamp(9, Timestamp.from(authorization.getRequestedAt().toInstant()));
+      stat.setTimestamp(10, Timestamp.from(authorization.getExpiresAt().toInstant()));
+      stat.setTimestamp(11, null);
+      stat.setInt(12, authorization.getInterval());
+      stat.execute();
+    } catch (SQLException | JsonProcessingException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public Optional<DeviceAuthorization> findByDeviceCode(String deviceCode) {
+    purgeExpired();
+    String sql = "SELECT * FROM _oauth_device_codes WHERE device_code = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, deviceCode);
+      try (ResultSet rs = stat.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapRow(rs));
+        }
+      }
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<DeviceAuthorization> findByUserCode(String tenant, String userCode) {
+    purgeExpired();
+    String sql = "SELECT * FROM _oauth_device_codes WHERE tenant = ? AND user_code = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, tenant);
+      stat.setString(2, userCode);
+      try (ResultSet rs = stat.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapRow(rs));
+        }
+      }
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public boolean approve(String deviceCode, AuthenticationData auth) {
+    String sql = "UPDATE _oauth_device_codes SET status = ?, auth_data = ? WHERE device_code = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, DeviceAuthorizationStatus.APPROVED.name());
+      stat.setString(2, mapper.writeValueAsString(auth));
+      stat.setString(3, deviceCode);
+      return stat.executeUpdate() > 0;
+    } catch (SQLException | JsonProcessingException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public boolean deny(String deviceCode) {
+    String sql = "UPDATE _oauth_device_codes SET status = ? WHERE device_code = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, DeviceAuthorizationStatus.DENIED.name());
+      stat.setString(2, deviceCode);
+      return stat.executeUpdate() > 0;
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public void touchPoll(String deviceCode, OffsetDateTime now) {
+    String sql = "UPDATE _oauth_device_codes SET last_poll_at = ? WHERE device_code = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setTimestamp(1, Timestamp.from(now.toInstant()));
+      stat.setString(2, deviceCode);
+      stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public void consume(String deviceCode) {
+    String sql = "DELETE FROM _oauth_device_codes WHERE device_code = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setString(1, deviceCode);
+      stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  private void purgeExpired() {
+    String sql = "DELETE FROM _oauth_device_codes WHERE expires_at < ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setTimestamp(1, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()));
+      stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  private DeviceAuthorization mapRow(ResultSet rs) throws SQLException {
+    List<String> audiences = List.of();
+    String audiencesJson = rs.getString("audiences");
+    if (audiencesJson != null && !audiencesJson.isBlank()) {
+      try {
+        audiences = mapper.readValue(audiencesJson, LIST_TYPE);
+      } catch (JsonProcessingException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+    AuthenticationData auth = null;
+    String authJson = rs.getString("auth_data");
+    if (authJson != null && !authJson.isBlank()) {
+      try {
+        auth = mapper.readValue(authJson, AuthenticationData.class);
+      } catch (JsonProcessingException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+    Timestamp lastPollAt = rs.getTimestamp("last_poll_at");
+    return DeviceAuthorization.builder().deviceCode(rs.getString("device_code"))
+        .userCode(rs.getString("user_code")).tenant(rs.getString("tenant"))
+        .clientId(rs.getString("client_id")).scope(rs.getString("scope")).audiences(audiences)
+        .interval(rs.getInt("interval_sec"))
+        .requestedAt(rs.getTimestamp("requested_at").toInstant().atOffset(ZoneOffset.UTC))
+        .expiresAt(rs.getTimestamp("expires_at").toInstant().atOffset(ZoneOffset.UTC))
+        .status(DeviceAuthorizationStatus.valueOf(rs.getString("status"))).auth(auth)
+        .lastPollAt(lastPollAt != null ? lastPollAt.toInstant().atOffset(ZoneOffset.UTC) : null)
+        .build();
+  }
+}
