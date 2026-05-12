@@ -28,7 +28,7 @@ public class TenantConfigAuditAdapter implements TenantConfigAuditGateway {
   @Override
   public void created(final String usecase, final TenantConfig tenantConfig,
       final OperationContext context) {
-    writer.record("access_tenant_config_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_access_tenant_config", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("tenantConfig").entityId(tenantConfig.getUid()).newValue(tenantConfig.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -50,7 +50,7 @@ public class TenantConfigAuditAdapter implements TenantConfigAuditGateway {
   @Override
   public void deleted(final String usecase, final TenantConfig tenantConfig,
       final OperationContext context) {
-    writer.record("access_tenant_config_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_access_tenant_config", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("tenantConfig").entityId(tenantConfig.getUid()).oldValue(tenantConfig.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -73,7 +73,7 @@ public class TenantConfigAuditAdapter implements TenantConfigAuditGateway {
   @Override
   public void updated(final String usecase, final TenantConfig tenantConfig,
       final TenantConfig tenantConfigOriginal, final OperationContext context) {
-    writer.record("access_tenant_config_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_access_tenant_config", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("tenantConfig").entityId(tenantConfig.getUid()).newValue(tenantConfig.toMap())
         .oldValue(tenantConfigOriginal.toMap())

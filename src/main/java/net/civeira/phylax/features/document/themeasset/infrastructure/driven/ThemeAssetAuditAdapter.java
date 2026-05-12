@@ -28,7 +28,7 @@ public class ThemeAssetAuditAdapter implements ThemeAssetAuditGateway {
   @Override
   public void created(final String usecase, final ThemeAsset themeAsset,
       final OperationContext context) {
-    writer.record("document_theme_asset_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_document_theme_asset", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("themeAsset")
         .entityId(themeAsset.getUid()).newValue(themeAsset.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -50,7 +50,7 @@ public class ThemeAssetAuditAdapter implements ThemeAssetAuditGateway {
   @Override
   public void deleted(final String usecase, final ThemeAsset themeAsset,
       final OperationContext context) {
-    writer.record("document_theme_asset_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_document_theme_asset", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("themeAsset")
         .entityId(themeAsset.getUid()).oldValue(themeAsset.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -73,7 +73,7 @@ public class ThemeAssetAuditAdapter implements ThemeAssetAuditGateway {
   @Override
   public void updated(final String usecase, final ThemeAsset themeAsset,
       final ThemeAsset themeAssetOriginal, final OperationContext context) {
-    writer.record("document_theme_asset_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_document_theme_asset", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("themeAsset")
         .entityId(themeAsset.getUid()).newValue(themeAsset.toMap())
         .oldValue(themeAssetOriginal.toMap())

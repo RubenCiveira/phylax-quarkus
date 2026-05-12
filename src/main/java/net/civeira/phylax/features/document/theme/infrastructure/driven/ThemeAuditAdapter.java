@@ -27,7 +27,7 @@ public class ThemeAuditAdapter implements ThemeAuditGateway {
    */
   @Override
   public void created(final String usecase, final Theme theme, final OperationContext context) {
-    writer.record("document_theme_audit", AuditEvent.builder().operation("create").usecase(usecase)
+    writer.record("_audit_document_theme", AuditEvent.builder().operation("create").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("theme")
         .entityId(theme.getUid()).newValue(theme.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -48,7 +48,7 @@ public class ThemeAuditAdapter implements ThemeAuditGateway {
    */
   @Override
   public void deleted(final String usecase, final Theme theme, final OperationContext context) {
-    writer.record("document_theme_audit", AuditEvent.builder().operation("delete").usecase(usecase)
+    writer.record("_audit_document_theme", AuditEvent.builder().operation("delete").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("theme")
         .entityId(theme.getUid()).oldValue(theme.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -71,7 +71,7 @@ public class ThemeAuditAdapter implements ThemeAuditGateway {
   @Override
   public void updated(final String usecase, final Theme theme, final Theme themeOriginal,
       final OperationContext context) {
-    writer.record("document_theme_audit", AuditEvent.builder().operation("update").usecase(usecase)
+    writer.record("_audit_document_theme", AuditEvent.builder().operation("update").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("theme")
         .entityId(theme.getUid()).newValue(theme.toMap()).oldValue(themeOriginal.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))

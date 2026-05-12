@@ -27,7 +27,7 @@ public class RoleAuditAdapter implements RoleAuditGateway {
    */
   @Override
   public void created(final String usecase, final Role role, final OperationContext context) {
-    writer.record("access_role_audit", AuditEvent.builder().operation("create").usecase(usecase)
+    writer.record("_audit_access_role", AuditEvent.builder().operation("create").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("role")
         .entityId(role.getUid()).newValue(role.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -48,7 +48,7 @@ public class RoleAuditAdapter implements RoleAuditGateway {
    */
   @Override
   public void deleted(final String usecase, final Role role, final OperationContext context) {
-    writer.record("access_role_audit", AuditEvent.builder().operation("delete").usecase(usecase)
+    writer.record("_audit_access_role", AuditEvent.builder().operation("delete").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("role")
         .entityId(role.getUid()).oldValue(role.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -71,7 +71,7 @@ public class RoleAuditAdapter implements RoleAuditGateway {
   @Override
   public void updated(final String usecase, final Role role, final Role roleOriginal,
       final OperationContext context) {
-    writer.record("access_role_audit", AuditEvent.builder().operation("update").usecase(usecase)
+    writer.record("_audit_access_role", AuditEvent.builder().operation("update").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("role")
         .entityId(role.getUid()).newValue(role.toMap()).oldValue(roleOriginal.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))

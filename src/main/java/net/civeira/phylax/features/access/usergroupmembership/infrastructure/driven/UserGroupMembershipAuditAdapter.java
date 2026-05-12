@@ -28,7 +28,7 @@ public class UserGroupMembershipAuditAdapter implements UserGroupMembershipAudit
   @Override
   public void created(final String usecase, final UserGroupMembership userGroupMembership,
       final OperationContext context) {
-    writer.record("access_user_group_membership_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_access_user_group_membership", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("userGroupMembership").entityId(userGroupMembership.getUid())
         .newValue(userGroupMembership.toMap())
@@ -51,7 +51,7 @@ public class UserGroupMembershipAuditAdapter implements UserGroupMembershipAudit
   @Override
   public void deleted(final String usecase, final UserGroupMembership userGroupMembership,
       final OperationContext context) {
-    writer.record("access_user_group_membership_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_access_user_group_membership", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("userGroupMembership").entityId(userGroupMembership.getUid())
         .oldValue(userGroupMembership.toMap())
@@ -75,7 +75,7 @@ public class UserGroupMembershipAuditAdapter implements UserGroupMembershipAudit
   @Override
   public void updated(final String usecase, final UserGroupMembership userGroupMembership,
       final UserGroupMembership userGroupMembershipOriginal, final OperationContext context) {
-    writer.record("access_user_group_membership_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_access_user_group_membership", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("userGroupMembership").entityId(userGroupMembership.getUid())
         .newValue(userGroupMembership.toMap()).oldValue(userGroupMembershipOriginal.toMap())

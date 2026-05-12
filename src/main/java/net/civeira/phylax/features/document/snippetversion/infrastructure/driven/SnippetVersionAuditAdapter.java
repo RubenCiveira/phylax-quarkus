@@ -28,7 +28,7 @@ public class SnippetVersionAuditAdapter implements SnippetVersionAuditGateway {
   @Override
   public void created(final String usecase, final SnippetVersion snippetVersion,
       final OperationContext context) {
-    writer.record("document_snippet_version_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_document_snippet_version", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("snippetVersion").entityId(snippetVersion.getUid())
         .newValue(snippetVersion.toMap())
@@ -51,7 +51,7 @@ public class SnippetVersionAuditAdapter implements SnippetVersionAuditGateway {
   @Override
   public void deleted(final String usecase, final SnippetVersion snippetVersion,
       final OperationContext context) {
-    writer.record("document_snippet_version_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_document_snippet_version", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("snippetVersion").entityId(snippetVersion.getUid())
         .oldValue(snippetVersion.toMap())
@@ -75,7 +75,7 @@ public class SnippetVersionAuditAdapter implements SnippetVersionAuditGateway {
   @Override
   public void updated(final String usecase, final SnippetVersion snippetVersion,
       final SnippetVersion snippetVersionOriginal, final OperationContext context) {
-    writer.record("document_snippet_version_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_document_snippet_version", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("snippetVersion").entityId(snippetVersion.getUid())
         .newValue(snippetVersion.toMap()).oldValue(snippetVersionOriginal.toMap())

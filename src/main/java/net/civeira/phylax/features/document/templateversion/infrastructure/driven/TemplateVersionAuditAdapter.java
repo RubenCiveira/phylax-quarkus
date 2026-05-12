@@ -28,7 +28,7 @@ public class TemplateVersionAuditAdapter implements TemplateVersionAuditGateway 
   @Override
   public void created(final String usecase, final TemplateVersion templateVersion,
       final OperationContext context) {
-    writer.record("document_template_version_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_document_template_version", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateVersion").entityId(templateVersion.getUid())
         .newValue(templateVersion.toMap())
@@ -51,7 +51,7 @@ public class TemplateVersionAuditAdapter implements TemplateVersionAuditGateway 
   @Override
   public void deleted(final String usecase, final TemplateVersion templateVersion,
       final OperationContext context) {
-    writer.record("document_template_version_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_document_template_version", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateVersion").entityId(templateVersion.getUid())
         .oldValue(templateVersion.toMap())
@@ -75,7 +75,7 @@ public class TemplateVersionAuditAdapter implements TemplateVersionAuditGateway 
   @Override
   public void updated(final String usecase, final TemplateVersion templateVersion,
       final TemplateVersion templateVersionOriginal, final OperationContext context) {
-    writer.record("document_template_version_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_document_template_version", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateVersion").entityId(templateVersion.getUid())
         .newValue(templateVersion.toMap()).oldValue(templateVersionOriginal.toMap())

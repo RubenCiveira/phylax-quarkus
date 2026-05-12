@@ -28,7 +28,7 @@ public class ConsentPurposeAuditAdapter implements ConsentPurposeAuditGateway {
   @Override
   public void created(final String usecase, final ConsentPurpose consentPurpose,
       final OperationContext context) {
-    writer.record("access_consent_purpose_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_access_consent_purpose", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("consentPurpose").entityId(consentPurpose.getUid())
         .newValue(consentPurpose.toMap())
@@ -51,7 +51,7 @@ public class ConsentPurposeAuditAdapter implements ConsentPurposeAuditGateway {
   @Override
   public void deleted(final String usecase, final ConsentPurpose consentPurpose,
       final OperationContext context) {
-    writer.record("access_consent_purpose_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_access_consent_purpose", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("consentPurpose").entityId(consentPurpose.getUid())
         .oldValue(consentPurpose.toMap())
@@ -75,7 +75,7 @@ public class ConsentPurposeAuditAdapter implements ConsentPurposeAuditGateway {
   @Override
   public void updated(final String usecase, final ConsentPurpose consentPurpose,
       final ConsentPurpose consentPurposeOriginal, final OperationContext context) {
-    writer.record("access_consent_purpose_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_access_consent_purpose", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("consentPurpose").entityId(consentPurpose.getUid())
         .newValue(consentPurpose.toMap()).oldValue(consentPurposeOriginal.toMap())

@@ -5,7 +5,7 @@ Tenant (xref:#entidad-tenant[Tenant])::
 null = global, valor = override
 Host* (string)::
 El host de smtp outbound config
-Port* (boolean)::
+Port* (integer)::
 El port de smtp outbound config
 Login* (string)::
 El login de smtp outbound config

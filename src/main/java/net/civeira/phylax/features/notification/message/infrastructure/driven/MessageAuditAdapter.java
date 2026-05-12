@@ -27,7 +27,7 @@ public class MessageAuditAdapter implements MessageAuditGateway {
    */
   @Override
   public void created(final String usecase, final Message message, final OperationContext context) {
-    writer.record("notification_message_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_notification_message", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("message")
         .entityId(message.getUid()).newValue(message.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -48,7 +48,7 @@ public class MessageAuditAdapter implements MessageAuditGateway {
    */
   @Override
   public void deleted(final String usecase, final Message message, final OperationContext context) {
-    writer.record("notification_message_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_notification_message", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("message")
         .entityId(message.getUid()).oldValue(message.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -71,7 +71,7 @@ public class MessageAuditAdapter implements MessageAuditGateway {
   @Override
   public void updated(final String usecase, final Message message, final Message messageOriginal,
       final OperationContext context) {
-    writer.record("notification_message_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_notification_message", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("message")
         .entityId(message.getUid()).newValue(message.toMap()).oldValue(messageOriginal.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))

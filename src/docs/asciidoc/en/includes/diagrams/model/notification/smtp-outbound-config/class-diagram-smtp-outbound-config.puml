@@ -22,7 +22,7 @@ disable()
 class notification.SmtpOutboundConfig{
 uid:string
 host:string
-port:boolean
+port:integer
 login:string
 password:string
 senderName:string

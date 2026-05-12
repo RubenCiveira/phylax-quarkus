@@ -28,7 +28,7 @@ public class UserRoleAssignamentAuditAdapter implements UserRoleAssignamentAudit
   @Override
   public void created(final String usecase, final UserRoleAssignament userRoleAssignament,
       final OperationContext context) {
-    writer.record("access_user_role_assignament_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_access_user_role_assignament", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("userRoleAssignament").entityId(userRoleAssignament.getUid())
         .newValue(userRoleAssignament.toMap())
@@ -51,7 +51,7 @@ public class UserRoleAssignamentAuditAdapter implements UserRoleAssignamentAudit
   @Override
   public void deleted(final String usecase, final UserRoleAssignament userRoleAssignament,
       final OperationContext context) {
-    writer.record("access_user_role_assignament_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_access_user_role_assignament", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("userRoleAssignament").entityId(userRoleAssignament.getUid())
         .oldValue(userRoleAssignament.toMap())
@@ -75,7 +75,7 @@ public class UserRoleAssignamentAuditAdapter implements UserRoleAssignamentAudit
   @Override
   public void updated(final String usecase, final UserRoleAssignament userRoleAssignament,
       final UserRoleAssignament userRoleAssignamentOriginal, final OperationContext context) {
-    writer.record("access_user_role_assignament_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_access_user_role_assignament", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("userRoleAssignament").entityId(userRoleAssignament.getUid())
         .newValue(userRoleAssignament.toMap()).oldValue(userRoleAssignamentOriginal.toMap())

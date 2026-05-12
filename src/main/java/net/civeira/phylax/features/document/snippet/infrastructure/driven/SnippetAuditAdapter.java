@@ -27,7 +27,7 @@ public class SnippetAuditAdapter implements SnippetAuditGateway {
    */
   @Override
   public void created(final String usecase, final Snippet snippet, final OperationContext context) {
-    writer.record("document_snippet_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_document_snippet", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("snippet")
         .entityId(snippet.getUid()).newValue(snippet.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -48,7 +48,7 @@ public class SnippetAuditAdapter implements SnippetAuditGateway {
    */
   @Override
   public void deleted(final String usecase, final Snippet snippet, final OperationContext context) {
-    writer.record("document_snippet_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_document_snippet", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("snippet")
         .entityId(snippet.getUid()).oldValue(snippet.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -71,7 +71,7 @@ public class SnippetAuditAdapter implements SnippetAuditGateway {
   @Override
   public void updated(final String usecase, final Snippet snippet, final Snippet snippetOriginal,
       final OperationContext context) {
-    writer.record("document_snippet_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_document_snippet", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId()).entityType("snippet")
         .entityId(snippet.getUid()).newValue(snippet.toMap()).oldValue(snippetOriginal.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))

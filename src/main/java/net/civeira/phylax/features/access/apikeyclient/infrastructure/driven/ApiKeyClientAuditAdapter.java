@@ -28,7 +28,7 @@ public class ApiKeyClientAuditAdapter implements ApiKeyClientAuditGateway {
   @Override
   public void created(final String usecase, final ApiKeyClient apiKeyClient,
       final OperationContext context) {
-    writer.record("access_api_key_client_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_access_api_key_client", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("apiKeyClient").entityId(apiKeyClient.getUid()).newValue(apiKeyClient.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -50,7 +50,7 @@ public class ApiKeyClientAuditAdapter implements ApiKeyClientAuditGateway {
   @Override
   public void deleted(final String usecase, final ApiKeyClient apiKeyClient,
       final OperationContext context) {
-    writer.record("access_api_key_client_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_access_api_key_client", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("apiKeyClient").entityId(apiKeyClient.getUid()).oldValue(apiKeyClient.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -73,7 +73,7 @@ public class ApiKeyClientAuditAdapter implements ApiKeyClientAuditGateway {
   @Override
   public void updated(final String usecase, final ApiKeyClient apiKeyClient,
       final ApiKeyClient apiKeyClientOriginal, final OperationContext context) {
-    writer.record("access_api_key_client_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_access_api_key_client", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("apiKeyClient").entityId(apiKeyClient.getUid()).newValue(apiKeyClient.toMap())
         .oldValue(apiKeyClientOriginal.toMap())

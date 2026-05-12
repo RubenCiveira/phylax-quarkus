@@ -27,7 +27,7 @@ public class UserAuditAdapter implements UserAuditGateway {
    */
   @Override
   public void created(final String usecase, final User user, final OperationContext context) {
-    writer.record("access_user_audit", AuditEvent.builder().operation("create").usecase(usecase)
+    writer.record("_audit_access_user", AuditEvent.builder().operation("create").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("user")
         .entityId(user.getUid()).newValue(user.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -48,7 +48,7 @@ public class UserAuditAdapter implements UserAuditGateway {
    */
   @Override
   public void deleted(final String usecase, final User user, final OperationContext context) {
-    writer.record("access_user_audit", AuditEvent.builder().operation("delete").usecase(usecase)
+    writer.record("_audit_access_user", AuditEvent.builder().operation("delete").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("user")
         .entityId(user.getUid()).oldValue(user.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -71,7 +71,7 @@ public class UserAuditAdapter implements UserAuditGateway {
   @Override
   public void updated(final String usecase, final User user, final User userOriginal,
       final OperationContext context) {
-    writer.record("access_user_audit", AuditEvent.builder().operation("update").usecase(usecase)
+    writer.record("_audit_access_user", AuditEvent.builder().operation("update").usecase(usecase)
         .traceId(currentTraceId()).spanId(currentSpanId()).entityType("user")
         .entityId(user.getUid()).newValue(user.toMap()).oldValue(userOriginal.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))

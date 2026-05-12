@@ -28,7 +28,7 @@ public class SmtpOutboundConfigAuditAdapter implements SmtpOutboundConfigAuditGa
   @Override
   public void created(final String usecase, final SmtpOutboundConfig smtpOutboundConfig,
       final OperationContext context) {
-    writer.record("notification_smtp_outbound_config_audit", AuditEvent.builder()
+    writer.record("_audit_notification_smtp_outbound_config", AuditEvent.builder()
         .operation("create").usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("smtpOutboundConfig").entityId(smtpOutboundConfig.getUid())
         .newValue(smtpOutboundConfig.toMap())
@@ -51,7 +51,7 @@ public class SmtpOutboundConfigAuditAdapter implements SmtpOutboundConfigAuditGa
   @Override
   public void deleted(final String usecase, final SmtpOutboundConfig smtpOutboundConfig,
       final OperationContext context) {
-    writer.record("notification_smtp_outbound_config_audit", AuditEvent.builder()
+    writer.record("_audit_notification_smtp_outbound_config", AuditEvent.builder()
         .operation("delete").usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("smtpOutboundConfig").entityId(smtpOutboundConfig.getUid())
         .oldValue(smtpOutboundConfig.toMap())
@@ -75,7 +75,7 @@ public class SmtpOutboundConfigAuditAdapter implements SmtpOutboundConfigAuditGa
   @Override
   public void updated(final String usecase, final SmtpOutboundConfig smtpOutboundConfig,
       final SmtpOutboundConfig smtpOutboundConfigOriginal, final OperationContext context) {
-    writer.record("notification_smtp_outbound_config_audit", AuditEvent.builder()
+    writer.record("_audit_notification_smtp_outbound_config", AuditEvent.builder()
         .operation("update").usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("smtpOutboundConfig").entityId(smtpOutboundConfig.getUid())
         .newValue(smtpOutboundConfig.toMap()).oldValue(smtpOutboundConfigOriginal.toMap())

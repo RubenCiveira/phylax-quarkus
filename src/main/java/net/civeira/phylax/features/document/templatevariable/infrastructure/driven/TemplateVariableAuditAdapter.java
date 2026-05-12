@@ -28,7 +28,7 @@ public class TemplateVariableAuditAdapter implements TemplateVariableAuditGatewa
   @Override
   public void created(final String usecase, final TemplateVariable templateVariable,
       final OperationContext context) {
-    writer.record("document_template_variable_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_document_template_variable", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateVariable").entityId(templateVariable.getUid())
         .newValue(templateVariable.toMap())
@@ -51,7 +51,7 @@ public class TemplateVariableAuditAdapter implements TemplateVariableAuditGatewa
   @Override
   public void deleted(final String usecase, final TemplateVariable templateVariable,
       final OperationContext context) {
-    writer.record("document_template_variable_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_document_template_variable", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateVariable").entityId(templateVariable.getUid())
         .oldValue(templateVariable.toMap())
@@ -75,7 +75,7 @@ public class TemplateVariableAuditAdapter implements TemplateVariableAuditGatewa
   @Override
   public void updated(final String usecase, final TemplateVariable templateVariable,
       final TemplateVariable templateVariableOriginal, final OperationContext context) {
-    writer.record("document_template_variable_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_document_template_variable", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateVariable").entityId(templateVariable.getUid())
         .newValue(templateVariable.toMap()).oldValue(templateVariableOriginal.toMap())

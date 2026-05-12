@@ -28,7 +28,7 @@ public class TenantLoginProviderAuditAdapter implements TenantLoginProviderAudit
   @Override
   public void created(final String usecase, final TenantLoginProvider tenantLoginProvider,
       final OperationContext context) {
-    writer.record("access_tenant_login_provider_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_access_tenant_login_provider", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("tenantLoginProvider").entityId(tenantLoginProvider.getUid())
         .newValue(tenantLoginProvider.toMap())
@@ -51,7 +51,7 @@ public class TenantLoginProviderAuditAdapter implements TenantLoginProviderAudit
   @Override
   public void deleted(final String usecase, final TenantLoginProvider tenantLoginProvider,
       final OperationContext context) {
-    writer.record("access_tenant_login_provider_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_access_tenant_login_provider", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("tenantLoginProvider").entityId(tenantLoginProvider.getUid())
         .oldValue(tenantLoginProvider.toMap())
@@ -75,7 +75,7 @@ public class TenantLoginProviderAuditAdapter implements TenantLoginProviderAudit
   @Override
   public void updated(final String usecase, final TenantLoginProvider tenantLoginProvider,
       final TenantLoginProvider tenantLoginProviderOriginal, final OperationContext context) {
-    writer.record("access_tenant_login_provider_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_access_tenant_login_provider", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("tenantLoginProvider").entityId(tenantLoginProvider.getUid())
         .newValue(tenantLoginProvider.toMap()).oldValue(tenantLoginProviderOriginal.toMap())

@@ -458,7 +458,7 @@ access.User "1"  o--  "N*" access.UserInvitation: acceptedBy
 class notification.SmtpOutboundConfig{
 uid:string
 host:string
-port:boolean
+port:integer
 login:string
 password:string
 senderName:string

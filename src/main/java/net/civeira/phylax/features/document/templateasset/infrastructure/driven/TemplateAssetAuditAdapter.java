@@ -28,7 +28,7 @@ public class TemplateAssetAuditAdapter implements TemplateAssetAuditGateway {
   @Override
   public void created(final String usecase, final TemplateAsset templateAsset,
       final OperationContext context) {
-    writer.record("document_template_asset_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_document_template_asset", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateAsset").entityId(templateAsset.getUid())
         .newValue(templateAsset.toMap())
@@ -51,7 +51,7 @@ public class TemplateAssetAuditAdapter implements TemplateAssetAuditGateway {
   @Override
   public void deleted(final String usecase, final TemplateAsset templateAsset,
       final OperationContext context) {
-    writer.record("document_template_asset_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_document_template_asset", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateAsset").entityId(templateAsset.getUid())
         .oldValue(templateAsset.toMap())
@@ -75,7 +75,7 @@ public class TemplateAssetAuditAdapter implements TemplateAssetAuditGateway {
   @Override
   public void updated(final String usecase, final TemplateAsset templateAsset,
       final TemplateAsset templateAssetOriginal, final OperationContext context) {
-    writer.record("document_template_asset_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_document_template_asset", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("templateAsset").entityId(templateAsset.getUid())
         .newValue(templateAsset.toMap()).oldValue(templateAssetOriginal.toMap())

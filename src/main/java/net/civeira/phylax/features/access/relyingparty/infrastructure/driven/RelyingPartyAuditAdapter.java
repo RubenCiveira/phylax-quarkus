@@ -28,7 +28,7 @@ public class RelyingPartyAuditAdapter implements RelyingPartyAuditGateway {
   @Override
   public void created(final String usecase, final RelyingParty relyingParty,
       final OperationContext context) {
-    writer.record("access_relying_party_audit", AuditEvent.builder().operation("create")
+    writer.record("_audit_access_relying_party", AuditEvent.builder().operation("create")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("relyingParty").entityId(relyingParty.getUid()).newValue(relyingParty.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -50,7 +50,7 @@ public class RelyingPartyAuditAdapter implements RelyingPartyAuditGateway {
   @Override
   public void deleted(final String usecase, final RelyingParty relyingParty,
       final OperationContext context) {
-    writer.record("access_relying_party_audit", AuditEvent.builder().operation("delete")
+    writer.record("_audit_access_relying_party", AuditEvent.builder().operation("delete")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("relyingParty").entityId(relyingParty.getUid()).oldValue(relyingParty.toMap())
         .performedBy(context.getActor().getName().orElse("<<no-user>>"))
@@ -73,7 +73,7 @@ public class RelyingPartyAuditAdapter implements RelyingPartyAuditGateway {
   @Override
   public void updated(final String usecase, final RelyingParty relyingParty,
       final RelyingParty relyingPartyOriginal, final OperationContext context) {
-    writer.record("access_relying_party_audit", AuditEvent.builder().operation("update")
+    writer.record("_audit_access_relying_party", AuditEvent.builder().operation("update")
         .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
         .entityType("relyingParty").entityId(relyingParty.getUid()).newValue(relyingParty.toMap())
         .oldValue(relyingPartyOriginal.toMap())
