@@ -1,0 +1,102 @@
+package net.civeira.phylax.features.oauth.consent.infrastructure.driven;
+
+import java.time.OffsetDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.consentpurpose.domain.ConsentPurpose;
+import net.civeira.phylax.features.access.consentpurpose.domain.ConsentPurposeReference;
+import net.civeira.phylax.features.access.consentpurpose.domain.gateway.ConsentPurposeFilter;
+import net.civeira.phylax.features.access.consentpurpose.domain.gateway.ConsentPurposeReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.userconsentpurposes.domain.UserConsentPurposes;
+import net.civeira.phylax.features.access.userconsentpurposes.domain.UserConsentPurposesChangeSet;
+import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesFilter;
+import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesReadRepositoryGateway;
+import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesWriteRepositoryGateway;
+import net.civeira.phylax.features.oauth.consent.domain.GdprConsentPurposeItem;
+import net.civeira.phylax.features.oauth.consent.domain.gateway.GdprConsentGateway;
+
+@Transactional
+@ApplicationScoped
+@RequiredArgsConstructor
+public class GdprConsentAdapter implements GdprConsentGateway {
+
+  private final TenantReadRepositoryGateway tenants;
+  private final UserReadRepositoryGateway users;
+  private final ConsentPurposeReadRepositoryGateway purposes;
+  private final UserConsentPurposesReadRepositoryGateway userPurposes;
+  private final UserConsentPurposesWriteRepositoryGateway userPurposesWriter;
+
+  @Override
+  public List<GdprConsentPurposeItem> pendingPurposes(String tenant, String username) {
+    Optional<User> userOpt = resolveUser(tenant, username);
+    if (userOpt.isEmpty()) {
+      return List.of();
+    }
+    User user = userOpt.get();
+    return purposes.list(ConsentPurposeFilter.builder().tenant(user.getTenant()).build()).stream()
+        .filter(purpose -> purpose.getActivationDate().isBefore(OffsetDateTime.now()))
+        .sorted(Comparator.comparing(ConsentPurpose::getActivationDate))
+        .filter(purpose -> userPurposes
+            .find(UserConsentPurposesFilter.builder().consentPurpose(purpose).user(user).build())
+            .isEmpty())
+        .map(purpose -> new GdprConsentPurposeItem(purpose.getUid(), purpose.getKey().toString(),
+            purpose.getTitle(), purpose.getDescription(), purpose.isRequired()))
+        .toList();
+  }
+
+  @Override
+  public void storePurposeDecisions(String tenant, String username,
+      Map<String, Boolean> decisionsByPurposeUid, String ipAddress, String userAgent) {
+    Optional<User> userOpt = resolveUser(tenant, username);
+    if (userOpt.isEmpty() || decisionsByPurposeUid == null || decisionsByPurposeUid.isEmpty()) {
+      return;
+    }
+    User user = userOpt.get();
+    for (Map.Entry<String, Boolean> entry : decisionsByPurposeUid.entrySet()) {
+      String purposeUid = entry.getKey();
+      Optional<ConsentPurpose> purposeOpt = purposes.retrieve(purposeUid,
+          Optional.of(ConsentPurposeFilter.builder().tenant(user.getTenant()).build()));
+      if (purposeOpt.isEmpty()) {
+        continue;
+      }
+      ConsentPurpose purpose = purposeOpt.get();
+      boolean exists = userPurposes
+          .find(UserConsentPurposesFilter.builder().consentPurpose(purpose).user(user).build())
+          .isPresent();
+      if (exists) {
+        continue;
+      }
+      UserConsentPurposesChangeSet changeSet = new UserConsentPurposesChangeSet().newUid()
+          .user(user).consentPurpose(ConsentPurposeReference.of(purposeUid))
+          .granted(Boolean.TRUE.equals(entry.getValue())).decisionAt(OffsetDateTime.now());
+      if (ipAddress != null && !ipAddress.isBlank()) {
+        changeSet.ipAddress(ipAddress);
+      }
+      if (userAgent != null && !userAgent.isBlank()) {
+        changeSet.userAgent(userAgent);
+      }
+      UserConsentPurposes entity = UserConsentPurposes.create(changeSet);
+      userPurposesWriter.create(entity);
+    }
+  }
+
+  private Optional<User> resolveUser(String tenantName, String username) {
+    Optional<Tenant> tenant = tenants.find(TenantFilter.builder().name(tenantName).build());
+    if (tenant.isEmpty()) {
+      return Optional.empty();
+    }
+    return users.find(UserFilter.builder().tenant(tenant.get()).name(username).build());
+  }
+}
