@@ -24,8 +24,8 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
-import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.application.DelegateLogin;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
 
 /**
  * OIDC step for delegated login callbacks.

@@ -25,11 +25,11 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.RequestInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.ResponseInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedLoginEndpoint;
+import net.civeira.phylax.features.oauth.delegatelogin.application.DelegateLogin;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.RequestInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.ResponseInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedLoginEndpoint;
 
 /**
  * HTML controller that drives delegated login redirects and callbacks.

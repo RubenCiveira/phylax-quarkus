@@ -16,7 +16,7 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
@@ -173,7 +173,11 @@ public class RegistrationStep implements OidcStep {
    * Renders the registration verification form (user enters code from email).
    */
   public Response doPaintVerifyForm(StepInput input, String email, String regcode, String msg) {
-    String js = securer.configureScripts(securer.addSign("sign"));
+    String js = securer.configureScripts(securer.addSign("sign"),
+        securer.cypher(
+            Arrays.asList(EncrytFieldTransfer.builder().from("type_regcode").to("regcode").build()),
+            "verify-register"),
+        securer.focusOn("type_regcode"));
     Locale locale = input.locale();
 
     String title = AuthorizeHtml.i18n(locale, "register-verify.title");
@@ -189,8 +193,10 @@ public class RegistrationStep implements OidcStep {
         .secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Verify Registration",
             js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
                 + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
-                + "<form method=\"POST\">" + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-                + "<label>" + codeLabel + " <input type=\"text\" name=\"regcode\" value=\""
+                + "<form id=\"verify-register\" method=\"POST\">"
+                + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<input type=\"hidden\" name=\"regcode\" id=\"regcode\" value=\"\" />"
+                + "<label>" + codeLabel + " <input type=\"text\" id=\"type_regcode\" value=\""
                 + nullToEmpty(regcode) + "\" /></label>"
                 + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
                 + "\" />" + "</form>" + "<form method=\"POST\">"
@@ -203,7 +209,7 @@ public class RegistrationStep implements OidcStep {
    * Executes registration code verification and resumes the auth flow.
    */
   public Optional<StepOutcome> doExecVerify(StepInput input, String email) {
-    String code = AuthorizeHtml.first(input.getFormParams(), "regcode");
+    String code = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "regcode"));
     Optional<String> verifiedUsername =
         registerUserUsecase.verifyRegister(input.getRequest().getTenant(), code);
     if (verifiedUsername.isPresent()) {

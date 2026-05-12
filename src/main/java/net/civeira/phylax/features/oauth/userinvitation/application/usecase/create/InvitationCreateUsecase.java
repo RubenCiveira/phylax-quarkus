@@ -70,11 +70,12 @@ public class InvitationCreateUsecase {
   }
 
   private static String buildAcceptUrl(InvitationCreateParams params, String rawToken) {
-    StringBuilder url = new StringBuilder(params.getBaseUrl().replaceAll("/+$", "") + "/oauth/openid/"
-        + java.net.URLEncoder.encode(params.getTenantName(),
-            java.nio.charset.StandardCharsets.UTF_8)
-        + "/invitation/accept?token="
-        + java.net.URLEncoder.encode(rawToken, java.nio.charset.StandardCharsets.UTF_8));
+    StringBuilder url =
+        new StringBuilder(params.getBaseUrl().replaceAll("/+$", "") + "/oauth/openid/"
+            + java.net.URLEncoder.encode(params.getTenantName(),
+                java.nio.charset.StandardCharsets.UTF_8)
+            + "/invitation/accept?token="
+            + java.net.URLEncoder.encode(rawToken, java.nio.charset.StandardCharsets.UTF_8));
     if (!params.getClientId().isBlank()) {
       url.append("&client_id=").append(java.net.URLEncoder.encode(params.getClientId(),
           java.nio.charset.StandardCharsets.UTF_8));

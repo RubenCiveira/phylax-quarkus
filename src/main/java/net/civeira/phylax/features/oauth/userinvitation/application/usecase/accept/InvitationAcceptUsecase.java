@@ -40,7 +40,7 @@ public class InvitationAcceptUsecase {
         () -> new IllegalArgumentException("This invitation is invalid or has expired."));
 
     var expired = invitation.getExpiredAt().isBefore(OffsetDateTime.now(ZoneOffset.UTC));
-    
+
     if (invitation.getStatus().orElse(null) != UserInvitationStatusOptions.PENDING || expired) {
       throw new IllegalArgumentException("This invitation is invalid or has expired.");
     }

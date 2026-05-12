@@ -6,8 +6,25 @@ login:
   password: "Password"
   recover-label: "Forgot password?"
   register-label: "Create account"
+  magic-link-label: "Sign in link"
   enter: "Sign in"
   wrong-credentials: "Wrong username or password"
+
+magic-link:
+  ask:
+    title: "Email sign in"
+    error-format: "{0}"
+    disabled: "Magic link login is not enabled"
+    help: "Enter your email and we will send you a secure sign-in link"
+    email: "Email"
+    send: "Send link"
+    back-label: "Back to login"
+    back-text: "{0}"
+  sent:
+    title: "Check your inbox"
+    help: "If the account exists, we sent a sign-in link"
+    back-label: "Back to login"
+    back-text: "{0}"
 
 recover:
   title: "Password recovery"
@@ -19,6 +36,13 @@ recover:
   back-text: "{0}"
   save-error: "Recovery could not be started"
   wrong-code: "Wrong code"
+  verify-title: "Reset password"
+  verify-help: "Enter the verification code and your new password"
+  verify-code: "Verification code"
+  verify-password: "New password"
+  verify-send: "Change password"
+  verify-back-label: "Back to login"
+  verify-back-text: "{0}"
 
 mfa:
   title: "Multi-factor authentication"
@@ -89,3 +113,20 @@ register-verify:
   send: "Verify"
   back-label: "Back to login"
   back-text: "{0}"
+
+device:
+  title: "Device login"
+  ask-help: "Enter the user code shown in your terminal"
+  user-code: "User code"
+  continue: "Continue"
+  invalid-code: "Invalid user code"
+  expired-code: "Expired user code"
+  already-approved: "Device already approved"
+  denied: "Device access denied"
+  pending-help: "Sign in from this browser and submit again to approve this device authorization"
+  code-required: "User code is required"
+  not-pending: "Device code is no longer pending"
+  auth-required: "Authentication required to approve device"
+  approved: "Device approved. You can return to your CLI"
+  approval-failed: "Device approval failed"
+  back: "Back"

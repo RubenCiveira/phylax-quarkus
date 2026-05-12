@@ -6,7 +6,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.oauth.application.usecase.VerifyTrustedClientUsecase;
+import net.civeira.phylax.features.oauth.authentication.application.usecase.VerifyTrustedClientUsecase;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 

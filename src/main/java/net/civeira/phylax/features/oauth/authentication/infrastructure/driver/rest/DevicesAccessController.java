@@ -55,6 +55,13 @@ public class DevicesAccessController {
     return Response.status(403, "Client not allowed.").build();
   }
 
+  @POST
+  @Path("oauth/openid/{tenant}/par")
+  public Response parAlias(final @PathParam("tenant") String tenant,
+      final MultivaluedMap<String, String> paramMap) {
+    return par(tenant, paramMap);
+  }
+
   /**
    * Handles CIBA authentication requests.
    *

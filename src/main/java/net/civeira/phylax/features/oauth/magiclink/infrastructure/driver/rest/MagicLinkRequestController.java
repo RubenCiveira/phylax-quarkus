@@ -1,0 +1,33 @@
+package net.civeira.phylax.features.oauth.magiclink.infrastructure.driver.rest;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.magiclink.application.usecase.requestmagiclink.RequestMagicLinkUsecase;
+
+@Path("")
+@RequestScoped
+@RequiredArgsConstructor
+public class MagicLinkRequestController {
+
+  private final RequestMagicLinkUsecase requestMagicLink;
+
+  @POST
+  @Path("oauth/openid/{tenant}/magic-link/request")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response request(final @PathParam("tenant") String tenant,
+      final MultivaluedMap<String, String> form) {
+    requestMagicLink.request(form.getFirst("email"), form.getFirst("client_id"),
+        form.getFirst("redirect_uri"), tenant, form.getFirst("scope"), form.getFirst("state"),
+        form.getFirst("nonce"));
+    return Response.accepted().build();
+  }
+}

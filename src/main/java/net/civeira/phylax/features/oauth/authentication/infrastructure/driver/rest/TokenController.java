@@ -29,7 +29,7 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
-import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 /**

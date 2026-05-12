@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
@@ -21,9 +21,10 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
-import net.civeira.phylax.features.oauth.delegated.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
+import net.civeira.phylax.features.oauth.delegatelogin.application.DelegateLogin;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedProviderDescription;
+import net.civeira.phylax.features.oauth.magiclink.application.usecase.requestmagiclink.RequestMagicLinkUsecase;
 
 /**
  * Renders the primary login form for the OIDC authorization flow.
@@ -47,6 +48,7 @@ public class LoginStep implements OidcStep {
   private final RecoverStep recoverStep;
   private final RegistrationStep registrationStep;
   private final DelegateLogin delegateLogin;
+  private final RequestMagicLinkUsecase magicLink;
 
   @Override
   public AuthenticationChallege challenge() {
@@ -105,6 +107,9 @@ public class LoginStep implements OidcStep {
     String passwordLabel = AuthorizeHtml.i18n(locale, "login.password");
     String recoverLabel = AuthorizeHtml.i18n(locale, "login.recover-label");
     String recoverText = "<input class=\"inline\" type=\"submit\" value=\"" + recoverLabel + "\"/>";
+    String magicLinkLabel = AuthorizeHtml.i18n(locale, "login.magic-link-label");
+    String magicLinkText =
+        "<input class=\"inline\" type=\"submit\" value=\"" + magicLinkLabel + "\"/>";
     String enter = AuthorizeHtml.i18n(locale, "login.enter");
 
     StringBuilder delegatedLogins = new StringBuilder();
@@ -153,6 +158,11 @@ public class LoginStep implements OidcStep {
                     + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />" + "<p>"
                     + "<input class=\"inline\" type=\"submit\" value=\""
                     + AuthorizeHtml.i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
+                : "")
+            + (magicLink.isEnabled(request.getTenant())
+                ? "<form method=\"POST\">"
+                    + "<input type=\"hidden\" name=\"step\" value=\"show-magic-link\" />"
+                    + "<p>" + magicLinkText + "</p></form>"
                 : ""),
             locale))
         .type(AuthorizeHtml.TEXT_HTML).cookie(cookieManager.clearAuthSession(request.getTenant()))

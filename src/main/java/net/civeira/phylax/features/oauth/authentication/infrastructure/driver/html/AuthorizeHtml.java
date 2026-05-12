@@ -35,7 +35,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
@@ -179,6 +179,14 @@ public class AuthorizeHtml {
     }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
   }
 
+  @GET
+  @Path("oauth/openid/{tenant}/authorize")
+  public Response showAuthorizeForm(final @PathParam(TENANT) String tenant,
+      @CookieParam(AUTH_SESSION_ID) String session, final @Context UriInfo req,
+      @Context HttpHeaders headers) {
+    return showForm(tenant, session, req, headers);
+  }
+
   @POST
   @Path("oauth/openid/{tenant}/auth")
   /**
@@ -197,6 +205,15 @@ public class AuthorizeHtml {
   }
 
   @POST
+  @Path("oauth/openid/{tenant}/authorize")
+  public Response processAuthorizeForm(final @PathParam(TENANT) String tenant,
+      final @Context UriInfo req, @Context HttpHeaders headers,
+      final MultivaluedMap<String, String> paramMap, @CookieParam(AUTH_SESSION_ID) String session,
+      @CookieParam(PRE_SESSION_ID) String cookie) {
+    return processForm(tenant, req, headers, paramMap, session, cookie);
+  }
+
+  @POST
   @Path("oauth/openid/{tenant}/revocation")
   /**
    * Revokes a pre-session by deleting its cookie session.
@@ -206,6 +223,14 @@ public class AuthorizeHtml {
       final @Context HttpHeaders headers) {
     sessionManager.removeSession(cookie);
     return Response.ok().build();
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/revoke")
+  public Response revokeAlias(final @PathParam(TENANT) String tenant,
+      @CookieParam(PRE_SESSION_ID) String cookie, final MultivaluedMap<String, String> paramMap,
+      final @Context HttpHeaders headers) {
+    return revoke(tenant, cookie, paramMap, headers);
   }
 
   @GET
@@ -234,6 +259,13 @@ public class AuthorizeHtml {
    */
   public String checkSession(final @PathParam(TENANT) String tenant) {
     return "<h1>Check</h1>";
+  }
+
+  @GET
+  @Path("oauth/openid/{tenant}/check-session")
+  @Produces(TEXT_HTML)
+  public String checkSessionAlias(final @PathParam(TENANT) String tenant) {
+    return checkSession(tenant);
   }
 
   /**

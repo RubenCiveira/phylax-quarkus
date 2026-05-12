@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.NewCookie.SameSite;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
-import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 
 /**
  * Manages the OIDC cookie lifecycle for authenticated and pre-authenticated sessions.

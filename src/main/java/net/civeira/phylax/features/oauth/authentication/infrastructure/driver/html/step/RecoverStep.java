@@ -16,7 +16,7 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.authentication.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
@@ -135,21 +135,38 @@ public class RecoverStep implements OidcStep {
       String recoverCode) {
     String js = securer.configureScripts(securer.addSign("sign"),
         securer.cypher(
-            Arrays
-                .asList(EncrytFieldTransfer.builder().from("type_password").to("password").build()),
+            Arrays.asList(
+                EncrytFieldTransfer.builder().from("type_password").to("password").build(),
+                EncrytFieldTransfer.builder().from("type_code").to("code").build()),
             "recover"),
-        securer.focusOn("password"));
+        securer.focusOn("type_code"));
+    Locale locale = input.locale();
+    String title = AuthorizeHtml.i18n(locale, "recover.verify-title");
+    String help = AuthorizeHtml.i18n(locale, "recover.verify-help");
+    String codeLabel = AuthorizeHtml.i18n(locale, "recover.verify-code");
+    String passwordLabel = AuthorizeHtml.i18n(locale, "recover.verify-password");
+    String send = AuthorizeHtml.i18n(locale, "recover.verify-send");
+    String backLabel = AuthorizeHtml.i18n(locale, "recover.verify-back-label");
+    String backText = AuthorizeHtml.i18n(locale, "recover.verify-back-text",
+        "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
+    String error = AuthorizeHtml.i18n(locale, "recover.error-format", msg);
     return securer.secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Recover",
-        js + "<h1>Code for Recover</h1>" + (null == msg ? "" : "<p>Error: " + msg + "</p>")
+        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+            + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
             + "<form id=\"recover\" method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-            + "<label>The username: <input type=\"text\" name=\"username\" value=\"" + username
-            + "\" /></label>" + "<label>The code: <input type=\"text\" name=\"code\" value=\""
+            + "<label>Username: <input type=\"text\" name=\"username\" value=\"" + username
+            + "\" /></label>" + "<input type=\"hidden\" id=\"code\" name=\"code\" value=\"\" />"
+            + "<label>" + codeLabel + ": <input type=\"text\" id=\"type_code\" value=\""
             + (null == recoverCode ? "" : recoverCode) + "\" /></label>"
-            + "<label>New pass: <input type=\"password\" id=\"type_password\" value=\"\" /></label>"
+            + "<label>" + passwordLabel
+            + ": <input type=\"password\" id=\"type_password\" value=\"\" /></label>"
             + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"\" />"
-            + "<input type=\"submit\" />" + "</form>",
-        input.locale())).type(AuthorizeHtml.TEXT_HTML));
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+            + "\" />" + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"\" />" + "<p>" + backText + "</p>"
+            + "</form>",
+        locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 
   /**
@@ -157,7 +174,7 @@ public class RecoverStep implements OidcStep {
    */
   public Optional<StepOutcome> doExecFinal(StepInput input) {
     String pass = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "password"));
-    String code = AuthorizeHtml.first(input.getFormParams(), "code");
+    String code = securer.decrypt(AuthorizeHtml.first(input.getFormParams(), "code"));
     String usernameParam = AuthorizeHtml.first(input.getFormParams(), "username");
     Optional<String> validatedUsername = changePasswordUsecase
         .validateChangeRequest(input.getRequest().getTenant(), usernameParam, code, pass);

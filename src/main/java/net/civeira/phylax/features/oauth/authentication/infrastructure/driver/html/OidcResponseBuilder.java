@@ -18,8 +18,8 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
-import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
-import net.civeira.phylax.features.oauth.token.domain.IdToken;
+import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.IdToken;
 
 /**
  * Builds the final HTTP redirect responses for the OIDC authorization flow.

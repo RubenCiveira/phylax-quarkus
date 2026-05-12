@@ -1,0 +1,18 @@
+package net.civeira.phylax.features.oauth.consent.domain;
+
+/**
+ * A single GDPR processing purpose pending user decision.
+ *
+ * @param uid unique identifier of the purpose
+ * @param key machine-readable purpose key
+ * @param title human-readable title
+ * @param description detailed description shown to the user
+ * @param required whether the user must accept this purpose to proceed
+ */
+public record GdprConsentPurposeItem(
+    String uid,
+    String key,
+    String title,
+    String description,
+    boolean required) {
+}

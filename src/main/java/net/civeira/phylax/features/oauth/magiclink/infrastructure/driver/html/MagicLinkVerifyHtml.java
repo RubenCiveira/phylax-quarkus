@@ -1,0 +1,28 @@
+package net.civeira.phylax.features.oauth.magiclink.infrastructure.driver.html;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
+import net.civeira.phylax.features.oauth.magiclink.application.usecase.verifymagiclink.VerifyMagicLinkUsecase;
+
+@Path("")
+@RequestScoped
+@RequiredArgsConstructor
+public class MagicLinkVerifyHtml {
+
+  private final VerifyMagicLinkUsecase verifyMagicLink;
+
+  @GET
+  @Path("oauth/openid/{tenant}/magic-link/verify")
+  public Response verify(final @PathParam("tenant") String tenant,
+      @QueryParam("token") String token, @QueryParam("client_id") String clientId) {
+    return verifyMagicLink.verify(token, clientId, tenant)
+        .map(result -> Response.status(302).location(AuthorizeHtml.buildUrl(result.getRedirectUrl())).build())
+        .orElseGet(() -> Response.status(401).entity("Invalid or expired magic link").build());
+  }
+}

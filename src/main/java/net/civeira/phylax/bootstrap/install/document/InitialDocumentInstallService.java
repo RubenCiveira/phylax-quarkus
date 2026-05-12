@@ -1,0 +1,351 @@
+package net.civeira.phylax.bootstrap.install.document;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
+import java.util.List;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.infrastructure.store.BinaryContent;
+import net.civeira.phylax.features.document.template.domain.Template;
+import net.civeira.phylax.features.document.template.domain.TemplateChangeSet;
+import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
+import net.civeira.phylax.features.document.template.domain.gateway.TemplateWriteRepositoryGateway;
+import net.civeira.phylax.features.document.templateversion.domain.TemplateVersion;
+import net.civeira.phylax.features.document.templateversion.domain.TemplateVersionChangeSet;
+import net.civeira.phylax.features.document.templateversion.domain.gateway.TemplateVersionWriteRepositoryGateway;
+import net.civeira.phylax.features.document.theme.domain.Theme;
+import net.civeira.phylax.features.document.theme.domain.ThemeChangeSet;
+import net.civeira.phylax.features.document.theme.domain.gateway.ThemeWriteRepositoryGateway;
+import net.civeira.phylax.features.document.themeasset.domain.ThemeAsset;
+import net.civeira.phylax.features.document.themeasset.domain.ThemeAssetChangeSet;
+import net.civeira.phylax.features.document.themeasset.domain.gateway.ThemeAssetContentUploadGateway;
+import net.civeira.phylax.features.document.themeasset.domain.gateway.ThemeAssetWriteRepositoryGateway;
+import net.civeira.phylax.features.document.themeversion.domain.ThemeVersion;
+import net.civeira.phylax.features.document.themeversion.domain.ThemeVersionChangeSet;
+import net.civeira.phylax.features.document.themeversion.domain.ThemeVersionChannelOptions;
+import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionWriteRepositoryGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class InitialDocumentInstallService {
+
+  private static final String ASSET_BASE_PATH = "install/document/default-theme/";
+
+  private static final List<String> DEFAULT_THEME_ASSETS = List.of("corporate.css", "full.css",
+      "profile.css", "identity.png", "logo.png", "office_480x800.jpeg", "office_480x800.webp",
+      "office_768x1024.jpeg", "office_768x1024.webp", "office_1024x768.jpeg",
+      "office_1024x768.webp", "office_1440x900.jpeg", "office_1440x900.webp",
+      "office_1920x1080.jpeg", "office_1920x1080.webp");
+
+  private final ThemeWriteRepositoryGateway themes;
+  private final ThemeVersionWriteRepositoryGateway themeVersions;
+  private final ThemeAssetWriteRepositoryGateway themeAssets;
+  private final ThemeAssetContentUploadGateway themeAssetContent;
+  private final TemplateWriteRepositoryGateway templates;
+  private final TemplateVersionWriteRepositoryGateway templateVersions;
+
+  public void install() {
+    Theme corporateTheme = createTheme("corporate", true);
+    createThemeVersion(corporateTheme, ThemeVersionChannelOptions.HTML, CORPORATE_HTML_LAYOUT);
+    installAssets(corporateTheme);
+
+    Theme corporateMailTheme = createTheme("corporate-mail", true);
+    createThemeVersion(corporateMailTheme, ThemeVersionChannelOptions.MAIL, CORPORATE_MAIL_LAYOUT);
+
+    Theme corporateFullTheme = createTheme("corporate-full", true);
+    createThemeVersion(corporateFullTheme, ThemeVersionChannelOptions.HTML, CORPORATE_FULL_LAYOUT);
+    installAssets(corporateFullTheme);
+
+    createTemplate("user.login", TemplateChannelOptions.MAIL, "corporate-mail",
+        "New sign-in to your account", LOGIN_TEMPLATE_HTML);
+    createTemplate("user.recover", TemplateChannelOptions.MAIL, "corporate-mail",
+        "Reset your password", RECOVER_TEMPLATE_HTML);
+    createTemplate("user.register", TemplateChannelOptions.MAIL, "corporate-mail",
+        "Welcome - activate your account", REGISTER_TEMPLATE_HTML);
+    createTemplate("user.delete", TemplateChannelOptions.MAIL, "corporate-mail",
+        "Confirm your account deletion request", DELETE_TEMPLATE_HTML);
+    createTemplate("auth.magic_link", TemplateChannelOptions.MAIL, "corporate-mail",
+        "Your sign-in link", MAGIC_LINK_TEMPLATE_HTML);
+    createTemplate("auth.delegate", TemplateChannelOptions.MAIL, "corporate-mail",
+        "New sign-in via {{provider.name}}", DELEGATE_TEMPLATE_HTML);
+    createTemplate("access.invitation", TemplateChannelOptions.MAIL, "corporate-mail",
+        "You have been invited", INVITATION_TEMPLATE_HTML);
+    createTemplate("page.index", TemplateChannelOptions.HTML, "corporate", "page.index",
+        PAGE_INDEX_TEMPLATE_HTML);
+    createTemplate("page.full", TemplateChannelOptions.HTML, "corporate-full", "page.full",
+        PAGE_FULL_TEMPLATE_HTML);
+  }
+
+  private Theme createTheme(String name, boolean isDefault) {
+    ThemeChangeSet change =
+        new ThemeChangeSet().newUid().name(name).isDefault(isDefault).enabled(true);
+    return themes.create(Theme.create(change));
+  }
+
+  private void createThemeVersion(Theme theme, ThemeVersionChannelOptions channel, String html) {
+    ThemeVersionChangeSet change =
+        new ThemeVersionChangeSet().newUid().theme(theme).channel(channel).contentHtml(html);
+    themeVersions.create(ThemeVersion.create(change));
+  }
+
+  private void createTemplate(String code, TemplateChannelOptions channel, String themeName,
+      String subject, String html) {
+    TemplateChangeSet template =
+        new TemplateChangeSet().newUid().code(code).channel(channel).theme(themeName).enabled(true);
+    Template created = templates.create(Template.create(template));
+
+    TemplateVersionChangeSet version = new TemplateVersionChangeSet().newUid().template(created)
+        .subject(subject).contentHtml(html);
+    templateVersions.create(TemplateVersion.create(version));
+  }
+
+  private void installAssets(Theme theme) {
+    for (String asset : DEFAULT_THEME_ASSETS) {
+      String path = ASSET_BASE_PATH + asset;
+      BinaryContent content = loadResource(path, asset);
+      String temporal = themeAssetContent.storeTemporalContent(content);
+      ThemeAssetChangeSet change = new ThemeAssetChangeSet().newUid().theme(theme).code(asset)
+          .type(content.getContentType()).content("temp://" + temporal).enabled(true);
+      themeAssets.create(ThemeAsset.create(change));
+    }
+  }
+
+  private BinaryContent loadResource(String resourcePath, String fileName) {
+    InputStream candidate =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath);
+    if (candidate == null) {
+      throw new IllegalStateException("Missing install resource: " + resourcePath);
+    }
+    byte[] data;
+    try (InputStream stream = candidate) {
+      data = stream.readAllBytes();
+    } catch (IOException ex) {
+      throw new IllegalStateException("Cannot read install resource: " + resourcePath, ex);
+    }
+    return BinaryContent.builder().name(fileName).contentType(resolveMimeType(fileName))
+        .lastModification(Instant.now().toEpochMilli())
+        .inputStream(new java.io.ByteArrayInputStream(data)).build();
+  }
+
+  private String resolveMimeType(String fileName) {
+    if (fileName.endsWith(".css")) {
+      return "text/css";
+    }
+    if (fileName.endsWith(".png")) {
+      return "image/png";
+    }
+    if (fileName.endsWith(".webp")) {
+      return "image/webp";
+    }
+    if (fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
+      return "image/jpeg";
+    }
+    return "application/octet-stream";
+  }
+
+  private static final String CORPORATE_HTML_LAYOUT =
+      """
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset=\"UTF-8\">
+              <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+              <title>{{title}}</title>
+              <link rel=\"icon\" type=\"image/png\" href=\"{{theme_assets_path}}/favicon.png\">
+              <link rel=\"stylesheet\" href=\"{{theme_assets_path}}/corporate.css\">
+          </head>
+          <body>
+              <div class=\"background-image\">
+                  <picture>
+                      <source media=\"(max-width: 480px)\" srcset=\"{{theme_assets_path}}/office_480x800.webp\" type=\"image/webp\">
+                      <source media=\"(max-width: 768px)\" srcset=\"{{theme_assets_path}}/office_768x1024.webp\" type=\"image/webp\">
+                      <source media=\"(max-width: 1024px)\" srcset=\"{{theme_assets_path}}/office_1024x768.webp\" type=\"image/webp\">
+                      <source media=\"(max-width: 1440px)\" srcset=\"{{theme_assets_path}}/office_1440x900.webp\" type=\"image/webp\">
+                      <source media=\"(min-width: 1441px)\" srcset=\"{{theme_assets_path}}/office_1920x1080.webp\" type=\"image/webp\">
+                      <source media=\"(max-width: 480px)\" srcset=\"{{theme_assets_path}}/office_480x800.jpeg\">
+                      <source media=\"(max-width: 768px)\" srcset=\"{{theme_assets_path}}/office_768x1024.jpeg\">
+                      <source media=\"(max-width: 1024px)\" srcset=\"{{theme_assets_path}}/office_1024x768.jpeg\">
+                      <source media=\"(max-width: 1440px)\" srcset=\"{{theme_assets_path}}/office_1440x900.jpeg\">
+                      <img src=\"{{theme_assets_path}}/office_1920x1080.jpeg\" alt=\"Corporate office background\" class=\"bg-img\" loading=\"lazy\">
+                  </picture>
+                  <div class=\"background-overlay\"></div>
+              </div>
+              <div class=\"main-container\">
+                  <div class=\"content-wrapper\">
+                      <div class=\"header\">
+                          <img src=\"{{theme_assets_path}}/logo.png\" alt=\"Company Logo\" class=\"company-logo\" />
+                      </div>
+                      {{{slot_content}}}
+                  </div>
+              </div>
+          </body>
+          </html>
+          """;
+
+  private static final String CORPORATE_MAIL_LAYOUT =
+      """
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <meta charset=\"UTF-8\">
+          <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+          <title>{{subject}}</title>
+          </head>
+          <body style=\"margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;\">
+          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f4f4;padding:24px 0;\">
+            <tr>
+              <td align=\"center\">
+                <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;\">
+                  <tr>
+                    <td style=\"background:#1d4ed8;padding:24px 32px;\">
+                      <p style=\"margin:0;font-size:22px;font-weight:bold;color:#ffffff;\">LughAuth</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style=\"padding:32px;\">
+                      {{{slot_content}}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style=\"background:#f9fafb;padding:16px 32px;text-align:center;font-size:12px;color:#6b7280;\">
+                      This message was sent automatically. Please do not reply.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          </body>
+          </html>
+          """;
+
+  private static final String CORPORATE_FULL_LAYOUT = """
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <meta charset=\"UTF-8\">
+          <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+          <title>{{title}}</title>
+          <link rel=\"icon\" type=\"image/png\" href=\"{{theme_assets_path}}/favicon.png\">
+          <link rel=\"stylesheet\" href=\"{{theme_assets_path}}/corporate.css\">
+          <link rel=\"stylesheet\" href=\"{{theme_assets_path}}/full.css\">
+          <link rel=\"stylesheet\" href=\"{{theme_assets_path}}/profile.css\">
+      </head>
+      <body class=\"full-window\">
+          <header class=\"app-header\">
+              <div class=\"app-header-inner\">
+                  <a class=\"app-logo\" href=\"/\">
+                      <img src=\"{{theme_assets_path}}/logo.png\" alt=\"Company Logo\" />
+                  </a>
+              </div>
+          </header>
+          <main class=\"app-main\">
+              <div class=\"app-content\">
+                  {{{slot_content}}}
+              </div>
+          </main>
+      </body>
+      </html>
+      """;
+
+  private static final String PAGE_INDEX_TEMPLATE_HTML =
+      """
+          <div class=\"main-content\">
+              <div class=\"image-panel\">
+                  <div class=\"corporate-image\">
+                      <img src=\"{{theme_assets_path}}/identity.png\" alt=\"Corporate illustration\" class=\"main-illustration\" />
+                  </div>
+                  <div class=\"image-content\">
+                      <h1>Stay connected and productive</h1>
+                      <p>Access your workspace from anywhere with secure, enterprise-grade authentication.</p>
+                  </div>
+              </div>
+              <div class=\"form-panel\">
+                  <div class=\"form-container\">
+                      <div class=\"form-content\">
+                          <div class=\"loading\"></div>
+                          <div class=\"in-form\">
+                              {{{innerContent}}}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          """;
+
+  private static final String PAGE_FULL_TEMPLATE_HTML = "{{{innerContent}}}";
+
+  private static final String LOGIN_TEMPLATE_HTML =
+      """
+          <p>Hello {{user.name}},</p>
+          <p>A new sign-in to your account was detected.</p>
+          <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin:24px 0;font-size:14px;color:#374151;\">
+            <tr><td style=\"padding:4px 0;font-weight:bold;width:120px;\">Date</td><td>{{login.date}}</td></tr>
+            <tr><td style=\"padding:4px 0;font-weight:bold;\">IP address</td><td>{{login.ip}}</td></tr>
+          </table>
+          <p>If this was you, no action is needed. If you did not sign in, please change your password immediately.</p>
+          """;
+
+  private static final String RECOVER_TEMPLATE_HTML =
+      """
+          <p>Hello {{user.name}},</p>
+          <p>We received a request to reset your password. Click the button below to choose a new one.</p>
+          <p style=\"margin:28px 0;text-align:center;\">
+            <a href=\"{{recover.url}}\" style=\"display:inline-block;background:#1d4ed8;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:bold;\">Reset my password</a>
+          </p>
+          <p style=\"font-size:13px;color:#6b7280;\">This link expires on <strong>{{recover.expires}}</strong>. If you did not request a password reset, you can safely ignore this email.</p>
+          """;
+
+  private static final String REGISTER_TEMPLATE_HTML =
+      """
+          <p>Welcome, <strong>{{user.name}}</strong>!</p>
+          <p>Your account has been created successfully. Click the button below to activate it and get started.</p>
+          <p style=\"margin:28px 0;text-align:center;\">
+            <a href=\"{{activate.url}}\" style=\"display:inline-block;background:#1d4ed8;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:bold;\">Activate my account</a>
+          </p>
+          <p style=\"font-size:13px;color:#6b7280;\">If you did not create this account, please disregard this message.</p>
+          """;
+
+  private static final String DELETE_TEMPLATE_HTML =
+      """
+          <p>Hello {{user.name}},</p>
+          <p>We received a request to permanently delete your account and all associated data. This action cannot be undone.</p>
+          <p style=\"margin:28px 0;text-align:center;\">
+            <a href=\"{{confirm.url}}\" style=\"display:inline-block;background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:bold;\">Confirm account deletion</a>
+          </p>
+          <p style=\"font-size:13px;color:#6b7280;\">This link expires on <strong>{{confirm.expires}}</strong>. If you did not request account deletion, please ignore this email - your account will remain active.</p>
+          """;
+
+  private static final String MAGIC_LINK_TEMPLATE_HTML =
+      """
+          <p>Hello {{user.name}},</p>
+          <p>Use the button below to sign in to your account. No password needed.</p>
+          <p style=\"margin:28px 0;text-align:center;\">
+            <a href=\"{{magic.url}}\" style=\"display:inline-block;background:#1d4ed8;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:bold;\">Sign in now</a>
+          </p>
+          <p style=\"font-size:13px;color:#6b7280;\">This link expires on <strong>{{magic.expires}}</strong> and can only be used once. If you did not request this, please ignore this email.</p>
+          """;
+
+  private static final String DELEGATE_TEMPLATE_HTML =
+      """
+          <p>Hello {{user.name}},</p>
+          <p>A new sign-in to your account was detected via <strong>{{provider.name}}</strong>.</p>
+          <table style=\"margin:16px 0;font-size:14px;color:#374151;\">
+            <tr><td style=\"padding:4px 12px 4px 0;color:#6b7280;\">Date</td><td>{{login.date}}</td></tr>
+            <tr><td style=\"padding:4px 12px 4px 0;color:#6b7280;\">IP address</td><td>{{login.ip}}</td></tr>
+          </table>
+          <p style=\"font-size:13px;color:#6b7280;\">If this was not you, please secure your account immediately.</p>
+          """;
+
+  private static final String INVITATION_TEMPLATE_HTML =
+      """
+          <p>You have been invited to join the platform.</p>
+          <p>Click the button below to create your account. This invitation expires on <strong>{{invitation.expires}}</strong>.</p>
+          <p style=\"margin:28px 0;text-align:center;\">
+            <a href=\"{{invitation.accept_url}}\" style=\"display:inline-block;background:#1d4ed8;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:bold;\">Accept invitation</a>
+          </p>
+          <p style=\"font-size:13px;color:#6b7280;\">Invited by <strong>{{invitation.invited_by}}</strong>. If you were not expecting this invitation, you can safely ignore this email.</p>
+          """;
+}

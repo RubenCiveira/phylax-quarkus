@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
-import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
  * Dispatches OIDC Back-Channel Logout notifications (server-to-server) to all registered Relying
