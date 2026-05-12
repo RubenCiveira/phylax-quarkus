@@ -13975,7 +13975,7 @@ components:
           type: string
         port:
           description: El port de smtp outbound config
-          type: boolean
+          type: integer
         login:
           description: El login de smtp outbound config
           type: string
