@@ -37,7 +37,7 @@ public class WebAuthnController {
   private final BeginAuthenticationUsecase beginAuthentication;
   private final FinishAuthenticationUsecase finishAuthentication;
 
-  @ConfigProperty(name = "oauth.base-url")
+  @ConfigProperty(name = "oauth.base-url", defaultValue = "")
   String baseUrl;
 
   @POST
@@ -45,9 +45,9 @@ public class WebAuthnController {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response registerBegin(final @PathParam("tenant") String tenant,
-      final Map<String, Object> body) {
+      final @Context HttpHeaders headers, final Map<String, Object> body) {
     String userUid = str(body.get("userUid"));
-    String[] rp = resolveRp(tenant);
+    String[] rp = resolveRp(tenant, headers);
     return Response.ok(beginRegistration.begin(userUid, tenant, rp[0], rp[1])).build();
   }
 
@@ -64,7 +64,7 @@ public class WebAuthnController {
             : Map.of();
     String deviceName = str(body.get("deviceName"));
 
-    String[] rp = resolveRp(tenant);
+    String[] rp = resolveRp(tenant, headers);
     finishRegistration.finish(challengeId, tenant, credential, resolveOrigin(headers), rp[0],
         deviceName);
     return Response.ok(Map.of("status", "ok")).build();
@@ -74,8 +74,9 @@ public class WebAuthnController {
   @Path("oauth/openid/{tenant}/webauthn/authenticate/begin")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response authenticateBegin(final @PathParam("tenant") String tenant) {
-    String[] rp = resolveRp(tenant);
+  public Response authenticateBegin(final @PathParam("tenant") String tenant,
+      final @Context HttpHeaders headers) {
+    String[] rp = resolveRp(tenant, headers);
     return Response.ok(beginAuthentication.begin(tenant, rp[0])).build();
   }
 
@@ -91,14 +92,14 @@ public class WebAuthnController {
         body.get("credential") instanceof Map<?, ?> ? (Map<String, Object>) body.get("credential")
             : Map.of();
 
-    String[] rp = resolveRp(tenant);
+    String[] rp = resolveRp(tenant, headers);
     finishAuthentication.finish(challengeId, tenant, credential, resolveOrigin(headers), rp[0]);
     return Response.ok(Map.of("status", "ok", "challengeId", challengeId)).build();
   }
 
-  private String[] resolveRp(String tenantName) {
+  private String[] resolveRp(String tenantName, HttpHeaders headers) {
     var tenant = tenants.find(TenantFilter.builder().name(tenantName).build()).orElse(null);
-    String defaultHost = URI.create(baseUrl).getHost();
+    String defaultHost = URI.create(resolveBaseUrl(headers)).getHost();
     String rpId = defaultHost != null ? defaultHost : tenantName;
     String rpName = tenantName;
     if (tenant != null) {
@@ -116,7 +117,37 @@ public class WebAuthnController {
     if (origin != null && !origin.isBlank()) {
       return origin;
     }
-    return baseUrl;
+    return resolveBaseUrl(headers);
+  }
+
+  private String resolveBaseUrl(HttpHeaders headers) {
+    if (baseUrl != null && !baseUrl.isBlank()) {
+      return baseUrl;
+    }
+    String proto = firstHeaderValue(headers, "X-Forwarded-Proto");
+    if (proto == null || proto.isBlank()) {
+      proto = "http";
+    }
+    String host = firstHeaderValue(headers, "X-Forwarded-Host");
+    if (host == null || host.isBlank()) {
+      host = firstHeaderValue(headers, "Host");
+    }
+    if (host == null || host.isBlank()) {
+      return "http://localhost";
+    }
+    return proto + "://" + host;
+  }
+
+  private static String firstHeaderValue(HttpHeaders headers, String name) {
+    if (headers == null) {
+      return null;
+    }
+    String value = headers.getHeaderString(name);
+    if (value == null) {
+      return null;
+    }
+    int comma = value.indexOf(',');
+    return comma >= 0 ? value.substring(0, comma).trim() : value.trim();
   }
 
   private static String str(Object o) {

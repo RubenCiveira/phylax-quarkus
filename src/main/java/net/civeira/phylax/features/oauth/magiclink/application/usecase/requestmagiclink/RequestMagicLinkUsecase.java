@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.oauth.magiclink.application.usecase.requestmagiclink;
 
+import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -46,7 +47,7 @@ public class RequestMagicLinkUsecase {
   private final MagicLinkMailGateway mailer;
   private final MagicLinkEnabledGateway enabled;
 
-  @ConfigProperty(name = "oauth.base-url")
+  @ConfigProperty(name = "oauth.base-url", defaultValue = "")
   String baseUrl;
 
   public boolean isEnabled(String tenantName) {
@@ -89,7 +90,8 @@ public class RequestMagicLinkUsecase {
 
     gateway.store(magicLink);
 
-    String verifyUrl = baseUrl.replaceAll("/+$", "") + "/oauth/openid/"
+    String effectiveBaseUrl = resolveBaseUrl(redirectUri);
+    String verifyUrl = effectiveBaseUrl.replaceAll("/+$", "") + "/oauth/openid/"
         + java.net.URLEncoder.encode(tenantName, java.nio.charset.StandardCharsets.UTF_8)
         + "/magic-link/verify?token="
         + java.net.URLEncoder.encode(rawToken, java.nio.charset.StandardCharsets.UTF_8)
@@ -112,5 +114,20 @@ public class RequestMagicLinkUsecase {
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("SHA-256 not available", e);
     }
+  }
+
+  private String resolveBaseUrl(String redirectUri) {
+    if (baseUrl != null && !baseUrl.isBlank()) {
+      return baseUrl;
+    }
+    try {
+      URI uri = URI.create(redirectUri);
+      if (uri.getScheme() != null && uri.getAuthority() != null) {
+        return uri.getScheme() + "://" + uri.getAuthority();
+      }
+    } catch (RuntimeException ignored) {
+      log.debug("Unable to derive oauth.base-url from redirect_uri");
+    }
+    return "http://localhost";
   }
 }
