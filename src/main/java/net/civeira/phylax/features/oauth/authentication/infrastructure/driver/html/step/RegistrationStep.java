@@ -16,13 +16,13 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.user.application.RegisterUserUsecase;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 
@@ -195,8 +195,8 @@ public class RegistrationStep implements OidcStep {
                 + (null == msg ? "" : "<p class=\"error\">" + error + "</p>")
                 + "<form id=\"verify-register\" method=\"POST\">"
                 + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-                + "<input type=\"hidden\" name=\"regcode\" id=\"regcode\" value=\"\" />"
-                + "<label>" + codeLabel + " <input type=\"text\" id=\"type_regcode\" value=\""
+                + "<input type=\"hidden\" name=\"regcode\" id=\"regcode\" value=\"\" />" + "<label>"
+                + codeLabel + " <input type=\"text\" id=\"type_regcode\" value=\""
                 + nullToEmpty(regcode) + "\" /></label>"
                 + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
                 + "\" />" + "</form>" + "<form method=\"POST\">"

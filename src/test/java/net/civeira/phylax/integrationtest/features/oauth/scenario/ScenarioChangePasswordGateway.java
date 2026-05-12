@@ -4,7 +4,6 @@ package net.civeira.phylax.integrationtest.features.oauth.scenario;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
-
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -19,7 +18,7 @@ public class ScenarioChangePasswordGateway implements ChangePasswordGateway {
   private boolean allowRecover = true;
   private boolean forceUpdatePasswordResult = true;
   private BiFunction<String, String, Optional<String>> validateBehavior =
-      (code, username) -> OidcTestFixtures.RECOVER_CODE.equals(code)
+      (code, _) -> OidcTestFixtures.RECOVER_CODE.equals(code)
           ? Optional.of(OidcTestFixtures.USERNAME)
           : Optional.empty();
 

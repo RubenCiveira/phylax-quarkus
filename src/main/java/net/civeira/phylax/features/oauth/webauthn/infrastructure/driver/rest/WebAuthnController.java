@@ -59,9 +59,9 @@ public class WebAuthnController {
       final @Context HttpHeaders headers, final Map<String, Object> body) {
     String challengeId = str(body.get("challengeId"));
     @SuppressWarnings("unchecked")
-    Map<String, Object> credential = body.get("credential") instanceof Map<?, ?>
-        ? (Map<String, Object>) body.get("credential")
-        : Map.of();
+    Map<String, Object> credential =
+        body.get("credential") instanceof Map<?, ?> ? (Map<String, Object>) body.get("credential")
+            : Map.of();
     String deviceName = str(body.get("deviceName"));
 
     String[] rp = resolveRp(tenant);
@@ -87,9 +87,9 @@ public class WebAuthnController {
       final @Context HttpHeaders headers, final Map<String, Object> body) {
     String challengeId = str(body.get("challengeId"));
     @SuppressWarnings("unchecked")
-    Map<String, Object> credential = body.get("credential") instanceof Map<?, ?>
-        ? (Map<String, Object>) body.get("credential")
-        : Map.of();
+    Map<String, Object> credential =
+        body.get("credential") instanceof Map<?, ?> ? (Map<String, Object>) body.get("credential")
+            : Map.of();
 
     String[] rp = resolveRp(tenant);
     finishAuthentication.finish(challengeId, tenant, credential, resolveOrigin(headers), rp[0]);

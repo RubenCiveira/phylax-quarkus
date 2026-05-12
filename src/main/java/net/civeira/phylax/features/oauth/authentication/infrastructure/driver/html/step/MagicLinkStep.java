@@ -91,17 +91,18 @@ public class MagicLinkStep implements OidcStep {
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
     String error = AuthorizeHtml.i18n(locale, "magic-link.ask.error-format", msg);
 
-    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Magic link",
-        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
-            + (msg == null ? "" : "<p class=\"error\">" + error + "</p>")
-            + "<form method=\"POST\">" + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-            + "<input type=\"hidden\" name=\"step\" value=\"send-magic-link\" />" + "<label>"
-            + label + " <input type=\"email\" id=\"email\" name=\"email\" value=\"\" /></label>"
-            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
-            + "\" />" + "</form>" + "<form method=\"POST\">"
-            + "<input type=\"hidden\" name=\"step\" value=\"login\" />" + "<p>" + backText + "</p>"
-            + "</form>",
-        locale)).type(AuthorizeHtml.TEXT_HTML));
+    return securer
+        .secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Magic link",
+            js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
+                + (msg == null ? "" : "<p class=\"error\">" + error + "</p>")
+                + "<form method=\"POST\">" + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
+                + "<input type=\"hidden\" name=\"step\" value=\"send-magic-link\" />" + "<label>"
+                + label + " <input type=\"email\" id=\"email\" name=\"email\" value=\"\" /></label>"
+                + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
+                + "\" />" + "</form>" + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"login\" />" + "<p>" + backText
+                + "</p>" + "</form>",
+            locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 
   private Response paintSentForm(StepInput input) {
@@ -111,10 +112,11 @@ public class MagicLinkStep implements OidcStep {
     String backLabel = AuthorizeHtml.i18n(locale, "magic-link.sent.back-label");
     String backText = AuthorizeHtml.i18n(locale, "magic-link.sent.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
-    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Magic link",
-        "<h1>" + title + "</h1>" + "<p>" + help + "</p>" + "<form method=\"POST\">"
-            + "<input type=\"hidden\" name=\"step\" value=\"login\" />" + "<p>" + backText + "</p>"
-            + "</form>",
-        locale)).type(AuthorizeHtml.TEXT_HTML));
+    return securer
+        .secureHtmlResponse(Response.ok(decorator.getFullPage(input.tenant(), "Magic link",
+            "<h1>" + title + "</h1>" + "<p>" + help + "</p>" + "<form method=\"POST\">"
+                + "<input type=\"hidden\" name=\"step\" value=\"login\" />" + "<p>" + backText
+                + "</p>" + "</form>",
+            locale)).type(AuthorizeHtml.TEXT_HTML));
   }
 }

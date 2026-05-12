@@ -12,8 +12,8 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.device.application.DeviceAuthorizationService;
 import net.civeira.phylax.features.oauth.device.domain.DeviceAuthorizationStatus;
@@ -36,15 +36,16 @@ public class DeviceVerificationHtml {
         : headers.getAcceptableLanguages().get(0);
     String normalized = normalize(userCode);
     if (normalized.isEmpty()) {
-      return Response.ok(decorator.getFullPage(tenant, AuthorizeHtml.i18n(locale, "device.title"),
-          "<h1>" + AuthorizeHtml.i18n(locale, "device.title") + "</h1><p>"
-              + AuthorizeHtml.i18n(locale, "device.ask-help") + "</p>"
-              + "<form method=\"POST\"><label>" + AuthorizeHtml.i18n(locale, "device.user-code")
-              + "<input type=\"text\" name=\"user_code\" value=\"\" /></label>"
-              + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-              + AuthorizeHtml.i18n(locale, "device.continue") + "\" />"
-              + "</form>",
-          locale)).type("text/html").build();
+      return Response
+          .ok(decorator.getFullPage(tenant, AuthorizeHtml.i18n(locale, "device.title"),
+              "<h1>" + AuthorizeHtml.i18n(locale, "device.title") + "</h1><p>"
+                  + AuthorizeHtml.i18n(locale, "device.ask-help") + "</p>"
+                  + "<form method=\"POST\"><label>" + AuthorizeHtml.i18n(locale, "device.user-code")
+                  + "<input type=\"text\" name=\"user_code\" value=\"\" /></label>"
+                  + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+                  + AuthorizeHtml.i18n(locale, "device.continue") + "\" />" + "</form>",
+              locale))
+          .type("text/html").build();
     }
     var record = deviceAuthorization.findByUserCode(tenant, normalized);
     if (record == null) {
@@ -91,16 +92,17 @@ public class DeviceVerificationHtml {
           deviceAuthorization.approveByUserCode(tenant, normalized, session.getValidationData());
       return approved ? message(tenant, AuthorizeHtml.i18n(locale, "device.approved"), locale)
           : message(tenant, AuthorizeHtml.i18n(locale, "device.approval-failed"), locale);
-    }).orElseGet(
-        () -> message(tenant, AuthorizeHtml.i18n(locale, "device.auth-required"), locale));
+    }).orElseGet(() -> message(tenant, AuthorizeHtml.i18n(locale, "device.auth-required"), locale));
   }
 
   private Response message(String tenant, String message, java.util.Locale locale) {
-    return Response.ok(decorator.getFullPage(tenant, AuthorizeHtml.i18n(locale, "device.title"),
-        "<h1>" + AuthorizeHtml.i18n(locale, "device.title") + "</h1><p>" + message + "</p>"
-            + "<form method=\"GET\">" + "<input class=\"inline\" type=\"submit\" value=\""
-            + AuthorizeHtml.i18n(locale, "device.back") + "\" />" + "</form>",
-        locale)).type("text/html").build();
+    return Response
+        .ok(decorator.getFullPage(tenant, AuthorizeHtml.i18n(locale, "device.title"),
+            "<h1>" + AuthorizeHtml.i18n(locale, "device.title") + "</h1><p>" + message + "</p>"
+                + "<form method=\"GET\">" + "<input class=\"inline\" type=\"submit\" value=\""
+                + AuthorizeHtml.i18n(locale, "device.back") + "\" />" + "</form>",
+            locale))
+        .type("text/html").build();
   }
 
   private String normalize(String value) {

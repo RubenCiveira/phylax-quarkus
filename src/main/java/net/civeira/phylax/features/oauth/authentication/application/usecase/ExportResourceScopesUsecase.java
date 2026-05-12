@@ -9,16 +9,16 @@ import lombok.RequiredArgsConstructor;
 public class ExportResourceScopesUsecase {
   // private final RelyingPartyReadRepositoryGateway parties;
   // private final RoleReadRepositoryGateway roles;
-//
-//  public List<RoleGrant> granted(String relayParty) {
-//    return List.of();
-//    // return parties.find(RelyingPartyFilter.builder().code(relayParty).build())
-//    // .map(this::grantedForRely).orElseGet(List::of);
-//  }
-//
-//  public List<RoleGrant> grantedForRely(RelyingParty party) {
-//    return List.of();
-//  }
+  //
+  // public List<RoleGrant> granted(String relayParty) {
+  // return List.of();
+  // // return parties.find(RelyingPartyFilter.builder().code(relayParty).build())
+  // // .map(this::grantedForRely).orElseGet(List::of);
+  // }
+  //
+  // public List<RoleGrant> grantedForRely(RelyingParty party) {
+  // return List.of();
+  // }
 
   // public List<RoleGrant> grantedForRely(RelyingParty party) {
   // List<SecurityScope> secScopes =

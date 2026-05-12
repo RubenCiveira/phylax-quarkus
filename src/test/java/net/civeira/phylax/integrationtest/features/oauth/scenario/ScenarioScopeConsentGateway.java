@@ -5,14 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
-
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
-import net.civeira.phylax.features.oauth.scopes.domain.ScopePermission;
-import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopeApprovalGateway;
-import net.civeira.phylax.features.oauth.scopes.domain.gateway.ScopesConsentGateway;
+import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
+import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
+import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopesConsentGateway;
 
 @Alternative
 @Priority(1)

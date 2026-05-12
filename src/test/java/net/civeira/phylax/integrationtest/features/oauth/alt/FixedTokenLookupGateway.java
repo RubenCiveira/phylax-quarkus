@@ -5,12 +5,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
-import net.civeira.phylax.features.oauth.introspection.domain.TokenIntrospectionResult;
-import net.civeira.phylax.features.oauth.introspection.domain.gateway.TokenLookupGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospectionResult;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenLookupGateway;
 
 /**
  * In-memory test alternative for {@link TokenLookupGateway}.

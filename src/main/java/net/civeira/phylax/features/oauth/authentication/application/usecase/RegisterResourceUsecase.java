@@ -10,11 +10,11 @@ public class RegisterResourceUsecase {
   // private final RelyingPartyReadRepositoryGateway parties;
   // private final SecurityScopeWriteRepositoryGateway scopes;
 
-//  public void registerScopes(String relayParty, List<ScopeList> paramMap) {}
-//
-//  public void registerSchema(String relayParty, List<PropertyList> paramMap) {
-//    /* nothing for now */
-//  }
+  // public void registerScopes(String relayParty, List<ScopeList> paramMap) {}
+  //
+  // public void registerSchema(String relayParty, List<PropertyList> paramMap) {
+  // /* nothing for now */
+  // }
 
   // public void registerScopes(String relayParty, List<ScopeList> paramMap) {
   // parties.find(RelyingPartyFilter.builder().code(relayParty).build()).ifPresent(party -> {

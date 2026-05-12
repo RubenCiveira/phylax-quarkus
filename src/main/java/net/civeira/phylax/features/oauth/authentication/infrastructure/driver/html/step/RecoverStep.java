@@ -16,13 +16,13 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder.EncrytFieldTransfer;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
 
 /**
@@ -133,13 +133,17 @@ public class RecoverStep implements OidcStep {
    */
   public Response doPaintWaitRecover(StepInput input, String msg, String username,
       String recoverCode) {
-    String js = securer.configureScripts(securer.addSign("sign"),
-        securer.cypher(
-            Arrays.asList(
-                EncrytFieldTransfer.builder().from("type_password").to("password").build(),
-                EncrytFieldTransfer.builder().from("type_code").to("code").build()),
-            "recover"),
-        securer.focusOn("type_code"));
+    String js =
+        securer
+            .configureScripts(securer.addSign("sign"),
+                securer
+                    .cypher(
+                        Arrays.asList(
+                            EncrytFieldTransfer.builder().from("type_password").to("password")
+                                .build(),
+                            EncrytFieldTransfer.builder().from("type_code").to("code").build()),
+                        "recover"),
+                securer.focusOn("type_code"));
     Locale locale = input.locale();
     String title = AuthorizeHtml.i18n(locale, "recover.verify-title");
     String help = AuthorizeHtml.i18n(locale, "recover.verify-help");
@@ -158,8 +162,7 @@ public class RecoverStep implements OidcStep {
             + "<label>Username: <input type=\"text\" name=\"username\" value=\"" + username
             + "\" /></label>" + "<input type=\"hidden\" id=\"code\" name=\"code\" value=\"\" />"
             + "<label>" + codeLabel + ": <input type=\"text\" id=\"type_code\" value=\""
-            + (null == recoverCode ? "" : recoverCode) + "\" /></label>"
-            + "<label>" + passwordLabel
+            + (null == recoverCode ? "" : recoverCode) + "\" /></label>" + "<label>" + passwordLabel
             + ": <input type=\"password\" id=\"type_password\" value=\"\" /></label>"
             + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"\" />"
             + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send

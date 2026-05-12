@@ -2,6 +2,7 @@
 package net.civeira.phylax.bootstrap.install;
 
 import java.util.List;
+
 import io.quarkus.runtime.StartupEvent;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -101,46 +102,39 @@ public class InstallAccess {
         .user(createdRoot).trustedClient(createdClient).groups("root");
     groupsMembership.create(UserGroupMembership.create(userClientGroups));
 
-    
-    UserRoleAssignamentChangeSet adminAssign =
-        new UserRoleAssignamentChangeSet().newUid().user(createdRoot).roles(List.of(
-            Roles.builder().role(createdAdminRole).build()
-        ));
+
+    UserRoleAssignamentChangeSet adminAssign = new UserRoleAssignamentChangeSet().newUid()
+        .user(createdRoot).roles(List.of(Roles.builder().role(createdAdminRole).build()));
     rolesAssignament.create(UserRoleAssignament.create(adminAssign));
 
-    UserRoleAssignamentChangeSet rootAssign =
-        new UserRoleAssignamentChangeSet().newUid().user(createdRoot).roles(List.of(
-            Roles.builder().role(createdRootRole).build()
-            ));
+    UserRoleAssignamentChangeSet rootAssign = new UserRoleAssignamentChangeSet().newUid()
+        .user(createdRoot).roles(List.of(Roles.builder().role(createdRootRole).build()));
     rolesAssignament.create(UserRoleAssignament.create(rootAssign));
 
-    UserRoleAssignamentChangeSet iamAssign =
-        new UserRoleAssignamentChangeSet().newUid().user(createdRoot).roles(List.of(
-            Roles.builder().role(createdIamRole).build()
-            ));
+    UserRoleAssignamentChangeSet iamAssign = new UserRoleAssignamentChangeSet().newUid()
+        .user(createdRoot).roles(List.of(Roles.builder().role(createdIamRole).build()));
     rolesAssignament.create(UserRoleAssignament.create(iamAssign));
 
-    ApiKeyClientChangeSet collectorApiKey = new ApiKeyClientChangeSet().newUid()
-        .code("Initial collector")
-        .key("hcaik_01jtteh99vbsv4qrj22trvh3wg35g1n4tgkcxzgqv0034y2cby7dceaf43").scopes("collect")
-        .enabled(true);
+    ApiKeyClientChangeSet collectorApiKey =
+        new ApiKeyClientChangeSet().newUid().code("Initial collector")
+            .key("hcaik_01jtteh99vbsv4qrj22trvh3wg35g1n4tgkcxzgqv0034y2cby7dceaf43")
+            .scopes("collect").enabled(true);
     apiKeys.create(ApiKeyClient.create(collectorApiKey).enable());
 
-    ApiKeyClientChangeSet syncApiKey = new ApiKeyClientChangeSet().newUid()
-        .code("Initial syn client")
-        .key("sck_01jtteh99vbsv4qrj22trvh3wg35g2n3tgkcxngqv0034y2cby7dceaf43").scopes("sync")
-        .enabled(true);
+    ApiKeyClientChangeSet syncApiKey =
+        new ApiKeyClientChangeSet().newUid().code("Initial syn client")
+            .key("sck_01jtteh99vbsv4qrj22trvh3wg35g2n3tgkcxngqv0034y2cby7dceaf43").scopes("sync")
+            .enabled(true);
     apiKeys.create(ApiKeyClient.create(syncApiKey).enable());
 
-    SmtpOutboundConfigChangeSet smtp = new SmtpOutboundConfigChangeSet().newUid()
-        .host(env("MAILER_HOST", "smtp.example.com"))
-        .port(envInt("MAILER_PORT", 587))
-        .login(env("MAILER_USERNAME", "noreply@example.com"))
-        .passwordPlain(env("MAILER_PASSWORD", "change-me"))
-        .senderName(env("MAILER_FROM_NAME", "LughAuth"))
-        .senderEmail(env("MAILER_FROM_EMAIL", "noreply@example.com")).timeout(30)
-        .useTls(Boolean.parseBoolean(env("MAILER_START_TLS", "true"))).maxRetries(3)
-        .retryDelay(60).rateLimit(100);
+    SmtpOutboundConfigChangeSet smtp =
+        new SmtpOutboundConfigChangeSet().newUid().host(env("MAILER_HOST", "smtp.example.com"))
+            .port(envInt("MAILER_PORT", 587)).login(env("MAILER_USERNAME", "noreply@example.com"))
+            .passwordPlain(env("MAILER_PASSWORD", "change-me"))
+            .senderName(env("MAILER_FROM_NAME", "LughAuth"))
+            .senderEmail(env("MAILER_FROM_EMAIL", "noreply@example.com")).timeout(30)
+            .useTls(Boolean.parseBoolean(env("MAILER_START_TLS", "true"))).maxRetries(3)
+            .retryDelay(60).rateLimit(100);
     smtpConfigs.create(SmtpOutboundConfig.create(smtp));
 
     documentInstall.install();

@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
-import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
@@ -25,6 +24,7 @@ import net.civeira.phylax.features.oauth.delegatelogin.application.DelegateLogin
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.magiclink.application.usecase.requestmagiclink.RequestMagicLinkUsecase;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 
 /**
  * Renders the primary login form for the OIDC authorization flow.
@@ -161,8 +161,8 @@ public class LoginStep implements OidcStep {
                 : "")
             + (magicLink.isEnabled(request.getTenant())
                 ? "<form method=\"POST\">"
-                    + "<input type=\"hidden\" name=\"step\" value=\"show-magic-link\" />"
-                    + "<p>" + magicLinkText + "</p></form>"
+                    + "<input type=\"hidden\" name=\"step\" value=\"show-magic-link\" />" + "<p>"
+                    + magicLinkText + "</p></form>"
                 : ""),
             locale))
         .type(AuthorizeHtml.TEXT_HTML).cookie(cookieManager.clearAuthSession(request.getTenant()))

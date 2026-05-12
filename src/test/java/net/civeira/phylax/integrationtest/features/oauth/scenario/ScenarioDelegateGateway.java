@@ -6,17 +6,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedAccessExternalProvider.UserData;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedProviderDescription;
-import net.civeira.phylax.features.oauth.delegated.domain.DelegatedRequestDetails;
-import net.civeira.phylax.features.oauth.delegated.domain.gateway.DelegateLoginGateway;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.UserData;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedProviderDescription;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.gateway.DelegateLoginGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
 /**

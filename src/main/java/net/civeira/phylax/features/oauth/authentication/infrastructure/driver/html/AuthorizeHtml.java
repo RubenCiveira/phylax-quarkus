@@ -35,11 +35,11 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
-import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
+import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 
 /**
  * Main HTML controller for the OAuth/OIDC authorization user interface.

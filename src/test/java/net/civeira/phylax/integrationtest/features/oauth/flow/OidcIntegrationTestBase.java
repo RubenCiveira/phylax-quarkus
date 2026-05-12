@@ -5,15 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
-import net.civeira.phylax.features.oauth.key.domain.gateway.TokenSigner;
-import net.civeira.phylax.features.oauth.token.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedClientStoreGateway;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedSessionStore;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTemporalKeysGateway;

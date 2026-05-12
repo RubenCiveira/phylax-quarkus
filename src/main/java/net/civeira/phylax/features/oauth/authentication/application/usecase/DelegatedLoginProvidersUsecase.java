@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProvider;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderSourceOptions;
@@ -17,6 +16,7 @@ import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.oauth.authentication.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.UserData;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.provider.GoogleDelegatedAccessProvider;

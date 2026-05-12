@@ -22,7 +22,8 @@ public class MagicLinkVerifyHtml {
   public Response verify(final @PathParam("tenant") String tenant,
       @QueryParam("token") String token, @QueryParam("client_id") String clientId) {
     return verifyMagicLink.verify(token, clientId, tenant)
-        .map(result -> Response.status(302).location(AuthorizeHtml.buildUrl(result.getRedirectUrl())).build())
+        .map(result -> Response.status(302)
+            .location(AuthorizeHtml.buildUrl(result.getRedirectUrl())).build())
         .orElseGet(() -> Response.status(401).entity("Invalid or expired magic link").build());
   }
 }
