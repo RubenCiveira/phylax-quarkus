@@ -90,7 +90,18 @@ public class VerifyTrustedClientUsecase {
   private boolean redirectAllowed(TrustedClient app, String redirect) {
     List<String> redirects =
         app.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList();
-    return redirects.contains("*") || redirects.contains(redirect);
+    return redirects.stream().anyMatch(allowed -> redirectMatches(allowed, redirect));
+  }
+
+  private boolean redirectMatches(String allowed, String redirect) {
+    if ("*".equals(allowed) || allowed.equals(redirect)) {
+      return true;
+    }
+    if (allowed.endsWith("/*")) {
+      String prefix = allowed.substring(0, allowed.length() - 1);
+      return redirect.startsWith(prefix);
+    }
+    return false;
   }
 
   private Optional<ClientDetails> privateClient(TrustedClient app, String clientId, String secret) {

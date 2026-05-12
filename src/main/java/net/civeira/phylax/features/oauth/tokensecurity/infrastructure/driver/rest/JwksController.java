@@ -15,6 +15,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -54,17 +55,28 @@ public class JwksController {
    */
   @GET
   @Path("oauth/openid/{tenant}/jwks")
-  public Response jwks(final @PathParam("tenant") String tenant, @Context Request request) {
+  public Response jwks(final @PathParam("tenant") String tenant, @Context Request request,
+      @Context HttpHeaders headers) {
     JwkSet jwkSet = tokenSigner.keysAsJwks(tenant);
     EntityTag etag = new EntityTag(hash(jwkSet));
     CacheControl cacheControl = new CacheControl();
     cacheControl.setMaxAge(3600);
+    String origin = headers.getHeaderString("Origin");
 
     Response.ResponseBuilder notModified = request.evaluatePreconditions(etag);
     if (notModified != null) {
+      if (origin != null && !origin.isBlank()) {
+        notModified.header("Access-Control-Allow-Origin", origin).header("Vary", "Origin")
+            .header("Access-Control-Allow-Credentials", "true");
+      }
       return notModified.cacheControl(cacheControl).build();
     }
-    return Response.ok(jwkSet).cacheControl(cacheControl).tag(etag).build();
+    Response.ResponseBuilder response = Response.ok(jwkSet).cacheControl(cacheControl).tag(etag);
+    if (origin != null && !origin.isBlank()) {
+      response.header("Access-Control-Allow-Origin", origin).header("Vary", "Origin")
+          .header("Access-Control-Allow-Credentials", "true");
+    }
+    return response.build();
   }
 
   /**

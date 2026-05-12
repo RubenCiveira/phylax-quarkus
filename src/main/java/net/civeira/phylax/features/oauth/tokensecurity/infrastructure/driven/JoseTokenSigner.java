@@ -122,6 +122,7 @@ public class JoseTokenSigner implements TokenSigner {
    */
   @Override
   public JwkSet keysAsJwks(String tenant) {
+    checkNewNeeded(tenant);
     List<Jks> syncCopy = new ArrayList<>();
     List<PublicKeyInformation> publicKeys = repository.listPublicKeys(tenant);
     for (PublicKeyInformation stream : publicKeys) {

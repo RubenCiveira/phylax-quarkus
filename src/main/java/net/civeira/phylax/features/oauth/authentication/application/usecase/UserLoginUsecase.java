@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -35,7 +36,6 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipFilter;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipReadRepositoryGateway;
-import net.civeira.phylax.features.access.userroleassignament.domain.Roles;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
 import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentFilter;
 import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentReadRepositoryGateway;
@@ -150,14 +150,14 @@ public class UserLoginUsecase {
     ud.setAudiences(request.getAudiences());
 
     List<String> forAllClient =
-        groupsFromIdentity(
+        groupsFromIdentities(
             userGroups
-                .find(UserGroupMembershipFilter.builder().user(user).forAllAudiences(true).build()),
+                .list(UserGroupMembershipFilter.builder().user(user).forAllAudiences(true).build()),
             tenant);
     List<String> forAllPlatform =
-        rolesFromIdentity(
+        rolesFromIdentities(
             userRoles
-                .find(UserRoleAssignamentFilter.builder().user(user).forAllAudiences(true).build()),
+                .list(UserRoleAssignamentFilter.builder().user(user).forAllAudiences(true).build()),
             tenant);
     request.getAudiences().forEach(aud -> {
       List<String> audRoles = new ArrayList<>(forAllPlatform);
@@ -166,18 +166,18 @@ public class UserLoginUsecase {
       Optional<TrustedClient> isClient =
           clients.find(TrustedClientFilter.builder().code(aud).build());
       if (isClient.isPresent()) {
-        audRoles.addAll(rolesFromIdentity(userRoles.find(
+        audRoles.addAll(rolesFromIdentities(userRoles.list(
             UserRoleAssignamentFilter.builder().user(user).trustedClient(isClient.get()).build()),
             tenant));
       }
       Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
       if (isParty.isPresent()) {
-        audGroups.addAll(groupsFromIdentity(
-            userGroups.find(
+        audGroups.addAll(groupsFromIdentities(
+            userGroups.list(
                 UserGroupMembershipFilter.builder().user(user).relyingParty(isParty.get()).build()),
             tenant));
-        audRoles.addAll(rolesFromIdentity(
-            userRoles.find(
+        audRoles.addAll(rolesFromIdentities(
+            userRoles.list(
                 UserRoleAssignamentFilter.builder().user(user).relyingParty(isParty.get()).build()),
             tenant));
       }
@@ -191,29 +191,28 @@ public class UserLoginUsecase {
     return AuthenticationResult.right(ud);
   }
 
-  private List<String> groupsFromIdentity(Optional<UserGroupMembership> identity, Tenant tenant) {
-    return identity.flatMap(UserGroupMembership::getGroups).map(rolesStr -> {
-      List<String> roles = Arrays.stream(rolesStr.split(",")).map(String::trim)
-          .filter(s -> !s.isEmpty()).map(str -> str.replace(":", "/").toLowerCase())
-          .collect(Collectors.toCollection(ArrayList::new));
-      if (tenant.isRoot()) {
-        roles.addAll(roles.stream().map(role -> "root:" + role).toList());
-      }
-      return (List<String>) roles;
-    }).orElseGet(List::of);
+  private List<String> groupsFromIdentities(List<UserGroupMembership> identities, Tenant tenant) {
+    LinkedHashSet<String> groups = new LinkedHashSet<>();
+    identities.stream().map(UserGroupMembership::getGroups).flatMap(Optional::stream)
+        .flatMap(groupsStr -> Arrays.stream(groupsStr.split(","))).map(String::trim)
+        .filter(s -> !s.isEmpty()).map(str -> str.replace(":", "/").toLowerCase())
+        .forEach(groups::add);
+    if (tenant.isRoot()) {
+      new ArrayList<>(groups).stream().map(role -> "root:" + role).forEach(groups::add);
+    }
+    return new ArrayList<>(groups);
   }
 
-  private List<String> rolesFromIdentity(Optional<UserRoleAssignament> identity, Tenant tenant) {
-    return identity.map(pi -> {
-      List<Roles> roleRefs = pi.getRoles();
-      List<String> roles = userRoles.resolveRoles(roleRefs).stream().map(Role::getName)
-          .map(name -> "platform:" + name.toLowerCase())
-          .collect(Collectors.toCollection(ArrayList::new));
-      if (tenant.isRoot()) {
-        roles.addAll(roles.stream().map(role -> "root:" + role).toList());
-      }
-      return (List<String>) roles;
-    }).orElseGet(List::of);
+  private List<String> rolesFromIdentities(List<UserRoleAssignament> identities, Tenant tenant) {
+    LinkedHashSet<String> roles = new LinkedHashSet<>();
+    identities.stream().map(UserRoleAssignament::getRoles).flatMap(List::stream)
+        .collect(Collectors.collectingAndThen(Collectors.toList(), userRoles::resolveRoles))
+        .stream().map(Role::getName).map(name -> "platform:" + name.toLowerCase())
+        .forEach(roles::add);
+    if (tenant.isRoot()) {
+      new ArrayList<>(roles).stream().map(role -> "root:" + role).forEach(roles::add);
+    }
+    return new ArrayList<>(roles);
   }
 
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,
