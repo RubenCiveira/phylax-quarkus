@@ -38,7 +38,7 @@ public class WebAuthnController {
   private final FinishAuthenticationUsecase finishAuthentication;
 
   @ConfigProperty(name = "oauth.base-url", defaultValue = "")
-  String baseUrl;
+  private final String baseUrl;
 
   @POST
   @Path("oauth/openid/{tenant}/webauthn/register/begin")

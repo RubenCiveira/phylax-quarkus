@@ -7,9 +7,8 @@
   <version>0.1.1</version>
   <properties>
     <compiler-plugin.version>3.13.0</compiler-plugin.version>
-    <toolchains-plugin.version>3.2.0</toolchains-plugin.version>
-    <lombok.version>1.18.42</lombok.version>
     <java.version>25</java.version>
+    <lombok.version>1.18.42</lombok.version>
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -20,6 +19,7 @@
     <quarkus.platform.version>3.35.1</quarkus.platform.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.5.0</surefire-plugin.version>
+    <toolchains-plugin.version>3.2.0</toolchains-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -166,7 +166,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-toolchains-plugin</artifactId>
         <version>${toolchains-plugin.version}</version>
         <executions>
@@ -218,6 +217,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire-plugin.version}</version>
         <configuration>
+          <jdkToolchain>
+            <version>${java.version}</version>
+          </jdkToolchain>
           <systemPropertyVariables>
             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
             <maven.home>${maven.home}</maven.home>

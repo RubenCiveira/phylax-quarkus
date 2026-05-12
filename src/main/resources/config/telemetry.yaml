@@ -15,20 +15,6 @@ quarkus:
       rotation:
         max-file-size: 30M
         max-backup-index: 5
-#    handler:
-#      file:
-#        "TRACES":
-#          enabled: true
-#          path: logs/traces.jsonl
-#          level: INFO
-#          rotation:
-#            max-file-size: 30M
-#            max-backup-index: 5
-#    category:
-#      "traces":
-#        level: INFO
-#        handlers: TRACES
-#        use-parent-handlers: false
 
   otel:
     enabled: true
@@ -38,15 +24,3 @@ quarkus:
       rotation:
         max-file-size: 30M
         max-backup-index: 5
-#    traces:
-#      enabled: true
-#    logs:
-#      enabled: true
-#    exporter:
-#      otlp:
-#        traces:
-#          protocol: grpc
-#          endpoint: http://localhost:4317
-#        logs:
-#          protocol: grpc
-#          endpoint: http://localhost:4317

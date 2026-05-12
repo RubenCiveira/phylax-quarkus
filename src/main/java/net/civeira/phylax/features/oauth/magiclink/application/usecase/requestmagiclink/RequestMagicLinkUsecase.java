@@ -48,7 +48,7 @@ public class RequestMagicLinkUsecase {
   private final MagicLinkEnabledGateway enabled;
 
   @ConfigProperty(name = "oauth.base-url", defaultValue = "")
-  String baseUrl;
+  private final String baseUrl;
 
   public boolean isEnabled(String tenantName) {
     return enabled.isEnabled(tenantName);
