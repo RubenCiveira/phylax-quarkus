@@ -1,4 +1,4 @@
-package net.civeira.phylax.bootstrap.install.document;
+package net.civeira.phylax.bootstrap.install;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVer
 
 @ApplicationScoped
 @RequiredArgsConstructor
-public class InitialDocumentInstallService {
+public class InitialDocument {
 
   private static final String ASSET_BASE_PATH = "install/document/default-theme/";
 

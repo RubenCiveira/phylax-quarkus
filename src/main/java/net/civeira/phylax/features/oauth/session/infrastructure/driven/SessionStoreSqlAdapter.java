@@ -13,8 +13,10 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.enterprise.context.RequestScoped;
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
@@ -29,7 +31,8 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGate
  *
  * Design notes: - Uses _oauth_sessions table for storage. - Serializes AuthenticationData as JSON.
  */
-@RequestScoped
+@Slf4j
+@ApplicationScoped
 @RequiredArgsConstructor
 public class SessionStoreSqlAdapter implements SessionStoreGateway {
   /**
@@ -163,6 +166,16 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
       }
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
+    }
+  }
+
+  @Scheduled(cron = "${oauth.cleanup.sessions.cron:0 30 3 * * ?}")
+  public void cleanExpiredSessions() {
+    log.debug("Running OAuth expired sessions cleanup");
+    try {
+      cleanTemp();
+    } catch (Exception e) {
+      log.error("OAuth sessions cleanup failed", e);
     }
   }
 }

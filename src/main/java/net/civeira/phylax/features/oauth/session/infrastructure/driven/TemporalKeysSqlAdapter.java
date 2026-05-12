@@ -23,7 +23,8 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.enterprise.context.RequestScoped;
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGate
  * rotation with fallback decryption.
  */
 @Slf4j
-@RequestScoped
+@ApplicationScoped
 @RequiredArgsConstructor
 public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
   @Builder
@@ -228,6 +229,16 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     try (PreparedStatement prepareStatement = connection.prepareStatement(sql)) {
       prepareStatement.setTimestamp(1, new Timestamp(Instant.now().toEpochMilli()));
       prepareStatement.executeUpdate();
+    }
+  }
+
+  @Scheduled(cron = "${oauth.cleanup.temporal-codes.cron:0 0 3 * * ?}")
+  public void cleanExpiredTemporalCodes() {
+    log.debug("Running OAuth expired temporal codes cleanup");
+    try (Connection connection = datasource.getConnection()) {
+      clearCodes(connection);
+    } catch (Exception e) {
+      log.error("OAuth temporal codes cleanup failed", e);
     }
   }
 
