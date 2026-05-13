@@ -137,26 +137,6 @@ public class AuthorizeHtml {
   }
 
   @GET
-  @Produces(TEXT_HTML)
-  @Path("oauth/openid/{tenant}/me")
-  /**
-   * Returns the current session information as HTML.
-   */
-  public Response showInfo(final @PathParam(TENANT) String tenant,
-      @CookieParam(AUTH_SESSION_ID) String cookie, final @Context UriInfo req,
-      @Context HttpHeaders headers) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
-    return loadClient(request)
-        .flatMap(
-            _ -> sessionManager.loadSession(cookie))
-        .map(sessionInfo -> securer
-            .secureHtmlResponse(Response.ok(decorator.getFullPage(request.getTenant(), "Data",
-                "<h1>Ficha de " + sessionInfo.getValidationData().getUsername() + "</h1>",
-                request.getLocale()))))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
-  }
-
-  @GET
   @Path("oauth/openid/{tenant}/auth")
   /**
    * Displays the login form or validates an existing session.

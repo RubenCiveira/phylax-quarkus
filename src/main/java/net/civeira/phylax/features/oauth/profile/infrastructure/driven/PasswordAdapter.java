@@ -1,7 +1,13 @@
 package net.civeira.phylax.features.oauth.profile.infrastructure.driven;
 
+import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.PasswordGateway;
 
 /**
@@ -13,12 +19,26 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.PasswordGateway;
  * </p>
  */
 @ApplicationScoped
-@Slf4j
+@RequiredArgsConstructor
 public class PasswordAdapter implements PasswordGateway {
+
+  private final UserWriteRepositoryGateway users;
+  private final AesCipherService cypher;
 
   @Override
   public boolean changePassword(String userUid, String tenant, String oldPass, String newPass) {
-    log.warn("PasswordAdapter is a stub — password not changed for user {}", userUid);
-    return false;
+    Optional<User> found = users.findForUpdate(UserFilter.builder().uid(userUid).build());
+    if (found.isEmpty()) {
+      return false;
+    }
+    User user = found.get();
+    if (!tenant.equals(user.getTenantUid())) {
+      return false;
+    }
+    if (!oldPass.equals(user.getPasswordPlain(cypher))) {
+      return false;
+    }
+    users.update(user, user.changePassword(newPass));
+    return true;
   }
 }

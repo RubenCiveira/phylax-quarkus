@@ -1,7 +1,20 @@
 package net.civeira.phylax.features.oauth.profile.infrastructure.driven;
 
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+import jakarta.activation.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.valueobject.SecondFactorSeedVO;
+import net.civeira.phylax.features.access.user.domain.valueobject.UseSecondFactorsVO;
+import net.civeira.phylax.features.oauth.authentication.application.service.OtpMfaService;
 import net.civeira.phylax.features.oauth.profile.domain.MfaSetup;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
 
@@ -13,27 +26,60 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
  * </p>
  */
 @ApplicationScoped
-@Slf4j
+@RequiredArgsConstructor
 public class MfaAdapter implements MfaGateway {
+
+  private final UserReadRepositoryGateway readers;
+  private final UserWriteRepositoryGateway users;
+  private final OtpMfaService otp;
 
   @Override
   public boolean isEnabled(String userUid, String tenant) {
-    return false;
+    return readers.find(UserFilter.builder().uid(userUid).build())
+        .filter(user -> tenant.equals(user.getTenantUid())).map(User::isUseSecondFactors)
+        .orElse(false);
   }
 
   @Override
   public MfaSetup buildSetup(String userUid, String tenant) {
-    log.warn("MfaAdapter is a stub — returning placeholder MFA setup for user {}", userUid);
-    return new MfaSetup("PLACEHOLDER_SEED", null);
+    Optional<User> user = users.findForUpdate(UserFilter.builder().uid(userUid).build())
+        .filter(it -> tenant.equals(it.getTenantUid()));
+    if (user.isEmpty()) {
+      return new MfaSetup("", null);
+    }
+
+    AtomicReference<String> seed = new AtomicReference<>();
+    DataSource qr = otp.getQr(OtpMfaService.ApplicationInfo.builder()
+        .label(user.get().getName() + " at " + tenant).issuer(tenant).build(),
+        generated -> seed.set(generated));
+    return new MfaSetup(seed.get(), toDataUri(qr));
   }
 
   @Override
   public void enable(String userUid, String tenant, String seed, String otp) {
-    log.warn("MfaAdapter is a stub — MFA not enabled for user {}", userUid);
+    Optional<User> user = users.findForUpdate(UserFilter.builder().uid(userUid).build())
+        .filter(it -> tenant.equals(it.getTenantUid()));
+    if (user.isPresent() && this.otp.validateOtp(otp, seed) && seed != null && !seed.isBlank()) {
+      users.update(user.get(), user.get().setMfaSeed(seed));
+    }
   }
 
   @Override
   public void disable(String userUid, String tenant) {
-    log.warn("MfaAdapter is a stub — MFA not disabled for user {}", userUid);
+    users.findForUpdate(UserFilter.builder().uid(userUid).build())
+        .filter(it -> tenant.equals(it.getTenantUid()))
+        .ifPresent(user -> users.update(user,
+            user.withUseSecondFactorsValue(UseSecondFactorsVO.from(false))
+                .withSecondFactorSeedValue(SecondFactorSeedVO.nullValue())));
+  }
+
+  private String toDataUri(DataSource qr) {
+    try {
+      byte[] bytes = qr.getInputStream().readAllBytes();
+      String mime = qr.getContentType();
+      return "data:" + mime + ";base64," + Base64.getEncoder().encodeToString(bytes);
+    } catch (IOException ex) {
+      throw new IllegalStateException(ex);
+    }
   }
 }
