@@ -37,9 +37,6 @@ import net.civeira.phylax.features.access.userroleassignament.domain.Roles;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignamentChangeSet;
 import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentWriteRepositoryGateway;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfig;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfigChangeSet;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigWriteRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -52,8 +49,6 @@ public class InstallAccess {
   private final UserRoleAssignamentWriteRepositoryGateway rolesAssignament;
   private final UserGroupMembershipWriteRepositoryGateway groupsMembership;
   private final ApiKeyClientWriteRepositoryGateway apiKeys;
-  private final SmtpOutboundConfigWriteRepositoryGateway smtpConfigs;
-  private final InitialDocument documentInstall;
 
   @Transactional
   void installOnStartup(
@@ -128,33 +123,5 @@ public class InstallAccess {
             .enabled(true);
     apiKeys.create(ApiKeyClient.create(syncApiKey).enable());
 
-    SmtpOutboundConfigChangeSet smtp =
-        new SmtpOutboundConfigChangeSet().newUid().host(env("MAILER_HOST", "smtp.example.com"))
-            .port(envInt("MAILER_PORT", 587)).login(env("MAILER_USERNAME", "noreply@example.com"))
-            .passwordPlain(env("MAILER_PASSWORD", "change-me"))
-            .senderName(env("MAILER_FROM_NAME", "LughAuth"))
-            .senderEmail(env("MAILER_FROM_EMAIL", "noreply@example.com")).timeout(30)
-            .useTls(Boolean.parseBoolean(env("MAILER_START_TLS", "true"))).maxRetries(3)
-            .retryDelay(60).rateLimit(100);
-    smtpConfigs.create(SmtpOutboundConfig.create(smtp));
-
-    documentInstall.install();
-  }
-
-  private static String env(String key, String fallback) {
-    String value = System.getenv(key);
-    return value == null || value.isBlank() ? fallback : value;
-  }
-
-  private static int envInt(String key, int fallback) {
-    String value = System.getenv(key);
-    if (value == null || value.isBlank()) {
-      return fallback;
-    }
-    try {
-      return Integer.parseInt(value);
-    } catch (NumberFormatException ex) {
-      return fallback;
-    }
   }
 }

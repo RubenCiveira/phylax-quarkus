@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
-
+import io.quarkus.runtime.StartupEvent;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.infrastructure.migration.Migrations;
 import net.civeira.phylax.common.infrastructure.store.BinaryContent;
 import net.civeira.phylax.features.document.template.domain.Template;
 import net.civeira.phylax.features.document.template.domain.TemplateChangeSet;
@@ -17,6 +21,8 @@ import net.civeira.phylax.features.document.templateversion.domain.TemplateVersi
 import net.civeira.phylax.features.document.templateversion.domain.gateway.TemplateVersionWriteRepositoryGateway;
 import net.civeira.phylax.features.document.theme.domain.Theme;
 import net.civeira.phylax.features.document.theme.domain.ThemeChangeSet;
+import net.civeira.phylax.features.document.theme.domain.gateway.ThemeFilter;
+import net.civeira.phylax.features.document.theme.domain.gateway.ThemeReadRepositoryGateway;
 import net.civeira.phylax.features.document.theme.domain.gateway.ThemeWriteRepositoryGateway;
 import net.civeira.phylax.features.document.themeasset.domain.ThemeAsset;
 import net.civeira.phylax.features.document.themeasset.domain.ThemeAssetChangeSet;
@@ -39,6 +45,7 @@ public class InitialDocument {
       "office_1024x768.webp", "office_1440x900.jpeg", "office_1440x900.webp",
       "office_1920x1080.jpeg", "office_1920x1080.webp");
 
+  private final ThemeReadRepositoryGateway themesRead;
   private final ThemeWriteRepositoryGateway themes;
   private final ThemeVersionWriteRepositoryGateway themeVersions;
   private final ThemeAssetWriteRepositoryGateway themeAssets;
@@ -46,7 +53,16 @@ public class InitialDocument {
   private final TemplateWriteRepositoryGateway templates;
   private final TemplateVersionWriteRepositoryGateway templateVersions;
 
+  @Transactional
+  void installOnStartup(
+      @Observes @Priority(Migrations.POST_MIGRATION_PHASE_PRIORITY) final StartupEvent ev) {
+    install();
+  }
+
   public void install() {
+    if (themesRead.count(ThemeFilter.builder().build()) > 0) {
+      return;
+    }
     Theme corporateTheme = createTheme("corporate", true);
     createThemeVersion(corporateTheme, ThemeVersionChannelOptions.HTML, CORPORATE_HTML_LAYOUT);
     installAssets(corporateTheme);
