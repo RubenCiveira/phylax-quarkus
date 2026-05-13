@@ -1,1 +1,2 @@
-/migration/mysql/000.001.001/20260512171618-model.changelog.mysql.sql
+/migration/mysql/000.001.001/20260512185409-model.changelog.mysql.sql
+/migration/mysql/000.001.001/20260513090000-oauth-session-grant-token-model.sql

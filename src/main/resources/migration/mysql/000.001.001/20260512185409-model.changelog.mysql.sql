@@ -96,6 +96,9 @@ CREATE TABLE _oauth_revoked_jti (jti VARCHAR(36) NOT NULL, tenant_id VARCHAR(36)
 -- changeset auto.generated:1825492372-32
 CREATE TABLE _oauth_session (session VARCHAR(255) NOT NULL, expiration timestamp DEFAULT NULL NULL, client_id VARCHAR(250) NOT NULL, issuer VARCHAR(255) NOT NULL, auth_data TEXT NOT NULL, csid TEXT NOT NULL, jti VARCHAR(36) NULL, refresh_jti VARCHAR(36) NULL, revoked_at timestamp DEFAULT NULL NULL, ip_address VARCHAR(45) NULL, user_agent VARCHAR(250) NULL, last_used_at datetime DEFAULT NULL NULL, client_name VARCHAR(200) NULL);
 
+-- changeset manual:20260513083000-session-token-table
+CREATE TABLE _oauth_session_token (id VARCHAR(36) NOT NULL, session VARCHAR(255) NOT NULL, jti VARCHAR(36) NOT NULL, refresh_jti VARCHAR(36) NOT NULL, issued_at datetime NOT NULL, expires_at datetime NOT NULL, revoked_at datetime DEFAULT NULL NULL, CONSTRAINT PK__OAUTH_SESSION_TOKEN PRIMARY KEY (id), UNIQUE (jti), UNIQUE (refresh_jti));
+
 -- changeset auto.generated:1825492372-33
 CREATE TABLE _oauth_temporal_codes (code VARCHAR(255) NOT NULL, code_data TEXT NOT NULL, expiration timestamp NOT NULL, code_challenge VARCHAR(128) NULL, code_challenge_method VARCHAR(10) NULL);
 
@@ -687,6 +690,12 @@ CREATE INDEX idx_session_jti ON _oauth_session(jti);
 -- changeset auto.generated:1825492372-229
 CREATE INDEX idx_session_refresh_jti ON _oauth_session(refresh_jti);
 
+-- changeset manual:20260513083001-session-token-index-session
+CREATE INDEX idx_session_token_session ON _oauth_session_token(session);
+
+-- changeset manual:20260513083002-session-token-index-exp
+CREATE INDEX idx_session_token_exp ON _oauth_session_token(expires_at);
+
 -- changeset auto.generated:1825492372-230
 CREATE UNIQUE INDEX uq_device_user_code ON _oauth_device_codes(tenant, user_code);
 
@@ -768,6 +777,9 @@ ALTER TABLE access_user_role_assignament ADD CONSTRAINT FK_ACCESS_USER_ROLE_ASSI
 -- changeset auto.generated:1825492372-256
 ALTER TABLE access_user_role_assignament ADD CONSTRAINT FK_ACCESS_USER_ROLE_ASSIGNAMENT_USER FOREIGN KEY (user) REFERENCES access_user (uid) ON UPDATE RESTRICT ON DELETE RESTRICT;
 
+-- changeset manual:20260513083003-session-token-fk
+ALTER TABLE _oauth_session_token ADD CONSTRAINT FK__OAUTH_SESSION_TOKEN_SESSION FOREIGN KEY (session) REFERENCES _oauth_session (session) ON UPDATE CASCADE ON DELETE CASCADE;
+
 -- changeset auto.generated:1825492372-257
 ALTER TABLE access_user ADD CONSTRAINT FK_ACCESS_USER_TENANT FOREIGN KEY (tenant) REFERENCES access_tenant (uid) ON UPDATE RESTRICT ON DELETE RESTRICT;
 
@@ -812,4 +824,3 @@ ALTER TABLE notification_message ADD CONSTRAINT FK_NOTIFICATION_MESSAGE_TENANT F
 
 -- changeset auto.generated:1825492372-271
 ALTER TABLE notification_smtp_outbound_config ADD CONSTRAINT FK_NOTIFICATION_SMTP_OUTBOUND_CONFIG_TENANT FOREIGN KEY (tenant) REFERENCES access_tenant (uid) ON UPDATE RESTRICT ON DELETE RESTRICT;
-

@@ -22,7 +22,3 @@ quarkus:
     enabled: true
     host: ${MANAGEMENT_HOST:0.0.0.0}
     port: ${MANAGEMENT_PORT:8090}
-
-oauth:
-  base-url: ""
-
