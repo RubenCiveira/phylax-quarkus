@@ -35,7 +35,7 @@ public class SessionsAdapter implements SessionsGateway {
   private final ObjectMapper mapper;
 
   @Override
-  public List<ActiveSession> listByUser(String userUid) {
+  public List<ActiveSession> listByUser(String userUid, String username) {
     List<ActiveSession> out = new ArrayList<>();
     try (Connection conn = source.getConnection();
         PreparedStatement stmt = conn.prepareStatement(
@@ -44,7 +44,7 @@ public class SessionsAdapter implements SessionsGateway {
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
           String authData = rs.getString("auth_data");
-          if (!matchesUser(authData, userUid)) {
+          if (!matchesUser(authData, userUid) && !matchesField(authData, "username", username)) {
             continue;
           }
           out.add(new ActiveSession(rs.getString("session"), rs.getString("client_id"),
@@ -74,13 +74,16 @@ public class SessionsAdapter implements SessionsGateway {
   }
 
   private boolean matchesUser(String authData, String userUid) {
-    if (authData == null || authData.isBlank()) {
+    return matchesField(authData, "uid", userUid);
+  }
+
+  private boolean matchesField(String authData, String field, String value) {
+    if (authData == null || authData.isBlank() || value == null) {
       return false;
     }
     try {
       JsonNode node = mapper.readTree(authData);
-      String uid = node.path("uid").asText("");
-      return userUid.equals(uid);
+      return value.equals(node.path(field).asText(""));
     } catch (Exception ex) {
       log.debug("Cannot parse session auth_data", ex);
       return false;

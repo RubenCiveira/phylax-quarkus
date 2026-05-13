@@ -15,7 +15,10 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.profile.application.ProfileService;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
@@ -35,6 +38,7 @@ public class ProfileHtmlController {
 
   private final SessionManager sessionManager;
   private final ProfileService profileService;
+  private final UserReadRepositoryGateway users;
   private final DecoratePageGateway decorator;
   private final ProfileViewPanel viewPanel;
   private final ProfileEditPanel editPanel;
@@ -58,7 +62,7 @@ public class ProfileHtmlController {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie).map(session -> {
-      OidcProfile profile = profileService.getProfile(session.getUserId()).orElse(null);
+      OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = "<div class=\"section-card\">" + viewPanel.render(profile, base + "/edit",
           base + "/password", base + "/mfa", base + "/sessions", t) + "</div>";
@@ -74,7 +78,7 @@ public class ProfileHtmlController {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie).map(session -> {
-      OidcProfile profile = profileService.getProfile(session.getUserId()).orElse(null);
+      OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = "<div class=\"section-card\">"
           + editPanel.render(profile, base + "/edit", base, null, t) + "</div>";
@@ -95,7 +99,7 @@ public class ProfileHtmlController {
           .gender(first(form, "gender")).birthdate(first(form, "birthdate"))
           .zoneinfo(first(form, "zoneinfo")).locale(first(form, "locale"))
           .phoneNumber(first(form, "phoneNumber")).build();
-      profileService.saveProfile(session.getUserId(), data);
+      profileService.saveProfile(resolveUserUid(session), data);
       return Response.status(302).header("Location", "/oauth/openid/" + tenant + "/me").build();
     }).orElseGet(() -> Response.status(401).build());
   }
@@ -135,7 +139,7 @@ public class ProfileHtmlController {
             decorator.getFullPage(tenant, t.get("profile.password.title"), html, locale, "full"))
             .type(TEXT_HTML).build();
       }
-      boolean ok = profileService.changePassword(session.getUserId(), tenant,
+      boolean ok = profileService.changePassword(resolveUserUid(session), tenant,
           first(form, "currentPassword"), newPass);
       String html = "<div class=\"section-card\">" + changePasswordPanel.render(base + "/password",
           base, ok ? null : t.get("profile.password.errorGeneric"), ok, t) + "</div>";
@@ -151,10 +155,10 @@ public class ProfileHtmlController {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie).map(session -> {
-      boolean enabled = profileService.isMfaEnabled(session.getUserId(), tenant);
+      boolean enabled = profileService.isMfaEnabled(resolveUserUid(session), tenant);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = "<div class=\"section-card\">" + mfaPanel.render(enabled, base + "/mfa", base,
-          enabled ? null : profileService.buildMfaSetup(session.getUserId(), tenant), null, false,
+          enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null, false,
           t) + "</div>";
       return page(tenant, headers, t.get("profile.mfa.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -172,14 +176,14 @@ public class ProfileHtmlController {
       String base = "/oauth/openid/" + tenant + "/me";
       String action = first(form, "action");
       if ("disable".equals(action)) {
-        profileService.disableMfa(session.getUserId(), tenant);
+        profileService.disableMfa(resolveUserUid(session), tenant);
       } else {
-        profileService.enableMfa(session.getUserId(), tenant, first(form, "seed"),
+        profileService.enableMfa(resolveUserUid(session), tenant, first(form, "seed"),
             first(form, "otp"));
       }
-      boolean enabled = profileService.isMfaEnabled(session.getUserId(), tenant);
+      boolean enabled = profileService.isMfaEnabled(resolveUserUid(session), tenant);
       String html = "<div class=\"section-card\">" + mfaPanel.render(enabled, base + "/mfa", base,
-          enabled ? null : profileService.buildMfaSetup(session.getUserId(), tenant), null, true, t)
+          enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null, true, t)
           + "</div>";
       return page(tenant, headers, t.get("profile.mfa.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -194,7 +198,9 @@ public class ProfileHtmlController {
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie).map(session -> {
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = sessionsPanel.render(profileService.listSessions(session.getUserId()),
+      String html = sessionsPanel.render(
+          profileService.listSessions(resolveUserUid(session),
+              session.getValidationData().getUsername()),
           base + "/sessions/revoke", base, cookie, t);
       return page(tenant, headers, t.get("profile.sessions.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -212,6 +218,13 @@ public class ProfileHtmlController {
       return Response.status(302).header("Location", "/oauth/openid/" + tenant + "/me/sessions")
           .build();
     }).orElseGet(() -> Response.status(401).build());
+  }
+
+  private String resolveUserUid(SessionInfo session) {
+    String username = session.getValidationData().getUsername();
+    return users.find(UserFilter.builder().nameOrEmail(username).build())
+        .map(u -> u.getUid())
+        .orElse(session.getUserId());
   }
 
   private Response page(String tenant, HttpHeaders headers, String title, String html,

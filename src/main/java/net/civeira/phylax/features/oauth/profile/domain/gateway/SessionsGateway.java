@@ -6,7 +6,7 @@ import net.civeira.phylax.features.oauth.profile.domain.ActiveSession;
 
 public interface SessionsGateway {
 
-  List<ActiveSession> listByUser(String userUid);
+  List<ActiveSession> listByUser(String userUid, String username);
 
   void revoke(String sessionId);
 }

@@ -59,8 +59,8 @@ public class ProfileService {
     return passwordGateway.changePassword(userUid, tenant, oldPass, newPass);
   }
 
-  public List<ActiveSession> listSessions(String userUid) {
-    return sessionsGateway.listByUser(userUid);
+  public List<ActiveSession> listSessions(String userUid, String username) {
+    return sessionsGateway.listByUser(userUid, username);
   }
 
   public void revokeSession(String sessionId) {

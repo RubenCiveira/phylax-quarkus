@@ -5,6 +5,9 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
@@ -23,6 +26,7 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.PasswordGateway;
 public class PasswordAdapter implements PasswordGateway {
 
   private final UserWriteRepositoryGateway users;
+  private final TenantReadRepositoryGateway tenants;
   private final AesCipherService cypher;
 
   @Override
@@ -32,7 +36,8 @@ public class PasswordAdapter implements PasswordGateway {
       return false;
     }
     User user = found.get();
-    if (!tenant.equals(user.getTenantUid())) {
+    Optional<Tenant> tenantObj = tenants.find(TenantFilter.builder().name(tenant).build());
+    if (tenantObj.isEmpty() || !tenantObj.get().getUid().equals(user.getTenantUid())) {
       return false;
     }
     if (!oldPass.equals(user.getPasswordPlain(cypher))) {
