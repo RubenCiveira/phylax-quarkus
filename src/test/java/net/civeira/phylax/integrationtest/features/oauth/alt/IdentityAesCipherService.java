@@ -6,11 +6,13 @@ import java.util.Optional;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.common.crypto.AesCipherService;
 
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

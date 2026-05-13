@@ -3,17 +3,20 @@ package net.civeira.phylax.integrationtest.features.oauth.alt;
 
 import java.util.Locale;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped
 public class FixedDecoratePageGateway implements DecoratePageGateway {
   @Override
-  public String getFullPage(String tenant, String title, String innerContent, Locale locale) {
+  public String getFullPage(String tenant, String title, String innerContent, Locale locale,
+      String template) {
     return innerContent;
   }
 }

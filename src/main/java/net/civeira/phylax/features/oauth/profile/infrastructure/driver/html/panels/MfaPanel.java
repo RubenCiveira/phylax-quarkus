@@ -1,0 +1,55 @@
+package net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels;
+
+import static net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.HtmlEscape.esc;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.features.oauth.profile.domain.MfaSetup;
+
+@ApplicationScoped
+public class MfaPanel {
+
+  public String render(boolean enabled, String saveUrl, String cancelUrl, MfaSetup setup,
+      String error, boolean success, YamlLocaleMessages t) {
+
+    String title = "<h1>" + t.get("profile.mfa.title") + "</h1>";
+    String errorHtml =
+        error != null && !error.isBlank() ? "<p class=\"error\">" + esc(error) + "</p>" : "";
+    String successHtml =
+        success ? "<p class=\"change-password-success\">" + t.get("profile.mfa.success") + "</p>"
+            : "";
+
+    if (enabled) {
+      return title + successHtml + errorHtml + "<p>" + t.get("profile.mfa.enabledHelp") + "</p>"
+          + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"change-password-form\">"
+          + "<input type=\"hidden\" name=\"action\" value=\"disable\" />"
+          + "<div class=\"profile-actions\">"
+          + "<input class=\"primary-button\" type=\"submit\" value=\""
+          + esc(t.get("profile.mfa.disable")) + "\" />" + "<a class=\"secondary-button\" href=\""
+          + esc(cancelUrl) + "\">" + t.get("profile.mfa.backToProfile") + "</a>" + "</div>"
+          + "</form>";
+    }
+
+    String seed = setup == null ? "" : (setup.seed() == null ? "" : setup.seed());
+    String qrBlock = "";
+    if (setup != null) {
+      String qrImage = setup.getQrImage().orElse(null);
+      if (qrImage != null && !qrImage.isBlank()) {
+        qrBlock = "<p><img src=\"" + esc(qrImage)
+            + "\" alt=\"MFA QR\" style=\"max-width:220px;height:auto;\" /></p>";
+      }
+    }
+
+    return title + successHtml + errorHtml + "<p>" + t.get("profile.mfa.help") + "</p>" + qrBlock
+        + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"change-password-form\">"
+        + "<input type=\"hidden\" name=\"action\" value=\"enable\" />"
+        + "<input type=\"hidden\" name=\"seed\" value=\"" + esc(seed) + "\" />" + "<label>"
+        + t.get("profile.mfa.secret") + "<input type=\"text\" value=\"" + esc(seed)
+        + "\" readonly />" + "</label>" + "<label>" + t.get("profile.mfa.otp")
+        + "<input type=\"text\" name=\"otp\" required />" + "</label>"
+        + "<div class=\"profile-actions\">"
+        + "<input class=\"primary-button\" type=\"submit\" value=\""
+        + esc(t.get("profile.mfa.enable")) + "\" />" + "<a class=\"secondary-button\" href=\""
+        + esc(cancelUrl) + "\">" + t.get("profile.mfa.cancel") + "</a>" + "</div>" + "</form>";
+  }
+}

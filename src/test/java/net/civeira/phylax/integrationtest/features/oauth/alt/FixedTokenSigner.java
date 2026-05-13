@@ -19,6 +19,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -27,6 +28,7 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.Jks;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.JwkSet;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

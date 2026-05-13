@@ -21,15 +21,24 @@ public interface DecoratePageGateway {
    * @param title page title
    * @param innerContent HTML body content
    * @param locale locale for localization
+   * @param template page template variant: {@code "index"} (compact login shell) or {@code "full"}
+   *        (wide content layout)
    * @return full HTML page
    */
-  String getFullPage(String tenant, String title, String innerContent, Locale locale);
+  String getFullPage(String tenant, String title, String innerContent, Locale locale,
+      String template);
 
   /**
-   * Builds a full HTML page without tenant context (uses global default theme). Delegates to
-   * {@link #getFullPage(TenantRef, String, String, Locale)} with {@code null} tenant.
+   * Builds a full HTML page using the default {@code "index"} template variant.
+   */
+  default String getFullPage(String tenant, String title, String innerContent, Locale locale) {
+    return getFullPage(tenant, title, innerContent, locale, "index");
+  }
+
+  /**
+   * Builds a full HTML page without tenant context (uses global default theme).
    */
   default String getGenericFullPage(String title, String innerContent, Locale locale) {
-    return getFullPage(null, title, innerContent, locale);
+    return getFullPage(null, title, innerContent, locale, "index");
   }
 }

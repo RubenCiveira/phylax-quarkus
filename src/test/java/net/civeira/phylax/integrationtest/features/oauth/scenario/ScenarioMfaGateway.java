@@ -4,6 +4,7 @@ package net.civeira.phylax.integrationtest.features.oauth.scenario;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -11,6 +12,7 @@ import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

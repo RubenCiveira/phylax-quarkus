@@ -4,12 +4,14 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.magiclink.domain.MagicLinkSession;
 import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkSessionGateway;
 
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

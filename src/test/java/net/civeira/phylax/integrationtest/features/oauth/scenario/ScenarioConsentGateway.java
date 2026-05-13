@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -14,6 +15,7 @@ import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ConsentGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

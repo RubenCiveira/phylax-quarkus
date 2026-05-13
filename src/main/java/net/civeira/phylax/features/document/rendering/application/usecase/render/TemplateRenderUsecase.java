@@ -58,6 +58,28 @@ public class TemplateRenderUsecase {
   private final TemplateRenderGateway renderGateway;
 
   /**
+   * Render raw HTML content with the same snippet + variable pipeline used by {@link #render}.
+   *
+   * <p>
+   * Use this when the HTML body has already been loaded (e.g. from a theme version) and only
+   * snippet resolution and variable substitution are needed.
+   *
+   * @param htmlContent raw HTML template string (Handlebars syntax)
+   * @param tenant tenant context for snippet/variable resolution; null for global
+   * @param locale locale for snippet version selection
+   * @param variables call-site variables (override tenant defaults)
+   * @return rendered document
+   */
+  public RenderedTemplate renderHtml(final String htmlContent, final TenantRef tenant,
+      final Locale locale, final Map<String, String> variables) {
+    String localeTag = locale != null ? locale.toLanguageTag() : null;
+    Map<String, String> mergedVars = mergeVariables(tenant, variables != null ? variables : Map.of());
+    Map<String, String> snippets = loadSnippets(tenant, localeTag);
+    return renderGateway.render(TemplateRenderRequest.builder().htmlContent(htmlContent)
+        .snippets(snippets).variables(mergedVars).build());
+  }
+
+  /**
    * Render the template identified by {@code input.code} and {@code input.channel}.
    *
    * @param input Render parameters (code, channel, tenant, locale, call-site variables).

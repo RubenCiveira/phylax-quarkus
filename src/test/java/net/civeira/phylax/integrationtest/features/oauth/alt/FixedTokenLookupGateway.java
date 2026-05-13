@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -22,6 +23,7 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenLooku
  * Tokens not found in the map are treated as inactive (revoked or never issued). - Call
  * {@link #clear()} in {@code @BeforeEach} to reset state between tests.
  */
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

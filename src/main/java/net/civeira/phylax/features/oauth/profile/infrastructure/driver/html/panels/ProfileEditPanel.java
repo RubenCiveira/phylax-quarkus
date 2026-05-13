@@ -1,0 +1,60 @@
+package net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels;
+
+import static net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.HtmlEscape.esc;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
+
+@ApplicationScoped
+public class ProfileEditPanel {
+
+  public String render(OidcProfile profile, String saveUrl, String cancelUrl, String error,
+      YamlLocaleMessages t) {
+    String errorHtml =
+        error != null && !error.isBlank() ? "<p class=\"error\">" + esc(error) + "</p>" : "";
+
+    return "<h1>" + t.get("profile.edit.title") + "</h1>" + errorHtml
+        + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"profile-edit-form\">"
+        + field(t.get("profile.edit.givenName"), "givenName", "text",
+            val(profile, profile == null ? null : profile.getGivenName().orElse(null)), "")
+        + field(t.get("profile.edit.familyName"), "familyName", "text",
+            val(profile, profile == null ? null : profile.getFamilyName().orElse(null)), "")
+        + field(t.get("profile.edit.middleName"), "middleName", "text",
+            val(profile, profile == null ? null : profile.getMiddleName().orElse(null)), "")
+        + field(t.get("profile.edit.nickname"), "nickname", "text",
+            val(profile, profile == null ? null : profile.getNickname().orElse(null)), "")
+        + field(t.get("profile.edit.preferredUsername"), "preferredUsername", "text",
+            val(profile, profile == null ? null : profile.getPreferredUsername().orElse(null)), "")
+        + field(t.get("profile.edit.pictureUrl"), "pictureUrl", "url",
+            val(profile, profile == null ? null : profile.getPictureUrl().orElse(null)), "")
+        + field(t.get("profile.edit.website"), "websiteUrl", "url",
+            val(profile, profile == null ? null : profile.getWebsiteUrl().orElse(null)), "")
+        + field(t.get("profile.edit.gender"), "gender", "text",
+            val(profile, profile == null ? null : profile.getGender().orElse(null)), "")
+        + field(t.get("profile.edit.birthdate"), "birthdate", "date",
+            val(profile, profile == null ? null : profile.getBirthdate().orElse(null)), "")
+        + field(t.get("profile.edit.timezone"), "zoneinfo", "text",
+            val(profile, profile == null ? null : profile.getZoneinfo().orElse(null)),
+            "Europe/Madrid")
+        + field(t.get("profile.edit.locale"), "locale", "text",
+            val(profile, profile == null ? null : profile.getLocale().orElse(null)), "es-ES")
+        + field(t.get("profile.edit.phoneNumber"), "phoneNumber", "tel",
+            val(profile, profile == null ? null : profile.getPhoneNumber().orElse(null)), "")
+        + "<div class=\"profile-actions\">"
+        + "<input class=\"primary-button\" type=\"submit\" value=\""
+        + esc(t.get("profile.edit.save")) + "\" />" + "<a class=\"secondary-button\" href=\""
+        + esc(cancelUrl) + "\">" + t.get("profile.edit.cancel") + "</a>" + "</div>" + "</form>";
+  }
+
+  private String val(OidcProfile profile, String value) {
+    return profile == null ? "" : (value == null ? "" : value);
+  }
+
+  private String field(String label, String name, String type, String value, String placeholder) {
+    String placeholderAttr =
+        placeholder.isBlank() ? "" : " placeholder=\"" + esc(placeholder) + "\"";
+    return "<label>" + label + "<input type=\"" + type + "\" name=\"" + name + "\" value=\""
+        + esc(value) + "\"" + placeholderAttr + " />" + "</label>";
+  }
+}

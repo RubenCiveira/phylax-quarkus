@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -13,6 +14,7 @@ import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

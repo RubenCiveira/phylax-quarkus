@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -26,6 +27,7 @@ import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtur
  * that exercise delegated login enable a "google" provider and configure the username resolution
  * via {@link #whenResolveUsername(Supplier)}.
  */
+@IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped

@@ -1,0 +1,11 @@
+package net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels;
+
+import org.apache.commons.text.StringEscapeUtils;
+
+final class HtmlEscape {
+  private HtmlEscape() {}
+
+  static String esc(String value) {
+    return value == null ? "" : StringEscapeUtils.escapeHtml4(value);
+  }
+}

@@ -9,130 +9,125 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderInput;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderUsecase;
 import net.civeira.phylax.features.document.rendering.domain.RenderedTemplate;
 import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
+import net.civeira.phylax.features.document.theme.domain.Theme;
 import net.civeira.phylax.features.document.theme.domain.gateway.ThemeFilter;
 import net.civeira.phylax.features.document.theme.domain.gateway.ThemeReadRepositoryGateway;
+import net.civeira.phylax.features.document.themeversion.domain.ThemeVersion;
+import net.civeira.phylax.features.document.themeversion.domain.ThemeVersionChannelOptions;
+import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionFilter;
+import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 
 /**
  * Theme-aware implementation of {@link DecoratePageGateway}.
  *
  * <p>
- * Renders the OIDC page shell using the {@code OAUTH_PAGE_WRAPPER} template (channel {@code HTML})
- * stored in the database for the tenant. The tenant's default theme is resolved and injected as the
- * {@code theme.name} variable so that the template can reference static assets (CSS, images) at
- * {@code /oauth/themes/{{theme.name}}/…}.
+ * Two-step rendering:
+ * <ol>
+ * <li>Render the page template (e.g. {@code page.index}) with the form HTML as
+ * {@code innerContent}.</li>
+ * <li>Wrap the result in the tenant's active theme layout ({@code document_theme_version}) using
+ * {@code slot_content}.</li>
+ * </ol>
  *
  * <p>
- * When no template is found (e.g. on a fresh install before the first startup seed runs), the
- * adapter falls back to the built-in HTML that mirrors the previous hardcoded behaviour, using the
- * resolved theme name for asset paths.
+ * Falls back to built-in HTML when no matching theme version or page template is found.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
 @Slf4j
 public class DecorateHtml implements DecoratePageGateway {
 
-  static final String TEMPLATE_CODE = "OAUTH_PAGE_WRAPPER";
   static final String DEFAULT_THEME = "blue";
 
   private final TemplateRenderUsecase renderUsecase;
   private final TenantReadRepositoryGateway tenants;
   private final ThemeReadRepositoryGateway themeGateway;
+  private final ThemeVersionReadRepositoryGateway themeVersionGateway;
 
-  // Tenant-unaware callers (existing controllers) delegate here with null tenant.
   @Override
   public String getFullPage(final String tenantName, final String title, final String innerContent,
-      final Locale locale) {
+      final Locale locale, final String template) {
 
-    Tenant tenant = tenants.find(TenantFilter.builder().name(tenantName).build())
-        .orElseThrow(() -> new IllegalStateException("Error"));
+    String templateCode = "page." + template;
+    Optional<Tenant> tenantOpt = tenants.find(TenantFilter.builder().name(tenantName).build());
+    Optional<Theme> themeOpt = tenantOpt.flatMap(this::resolveTheme);
+    String themeName = themeOpt.map(Theme::getName).orElse(DEFAULT_THEME);
+    String themeAssetsPath = "/oauth/themes/" + themeName;
 
-    String themeName = resolveThemeName(tenant);
+    // Step 1 — render the page body template (e.g. page.index / page.full)
+    String pageBody = renderPageTemplate(templateCode, tenantOpt, locale, innerContent, title,
+        themeAssetsPath);
 
-    Optional<RenderedTemplate> rendered = renderUsecase.render(TemplateRenderInput.builder()
-        .code(TEMPLATE_CODE).channel(TemplateChannelOptions.HTML).tenant(tenant).locale(locale)
-        .variables(
-            Map.of("page.title", title, "page.content", innerContent, "theme.name", themeName))
-        .build());
-
-    return rendered.map(RenderedTemplate::getHtmlContent).orElseGet(() -> {
-      log.debug("No '{}' template found, using built-in fallback (theme='{}')", TEMPLATE_CODE,
-          themeName);
-      return builtInFallback(title, innerContent, themeName);
-    });
+    // Step 2 — wrap in the theme layout
+    return themeOpt.flatMap(theme -> renderThemeLayout(theme, locale, pageBody, title, themeAssetsPath))
+        .orElseGet(() -> {
+          log.debug("No theme layout found for theme='{}', using built-in fallback", themeName);
+          return builtInFallback(title, pageBody, themeName);
+        });
   }
 
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  /**
-   * Returns the name of the tenant's default enabled theme, falling back to
-   * {@value #DEFAULT_THEME}.
-   */
-  private String resolveThemeName(final Tenant tenant) {
-    if (tenant == null) {
-      return DEFAULT_THEME;
-    }
-    // FIXME: isDefault must use another name.
-    return themeGateway.list(ThemeFilter.builder().tenant(tenant).build()).stream()
-        .filter(t -> t.isEnabled())
-        // .filter(t -> t.isDefault().orElse(false))
-        .map(t -> t.getName()).findFirst().orElse(DEFAULT_THEME);
+  private String renderPageTemplate(final String templateCode, final Optional<Tenant> tenantOpt,
+      final Locale locale, final String innerContent, final String title,
+      final String themeAssetsPath) {
+    Optional<RenderedTemplate> rendered = renderUsecase.render(TemplateRenderInput.builder()
+        .code(templateCode).channel(TemplateChannelOptions.HTML)
+        .tenant(tenantOpt.map(t -> (TenantRef) t).orElse(null)).locale(locale)
+        .variables(Map.of("title", title, "innerContent", innerContent,
+            "theme_assets_path", themeAssetsPath))
+        .build());
+    return rendered.map(RenderedTemplate::getHtmlContent).orElseGet(() -> {
+      log.debug("No '{}' page template found, using innerContent directly", templateCode);
+      return innerContent;
+    });
   }
 
-  /**
-   * Built-in fallback page identical to the previous hardcoded behaviour, but using the dynamically
-   * resolved theme name for asset paths. Used when the {@code OAUTH_PAGE_WRAPPER} template has not
-   * been seeded yet.
-   */
-  private String builtInFallback(final String title, final String innerContent,
-      final String theme) {
-    return "<html><head>" + "<meta charset=\"UTF-8\">\r\n"
+  private Optional<String> renderThemeLayout(final Theme theme, final Locale locale,
+      final String slotContent, final String title, final String themeAssetsPath) {
+    String localeTag = locale != null ? locale.toLanguageTag() : null;
+
+    Optional<ThemeVersion> version = themeVersionGateway
+        .list(ThemeVersionFilter.builder().theme(theme).build()).stream()
+        .filter(v -> ThemeVersionChannelOptions.HTML == v.getChannel())
+        .filter(v -> localeTag == null || localeTag.equals(v.getLocale().orElse(null))
+            || v.getLocale().isEmpty())
+        .findFirst();
+
+    TenantRef tenantRef = theme.getTenant().orElse(null);
+    return version.map(v -> {
+      RenderedTemplate rendered = renderUsecase.renderHtml(v.getContentHtml(), tenantRef, locale,
+          Map.of("slot_content", slotContent, "title", title, "theme_assets_path", themeAssetsPath));
+      return rendered.getHtmlContent();
+    });
+  }
+
+  private Optional<Theme> resolveTheme(final Tenant tenant) {
+    return themeGateway.list(ThemeFilter.builder().tenant(tenant).build()).stream()
+        .filter(Theme::isEnabled)
+        .findFirst();
+  }
+
+  private String builtInFallback(final String title, final String body, final String theme) {
+    return "<html><head>"
+        + "<meta charset=\"UTF-8\">\r\n"
         + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n"
         + "<title>" + title + "</title>"
         + "<link rel=\"icon\" type=\"image/png\" href=\"/oauth/themes/" + theme + "/favicon.png\">"
         + "<link rel=\"stylesheet\" href=\"/oauth/themes/" + theme + "/styles.css\">\r\n"
-        + "</head><body>" + "<div class=\"container\">\r\n"
-        + "  <div class=\"background-image\">\r\n" + "    <picture>\n"
-        + "      <source srcset=\"/oauth/themes/" + theme
-        + "/background-720.jpg\" media=\"(max-width: 720px)\">\n"
-        + "      <source srcset=\"/oauth/themes/" + theme
-        + "/background-1280.jpg\" media=\"(max-width: 1280px)\">\n"
-        + "      <source srcset=\"/oauth/themes/" + theme
-        + "/background-1620.jpg\" media=\"(max-width: 1620px)\">\n"
-        + "      <source srcset=\"/oauth/themes/" + theme
-        + "/background-5224.jpg\" media=\"(min-width: 1281px)\">\n"
-        + "      <img src=\"/oauth/themes/" + theme
-        + "/background-1280.jpg\" alt=\"Fondo\" class=\"background-img\">\n" + "    </picture>"
-        + "    <div class=\"overlay-content\">\r\n" + "      <img src=\"/oauth/themes/" + theme
-        + "/logo.png\" alt=\"Logotipo\" class=\"logo\">\r\n" + "      <h2>Hello</h2>\r\n"
-        + "    </div>\r\n" + "  </div>\r\n"
-        + "  <div class=\"form-content\"><div class=\"loading\"></div><div class=\"in-form\">"
-        + innerContent + "  </div></div>" + "</div>" + "<script>"
-        + "document.addEventListener('DOMContentLoaded', function() {\n"
-        + "  const formContent = document.querySelector('.form-content');\n"
-        + "  const loadingIndicator = document.querySelector('.loading');\n"
-        + "  formContent.classList.add('slide-in');\n" + "  setTimeout(function() {\n"
-        + "    const form = formContent.querySelector('form');\n" + "    if (form) {\n"
-        + "      function handleFormSubmit(event) {\n" + "        event.preventDefault();\n"
-        + "        formContent.classList.add('slide-out');\n"
-        + "        loadingIndicator.style.display = 'block';\n"
-        + "        setTimeout(function() {\n"
-        + "          form.removeEventListener('submit', handleFormSubmit);\n"
-        + "          form.submit();\n" + "        }, 500);\n" + "      }\n"
-        + "      const existingSubmitListener = form.onsubmit;\n"
-        + "      if (existingSubmitListener) {\n"
-        + "        form.addEventListener('submit', function(event) {\n"
-        + "          existingSubmitListener.call(form, event);\n"
-        + "          handleFormSubmit(event);\n" + "        });\n" + "      } else {\n"
-        + "        form.addEventListener('submit', handleFormSubmit);\n" + "      }\n" + "    }\n"
-        + "  }, 1000);\n" + "});\n" + "</script>" + "</body></html>";
+        + "</head><body>"
+        + "<div class=\"form-content\"><div class=\"loading\"></div><div class=\"in-form\">"
+        + body + "</div></div>"
+        + "</body></html>";
   }
 }
