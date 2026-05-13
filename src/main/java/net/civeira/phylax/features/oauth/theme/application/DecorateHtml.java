@@ -58,7 +58,8 @@ public class DecorateHtml implements DecoratePageGateway {
 
     String templateCode = "page." + template;
     Optional<Tenant> tenantOpt = tenants.find(TenantFilter.builder().name(tenantName).build());
-    Optional<Theme> themeOpt = tenantOpt.flatMap(this::resolveTheme);
+    Optional<Theme> themeOpt = tenantOpt.flatMap(this::resolveTheme)
+        .or(this::resolveGlobalTheme);
     String themeName = themeOpt.map(Theme::getName).orElse(DEFAULT_THEME);
     String themeAssetsPath = "/oauth/themes/" + themeName;
 
@@ -114,8 +115,12 @@ public class DecorateHtml implements DecoratePageGateway {
 
   private Optional<Theme> resolveTheme(final Tenant tenant) {
     return themeGateway.list(ThemeFilter.builder().tenant(tenant).build()).stream()
-        .filter(Theme::isEnabled)
-        .findFirst();
+        .filter(Theme::isEnabled).findFirst();
+  }
+
+  private Optional<Theme> resolveGlobalTheme() {
+    return themeGateway.list(ThemeFilter.builder().global(true).build()).stream()
+        .filter(Theme::isEnabled).findFirst();
   }
 
   private String builtInFallback(final String title, final String body, final String theme) {
