@@ -16,7 +16,7 @@ public class SessionsPanel {
 
     StringBuilder cards = new StringBuilder();
     for (ActiveSession session : sessions) {
-      String sessionId = esc(session.getSessionId());
+//      String sessionId = esc(session.getSessionId());
       String client =
           esc(session.getClientName().filter(s -> !s.isBlank()).orElseGet(session::getClientId));
       String ip = esc(session.getIpAddress().orElse(t.get("profile.sessions.unknown")));

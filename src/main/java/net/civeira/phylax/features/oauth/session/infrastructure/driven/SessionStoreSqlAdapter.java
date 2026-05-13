@@ -144,17 +144,13 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
   @Override
   public void updateSession(String newState, String oldState) {
     try (Connection conn = source.getConnection();
-        PreparedStatement tokenUpdate =
-            conn.prepareStatement("UPDATE _oauth_session_token set session=? where session = ?");
         PreparedStatement stat = conn.prepareStatement(
             "UPDATE _oauth_session set session=?, expiration = ? where session = ?")) {
-      tokenUpdate.setString(1, newState);
-      tokenUpdate.setString(2, oldState);
-      tokenUpdate.execute();
       stat.setString(1, newState);
       stat.setTimestamp(2, new Timestamp(System.currentTimeMillis() + 360000000));
       stat.setString(3, oldState);
       stat.execute();
+      // _oauth_session_token.session is updated automatically via ON UPDATE CASCADE
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }

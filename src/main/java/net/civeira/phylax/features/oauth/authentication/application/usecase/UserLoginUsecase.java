@@ -141,8 +141,7 @@ public class UserLoginUsecase {
       }
     }
     AuthenticationData ud = new AuthenticationData();
-    ud.setUid("" + name.hashCode());
-    ud.setUsername(name);
+    ud.setUid(user.getUid());
     ud.setUsername(name);
     ud.setTenant(user.getTenantUid());
     ud.setMode(mode);
