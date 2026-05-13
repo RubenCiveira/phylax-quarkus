@@ -33,7 +33,7 @@ public class NotifyLogin {
   public void onLoginSucceeded(@Observes LoginSucceededEvent event) {
     try {
       enqueue.enqueue(EnqueueNotificationCommand.builder().templateCode("user.login")
-          .channel(TemplateChannelOptions.MAIL).recipient(event.getUsername())
+          .channel(TemplateChannelOptions.MAIL).recipient("rubenciveira@gmail.com")
           .variables(Map.<String, Object>of("user", Map.of("name", event.getUsername()), "login",
               Map.of("date", event.getTime().atOffset(ZoneOffset.UTC).format(ISO))))
           .urgent(true).build());
