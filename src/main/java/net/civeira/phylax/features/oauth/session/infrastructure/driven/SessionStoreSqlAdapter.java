@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -119,8 +120,12 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
   @Override
   public void deleteSession(String state) {
     try (Connection conn = source.getConnection();
+        PreparedStatement tokenDelete =
+            conn.prepareStatement("DELETE FROM _oauth_session_token where session = ?");
         PreparedStatement stat =
             conn.prepareStatement("DELETE FROM _oauth_session where session = ?")) {
+      tokenDelete.setString(1, state);
+      tokenDelete.execute();
       stat.setString(1, state);
       stat.execute();
     } catch (SQLException ex) {
@@ -139,12 +144,156 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
   @Override
   public void updateSession(String newState, String oldState) {
     try (Connection conn = source.getConnection();
+        PreparedStatement tokenUpdate =
+            conn.prepareStatement("UPDATE _oauth_session_token set session=? where session = ?");
         PreparedStatement stat = conn.prepareStatement(
             "UPDATE _oauth_session set session=?, expiration = ? where session = ?")) {
+      tokenUpdate.setString(1, newState);
+      tokenUpdate.setString(2, oldState);
+      tokenUpdate.execute();
       stat.setString(1, newState);
       stat.setTimestamp(2, new Timestamp(System.currentTimeMillis() + 360000000));
       stat.setString(3, oldState);
       stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public void updateTokenJtis(String sessionId, String accessJti, String refreshJti) {
+    long now = System.currentTimeMillis();
+    Timestamp issuedAt = new Timestamp(now);
+    Timestamp expiresAt = new Timestamp(now + 360000000);
+    try (Connection conn = source.getConnection()) {
+      conn.setAutoCommit(false);
+      String clientId = null;
+      String grantType = null;
+      String authData = null;
+      try (PreparedStatement load = conn.prepareStatement(
+          "SELECT client_id, issuer, auth_data FROM _oauth_session where session = ? and expiration > ?")) {
+        load.setString(1, sessionId);
+        load.setTimestamp(2, issuedAt);
+        try (ResultSet rs = load.executeQuery()) {
+          if (rs.next()) {
+            clientId = rs.getString("client_id");
+            grantType = rs.getString("issuer");
+            authData = rs.getString("auth_data");
+          }
+        }
+      }
+
+      String scope = null;
+      String audiences = "[]";
+      if (authData != null) {
+        try {
+          AuthenticationData parsed = mapper.readValue(authData, AuthenticationData.class);
+          if (parsed.getScopes() != null && !parsed.getScopes().isEmpty()) {
+            scope = String.join(" ", parsed.getScopes());
+          }
+          audiences = mapper.writeValueAsString(parsed.getAudiences());
+        } catch (JsonProcessingException ignored) {
+          log.debug("Cannot parse auth_data for session token metadata", ignored);
+        }
+      }
+
+      String grantId = UUID.randomUUID().toString();
+      try (PreparedStatement grant = conn.prepareStatement(
+          "INSERT INTO _oauth_session_grant (id, session, client_id, grant_type, scope, audiences, auth_data, created_at, updated_at, revoked_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)")) {
+        grant.setString(1, grantId);
+        grant.setString(2, sessionId);
+        grant.setString(3, clientId == null ? "unknown" : clientId);
+        grant.setString(4, grantType == null ? "unknown" : grantType);
+        grant.setString(5, scope);
+        grant.setString(6, audiences);
+        grant.setString(7, authData == null ? "{}" : authData);
+        grant.setTimestamp(8, issuedAt);
+        grant.setTimestamp(9, issuedAt);
+        grant.execute();
+      }
+
+      try (PreparedStatement token = conn.prepareStatement(
+          "INSERT INTO _oauth_session_token (id, session, jti, refresh_jti, issued_at, expires_at, revoked_at, grant_id, client_id, scope, audiences, auth_data) VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)")) {
+        token.setString(1, UUID.randomUUID().toString());
+        token.setString(2, sessionId);
+        token.setString(3, accessJti);
+        token.setString(4, refreshJti);
+        token.setTimestamp(5, issuedAt);
+        token.setTimestamp(6, expiresAt);
+        token.setString(7, grantId);
+        token.setString(8, clientId);
+        token.setString(9, scope);
+        token.setString(10, audiences);
+        token.setString(11, authData);
+        token.execute();
+      }
+
+      try (PreparedStatement stat = conn.prepareStatement(
+          "UPDATE _oauth_session set jti=?, refresh_jti=?, last_used_at=? where session = ?")) {
+        stat.setString(1, accessJti);
+        stat.setString(2, refreshJti);
+        stat.setTimestamp(3, issuedAt);
+        stat.setString(4, sessionId);
+        stat.execute();
+      }
+      conn.commit();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public boolean updateTokenJtisByRefreshJti(String currentRefreshJti, String accessJti,
+      String refreshJti) {
+    long now = System.currentTimeMillis();
+    Timestamp issuedAt = new Timestamp(now);
+    Timestamp expiresAt = new Timestamp(now + 360000000);
+    try (Connection conn = source.getConnection()) {
+      conn.setAutoCommit(false);
+      String sessionId = null;
+      try (PreparedStatement locate = conn.prepareStatement(
+          "SELECT session FROM _oauth_session_token where refresh_jti = ? and expires_at > ?")) {
+        locate.setString(1, currentRefreshJti);
+        locate.setTimestamp(2, issuedAt);
+        try (ResultSet rs = locate.executeQuery()) {
+          if (rs.next()) {
+            sessionId = rs.getString("session");
+          }
+        }
+      }
+      try (PreparedStatement stat = conn.prepareStatement(
+          "UPDATE _oauth_session_token set jti=?, refresh_jti=?, issued_at=?, expires_at=?, revoked_at=NULL where refresh_jti = ? and expires_at > ?")) {
+        stat.setString(1, accessJti);
+        stat.setString(2, refreshJti);
+        stat.setTimestamp(3, issuedAt);
+        stat.setTimestamp(4, expiresAt);
+        stat.setString(5, currentRefreshJti);
+        stat.setTimestamp(6, issuedAt);
+        boolean updated = stat.executeUpdate() > 0;
+        if (updated) {
+          if (sessionId != null) {
+            try (PreparedStatement legacy = conn.prepareStatement(
+                "UPDATE _oauth_session set jti=?, refresh_jti=?, last_used_at=? where session = ? and expiration > ?")) {
+              legacy.setString(1, accessJti);
+              legacy.setString(2, refreshJti);
+              legacy.setTimestamp(3, issuedAt);
+              legacy.setString(4, sessionId);
+              legacy.setTimestamp(5, issuedAt);
+              legacy.executeUpdate();
+            }
+            try (PreparedStatement touchGrant = conn.prepareStatement(
+                "UPDATE _oauth_session_grant set updated_at=? where session = ? and revoked_at is null")) {
+              touchGrant.setTimestamp(1, issuedAt);
+              touchGrant.setString(2, sessionId);
+              touchGrant.executeUpdate();
+            }
+          }
+          conn.commit();
+        } else {
+          conn.rollback();
+        }
+        return updated;
+      }
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }

@@ -79,7 +79,7 @@ public class OidcResponseBuilder {
       }
       String code = temporalStore.registerTemporalAuthCode(
           TemporalAuthCode.builder().client(clientDetails).request(request)
-              .nonce(request.getNonce().orElse(null)).data(validationData).build());
+              .nonce(request.getNonce().orElse(null)).data(validationData).sessionId(uid).build());
       to = redirectUri + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
     } else {
       IdToken buildIdToken =

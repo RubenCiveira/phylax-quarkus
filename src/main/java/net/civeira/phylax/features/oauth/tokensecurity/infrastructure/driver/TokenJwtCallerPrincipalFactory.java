@@ -24,6 +24,7 @@ import jakarta.json.JsonObject;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
@@ -38,6 +39,7 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigne
 @ApplicationScoped
 @Alternative
 @Priority(1)
+@Slf4j
 public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
   @Data
   @RequiredArgsConstructor
@@ -140,7 +142,6 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
       } else if (null != principal) {
         throw new ParseException("Expired token");
       } else {
-        System.err.println("> WRONG TOKEN");
         throw new ParseException(error, getException());
       }
     }
@@ -200,13 +201,22 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
       return Cacheable.fail("Unable to parse token", e);
     }
     try {
-      String keypass = tokenSigner.verifiedKeypass("", token);
+      String tenant = resolveTenant(parsed.getClaims());
+      String issuer = safeIssuer(parsed.getClaims());
+      String tid = safeClaim(parsed.getClaims(), "tid");
+      String keypass = tokenSigner.verifiedKeypass(tenant, token);
       if (null == keypass || keypass.isBlank()) {
+        log.warn(
+            "jwt principal verification failed: invalid sign tenantResolved={} iss={} tid={} kid={}",
+            tenant, issuer, tid, parsed.getHeader().getString("kid", ""));
         return Cacheable.fail("Invalid JWT sign");
       }
       Instant expiresAt = expirationFromClaims(parsed.getClaims());
+      log.debug("jwt principal verified: tenantResolved={} iss={} tid={} kid={}", tenant, issuer,
+          tid, parsed.getHeader().getString("kid", ""));
       return Cacheable.ok(parsed.getPrincipal(), expiresAt);
     } catch (RuntimeException e) {
+      log.error("jwt principal verification error: {}", e.getMessage(), e);
       return Cacheable.fail("Unable to load the keys", e);
     }
   }
@@ -230,6 +240,49 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
       return Instant.now();
     }
     return Instant.now();
+  }
+
+  private String resolveTenant(JwtClaims claims) {
+    try {
+      String issuer = claims.getIssuer();
+      if (issuer != null) {
+        int idx = issuer.lastIndexOf("/oauth/openid/");
+        if (idx >= 0) {
+          String tenant = issuer.substring(idx + "/oauth/openid/".length());
+          if (!tenant.isBlank()) {
+            return tenant;
+          }
+        }
+      }
+    } catch (MalformedClaimException ignored) {
+      // fallback to tid
+    }
+    try {
+      String tid = claims.getStringClaimValue("tid");
+      if (tid != null && !tid.isBlank()) {
+        return tid;
+      }
+    } catch (MalformedClaimException ignored) {
+      // no-op
+    }
+    return "";
+  }
+
+  private String safeIssuer(JwtClaims claims) {
+    try {
+      return claims.getIssuer();
+    } catch (MalformedClaimException ex) {
+      return "";
+    }
+  }
+
+  private String safeClaim(JwtClaims claims, String claim) {
+    try {
+      String value = claims.getStringClaimValue(claim);
+      return value == null ? "" : value;
+    } catch (MalformedClaimException ex) {
+      return "";
+    }
   }
 
   /**

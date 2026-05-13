@@ -57,17 +57,28 @@ public class TokenLookupSqlAdapter implements TokenLookupGateway {
   public Optional<TokenIntrospectionResult> lookupByJti(String tenantSlug, String jti) {
     try (Connection conn = source.getConnection();
         PreparedStatement stmt = conn.prepareStatement(
-            "SELECT jti, expiration, client_id, auth_data FROM _oauth_session WHERE jti = ? AND expiration > ?")) {
+            "SELECT t.jti, t.client_id as token_client_id, t.scope as token_scope, t.auth_data as token_auth_data, s.expiration, s.client_id, s.auth_data FROM _oauth_session_token t JOIN _oauth_session s ON s.session = t.session WHERE t.jti = ? AND t.revoked_at IS NULL AND t.expires_at > ? AND s.expiration > ?")) {
       stmt.setString(1, jti);
       stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+      stmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
       try (ResultSet rs = stmt.executeQuery()) {
         if (rs.next()) {
-          String authJson = rs.getString("auth_data");
+          String authJson = rs.getString("token_auth_data");
+          if (authJson == null || authJson.isBlank()) {
+            authJson = rs.getString("auth_data");
+          }
           AuthenticationData auth = mapper.readValue(authJson, AuthenticationData.class);
           long expEpoch = rs.getTimestamp("expiration").toInstant().getEpochSecond();
-          String scopeStr = auth.getScopes() == null ? "" : String.join(" ", auth.getScopes());
+          String scopeStr = rs.getString("token_scope");
+          if (scopeStr == null) {
+            scopeStr = auth.getScopes() == null ? "" : String.join(" ", auth.getScopes());
+          }
+          String clientId = rs.getString("token_client_id");
+          if (clientId == null || clientId.isBlank()) {
+            clientId = rs.getString("client_id");
+          }
           return Optional.of(TokenIntrospectionResult.builder().active(true).sub(auth.getUsername())
-              .clientId(rs.getString("client_id")).scope(scopeStr).exp(expEpoch).jti(jti).build());
+              .clientId(clientId).scope(scopeStr).exp(expEpoch).jti(jti).build());
         }
       }
     } catch (SQLException | JsonProcessingException ex) {

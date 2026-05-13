@@ -37,4 +37,9 @@ public class TemporalAuthCode {
    * Original auth request context.
    */
   public final AuthRequest request;
+
+  /**
+   * Browser session identifier associated with the auth code.
+   */
+  public final String sessionId;
 }

@@ -6,15 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.microprofile.jwt.JsonWebToken;
-
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.tokensecurity.application.usecase.IntrospectTokenUseCase;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
  * REST controller for retrieving userinfo claims.
@@ -22,10 +26,11 @@ import lombok.RequiredArgsConstructor;
  * Responsibilities: - Expose userinfo data for authenticated principals. - Provide a simplified
  * profile for resource servers.
  *
- * Design notes: - Uses JsonWebToken from the security context. - Returns a map of standard OIDC
- * claims.
+ * Design notes: - Uses internal token verification to stay aligned with OAuth signer keys. -
+ * Returns a map of standard OIDC claims.
  */
 @RequestScoped
+@Slf4j
 @RequiredArgsConstructor
 @Path("")
 public class InformationController {
@@ -52,10 +57,9 @@ public class InformationController {
     private List<String> roles = new ArrayList<>();
   }
 
-  /**
-   * JWT for the currently authenticated subject.
-   */
-  private final JsonWebToken jwt;
+  private final IntrospectTokenUseCase introspectTokenUseCase;
+
+  private final TokenSigner tokenSigner;
 
   /**
    * Returns the current authenticated user info.
@@ -67,10 +71,43 @@ public class InformationController {
    */
   @GET
   @Path("oauth/openid/{tenant}/userinfo")
-  public Response retrieveUserData(String tenant) {
+  public Response retrieveUserData(@PathParam("tenant") String tenant,
+      @Context HttpHeaders headers) {
+    String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      log.warn("userinfo unauthorized: missing/invalid Authorization header for tenant={}", tenant);
+      return Response.status(401).build();
+    }
+    String token = authHeader.substring(7).trim();
+    if (token.isEmpty()) {
+      log.warn("userinfo unauthorized: empty bearer token for tenant={}", tenant);
+      return Response.status(401).build();
+    }
+    var introspection = introspectTokenUseCase.introspect(tenant, token);
+    if (!introspection.isActive()) {
+      log.warn(
+          "userinfo unauthorized: token inactive for tenant={} sub={} clientId={} iss={} jti={}",
+          tenant, introspection.getSub(), introspection.getClientId(), introspection.getIss(),
+          introspection.getJti());
+      return Response.status(401).build();
+    }
+    Map<String, Object> payload = tokenSigner.verifyTokenPayload(tenant, token);
+    if (payload.isEmpty()) {
+      log.warn("userinfo unauthorized: payload verification failed for tenant={}", tenant);
+      return Response.status(401).build();
+    }
+    String subject = String.valueOf(payload.getOrDefault("sub", ""));
+    String issuer = String.valueOf(payload.getOrDefault("iss", ""));
+    String tid = String.valueOf(payload.getOrDefault("tid", ""));
+    log.info("userinfo token verified tenant={} iss={} tid={} sub={}", tenant, issuer, tid,
+        subject);
+    if (subject.isBlank()) {
+      log.warn("userinfo unauthorized: token without subject for tenant={} iss={} tid={}", tenant,
+          issuer, tid);
+      return Response.status(401).build();
+    }
     Map<String, String> map = new HashMap<>();
-    map.putAll(
-        Map.of("sub", jwt.getSubject(), "name", jwt.getSubject(), "issuer", jwt.getIssuer()));
+    map.putAll(Map.of("sub", subject, "name", subject, "issuer", issuer));
     return Response.ok(map).build();
   }
 }

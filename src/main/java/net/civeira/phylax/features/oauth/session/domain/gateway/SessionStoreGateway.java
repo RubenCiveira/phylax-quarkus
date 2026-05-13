@@ -53,6 +53,30 @@ public interface SessionStoreGateway {
   void updateSession(String newState, String oldState);
 
   /**
+   * Persists the latest token identifiers for a session.
+   *
+   * Stores access and refresh JTI values used by introspection/revocation flows.
+   *
+   * @param sessionId session identifier
+   * @param accessJti access token jti
+   * @param refreshJti refresh token jti
+   */
+  void updateTokenJtis(String sessionId, String accessJti, String refreshJti);
+
+  /**
+   * Rotates token identifiers using the current refresh token jti.
+   *
+   * Used in refresh_token grant where no browser cookie/session id is available.
+   *
+   * @param currentRefreshJti current refresh token jti
+   * @param accessJti new access token jti
+   * @param refreshJti new refresh token jti
+   * @return true when a session row was updated
+   */
+  boolean updateTokenJtisByRefreshJti(String currentRefreshJti, String accessJti,
+      String refreshJti);
+
+  /**
    * Deletes a session by its identifier.
    *
    * Used for logout and session revocation. Implementations should ignore missing sessions.

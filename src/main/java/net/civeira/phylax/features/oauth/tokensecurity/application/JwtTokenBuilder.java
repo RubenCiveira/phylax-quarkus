@@ -378,6 +378,19 @@ public class JwtTokenBuilder {
     }
   }
 
+  public Optional<String> tokenJti(String token, String tenant) {
+    try {
+      Map<String, Object> payload = tokenSigner.verifyTokenPayload(tenant, token);
+      if (payload.isEmpty()) {
+        return Optional.empty();
+      }
+      String jti = claimAsString(payload.get("jti"));
+      return jti == null || jti.isBlank() ? Optional.empty() : Optional.of(jti);
+    } catch (NotAllowedException nae) {
+      return Optional.empty();
+    }
+  }
+
 
 
   /**

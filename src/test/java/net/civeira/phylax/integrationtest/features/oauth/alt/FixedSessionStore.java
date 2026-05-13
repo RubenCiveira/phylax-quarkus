@@ -45,6 +45,17 @@ public class FixedSessionStore implements SessionStoreGateway {
   }
 
   @Override
+  public void updateTokenJtis(String sessionId, String accessJti, String refreshJti) {
+    // no-op for tests using in-memory session state only
+  }
+
+  @Override
+  public boolean updateTokenJtisByRefreshJti(String currentRefreshJti, String accessJti,
+      String refreshJti) {
+    return false;
+  }
+
+  @Override
   public void deleteSession(String state) {
     sessions.remove(state);
   }

@@ -23,13 +23,16 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.application.granter.TokenGranter;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
+import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
 import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
 
 /**
@@ -113,6 +116,10 @@ public class TokenController {
    */
   private final TemporalKeysGateway temporalStore;
   /**
+   * Gateway to persist OAuth session metadata.
+   */
+  private final SessionStoreGateway sessionStore;
+  /**
    * Use case for user login and pre-authenticated flows.
    */
   private final LoginUsecase loginUsecase;
@@ -163,8 +170,8 @@ public class TokenController {
                 Arrays.asList(), AuthenticationMode.CODE_EXCHANGE);
         return auth.isRight()
             ? Response.status(200)
-                .entity(tokenBuilder.buildToken(tenant, code.client,
-                    paramMap.getFirst("grant_type"), auth.getData(), request))
+                .entity(emitAndBindToken(tenant, code.client, paramMap.getFirst("grant_type"),
+                    auth.getData(), request, Optional.ofNullable(code.sessionId), Optional.empty()))
                 .build()
             : Response.status(401).build();
       }).orElseGet(() -> Response.status(401).build());
@@ -179,8 +186,10 @@ public class TokenController {
             AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request,
                 info.getUsername(), client, Arrays.asList(), AuthenticationMode.REFRESH);
             return auth.isRight()
-                ? Response.status(200).entity(tokenBuilder.buildToken(tenant, client,
-                    paramMap.getFirst("grant_type"), auth.getData(), request)).build()
+                ? Response.status(200)
+                    .entity(emitAndBindToken(tenant, client, paramMap.getFirst("grant_type"),
+                        auth.getData(), request, Optional.empty(), Optional.of(refreshToken)))
+                    .build()
                 : Response.status(401).build();
           })).orElseGet(() -> Response.status(401).build());
     }
@@ -257,10 +266,29 @@ public class TokenController {
     }
     return authenticate.isRight()
         ? Response.status(200)
-            .entity(tokenBuilder.buildToken(tenant, clientDetails, paramMap.getFirst("grant_type"),
-                authenticate.getData(), request))
+            .entity(emitAndBindToken(tenant, clientDetails, paramMap.getFirst("grant_type"),
+                authenticate.getData(), request, Optional.empty(), Optional.empty()))
             .build()
         : Response.status(401).entity(authenticate.getFail().entity(tokenBuilder)).build();
+  }
+
+  private AutorizationToken emitAndBindToken(String tenant, ClientDetails clientDetails,
+      String grantType, AuthenticationData auth, AuthRequest request, Optional<String> sessionId,
+      Optional<String> previousRefreshToken) {
+    AutorizationToken token =
+        tokenBuilder.buildToken(tenant, clientDetails, grantType, auth, request);
+    Optional<String> accessJti = tokenBuilder.tokenJti(token.getAccessToken(), tenant);
+    Optional<String> refreshJti = tokenBuilder.tokenJti(token.getRefreshToken(), tenant);
+    if (accessJti.isPresent() && refreshJti.isPresent()) {
+      if (sessionId.isPresent() && !sessionId.get().isBlank()) {
+        sessionStore.updateTokenJtis(sessionId.get(), accessJti.get(), refreshJti.get());
+      } else if (previousRefreshToken.isPresent()) {
+        tokenBuilder.tokenJti(previousRefreshToken.get(), tenant)
+            .ifPresent(oldRefreshJti -> sessionStore.updateTokenJtisByRefreshJti(oldRefreshJti,
+                accessJti.get(), refreshJti.get()));
+      }
+    }
+    return token;
   }
 
   /**
