@@ -3,9 +3,9 @@ package net.civeira.phylax.features.oauth.user.infrastructure.driven;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationCommand;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationUseCase;
+import net.civeira.phylax.features.notification.outbox.domain.ChannelOptions;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationNotificationData;
 import net.civeira.phylax.features.oauth.user.domain.gateway.UserRegistrationMailGateway;
 
@@ -28,7 +28,7 @@ public class UserRegistrationMailAdapter implements UserRegistrationMailGateway 
   public void sendRegistrationVerification(RegistrationNotificationData data) {
     try {
       enqueue.enqueue(EnqueueNotificationCommand.builder().templateCode("user.register")
-          .channel(TemplateChannelOptions.MAIL).tenant(data.tenant()).recipient(data.email())
+          .channel(ChannelOptions.MAIL).tenant(data.tenant()).recipient(data.email())
           .variables(java.util.Map.<String, Object>of("user", java.util.Map.of("name", data.name()),
               "registration", java.util.Map.of("activateUrl", data.activateUrl())))
           .urgent(false).build());

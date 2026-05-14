@@ -8,7 +8,7 @@ import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
 import net.civeira.phylax.features.access.tenant.domain.TenantRef;
-import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
+import net.civeira.phylax.features.notification.outbox.domain.ChannelOptions;
 
 /**
  * Command to enqueue a notification generated from a template.
@@ -26,7 +26,7 @@ public class EnqueueNotificationCommand {
   private final String templateCode;
 
   /** Delivery channel used to select among templates with the same code (e.g. {@code EMAIL}). */
-  private final TemplateChannelOptions channel;
+  private final ChannelOptions channel;
 
   /**
    * Tenant uid for template resolution and SMTP config lookup. {@code null} means the global

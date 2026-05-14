@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.mail.EmailMessage;
 import net.civeira.phylax.common.infrastructure.mail.EmailService;
 import net.civeira.phylax.common.infrastructure.mail.MailConfiguration;
+import net.civeira.phylax.features.notification.outbox.domain.OutboundMail;
 import net.civeira.phylax.features.notification.outbox.domain.gateway.SmtpMailSenderGateway;
-import net.civeira.phylax.features.notification.outbox.domain.model.OutboundMail;
 
 /**
  * Adapts {@link SmtpMailSenderGateway} to the existing {@link EmailService} infrastructure.

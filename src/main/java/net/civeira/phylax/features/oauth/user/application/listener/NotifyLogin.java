@@ -4,14 +4,13 @@ package net.civeira.phylax.features.oauth.user.application.listener;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationCommand;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationUseCase;
+import net.civeira.phylax.features.notification.outbox.domain.ChannelOptions;
 import net.civeira.phylax.features.oauth.authentication.domain.event.LoginSucceededEvent;
 
 /**
@@ -34,7 +33,7 @@ public class NotifyLogin {
   public void onLoginSucceeded(@Observes LoginSucceededEvent event) {
     try {
       enqueue.enqueue(EnqueueNotificationCommand.builder().templateCode("user.login")
-          .channel(TemplateChannelOptions.MAIL).recipient("rubenciveira@gmail.com")
+          .channel(ChannelOptions.MAIL).recipient("rubenciveira@gmail.com")
           .variables(Map.<String, Object>of("user", Map.of("name", event.getUsername()), "login",
               Map.of("date", event.getTime().atOffset(ZoneOffset.UTC).format(ISO))))
           .urgent(true).build());

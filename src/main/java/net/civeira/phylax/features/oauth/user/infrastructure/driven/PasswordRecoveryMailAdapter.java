@@ -3,9 +3,9 @@ package net.civeira.phylax.features.oauth.user.infrastructure.driven;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationCommand;
 import net.civeira.phylax.features.notification.outbox.application.usecase.enqueue.EnqueueNotificationUseCase;
+import net.civeira.phylax.features.notification.outbox.domain.ChannelOptions;
 import net.civeira.phylax.features.oauth.user.domain.RecoveryNotificationData;
 import net.civeira.phylax.features.oauth.user.domain.gateway.PasswordRecoveryMailGateway;
 
@@ -29,7 +29,7 @@ public class PasswordRecoveryMailAdapter implements PasswordRecoveryMailGateway 
     try {
       enqueue
           .enqueue(EnqueueNotificationCommand.builder().templateCode("user.password-recovery")
-              .channel(TemplateChannelOptions.MAIL).tenant(data.tenant()).recipient(data.email())
+              .channel(ChannelOptions.MAIL).tenant(data.tenant()).recipient(data.email())
               .variables(java.util.Map.<String, Object>of("user",
                   java.util.Map.of("name", data.name()), "recovery", java.util.Map.of("url",
                       data.recoveryUrl(), "expiresAt", data.expiresAt().toString())))

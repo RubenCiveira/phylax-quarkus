@@ -2,7 +2,7 @@
 package net.civeira.phylax.features.notification.outbox.domain.gateway;
 
 import net.civeira.phylax.common.infrastructure.mail.MailConfiguration;
-import net.civeira.phylax.features.notification.outbox.domain.model.OutboundMail;
+import net.civeira.phylax.features.notification.outbox.domain.OutboundMail;
 
 /**
  * Port for sending outbound email messages.
