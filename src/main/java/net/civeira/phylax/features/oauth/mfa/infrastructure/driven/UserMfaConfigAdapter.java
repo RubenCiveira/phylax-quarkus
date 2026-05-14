@@ -2,32 +2,50 @@
 package net.civeira.phylax.features.oauth.mfa.infrastructure.driven;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.temporal.TemporalAmount;
 import java.util.Base64;
+import java.util.List;
 import java.util.Locale;
-
+import java.util.Optional;
 import jakarta.activation.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.oauth.authentication.application.usecase.MfaConfigUsecase;
+import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
+import net.civeira.phylax.features.oauth.mfa.infrastructure.OtpMfaService;
+import net.civeira.phylax.features.oauth.mfa.infrastructure.OtpMfaService.ApplicationInfo;
+import net.civeira.phylax.features.oauth.user.infrastructure.ActiveUserFindService;
 
 @Slf4j
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
 public class UserMfaConfigAdapter implements UserMfaGateway {
-  private final MfaConfigUsecase config;
+  private final static TemporalAmount EXPIRATION_TIME = Duration.ofHours(6);
+
+  private final OtpMfaService otp;
+  private final ActiveUserFindService finder;
+  private final UserWriteRepositoryGateway users;
+  private final UserAccessTemporalCodeWriteRepositoryGateway codes;
+  private final AesCipherService cypher;
 
   @Override
   public PublicLoginMfaBuildResponse configurationForNewMfa(String tenant, String username,
       Locale locale) {
     AuthRequest request = AuthRequest.builder().tenant(tenant).locale(locale).build();
     boolean needsImage = requireImage(request, username);
-    String imageDataUri = config.configQr(tenant, username, request.getAudiences(), locale)
+    String imageDataUri = configQr(tenant, username, request.getAudiences(), locale)
         .map(ds -> toDataUri(ds)).orElse(null);
     return PublicLoginMfaBuildResponse.builder().requiresImage(needsImage).image(imageDataUri)
         .build();
@@ -36,18 +54,93 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
   @Override
   public boolean verifyOtp(String tenant, String username, String otp) {
     AuthRequest request = AuthRequest.builder().tenant(tenant).build();
-    return config.validateOtpConfig(tenant, username, request.getAudiences(), otp);
+    return validateOtpConfig(tenant, username, request.getAudiences(), otp);
   }
 
   @Override
   public boolean verifyNewOtp(String tenant, String username, String otp) {
     AuthRequest request = AuthRequest.builder().tenant(tenant).build();
-    return config.validateOtpConfig(tenant, username, request.getAudiences(), otp);
+    return validateOtpConfig(tenant, username, request.getAudiences(), otp);
   }
 
   @Override
   public void storeSeed(String tenant, String username, String seed) {
     // Legacy flow stores the seed during OTP validation.
+  }
+
+  private Optional<DataSource> configQr(String tenant, String username, List<String> audiences,
+      Locale locale) {
+    return finder.findEnabledUser(tenant, username, audiences).map(user -> {
+      Optional<UserAccessTemporalCode> find =
+          codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
+      Optional<String> prev = find
+          .filter(code -> code.getTempSecondFactorSeedExpiration()
+              .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
+          .flatMap(code -> code.getTempSecondFactorSeedCyphered(cypher));
+      if (prev.isPresent()) {
+        return otp.getQr(
+            ApplicationInfo.builder().label(user.getName() + " at ").issuer("no").build(),
+            prev.get());
+      } else {
+        return otp.getQr(
+            ApplicationInfo.builder().label(user.getName() + " at ").issuer("no").build(),
+            secret -> {
+              UserAccessTemporalCode code;
+              if (find.isPresent()) {
+                code = find.get();
+              } else {
+                code = codes.create(UserAccessTemporalCode
+                    .create(new UserAccessTemporalCodeChangeSet().newUid().user(user)));
+              }
+              codes.update(code,
+                  code.generateMfaTemporalCode(secret, OffsetDateTime.now().plus(EXPIRATION_TIME)));
+            });
+      }
+    });
+  }
+
+  private boolean validateOtp(String tenant, String username, List<String> audiences, String code) {
+    return finder.findEnabledUser(tenant, username, audiences).map(user -> {
+      Optional<String> find = user.getSecondFactorSeedCyphered(cypher);
+      if (find.isPresent()) {
+        String seed = find.get();
+        return otp.validateOtp(code, seed);
+      } else {
+        log.error("There is no temp second factor seed to config validate");
+        return false;
+      }
+    }).orElse(false);
+  }
+
+  private boolean validateOtpConfig(String tenant, String username, List<String> audiences,
+      String code) {
+    return finder.findEnabledUser(tenant, username, audiences).map(user -> {
+      Optional<UserAccessTemporalCode> find =
+          codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
+      Optional<String> prev = find
+          .filter(temps -> temps.getTempSecondFactorSeedExpiration()
+              .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
+          .flatMap(second -> second.getTempSecondFactorSeedCyphered(cypher));
+      if (prev.isPresent()) {
+        String seed = prev.get();
+        boolean valid = otp.validateOtp(code, seed);
+        if (valid) {
+          if (find.isPresent()) {
+            UserAccessTemporalCode temps = find.get();
+            codes.update(temps, temps.resetMfaTemporalCode());
+            users.update(user,
+                user.setMfaSeed(temps.getTempSecondFactorSeedPlain(cypher).orElseThrow()));
+          } else {
+            log.error("We have a part but not the hole item");
+            throw new IllegalStateException("");
+          }
+        }
+        return valid;
+      } else {
+        log.error("There is no temp second factor seed to config validate");
+        return false;
+      }
+    }).orElse(false);
   }
 
   private boolean requireImage(AuthRequest request, String username) {

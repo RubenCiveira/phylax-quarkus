@@ -10,7 +10,7 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.event.Us
  *
  * <p>
  * The recovery email is sent directly by
- * {@link net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase} via
+ * {@link net.civeira.phylax.features.oauth.user.application.usecase.ChangePasswordUsecase} via
  * {@link net.civeira.phylax.features.oauth.user.domain.gateway.PasswordRecoveryMailGateway}. This
  * listener exists for future cross-cutting concerns (e.g. audit, security alerts).
  * </p>

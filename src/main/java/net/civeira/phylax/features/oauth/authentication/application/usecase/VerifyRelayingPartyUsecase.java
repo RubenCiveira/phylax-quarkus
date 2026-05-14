@@ -9,6 +9,7 @@ import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
 
+@Deprecated
 @ApplicationScoped
 @RequiredArgsConstructor
 public class VerifyRelayingPartyUsecase {

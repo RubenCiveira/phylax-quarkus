@@ -10,7 +10,7 @@ import net.civeira.phylax.features.access.user.domain.event.UserCreateEvent;
  *
  * <p>
  * Registration verification email is sent directly by
- * {@link net.civeira.phylax.features.oauth.user.application.RegisterUserUsecase} via
+ * {@link net.civeira.phylax.features.oauth.user.application.usecase.RegisterUserUsecase} via
  * {@link net.civeira.phylax.features.oauth.user.domain.gateway.UserRegistrationMailGateway}. This
  * listener exists for future cross-cutting concerns (e.g. audit, CRM sync).
  * </p>

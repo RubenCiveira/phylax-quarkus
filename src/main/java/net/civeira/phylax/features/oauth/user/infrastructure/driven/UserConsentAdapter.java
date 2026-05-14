@@ -13,10 +13,11 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ConsentGateway;
 
+@Deprecated
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
-public class UserConsentInteractor implements ConsentGateway {
+public class UserConsentAdapter implements ConsentGateway {
   private final PendingConsentUsecase pending;
 
   @Override

@@ -7,7 +7,6 @@ import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
 import jakarta.activation.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +17,11 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAcce
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
-import net.civeira.phylax.features.oauth.authentication.application.service.ActiveUserFindService;
-import net.civeira.phylax.features.oauth.authentication.application.service.OtpMfaService;
-import net.civeira.phylax.features.oauth.authentication.application.service.OtpMfaService.ApplicationInfo;
+import net.civeira.phylax.features.oauth.mfa.infrastructure.OtpMfaService;
+import net.civeira.phylax.features.oauth.mfa.infrastructure.OtpMfaService.ApplicationInfo;
+import net.civeira.phylax.features.oauth.user.infrastructure.ActiveUserFindService;
 
+@Deprecated
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor

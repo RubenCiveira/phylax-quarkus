@@ -18,6 +18,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedCl
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
+@Deprecated
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor

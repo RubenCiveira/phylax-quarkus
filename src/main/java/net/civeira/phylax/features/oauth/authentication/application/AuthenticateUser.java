@@ -10,7 +10,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
-import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
+import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
 
 /**
  * Application service that orchestrates user authentication within an OIDC flow.

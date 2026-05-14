@@ -4,7 +4,6 @@ package net.civeira.phylax.features.oauth.authentication.application.usecase;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
@@ -16,14 +15,15 @@ import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
-import net.civeira.phylax.features.oauth.authentication.application.service.ActiveUserFindService;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.UserData;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.provider.GoogleDelegatedAccessProvider;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.provider.SamlDelegatedAccessProvider;
+import net.civeira.phylax.features.oauth.user.infrastructure.ActiveUserFindService;
 
 @ApplicationScoped
 @RequiredArgsConstructor
+@Deprecated
 public class DelegatedLoginProvidersUsecase {
   private final ActiveUserFindService actives;
   private final UserWriteRepositoryGateway usersWriter;

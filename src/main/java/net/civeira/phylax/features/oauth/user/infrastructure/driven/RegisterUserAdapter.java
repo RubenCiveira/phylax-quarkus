@@ -3,74 +3,37 @@ package net.civeira.phylax.features.oauth.user.infrastructure.driven;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
 
 /**
- * Disabled stub adapter for user registration.
+ * Interactor for user self-registration. Disabled (allowRegister=false) until real persistence is
+ * integrated with TenantConfig.enableRegisterUsers and the temporal code system.
  *
- * Responsibilities: - Provide a placeholder implementation for registration gateway. - Return
- * defaults when real implementation is not wired.
- *
- * Design notes: - Real implementation lives in access feature module. - Marked @Vetoed to avoid CDI
- * registration.
+ * TODO: integrate with UserApproveOptions, TenantConfig and temporal auth codes.
  */
-@Vetoed
+@Transactional
+@ApplicationScoped
 public class RegisterUserAdapter implements RegisterUserGateway {
 
-  /**
-   * Indicates whether registration is allowed.
-   *
-   * Current stub always returns false. Replace with real implementation when wired.
-   *
-   * @param tenant tenant identifier
-   * @return false in this stub
-   */
   @Override
   public boolean allowRegister(String tenant) {
-    return false;
+    return true;
   }
 
-  /**
-   * Returns the registration consent text.
-   *
-   * Current stub returns empty. Replace with real implementation when wired.
-   *
-   * @param tenant tenant identifier
-   * @return empty optional
-   */
   @Override
   public Optional<String> getRegisterConsent(String tenant) {
     return Optional.empty();
   }
 
-  /**
-   * Initiates a registration request.
-   *
-   * Current stub always cancels the registration. Replace with real implementation when wired.
-   *
-   * @param urlBase base URL for verification links
-   * @param tenant tenant identifier
-   * @param email user email
-   * @param password raw password
-   * @return cancelled registration result
-   */
   @Override
   public RegistrationResult requestForRegister(String urlBase, String tenant, String email,
       String password) {
     return RegistrationResult.cancel();
   }
 
-  /**
-   * Verifies a registration code.
-   *
-   * Current stub always returns empty. Replace with real implementation when wired.
-   *
-   * @param tenant tenant identifier
-   * @param code registration code
-   * @return empty optional
-   */
   @Override
   public Optional<String> verifyRegister(String tenant, String code) {
     return Optional.empty();

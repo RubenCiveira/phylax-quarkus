@@ -14,7 +14,7 @@ import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepository
 import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.valueobject.SecondFactorSeedVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.UseSecondFactorsVO;
-import net.civeira.phylax.features.oauth.authentication.application.service.OtpMfaService;
+import net.civeira.phylax.features.oauth.mfa.infrastructure.OtpMfaService;
 import net.civeira.phylax.features.oauth.profile.domain.MfaSetup;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
 

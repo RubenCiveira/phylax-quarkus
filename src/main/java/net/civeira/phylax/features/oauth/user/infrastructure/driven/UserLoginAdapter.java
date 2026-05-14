@@ -6,7 +6,6 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.usecase.UserLoginUsecase;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
@@ -14,12 +13,13 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationRes
 import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.domain.gateway.LoginGateway;
+import net.civeira.phylax.features.oauth.user.infrastructure.UserLoginService;
 
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
-public class UserLoginInteractor implements LoginGateway {
-  private final UserLoginUsecase login;
+public class UserLoginAdapter implements LoginGateway {
+  private final UserLoginService login;
   private final OidcEventDispatcher eventDispatcher;
 
   @Override

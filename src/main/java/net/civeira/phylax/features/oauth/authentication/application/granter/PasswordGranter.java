@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
-import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
+import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
 
 /**
  * Token granter for the OAuth password grant.

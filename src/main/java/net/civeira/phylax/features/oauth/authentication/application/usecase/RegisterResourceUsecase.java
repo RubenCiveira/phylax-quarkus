@@ -4,6 +4,7 @@ package net.civeira.phylax.features.oauth.authentication.application.usecase;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
+@Deprecated
 @ApplicationScoped
 @RequiredArgsConstructor
 public class RegisterResourceUsecase {

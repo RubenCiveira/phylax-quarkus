@@ -14,7 +14,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationRes
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.mfa.application.UserMfa;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
-import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
+import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
 
 /**
  * Token granter for the MFA grant.

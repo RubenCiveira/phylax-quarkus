@@ -3,13 +3,13 @@ package net.civeira.phylax.features.oauth.authentication.application.usecase;
 
 import java.util.Locale;
 import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.application.service.ActiveUserFindService;
-import net.civeira.phylax.features.oauth.authentication.application.service.RequiredConsentService;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.consent.infrastructure.RequiredConsentService;
+import net.civeira.phylax.features.oauth.user.infrastructure.ActiveUserFindService;
 
+@Deprecated
 @ApplicationScoped
 @RequiredArgsConstructor
 public class PendingConsentUsecase {

@@ -15,6 +15,7 @@ import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
  *
  * Design notes: - Implemented by infrastructure adapters. - Keeps persistence outside the domain.
  */
+@Deprecated
 public interface ConsentGateway {
 
   /**

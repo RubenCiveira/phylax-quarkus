@@ -12,7 +12,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMod
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.delegatelogin.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
+import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
 
 /**
  * Token granter for delegated access tokens.

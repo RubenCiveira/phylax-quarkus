@@ -21,7 +21,7 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.user.application.ChangePasswordUsecase;
+import net.civeira.phylax.features.oauth.user.application.usecase.ChangePasswordUsecase;
 
 /**
  * OIDC step for forced password changes.

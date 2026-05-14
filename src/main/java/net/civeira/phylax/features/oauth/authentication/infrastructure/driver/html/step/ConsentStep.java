@@ -19,7 +19,7 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
-import net.civeira.phylax.features.oauth.user.application.ConsentUsecase;
+import net.civeira.phylax.features.oauth.user.application.usecase.ConsentUsecase;
 import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 
 /**

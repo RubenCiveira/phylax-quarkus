@@ -33,7 +33,7 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGate
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
-import net.civeira.phylax.features.oauth.user.application.LoginUsecase;
+import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
 
 /**
  * REST controller for token issuance and related OAuth endpoints.
