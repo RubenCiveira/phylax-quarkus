@@ -52,7 +52,7 @@ public class Actor {
     }
     return false;
   }
-  
+
   public boolean hasScope(String scope) {
     if (scope.endsWith(":*")) {
       String prefix = scope.substring(0, scope.length() - 1);

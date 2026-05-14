@@ -187,6 +187,9 @@ public class UserLoginUsecase {
         ud.addGroupsTo(aud, audGroups);
       }
     });
+    if (tenant.isRoot()) {
+      ud.setScopes(List.of("platform:global_access"));
+    }
     return AuthenticationResult.right(ud);
   }
 
@@ -196,9 +199,6 @@ public class UserLoginUsecase {
         .flatMap(groupsStr -> Arrays.stream(groupsStr.split(","))).map(String::trim)
         .filter(s -> !s.isEmpty()).map(str -> str.replace(":", "/").toLowerCase())
         .forEach(groups::add);
-    if (tenant.isRoot()) {
-      new ArrayList<>(groups).stream().map(role -> "root:" + role).forEach(groups::add);
-    }
     return new ArrayList<>(groups);
   }
 
@@ -206,11 +206,7 @@ public class UserLoginUsecase {
     LinkedHashSet<String> roles = new LinkedHashSet<>();
     identities.stream().map(UserRoleAssignament::getRoles).flatMap(List::stream)
         .collect(Collectors.collectingAndThen(Collectors.toList(), userRoles::resolveRoles))
-        .stream().map(Role::getName).map(name -> "platform:" + name.toLowerCase())
-        .forEach(roles::add);
-    if (tenant.isRoot()) {
-      new ArrayList<>(roles).stream().map(role -> "root:" + role).forEach(roles::add);
-    }
+        .stream().map(Role::getName).map(String::toLowerCase).forEach(roles::add);
     return new ArrayList<>(roles);
   }
 

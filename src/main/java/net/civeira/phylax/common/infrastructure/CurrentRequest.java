@@ -214,13 +214,19 @@ public class CurrentRequest {
         resolvedRoles =
             security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList();
       }
-      JsonObject scopesJson = jwt.getClaim("scopes");
-      List<String> resolvedScopes = scopesJson != null
-          ? scopesJson.entrySet().stream().flatMap(e -> e.getValue().asJsonArray().stream())
-              .filter(v -> v.getValueType() == JsonValue.ValueType.STRING)
-              .map(v -> ((JsonString) v).getString()).toList()
-          : List.of();
-      
+      List<String> resolvedScopes;
+      Object scopeRaw = jwt.getClaim("scope");
+      if (scopeRaw instanceof String s) {
+        resolvedScopes = Arrays.stream(s.split("\\s+")).filter(v -> !v.isBlank()).toList();
+      } else if (scopeRaw instanceof JsonValue jv
+          && jv.getValueType() == JsonValue.ValueType.ARRAY) {
+        resolvedScopes =
+            jv.asJsonArray().stream().filter(v -> v.getValueType() == JsonValue.ValueType.STRING)
+                .map(v -> ((JsonString) v).getString()).toList();
+      } else {
+        resolvedScopes = List.of();
+      }
+
       builder = builder.name(security.getPrincipal().getName()).roles(resolvedRoles)
           .groups(resolvedGroups).scopes(resolvedScopes);
       Object claim = jwt.getClaim("tid");
