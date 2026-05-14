@@ -100,19 +100,6 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
     });
   }
 
-  private boolean validateOtp(String tenant, String username, List<String> audiences, String code) {
-    return finder.findEnabledUser(tenant, username, audiences).map(user -> {
-      Optional<String> find = user.getSecondFactorSeedCyphered(cypher);
-      if (find.isPresent()) {
-        String seed = find.get();
-        return otp.validateOtp(code, seed);
-      } else {
-        log.error("There is no temp second factor seed to config validate");
-        return false;
-      }
-    }).orElse(false);
-  }
-
   private boolean validateOtpConfig(String tenant, String username, List<String> audiences,
       String code) {
     return finder.findEnabledUser(tenant, username, audiences).map(user -> {
