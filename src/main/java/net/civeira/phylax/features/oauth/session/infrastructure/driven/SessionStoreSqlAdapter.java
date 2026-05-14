@@ -224,12 +224,10 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
         token.execute();
       }
 
-      try (PreparedStatement stat = conn.prepareStatement(
-          "UPDATE _oauth_session set jti=?, refresh_jti=?, last_used_at=? where session = ?")) {
-        stat.setString(1, accessJti);
-        stat.setString(2, refreshJti);
-        stat.setTimestamp(3, issuedAt);
-        stat.setString(4, sessionId);
+      try (PreparedStatement stat =
+          conn.prepareStatement("UPDATE _oauth_session set last_used_at=? where session = ?")) {
+        stat.setTimestamp(1, issuedAt);
+        stat.setString(2, sessionId);
         stat.execute();
       }
       conn.commit();
@@ -268,14 +266,12 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
         boolean updated = stat.executeUpdate() > 0;
         if (updated) {
           if (sessionId != null) {
-            try (PreparedStatement legacy = conn.prepareStatement(
-                "UPDATE _oauth_session set jti=?, refresh_jti=?, last_used_at=? where session = ? and expiration > ?")) {
-              legacy.setString(1, accessJti);
-              legacy.setString(2, refreshJti);
-              legacy.setTimestamp(3, issuedAt);
-              legacy.setString(4, sessionId);
-              legacy.setTimestamp(5, issuedAt);
-              legacy.executeUpdate();
+            try (PreparedStatement touchSession = conn.prepareStatement(
+                "UPDATE _oauth_session set last_used_at=? where session = ? and expiration > ?")) {
+              touchSession.setTimestamp(1, issuedAt);
+              touchSession.setString(2, sessionId);
+              touchSession.setTimestamp(3, issuedAt);
+              touchSession.executeUpdate();
             }
             try (PreparedStatement touchGrant = conn.prepareStatement(
                 "UPDATE _oauth_session_grant set updated_at=? where session = ? and revoked_at is null")) {
