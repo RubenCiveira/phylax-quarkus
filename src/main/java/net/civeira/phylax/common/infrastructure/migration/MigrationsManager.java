@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import io.agroal.api.AgroalDataSource;
@@ -18,6 +20,7 @@ import io.smallrye.config.ConfigMapping;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.sql.UncheckedSqlException;
 
@@ -76,6 +79,7 @@ public class MigrationsManager {
 
   private final MigrationsConfig config;
   private final DataSource source;
+  private final Instance<MigrationSeed> seeds;
 
   /**
    * Executes migrations during application startup.
@@ -109,9 +113,12 @@ public class MigrationsManager {
         throw new UncheckedSqlException(e);
       }
     }).orElseGet(() -> source);
+    String group = config.group().orElse("-");
+    List<MigrationSeed> seedList = seeds.stream().toList();
     try (Migrations mig = new Migrations(migrationsSource.getConnection(),
-        config.location().orElse("db/migration/changelog.txt"), config.group().orElse("-"))) {
+        config.location().orElse("db/migration/changelog.txt"), group)) {
       mig.runMigrations();
+      mig.runSeeds(seedList, group);
     } catch (SQLException ex) {
       throw new UncheckedSqlException(ex);
     }

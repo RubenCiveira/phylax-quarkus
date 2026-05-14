@@ -3,13 +3,10 @@ package net.civeira.phylax.bootstrap.install;
 
 import java.util.List;
 
-import io.quarkus.runtime.StartupEvent;
-import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.infrastructure.migration.Migrations;
+import net.civeira.phylax.common.infrastructure.migration.MigrationSeed;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClientChangeSet;
 import net.civeira.phylax.features.access.apikeyclient.domain.gateway.ApiKeyClientWriteRepositoryGateway;
@@ -40,7 +37,23 @@ import net.civeira.phylax.features.access.userroleassignament.domain.gateway.Use
 
 @ApplicationScoped
 @RequiredArgsConstructor
-public class InstallAccess {
+public class InstallAccess implements MigrationSeed {
+
+  @Override
+  public String id() {
+    return "seed/install-access";
+  }
+
+  @Override
+  public int order() {
+    return 10;
+  }
+
+  @Override
+  @Transactional
+  public void run() {
+    install("sesamo");
+  }
   private final UserWriteRepositoryGateway users;
   private final RoleWriteRepositoryGateway roles;
   private final TenantWriteRepositoryGateway tenants;
@@ -49,12 +62,6 @@ public class InstallAccess {
   private final UserRoleAssignamentWriteRepositoryGateway rolesAssignament;
   private final UserGroupMembershipWriteRepositoryGateway groupsMembership;
   private final ApiKeyClientWriteRepositoryGateway apiKeys;
-
-  @Transactional
-  void installOnStartup(
-      @Observes @Priority(Migrations.POST_MIGRATION_PHASE_PRIORITY) final StartupEvent ev) {
-    install("sesamo");
-  }
 
   void install(String password) {
     if (users.countForUpdate(UserFilter.builder().build()) != 0) {

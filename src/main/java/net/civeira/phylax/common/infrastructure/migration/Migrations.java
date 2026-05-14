@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,60 @@ public class Migrations implements AutoCloseable {
 
     }
     return result;
+  }
+
+  /**
+   * Executes pending CDI seeds and records each result in the same {@code _migrations} table.
+   *
+   * Seeds are sorted by {@link MigrationSeed#order()} and skipped when already recorded without
+   * error. A failed seed is marked with its error message and retried on the next startup.
+   *
+   * @param seeds list of seeds to evaluate
+   * @param group migration group identifier (same as used for SQL migrations)
+   * @return a result map with keys for files, queries, and errors
+   * @throws SQLException when database operations fail
+   */
+  public Map<String, Object> runSeeds(List<MigrationSeed> seeds, String group) throws SQLException {
+    Map<String, Object> result = new HashMap<>();
+    result.put(ERRORS, new ArrayList<String>());
+    result.put(QUERIES, new ArrayList<String>());
+    result.put(FILES, new ArrayList<String>());
+    if (lock()) {
+      try {
+        Map<String, Map<String, String>> executed = listExecuted(group);
+        seeds.stream().sorted(Comparator.comparingInt(MigrationSeed::order))
+            .forEach(seed -> runSeed(seed, group, executed, result));
+      } catch (RuntimeException | SQLException e) {
+        addError(result, e.getMessage());
+      } finally {
+        unlock();
+      }
+    } else {
+      addError(result, "The seeds are locked.");
+    }
+    return result;
+  }
+
+  private void runSeed(MigrationSeed seed, String group,
+      Map<String, Map<String, String>> executed, Map<String, Object> result) {
+    String id = seed.id();
+    if (executed.containsKey(id) && executed.get(id).get("error") == null) {
+      return;
+    }
+    boolean exists = executed.containsKey(id);
+    addFiles(result, "Running seed " + id);
+    try {
+      seed.run();
+      markOk(group, id, exists, "seed");
+      addQuery(result, "Seed completed: " + id);
+    } catch (Exception e) {
+      try {
+        markFail(group, id, exists, "seed", e);
+      } catch (SQLException ex) {
+        LOG.warn("Cannot record seed failure for " + id + ": " + ex.getMessage());
+      }
+      addError(result, "Seed " + id + " failed: " + e.getMessage());
+    }
   }
 
   /**
