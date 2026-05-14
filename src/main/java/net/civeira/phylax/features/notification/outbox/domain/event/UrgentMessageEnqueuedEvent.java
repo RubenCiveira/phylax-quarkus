@@ -14,3 +14,4 @@ package net.civeira.phylax.features.notification.outbox.domain.event;
  */
 public record UrgentMessageEnqueuedEvent(String messageUid) {}
 
+
