@@ -52,7 +52,7 @@ public class InitialDocument implements MigrationSeed {
     install();
   }
 
-  private static final String ASSET_BASE_PATH = "migration/seeed/assets/document/default-theme/";
+  private static final String ASSET_BASE_PATH = "migration/seed/assets/document/default-theme/";
 
   private static final List<String> DEFAULT_THEME_ASSETS = List.of("corporate.css", "full.css",
       "profile.css", "identity.png", "logo.png", "office_480x800.jpeg", "office_480x800.webp",
