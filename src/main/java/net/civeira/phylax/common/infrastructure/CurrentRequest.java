@@ -200,6 +200,7 @@ public class CurrentRequest {
     if (security.isAnonymous()) {
       builder = builder.authenticated(false).roles(List.of()).groups(List.of());
     } else {
+      List<String> resolvedGroups = new ArrayList<>(jwt.getGroups());
       List<String> resolvedRoles;
       if ("roles".equals(rolesClaimName)) {
         JsonObject rolesJson = jwt.getClaim("roles");
@@ -213,9 +214,15 @@ public class CurrentRequest {
         resolvedRoles =
             security.getRoles().stream().map(this::removePrefix).filter(Objects::nonNull).toList();
       }
-      List<String> resolvedGroups = new ArrayList<>(jwt.getGroups());
+      JsonObject scopesJson = jwt.getClaim("scopes");
+      List<String> resolvedScopes = scopesJson != null
+          ? scopesJson.entrySet().stream().flatMap(e -> e.getValue().asJsonArray().stream())
+              .filter(v -> v.getValueType() == JsonValue.ValueType.STRING)
+              .map(v -> ((JsonString) v).getString()).toList()
+          : List.of();
+      
       builder = builder.name(security.getPrincipal().getName()).roles(resolvedRoles)
-          .groups(resolvedGroups);
+          .groups(resolvedGroups).scopes(resolvedScopes);
       Object claim = jwt.getClaim("tid");
       if (null != claim) {
         builder = builder.tenant(String.valueOf(claim));

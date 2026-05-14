@@ -16,6 +16,7 @@ public class Actor {
   private final boolean authenticated;
   private final List<String> roles;
   private final List<String> groups;
+  private final List<String> scopes;
   private final Map<String, String> claims;
 
   public Optional<String> getTenant() {
@@ -46,6 +47,24 @@ public class Actor {
   public boolean isInAnyGroup(String... groups) {
     for (String group : groups) {
       if (isInGroup(group)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  public boolean hasScope(String scope) {
+    if (scope.endsWith(":*")) {
+      String prefix = scope.substring(0, scope.length() - 1);
+      return scopes.stream().anyMatch(has -> has.startsWith(prefix));
+    } else {
+      return scopes.contains(scope);
+    }
+  }
+
+  public boolean hasAnyScope(String... scopes) {
+    for (String scope : scopes) {
+      if (hasScope(scope)) {
         return true;
       }
     }
