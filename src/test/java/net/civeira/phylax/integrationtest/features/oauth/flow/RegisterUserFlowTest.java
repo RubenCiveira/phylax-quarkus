@@ -2,7 +2,6 @@
 package net.civeira.phylax.integrationtest.features.oauth.flow;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
@@ -14,7 +13,6 @@ import io.restassured.response.Response;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
-import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
 import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
@@ -143,9 +141,6 @@ class RegisterUserFlowTest extends OidcIntegrationTestBase {
       }
       return AuthenticationResult.right(defaultData());
     });
-
-    consentGateway.whenPending(
-        () -> Optional.of(PendingConsent.of(OidcTestFixtures.CLIENT_ID, "Terms and conditions")));
 
     // Step 1: Registration succeeds → pre-auth returns MFA challenge
     Response register = client.submitRegister(OidcTestFixtures.TENANT,

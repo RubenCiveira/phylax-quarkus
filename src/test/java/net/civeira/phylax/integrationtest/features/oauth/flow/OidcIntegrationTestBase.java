@@ -21,13 +21,14 @@ import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTokenLookupGat
 import net.civeira.phylax.integrationtest.features.oauth.client.OidcFlowClient;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioChangePasswordGateway;
-import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioConsentGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioDelegateGateway;
+import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioGdprConsentGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioLoginGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioMfaGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioPasswordRecoveryMailGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioRegisterUserGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioScopeConsentGateway;
+import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioTermsOfUseConsentGateway;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioUserRegistrationMailGateway;
 
 @QuarkusTest
@@ -43,7 +44,9 @@ public abstract class OidcIntegrationTestBase {
   @Inject
   ScenarioLoginGateway loginGateway;
   @Inject
-  ScenarioConsentGateway consentGateway;
+  ScenarioTermsOfUseConsentGateway touConsentGateway;
+  @Inject
+  ScenarioGdprConsentGateway gdprConsentGateway;
   @Inject
   ScenarioMfaGateway mfaGateway;
   @Inject
@@ -71,7 +74,8 @@ public abstract class OidcIntegrationTestBase {
     temporalKeysGateway.clear();
     clientStoreGateway.reset();
     loginGateway.reset();
-    consentGateway.reset();
+    touConsentGateway.reset();
+    gdprConsentGateway.reset();
     mfaGateway.reset();
     changePasswordGateway.reset();
     scopeConsentGateway.reset();

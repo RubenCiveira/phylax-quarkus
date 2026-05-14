@@ -2,7 +2,7 @@
 package net.civeira.phylax.integrationtest.features.oauth.flow;
 
 import java.time.Instant;
-import java.util.Optional;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
@@ -14,7 +14,7 @@ import io.restassured.response.Response;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
-import net.civeira.phylax.features.oauth.user.domain.PendingConsent;
+import net.civeira.phylax.features.oauth.consent.domain.TermsOfUseAcceptance;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
 @Tag("oidc-flow")
@@ -27,14 +27,14 @@ class ConsentMultiRpFlowTest extends OidcIntegrationTestBase {
     loginGateway.whenValidate(() -> AuthenticationResult.consentRequired(OidcTestFixtures.TENANT,
         OidcTestFixtures.USERNAME));
 
-    // First call returns rp-a, second call returns rp-b
+    // First call returns term rp-a, second call returns term rp-b
     AtomicInteger pendingCalls = new AtomicInteger();
-    consentGateway.whenPending(() -> {
+    touConsentGateway.whenPending(() -> {
       int call = pendingCalls.getAndIncrement();
       if (call == 0) {
-        return Optional.of(PendingConsent.of("rp-a", "Terms for RP-A"));
+        return List.of(new TermsOfUseAcceptance("rp-a", "Terms for RP-A"));
       } else {
-        return Optional.of(PendingConsent.of("rp-b", "Terms for RP-B"));
+        return List.of(new TermsOfUseAcceptance("rp-b", "Terms for RP-B"));
       }
     });
 
@@ -55,7 +55,7 @@ class ConsentMultiRpFlowTest extends OidcIntegrationTestBase {
     Assertions.assertTrue(login.getBody().asString().contains("Terms for RP-A"));
     String preSession1 = client.extractPreSessionCookie(login);
     Assertions.assertNotNull(preSession1);
-    Assertions.assertEquals(0, consentGateway.getAcceptedCount());
+    Assertions.assertEquals(0, touConsentGateway.getAcceptedCount());
 
     // Step 2: Accept rp-a → consent form for rp-b
     Response consent1 = client.submitConsent(OidcTestFixtures.TENANT, "on", "rp-a", preSession1);
@@ -63,15 +63,15 @@ class ConsentMultiRpFlowTest extends OidcIntegrationTestBase {
     Assertions.assertTrue(consent1.getBody().asString().contains("Terms for RP-B"));
     String preSession2 = client.extractPreSessionCookie(consent1);
     Assertions.assertNotNull(preSession2);
-    Assertions.assertEquals(1, consentGateway.getAcceptedCount());
-    Assertions.assertEquals("rp-a", consentGateway.getLastRelyingParty());
+    Assertions.assertEquals(1, touConsentGateway.getAcceptedCount());
+    Assertions.assertEquals("rp-a", touConsentGateway.getLastConsentId());
 
     // Step 3: Accept rp-b → 302 with auth code
     Response consent2 = client.submitConsent(OidcTestFixtures.TENANT, "on", "rp-b", preSession2);
     Assertions.assertEquals(302, consent2.statusCode());
     Assertions.assertNotNull(client.extractAuthCode(consent2));
-    Assertions.assertEquals(2, consentGateway.getAcceptedCount());
-    Assertions.assertEquals("rp-b", consentGateway.getLastRelyingParty());
+    Assertions.assertEquals(2, touConsentGateway.getAcceptedCount());
+    Assertions.assertEquals("rp-b", touConsentGateway.getLastConsentId());
   }
 
   private AuthenticationData defaultData() {
