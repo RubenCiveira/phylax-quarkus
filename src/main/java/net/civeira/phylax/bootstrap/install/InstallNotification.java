@@ -39,17 +39,13 @@ public class InstallNotification implements MigrationSeed {
       return;
     }
     SmtpOutboundConfigChangeSet change = new SmtpOutboundConfigChangeSet().newUid()
-        .host(env("MAILER_HOST", "smtp.example.com"))
-        .port(envInt("MAILER_PORT", 587))
+        .host(env("MAILER_HOST", "smtp.example.com")).port(envInt("MAILER_PORT", 587))
         .useTls(Boolean.parseBoolean(env("MAILER_START_TLS", "true")))
         .login(env("MAILER_USERNAME", "noreply@example.com"))
         .passwordPlain(env("MAILER_PASSWORD", "change-me"))
         .senderName(env("MAILER_FROM_NAME", "Phylax"))
-        .senderEmail(env("MAILER_FROM_EMAIL", "noreply@example.com"))
-        .timeout(30)
-        .maxRetries(3)
-        .retryDelay(60)
-        .rateLimit(100);
+        .senderEmail(env("MAILER_FROM_EMAIL", "noreply@example.com")).timeout(30).maxRetries(3)
+        .retryDelay(60).rateLimit(100);
     smtpConfigs.create(SmtpOutboundConfig.create(change));
   }
 

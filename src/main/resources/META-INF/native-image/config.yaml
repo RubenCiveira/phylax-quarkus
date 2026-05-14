@@ -4,5 +4,6 @@ quarkus:
     native: true
   native:
     resources:
-      includes: db/**
+      includes: 
+        - migration/**
     native-image-xmx: 5500m

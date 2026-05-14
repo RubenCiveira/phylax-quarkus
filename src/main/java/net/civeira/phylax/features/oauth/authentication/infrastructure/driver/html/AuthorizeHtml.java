@@ -156,7 +156,7 @@ public class AuthorizeHtml {
                 .challenges(Optional.empty()).formParams(new MultivaluedHashMap<>()).build();
             return router.paintFallback(input, null);
           });
-    }).orElseGet(() -> Response.status(403, "Client not allowed.").build());
+    }).orElseGet(() -> clientNotAllowedResponse(tenant, headers));
   }
 
   @GET
@@ -181,7 +181,7 @@ public class AuthorizeHtml {
         .map(loadClient -> sessionManager.loadSession(session)
             .map(sessionInfo -> doCheckSession(sessionInfo, loadClient, request, paramMap, session))
             .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie)))
-        .orElseGet(() -> Response.status(403, "Client not allowed.").build());
+        .orElseGet(() -> clientNotAllowedResponse(tenant, headers));
   }
 
   @POST
@@ -337,6 +337,16 @@ public class AuthorizeHtml {
   private Optional<ClientDetails> loadClient(final AuthRequest request) {
     return clientRetrieve.loadPublic(request.getTenant(), request.getClientId().orElseThrow(),
         request.getRedirect().orElseThrow());
+  }
+
+  private Response clientNotAllowedResponse(String tenant, HttpHeaders headers) {
+    Locale locale = headers.getAcceptableLanguages().stream().findFirst().orElse(Locale.ENGLISH);
+    String body = "<div class=\"form-content\"><div class=\"in-form\">"
+        + "<h1>403 – Client not allowed</h1>"
+        + "<p>The requested client is not registered or not permitted to access this resource.</p>"
+        + "</div></div>";
+    return Response.status(403).entity(decorator.getFullPage(tenant, "Access denied", body, locale))
+        .header("Content-Type", TEXT_HTML).build();
   }
 
   /**

@@ -58,17 +58,17 @@ public class DecorateHtml implements DecoratePageGateway {
 
     String templateCode = "page." + template;
     Optional<Tenant> tenantOpt = tenants.find(TenantFilter.builder().name(tenantName).build());
-    Optional<Theme> themeOpt = tenantOpt.flatMap(this::resolveTheme)
-        .or(this::resolveGlobalTheme);
+    Optional<Theme> themeOpt = tenantOpt.flatMap(this::resolveTheme).or(this::resolveGlobalTheme);
     String themeName = themeOpt.map(Theme::getName).orElse(DEFAULT_THEME);
     String themeAssetsPath = "/oauth/themes/" + themeName;
 
     // Step 1 — render the page body template (e.g. page.index / page.full)
-    String pageBody = renderPageTemplate(templateCode, tenantOpt, locale, innerContent, title,
-        themeAssetsPath);
+    String pageBody =
+        renderPageTemplate(templateCode, tenantOpt, locale, innerContent, title, themeAssetsPath);
 
     // Step 2 — wrap in the theme layout
-    return themeOpt.flatMap(theme -> renderThemeLayout(theme, locale, pageBody, title, themeAssetsPath))
+    return themeOpt
+        .flatMap(theme -> renderThemeLayout(theme, locale, pageBody, title, themeAssetsPath))
         .orElseGet(() -> {
           log.debug("No theme layout found for theme='{}', using built-in fallback", themeName);
           return builtInFallback(title, pageBody, themeName);
@@ -84,9 +84,8 @@ public class DecorateHtml implements DecoratePageGateway {
       final String themeAssetsPath) {
     Optional<RenderedTemplate> rendered = renderUsecase.render(TemplateRenderInput.builder()
         .code(templateCode).channel(TemplateChannelOptions.HTML)
-        .tenant(tenantOpt.map(t -> (TenantRef) t).orElse(null)).locale(locale)
-        .variables(Map.of("title", title, "innerContent", innerContent,
-            "theme_assets_path", themeAssetsPath))
+        .tenant(tenantOpt.map(t -> (TenantRef) t).orElse(null)).locale(locale).variables(Map
+            .of("title", title, "innerContent", innerContent, "theme_assets_path", themeAssetsPath))
         .build());
     return rendered.map(RenderedTemplate::getHtmlContent).orElseGet(() -> {
       log.debug("No '{}' page template found, using innerContent directly", templateCode);
@@ -98,17 +97,18 @@ public class DecorateHtml implements DecoratePageGateway {
       final String slotContent, final String title, final String themeAssetsPath) {
     String localeTag = locale != null ? locale.toLanguageTag() : null;
 
-    Optional<ThemeVersion> version = themeVersionGateway
-        .list(ThemeVersionFilter.builder().theme(theme).build()).stream()
-        .filter(v -> ThemeVersionChannelOptions.HTML == v.getChannel())
-        .filter(v -> localeTag == null || localeTag.equals(v.getLocale().orElse(null))
-            || v.getLocale().isEmpty())
-        .findFirst();
+    Optional<ThemeVersion> version =
+        themeVersionGateway.list(ThemeVersionFilter.builder().theme(theme).build()).stream()
+            .filter(v -> ThemeVersionChannelOptions.HTML == v.getChannel())
+            .filter(v -> localeTag == null || localeTag.equals(v.getLocale().orElse(null))
+                || v.getLocale().isEmpty())
+            .findFirst();
 
     TenantRef tenantRef = theme.getTenant().orElse(null);
     return version.map(v -> {
-      RenderedTemplate rendered = renderUsecase.renderHtml(v.getContentHtml(), tenantRef, locale,
-          Map.of("slot_content", slotContent, "title", title, "theme_assets_path", themeAssetsPath));
+      RenderedTemplate rendered =
+          renderUsecase.renderHtml(v.getContentHtml(), tenantRef, locale, Map.of("slot_content",
+              slotContent, "title", title, "theme_assets_path", themeAssetsPath));
       return rendered.getHtmlContent();
     });
   }
@@ -124,15 +124,13 @@ public class DecorateHtml implements DecoratePageGateway {
   }
 
   private String builtInFallback(final String title, final String body, final String theme) {
-    return "<html><head>"
-        + "<meta charset=\"UTF-8\">\r\n"
+    return "<html><head>" + "<meta charset=\"UTF-8\">\r\n"
         + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n"
         + "<title>" + title + "</title>"
         + "<link rel=\"icon\" type=\"image/png\" href=\"/oauth/themes/" + theme + "/favicon.png\">"
         + "<link rel=\"stylesheet\" href=\"/oauth/themes/" + theme + "/styles.css\">\r\n"
         + "</head><body>"
-        + "<div class=\"form-content\"><div class=\"loading\"></div><div class=\"in-form\">"
-        + body + "</div></div>"
-        + "</body></html>";
+        + "<div class=\"form-content\"><div class=\"loading\"></div><div class=\"in-form\">" + body
+        + "</div></div>" + "</body></html>";
   }
 }

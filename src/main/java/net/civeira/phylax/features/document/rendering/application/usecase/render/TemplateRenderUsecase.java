@@ -73,7 +73,8 @@ public class TemplateRenderUsecase {
   public RenderedTemplate renderHtml(final String htmlContent, final TenantRef tenant,
       final Locale locale, final Map<String, String> variables) {
     String localeTag = locale != null ? locale.toLanguageTag() : null;
-    Map<String, String> mergedVars = mergeVariables(tenant, variables != null ? variables : Map.of());
+    Map<String, String> mergedVars =
+        mergeVariables(tenant, variables != null ? variables : Map.of());
     Map<String, String> snippets = loadSnippets(tenant, localeTag);
     return renderGateway.render(TemplateRenderRequest.builder().htmlContent(htmlContent)
         .snippets(snippets).variables(mergedVars).build());

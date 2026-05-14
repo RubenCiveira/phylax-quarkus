@@ -159,10 +159,8 @@ public class SecureHtmlBuilder {
     });
     return new Snipped("" + "document.getElementById('" + form
         + "').addEventListener('submit', async function(event) {\r\n"
-        + "  event.preventDefault();\r\n"
-        + group.toString()
-        + "  this.submit();\r\n"
-        + "});" + "", "oauth.min.js");
+        + "  event.preventDefault();\r\n" + group.toString() + "  this.submit();\r\n" + "});" + "",
+        "oauth.min.js");
   }
 
   /**

@@ -18,7 +18,6 @@ import net.civeira.phylax.common.value.YamlLocaleMessages;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
-import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.profile.application.ProfileService;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
@@ -28,6 +27,7 @@ import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.pane
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ProfileEditPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ProfileViewPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.SessionsPanel;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 
 @Path("")
@@ -158,8 +158,8 @@ public class ProfileHtmlController {
       boolean enabled = profileService.isMfaEnabled(resolveUserUid(session), tenant);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = "<div class=\"section-card\">" + mfaPanel.render(enabled, base + "/mfa", base,
-          enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null, false,
-          t) + "</div>";
+          enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null,
+          false, t) + "</div>";
       return page(tenant, headers, t.get("profile.mfa.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
   }
@@ -183,8 +183,8 @@ public class ProfileHtmlController {
       }
       boolean enabled = profileService.isMfaEnabled(resolveUserUid(session), tenant);
       String html = "<div class=\"section-card\">" + mfaPanel.render(enabled, base + "/mfa", base,
-          enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null, true, t)
-          + "</div>";
+          enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null,
+          true, t) + "</div>";
       return page(tenant, headers, t.get("profile.mfa.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
   }
@@ -222,8 +222,7 @@ public class ProfileHtmlController {
 
   private String resolveUserUid(SessionInfo session) {
     String username = session.getValidationData().getUsername();
-    return users.find(UserFilter.builder().nameOrEmail(username).build())
-        .map(u -> u.getUid())
+    return users.find(UserFilter.builder().nameOrEmail(username).build()).map(u -> u.getUid())
         .orElse(session.getUserId());
   }
 

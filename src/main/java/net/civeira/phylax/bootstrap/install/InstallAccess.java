@@ -54,6 +54,7 @@ public class InstallAccess implements MigrationSeed {
   public void run() {
     install("sesamo");
   }
+
   private final UserWriteRepositoryGateway users;
   private final RoleWriteRepositoryGateway roles;
   private final TenantWriteRepositoryGateway tenants;

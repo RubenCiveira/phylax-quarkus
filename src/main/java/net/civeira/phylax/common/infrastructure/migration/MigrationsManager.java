@@ -2,10 +2,9 @@
 package net.civeira.phylax.common.infrastructure.migration;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import java.util.List;
 
 import javax.sql.DataSource;
 

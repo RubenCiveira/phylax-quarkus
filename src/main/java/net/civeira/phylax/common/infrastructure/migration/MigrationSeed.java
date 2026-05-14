@@ -4,20 +4,21 @@ package net.civeira.phylax.common.infrastructure.migration;
 /**
  * A CDI-based data seed that integrates with the migration runner.
  *
- * <p>Each implementation is discovered at startup, checked against the {@code _migrations} table by
+ * <p>
+ * Each implementation is discovered at startup, checked against the {@code _migrations} table by
  * {@code id()}, and executed only once. Results are recorded in the same table as SQL migrations.
  */
 public interface MigrationSeed {
 
   /**
-   * Unique identifier stored in {@code _migrations.filename}.
-   * Use a stable, descriptive string — changing it causes re-execution.
+   * Unique identifier stored in {@code _migrations.filename}. Use a stable, descriptive string —
+   * changing it causes re-execution.
    */
   String id();
 
   /**
-   * Execution order relative to other seeds. Lower values run first.
-   * SQL file migrations always run before any seed regardless of this value.
+   * Execution order relative to other seeds. Lower values run first. SQL file migrations always run
+   * before any seed regardless of this value.
    */
   default int order() {
     return 0;

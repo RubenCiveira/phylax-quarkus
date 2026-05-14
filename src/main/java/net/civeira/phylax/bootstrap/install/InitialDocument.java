@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class InitialDocument implements MigrationSeed {
     install();
   }
 
-  private static final String ASSET_BASE_PATH = "install/document/default-theme/";
+  private static final String ASSET_BASE_PATH = "migration/seeed/assets/document/default-theme/";
 
   private static final List<String> DEFAULT_THEME_ASSETS = List.of("corporate.css", "full.css",
       "profile.css", "identity.png", "logo.png", "office_480x800.jpeg", "office_480x800.webp",

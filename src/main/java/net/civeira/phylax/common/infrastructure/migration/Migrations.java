@@ -177,8 +177,8 @@ public class Migrations implements AutoCloseable {
     return result;
   }
 
-  private void runSeed(MigrationSeed seed, String group,
-      Map<String, Map<String, String>> executed, Map<String, Object> result) {
+  private void runSeed(MigrationSeed seed, String group, Map<String, Map<String, String>> executed,
+      Map<String, Object> result) {
     String id = seed.id();
     if (executed.containsKey(id) && executed.get(id).get("error") == null) {
       return;
