@@ -4,6 +4,7 @@ package net.civeira.phylax.features.oauth.delegatelogin.infrastructure.driven;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,7 @@ public class DelegatedAccessAuthValidatorAdapter implements DelegatedAccessProvi
   @Override
   public Optional<String> retrieveUsername(AuthRequest request, String provider,
       UserData codeInfo) {
-    return retrieveUsername(request.getTenant(), request.getAudiences(), provider,
-        codeInfo);
+    return retrieveUsername(request.getTenant(), request.getAudiences(), provider, codeInfo);
   }
 
   private List<DelegatedAccessExternalProvider> providers(String tenant, List<String> audiences) {

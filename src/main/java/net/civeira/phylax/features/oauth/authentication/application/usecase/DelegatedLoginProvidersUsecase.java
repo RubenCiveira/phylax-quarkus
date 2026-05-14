@@ -4,6 +4,7 @@ package net.civeira.phylax.features.oauth.authentication.application.usecase;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;

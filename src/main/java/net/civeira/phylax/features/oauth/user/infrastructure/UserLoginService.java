@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +72,7 @@ public class UserLoginService {
 
   private final AesCipherService cypher;
 
-//  private final MfaConfigUsecase otp;
+  // private final MfaConfigUsecase otp;
 
   private final ScopesConsentUsecase scopesConsent;
 
@@ -91,16 +92,16 @@ public class UserLoginService {
     return userData(request, username, password, AuthenticationMode.PASSWORD);
   }
 
-//  @Deprecated
-//  public AuthenticationResult validateMfa(AuthRequest request, String username, String secreto,
-//      ClientDetails client, List<AuthenticationChallege> challenges) {
-//    if (otp.validateOtp(request.getTenant(), username, request.getAudiences(), secreto)) {
-//      return userData(request, username, null, AuthenticationMode.MFA);
-//    } else {
-//      return AuthenticationResult.wrongCredential(request.getTenant(), username);
-//    }
-//    return null;
-//  }
+  // @Deprecated
+  // public AuthenticationResult validateMfa(AuthRequest request, String username, String secreto,
+  // ClientDetails client, List<AuthenticationChallege> challenges) {
+  // if (otp.validateOtp(request.getTenant(), username, request.getAudiences(), secreto)) {
+  // return userData(request, username, null, AuthenticationMode.MFA);
+  // } else {
+  // return AuthenticationResult.wrongCredential(request.getTenant(), username);
+  // }
+  // return null;
+  // }
 
   public boolean updatePassword(AuthRequest request, String username, String oldPassword,
       String newPassword) {

@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.authentication.application.usecase;
 
 import java.util.Locale;
 import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
