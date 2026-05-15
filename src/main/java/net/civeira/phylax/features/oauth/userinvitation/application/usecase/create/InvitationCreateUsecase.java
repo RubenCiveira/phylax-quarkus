@@ -12,6 +12,8 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitationChangeSet;
@@ -24,11 +26,12 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvit
 @RequiredArgsConstructor
 public class InvitationCreateUsecase {
 
-  private static final int EXPIRES_DAYS = 7;
+  private static final int DEFAULT_EXPIRES_DAYS = 7;
 
   private final UserInvitationWriteRepositoryGateway writeGateway;
   private final UserInvitationQueryGateway queryGateway;
   private final UserInvitationMailGateway mailer;
+  private final TenantConfigReadRepositoryGateway tenantConfigs;
 
   public InvitationCreateResult create(InvitationCreateParams params) {
     queryGateway.findPendingByEmail(params.getEmail(), params.getTenantId()).ifPresent(existing -> {
@@ -42,7 +45,10 @@ public class InvitationCreateUsecase {
     new SecureRandom().nextBytes(rawBytes);
     String rawToken = HexFormat.of().formatHex(rawBytes);
     String tokenHash = sha256(rawToken);
-    OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(EXPIRES_DAYS);
+    int expiryDays = tenantConfigs
+        .find(TenantConfigFilter.builder().tenant(TenantReference.of(params.getTenantId())).build())
+        .map(c -> c.getInvitationExpiryDays()).orElse(DEFAULT_EXPIRES_DAYS);
+    OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(expiryDays);
 
     UserInvitationChangeSet change = new UserInvitationChangeSet();
     change.uid(UUID.randomUUID().toString());

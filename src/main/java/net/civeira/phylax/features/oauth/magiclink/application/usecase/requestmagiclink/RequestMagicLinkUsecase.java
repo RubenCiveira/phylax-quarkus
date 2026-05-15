@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
@@ -39,10 +41,11 @@ import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkMailG
 @Slf4j
 public class RequestMagicLinkUsecase {
 
-  private static final int EXPIRES_MINUTES = 15;
+  private static final int DEFAULT_EXPIRES_MINUTES = 15;
 
   private final UserReadRepositoryGateway users;
   private final TenantReadRepositoryGateway tenants;
+  private final TenantConfigReadRepositoryGateway tenantConfigs;
   private final ClientStoreGateway clients;
   private final MagicLinkGateway gateway;
   private final MagicLinkMailGateway mailer;
@@ -82,7 +85,10 @@ public class RequestMagicLinkUsecase {
     new SecureRandom().nextBytes(rawBytes);
     String rawToken = HexFormat.of().formatHex(rawBytes);
     String tokenHash = sha256(rawToken);
-    OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(EXPIRES_MINUTES);
+    int expiryMinutes =
+        tenantConfigs.find(TenantConfigFilter.builder().tenant(tenant.get()).build())
+            .map(c -> c.getMagicLinkExpiryMinutes()).orElse(DEFAULT_EXPIRES_MINUTES);
+    OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(expiryMinutes);
 
     MagicLink magicLink = MagicLink.builder().uid(UUID.randomUUID().toString()).tenantId(tenantName)
         .userUid(userUid).clientId(clientId).tokenHash(tokenHash).redirectUri(redirectUri)

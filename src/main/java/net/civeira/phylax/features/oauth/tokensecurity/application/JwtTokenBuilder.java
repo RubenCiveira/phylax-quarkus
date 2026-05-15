@@ -27,6 +27,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.exception.NotAllowedException;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
@@ -130,6 +134,14 @@ public class JwtTokenBuilder {
    * Request context used to build issuer URLs.
    */
   private final CurrentRequest current;
+  /**
+   * Used to resolve tenant name to entity for TenantConfig lookup.
+   */
+  private final TenantReadRepositoryGateway tenantRepo;
+  /**
+   * Used to read per-tenant policy values such as refresh token TTL.
+   */
+  private final TenantConfigReadRepositoryGateway tenantConfigs;
 
   /**
    * Builds an ID token response for OIDC flows.
@@ -149,7 +161,7 @@ public class JwtTokenBuilder {
       String grantType, AuthenticationData validationData) {
     Duration expiration = propiedadEntera(EXPIRATION_CONF);
     Instant authExpires = Instant.now().plus(expiration);
-    Instant refreshExpires = Instant.now().plus(propiedadEntera(EXPIRATION_CONF));
+    Instant refreshExpires = Instant.now().plus(refreshTtl(tenant));
 
     String sessionState = UUID.randomUUID().toString();
 
@@ -296,7 +308,7 @@ public class JwtTokenBuilder {
 
     Duration expiration = propiedadEntera(EXPIRATION_CONF);
     Instant authExpires = Instant.now().plus(expiration);
-    Instant refreshExpires = Instant.now().plus(propiedadEntera(EXPIRATION_CONF));
+    Instant refreshExpires = Instant.now().plus(refreshTtl(tenant));
 
     AutorizationToken authorization = new AutorizationToken();
     authorization.setGrantType(grantType);
@@ -609,6 +621,13 @@ public class JwtTokenBuilder {
       throw new NotAllowedException(
           "Imposible generar el token, por un error [" + e.getClass() + "]: " + e.getMessage());
     }
+  }
+
+  private Duration refreshTtl(String tenantName) {
+    return tenantRepo.find(TenantFilter.builder().name(tenantName).build())
+        .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
+        .map(cfg -> Duration.ofSeconds(cfg.getRefreshTokenTtlSeconds()))
+        .orElseGet(() -> propiedadEntera(EXPIRATION_CONF));
   }
 
   /**

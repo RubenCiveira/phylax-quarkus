@@ -88,6 +88,19 @@ public class OidcCookieManager {
   }
 
   /**
+   * Builds an {@code AUTH_SESSION_ID} cookie with an explicit Max-Age driven by the tenant SSO TTL.
+   *
+   * @param uid session unique identifier
+   * @param tenant tenant identifier used for the cookie path
+   * @param ttlSeconds Max-Age in seconds (from {@code sessionSsoTtlSeconds} tenant policy)
+   * @return a new session cookie with Max-Age set
+   */
+  public NewCookie writeAuthSession(String uid, String tenant, int ttlSeconds) {
+    return new NewCookie.Builder(AUTH_SESSION_ID).value(uid).sameSite(SameSite.NONE)
+        .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true).maxAge(ttlSeconds).build();
+  }
+
+  /**
    * Builds an {@code AUTH_SESSION_ID} cookie with an empty value to clear it in the browser.
    *
    * @param tenant tenant identifier used for the cookie path

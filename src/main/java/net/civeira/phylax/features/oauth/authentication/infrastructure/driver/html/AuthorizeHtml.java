@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.h
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +29,10 @@ import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.AuthenticateUser;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
@@ -120,6 +125,14 @@ public class AuthorizeHtml {
    * Dispatcher for OIDC domain events.
    */
   private final OidcEventDispatcher oidcEventDispatcher;
+  /**
+   * Used to resolve tenant name for SSO TTL lookup.
+   */
+  private final TenantReadRepositoryGateway tenantRepo;
+  /**
+   * Used to read per-tenant SSO TTL policy for session expiry validation.
+   */
+  private final TenantConfigReadRepositoryGateway tenantConfigs;
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
@@ -146,7 +159,7 @@ public class AuthorizeHtml {
       @Context HttpHeaders headers) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
     return loadClient(request).map(loadClient -> {
-      return sessionManager.loadSession(session)
+      return loadValidSession(session, tenant)
           .map(sessionInfo -> doPaintVerifySession(sessionInfo, loadClient, request, session))
           .orElseGet(() -> {
             if ("none".equals(request.getPrompt().orElse(""))) {
@@ -178,7 +191,7 @@ public class AuthorizeHtml {
     AuthRequest request = new AuthRequest(tenant, req, headers);
 
     return loadClient(request)
-        .map(loadClient -> sessionManager.loadSession(session)
+        .map(loadClient -> loadValidSession(session, tenant)
             .map(sessionInfo -> doCheckSession(sessionInfo, loadClient, request, paramMap, session))
             .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie)))
         .orElseGet(() -> clientNotAllowedResponse(tenant, headers));
@@ -246,6 +259,19 @@ public class AuthorizeHtml {
   @Produces(TEXT_HTML)
   public String checkSessionAlias(final @PathParam(TENANT) String tenant) {
     return checkSession(tenant);
+  }
+
+  private Optional<SessionInfo> loadValidSession(String sessionId, String tenantName) {
+    return sessionManager.loadSession(sessionId).filter(info -> {
+      Instant authTime = info.getValidationData().getTime();
+      if (authTime == null) {
+        return true;
+      }
+      int ttl = tenantRepo.find(TenantFilter.builder().name(tenantName).build())
+          .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
+          .map(cfg -> cfg.getSessionSsoTtlSeconds()).orElse(3600);
+      return authTime.plusSeconds(ttl).isAfter(Instant.now());
+    });
   }
 
   /**

@@ -37,30 +37,64 @@ comprobado previamente. El canal de llegada del usuario determina su estado inic
 
 `features/oauth/user/infrastructure/UserLoginService.java`
 
-Añadir un nuevo check en la cadena de `userToGrant`, entre `checkFirstPass` y `checkMfa`:
+Añadir un nuevo check en la cadena de `userToGrant`, entre `checkFirstPass` y `checkMfa`.
+El método `userToGrant` ya recibe un `Tenant tenant` resuelto, por lo que se pasa directamente
+como `TenantRef` al filtro de `TenantConfigReadRepositoryGateway` — igual que el patrón
+establecido en Issue 1.5 (ver `OidcResponseBuilder.ssoTtl`, `AuthorizeHtml.loadValidSession`).
+
+Inyectar en `UserLoginService`:
+
+```java
+private final TenantConfigReadRepositoryGateway tenantConfigs;
+```
+
+Importaciones necesarias (mismas que en issue-1.5):
+
+```java
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
+```
+
+Añadir el check en la cadena de `userToGrant`:
 
 ```java
 List.of(
     () -> checkPassword(request, user, password),
     () -> checkFirstPass(request, user),
-    () -> checkEmailVerification(request, user),   // ← nuevo
+    () -> checkEmailVerification(request, user, tenant),   // ← nuevo
     () -> checkMfa(request, user, mode),
     () -> checkTerms(request, user),
     () -> checkScopesConsent(request, user)
 )
 ```
 
-Implementación del check:
+Implementación del check — la obligatoriedad la determina el flag `requireEmailVerification`
+del `TenantConfig` del tenant (campo gestionado por Issue 1.5, ya disponible vía
+`TenantConfigReadRepositoryGateway`):
 
 ```java
-private Optional<AuthenticationResult> checkEmailVerification(AuthRequest request, User user) {
-    if (!user.isEmailVerified() && tenantConfig.isRequireEmailVerification(request.getTenant())) {
+private Optional<AuthenticationResult> checkEmailVerification(
+        AuthRequest request, User user, Tenant tenant) {
+    if (user.isEmailVerified()) {
+        return Optional.empty();
+    }
+    boolean required = tenantConfigs
+        .find(TenantConfigFilter.builder().tenant(tenant).build())
+        .map(cfg -> cfg.getRequireEmailVerification())
+        .orElse(false);
+    if (required) {
         return Optional.of(
             AuthenticationResult.emailVerificationRequired(request.getTenant(), user.getName()));
     }
     return Optional.empty();
 }
 ```
+
+Notas:
+- El `Tenant tenant` ya está resuelto en `userToGrant` — no es necesario resolver el nombre.
+- El fallback es `false` (verificación no obligatoria si no hay config), coherente con el
+  default `0` de la columna `require_email_verification` en BD.
+- `user.isEmailVerified()` proviene del campo `email_verified` a través de `EmailVerifiedVO`.
 
 `AuthenticationResult.emailVerificationRequired(...)` — añadir a `AuthenticationResult` siguiendo
 el mismo patrón que `newPasswordRequired`.
@@ -131,14 +165,17 @@ GET /{tenant}/oidc/verify-email?token={token}&session={sessionId}
 
 - `UserAccessTemporalCodeWriteRepositoryGateway` — para generar el token de verificación.
 - Evento de aceptación de `userinvitation` BC — para el listener del paso 2.
-- Issue 1.5 (tenant config) — `requireEmailVerification` flag.
+- Issue 1.5 (tenant config) ✅ — `requireEmailVerification` ya está disponible vía
+  `TenantConfigReadRepositoryGateway.find(TenantConfigFilter.builder().tenant(tenant).build())
+  .map(cfg -> cfg.getRequireEmailVerification())`. El patrón de inyección está establecido
+  en `UserLoginService` tal como se describe en el paso 1 de esta issue.
 - PLAN-05 (Userinfo) — consume `email_verified` claim.
 
 ## Files to create / modify
 
 | Action | File |
 |--------|------|
-| **Modify** | `oauth/user/infrastructure/UserLoginService.java` — añadir `checkEmailVerification` en la cadena |
+| **Modify** | `oauth/user/infrastructure/UserLoginService.java` — inyectar `TenantConfigReadRepositoryGateway`, añadir `checkEmailVerification(request, user, tenant)` en la cadena |
 | **Modify** | `oauth/authentication/domain/AuthenticationResult.java` — añadir `emailVerificationRequired` |
 | **Create** | `oauth/authentication/infrastructure/driver/html/step/VerifyEmailStep.java` |
 | **Create** | `oauth/authentication/infrastructure/driver/html/EmailVerificationController.java` |

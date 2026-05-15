@@ -12,6 +12,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
@@ -40,6 +44,8 @@ public class OidcResponseBuilder {
   private final TemporalKeysGateway temporalStore;
   private final JwtTokenBuilder tokenBuilder;
   private final OidcCookieManager cookieManager;
+  private final TenantReadRepositoryGateway tenantRepo;
+  private final TenantConfigReadRepositoryGateway tenantConfigs;
 
   /**
    * Builds a redirect response after successful authentication.
@@ -100,8 +106,9 @@ public class OidcResponseBuilder {
           + "&token_type=" + buildIdToken.getTokenType() + "&expires_in="
           + buildIdToken.getExpiresIn();
     }
-    return securer.secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to))
-        .cookie(cookieManager.writeAuthSession(uid, request.getTenant())));
+    return securer
+        .secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to)).cookie(
+            cookieManager.writeAuthSession(uid, request.getTenant(), ssoTtl(request.getTenant()))));
   }
 
   /**
@@ -116,6 +123,12 @@ public class OidcResponseBuilder {
         + URLEncoder.encode(message, StandardCharsets.UTF_8);
     return securer.secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to))
         .cookie(cookieManager.clearAuthSession(request.getTenant())));
+  }
+
+  private int ssoTtl(String tenantName) {
+    return tenantRepo.find(TenantFilter.builder().name(tenantName).build())
+        .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
+        .map(cfg -> cfg.getSessionSsoTtlSeconds()).orElse(3600);
   }
 
   private static String first(Map<String, List<String>> paramMap, String key) {
