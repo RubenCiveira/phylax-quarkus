@@ -19,6 +19,16 @@ Enable register users (boolean)::
 El enable register users de tenant config
 Magic link enabled (boolean)::
 El magic link enabled de tenant config
+Require email verification* (boolean)::
+If true, users must confirm their email address via the verification link       before they can complete their first login. The OIDC flow will hold the user at a       verification-pending challenge until the link is clicked.
+Invitation expiry days* (integer)::
+Number of days before an unused user invitation token expires.       Currently hardcoded to 7 days in InvitationCreateUsecase.
+Magic link expiry minutes* (integer)::
+Number of minutes before a magic-link token expires after being sent.       Only relevant when magic-link-enabled=true.
+Session sso ttl seconds* (integer)::
+Lifetime in seconds of the cross-client SSO session cookie.       After this duration the user must re-authenticate even if a per-flow session is still valid.       Corresponds to the max_age upper bound for prompt=none requests.
+Refresh token ttl seconds* (integer)::
+Lifetime in seconds of issued refresh tokens. Defaults to 30 days (2 592 000 s).       Applies to all grant types that issue refresh tokens for this tenant.
 Webauthn enabled (boolean)::
 El webauthn enabled de tenant config
 Webauthn rp id (string)::

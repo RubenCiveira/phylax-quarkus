@@ -11,6 +11,8 @@ Email (string)::
 An optional email used to send notifications to the user
 Wellcome at (datetime)::
 The date when a wellcome email is send
+Email verified (boolean)::
+Indicates whether the user has confirmed ownership of their email address       by clicking the verification link sent at registration. Used by the OIDC flow to emit       the email_verified claim and optionally block login until confirmed.
 Enabled (boolean)::
 A disabled user cant login on the system. On his login attempts, he will recive a specific warn of his disabled account.
 Approve (UserApproveOptions)::

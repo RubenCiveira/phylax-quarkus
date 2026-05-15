@@ -139,6 +139,11 @@ public class TenantConfigListController {
     tenantConfigApiDto.setAllowRegister(dto.getAllowRegister());
     tenantConfigApiDto.setEnableRegisterUsers(dto.getEnableRegisterUsers());
     tenantConfigApiDto.setMagicLinkEnabled(dto.getMagicLinkEnabled());
+    tenantConfigApiDto.setRequireEmailVerification(dto.getRequireEmailVerification());
+    tenantConfigApiDto.setInvitationExpiryDays(dto.getInvitationExpiryDays());
+    tenantConfigApiDto.setMagicLinkExpiryMinutes(dto.getMagicLinkExpiryMinutes());
+    tenantConfigApiDto.setSessionSsoTtlSeconds(dto.getSessionSsoTtlSeconds());
+    tenantConfigApiDto.setRefreshTokenTtlSeconds(dto.getRefreshTokenTtlSeconds());
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());

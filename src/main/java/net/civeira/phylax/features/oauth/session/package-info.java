@@ -2,48 +2,53 @@
 /**
  * OIDC authorization-session storage, temporal authorization codes, and ephemeral key management.
  *
- * <p>This bounded context owns the state that persists across the multiple HTTP roundtrips that
- * make up a challenge-based OIDC authorization flow. It provides the session model, a gateway
- * for its persistence, a short-lived temporal authorization code abstraction used to bind the
- * authorization endpoint to the token endpoint, and an ephemeral key store for challenge tokens
- * (MFA tokens, recovery codes, CSID verification tokens).
+ * <p>
+ * This bounded context owns the state that persists across the multiple HTTP roundtrips that make
+ * up a challenge-based OIDC authorization flow. It provides the session model, a gateway for its
+ * persistence, a short-lived temporal authorization code abstraction used to bind the authorization
+ * endpoint to the token endpoint, and an ephemeral key store for challenge tokens (MFA tokens,
+ * recovery codes, CSID verification tokens).
  *
- * <p><b>Key domain types:</b>
+ * <p>
+ * <b>Key domain types:</b>
  * <ul>
- *   <li>{@code SessionInfo} — aggregate root of this context. Carries all state that must
- *       survive across HTTP requests during an authorization flow: the session identifier (CSID
- *       stored as a browser cookie), the active {@code ChallengesState}, the originating OAuth
- *       parameters ({@code AuthRequest} snapshot), the authenticated user and client identifiers
- *       once credentials have been validated, the grant type, the MFA-passed flag, the issuer,
- *       and the JTI of any bound refresh token. Modified immutably at each checkpoint and
- *       re-persisted by {@code SessionManager} in the Authentication context.</li>
- *   <li>{@code TemporalAuthCode} — value object representing a short-lived, single-use
- *       authorization code generated when the authorization endpoint successfully completes.
- *       Stores the code hash, expiry instant, associated user and client identifiers, redirect
- *       URI, approved scope set, nonce, and the PKCE code-challenge pair. Consumed exactly once
- *       by the token endpoint during code exchange and then deleted from the store.</li>
- *   <li>{@code SessionStoreGateway} — primary outbound port for {@code SessionInfo} persistence.
- *       Provides {@code save}, {@code load}, {@code delete}, and {@code updateTokenJtis} operations.
- *       The update-JTI operation is called after token issuance to bind the session to the issued
- *       refresh-token JTI, enabling targeted revocation.</li>
- *   <li>{@code TemporalKeysGateway} — outbound port for ephemeral short-lived tokens. Provides
- *       {@code store}, {@code retrieve} (single-use — deletes on read), and {@code generate}
- *       for challenge tokens used in MFA, recovery, and CSID verification flows where the
- *       one-time-use property is a security requirement.</li>
+ * <li>{@code SessionInfo} — aggregate root of this context. Carries all state that must survive
+ * across HTTP requests during an authorization flow: the session identifier (CSID stored as a
+ * browser cookie), the active {@code ChallengesState}, the originating OAuth parameters
+ * ({@code AuthRequest} snapshot), the authenticated user and client identifiers once credentials
+ * have been validated, the grant type, the MFA-passed flag, the issuer, and the JTI of any bound
+ * refresh token. Modified immutably at each checkpoint and re-persisted by {@code SessionManager}
+ * in the Authentication context.</li>
+ * <li>{@code TemporalAuthCode} — value object representing a short-lived, single-use authorization
+ * code generated when the authorization endpoint successfully completes. Stores the code hash,
+ * expiry instant, associated user and client identifiers, redirect URI, approved scope set, nonce,
+ * and the PKCE code-challenge pair. Consumed exactly once by the token endpoint during code
+ * exchange and then deleted from the store.</li>
+ * <li>{@code SessionStoreGateway} — primary outbound port for {@code SessionInfo} persistence.
+ * Provides {@code save}, {@code load}, {@code delete}, and {@code updateTokenJtis} operations. The
+ * update-JTI operation is called after token issuance to bind the session to the issued
+ * refresh-token JTI, enabling targeted revocation.</li>
+ * <li>{@code TemporalKeysGateway} — outbound port for ephemeral short-lived tokens. Provides
+ * {@code store}, {@code retrieve} (single-use — deletes on read), and {@code generate} for
+ * challenge tokens used in MFA, recovery, and CSID verification flows where the one-time-use
+ * property is a security requirement.</li>
  * </ul>
  *
- * <p><b>Infrastructure adapters:</b>
+ * <p>
+ * <b>Infrastructure adapters:</b>
  * <ul>
- *   <li>{@code SessionStoreSqlAdapter} — driven SQL adapter implementing {@code SessionStoreGateway}.
- *       Stores sessions as serialized JSON rows with TTL-based expiry. Handles concurrent updates
- *       using optimistic locking to prevent lost-update races when two requests modify the same
- *       session (e.g., back-button navigation during MFA enrollment).</li>
- *   <li>{@code TemporalKeysSqlAdapter} — driven SQL adapter implementing {@code TemporalKeysGateway}.
- *       Uses a database row with an expiry column; {@code retrieve} atomically deletes the row to
- *       guarantee one-time-use semantics even under concurrent requests.</li>
+ * <li>{@code SessionStoreSqlAdapter} — driven SQL adapter implementing {@code SessionStoreGateway}.
+ * Stores sessions as serialized JSON rows with TTL-based expiry. Handles concurrent updates using
+ * optimistic locking to prevent lost-update races when two requests modify the same session (e.g.,
+ * back-button navigation during MFA enrollment).</li>
+ * <li>{@code TemporalKeysSqlAdapter} — driven SQL adapter implementing {@code TemporalKeysGateway}.
+ * Uses a database row with an expiry column; {@code retrieve} atomically deletes the row to
+ * guarantee one-time-use semantics even under concurrent requests.</li>
  * </ul>
  *
- * <p><b>Internal structure:</b>
+ * <p>
+ * <b>Internal structure:</b>
+ * 
  * <pre>
  * session/
  * ├── domain/
@@ -57,12 +62,14 @@
  *     └── TemporalKeysSqlAdapter.java    — SQL ephemeral key persistence
  * </pre>
  *
- * <p><b>Dependencies:</b> Core dependency of the Authentication context ({@code SessionManager},
- * {@code AuthorizeHtml}, {@code TokenController}). Also referenced by TokenSecurity when
- * binding refresh-token JTIs to a session for revocation, and by MagicLink when creating a
- * session after link verification.
+ * <p>
+ * <b>Dependencies:</b> Core dependency of the Authentication context ({@code SessionManager},
+ * {@code AuthorizeHtml}, {@code TokenController}). Also referenced by TokenSecurity when binding
+ * refresh-token JTIs to a session for revocation, and by MagicLink when creating a session after
+ * link verification.
  *
- * <p><b>Stability:</b> stable; the session model evolves only when new challenge types or
+ * <p>
+ * <b>Stability:</b> stable; the session model evolves only when new challenge types or
  * token-binding requirements are added to the authentication flow.
  */
 package net.civeira.phylax.features.oauth.session;

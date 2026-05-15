@@ -12,6 +12,7 @@ The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAM
  * MICROSOFT
  * APPLE
  * SAML
+ * OIDC
 
 Disabled (boolean)::
 Indicates if this provider is currently disabled.
@@ -25,6 +26,8 @@ Certificate (blob)::
 The provider certificate used for signature verification, if required.
 Metadata (binary)::
 A metadata file required by some providers for configuration (e.g., SAML descriptor).
+Oidc discovery url (string)::
+For source=OIDC: the /.well-known/openid-configuration URL of the external       OIDC identity provider. The system will fetch authorization_endpoint, token_endpoint, and       jwks_uri from this document at startup. public-key holds the OIDC client_id;       private-key holds the OIDC client_secret.
 Saml idp metadata url (string)::
 El saml idp metadata url de tenant login provider
 Saml idp entity id (string)::

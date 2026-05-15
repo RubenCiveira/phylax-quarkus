@@ -21,6 +21,7 @@ actor :Autorizado: as a0
 (Block) as block
 (Set mfa seed) as setMfaSeed
 (Change password) as changePassword
+(Verify email) as verifyEmail
 
 a0 --> listado
 a0 --> consulta
@@ -37,6 +38,7 @@ a0 --> unlock
 p0 --> block
 p0 --> setMfaSeed
 p0 --> changePassword
+p0 --> verifyEmail
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

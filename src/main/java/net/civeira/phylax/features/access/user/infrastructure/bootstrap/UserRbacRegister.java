@@ -63,6 +63,10 @@ public class UserRbacRegister {
         .name("set-mfa-seed").description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
         .name("change-password").description("").required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("verify-email").description(
+            "Marks the user's email address as verified. Called by the email verification endpoint after validating the register-code token from user-access-temporal-code.")
+            .required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
         .description("A number to identify the db record").build());
     rbac.registerResourceField(RESOURCE,
@@ -75,6 +79,10 @@ public class UserRbacRegister {
         .description("An optional email used to send notifications to the user").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("wellcomeAt")
         .description("The date when a wellcome email is send").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("emailVerified").description(
+            "Indicates whether the user has confirmed ownership of their email address by clicking the verification link sent at registration. Used by the OIDC flow to emit the email_verified claim and optionally block login until confirmed.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled").description(
         "A disabled user cant login on the system. On his login attempts, he will recive a specific warn of his disabled account.")
         .build());

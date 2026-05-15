@@ -131,6 +131,26 @@ enable()
 disable()
 }
 
+class access.UserPersonalApiKey{
+uid:string
+name:string
+keyHash:string
+scopes:string
+lastUsedAt:datetime
+expiresAt:datetime
+createdAt:datetime
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+touch()
+revoke()
+}
+access.User "1"  o--  "N*" access.UserPersonalApiKey: user 
+
 class access.Tenant{
 uid:string
 name:string
@@ -181,6 +201,8 @@ code:string
 allowAllScopes:boolean
 publicAllow:boolean
 secretOauth:string
+isResourceServer:boolean
+requirePkce:boolean
 backChannelLogoutUri:string
 backChannelLogoutSessionRequired:boolean
 frontChannelLogoutUri:string
@@ -220,6 +242,11 @@ dynamicRegistrationPolicy:TenantConfigDynamicRegistrationPolicyOptions
 allowRegister:boolean
 enableRegisterUsers:boolean
 magicLinkEnabled:boolean
+requireEmailVerification:boolean
+invitationExpiryDays:integer
+magicLinkExpiryMinutes:integer
+sessionSsoTtlSeconds:integer
+refreshTokenTtlSeconds:integer
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
@@ -285,6 +312,7 @@ publicKey:string
 privateKey:string
 certificate:blob
 metadata:binary
+oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
 samlIdpSsoUrl:string
@@ -318,6 +346,21 @@ disable()
 }
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
+
+class access.UserMfaRecoveryCode{
+uid:string
+codeHash:string
+usedAt:datetime
+createdAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+consume()
+}
+access.User "1"  o--  "N*" access.UserMfaRecoveryCode: user 
 
 class access.UserConsentedScopes{
 uid:string
@@ -365,6 +408,7 @@ name:string
 password:string
 email:string
 wellcomeAt:datetime
+emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
 temporalPassword:boolean
@@ -388,6 +432,7 @@ unlock()
 block()
 setMfaSeed()
 changePassword()
+verifyEmail()
 }
 access.Tenant "1"  o--  "N*" access.User: tenant 
 
@@ -404,6 +449,7 @@ access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
 access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
 access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions  
+access.User "1"  o--  "N*" access.UserPersonalApiKey: user  
 access.User "1"  o--  "N*" access.UserProfile: user  
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
@@ -414,6 +460,7 @@ access.User "1"  o--  "N*" access.UserInvitation: acceptedBy
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
+access.User "1"  o--  "N*" access.UserMfaRecoveryCode: user  
 access.User "1"  o--  "N*" access.UserConsentedScopes: user  
 access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient  
 access.User "1"  o--  "N*" access.UserWebauthnCredential: user  

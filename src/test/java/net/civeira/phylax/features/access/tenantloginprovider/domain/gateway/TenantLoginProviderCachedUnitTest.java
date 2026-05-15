@@ -15,6 +15,7 @@ import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.DisabledVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.MetadataVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.NameVO;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcDiscoveryUrlVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PrivateKeyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PublicKeyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpEntityIdVO;
@@ -41,6 +42,7 @@ class TenantLoginProviderCachedUnitTest {
         .disabledValue(DisabledVO.from(true)).directAccessValue(DirectAccessVO.from(true))
         .publicKeyValue(PublicKeyVO.from("one")).privateKeyValue(PrivateKeyVO.from("one"))
         .certificateValue(CertificateVO.from("one")).metadataValue(MetadataVO.from("file_1"))
+        .oidcDiscoveryUrlValue(OidcDiscoveryUrlVO.from("one"))
         .samlIdpMetadataUrlValue(SamlIdpMetadataUrlVO.from("one"))
         .samlIdpEntityIdValue(SamlIdpEntityIdVO.from("one"))
         .samlIdpSsoUrlValue(SamlIdpSsoUrlVO.from("one"))

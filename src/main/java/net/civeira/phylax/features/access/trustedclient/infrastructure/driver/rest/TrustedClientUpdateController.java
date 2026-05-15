@@ -60,6 +60,8 @@ public class TrustedClientUpdateController {
     trustedClientApiDto.setAllowedRedirects(
         dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
     trustedClientApiDto.setSecretOauth("*****");
+    trustedClientApiDto.setIsResourceServer(dto.getIsResourceServer());
+    trustedClientApiDto.setRequirePkce(dto.getRequirePkce());
     trustedClientApiDto.setBackChannelLogoutUri(dto.getBackChannelLogoutUri());
     trustedClientApiDto
         .setBackChannelLogoutSessionRequired(dto.getBackChannelLogoutSessionRequired());
@@ -126,6 +128,12 @@ public class TrustedClientUpdateController {
     if (null != trustedClientApiDto.getSecretOauth()
         && !"*****".equals(trustedClientApiDto.getSecretOauth())) {
       dto.setSecretOauth(trustedClientApiDto.getSecretOauth());
+    }
+    if (null != trustedClientApiDto.getIsResourceServer()) {
+      dto.setIsResourceServer(trustedClientApiDto.getIsResourceServer());
+    }
+    if (null != trustedClientApiDto.getRequirePkce()) {
+      dto.setRequirePkce(trustedClientApiDto.getRequirePkce());
     }
     if (null != trustedClientApiDto.getBackChannelLogoutUri()) {
       dto.setBackChannelLogoutUri(trustedClientApiDto.getBackChannelLogoutUri());

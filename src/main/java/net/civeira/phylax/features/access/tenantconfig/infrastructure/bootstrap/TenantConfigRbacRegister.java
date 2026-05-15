@@ -62,6 +62,26 @@ public class TenantConfigRbacRegister {
         .description("El enable register users de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("magicLinkEnabled")
         .description("El magic link enabled de tenant config").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("requireEmailVerification").description(
+            "If true, users must confirm their email address via the verification link before they can complete their first login. The OIDC flow will hold the user at a verification-pending challenge until the link is clicked.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("invitationExpiryDays").description(
+            "Number of days before an unused user invitation token expires. Currently hardcoded to 7 days in InvitationCreateUsecase.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("magicLinkExpiryMinutes").description(
+            "Number of minutes before a magic-link token expires after being sent. Only relevant when magic-link-enabled=true.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("sessionSsoTtlSeconds").description(
+            "Lifetime in seconds of the cross-client SSO session cookie. After this duration the user must re-authenticate even if a per-flow session is still valid. Corresponds to the max_age upper bound for prompt=none requests.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("refreshTokenTtlSeconds").description(
+            "Lifetime in seconds of issued refresh tokens. Defaults to 30 days (2 592 000 s). Applies to all grant types that issue refresh tokens for this tenant.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnEnabled")
         .description("El webauthn enabled de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnRpId")

@@ -100,6 +100,11 @@ public class TenantConfigCreateController {
     tenantConfigApiDto.setAllowRegister(dto.getAllowRegister());
     tenantConfigApiDto.setEnableRegisterUsers(dto.getEnableRegisterUsers());
     tenantConfigApiDto.setMagicLinkEnabled(dto.getMagicLinkEnabled());
+    tenantConfigApiDto.setRequireEmailVerification(dto.getRequireEmailVerification());
+    tenantConfigApiDto.setInvitationExpiryDays(dto.getInvitationExpiryDays());
+    tenantConfigApiDto.setMagicLinkExpiryMinutes(dto.getMagicLinkExpiryMinutes());
+    tenantConfigApiDto.setSessionSsoTtlSeconds(dto.getSessionSsoTtlSeconds());
+    tenantConfigApiDto.setRefreshTokenTtlSeconds(dto.getRefreshTokenTtlSeconds());
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());
@@ -144,6 +149,21 @@ public class TenantConfigCreateController {
     }
     if (null != tenantConfigApiDto.getMagicLinkEnabled()) {
       dto.setMagicLinkEnabled(tenantConfigApiDto.getMagicLinkEnabled());
+    }
+    if (null != tenantConfigApiDto.getRequireEmailVerification()) {
+      dto.setRequireEmailVerification(tenantConfigApiDto.getRequireEmailVerification());
+    }
+    if (null != tenantConfigApiDto.getInvitationExpiryDays()) {
+      dto.setInvitationExpiryDays(tenantConfigApiDto.getInvitationExpiryDays());
+    }
+    if (null != tenantConfigApiDto.getMagicLinkExpiryMinutes()) {
+      dto.setMagicLinkExpiryMinutes(tenantConfigApiDto.getMagicLinkExpiryMinutes());
+    }
+    if (null != tenantConfigApiDto.getSessionSsoTtlSeconds()) {
+      dto.setSessionSsoTtlSeconds(tenantConfigApiDto.getSessionSsoTtlSeconds());
+    }
+    if (null != tenantConfigApiDto.getRefreshTokenTtlSeconds()) {
+      dto.setRefreshTokenTtlSeconds(tenantConfigApiDto.getRefreshTokenTtlSeconds());
     }
     if (null != tenantConfigApiDto.getWebauthnEnabled()) {
       dto.setWebauthnEnabled(tenantConfigApiDto.getWebauthnEnabled());

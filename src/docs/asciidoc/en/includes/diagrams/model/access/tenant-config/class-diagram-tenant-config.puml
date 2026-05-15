@@ -27,6 +27,11 @@ dynamicRegistrationPolicy:TenantConfigDynamicRegistrationPolicyOptions
 allowRegister:boolean
 enableRegisterUsers:boolean
 magicLinkEnabled:boolean
+requireEmailVerification:boolean
+invitationExpiryDays:integer
+magicLinkExpiryMinutes:integer
+sessionSsoTtlSeconds:integer
+refreshTokenTtlSeconds:integer
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string

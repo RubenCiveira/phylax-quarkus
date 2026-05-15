@@ -29,6 +29,7 @@ publicKey:string
 privateKey:string
 certificate:blob
 metadata:binary
+oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
 samlIdpSsoUrl:string

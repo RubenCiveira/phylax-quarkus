@@ -2,60 +2,64 @@
 /**
  * JWT token issuance, signing, verification, introspection, and key-set management.
  *
- * <p>This bounded context owns all cryptographic token operations: building and signing access
- * tokens, refresh tokens, ID tokens, MFA tokens, and challenge tokens; verifying and parsing
- * incoming JWTs; exposing the JWKS endpoint; and providing the token introspection endpoint
- * (RFC 7662). It is a cross-cutting security service consumed by every grant type and by
- * back-channel logout.
+ * <p>
+ * This bounded context owns all cryptographic token operations: building and signing access tokens,
+ * refresh tokens, ID tokens, MFA tokens, and challenge tokens; verifying and parsing incoming JWTs;
+ * exposing the JWKS endpoint; and providing the token introspection endpoint (RFC 7662). It is a
+ * cross-cutting security service consumed by every grant type and by back-channel logout.
  *
- * <p><b>Key domain types:</b>
+ * <p>
+ * <b>Key domain types:</b>
  * <ul>
- *   <li>{@code JwtTokenBuilder} — the central application service. Builds all token types
- *       issued by the authorization server. Encodes standard OIDC claims (sub, iss, aud, iat,
- *       exp, nonce, acr, amr), custom claims (roles, groups, tenant), and token-specific claims.
- *       Also provides PKCE helper methods (S256 hash generation), JTI extraction from refresh
- *       tokens, and opaque/JWT token verification used by {@code RefreshGranter}.</li>
- *   <li>{@code AutorizationToken} — value object representing the complete token-endpoint
- *       response: access_token, token_type, expires_in, refresh_token (if issued), and
- *       optionally an id_token for OIDC authorization-code flows.</li>
- *   <li>{@code IdToken} — value object encapsulating an OIDC ID token with the standard OIDC
- *       claims plus at_hash, c_hash, and nonce. Built by {@code JwtTokenBuilder} and included
- *       in the {@code AutorizationToken} response for code and implicit flows.</li>
- *   <li>{@code MfaToken} — short-lived JWT issued after successful OTP verification, used as
- *       a bearer credential in the subsequent {@code MfaGranter} call to exchange for full
- *       access and refresh tokens without requiring re-entry of credentials.</li>
- *   <li>{@code TokenIntrospectionResult} — RFC 7662 introspection response payload: active flag,
- *       scope, client_id, username, token_type, sub, exp, iat, jti, and custom claims extracted
- *       from the introspected token or looked up from the token store.</li>
- *   <li>{@code TokenSigner} — primary outbound port abstracting the signing and verification
- *       operation. Receives a claims map and signing algorithm, returns a signed compact JWT.
- *       Verification returns the parsed claims or a failure result without throwing.</li>
- *   <li>{@code TokenStoreGateway} — port for persisting and revoking token records (JTI, exp,
- *       sub, client) to support revocation checks during introspection and refresh.</li>
- *   <li>{@code TokenRevocationGateway} — port for processing RFC 7009 token revocation requests:
- *       marks the token record as revoked and cascades revocation to any bound refresh token.</li>
- *   <li>{@code KeyConfig} / {@code KeyInformation} / {@code JwkSet} — domain model for key
- *       material: active signing key selection, JWK representation, and JWKS document assembly
- *       served by the {@code JwksController}.</li>
+ * <li>{@code JwtTokenBuilder} — the central application service. Builds all token types issued by
+ * the authorization server. Encodes standard OIDC claims (sub, iss, aud, iat, exp, nonce, acr,
+ * amr), custom claims (roles, groups, tenant), and token-specific claims. Also provides PKCE helper
+ * methods (S256 hash generation), JTI extraction from refresh tokens, and opaque/JWT token
+ * verification used by {@code RefreshGranter}.</li>
+ * <li>{@code AutorizationToken} — value object representing the complete token-endpoint response:
+ * access_token, token_type, expires_in, refresh_token (if issued), and optionally an id_token for
+ * OIDC authorization-code flows.</li>
+ * <li>{@code IdToken} — value object encapsulating an OIDC ID token with the standard OIDC claims
+ * plus at_hash, c_hash, and nonce. Built by {@code JwtTokenBuilder} and included in the
+ * {@code AutorizationToken} response for code and implicit flows.</li>
+ * <li>{@code MfaToken} — short-lived JWT issued after successful OTP verification, used as a bearer
+ * credential in the subsequent {@code MfaGranter} call to exchange for full access and refresh
+ * tokens without requiring re-entry of credentials.</li>
+ * <li>{@code TokenIntrospectionResult} — RFC 7662 introspection response payload: active flag,
+ * scope, client_id, username, token_type, sub, exp, iat, jti, and custom claims extracted from the
+ * introspected token or looked up from the token store.</li>
+ * <li>{@code TokenSigner} — primary outbound port abstracting the signing and verification
+ * operation. Receives a claims map and signing algorithm, returns a signed compact JWT.
+ * Verification returns the parsed claims or a failure result without throwing.</li>
+ * <li>{@code TokenStoreGateway} — port for persisting and revoking token records (JTI, exp, sub,
+ * client) to support revocation checks during introspection and refresh.</li>
+ * <li>{@code TokenRevocationGateway} — port for processing RFC 7009 token revocation requests:
+ * marks the token record as revoked and cascades revocation to any bound refresh token.</li>
+ * <li>{@code KeyConfig} / {@code KeyInformation} / {@code JwkSet} — domain model for key material:
+ * active signing key selection, JWK representation, and JWKS document assembly served by the
+ * {@code JwksController}.</li>
  * </ul>
  *
- * <p><b>Infrastructure adapters:</b>
+ * <p>
+ * <b>Infrastructure adapters:</b>
  * <ul>
- *   <li>{@code JoseTokenSigner} — driven adapter implementing {@code TokenSigner} using a JOSE
- *       library (e.g., Nimbus JOSE+JWT). Loads the active private key from the key store and
- *       signs JWTs with RS256 or ES256 depending on configuration.</li>
- *   <li>{@code TokenStoreSqlAdapter} / {@code TokenLookupSqlAdapter} — driven SQL adapters for
- *       token persistence and lookup used by introspection and revocation.</li>
- *   <li>{@code JwksController} — REST driver serving GET /.well-known/jwks.json with the
- *       current active public key set in JWK format.</li>
- *   <li>{@code IntrospectionController} — REST driver implementing POST /introspect per RFC 7662,
- *       gated behind client authentication.</li>
- *   <li>{@code TokenJwtCallerPrincipalFactory} — Quarkus security SPI adapter that converts a
- *       verified JWT into a {@code JsonWebToken} CallerPrincipal for JAX-RS bearer-token
- *       authentication of management endpoints.</li>
+ * <li>{@code JoseTokenSigner} — driven adapter implementing {@code TokenSigner} using a JOSE
+ * library (e.g., Nimbus JOSE+JWT). Loads the active private key from the key store and signs JWTs
+ * with RS256 or ES256 depending on configuration.</li>
+ * <li>{@code TokenStoreSqlAdapter} / {@code TokenLookupSqlAdapter} — driven SQL adapters for token
+ * persistence and lookup used by introspection and revocation.</li>
+ * <li>{@code JwksController} — REST driver serving GET /.well-known/jwks.json with the current
+ * active public key set in JWK format.</li>
+ * <li>{@code IntrospectionController} — REST driver implementing POST /introspect per RFC 7662,
+ * gated behind client authentication.</li>
+ * <li>{@code TokenJwtCallerPrincipalFactory} — Quarkus security SPI adapter that converts a
+ * verified JWT into a {@code JsonWebToken} CallerPrincipal for JAX-RS bearer-token authentication
+ * of management endpoints.</li>
  * </ul>
  *
- * <p><b>Internal structure:</b>
+ * <p>
+ * <b>Internal structure:</b>
+ * 
  * <pre>
  * tokensecurity/
  * ├── domain/
@@ -71,10 +75,12 @@
  *         └── rest/  — JwksController, IntrospectionController
  * </pre>
  *
- * <p><b>Dependencies:</b> Used by Authentication (all grant types), MFA (MFA token issuance),
+ * <p>
+ * <b>Dependencies:</b> Used by Authentication (all grant types), MFA (MFA token issuance),
  * DelegateLogin (federated token exchange), and Session (JTI binding for revocation).
  *
- * <p><b>Stability:</b> security-critical; the signing algorithm and claim set are governed by
- * the OIDC Core spec. New claim types or algorithm support must be backwards-compatible.
+ * <p>
+ * <b>Stability:</b> security-critical; the signing algorithm and claim set are governed by the OIDC
+ * Core spec. New claim types or algorithm support must be backwards-compatible.
  */
 package net.civeira.phylax.features.oauth.tokensecurity;

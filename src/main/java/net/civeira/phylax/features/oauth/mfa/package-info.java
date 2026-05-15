@@ -2,44 +2,50 @@
 /**
  * TOTP-based multi-factor authentication enrollment and verification.
  *
- * <p>This bounded context manages the full lifecycle of time-based one-time password (TOTP,
- * RFC 6238) multi-factor authentication: generating and storing shared secrets, producing QR-code
- * setup payloads for authenticator apps, and verifying OTP codes during the authentication flow
- * or at the token endpoint via the {@code MfaGranter} strategy.
+ * <p>
+ * This bounded context manages the full lifecycle of time-based one-time password (TOTP, RFC 6238)
+ * multi-factor authentication: generating and storing shared secrets, producing QR-code setup
+ * payloads for authenticator apps, and verifying OTP codes during the authentication flow or at the
+ * token endpoint via the {@code MfaGranter} strategy.
  *
- * <p><b>Key domain types:</b>
+ * <p>
+ * <b>Key domain types:</b>
  * <ul>
- *   <li>{@code UserMfaGateway} — central outbound port. Provides four operations: store a new
- *       TOTP shared secret for a user, retrieve the stored secret for verification, mark MFA as
- *       active/inactive on the user profile, and verify a submitted OTP code against the stored
- *       secret and the current TOTP time window (typically ±1 step tolerance).</li>
- *   <li>{@code PublicLoginMfaBuildResponse} — value object returned by the enrollment use case.
- *       Carries the QR-code URL (otpauth:// URI suitable for Google Authenticator / Aegis), the
- *       raw Base32-encoded secret for manual entry, and the issuer label derived from the tenant
- *       configuration so that the UI can render a complete MFA setup screen without further
- *       calls to the domain layer.</li>
+ * <li>{@code UserMfaGateway} — central outbound port. Provides four operations: store a new TOTP
+ * shared secret for a user, retrieve the stored secret for verification, mark MFA as
+ * active/inactive on the user profile, and verify a submitted OTP code against the stored secret
+ * and the current TOTP time window (typically ±1 step tolerance).</li>
+ * <li>{@code PublicLoginMfaBuildResponse} — value object returned by the enrollment use case.
+ * Carries the QR-code URL (otpauth:// URI suitable for Google Authenticator / Aegis), the raw
+ * Base32-encoded secret for manual entry, and the issuer label derived from the tenant
+ * configuration so that the UI can render a complete MFA setup screen without further calls to the
+ * domain layer.</li>
  * </ul>
  *
- * <p><b>Key application services:</b>
+ * <p>
+ * <b>Key application services:</b>
  * <ul>
- *   <li>{@code UserMfa} — facade service exposing two capabilities used by the Authentication
- *       context: {@code setupMfa(userId)} generates a new TOTP secret and returns a
- *       {@code PublicLoginMfaBuildResponse}, and {@code verifyMfa(userId, otp)} delegates OTP
- *       validation to {@code UserMfaGateway}, returning a boolean consumed by {@code MfaGranter}
- *       and {@code MfaStep} to decide whether to advance or reject the MFA challenge step.</li>
+ * <li>{@code UserMfa} — facade service exposing two capabilities used by the Authentication
+ * context: {@code setupMfa(userId)} generates a new TOTP secret and returns a
+ * {@code PublicLoginMfaBuildResponse}, and {@code verifyMfa(userId, otp)} delegates OTP validation
+ * to {@code UserMfaGateway}, returning a boolean consumed by {@code MfaGranter} and {@code MfaStep}
+ * to decide whether to advance or reject the MFA challenge step.</li>
  * </ul>
  *
- * <p><b>Infrastructure adapters:</b>
+ * <p>
+ * <b>Infrastructure adapters:</b>
  * <ul>
- *   <li>{@code OtpMfaService} — application-layer adapter that wraps a TOTP library (e.g.,
- *       Google Authenticator-compatible HOTP/TOTP) to generate secrets and verify codes.
- *       Kept in the infrastructure layer to isolate the TOTP library dependency from the domain.</li>
- *   <li>{@code UserMfaConfigAdapter} — driven SQL adapter implementing {@code UserMfaGateway}.
- *       Reads and writes TOTP secrets and enrollment state from the user-configuration table,
- *       ensuring that secrets are stored encrypted at rest via the platform crypto service.</li>
+ * <li>{@code OtpMfaService} — application-layer adapter that wraps a TOTP library (e.g., Google
+ * Authenticator-compatible HOTP/TOTP) to generate secrets and verify codes. Kept in the
+ * infrastructure layer to isolate the TOTP library dependency from the domain.</li>
+ * <li>{@code UserMfaConfigAdapter} — driven SQL adapter implementing {@code UserMfaGateway}. Reads
+ * and writes TOTP secrets and enrollment state from the user-configuration table, ensuring that
+ * secrets are stored encrypted at rest via the platform crypto service.</li>
  * </ul>
  *
- * <p><b>Internal structure:</b>
+ * <p>
+ * <b>Internal structure:</b>
+ * 
  * <pre>
  * mfa/
  * ├── domain/
@@ -52,13 +58,14 @@
  *     └── driven/UserMfaConfigAdapter.java   — SQL adapter for TOTP secret persistence
  * </pre>
  *
- * <p><b>Dependencies:</b> Called by the Authentication context ({@code MfaStep},
- * {@code MfaGranter}, {@code NewMfaStep}) and by the Profile context (MFA enable/disable
- * self-service). The TOTP secret storage relies on the platform crypto service for encryption
- * at rest.
+ * <p>
+ * <b>Dependencies:</b> Called by the Authentication context ({@code MfaStep}, {@code MfaGranter},
+ * {@code NewMfaStep}) and by the Profile context (MFA enable/disable self-service). The TOTP secret
+ * storage relies on the platform crypto service for encryption at rest.
  *
- * <p><b>Stability:</b> stable; the domain model is minimal and the TOTP algorithm is fixed by
- * RFC 6238. Extension points are isolated to the adapter layer (alternative MFA methods such as
- * SMS or hardware tokens would be added via new gateway implementations, not changes here).
+ * <p>
+ * <b>Stability:</b> stable; the domain model is minimal and the TOTP algorithm is fixed by RFC
+ * 6238. Extension points are isolated to the adapter layer (alternative MFA methods such as SMS or
+ * hardware tokens would be added via new gateway implementations, not changes here).
  */
 package net.civeira.phylax.features.oauth.mfa;

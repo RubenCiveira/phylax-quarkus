@@ -21,6 +21,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.valueobject.Enabl
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.GrantTypesJsonVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IsResourceServerVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.LogoUriVO;
@@ -30,6 +31,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.valueobject.Publi
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegisteredAtVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegistrationAccessVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequestObjectSigningAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePkceVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ResponseTypesJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthMethodVO;
@@ -51,6 +53,8 @@ class TrustedClientUnitTest {
         .allowedRedirectsValue(AllowedRedirectsVO
             .from(List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build())))
         .secretOauthValue(SecretOauthVO.fromCyphered("one"))
+        .isResourceServerValue(IsResourceServerVO.from(true))
+        .requirePkceValue(RequirePkceVO.from(true))
         .backChannelLogoutUriValue(BackChannelLogoutUriVO.from("one"))
         .backChannelLogoutSessionRequiredValue(BackChannelLogoutSessionRequiredVO.from(true))
         .frontChannelLogoutUriValue(FrontChannelLogoutUriVO.from("one"))

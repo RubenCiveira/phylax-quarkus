@@ -64,6 +64,13 @@ public class TrustedClientRbacRegister {
         .description("El allowed redirects de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
         .description("If the user is not delegated, the phrasse to identify").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("isResourceServer").description(
+            "If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.")
+            .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("requirePkce").description(
+        "If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.")
+        .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("backChannelLogoutUri")
         .description("El back channel logout uri de trusted client").build());
     rbac.registerResourceField(RESOURCE,

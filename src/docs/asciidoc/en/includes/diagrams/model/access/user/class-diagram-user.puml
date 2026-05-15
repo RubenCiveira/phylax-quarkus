@@ -25,6 +25,7 @@ name:string
 password:string
 email:string
 wellcomeAt:datetime
+emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
 temporalPassword:boolean
@@ -48,6 +49,7 @@ unlock()
 block()
 setMfaSeed()
 changePassword()
+verifyEmail()
 }
 access.Tenant "1"  o--  "N*" access.User: tenant
 

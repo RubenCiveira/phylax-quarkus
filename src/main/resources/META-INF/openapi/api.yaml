@@ -111,6 +111,14 @@ tags:
     description: Audit operations for changes on api key client
   - name: api-key-client-acl
     description: Access control for api key client
+  - name: user-personal-api-key
+    description: A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication uses the SHA-256 hash for constant-time comparison.
+  - name: user-personal-api-key-batch
+    description: Massive operations for user personal api key
+  - name: user-personal-api-key-audit
+    description: Audit operations for changes on user personal api key
+  - name: user-personal-api-key-acl
+    description: Access control for user personal api key
   - name: template-variable
     description: template-variable
   - name: template-variable-batch
@@ -4805,6 +4813,420 @@ paths:
         - api-key-client-batch
       summary: Query the result of an massive delete
       operationId: api-key-client-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/me/api-keys:
+    get:
+      tags:
+        - user-personal-api-key
+      summary: List of user personal api key
+      operationId: user-personal-api-key-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: key-hash
+          in: query
+          description: key hash
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximun number of results
+          required: false
+          schema:
+            type: string
+        - name: since-name
+          in: query
+          description: Order by name asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPersonalApiKeyApiDtoList'
+    post:
+      tags:
+        - user-personal-api-key
+      summary: Create a new user personal api key
+      operationId: user-personal-api-key-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPersonalApiKeyApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPersonalApiKeyApiDto'
+    delete:
+      tags:
+        - user-personal-api-key-batch
+      summary: Delete a colection of user personal api key by filter
+      operationId: user-personal-api-key-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: key-hash
+          in: query
+          description: key hash
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/me/api-keys/{uid}:
+    get:
+      tags:
+        - user-personal-api-key
+      summary: Retrive on  user personal api key by their uid
+      operationId: user-personal-api-key-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPersonalApiKeyApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - user-personal-api-key
+      summary: Update a user personal api key by their uid
+      operationId: user-personal-api-key-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPersonalApiKeyApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPersonalApiKeyApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - user-personal-api-key
+      summary: Delete a  user personal api key by their uid
+      operationId: user-personal-api-key-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/me/api-keys/~/delete-status/{uid}:
+    get:
+      tags:
+        - user-personal-api-key-batch
+      summary: Query the result of an massive delete
+      operationId: user-personal-api-key-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/me/api-keys/-/audit/entity/{uid}:
+    get:
+      tags:
+        - user-personal-api-key-audit
+      summary: Update a user personal api key by their uid
+      operationId: user-personal-api-key-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/me/api-keys/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - user-personal-api-key-audit
+      summary: Update a user personal api key by their uid
+      operationId: user-personal-api-key-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/me/api-keys/{uid}/revoke:
+    patch:
+      tags:
+        - user-personal-api-key
+      summary: Update a user personal api key by their uid
+      operationId: user-personal-api-key-api-revoke
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPersonalApiKeyApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/me/api-keys:
+    get:
+      tags:
+        - user-personal-api-key-acl
+      summary: Check for allow permissions for the current user on user personal api key
+      operationId: user-personal-api-key-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPersonalApiKeyGenericAcl'
+  /api/me/acl/access/me/api-keys/{uid}:
+    get:
+      tags:
+        - user-personal-api-key-acl
+      summary: Check for allow permissions for the current user on user personal api key by their uid
+      operationId: user-personal-api-key-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPersonalApiKeySpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/access/me/api-keys/~/revoke:
+    patch:
+      tags:
+        - user-personal-api-key-batch
+      summary: revoke a colection of user personal api key by filter
+      operationId: user-personal-api-key-api-batch-revoke
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: key-hash
+          in: query
+          description: key hash
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocalizator'
+  /api/access/me/api-keys/~/revoke-status/{uid}:
+    get:
+      tags:
+        - user-personal-api-key-batch
+      summary: Query the result of an massive delete
+      operationId: user-personal-api-key-api-batch-revoke-query
       parameters:
         - name: uid
           in: path
@@ -12863,6 +13285,122 @@ components:
           type: array
           items:
             type: string
+    UserPersonalApiKeyApiDto:
+      type: object
+      description: A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication uses the SHA-256 hash for constant-time comparison.
+      properties:
+        uid:
+          description: El uid de user personal api key
+          type: string
+        user:
+          $ref: '#/components/schemas/UserApiRef'
+        name:
+          description: A label to identify the key (e.g. 'CI pipeline', 'local dev').
+          type: string
+        keyHash:
+          description: SHA-256 hex digest of the raw key. Never stored in plain text.
+          type: string
+        scopes:
+          description: Space-separated OAuth scopes granted to this key.
+          type: string
+        lastUsedAt:
+          description: Timestamp of the most recent successful authentication.
+          type: string
+          format: date-time
+        expiresAt:
+          description: Optional expiry. Null means the key does not expire.
+          type: string
+          format: date-time
+        createdAt:
+          description: El created at de user personal api key
+          type: string
+          format: date-time
+        enabled:
+          description: El enabled de user personal api key
+          type: boolean
+        version:
+          description: Campo con el número de version de user personal api key para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    UserPersonalApiKeyApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPersonalApiKeyApiDto'
+    UserPersonalApiKeyGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserPersonalApiKeyAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/UserPersonalApiKeyAclFields'
+    UserPersonalApiKeySpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserPersonalApiKeyAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/UserPersonalApiKeyAclFields'
+    UserPersonalApiKeyAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        revoke:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - revoke
+        - list
+    UserPersonalApiKeyAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        revoke:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - revoke
+    UserPersonalApiKeyAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
     TemplateVariableApiDto:
       type: object
       description: template-variable
@@ -13459,6 +13997,12 @@ components:
         secretOauth:
           description: If the user is not delegated, the phrasse to identify
           type: string
+        isResourceServer:
+          description: If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.
+          type: boolean
+        requirePkce:
+          description: If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.
+          type: boolean
         backChannelLogoutUri:
           description: El back channel logout uri de trusted client
           type: string
@@ -13754,6 +14298,25 @@ components:
         magicLinkEnabled:
           description: El magic link enabled de tenant config
           type: boolean
+        requireEmailVerification:
+          description: If true, users must confirm their email address via the verification link before they can complete their first login. The OIDC flow will hold the user at a verification-pending challenge until the link is clicked.
+          type: boolean
+        invitationExpiryDays:
+          description: Number of days before an unused user invitation token expires. Currently hardcoded to 7 days in InvitationCreateUsecase.
+          type: integer
+          format: int32
+        magicLinkExpiryMinutes:
+          description: Number of minutes before a magic-link token expires after being sent. Only relevant when magic-link-enabled=true.
+          type: integer
+          format: int32
+        sessionSsoTtlSeconds:
+          description: Lifetime in seconds of the cross-client SSO session cookie. After this duration the user must re-authenticate even if a per-flow session is still valid. Corresponds to the max_age upper bound for prompt=none requests.
+          type: integer
+          format: int32
+        refreshTokenTtlSeconds:
+          description: Lifetime in seconds of issued refresh tokens. Defaults to 30 days (2 592 000 s). Applies to all grant types that issue refresh tokens for this tenant.
+          type: integer
+          format: int32
         webauthnEnabled:
           description: El webauthn enabled de tenant config
           type: boolean
@@ -14100,7 +14663,7 @@ components:
         source:
           description: The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAML).
           type: string
-          enum: [google,github,microsoft,apple,saml]
+          enum: [google,github,microsoft,apple,saml,oidc]
         disabled:
           description: Indicates if this provider is currently disabled.
           type: boolean
@@ -14118,6 +14681,9 @@ components:
           type: string
         metadata:
           description: A metadata file required by some providers for configuration (e.g., SAML descriptor).
+          type: string
+        oidcDiscoveryUrl:
+          description: For source=OIDC the /.well-known/openid-configuration URL of the external OIDC identity provider. The system will fetch authorization_endpoint, token_endpoint, and jwks_uri from this document at startup. public-key holds the OIDC client_id; private-key holds the OIDC client_secret.
           type: string
         samlIdpMetadataUrl:
           description: El saml idp metadata url de tenant login provider
@@ -14367,6 +14933,9 @@ components:
           description: The date when a wellcome email is send
           type: string
           format: date-time
+        emailVerified:
+          description: Indicates whether the user has confirmed ownership of their email address by clicking the verification link sent at registration. Used by the OIDC flow to emit the email_verified claim and optionally block login until confirmed.
+          type: boolean
         enabled:
           description: A disabled user cant login on the system. On his login attempts, he will recive a specific warn of his disabled account.
           type: boolean

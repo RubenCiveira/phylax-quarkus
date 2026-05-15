@@ -60,7 +60,7 @@ public class EnqueueNotificationUseCase {
     TenantRef tenantRef = cmd.getTenantOptional().orElse(null);
 
     TemplateRenderInput renderInput =
-        TemplateRenderInput.builder().code(cmd.getTemplateCode()).channel( channel(cmd.getChannel()) )
+        TemplateRenderInput.builder().code(cmd.getTemplateCode()).channel(channel(cmd.getChannel()))
             .tenant(tenantRef).variables(flattenVariables("", cmd.getVariables()))
             .outputFormat(TemplateOutputFormat.HTML_EMBEDDED).build();
 
@@ -142,8 +142,8 @@ public class EnqueueNotificationUseCase {
    * @param text plain-text alternative; null when absent
    */
   record RenderedContent(String subject, String html, String text) {}
-  
+
   private TemplateChannelOptions channel(ChannelOptions opts) {
-    return TemplateChannelOptions.valueOf( opts.name() );
+    return TemplateChannelOptions.valueOf(opts.name());
   }
 }

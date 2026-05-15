@@ -18,8 +18,9 @@ class TenantLoginProviderChangeSetUnitTest {
         new TenantLoginProviderChangeSet().uid("one").tenant(TenantReference.of("one")).name("one")
             .source(TenantLoginProviderSourceOptions.GOOGLE).disabled(true).directAccess(true)
             .publicKey("one").privateKey("one").certificate("one").metadata("file_1")
-            .samlIdpMetadataUrl("one").samlIdpEntityId("one").samlIdpSsoUrl("one")
-            .samlIdpIdpCert("file_1").usersEnabledByDefault(true).version(1).newUid();
+            .oidcDiscoveryUrl("one").samlIdpMetadataUrl("one").samlIdpEntityId("one")
+            .samlIdpSsoUrl("one").samlIdpIdpCert("file_1").usersEnabledByDefault(true).version(1)
+            .newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -91,6 +92,14 @@ class TenantLoginProviderChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("metadata");
     Assertions.assertFalse(one.getMetadata().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getOidcDiscoveryUrl().get(),
+        "Value must equals to the intial value");
+    one.oidcDiscoveryUrl("two");
+    Assertions.assertEquals("two", one.getOidcDiscoveryUrl().get(),
+        "Value must equals to the assigned value");
+    one.unset("oidcDiscoveryUrl");
+    Assertions.assertFalse(one.getOidcDiscoveryUrl().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getSamlIdpMetadataUrl().get(),
         "Value must equals to the intial value");

@@ -2,59 +2,66 @@
 /**
  * OAuth 2.0 client registration, resolution, and per-user scope-consent tracking.
  *
- * <p>This bounded context owns the lifecycle of OAuth 2.0 clients: statically configured clients,
+ * <p>
+ * This bounded context owns the lifecycle of OAuth 2.0 clients: statically configured clients,
  * dynamically registered clients (RFC 7591 / RFC 7592), API-key-based machine clients, and the
  * per-user, per-client scope-consent records that gate incremental scope approval during flows.
  *
- * <p><b>Key domain types:</b>
+ * <p>
+ * <b>Key domain types:</b>
  * <ul>
- *   <li>{@code ClientDetails} — the central aggregate. Carries client_id, allowed redirect URIs,
- *       permitted grant types, required and allowed scopes, audience configuration, authentication
- *       method (client_secret_basic / post / none), token lifetimes, PKCE-enforcement flag,
- *       refresh-token rotation policy, and back-channel logout URL.</li>
- *   <li>{@code DynamicClientData} — mutable projection of a dynamically registered client.
- *       Includes the registration_access_token and registration_client_uri alongside all RFC 7591
- *       metadata fields required for read, update, and delete operations per RFC 7592.</li>
- *   <li>{@code DynamicClientRequest} — inbound DTO for RFC 7591 register and RFC 7592 update
- *       requests. Validated by the corresponding use cases before persistence through the gateway.</li>
- *   <li>{@code ApiKeyData} — value object representing a machine-to-machine client authenticated
- *       via API key. Carries the hashed key, its associated scopes, and a reference client_id.</li>
- *   <li>{@code ClientStoreGateway} — primary outbound port for resolving a {@code ClientDetails}
- *       by client_id. Implementations may use SQL, config files, or a remote registry.</li>
- *   <li>{@code ClientScopeConsentGateway} — port for reading and writing the set of scopes a
- *       user has previously approved for a specific client, enabling incremental consent across
- *       multiple authorization sessions without repeatedly prompting for already-approved scopes.</li>
- *   <li>{@code DynamicClientGateway} — port covering the full CRUD lifecycle for dynamically
- *       registered clients, including registration_access_token verification for protected ops.</li>
- *   <li>{@code ApiKeyStoreGateway} — port for resolving a client by a raw API key value, used
- *       by the machine-to-machine authentication path in the token endpoint.</li>
+ * <li>{@code ClientDetails} — the central aggregate. Carries client_id, allowed redirect URIs,
+ * permitted grant types, required and allowed scopes, audience configuration, authentication method
+ * (client_secret_basic / post / none), token lifetimes, PKCE-enforcement flag, refresh-token
+ * rotation policy, and back-channel logout URL.</li>
+ * <li>{@code DynamicClientData} — mutable projection of a dynamically registered client. Includes
+ * the registration_access_token and registration_client_uri alongside all RFC 7591 metadata fields
+ * required for read, update, and delete operations per RFC 7592.</li>
+ * <li>{@code DynamicClientRequest} — inbound DTO for RFC 7591 register and RFC 7592 update
+ * requests. Validated by the corresponding use cases before persistence through the gateway.</li>
+ * <li>{@code ApiKeyData} — value object representing a machine-to-machine client authenticated via
+ * API key. Carries the hashed key, its associated scopes, and a reference client_id.</li>
+ * <li>{@code ClientStoreGateway} — primary outbound port for resolving a {@code ClientDetails} by
+ * client_id. Implementations may use SQL, config files, or a remote registry.</li>
+ * <li>{@code ClientScopeConsentGateway} — port for reading and writing the set of scopes a user has
+ * previously approved for a specific client, enabling incremental consent across multiple
+ * authorization sessions without repeatedly prompting for already-approved scopes.</li>
+ * <li>{@code DynamicClientGateway} — port covering the full CRUD lifecycle for dynamically
+ * registered clients, including registration_access_token verification for protected ops.</li>
+ * <li>{@code ApiKeyStoreGateway} — port for resolving a client by a raw API key value, used by the
+ * machine-to-machine authentication path in the token endpoint.</li>
  * </ul>
  *
- * <p><b>Key application services:</b>
+ * <p>
+ * <b>Key application services:</b>
  * <ul>
- *   <li>{@code ClientScopeConsentUsecase} — computes the delta between requested scopes and
- *       already-approved scopes for a (user, client) pair. Persists newly approved scopes and
- *       returns the pending set that requires interactive consent on the current request.</li>
- *   <li>{@code RegisterClientUsecase} — validates RFC 7591 registration input, generates a
- *       secure registration_access_token, persists the client, and returns {@code RegisterClientResult}.</li>
- *   <li>{@code UpdateDynamicClientUsecase} — verifies the registration_access_token, validates
- *       the RFC 7592 update payload, and persists the updated dynamic client metadata.</li>
- *   <li>{@code ReadDynamicClientUsecase} / {@code DeleteDynamicClientUsecase} — protected RFC 7592
- *       read and delete operations, both gated behind registration_access_token verification.</li>
+ * <li>{@code ClientScopeConsentUsecase} — computes the delta between requested scopes and
+ * already-approved scopes for a (user, client) pair. Persists newly approved scopes and returns the
+ * pending set that requires interactive consent on the current request.</li>
+ * <li>{@code RegisterClientUsecase} — validates RFC 7591 registration input, generates a secure
+ * registration_access_token, persists the client, and returns {@code RegisterClientResult}.</li>
+ * <li>{@code UpdateDynamicClientUsecase} — verifies the registration_access_token, validates the
+ * RFC 7592 update payload, and persists the updated dynamic client metadata.</li>
+ * <li>{@code ReadDynamicClientUsecase} / {@code DeleteDynamicClientUsecase} — protected RFC 7592
+ * read and delete operations, both gated behind registration_access_token verification.</li>
  * </ul>
  *
- * <p><b>Infrastructure adapters:</b>
+ * <p>
+ * <b>Infrastructure adapters:</b>
  * <ul>
- *   <li>{@code ClientRetrieveAdapter} — driven SQL adapter implementing {@code ClientStoreGateway}.</li>
- *   <li>{@code ClientScopeConsentInteractor} — driven adapter for scope-consent persistence.</li>
- *   <li>{@code DynamicClientAdapter} — driven adapter for the full DCR CRUD gateway contract.</li>
- *   <li>{@code ApiKeyStoreAdapter} — driven adapter for API key lookup and resolution.</li>
- *   <li>{@code ClientRegisterController} — REST driver exposing POST/GET/PUT/DELETE /register
- *       per RFC 7591/7592 for dynamic client management.</li>
- *   <li>{@code ApiKeyController} — REST driver for API key management operations.</li>
+ * <li>{@code ClientRetrieveAdapter} — driven SQL adapter implementing
+ * {@code ClientStoreGateway}.</li>
+ * <li>{@code ClientScopeConsentInteractor} — driven adapter for scope-consent persistence.</li>
+ * <li>{@code DynamicClientAdapter} — driven adapter for the full DCR CRUD gateway contract.</li>
+ * <li>{@code ApiKeyStoreAdapter} — driven adapter for API key lookup and resolution.</li>
+ * <li>{@code ClientRegisterController} — REST driver exposing POST/GET/PUT/DELETE /register per RFC
+ * 7591/7592 for dynamic client management.</li>
+ * <li>{@code ApiKeyController} — REST driver for API key management operations.</li>
  * </ul>
  *
- * <p><b>Internal structure:</b>
+ * <p>
+ * <b>Internal structure:</b>
+ * 
  * <pre>
  * client/
  * ├── domain/
@@ -70,10 +77,12 @@
  *     └── driver/rest/ — ClientRegisterController, ApiKeyController
  * </pre>
  *
- * <p><b>Dependencies:</b> Referenced by Authentication (client resolution and consent checks),
+ * <p>
+ * <b>Dependencies:</b> Referenced by Authentication (client resolution and consent checks),
  * TokenSecurity (audience and scope intersection for JWT claims), PAR (client validation before
  * request_uri issuance), and Device (device authorization client validation).
  *
- * <p><b>Stability:</b> stable; DCR endpoints are additive and isolated from the core auth flow.
+ * <p>
+ * <b>Stability:</b> stable; DCR endpoints are additive and isolated from the core auth flow.
  */
 package net.civeira.phylax.features.oauth.client;

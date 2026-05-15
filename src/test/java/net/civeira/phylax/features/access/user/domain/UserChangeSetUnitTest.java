@@ -22,11 +22,12 @@ class UserChangeSetUnitTest {
     AesCipherService cypher = Mockito.mock(AesCipherService.class);
     UserChangeSet one = new UserChangeSet().uid("one").tenant(TenantReference.of("one")).name("one")
         .passwordPlain("one").email("one")
-        .wellcomeAt(LocalDateTime
-            .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-        .enabled(true).approve(UserApproveOptions.UNVERIFIED).temporalPassword(true)
-        .useSecondFactors(true).secondFactorSeedPlain("one").blockedUntil(LocalDateTime
-            .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+        .wellcomeAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+            .toOffsetDateTime())
+        .emailVerified(true).enabled(true).approve(UserApproveOptions.UNVERIFIED)
+        .temporalPassword(true).useSecondFactors(true).secondFactorSeedPlain("one")
+        .blockedUntil(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+            .toOffsetDateTime())
         .provider("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
@@ -68,6 +69,14 @@ class UserChangeSetUnitTest {
         one.getWellcomeAt().get(), "Value must equals to the assigned value");
     one.unset("wellcomeAt");
     Assertions.assertFalse(one.getWellcomeAt().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getEmailVerified().get(),
+        "Value must equals to the intial value");
+    one.emailVerified(false);
+    Assertions.assertEquals(false, one.getEmailVerified().get(),
+        "Value must equals to the assigned value");
+    one.unset("emailVerified");
+    Assertions.assertFalse(one.getEmailVerified().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getEnabled().get(), "Value must equals to the intial value");
     one.enabled(false);

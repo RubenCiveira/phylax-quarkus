@@ -20,19 +20,20 @@ class TrustedClientChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_trusted_client_change_set_builder() {
     AesCipherService cypher = Mockito.mock(AesCipherService.class);
-    TrustedClientChangeSet one = new TrustedClientChangeSet().uid("one").code("one")
-        .allowAllScopes(true).publicAllow(true)
-        .allowedRedirects(
-            List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()))
-        .secretOauthPlain("one").backChannelLogoutUri("one").backChannelLogoutSessionRequired(true)
-        .frontChannelLogoutUri("one").frontChannelLogoutSessionRequired(true).enabled(true)
-        .registrationAccess("one").clientName("one").logoUri("one").clientUri("one")
-        .policyUri("one").tosUri("one").tokenEndpointAuthMethod("one").grantTypesJson("one")
-        .responseTypesJson("one").dynamicallyRegistered(true)
-        .registeredAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
-            .toOffsetDateTime())
-        .allowedScopesM2m("one").m2mTokenTtlSeconds(1).requestObjectSigningAlg("one").jwksUri("one")
-        .jwksJson("one").version(1).newUid();
+    TrustedClientChangeSet one =
+        new TrustedClientChangeSet().uid("one").code("one").allowAllScopes(true).publicAllow(true)
+            .allowedRedirects(
+                List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()))
+            .secretOauthPlain("one").isResourceServer(true).requirePkce(true)
+            .backChannelLogoutUri("one").backChannelLogoutSessionRequired(true)
+            .frontChannelLogoutUri("one").frontChannelLogoutSessionRequired(true).enabled(true)
+            .registrationAccess("one").clientName("one").logoUri("one").clientUri("one")
+            .policyUri("one").tosUri("one").tokenEndpointAuthMethod("one").grantTypesJson("one")
+            .responseTypesJson("one").dynamicallyRegistered(true)
+            .registeredAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .allowedScopesM2m("one").m2mTokenTtlSeconds(1).requestObjectSigningAlg("one")
+            .jwksUri("one").jwksJson("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -76,6 +77,22 @@ class TrustedClientChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("secretOauth");
     Assertions.assertFalse(one.getSecretOauthPlain(cypher).isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getIsResourceServer().get(),
+        "Value must equals to the intial value");
+    one.isResourceServer(false);
+    Assertions.assertEquals(false, one.getIsResourceServer().get(),
+        "Value must equals to the assigned value");
+    one.unset("isResourceServer");
+    Assertions.assertFalse(one.getIsResourceServer().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getRequirePkce().get(),
+        "Value must equals to the intial value");
+    one.requirePkce(false);
+    Assertions.assertEquals(false, one.getRequirePkce().get(),
+        "Value must equals to the assigned value");
+    one.unset("requirePkce");
+    Assertions.assertFalse(one.getRequirePkce().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getBackChannelLogoutUri().get(),
         "Value must equals to the intial value");

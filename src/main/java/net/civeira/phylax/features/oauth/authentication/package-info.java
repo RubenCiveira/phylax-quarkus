@@ -2,72 +2,78 @@
 /**
  * Core challenge-based authentication orchestration for the OAuth 2.0 / OIDC authorization server.
  *
- * <p>This bounded context owns the end-to-end flow from an incoming authorization request through
+ * <p>
+ * This bounded context owns the end-to-end flow from an incoming authorization request through
  * credential validation, multi-factor challenges, consent collection, and final authorization-code
  * or token issuance. It coordinates all other bounded contexts without coupling to their internals.
  *
- * <p><b>Key domain types:</b>
+ * <p>
+ * <b>Key domain types:</b>
  * <ul>
- *   <li>{@code AuthRequest} — immutable value object carrying the parsed OAuth/OIDC query
- *       parameters (client_id, redirect_uri, response_type, scope, state, nonce, code_challenge,
- *       request_uri). It is the canonical entry object for every authorization request.</li>
- *   <li>{@code AuthenticationResult} — right/left discriminated union returned by
- *       {@code AuthenticateUser}. Carries either a fully authenticated principal or an active
- *       {@code AuthenticationChallege} that the HTML step-router must present next.</li>
- *   <li>{@code AuthenticationData} — immutable snapshot of a pre-authenticated user loaded after
- *       credential validation: roles, MFA enrollment status, required-challenge flags, active
- *       consent obligations, and delegated-provider information.</li>
- *   <li>{@code AuthenticationChallege} — enum encoding every interactive challenge the flow may
- *       require: PASSWORD, MFA, FRESH_PASSWORD, USE_CONSENT, CLIENT_CONSENT, DELEGATED,
- *       MAGIC_LINK, REGISTRATION, WEBAUTHN. Drives the {@code OidcStepRouter} dispatch table.</li>
- *   <li>{@code ChallengesState} — serializable bag of challenge-progress flags attached to the
- *       OIDC session, enabling multi-step flows to resume correctly after page reloads or
- *       back-button navigation without repeating already-completed steps.</li>
- *   <li>{@code PkceChallenge} — value object encapsulating the S256/plain code-challenge pair
- *       with a {@code verify(verifier)} method used at token-endpoint code-exchange time.</li>
- *   <li>{@code AuthenticationMode} — enum distinguishing login-only from full authorization,
- *       used to skip consent steps when the client does not request code or token issuance.</li>
- *   <li>{@code StepName} — stable identifier for each UI step, matched by the step-router to
- *       select and invoke the correct {@code OidcStep} handler implementation.</li>
- *   <li>Domain events — {@code LoginSucceededEvent}, {@code LoginFailedEvent}, {@code UserLocked},
- *       {@code UserUnlocked} — fired by the orchestrator and dispatched via CDI to allow
- *       cross-context reactions (audit logging, account locking) without direct coupling.</li>
- *   <li>Exception hierarchy — {@code LoginException} subtypes ({@code WrongCredentialsException},
- *       {@code MfaRequiredException}, {@code NewPasswordRequiredException},
- *       {@code ConsentRequiredException}, {@code ClientScopeConsentRequiredException},
- *       {@code NotAllowedAccessUserException}) — thrown within the application layer and caught
- *       by the HTML/REST drivers to redirect the flow to the appropriate challenge step.</li>
+ * <li>{@code AuthRequest} — immutable value object carrying the parsed OAuth/OIDC query parameters
+ * (client_id, redirect_uri, response_type, scope, state, nonce, code_challenge, request_uri). It is
+ * the canonical entry object for every authorization request.</li>
+ * <li>{@code AuthenticationResult} — right/left discriminated union returned by
+ * {@code AuthenticateUser}. Carries either a fully authenticated principal or an active
+ * {@code AuthenticationChallege} that the HTML step-router must present next.</li>
+ * <li>{@code AuthenticationData} — immutable snapshot of a pre-authenticated user loaded after
+ * credential validation: roles, MFA enrollment status, required-challenge flags, active consent
+ * obligations, and delegated-provider information.</li>
+ * <li>{@code AuthenticationChallege} — enum encoding every interactive challenge the flow may
+ * require: PASSWORD, MFA, FRESH_PASSWORD, USE_CONSENT, CLIENT_CONSENT, DELEGATED, MAGIC_LINK,
+ * REGISTRATION, WEBAUTHN. Drives the {@code OidcStepRouter} dispatch table.</li>
+ * <li>{@code ChallengesState} — serializable bag of challenge-progress flags attached to the OIDC
+ * session, enabling multi-step flows to resume correctly after page reloads or back-button
+ * navigation without repeating already-completed steps.</li>
+ * <li>{@code PkceChallenge} — value object encapsulating the S256/plain code-challenge pair with a
+ * {@code verify(verifier)} method used at token-endpoint code-exchange time.</li>
+ * <li>{@code AuthenticationMode} — enum distinguishing login-only from full authorization, used to
+ * skip consent steps when the client does not request code or token issuance.</li>
+ * <li>{@code StepName} — stable identifier for each UI step, matched by the step-router to select
+ * and invoke the correct {@code OidcStep} handler implementation.</li>
+ * <li>Domain events — {@code LoginSucceededEvent}, {@code LoginFailedEvent}, {@code UserLocked},
+ * {@code UserUnlocked} — fired by the orchestrator and dispatched via CDI to allow cross-context
+ * reactions (audit logging, account locking) without direct coupling.</li>
+ * <li>Exception hierarchy — {@code LoginException} subtypes ({@code WrongCredentialsException},
+ * {@code MfaRequiredException}, {@code NewPasswordRequiredException},
+ * {@code ConsentRequiredException}, {@code ClientScopeConsentRequiredException},
+ * {@code NotAllowedAccessUserException}) — thrown within the application layer and caught by the
+ * HTML/REST drivers to redirect the flow to the appropriate challenge step.</li>
  * </ul>
  *
- * <p><b>Key application services:</b>
+ * <p>
+ * <b>Key application services:</b>
  * <ul>
- *   <li>{@code AuthenticateUser} — top-level orchestrator. Loads the session, delegates
- *       credential validation to the User context via {@code LoginUsecase}, evaluates active
- *       challenges, and decides whether to grant tokens or return the next challenge.</li>
- *   <li>{@code SessionManager} — manages short-lived OIDC auth sessions: creation on the first
- *       authorization request, checkpoint updates after each step, and cleanup on completion.</li>
- *   <li>{@code BackChannelLogoutDispatcher} — issues async RFC 7009 / OIDC Session 1.0
- *       back-channel logout notifications to registered relying-party logout endpoints.</li>
- *   <li>{@code TokenGranter} (interface) / granter implementations — Strategy pattern for the
- *       token endpoint: {@code PasswordGranter} (ROPC), {@code RefreshGranter} (refresh rotation),
- *       {@code MfaGranter} (MFA token exchange), {@code DelegatedAccessGranter} (federation).</li>
+ * <li>{@code AuthenticateUser} — top-level orchestrator. Loads the session, delegates credential
+ * validation to the User context via {@code LoginUsecase}, evaluates active challenges, and decides
+ * whether to grant tokens or return the next challenge.</li>
+ * <li>{@code SessionManager} — manages short-lived OIDC auth sessions: creation on the first
+ * authorization request, checkpoint updates after each step, and cleanup on completion.</li>
+ * <li>{@code BackChannelLogoutDispatcher} — issues async RFC 7009 / OIDC Session 1.0 back-channel
+ * logout notifications to registered relying-party logout endpoints.</li>
+ * <li>{@code TokenGranter} (interface) / granter implementations — Strategy pattern for the token
+ * endpoint: {@code PasswordGranter} (ROPC), {@code RefreshGranter} (refresh rotation),
+ * {@code MfaGranter} (MFA token exchange), {@code DelegatedAccessGranter} (federation).</li>
  * </ul>
  *
- * <p><b>Infrastructure drivers:</b>
+ * <p>
+ * <b>Infrastructure drivers:</b>
  * <ul>
- *   <li>{@code TokenController} — REST driver for POST /token. Dispatches across granters,
- *       handles PKCE code exchange, validates client credentials, serializes token responses.</li>
- *   <li>{@code AuthorizeHtml} — HTML driver for GET/POST /authorize. Bootstraps the session,
- *       resolves PAR request_uri references, and delegates rendering to the step-router.</li>
- *   <li>{@code OidcStepRouter} — resolves the active {@code StepName} and dispatches to the
- *       matching {@code OidcStep} handler (LoginStep, MfaStep, ConsentStep, NewPassStep, etc.).</li>
- *   <li>{@code OidcEventDispatcher} — CDI observer that forwards domain events to listeners
- *       across bounded contexts for audit and account-protection purposes.</li>
- *   <li>{@code InformationController} — serves the OIDC userinfo endpoint and front/back-channel
- *       logout endpoints.</li>
+ * <li>{@code TokenController} — REST driver for POST /token. Dispatches across granters, handles
+ * PKCE code exchange, validates client credentials, serializes token responses.</li>
+ * <li>{@code AuthorizeHtml} — HTML driver for GET/POST /authorize. Bootstraps the session, resolves
+ * PAR request_uri references, and delegates rendering to the step-router.</li>
+ * <li>{@code OidcStepRouter} — resolves the active {@code StepName} and dispatches to the matching
+ * {@code OidcStep} handler (LoginStep, MfaStep, ConsentStep, NewPassStep, etc.).</li>
+ * <li>{@code OidcEventDispatcher} — CDI observer that forwards domain events to listeners across
+ * bounded contexts for audit and account-protection purposes.</li>
+ * <li>{@code InformationController} — serves the OIDC userinfo endpoint and front/back-channel
+ * logout endpoints.</li>
  * </ul>
  *
- * <p><b>Internal structure:</b>
+ * <p>
+ * <b>Internal structure:</b>
+ * 
  * <pre>
  * authentication/
  * ├── domain/
@@ -86,12 +92,14 @@
  *     └── event/          — OidcEventDispatcher
  * </pre>
  *
- * <p><b>Dependencies:</b> User (credential validation), Client (client resolution), Session
- * (session storage), TokenSecurity (JWT issuance), MFA (OTP verification), Consent (scope/terms),
- * MagicLink (passwordless), WebAuthn (FIDO2), DelegateLogin (federation), PAR (request_uri
- * resolution), Device (device-flow token exchange).
+ * <p>
+ * <b>Dependencies:</b> User (credential validation), Client (client resolution), Session (session
+ * storage), TokenSecurity (JWT issuance), MFA (OTP verification), Consent (scope/terms), MagicLink
+ * (passwordless), WebAuthn (FIDO2), DelegateLogin (federation), PAR (request_uri resolution),
+ * Device (device-flow token exchange).
  *
- * <p><b>Stability:</b> security-critical core; all changes require integration test coverage
- * under the {@code oidc-flow} test group.
+ * <p>
+ * <b>Stability:</b> security-critical core; all changes require integration test coverage under the
+ * {@code oidc-flow} test group.
  */
 package net.civeira.phylax.features.oauth.authentication;

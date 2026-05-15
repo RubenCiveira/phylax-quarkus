@@ -25,5 +25,6 @@ TIP: Accedemos al menú de Maestros - Administradores
 | UX-ADM-12 | Block | Cualquier usuarios | Ve y ejecuta la accion
 | UX-ADM-13 | Set mfa seed | Cualquier usuarios | Ve y ejecuta la accion
 | UX-ADM-14 | Change password | Cualquier usuarios | Ve y ejecuta la accion
+| UX-ADM-15 | Verify email | Cualquier usuarios | Ve y ejecuta la accion
 |===
 

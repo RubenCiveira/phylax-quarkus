@@ -13,6 +13,8 @@ code:string
 allowAllScopes:boolean
 publicAllow:boolean
 secretOauth:string
+isResourceServer:boolean
+requirePkce:boolean
 backChannelLogoutUri:string
 backChannelLogoutSessionRequired:boolean
 frontChannelLogoutUri:string

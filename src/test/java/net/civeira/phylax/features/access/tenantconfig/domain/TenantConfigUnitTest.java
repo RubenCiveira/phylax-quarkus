@@ -13,9 +13,14 @@ import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.Enable
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnabledUserEmailVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.ForceMfaVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.InnerLabelVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.InvitationExpiryDaysVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkEnabledVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkExpiryMinutesVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RecoverPassEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisterdEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequireEmailVerificationVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SessionSsoTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.VersionVO;
@@ -40,6 +45,11 @@ class TenantConfigUnitTest {
         .allowRegisterValue(AllowRegisterVO.from(true))
         .enableRegisterUsersValue(EnableRegisterUsersVO.from(true))
         .magicLinkEnabledValue(MagicLinkEnabledVO.from(true))
+        .requireEmailVerificationValue(RequireEmailVerificationVO.from(true))
+        .invitationExpiryDaysValue(InvitationExpiryDaysVO.from(1))
+        .magicLinkExpiryMinutesValue(MagicLinkExpiryMinutesVO.from(1))
+        .sessionSsoTtlSecondsValue(SessionSsoTtlSecondsVO.from(1))
+        .refreshTokenTtlSecondsValue(RefreshTokenTtlSecondsVO.from(1))
         .webauthnEnabledValue(WebauthnEnabledVO.from(true))
         .webauthnRpIdValue(WebauthnRpIdVO.from("one"))
         .webauthnRpNameValue(WebauthnRpNameVO.from("one"))

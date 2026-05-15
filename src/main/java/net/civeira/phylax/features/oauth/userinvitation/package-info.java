@@ -2,66 +2,75 @@
 /**
  * Invitation-based user onboarding: lifecycle management from invite issuance to account creation.
  *
- * <p>This bounded context manages the invitation flow that allows administrators or the system
- * to onboard new users without requiring self-registration. An invitation carries a secure
- * one-time token, is delivered by email, and expires after a configurable window. The invitee
- * accepts the invitation, sets their credentials, and is immediately provisioned with an active
- * user account. The context also supports resending and cancelling pending invitations.
+ * <p>
+ * This bounded context manages the invitation flow that allows administrators or the system to
+ * onboard new users without requiring self-registration. An invitation carries a secure one-time
+ * token, is delivered by email, and expires after a configurable window. The invitee accepts the
+ * invitation, sets their credentials, and is immediately provisioned with an active user account.
+ * The context also supports resending and cancelling pending invitations.
  *
- * <p><b>Key domain types:</b>
+ * <p>
+ * <b>Key domain types:</b>
  * <ul>
- *   <li>{@code UserInvitationSession} — value object created when an invitee begins the
- *       acceptance flow. Carries the invitation token hash, the resolved user metadata (email,
- *       display name, pre-assigned roles from the invitation record), and the OIDC
- *       {@code AuthRequest} snapshot so that after successful account creation the user is
- *       automatically logged in and redirected to the originating relying party without a
- *       second authentication step.</li>
- *   <li>{@code InvitationStoreGateway} — primary persistence port. Provides {@code save} for
- *       new invitation records, {@code findByToken} (hashed lookup) for acceptance and resend
- *       operations, {@code findById} for cancel operations, and {@code markAccepted} /
- *       {@code markCancelled} for lifecycle state transitions.</li>
- *   <li>{@code UserInvitationMailGateway} — outbound port for delivering the invitation email.
- *       Renders a template containing the acceptance URL with the raw invitation token and
- *       submits it via the platform SMTP service. Used by both create and resend use cases.</li>
- *   <li>{@code InvitationAcceptGateway} — port that bridges invitation acceptance to user
- *       provisioning. On accept, creates the user account (via the User context persistence
- *       model), marks the invitation as accepted, and returns the new user's identifier.</li>
- *   <li>{@code UserInvitationCodeGateway} — port for generating the short-lived authorization
- *       code issued immediately after acceptance, enabling the seamless auto-login redirect.</li>
- *   <li>{@code UserInvitationQueryGateway} — read-model port for listing and filtering pending
- *       invitations, used by administrative UIs and management APIs.</li>
- *   <li>{@code UserInvitationSessionGateway} — port for persisting the {@code UserInvitationSession}
- *       between the token-validation step and the credential-setup form submission.</li>
+ * <li>{@code UserInvitationSession} — value object created when an invitee begins the acceptance
+ * flow. Carries the invitation token hash, the resolved user metadata (email, display name,
+ * pre-assigned roles from the invitation record), and the OIDC {@code AuthRequest} snapshot so that
+ * after successful account creation the user is automatically logged in and redirected to the
+ * originating relying party without a second authentication step.</li>
+ * <li>{@code InvitationStoreGateway} — primary persistence port. Provides {@code save} for new
+ * invitation records, {@code findByToken} (hashed lookup) for acceptance and resend operations,
+ * {@code findById} for cancel operations, and {@code markAccepted} / {@code markCancelled} for
+ * lifecycle state transitions.</li>
+ * <li>{@code UserInvitationMailGateway} — outbound port for delivering the invitation email.
+ * Renders a template containing the acceptance URL with the raw invitation token and submits it via
+ * the platform SMTP service. Used by both create and resend use cases.</li>
+ * <li>{@code InvitationAcceptGateway} — port that bridges invitation acceptance to user
+ * provisioning. On accept, creates the user account (via the User context persistence model), marks
+ * the invitation as accepted, and returns the new user's identifier.</li>
+ * <li>{@code UserInvitationCodeGateway} — port for generating the short-lived authorization code
+ * issued immediately after acceptance, enabling the seamless auto-login redirect.</li>
+ * <li>{@code UserInvitationQueryGateway} — read-model port for listing and filtering pending
+ * invitations, used by administrative UIs and management APIs.</li>
+ * <li>{@code UserInvitationSessionGateway} — port for persisting the {@code UserInvitationSession}
+ * between the token-validation step and the credential-setup form submission.</li>
  * </ul>
  *
- * <p><b>Key application services:</b>
+ * <p>
+ * <b>Key application services:</b>
  * <ul>
- *   <li>{@code InvitationCreateUsecase} — validates the target email (no duplicate pending
- *       invitations), generates a cryptographically secure raw token, hashes and stores it
- *       with a 7-day expiry, triggers the invitation email via {@code UserInvitationMailGateway},
- *       and returns a {@code InvitationCreateResult} with the new invitation identifier.</li>
- *   <li>{@code InvitationAcceptUsecase} — validates the token hash (expiry, already-accepted
- *       check), delegates user creation to {@code InvitationAcceptGateway}, generates the
- *       auto-login authorization code, and returns a redirect outcome so the OIDC flow completes
- *       seamlessly without a separate login step.</li>
- *   <li>{@code InvitationResendUsecase} — resets the expiry of a pending invitation, regenerates
- *       the token, and re-sends the invitation email, invalidating the old link.</li>
- *   <li>{@code InvitationCancelUsecase} — transitions the invitation to CANCELLED state,
- *       preventing future acceptance even if the invitee still holds the original email link.</li>
+ * <li>{@code InvitationCreateUsecase} — validates the target email (no duplicate pending
+ * invitations), generates a cryptographically secure raw token, hashes and stores it with a 7-day
+ * expiry, triggers the invitation email via {@code UserInvitationMailGateway}, and returns a
+ * {@code InvitationCreateResult} with the new invitation identifier.</li>
+ * <li>{@code InvitationAcceptUsecase} — validates the token hash (expiry, already-accepted check),
+ * delegates user creation to {@code InvitationAcceptGateway}, generates the auto-login
+ * authorization code, and returns a redirect outcome so the OIDC flow completes seamlessly without
+ * a separate login step.</li>
+ * <li>{@code InvitationResendUsecase} — resets the expiry of a pending invitation, regenerates the
+ * token, and re-sends the invitation email, invalidating the old link.</li>
+ * <li>{@code InvitationCancelUsecase} — transitions the invitation to CANCELLED state, preventing
+ * future acceptance even if the invitee still holds the original email link.</li>
  * </ul>
  *
- * <p><b>Infrastructure adapters:</b>
+ * <p>
+ * <b>Infrastructure adapters:</b>
  * <ul>
- *   <li>{@code InvitationStoreAdapter} — driven SQL adapter for the full invitation lifecycle
- *       persistence (create, find, markAccepted, markCancelled).</li>
- *   <li>{@code UserInvitationMailAdapter} — driven adapter rendering and sending invitation emails.</li>
- *   <li>{@code InvitationAcceptAdapter} — driven adapter implementing {@code InvitationAcceptGateway},
- *       coordinating invitation acceptance with user provisioning in the persistence layer.</li>
- *   <li>{@code UserInvitationQueryAdapter} — driven read adapter for administrative listing queries.</li>
- *   <li>{@code UserInvitationSessionAdapter} — driven adapter for invitation-session persistence.</li>
+ * <li>{@code InvitationStoreAdapter} — driven SQL adapter for the full invitation lifecycle
+ * persistence (create, find, markAccepted, markCancelled).</li>
+ * <li>{@code UserInvitationMailAdapter} — driven adapter rendering and sending invitation
+ * emails.</li>
+ * <li>{@code InvitationAcceptAdapter} — driven adapter implementing
+ * {@code InvitationAcceptGateway}, coordinating invitation acceptance with user provisioning in the
+ * persistence layer.</li>
+ * <li>{@code UserInvitationQueryAdapter} — driven read adapter for administrative listing
+ * queries.</li>
+ * <li>{@code UserInvitationSessionAdapter} — driven adapter for invitation-session
+ * persistence.</li>
  * </ul>
  *
- * <p><b>Internal structure:</b>
+ * <p>
+ * <b>Internal structure:</b>
+ * 
  * <pre>
  * userinvitation/
  * ├── domain/
@@ -79,14 +88,16 @@
  *       UserInvitationQueryAdapter, UserInvitationSessionAdapter
  * </pre>
  *
- * <p><b>Dependencies:</b> Depends on the User context persistence model for account provisioning.
- * Shares the token-hashing pattern with MagicLink and Session. The Authentication context
- * processes the auto-login code generated by {@code InvitationAcceptUsecase} at the token
- * endpoint. Administrative REST endpoints for listing/cancelling invitations live in the access
- * management bounded context outside the OAuth feature package.
+ * <p>
+ * <b>Dependencies:</b> Depends on the User context persistence model for account provisioning.
+ * Shares the token-hashing pattern with MagicLink and Session. The Authentication context processes
+ * the auto-login code generated by {@code InvitationAcceptUsecase} at the token endpoint.
+ * Administrative REST endpoints for listing/cancelling invitations live in the access management
+ * bounded context outside the OAuth feature package.
  *
- * <p><b>Stability:</b> stable for the core flow; resend and cancel are fully implemented.
- * The auto-login redirect after acceptance depends on the OIDC flow being initiated before
- * the acceptance click, which constrains UX scenarios where invitation links are shared.
+ * <p>
+ * <b>Stability:</b> stable for the core flow; resend and cancel are fully implemented. The
+ * auto-login redirect after acceptance depends on the OIDC flow being initiated before the
+ * acceptance click, which constrains UX scenarios where invitation links are shared.
  */
 package net.civeira.phylax.features.oauth.userinvitation;

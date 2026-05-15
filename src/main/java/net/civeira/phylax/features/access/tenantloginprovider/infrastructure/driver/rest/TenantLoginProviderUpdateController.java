@@ -72,6 +72,8 @@ public class TenantLoginProviderUpdateController {
       result = SourceEnum.APPLE;
     } else if (domainEnum == TenantLoginProviderSourceOptions.SAML) {
       result = SourceEnum.SAML;
+    } else if (domainEnum == TenantLoginProviderSourceOptions.OIDC) {
+      result = SourceEnum.OIDC;
     } else {
       result = null;
     }
@@ -95,6 +97,8 @@ public class TenantLoginProviderUpdateController {
       result = TenantLoginProviderSourceOptions.APPLE;
     } else if (apiEnum == SourceEnum.SAML) {
       result = TenantLoginProviderSourceOptions.SAML;
+    } else if (apiEnum == SourceEnum.OIDC) {
+      result = TenantLoginProviderSourceOptions.OIDC;
     } else if (null == apiEnum) {
       result = null;
     } else {
@@ -125,6 +129,7 @@ public class TenantLoginProviderUpdateController {
           + dto.getUidOrDefault("-") + "/metadata";
       tenantLoginProviderApiDto.setMetadata(magicLink.create(url, currentRequest.interaction()));
     }
+    tenantLoginProviderApiDto.setOidcDiscoveryUrl(dto.getOidcDiscoveryUrl());
     tenantLoginProviderApiDto.setSamlIdpMetadataUrl(dto.getSamlIdpMetadataUrl());
     tenantLoginProviderApiDto.setSamlIdpEntityId(dto.getSamlIdpEntityId());
     tenantLoginProviderApiDto.setSamlIdpSsoUrl(dto.getSamlIdpSsoUrl());
@@ -186,6 +191,9 @@ public class TenantLoginProviderUpdateController {
           + tenantLoginProviderApiDto.getUid() + "/metadata"))) {
         dto.setMetadata(tenantLoginProviderApiDto.getMetadata());
       }
+    }
+    if (null != tenantLoginProviderApiDto.getOidcDiscoveryUrl()) {
+      dto.setOidcDiscoveryUrl(tenantLoginProviderApiDto.getOidcDiscoveryUrl());
     }
     if (null != tenantLoginProviderApiDto.getSamlIdpMetadataUrl()) {
       dto.setSamlIdpMetadataUrl(tenantLoginProviderApiDto.getSamlIdpMetadataUrl());

@@ -76,6 +76,7 @@ public class UserRetrieveController {
     userApiDto.setPassword("*****");
     userApiDto.setEmail(dto.getEmail());
     userApiDto.setWellcomeAt(dto.getWellcomeAt());
+    userApiDto.setEmailVerified(dto.getEmailVerified());
     userApiDto.setEnabled(dto.getEnabled());
     userApiDto.setApprove(approveEnumToApi(dto.getApprove()));
     userApiDto.setTemporalPassword(dto.getTemporalPassword());

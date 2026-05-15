@@ -25,6 +25,7 @@ name:string
 password:string
 email:string
 wellcomeAt:datetime
+emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
 temporalPassword:boolean
@@ -48,6 +49,7 @@ unlock()
 block()
 setMfaSeed()
 changePassword()
+verifyEmail()
 }
 class access.User{
 uid:string
@@ -55,6 +57,7 @@ name:string
 password:string
 email:string
 wellcomeAt:datetime
+emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
 temporalPassword:boolean
@@ -78,6 +81,7 @@ unlock()
 block()
 setMfaSeed()
 changePassword()
+verifyEmail()
 }
 class access.UserInvitation{
 uid:string

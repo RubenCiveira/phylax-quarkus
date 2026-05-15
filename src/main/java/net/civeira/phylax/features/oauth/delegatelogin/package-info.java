@@ -2,66 +2,73 @@
 /**
  * Federated identity and delegated login via external OAuth 2.0 / OIDC and SAML providers.
  *
- * <p>This bounded context manages the integration with external identity providers (IdPs). It
+ * <p>
+ * This bounded context manages the integration with external identity providers (IdPs). It
  * orchestrates the full delegated-login flow: selecting the appropriate provider, building the
  * outbound authentication request, receiving and validating the provider's response, mapping
- * external identity claims to a local user, and handing control back to the Authentication
- * context so that a regular OIDC session and token set can be issued. It acts as an
- * Anti-Corruption Layer between external IdP protocols and the internal authentication model.
+ * external identity claims to a local user, and handing control back to the Authentication context
+ * so that a regular OIDC session and token set can be issued. It acts as an Anti-Corruption Layer
+ * between external IdP protocols and the internal authentication model.
  *
- * <p><b>Key domain types:</b>
+ * <p>
+ * <b>Key domain types:</b>
  * <ul>
- *   <li>{@code DelegatedAccessExternalProvider} — provider interface (Strategy) that each
- *       external IdP implementation must fulfil. Declares three operations:
- *       {@code buildRequest(DelegatedRequestDetails)} to generate the outbound redirect URL or
- *       POST body, {@code handleResponse(params)} to parse and validate the provider callback,
- *       and {@code resolveUserInfo(token)} to fetch the external user's identity claims.</li>
- *   <li>{@code DelegatedLoginEndpoint} — value object describing a configured provider instance:
- *       provider type (OIDC, SAML, Google), client credentials, authorization and token endpoint
- *       URLs, requested scopes, and the local client_id to which this provider is attached.</li>
- *   <li>{@code DelegatedRequestDetails} — immutable context object assembled by {@code DelegateLogin}
- *       before calling a provider: includes the state parameter, nonce, redirect_uri, the active
- *       OIDC session snapshot, and the selected {@code DelegatedLoginEndpoint}.</li>
- *   <li>{@code DelegatedAccessDescriptor} — result of a successful provider callback parse.
- *       Carries the resolved external identity (external subject, email, display name, raw claims)
- *       before it is mapped to a local user identity by the gateway.</li>
- *   <li>{@code DelegatedProviderDescription} — UI-facing descriptor for a provider, used to
- *       render the delegated-login button on the login step (icon, label, initiation URL).</li>
- *   <li>{@code DelegateLoginGateway} — composite outbound port covering: retrieving the list of
- *       active providers for a client, storing and retrieving the delegated state token (CSRF
- *       protection), and resolving a local username from an external identity descriptor.</li>
- *   <li>{@code DelegatedStoreGateway} — port for storing and retrieving the temporary state
- *       object created when the delegated-login redirect is initiated, enabling the callback
- *       handler to reconstruct the original OIDC session context.</li>
- *   <li>{@code DelegatedAccessProviderGateway} — port for loading the registered
- *       {@code DelegatedLoginEndpoint} configurations associated with a given client_id.</li>
+ * <li>{@code DelegatedAccessExternalProvider} — provider interface (Strategy) that each external
+ * IdP implementation must fulfil. Declares three operations:
+ * {@code buildRequest(DelegatedRequestDetails)} to generate the outbound redirect URL or POST body,
+ * {@code handleResponse(params)} to parse and validate the provider callback, and
+ * {@code resolveUserInfo(token)} to fetch the external user's identity claims.</li>
+ * <li>{@code DelegatedLoginEndpoint} — value object describing a configured provider instance:
+ * provider type (OIDC, SAML, Google), client credentials, authorization and token endpoint URLs,
+ * requested scopes, and the local client_id to which this provider is attached.</li>
+ * <li>{@code DelegatedRequestDetails} — immutable context object assembled by {@code DelegateLogin}
+ * before calling a provider: includes the state parameter, nonce, redirect_uri, the active OIDC
+ * session snapshot, and the selected {@code DelegatedLoginEndpoint}.</li>
+ * <li>{@code DelegatedAccessDescriptor} — result of a successful provider callback parse. Carries
+ * the resolved external identity (external subject, email, display name, raw claims) before it is
+ * mapped to a local user identity by the gateway.</li>
+ * <li>{@code DelegatedProviderDescription} — UI-facing descriptor for a provider, used to render
+ * the delegated-login button on the login step (icon, label, initiation URL).</li>
+ * <li>{@code DelegateLoginGateway} — composite outbound port covering: retrieving the list of
+ * active providers for a client, storing and retrieving the delegated state token (CSRF
+ * protection), and resolving a local username from an external identity descriptor.</li>
+ * <li>{@code DelegatedStoreGateway} — port for storing and retrieving the temporary state object
+ * created when the delegated-login redirect is initiated, enabling the callback handler to
+ * reconstruct the original OIDC session context.</li>
+ * <li>{@code DelegatedAccessProviderGateway} — port for loading the registered
+ * {@code DelegatedLoginEndpoint} configurations associated with a given client_id.</li>
  * </ul>
  *
- * <p><b>Key application services:</b>
+ * <p>
+ * <b>Key application services:</b>
  * <ul>
- *   <li>{@code DelegateLogin} — orchestrator use case. On initiation: selects the provider,
- *       stores the delegated state, builds the redirect URL via the provider strategy.
- *       On callback: retrieves the state, delegates response parsing and userInfo fetching to
- *       the provider, resolves the local user, and returns the authenticated {@code AuthenticationData}
- *       for the Authentication context to resume the OIDC session with.</li>
+ * <li>{@code DelegateLogin} — orchestrator use case. On initiation: selects the provider, stores
+ * the delegated state, builds the redirect URL via the provider strategy. On callback: retrieves
+ * the state, delegates response parsing and userInfo fetching to the provider, resolves the local
+ * user, and returns the authenticated {@code AuthenticationData} for the Authentication context to
+ * resume the OIDC session with.</li>
  * </ul>
  *
- * <p><b>Infrastructure adapters:</b>
+ * <p>
+ * <b>Infrastructure adapters:</b>
  * <ul>
- *   <li>{@code GoogleDelegatedAccessProvider} — OIDC/Google-specific {@code DelegatedAccessExternalProvider}
- *       implementation. Handles OAuth 2.0 authorization-code flow with PKCE against Google's IdP.</li>
- *   <li>{@code SamlDelegatedAccessProvider} — SAML 2.0 SP-initiated SSO provider implementation.
- *       Generates SAML AuthnRequest and validates the SAML Response / Assertion on callback.</li>
- *   <li>{@code DelegateLoginAdapter} — driven adapter implementing the username-resolution part
- *       of {@code DelegateLoginGateway}: maps external subject identifiers to local user accounts,
- *       creating JIT-provisioned accounts when auto-provisioning is configured.</li>
- *   <li>{@code DelegateRepositoryJdbcAdapter} — driven SQL adapter for {@code DelegatedStoreGateway}
- *       (state persistence) and {@code DelegatedAccessProviderGateway} (provider config loading).</li>
- *   <li>{@code DelegatedAuthCallbackController} / {@code DelegatedAccessController} — HTML driver
- *       endpoints for initiation (redirects to provider) and callback (processes provider response).</li>
+ * <li>{@code GoogleDelegatedAccessProvider} — OIDC/Google-specific
+ * {@code DelegatedAccessExternalProvider} implementation. Handles OAuth 2.0 authorization-code flow
+ * with PKCE against Google's IdP.</li>
+ * <li>{@code SamlDelegatedAccessProvider} — SAML 2.0 SP-initiated SSO provider implementation.
+ * Generates SAML AuthnRequest and validates the SAML Response / Assertion on callback.</li>
+ * <li>{@code DelegateLoginAdapter} — driven adapter implementing the username-resolution part of
+ * {@code DelegateLoginGateway}: maps external subject identifiers to local user accounts, creating
+ * JIT-provisioned accounts when auto-provisioning is configured.</li>
+ * <li>{@code DelegateRepositoryJdbcAdapter} — driven SQL adapter for {@code DelegatedStoreGateway}
+ * (state persistence) and {@code DelegatedAccessProviderGateway} (provider config loading).</li>
+ * <li>{@code DelegatedAuthCallbackController} / {@code DelegatedAccessController} — HTML driver
+ * endpoints for initiation (redirects to provider) and callback (processes provider response).</li>
  * </ul>
  *
- * <p><b>Internal structure:</b>
+ * <p>
+ * <b>Internal structure:</b>
+ * 
  * <pre>
  * delegatelogin/
  * ├── domain/
@@ -77,12 +84,14 @@
  *     └── DelegatedAccessAuthValidatorAdapter.java
  * </pre>
  *
- * <p><b>Dependencies:</b> Invoked by the Authentication context via the DELEGATED challenge step
- * and the {@code DelegatedAccessGranter} token-endpoint strategy. Depends on User context for
- * JIT provisioning and on Session for state storage.
+ * <p>
+ * <b>Dependencies:</b> Invoked by the Authentication context via the DELEGATED challenge step and
+ * the {@code DelegatedAccessGranter} token-endpoint strategy. Depends on User context for JIT
+ * provisioning and on Session for state storage.
  *
- * <p><b>Stability:</b> moderate; provider implementations evolve as new IdPs are integrated.
- * The domain model and orchestrator are stable; the provider strategy isolates IdP-specific
- * protocol details from the rest of the flow.
+ * <p>
+ * <b>Stability:</b> moderate; provider implementations evolve as new IdPs are integrated. The
+ * domain model and orchestrator are stable; the provider strategy isolates IdP-specific protocol
+ * details from the rest of the flow.
  */
 package net.civeira.phylax.features.oauth.delegatelogin;

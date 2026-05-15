@@ -26,9 +26,6 @@ public class CreateOnlyForRoot {
    */
   public void checkAllow(@Observes TenantCreateAuthorizationDecision allowDecision) {
     Actor actor = allowDecision.getActor();
-    System.err.println("Scope: " + actor.hasScope(SCOPE_PLATFORM_GLOBAL_ACCESS));
-    System.err.println("Role: " + actor.hasRole(ROL_ADMIN));
-    System.err.println("=========================");
     if (!(actor.hasScope(SCOPE_PLATFORM_GLOBAL_ACCESS) && actor.hasRole(ROL_ADMIN))) {
       allowDecision.deny("Create only for root");
     }

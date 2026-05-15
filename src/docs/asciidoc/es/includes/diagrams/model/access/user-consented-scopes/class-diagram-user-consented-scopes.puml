@@ -8,6 +8,7 @@ name:string
 password:string
 email:string
 wellcomeAt:datetime
+emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
 temporalPassword:boolean
@@ -31,6 +32,7 @@ unlock()
 block()
 setMfaSeed()
 changePassword()
+verifyEmail()
 }
 class access.TrustedClient{
 uid:string
@@ -38,6 +40,8 @@ code:string
 allowAllScopes:boolean
 publicAllow:boolean
 secretOauth:string
+isResourceServer:boolean
+requirePkce:boolean
 backChannelLogoutUri:string
 backChannelLogoutSessionRequired:boolean
 frontChannelLogoutUri:string

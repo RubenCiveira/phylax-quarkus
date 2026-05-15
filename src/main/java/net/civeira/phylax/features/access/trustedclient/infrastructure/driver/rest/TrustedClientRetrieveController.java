@@ -55,6 +55,8 @@ public class TrustedClientRetrieveController {
     trustedClientApiDto.setAllowedRedirects(
         dto.getAllowedRedirects().stream().map(this::toApiModelAllowedRedirects).toList());
     trustedClientApiDto.setSecretOauth("*****");
+    trustedClientApiDto.setIsResourceServer(dto.getIsResourceServer());
+    trustedClientApiDto.setRequirePkce(dto.getRequirePkce());
     trustedClientApiDto.setBackChannelLogoutUri(dto.getBackChannelLogoutUri());
     trustedClientApiDto
         .setBackChannelLogoutSessionRequired(dto.getBackChannelLogoutSessionRequired());

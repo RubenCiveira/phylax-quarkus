@@ -103,6 +103,7 @@ public class UserUpdateController {
     userApiDto.setPassword("*****");
     userApiDto.setEmail(dto.getEmail());
     userApiDto.setWellcomeAt(dto.getWellcomeAt());
+    userApiDto.setEmailVerified(dto.getEmailVerified());
     userApiDto.setEnabled(dto.getEnabled());
     userApiDto.setApprove(approveEnumToApi(dto.getApprove()));
     userApiDto.setTemporalPassword(dto.getTemporalPassword());
@@ -138,6 +139,9 @@ public class UserUpdateController {
     }
     if (null != userApiDto.getWellcomeAt()) {
       dto.setWellcomeAt(userApiDto.getWellcomeAt());
+    }
+    if (null != userApiDto.getEmailVerified()) {
+      dto.setEmailVerified(userApiDto.getEmailVerified());
     }
     if (null != userApiDto.getEnabled()) {
       dto.setEnabled(userApiDto.getEnabled());

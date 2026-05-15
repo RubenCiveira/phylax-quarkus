@@ -204,6 +204,8 @@ public class TenantLoginProviderDisableController {
       result = SourceEnum.APPLE;
     } else if (domainEnum == TenantLoginProviderSourceOptions.SAML) {
       result = SourceEnum.SAML;
+    } else if (domainEnum == TenantLoginProviderSourceOptions.OIDC) {
+      result = SourceEnum.OIDC;
     } else {
       result = null;
     }
@@ -232,6 +234,7 @@ public class TenantLoginProviderDisableController {
           + dto.getUidOrDefault("-") + "/metadata";
       tenantLoginProviderApiDto.setMetadata(magicLink.create(url, currentRequest.interaction()));
     }
+    tenantLoginProviderApiDto.setOidcDiscoveryUrl(dto.getOidcDiscoveryUrl());
     tenantLoginProviderApiDto.setSamlIdpMetadataUrl(dto.getSamlIdpMetadataUrl());
     tenantLoginProviderApiDto.setSamlIdpEntityId(dto.getSamlIdpEntityId());
     tenantLoginProviderApiDto.setSamlIdpSsoUrl(dto.getSamlIdpSsoUrl());

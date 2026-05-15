@@ -15,6 +15,7 @@ import net.civeira.phylax.features.access.user.domain.UserApproveOptions;
 import net.civeira.phylax.features.access.user.domain.valueobject.ApproveVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.BlockedUntilVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.EmailVO;
+import net.civeira.phylax.features.access.user.domain.valueobject.EmailVerifiedVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.NameVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.PasswordVO;
@@ -40,7 +41,7 @@ class UserCachedUnitTest {
         .passwordValue(PasswordVO.fromCyphered("one")).emailValue(EmailVO.from("one"))
         .wellcomeAtValue(WellcomeAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
-        .enabledValue(EnabledVO.from(true))
+        .emailVerifiedValue(EmailVerifiedVO.from(true)).enabledValue(EnabledVO.from(true))
         .approveValue(ApproveVO.from(UserApproveOptions.UNVERIFIED))
         .temporalPasswordValue(TemporalPasswordVO.from(true))
         .useSecondFactorsValue(UseSecondFactorsVO.from(true))
