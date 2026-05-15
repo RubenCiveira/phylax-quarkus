@@ -10,7 +10,7 @@ import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 public class ProfileViewPanel {
 
   public String render(OidcProfile profile, String editUrl, String passwordUrl, String mfaUrl,
-      String sessionsUrl, String recoveryCodesUrl, YamlLocaleMessages t) {
+      String sessionsUrl, String recoveryCodesUrl, String consentsUrl, YamlLocaleMessages t) {
 
     String givenName = esc(profile == null ? null : profile.getGivenName().orElse(null));
     String familyName = esc(profile == null ? null : profile.getFamilyName().orElse(null));
@@ -51,8 +51,9 @@ public class ProfileViewPanel {
         + esc(mfaUrl) + "\">" + t.get("profile.view.configureMfa") + "</a>"
         + "<a class=\"secondary-button\" href=\"" + esc(sessionsUrl) + "\">"
         + t.get("profile.view.manageSessions") + "</a>" + "<a class=\"secondary-button\" href=\""
-        + esc(recoveryCodesUrl) + "\">" + t.get("profile.view.recoveryCodes") + "</a>" + "</div>"
-        + "</div>";
+        + esc(recoveryCodesUrl) + "\">" + t.get("profile.view.recoveryCodes") + "</a>"
+        + "<a class=\"secondary-button\" href=\"" + esc(consentsUrl) + "\">"
+        + t.get("profile.view.manageConsents") + "</a>" + "</div>" + "</div>";
   }
 
   private String dt(String label, String value) {

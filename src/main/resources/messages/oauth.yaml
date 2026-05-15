@@ -142,6 +142,7 @@ profile:
     configureMfa: "Two-factor authentication"
     manageSessions: "Sessions"
     recoveryCodes: "Recovery codes"
+    manageConsents: "Authorized applications"
   recovery-codes:
     title: "Recovery codes"
     count: "You have {0} unused recovery codes"
@@ -200,6 +201,16 @@ profile:
     expires: "Expires"
     empty: "No active sessions"
     backToProfile: "Back to profile"
+  consents:
+    title: "Authorized applications"
+    help: "These applications have been granted access to your account"
+    client: "Application"
+    scopes: "Permissions"
+    grantedAt: "Authorized on"
+    revoke: "Revoke access"
+    empty: "No applications authorized"
+    backToProfile: "Back to profile"
+    unknown: "Unknown"
   auth:
     title: "Not signed in"
     help: "You must be signed in to view this page"

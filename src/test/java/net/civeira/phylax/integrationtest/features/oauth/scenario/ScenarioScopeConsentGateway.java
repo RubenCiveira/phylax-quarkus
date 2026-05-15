@@ -11,6 +11,7 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopesConsentGateway;
@@ -93,6 +94,16 @@ public class ScenarioScopeConsentGateway implements ScopesConsentGateway, ScopeA
   public void storeApprovedScopes(String tenant, String username, String clientId,
       List<String> acceptedScopes) {
     recordAccepted(tenant, username, clientId, acceptedScopes);
+  }
+
+  @Override
+  public List<ClientConsentSummary> listGrantedByUser(String tenant, String username) {
+    return List.of();
+  }
+
+  @Override
+  public void revokeClientConsent(String tenant, String username, String clientUid) {
+    // no-op in tests
   }
 
   private List<ScopePermission> buildPermissions(String clientId, List<String> requestedScopes) {

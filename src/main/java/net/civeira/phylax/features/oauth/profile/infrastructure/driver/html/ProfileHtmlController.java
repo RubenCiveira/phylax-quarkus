@@ -20,11 +20,14 @@ import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
+import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
+import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopesConsentGateway;
 import net.civeira.phylax.features.oauth.mfa.application.MfaRecoveryService;
 import net.civeira.phylax.features.oauth.profile.application.ProfileService;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ChangePasswordPanel;
+import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ConsentedScopesPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.MfaPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ProfileEditPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ProfileViewPanel;
@@ -50,6 +53,8 @@ public class ProfileHtmlController {
   private final SessionsPanel sessionsPanel;
   private final MfaRecoveryService mfaRecoveryService;
   private final RecoveryCodesPanel recoveryCodesPanel;
+  private final ScopesConsentGateway scopesConsentGateway;
+  private final ConsentedScopesPanel consentedScopesPanel;
 
   @GET
   @Path("oauth/openid/{tenant}/profile")
@@ -69,8 +74,9 @@ public class ProfileHtmlController {
     return sessionManager.loadSession(cookie).map(session -> {
       OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = "<div class=\"section-card\">" + viewPanel.render(profile, base + "/edit",
-          base + "/password", base + "/mfa", base + "/sessions", base + "/recovery-codes", t)
+      String html = "<div class=\"section-card\">"
+          + viewPanel.render(profile, base + "/edit", base + "/password", base + "/mfa",
+              base + "/sessions", base + "/recovery-codes", base + "/consents", t)
           + "</div>";
       return page(tenant, headers, t.get("profile.view.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -258,6 +264,38 @@ public class ProfileHtmlController {
           base + "/recovery-codes/regenerate", base, codes, t) + "</div>";
       return page(tenant, headers, t.get("profile.recovery-codes.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
+  }
+
+  @GET
+  @Path("oauth/openid/{tenant}/me/consents")
+  @Produces(TEXT_HTML)
+  public Response consents(@PathParam("tenant") String tenant,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie, @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    return sessionManager.loadSession(cookie).map(session -> {
+      String username = session.getValidationData().getUsername();
+      String base = "/oauth/openid/" + tenant + "/me";
+      List<ClientConsentSummary> granted = scopesConsentGateway.listGrantedByUser(tenant, username);
+      String html = "<div class=\"section-card\">"
+          + consentedScopesPanel.render(granted, base + "/consents/revoke", base, t) + "</div>";
+      return page(tenant, headers, t.get("profile.consents.title"), html, locale);
+    }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/me/consents/revoke/{clientUid}")
+  public Response revokeConsent(@PathParam("tenant") String tenant,
+      @PathParam("clientUid") String clientUid,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie) {
+    return sessionManager.loadSession(cookie).map(session -> {
+      String username = session.getValidationData().getUsername();
+      if (clientUid != null && !clientUid.isBlank()) {
+        scopesConsentGateway.revokeClientConsent(tenant, username, clientUid);
+      }
+      return Response.status(302).header("Location", "/oauth/openid/" + tenant + "/me/consents")
+          .build();
+    }).orElseGet(() -> Response.status(401).build());
   }
 
   private String resolveUserUid(SessionInfo session) {

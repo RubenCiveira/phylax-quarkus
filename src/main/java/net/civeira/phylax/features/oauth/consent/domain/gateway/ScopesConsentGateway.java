@@ -3,13 +3,14 @@ package net.civeira.phylax.features.oauth.consent.domain.gateway;
 
 import java.util.List;
 
+import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 
 /**
  * Domain port for scope consent storage.
  *
  * Responsibilities: - Compute pending scope permissions for consent. - Store accepted scopes for
- * users and clients.
+ * users and clients. - List and revoke consents from the user profile.
  *
  * Design notes: - Implemented by infrastructure adapters. - Keeps persistence outside the domain.
  */
@@ -42,4 +43,22 @@ public interface ScopesConsentGateway {
    * @param scopes accepted scopes
    */
   void storeAcceptedScopes(String tenant, String username, String clientId, List<String> scopes);
+
+  /**
+   * Lists all granted consents for the user, grouped by OAuth client.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @return one summary per client the user has granted scopes to
+   */
+  List<ClientConsentSummary> listGrantedByUser(String tenant, String username);
+
+  /**
+   * Revokes all scope consents granted by the user to a specific client.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientUid UID of the trusted client whose consents are to be removed
+   */
+  void revokeClientConsent(String tenant, String username, String clientUid);
 }

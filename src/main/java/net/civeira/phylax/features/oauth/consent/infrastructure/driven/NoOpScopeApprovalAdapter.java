@@ -4,6 +4,7 @@ package net.civeira.phylax.features.oauth.consent.infrastructure.driven;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
@@ -19,6 +20,7 @@ import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGat
  * Replace this bean with a real implementation (higher CDI {@code @Priority}) to enforce scope
  * approval in production.
  */
+@Alternative
 @ApplicationScoped
 public class NoOpScopeApprovalAdapter implements ScopeApprovalGateway {
 
