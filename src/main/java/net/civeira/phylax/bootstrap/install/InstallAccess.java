@@ -69,14 +69,15 @@ public class InstallAccess implements MigrationSeed {
       return;
     }
 
-    RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("lughauth-api")
+    RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("phylax-api")
         .apiKey("1111").enabled(Boolean.TRUE);
 
     AllowedRedirects localhost =
         AllowedRedirects.builder().newUid().url("http://localhost:4200/*").build();
 
-    TrustedClientChangeSet client = new TrustedClientChangeSet().newUid().code("lughauth-ui")
+    TrustedClientChangeSet client = new TrustedClientChangeSet().newUid().code("phylax-ui")
         .allowAllScopes(Boolean.TRUE).secretOauthPlain("123456").publicAllow(Boolean.TRUE)
+        .isResourceServer(Boolean.FALSE)
         .tokenEndpointAuthMethod("client_secret_post").m2mTokenTtlSeconds(3600)
         .allowedRedirects(List.of(localhost)).enabled(Boolean.TRUE);
 

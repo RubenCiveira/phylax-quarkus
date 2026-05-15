@@ -38,7 +38,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return tenant(tenant)
         .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
         .filter(this::clientEnabled)
-        .map(client -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
+        .map(_ -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
             .requirePkce(false).allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES)
             .build());
   }
