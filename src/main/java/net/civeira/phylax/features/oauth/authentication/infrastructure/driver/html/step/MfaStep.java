@@ -86,6 +86,8 @@ public class MfaStep implements OidcStep {
     String backText = AuthorizeHtml.i18n(input.locale(), "mfa.back-text",
         "<input class=\"inline\" type=\"submit\" value=\"" + backLabel + "\" />");
 
+    String recoveryLabel = AuthorizeHtml.i18n(input.locale(), "mfa.recovery-link");
+
     return Response.ok(decorator.getFullPage(input.tenant(), "MFA",
         js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
             + (null == msg ? "" : "<p class=\"error\"> " + error + "</p>")
@@ -96,6 +98,9 @@ public class MfaStep implements OidcStep {
             + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + send
             + "\" />" + "</form>" + "<form method=\"POST\">"
             + "<input type=\"hidden\" name=\"step\" value=\"start\" />" + "<p>" + backText + "</p>"
+            + "</form>" + "<form method=\"POST\">"
+            + "<input type=\"hidden\" name=\"step\" value=\"show-recover-mfa\" />"
+            + "<p><input class=\"inline\" type=\"submit\" value=\"" + recoveryLabel + "\" /></p>"
             + "</form>",
         input.locale())).type(AuthorizeHtml.TEXT_HTML);
   }

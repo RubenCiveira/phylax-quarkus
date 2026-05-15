@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.oauth.profile.infrastructure.driver.html;
 
+import java.util.List;
 import java.util.Locale;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -19,6 +20,7 @@ import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
+import net.civeira.phylax.features.oauth.mfa.application.MfaRecoveryService;
 import net.civeira.phylax.features.oauth.profile.application.ProfileService;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
@@ -26,6 +28,7 @@ import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.pane
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.MfaPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ProfileEditPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ProfileViewPanel;
+import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.RecoveryCodesPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.SessionsPanel;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
@@ -45,6 +48,8 @@ public class ProfileHtmlController {
   private final ChangePasswordPanel changePasswordPanel;
   private final MfaPanel mfaPanel;
   private final SessionsPanel sessionsPanel;
+  private final MfaRecoveryService mfaRecoveryService;
+  private final RecoveryCodesPanel recoveryCodesPanel;
 
   @GET
   @Path("oauth/openid/{tenant}/profile")
@@ -65,7 +70,8 @@ public class ProfileHtmlController {
       OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = "<div class=\"section-card\">" + viewPanel.render(profile, base + "/edit",
-          base + "/password", base + "/mfa", base + "/sessions", t) + "</div>";
+          base + "/password", base + "/mfa", base + "/sessions", base + "/recovery-codes", t)
+          + "</div>";
       return page(tenant, headers, t.get("profile.view.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
   }
@@ -218,6 +224,40 @@ public class ProfileHtmlController {
       return Response.status(302).header("Location", "/oauth/openid/" + tenant + "/me/sessions")
           .build();
     }).orElseGet(() -> Response.status(401).build());
+  }
+
+  @GET
+  @Path("oauth/openid/{tenant}/me/recovery-codes")
+  @Produces(TEXT_HTML)
+  public Response recoveryCodes(@PathParam("tenant") String tenant,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie, @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    return sessionManager.loadSession(cookie).map(session -> {
+      String base = "/oauth/openid/" + tenant + "/me";
+      long unusedCount = mfaRecoveryService.countUnused(resolveUserUid(session));
+      String html = "<div class=\"section-card\">" + recoveryCodesPanel.render(unusedCount,
+          base + "/recovery-codes/regenerate", base, null, t) + "</div>";
+      return page(tenant, headers, t.get("profile.recovery-codes.title"), html, locale);
+    }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/me/recovery-codes/regenerate")
+  @Produces(TEXT_HTML)
+  public Response regenerateRecoveryCodes(@PathParam("tenant") String tenant,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie, @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    return sessionManager.loadSession(cookie).map(session -> {
+      String base = "/oauth/openid/" + tenant + "/me";
+      String userUid = resolveUserUid(session);
+      List<String> codes = mfaRecoveryService.generateCodes(userUid, 8);
+      long unusedCount = mfaRecoveryService.countUnused(userUid);
+      String html = "<div class=\"section-card\">" + recoveryCodesPanel.render(unusedCount,
+          base + "/recovery-codes/regenerate", base, codes, t) + "</div>";
+      return page(tenant, headers, t.get("profile.recovery-codes.title"), html, locale);
+    }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
   }
 
   private String resolveUserUid(SessionInfo session) {

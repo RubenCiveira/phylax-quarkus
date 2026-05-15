@@ -1,0 +1,44 @@
+package net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels;
+
+import static net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.HtmlEscape.esc;
+
+import java.util.List;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.common.value.YamlLocaleMessages;
+
+@ApplicationScoped
+public class RecoveryCodesPanel {
+
+  public String render(long unusedCount, String regenerateUrl, String cancelUrl,
+      List<String> generatedCodes, YamlLocaleMessages t) {
+
+    String title = "<h1>" + t.get("profile.recovery-codes.title") + "</h1>";
+    String countHtml =
+        "<p>" + t.get("profile.recovery-codes.count", String.valueOf(unusedCount)) + "</p>";
+
+    String codesHtml = "";
+    if (generatedCodes != null && !generatedCodes.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("<div class=\"recovery-codes-box\">");
+      sb.append("<p class=\"recovery-codes-warning\">")
+          .append(t.get("profile.recovery-codes.warning")).append("</p>");
+      sb.append("<ul class=\"recovery-codes-list\">");
+      for (String code : generatedCodes) {
+        sb.append("<li><code>").append(esc(code)).append("</code></li>");
+      }
+      sb.append("</ul>");
+      sb.append("</div>");
+      codesHtml = sb.toString();
+    }
+
+    String form = "<form method=\"POST\" action=\"" + esc(regenerateUrl)
+        + "\" class=\"change-password-form\">" + "<div class=\"profile-actions\">"
+        + "<input class=\"primary-button\" type=\"submit\" value=\""
+        + esc(t.get("profile.recovery-codes.regenerate")) + "\" />"
+        + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
+        + t.get("profile.recovery-codes.back") + "</a>" + "</div>" + "</form>";
+
+    return title + countHtml + codesHtml + form;
+  }
+}

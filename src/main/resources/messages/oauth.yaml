@@ -53,6 +53,16 @@ mfa:
   send: "Verify"
   back-label: "Back"
   back-text: "{0}"
+  recovery-link: "Lost your device?"
+  recovery:
+    title: "Use a recovery code"
+    error-format: "{0}"
+    help: "Enter one of your single-use backup recovery codes"
+    code: "Recovery code"
+    send: "Verify"
+    invalid: "Invalid or already used recovery code"
+    back-label: "Back to MFA"
+    back-text: "{0}"
 
 newmfa:
   title: "Set up authenticator"
@@ -131,6 +141,13 @@ profile:
     changePassword: "Change password"
     configureMfa: "Two-factor authentication"
     manageSessions: "Sessions"
+    recoveryCodes: "Recovery codes"
+  recovery-codes:
+    title: "Recovery codes"
+    count: "You have {0} unused recovery codes"
+    warning: "Save these codes in a safe place. Each code can only be used once."
+    regenerate: "Generate new codes"
+    back: "Back to profile"
   edit:
     title: "Edit profile"
     givenName: "First name"
