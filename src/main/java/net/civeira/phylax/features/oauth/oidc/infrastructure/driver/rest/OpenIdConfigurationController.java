@@ -86,7 +86,8 @@ public class OpenIdConfigurationController {
         .userinfoEndpoint(base + "userinfo").endSessionEndpoint(base + "logout")
         .frontchannelLogoutSessionSupported(false).frontchannelLogoutSupported(false)
         .jwksUri(base + "jwks").checkSessionIframe(base + "login-status-iframe")
-        .grantTypesSupported(Arrays.asList("refresh_token", "password", "mfa"))
+        .grantTypesSupported(Arrays.asList("refresh_token", "password", "mfa",
+            "urn:ietf:params:oauth:grant-type:device_code"))
         .acrValuesSupported(Arrays.asList("0", "1"))
         .responseTypesSupported(Arrays.asList("code", "none", "id_token", "token", "id_token token",
             "code id_token", "code token", "code id_token token"))

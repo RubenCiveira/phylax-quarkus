@@ -26,7 +26,8 @@ public class DeviceAuthorizationService {
   public static final int DEFAULT_INTERVAL = 5;
   public static final int DEFAULT_TTL_SECONDS = 600;
 
-  private static final String USER_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  // RFC 8628 §6.1: consonants only, no visually ambiguous chars (0/O/I/1/l)
+  private static final String USER_CODE_ALPHABET = "BCDFGHJKLMNPQRSTVWXZ";
 
   private final DeviceAuthorizationGateway gateway;
 

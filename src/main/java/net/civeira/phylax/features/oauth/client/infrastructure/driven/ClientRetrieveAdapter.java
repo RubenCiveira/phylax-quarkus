@@ -26,7 +26,8 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGatewa
 @RequiredArgsConstructor
 public class ClientRetrieveAdapter implements ClientStoreGateway {
   private static final List<String> DEFAULT_SCOPES = List.of("*");
-  private static final List<String> DEFAULT_GRANTERS = List.of("password", "refresh", "mfa");
+  private static final List<String> DEFAULT_GRANTERS =
+      List.of("password", "refresh", "mfa", "urn:ietf:params:oauth:grant-type:device_code");
 
   private final AesCipherService cypher;
   private final TenantReadRepositoryGateway tenants;
