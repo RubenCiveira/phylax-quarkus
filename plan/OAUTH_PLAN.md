@@ -461,6 +461,39 @@ MFA, password-change, or delegation events.
 
 ---
 
+### PLAN-31 — Scope Consent Tracking
+
+**Source:** TAREAS_PLAN_UPGRADE 02-03 · OAUTH_STATE §2.5 consent
+
+**Status:** 0% — `ScopesConsentGateway` is a stub that always returns `[]` (no scopes consented).
+The consent form reappears on every login, breaking the UX for apps that correctly use OIDC.
+
+**Architecture decision (ADR-01):** Persistence lives in `features/access/userconsentedscopes/`,
+not in `features/oauth/`. The OAuth context acts as an ACL adapter delegating to the Access BC,
+following the exact precedent of `UserAcceptedTermnsOfUse`.
+
+**Concrete steps:**
+
+1. Create `features/access/userconsentedscopes/` bounded context:
+   - Entity with fields: `uid`, `user (FK→access_user)`, `client (FK→access_trusted_client)`,
+     `scope (string)`, `grant_date (Instant)`. One row per granted scope.
+   - No `revoked_at` column — existence = granted, deletion = revoked.
+   - `ListConsentedScopesUseCase`, `GrantScopeConsentUseCase`, `RevokeScopeConsentUseCase`.
+   - Model compiler generates the `access_user_consented_scope` table.
+2. In `features/oauth/consent/` (ACL layer):
+   - Replace the stub `ScopesConsentGateway` implementation with
+     `ScopesConsentAclAdapter` that delegates to the Access BC use cases.
+3. In the authorization flow: after the consent form is submitted, call
+   `GrantScopeConsentUseCase` for each approved scope. On subsequent `/authorize`
+   calls, call `ListConsentedScopesUseCase` — if all requested scopes are already
+   granted, skip the consent step.
+4. Prerequisite for PLAN-38 (GDPR consent management page).
+
+**Files:** `features/access/userconsentedscopes/` (new BC),
+`features/oauth/consent/infrastructure/driven/ScopesConsentAclAdapter.java` (replaces stub)
+
+---
+
 ### PLAN-16 — PAR REST Driver and Client Authentication
 
 **Source:** OAUTH_STATE §2.12 par
@@ -650,6 +683,39 @@ Three sub-tasks of GDPR compliance:
 
 ---
 
+### PLAN-32 — Active Sessions Management API
+
+**Source:** TAREAS_PLAN_UPGRADE 05-01
+
+List and revoke the user's own active sessions from the profile area.
+Functional equivalent of "Sign out from other devices" (Google/GitHub pattern).
+
+Endpoints under `/api/access/users/{uid}/sessions`:
+- `GET` — list active sessions with device info (user_agent, ip, created_at, expires_at)
+- `DELETE /{sid}` — revoke a specific session (requires PLAN-03 for JTI revocation)
+- `DELETE` — revoke all sessions for the user
+
+Requires `_oauth_session` to carry `user_uid` (already present as part of `auth_data`
+or needs explicit column). Requires PLAN-03 (token revocation) to invalidate JTIs on
+session deletion.
+
+---
+
+### PLAN-33 — GDPR Consent Management Page (Art. 7)
+
+**Source:** TAREAS_PLAN_UPGRADE 07-03
+
+Unified HTML page at `/account/{tenant}/consents` where a user can view and revoke
+all their consents in one place:
+1. **Terms of use** accepted (existing `UserAcceptedTermnsOfUse` BC)
+2. **OAuth scopes granted** per client (requires PLAN-31 `userconsentedscopes` BC)
+
+Controller lives in `features/access/userconsentedscopes/infrastructure/driver/html/`.
+Distinct from the in-flow consent step under `/openid/{tenant}/authorize`.
+Requires PLAN-31 as prerequisite.
+
+---
+
 ### PLAN-29 — Discovery: DiscoveryContributor SPI
 
 **Source:** OAUTH_STATE §2.15 oidc (design debt)
@@ -685,6 +751,7 @@ Wave 2 (extensions — after Wave 1):
   PLAN-14 Generic OIDC provider  (includes PLAN-21 as a subtask)
   PLAN-15 Audit logging
   PLAN-16 PAR REST driver
+  PLAN-31 Scope Consent Tracking   (prerequisite for PLAN-38)
 
 Wave 3 (debt — can interleave with Wave 2):
   PLAN-17 JwtTokenBuilder decomposition
@@ -694,7 +761,15 @@ Wave 3 (debt — can interleave with Wave 2):
   PLAN-22 FrontAccessController rename (typo fix is zero-risk, do immediately)
 
 Wave 4 (deferred):
-  PLAN-23 through PLAN-29
+  PLAN-23 Consent versioning
+  PLAN-24 c_hash Hybrid Flow
+  PLAN-25 WebAuthn credential management in Profile
+  PLAN-26 Personal Access Tokens
+  PLAN-27 Webhooks
+  PLAN-28 GDPR (data export, erasure)
+  PLAN-29 DiscoveryContributor SPI
+  PLAN-32 Active Sessions Management API
+  PLAN-33 Consent Management Page      (after PLAN-31)
 ```
 
 ---
