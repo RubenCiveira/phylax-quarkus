@@ -37,8 +37,9 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return tenant(tenant)
         .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
         .filter(this::clientEnabled)
-        .map(_ -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
-            .allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES).build());
+        .map(client -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
+            .requirePkce(false).allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES)
+            .build());
   }
 
   @Override
@@ -87,7 +88,8 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
       String redirect) {
     if (app.isPublicAllow() && redirectAllowed(app, redirect)) {
       return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
-          .allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES).build());
+          .requirePkce(app.isPublicAllow() || app.isRequirePkce()).allowedGrants(DEFAULT_GRANTERS)
+          .allowedScopes(DEFAULT_SCOPES).build());
     } else {
       return Optional.empty();
     }
@@ -115,7 +117,8 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     Optional<String> pass = secretOauth.getSecretOauthPlain(cypher);
     if (pass.isPresent() && secret.equals(pass.get())) {
       return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(true)
-          .allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES).build());
+          .requirePkce(app.isRequirePkce()).allowedGrants(DEFAULT_GRANTERS)
+          .allowedScopes(DEFAULT_SCOPES).build());
     } else {
       return Optional.empty();
     }

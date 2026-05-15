@@ -59,6 +59,15 @@ public class OidcResponseBuilder {
   public Response successRedirect(Optional<String> existingSession, ClientDetails clientDetails,
       String grant, AuthRequest request, AuthenticationData validationData,
       MultivaluedMap<String, String> paramMap) {
+    String type = request.getResponseType().orElse("code");
+    if ("code".equals(type)) {
+      if (clientDetails.isRequirePkce() && request.getCodeChallenge().isEmpty()) {
+        return errorRedirect(request, "invalid_request");
+      }
+      if ("plain".equals(request.getCodeChallengeMethod().orElse(""))) {
+        return errorRedirect(request, "invalid_request");
+      }
+    }
     String uid = UUID.randomUUID().toString();
     if (existingSession.isPresent()) {
       sessionStore.updateSession(uid, existingSession.get());
@@ -67,7 +76,6 @@ public class OidcResponseBuilder {
       sessionStore.saveSession(uid, clientDetails, grant, validationData, csid);
     }
     validationData.setAudiences(request.getAudiences());
-    String type = request.getResponseType().orElse("code");
     String to;
     if ("code".equals(type)) {
       String redirectUri = request.getRedirect().orElseThrow();

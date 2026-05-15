@@ -43,6 +43,12 @@ public class ClientDetails {
   private final boolean protectedWithSecret;
 
   /**
+   * Indicates whether every authorization code request must include a PKCE code_challenge (S256).
+   * Always true for public clients.
+   */
+  private final boolean requirePkce;
+
+  /**
    * Checks whether a scope is allowed for this client.
    *
    * Returns true when the scope is present in the allowed list. Used to filter requested scopes

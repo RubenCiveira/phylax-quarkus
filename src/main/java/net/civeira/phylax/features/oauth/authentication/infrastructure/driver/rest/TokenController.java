@@ -154,12 +154,10 @@ public class TokenController {
           if (codeVerifier == null || codeVerifier.isBlank()) {
             return Response.status(401).build();
           }
-          String expected;
-          if ("S256".equals(code.request.getCodeChallengeMethod().orElse(""))) {
-            expected = generateCodeChallenge(codeVerifier);
-          } else {
-            expected = codeVerifier;
+          if (!"S256".equals(code.request.getCodeChallengeMethod().orElse(""))) {
+            return Response.status(401).build();
           }
+          String expected = generateCodeChallenge(codeVerifier);
           if (!expected.equals(storedChallenge)) {
             return Response.status(401).build();
           }
