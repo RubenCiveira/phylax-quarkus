@@ -4,73 +4,145 @@
 **OAUTH_PLAN:** PLAN-10 (Email Verification After Registration)  
 **Wave:** 1
 
+## Architectural constraint
+
+> No se crean nuevos casos de uso en `features/access/`. La lógica va en
+> `features/oauth/` usando los gateways de Access directamente, o como listener
+> `@Observes` sobre eventos del dominio Access.
+
+## Contexto funcional
+
+El campo `email_verified` es necesario solo cuando el email del usuario no ha sido
+comprobado previamente. El canal de llegada del usuario determina su estado inicial:
+
+| Canal de registro | `email_verified` al crear | Acción necesaria |
+|---|---|---|
+| Invitación (link en email) | `true` — el clic en el link prueba el email | Marcar en el listener de aceptación (ver paso 2) |
+| Registro por formulario | `false` | Enviar link de verificación + step obligatorio |
+| Login social / delegado (Google, SAML, OIDC) | según claim `email_verified` del proveedor | Mapear desde el token externo |
+| Creado por admin via API | `false` | Notificar por email o verificación manual (futuro) |
+
 ## Current state
 
-- `access_user.email_verified BIT` column exists in DB (migration applied ✅).
-- Domain: `EmailVerifiedVO`, `EmailVerifiedValueHolder`, `UserVerifyEmailEvent` exist in
-  `features/access/user/domain/`. The model knows about email verification.
-- **No application use case** for triggering verification (no `UserVerifyEmailUsecase`).
-- **No HTTP driver** for consuming the verification link.
-- **No OAuth claim emission** — `email_verified` is never set in ID tokens or userinfo responses.
+- `access_user.email_verified BIT DEFAULT 0` column exists in DB ✅.
+- Domain: `EmailVerifiedVO`, `EmailVerifiedValueHolder`, `UserVerifyEmailEvent` ✅.
+- `UserWriteRepositoryGateway` + `UserReadRepositoryGateway` inyectables ✅.
+- `UserLoginService.userToGrant` ejecuta checks en cadena: `checkPassword` → `checkFirstPass`
+  (temporal password) → `checkMfa` → `checkTerms` → `checkScopesConsent`.
+- **Falta**: `checkEmailVerification` en esa cadena + step handler + link de verificación.
 
 ## What to implement
 
-### 1. Application use case — `UserVerifyEmailUsecase`
+### 1. Check en `UserLoginService` — igual que `checkFirstPass` para temporal password
 
-`features/access/user/application/usecase/verifyemail/`
+`features/oauth/user/infrastructure/UserLoginService.java`
 
-- Input: verification token (opaque string from `user-access-temporal-code`).
-- Steps:
-  1. Retrieve and consume the temporal code (`UserAccessTemporalCodeReadRepositoryGateway`, filter by `register_code`).
-  2. Load the user by the UID stored in the temporal code.
-  3. Call `user.verifyEmail()` (or equivalent `update` with `emailVerified=true`).
-  4. Persist via `UserWriteRepositoryGateway`.
-- Throws `NotFoundException` if token is missing or expired; throws nothing if already verified (idempotent).
+Añadir un nuevo check en la cadena de `userToGrant`, entre `checkFirstPass` y `checkMfa`:
 
-### 2. HTTP driver — `EmailVerificationController`
-
-`features/access/user/infrastructure/driver/html/EmailVerificationController.java`
-
-```
-GET /access/{tenant}/verify-email?token={token}
+```java
+List.of(
+    () -> checkPassword(request, user, password),
+    () -> checkFirstPass(request, user),
+    () -> checkEmailVerification(request, user),   // ← nuevo
+    () -> checkMfa(request, user, mode),
+    () -> checkTerms(request, user),
+    () -> checkScopesConsent(request, user)
+)
 ```
 
-- Calls `UserVerifyEmailUsecase`.
-- On success: redirect to a confirmation page or the tenant login page.
-- On invalid/expired token: return 400 with an error page.
-- No authentication required (the token itself is the credential).
+Implementación del check:
 
-### 3. Registration flow — set `email_verified = false` on new accounts
+```java
+private Optional<AuthenticationResult> checkEmailVerification(AuthRequest request, User user) {
+    if (!user.isEmailVerified() && tenantConfig.isRequireEmailVerification(request.getTenant())) {
+        return Optional.of(
+            AuthenticationResult.emailVerificationRequired(request.getTenant(), user.getName()));
+    }
+    return Optional.empty();
+}
+```
 
-In `features/access/user/application/usecase/create/UserCreateEnrich.java` (or equivalent):
-- Set `emailVerified = false` when creating a new user (should already be the DB default, but
-  set it explicitly in the domain to make the intent clear).
+`AuthenticationResult.emailVerificationRequired(...)` — añadir a `AuthenticationResult` siguiendo
+el mismo patrón que `newPasswordRequired`.
 
-### 4. OIDC claim emission — `email_verified` in ID token and userinfo
+### 2. Marcar `email_verified = true` en la aceptación de invitación
+
+`features/oauth/` — listener `@Observes` sobre el evento de aceptación de invitación
+(localizar el evento de dominio del BC `userinvitation` que se dispara al aceptar):
+
+```java
+@ApplicationScoped
+public class InvitationAcceptedObserver {
+    @Inject UserWriteRepositoryGateway users;
+
+    void onAccepted(@Observes UserInvitationAcceptEvent event) {
+        // El usuario aceptó la invitación → el email queda verificado implícitamente
+        String userUid = event.getPayload().getUser().getUid();
+        users.find(UserFilter.builder().uid(userUid).build())
+            .ifPresent(user -> users.update(user,
+                new UserChangeSet().withEmailVerified(true)));
+    }
+}
+```
+
+### 3. Mapear `email_verified` del proveedor externo en login social
+
+`features/oauth/delegatelogin/` — al crear o actualizar el usuario tras un login delegado,
+propagar el campo `email_verified` que devuelve el proveedor:
+
+```java
+// En el adapter que procesa el callback del proveedor externo:
+boolean providerEmailVerified = externalUserInfo.isEmailVerified();  // del ID token del proveedor
+users.update(user, new UserChangeSet().withEmailVerified(providerEmailVerified));
+```
+
+### 4. Step handler `VERIFY_EMAIL` en el flujo OAuth
+
+`features/oauth/authentication/infrastructure/driver/html/step/VerifyEmailStep.java`
+
+- `GET` → muestra página "Revisa tu bandeja de entrada" con botón "Reenviar email".
+- `POST /resend` → genera un nuevo token temporal (via `UserAccessTemporalCodeWriteRepositoryGateway`),
+  envía el email de verificación.
+- El link de verificación incluye el contexto de sesión OAuth:
+  `/{tenant}/oidc/verify-email?token={token}&session={sessionId}`
+
+### 5. Controlador de verificación del link
+
+`features/oauth/authentication/infrastructure/driver/html/EmailVerificationController.java`
+
+```
+GET /{tenant}/oidc/verify-email?token={token}&session={sessionId}
+```
+
+1. Consume el token temporal via `UserAccessTemporalCodeReadRepositoryGateway`.
+2. Actualiza `email_verified = true` via `UserWriteRepositoryGateway`.
+3. Si `session` está presente y es válida: redirige de vuelta al flujo OAuth
+   (`/{tenant}/oidc/authorize?...` con los parámetros originales) — el check
+   `checkEmailVerification` ya no bloqueará porque el flag está a `true`.
+4. Si no hay sesión activa: muestra página de confirmación con link al login.
+
+### 6. Emisión del claim `email_verified` en tokens
 
 `features/oauth/tokensecurity/application/JwtTokenBuilder.java`:
-- When building the ID token and when handling the `/userinfo` endpoint:
-  - If `email` scope is requested: add `email_verified: boolean` to claims.
-  - Source: load via `LoginGateway` or `ProfileGateway` — whichever already carries the user row.
-
-### 5. Tenant policy enforcement (optional, PLAN-10 step 5)
-
-In `features/access/tenantconfig/` — expose `requireEmailVerification` from `TenantConfig`.  
-In the OIDC step router: if `tenantConfig.requireEmailVerification && !user.emailVerified`,
-inject a `VERIFY_EMAIL_PENDING` challenge step instead of proceeding to the consent step.
+- Scope `email` → añadir `email_verified: boolean` en ID token y respuesta userinfo.
+- Fuente: `LoginGateway` o `ProfileGateway` — el que ya carga la fila del usuario.
 
 ## Dependencies
 
-- `user-access-temporal-code` BC (for token storage/retrieval) — already implemented.
-- `UserWriteRepositoryGateway` + `UserReadRepositoryGateway` — already implemented.
-- PLAN-05 (Userinfo endpoint) — consume `emailVerified` claim there too.
+- `UserAccessTemporalCodeWriteRepositoryGateway` — para generar el token de verificación.
+- Evento de aceptación de `userinvitation` BC — para el listener del paso 2.
+- Issue 1.5 (tenant config) — `requireEmailVerification` flag.
+- PLAN-05 (Userinfo) — consume `email_verified` claim.
 
 ## Files to create / modify
 
 | Action | File |
 |--------|------|
-| **Create** | `user/application/usecase/verifyemail/UserVerifyEmailUsecase.java` |
-| **Create** | `user/infrastructure/driver/html/EmailVerificationController.java` |
-| **Modify** | `oauth/tokensecurity/application/JwtTokenBuilder.java` — add `email_verified` claim |
-| **Modify** | `user/application/usecase/create/UserCreateEnrich.java` — explicit `emailVerified=false` |
-| **Modify** (optional) | `oauth/authentication/.../OidcStepRouter.java` — `VERIFY_EMAIL_PENDING` step |
+| **Modify** | `oauth/user/infrastructure/UserLoginService.java` — añadir `checkEmailVerification` en la cadena |
+| **Modify** | `oauth/authentication/domain/AuthenticationResult.java` — añadir `emailVerificationRequired` |
+| **Create** | `oauth/authentication/infrastructure/driver/html/step/VerifyEmailStep.java` |
+| **Create** | `oauth/authentication/infrastructure/driver/html/EmailVerificationController.java` |
+| **Create** | `oauth/authentication/application/InvitationAcceptedObserver.java` — marcar verified en invitaciones |
+| **Modify** | `oauth/delegatelogin/` — mapear `email_verified` del proveedor externo |
+| **Modify** | `oauth/tokensecurity/application/JwtTokenBuilder.java` — claim `email_verified` |
+| **Modify** | `messages/oauth.yaml` — añadir claves `email.verification.pending`, `email.verification.resent` |

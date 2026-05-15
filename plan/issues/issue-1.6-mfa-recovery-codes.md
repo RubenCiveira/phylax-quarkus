@@ -4,90 +4,126 @@
 **OAUTH_PLAN:** PLAN-04 (MFA Recovery Codes)  
 **Wave:** 0
 
+## Architectural constraint
+
+> No se crean nuevos casos de uso en `features/access/`. La lógica va directamente en
+> `features/oauth/mfa/` usando los gateways de acceso ya disponibles, o como listener
+> `@Observes` sobre eventos del dominio Access.
+
 ## Current state
 
 - `access_user_mfa_recovery_code` table exists in DB ✅.
 - Domain: `UserMfaRecoveryCode` entity with `uid`, `user`, `codeHash`, `createdAt`, `usedAt` ✅.
-- Domain events: `UserMfaRecoveryCodeConsumeEvent` ✅.
+- Domain events: `UserMfaRecoveryCodeConsumeEvent`, `UserMfaRecoveryCodeCreateEvent` ✅.
 - Infrastructure: `UserMfaRecoveryCodeReadGatewayAdapter`, `UserMfaRecoveryCodeWriteGatewayAdapter`,
-  `UserMfaRecoveryCodeRepository`, `UserMfaRecoveryCodeSlider` ✅.
-- **No application use cases** exist for generating or consuming codes.
-- **No step handler** in the OIDC flow for the recovery path.
+  `UserMfaRecoveryCodeRepository` ✅ — injectable from any bounded context.
+- **No recovery step** in the OIDC authentication flow.
 
 ## What to implement
 
-### 1. `GenerateRecoveryCodesUseCase`
+### 1. Recovery code logic in `features/oauth/mfa/`
 
-`features/access/usermfarecoverycode/application/usecase/generate/GenerateRecoveryCodesUseCase.java`
+All business logic lives in the OAuth MFA context, using the Access gateways directly.
 
-- Input: `userId (String)`, `count (int, default 8)`.
-- Steps:
-  1. Delete all existing codes for the user (atomic replacement of the full set).
-  2. Generate `count` cryptographically random codes (SecureRandom, 10 printable chars each,
-     excluding visually ambiguous: `0`, `O`, `I`, `1`).
-  3. For each raw code: compute `SHA-256` hex digest; persist a `UserMfaRecoveryCode` with
-     `codeHash` set and `usedAt` null.
-  4. Return the raw codes (shown to the user once, never stored again).
-- Called after TOTP enrollment success and from the profile "regenerate" action.
-
-### 2. `ConsumeRecoveryCodeUseCase`
-
-`features/access/usermfarecoverycode/application/usecase/consume/ConsumeRecoveryCodeUseCase.java`
-
-- Input: `userId (String)`, `rawCode (String)`.
-- Steps:
-  1. Compute `SHA-256` of `rawCode`.
-  2. Query `UserMfaRecoveryCodeReadRepositoryGateway` with filter `user=userId`:
-     find a code with matching `codeHash` and `usedAt == null`.
-  3. If not found: return `Optional.empty()` (wrong code or already used).
-  4. If found: call `code.consume(Instant.now())` → dispatch `UserMfaRecoveryCodeConsumeEvent`
-     → persist via `UserMfaRecoveryCodeWriteGatewayAdapter`.
-  5. Return `Optional.of(code.getUid())` to signal success.
-
-### 3. MFA Recovery step in the OIDC authentication flow
-
-`features/oauth/authentication/` — add a `RECOVER_MFA` step handler:
-
-- The MFA step renders a "Lost your device?" link that routes to `RECOVER_MFA`.
-- The `RECOVER_MFA` form accepts a single text field (`recovery_code`).
-- On POST:
-  1. Call `ConsumeRecoveryCodeUseCase` (injected via ACL adapter from the OAuth context).
-  2. If success: mark the MFA challenge as resolved, advance the step router.
-  3. If failure: re-render the form with an error message (`mfa.recovery.invalid` in `oauth.yaml`).
-- The step must include `csid` in the form (see Known Pitfall #2 in project memory).
-
-### 4. Profile panel — show and regenerate recovery codes
-
-`features/access/usermfarecoverycode/infrastructure/driver/html/` or within the existing
-`profile/` context:
-
-- Panel showing how many unused codes remain (count only — not the raw codes).
-- Button "Regenerate codes" → calls `GenerateRecoveryCodesUseCase` → displays the new raw codes
-  once, with a warning that they won't be shown again.
-- Only accessible after a fresh authentication (require ACR ≥ 2 or re-auth prompt).
-
-### 5. ACL port in the OAuth context
-
-`features/oauth/mfa/domain/gateway/MfaRecoveryGateway.java` (new port):
+**`MfaRecoveryService.java`** — `features/oauth/mfa/application/MfaRecoveryService.java`
 
 ```java
-public interface MfaRecoveryGateway {
-    Optional<String> consumeRecoveryCode(String userId, String rawCode);
+@ApplicationScoped
+@RequiredArgsConstructor
+public class MfaRecoveryService {
+
+    private final UserMfaRecoveryCodeReadRepositoryGateway readGateway;
+    private final UserMfaRecoveryCodeWriteRepositoryGateway writeGateway;
+    private final SecureTokenService tokenService;  // PLAN-18
+
+    /** Generates 8 single-use codes, replacing any existing ones for the user. */
+    public List<String> generateCodes(String userUid, int count) {
+        // 1. Delete all existing codes for the user
+        readGateway.list(UserMfaRecoveryCodeFilter.builder().user(userRef(userUid)).build())
+            .forEach(code -> writeGateway.delete(code.delete()));
+
+        // 2. Generate count raw codes and persist hashes
+        List<String> rawCodes = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            String raw = generateRawCode();          // SecureRandom, consonant alphabet, XXXX-XXXX
+            String hash = tokenService.hash(raw);
+            UserMfaRecoveryCode entity = UserMfaRecoveryCode.create(
+                new UserMfaRecoveryCodeChangeSet()
+                    .withUid(UUID.randomUUID().toString())
+                    .withUser(userRef(userUid))
+                    .withCodeHash(hash)
+                    .withCreatedAt(Instant.now()));
+            writeGateway.create(entity);
+            rawCodes.add(raw);
+        }
+        return rawCodes;  // shown once, never stored again
+    }
+
+    /** Returns true and marks the code used if it matches; false otherwise. */
+    public boolean consumeCode(String userUid, String rawCode) {
+        String hash = tokenService.hash(rawCode);
+        Optional<UserMfaRecoveryCode> match = readGateway.list(
+            UserMfaRecoveryCodeFilter.builder().user(userRef(userUid)).build())
+            .stream()
+            .filter(c -> c.getUsedAt().isEmpty() && c.getCodeHash().equals(hash))
+            .findFirst();
+
+        match.ifPresent(code ->
+            writeGateway.update(code.consume(Instant.now())));
+
+        return match.isPresent();
+    }
 }
 ```
 
-Implemented by an adapter in `features/oauth/mfa/infrastructure/driven/` that delegates to
-`ConsumeRecoveryCodeUseCase`.
+Raw code alphabet: consonants only (`BCDFGHJKLMNPQRSTVWXZ`) to avoid visual ambiguity (`0/O`, `I/1`).
+Format: `XXXX-XXXX` (8 chars + hyphen separator).
+
+### 2. `UserMfaRecoveryCodeConsumeEvent` listener — for side effects
+
+If audit or notification is needed when a code is consumed, add a CDI observer in OAuth:
+
+`features/oauth/mfa/application/MfaRecoveryCodeConsumedObserver.java`
+
+```java
+void onConsumed(@Observes UserMfaRecoveryCodeConsumeEvent event) {
+    auditGateway.mfaRecoveryUsed(event.getPayload().getUser().getUid());
+}
+```
+
+### 3. OIDC `RECOVER_MFA` step handler
+
+`features/oauth/authentication/infrastructure/driver/html/` — add a step handler for `RECOVER_MFA`:
+
+- The MFA form template renders a "Lost your device?" link that routes to `RECOVER_MFA`.
+- `GET` renders the recovery code input form.
+- `POST` receives `recovery_code` form field (+ `csid` — see Known Pitfall #2):
+  1. Extract `userUid` from the current `SessionInfo`.
+  2. Call `mfaRecoveryService.consumeCode(userUid, rawCode)`.
+  3. If `true`: advance the step router (MFA challenge resolved).
+  4. If `false`: re-render form with error key `mfa.recovery.invalid`.
+
+### 4. Profile panel — regenerate recovery codes
+
+In the OAuth profile area (not in Access), add a panel that:
+- Shows the count of unused recovery codes (query by `user + usedAt IS NULL`).
+- "Regenerate codes" button → calls `mfaRecoveryService.generateCodes(userUid, 8)` → displays
+  the raw codes once with a warning.
+- Requires ACR ≥ 2 (fresh MFA authentication) before regeneration.
+
+## Dependencies
+
+- `UserMfaRecoveryCodeReadRepositoryGateway` + `UserMfaRecoveryCodeWriteRepositoryGateway` — injectable ✅.
+- PLAN-18 (`SecureTokenService`) — for `hash()`. Implement inline if PLAN-18 is not done yet.
 
 ## Files to create / modify
 
 | Action | File |
 |--------|------|
-| **Create** | `access/usermfarecoverycode/application/usecase/generate/GenerateRecoveryCodesUseCase.java` |
-| **Create** | `access/usermfarecoverycode/application/usecase/consume/ConsumeRecoveryCodeUseCase.java` |
-| **Create** | `oauth/mfa/domain/gateway/MfaRecoveryGateway.java` |
-| **Create** | `oauth/mfa/infrastructure/driven/MfaRecoveryAdapter.java` |
-| **Create** | Step handler for `RECOVER_MFA` in `oauth/authentication/` |
+| **Create** | `oauth/mfa/application/MfaRecoveryService.java` |
+| **Create** (if side effects needed) | `oauth/mfa/application/MfaRecoveryCodeConsumedObserver.java` |
+| **Create** | `RECOVER_MFA` step handler in `oauth/authentication/infrastructure/driver/html/` |
 | **Modify** | `oauth/authentication/.../OidcStepRouter.java` — register `RECOVER_MFA` step |
 | **Modify** | MFA step template — add "Lost your device?" link |
-| **Modify** | `messages/oauth.yaml` — add `mfa.recovery.invalid` message key |
+| **Modify** | `messages/oauth.yaml` — add `mfa.recovery.invalid` |
+| **Modify** | Profile area — add recovery code count panel + regenerate action |

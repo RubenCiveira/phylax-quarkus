@@ -1,106 +1,144 @@
-# Issue 1.8 — Scope consent tracking — application layer and OAuth wiring
+# Issue 1.8 — Scope consent tracking — OAuth wiring
 
 **Model section:** 1.8  
 **OAUTH_PLAN:** PLAN-31 (Scope Consent Tracking)  
 **Wave:** 2
 
+## Architectural constraint
+
+> No se crean nuevos casos de uso en `features/access/userconsentedscopes/`. La lógica
+> va directamente en `features/oauth/consent/` usando los gateways de Access. Si se
+> necesita reaccionar a persistencia de consentimientos, se añade un listener `@Observes`
+> sobre `UserConsentedScopesCreateEvent` / `UserConsentedScopesDeleteEvent`.
+
 ## Current state
 
-- `access_user_consented_scopes` table exists in DB ✅.
-- The actual generated table has a richer schema than the plan originally described:
+- `access_user_consented_scopes` table exists in DB ✅ with columns:
   `uid`, `user`, `trusted_client`, `scope`, `granted BIT`, `decision_at`, `ip_address`, `user_agent`.
-- Domain: `UserConsentedScopes` entity and `UserConsentedScopesFilter` (with `user`, `trustedClient`
-  filter fields) exist ✅.
-- Domain events: `UserConsentedScopesCreateEvent`, `UserConsentedScopesDeleteEvent` ✅.
-- Infrastructure: `UserConsentedScopesReadRepositoryGateway`, `UserConsentedScopesWriteRepositoryGateway` ✅.
-- **No application use cases** — `features/access/userconsentedscopes/application/` does not exist.
-- OAuth adapter `ScopesConsentAdapter` has scaffolding with commented-out use case calls:
-  `// private final CheckScopeConsentUseCase checkConsent;`
-  `// private final GrantScopeConsentUseCase grantConsent;`
+- Domain: `UserConsentedScopes` entity, `UserConsentedScopesFilter` (with `user` + `trustedClient`
+  filter fields), `UserConsentedScopesCreateEvent`, `UserConsentedScopesDeleteEvent` ✅.
+- `UserConsentedScopesReadRepositoryGateway` + `UserConsentedScopesWriteRepositoryGateway` ✅.
+- `ScopesConsentAdapter` in `features/oauth/consent/infrastructure/driven/` has scaffolding with
+  commented-out use case injection:
+  ```java
+  // private final CheckScopeConsentUseCase checkConsent;
+  // private final GrantScopeConsentUseCase grantConsent;
+  ```
 
 ## What to implement
 
-### 1. `CheckScopeConsentUseCase`
+### 1. Implement `pendingScopes` directly in `ScopesConsentAdapter`
 
-`features/access/userconsentedscopes/application/usecase/check/CheckScopeConsentUseCase.java`
-
-- Input: `userUid (String)`, `clientUid (String)`, `requestedScopes (List<String>)`.
-- Steps:
-  1. Load all `UserConsentedScopes` records for `user=userUid` AND `trustedClient=clientUid`
-     via `UserConsentedScopesReadRepositoryGateway` (use `UserConsentedScopesFilter.builder().user(userRef).trustedClient(clientRef).build()`).
-  2. Filter to those with `granted=true` and no `usedAt`/revocation flag.
-  3. Return the subset of `requestedScopes` that have **no** matching granted record
-     (i.e., the scopes still requiring consent).
-
-### 2. `GrantScopeConsentUseCase`
-
-`features/access/userconsentedscopes/application/usecase/grant/GrantScopeConsentUseCase.java`
-
-- Input: `userUid`, `clientUid`, `scope`, `ipAddress (optional)`, `userAgent (optional)`.
-- Steps:
-  1. Check if a record already exists for `(user, trustedClient, scope)` — idempotent.
-  2. If not: create a `UserConsentedScopes` via `UserConsentedScopes.create(changeset)` with
-     `granted=true`, `decisionAt=now()`, `ipAddress`, `userAgent`.
-  3. Persist via `UserConsentedScopesWriteRepositoryGateway`.
-- If a record exists with `granted=false` (previously denied and stored): update it to `granted=true`.
-
-### 3. `RevokeScopeConsentUseCase`
-
-`features/access/userconsentedscopes/application/usecase/revoke/RevokeScopeConsentUseCase.java`
-
-- Input: `userUid`, `clientUid`, optional `scope` (if null, revoke all scopes for the client).
-- Steps: load matching records, call `record.delete()`, persist deletions.
-- Called from the GDPR Consent Management Page (PLAN-33).
-
-### 4. Wire into `ScopesConsentAdapter`
-
-`features/oauth/consent/infrastructure/driven/ScopesConsentAdapter.java` — uncomment and implement:
+Remove the commented-out use case references. Implement the logic inline using the gateways:
 
 ```java
-private final CheckScopeConsentUseCase checkConsent;
-private final GrantScopeConsentUseCase grantConsent;
+@Override
+public List<ScopePermission> pendingScopes(String tenant, String username, String clientId,
+        List<String> scopes) {
+    if (scopes.isEmpty()) return List.of();
+
+    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    if (user == null) return toPermissions(scopes);
+
+    TrustedClient client = clients.find(TrustedClientFilter.builder().code(clientId).build()).orElse(null);
+    if (client == null) return toPermissions(scopes);
+
+    // Load all granted consents for (user, client)
+    List<UserConsentedScopes> granted = consentRead.list(
+        UserConsentedScopesFilter.builder()
+            .user(user)
+            .trustedClient(client)
+            .build())
+        .stream()
+        .filter(c -> Boolean.TRUE.equals(c.getGranted()))
+        .toList();
+
+    Set<String> grantedScopes = granted.stream()
+        .map(UserConsentedScopes::getScope)
+        .collect(Collectors.toSet());
+
+    // Return only the scopes not yet consented
+    return scopes.stream()
+        .filter(s -> !grantedScopes.contains(s))
+        .map(this::toPermission)
+        .toList();
+}
 ```
 
-**`pendingScopes`:**
+### 2. Implement `storeAcceptedScopes` directly in `ScopesConsentAdapter`
+
 ```java
-// After resolving user UID and client UID:
-List<String> pending = checkConsent.execute(user.getUid(), client.getUid(), scopes);
-return toPermissions(pending);
+@Override
+public void storeAcceptedScopes(String tenant, String username, String clientId,
+        List<String> scopes) {
+    if (scopes.isEmpty()) return;
+
+    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    if (user == null) return;
+    TrustedClient client = clients.find(TrustedClientFilter.builder().code(clientId).build()).orElse(null);
+    if (client == null) return;
+
+    String ip = requestContext.getRemoteAddr();     // from injected HttpServletRequest or Vert.x context
+    String ua = requestContext.getHeader("User-Agent");
+
+    for (String scope : scopes) {
+        // Idempotent: skip if already granted
+        boolean exists = consentRead.list(
+            UserConsentedScopesFilter.builder()
+                .user(user).trustedClient(client).build())
+            .stream()
+            .anyMatch(c -> scope.equals(c.getScope()) && Boolean.TRUE.equals(c.getGranted()));
+
+        if (!exists) {
+            UserConsentedScopes consent = UserConsentedScopes.create(
+                new UserConsentedScopesChangeSet()
+                    .withUid(UUID.randomUUID().toString())
+                    .withUser(user)
+                    .withTrustedClient(client)
+                    .withScope(scope)
+                    .withGranted(true)
+                    .withDecisionAt(Instant.now())
+                    .withIpAddress(ip)
+                    .withUserAgent(ua));
+            consentWrite.create(consent);
+        }
+    }
+}
 ```
 
-**`storeAcceptedScopes`:**
+### 3. Revocation — via `ScopesConsentAdapter` or direct gateway call
+
+For PLAN-33 (GDPR Consent Management Page), add a `revokeConsent` method to `ScopesConsentGateway`
+and implement it in the adapter:
+
 ```java
-// After resolving user UID and client UID:
-scopes.forEach(scope ->
-    grantConsent.execute(user.getUid(), client.getUid(), scope, requestIp, requestUserAgent));
+void revokeConsent(String userId, String clientId);           // revoke all scopes for a client
+void revokeScope(String userId, String clientId, String scope); // revoke a single scope
 ```
 
-Pass `ip_address` and `user_agent` from the HTTP context if available — useful for GDPR audit.
+Implementation: load matching `UserConsentedScopes` records, call `record.delete()` on each,
+persist via `UserConsentedScopesWriteRepositoryGateway`.
 
-### 5. UserRef and TrustedClientRef resolution
+### 4. `UserConsentedScopesCreateEvent` listener — for audit/side effects
 
-The filter uses `UserRef` and `TrustedClientRef` domain references, not raw strings.
-`ScopesConsentAdapter` already resolves `username → User` and `clientId → TrustedClient`.
-Pass `user` and `client` as refs directly into the filter:
+If audit is needed when consent is granted, add a CDI observer in the OAuth context:
+
+`features/oauth/consent/application/ScopeConsentGrantedObserver.java`
 
 ```java
-UserConsentedScopesFilter.builder()
-    .user(user)            // UserRef
-    .trustedClient(client) // TrustedClientRef
-    .build()
+void onGranted(@Observes UserConsentedScopesCreateEvent event) {
+    auditGateway.consentAccepted(
+        event.getPayload().getUser().getUid(),
+        event.getPayload().getTrustedClient().getUid(),
+        event.getPayload().getScope());
+}
 ```
 
-## Scope of this issue vs PLAN-33
-
-This issue covers the persistence layer and OAuth flow integration.  
-PLAN-33 (GDPR Consent Management Page) uses `RevokeScopeConsentUseCase` from this issue
-as its prerequisite — create the use case here even if the HTML driver comes later.
-
-## Files to create / modify
+## Files to modify / create
 
 | Action | File |
 |--------|------|
-| **Create** | `access/userconsentedscopes/application/usecase/check/CheckScopeConsentUseCase.java` |
-| **Create** | `access/userconsentedscopes/application/usecase/grant/GrantScopeConsentUseCase.java` |
-| **Create** | `access/userconsentedscopes/application/usecase/revoke/RevokeScopeConsentUseCase.java` |
-| **Modify** | `oauth/consent/infrastructure/driven/ScopesConsentAdapter.java` — uncomment + wire use cases |
+| **Modify** | `oauth/consent/infrastructure/driven/ScopesConsentAdapter.java` — implement using gateways directly |
+| **Modify** | `oauth/consent/domain/gateway/ScopesConsentGateway.java` — add `revokeConsent`, `revokeScope` |
+| **Create** (if audit needed) | `oauth/consent/application/ScopeConsentGrantedObserver.java` |
+| **Add injection** | `ScopesConsentAdapter` — inject `UserConsentedScopesReadRepositoryGateway` + `WriteRepositoryGateway` |
