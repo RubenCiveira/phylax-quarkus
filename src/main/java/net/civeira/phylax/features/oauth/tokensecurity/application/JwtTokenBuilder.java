@@ -38,6 +38,7 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.IdToken;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.MfaToken;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
@@ -139,6 +140,10 @@ public class JwtTokenBuilder {
    * Token signer used to sign and verify JWTs.
    */
   private final TokenSigner tokenSigner;
+  /**
+   * Gateway used to check whether a JTI has been explicitly revoked.
+   */
+  private final TokenRevocationGateway revocationGateway;
   /**
    * Request context used to build issuer URLs.
    */
@@ -397,6 +402,9 @@ public class JwtTokenBuilder {
         if (expiresAt == null) {
           expiresAt = Instant.now().plus(90, ChronoUnit.DAYS);
         }
+        if (jti != null && !jti.isBlank() && revocationGateway.isRevoked(jti, tenant)) {
+          return Optional.empty();
+        }
         response = Optional
             .of(RefreshTokenInfo.builder().username(claimAsString(payload.get(CLAIM_USER_NAME)))
                 .client(claimAsString(payload.get(CLAIM_CLIENT_ID)))
@@ -441,6 +449,10 @@ public class JwtTokenBuilder {
         return Optional.empty();
       }
       List<String> scopes = claimAsList(payload.get(CLAIM_SCOPE));
+      String jti = claimAsString(payload.get("jti"));
+      if (jti != null && !jti.isBlank() && revocationGateway.isRevoked(jti, tenant)) {
+        return Optional.empty();
+      }
       if (scopes.size() == 1 && scopes.contains(scope)) {
         response = Optional.ofNullable(claimAsString(payload.get(CLAIM_USER_NAME)));
       }
