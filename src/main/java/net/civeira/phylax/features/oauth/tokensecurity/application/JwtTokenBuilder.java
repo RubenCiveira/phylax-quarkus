@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -120,6 +121,14 @@ public class JwtTokenBuilder {
      * Client id associated with the refresh token.
      */
     private final String client;
+    /**
+     * JWT ID of the refresh token — used for revocation.
+     */
+    private final String jti;
+    /**
+     * Token expiry — used to schedule revocation record cleanup.
+     */
+    private final Instant expiresAt;
   }
 
   /**
@@ -379,10 +388,19 @@ public class JwtTokenBuilder {
       List<String> scopes = claimAsList(payload.get(CLAIM_SCOPE));
       if (scopes.size() == 1 && scopes.contains(scope)) {
         List<String> aud = claimAsList(payload.get(CLAIM_AUDIENCE_ID));
+        String jti = claimAsString(payload.get("jti"));
+        Instant expiresAt = null;
+        Object exp = payload.get("exp");
+        if (exp instanceof Number n) {
+          expiresAt = Instant.ofEpochSecond(n.longValue());
+        }
+        if (expiresAt == null) {
+          expiresAt = Instant.now().plus(90, ChronoUnit.DAYS);
+        }
         response = Optional
             .of(RefreshTokenInfo.builder().username(claimAsString(payload.get(CLAIM_USER_NAME)))
                 .client(claimAsString(payload.get(CLAIM_CLIENT_ID)))
-                .audiences(null == aud ? List.of() : aud).build());
+                .audiences(null == aud ? List.of() : aud).jti(jti).expiresAt(expiresAt).build());
       }
       return response;
     } catch (NotAllowedException nae) {

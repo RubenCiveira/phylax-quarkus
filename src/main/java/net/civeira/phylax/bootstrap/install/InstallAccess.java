@@ -75,12 +75,11 @@ public class InstallAccess implements MigrationSeed {
     AllowedRedirects localhost =
         AllowedRedirects.builder().newUid().url("http://localhost:4200/*").build();
 
-    TrustedClientChangeSet client = new TrustedClientChangeSet().newUid().code("phylax-ui")
-        .allowAllScopes(Boolean.TRUE).secretOauthPlain("123456").publicAllow(Boolean.TRUE)
-        .isResourceServer(Boolean.FALSE)
-        .requirePkce(Boolean.TRUE)
-        .tokenEndpointAuthMethod("client_secret_post").m2mTokenTtlSeconds(3600)
-        .allowedRedirects(List.of(localhost)).enabled(Boolean.TRUE);
+    TrustedClientChangeSet client =
+        new TrustedClientChangeSet().newUid().code("phylax-ui").allowAllScopes(Boolean.TRUE)
+            .secretOauthPlain("123456").publicAllow(Boolean.TRUE).isResourceServer(Boolean.FALSE)
+            .requirePkce(Boolean.TRUE).tokenEndpointAuthMethod("client_secret_post")
+            .m2mTokenTtlSeconds(3600).allowedRedirects(List.of(localhost)).enabled(Boolean.TRUE);
 
     RoleChangeSet adminRole = new RoleChangeSet().newUid().name("ADMIN");
     RoleChangeSet rootRole = new RoleChangeSet().newUid().name("ROOT");

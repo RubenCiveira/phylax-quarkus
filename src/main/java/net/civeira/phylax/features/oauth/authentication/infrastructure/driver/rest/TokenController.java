@@ -33,6 +33,7 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGate
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
 import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
 
 /**
@@ -123,6 +124,10 @@ public class TokenController {
    * Use case for user login and pre-authenticated flows.
    */
   private final LoginUsecase loginUsecase;
+  /**
+   * Gateway for revoking JTIs and detecting token replay attacks.
+   */
+  private final TokenRevocationGateway revocationGateway;
 
   /**
    * Issues tokens for supported OAuth grant types.
@@ -175,21 +180,34 @@ public class TokenController {
       }).orElseGet(() -> Response.status(401).build());
     } else if ("refresh_token".equals(paramMap.getFirst("grant_type"))) {
       String refreshToken = paramMap.getFirst("refresh_token");
-      return tokenBuilder.verifyRefreshInfo(refreshToken, tenant)
-          .flatMap(info -> loadPreautorizedClient(tenant, info.getClient()).map(client -> {
-            List<String> audiences = info.getAudiences();
-            AuthRequest request = AuthRequest.builder().audiences(audiences).tenant(tenant)
-                .clientId(Optional.of(client.getClientId()))
-                .scope(Optional.ofNullable(paramMap.getFirst("scope"))).build();
-            AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request,
-                info.getUsername(), client, Arrays.asList(), AuthenticationMode.REFRESH);
-            return auth.isRight()
-                ? Response.status(200)
-                    .entity(emitAndBindToken(tenant, client, paramMap.getFirst("grant_type"),
-                        auth.getData(), request, Optional.empty(), Optional.of(refreshToken)))
-                    .build()
-                : Response.status(401).build();
-          })).orElseGet(() -> Response.status(401).build());
+      Optional<JwtTokenBuilder.RefreshTokenInfo> maybeInfo =
+          tokenBuilder.verifyRefreshInfo(refreshToken, tenant);
+      if (maybeInfo.isEmpty()) {
+        return Response.status(401).build();
+      }
+      JwtTokenBuilder.RefreshTokenInfo info = maybeInfo.get();
+      if (info.getJti() != null && revocationGateway.isRevoked(info.getJti(), tenant)) {
+        // Replay detected — revoke all active refresh tokens for this user/client pair
+        revocationGateway.revokeAllForUser(info.getUsername(), info.getClient(), tenant);
+        return Response.status(401).build();
+      }
+      return loadPreautorizedClient(tenant, info.getClient()).map(client -> {
+        List<String> audiences = info.getAudiences();
+        AuthRequest request = AuthRequest.builder().audiences(audiences).tenant(tenant)
+            .clientId(Optional.of(client.getClientId()))
+            .scope(Optional.ofNullable(paramMap.getFirst("scope"))).build();
+        AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request, info.getUsername(),
+            client, Arrays.asList(), AuthenticationMode.REFRESH);
+        if (!auth.isRight()) {
+          return Response.status(401).build();
+        }
+        AutorizationToken token = emitAndBindToken(tenant, client, paramMap.getFirst("grant_type"),
+            auth.getData(), request, Optional.empty(), Optional.of(refreshToken));
+        if (info.getJti() != null) {
+          revocationGateway.revokeJti(info.getJti(), tenant, "refresh", info.getExpiresAt());
+        }
+        return Response.status(200).entity(token).build();
+      }).orElseGet(() -> Response.status(401).build());
     }
     if (null != autho && autho.startsWith("Basic ")) {
       String encodeToString = new String(Base64.getDecoder().decode(autho.substring(6).getBytes()),

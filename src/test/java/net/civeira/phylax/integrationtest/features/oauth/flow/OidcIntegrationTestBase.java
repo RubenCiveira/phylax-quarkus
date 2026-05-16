@@ -18,6 +18,7 @@ import net.civeira.phylax.integrationtest.features.oauth.alt.FixedClientStoreGat
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedSessionStore;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTemporalKeysGateway;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTokenLookupGateway;
+import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTokenRevocationGateway;
 import net.civeira.phylax.integrationtest.features.oauth.client.OidcFlowClient;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioChangePasswordGateway;
@@ -60,6 +61,8 @@ public abstract class OidcIntegrationTestBase {
   @Inject
   FixedTokenLookupGateway tokenLookupGateway;
   @Inject
+  FixedTokenRevocationGateway tokenRevocationGateway;
+  @Inject
   ScenarioPasswordRecoveryMailGateway passwordRecoveryMailGateway;
   @Inject
   ScenarioUserRegistrationMailGateway userRegistrationMailGateway;
@@ -82,6 +85,7 @@ public abstract class OidcIntegrationTestBase {
     registerGateway.reset();
     delegateGateway.reset();
     tokenLookupGateway.clear();
+    tokenRevocationGateway.clear();
     passwordRecoveryMailGateway.reset();
     userRegistrationMailGateway.reset();
   }

@@ -41,4 +41,18 @@ public interface TokenRevocationGateway {
    * </p>
    */
   void cleanup();
+
+  /**
+   * Revokes all non-expired refresh tokens for a given user/client pair.
+   *
+   * <p>
+   * Called on theft detection: when a refresh token JTI appears that was already revoked, all
+   * active refresh tokens for the same user and client are invalidated to limit blast radius.
+   * </p>
+   *
+   * @param username authenticated username
+   * @param clientId OAuth client identifier
+   * @param tenantId tenant identifier
+   */
+  void revokeAllForUser(String username, String clientId, String tenantId);
 }
