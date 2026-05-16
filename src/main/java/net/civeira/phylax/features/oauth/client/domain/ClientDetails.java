@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.client.domain;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
@@ -47,6 +48,27 @@ public class ClientDetails {
    * Always true for public clients.
    */
   private final boolean requirePkce;
+
+  /**
+   * Allowed post-logout redirect URIs for this client. Validated during end-session requests.
+   */
+  @Builder.Default
+  @NonNull
+  private final List<String> postLogoutRedirectUris = List.of();
+
+  /**
+   * Back-channel logout URI for server-to-server logout notifications. Null when not configured.
+   */
+  private final String backchannelLogoutUri;
+
+  /**
+   * Whether the client requires the {@code sid} claim in the logout token.
+   */
+  private final boolean backchannelLogoutSessionRequired;
+
+  public Optional<String> findBackchannelLogoutUri() {
+    return Optional.ofNullable(backchannelLogoutUri).filter(u -> !u.isBlank());
+  }
 
   /**
    * Checks whether a scope is allowed for this client.

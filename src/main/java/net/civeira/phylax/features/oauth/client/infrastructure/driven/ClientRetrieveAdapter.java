@@ -38,8 +38,12 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return tenant(tenant)
         .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
         .filter(this::clientEnabled)
-        .map(_ -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
+        .map(app -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
             .requirePkce(false).allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES)
+            .postLogoutRedirectUris(postLogoutUris(app))
+            .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
+            .backchannelLogoutSessionRequired(
+                Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
             .build());
   }
 
@@ -90,7 +94,11 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     if (app.isPublicAllow() && redirectAllowed(app, redirect)) {
       return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
           .requirePkce(app.isPublicAllow() || app.isRequirePkce()).allowedGrants(DEFAULT_GRANTERS)
-          .allowedScopes(DEFAULT_SCOPES).build());
+          .allowedScopes(DEFAULT_SCOPES).postLogoutRedirectUris(postLogoutUris(app))
+          .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
+          .backchannelLogoutSessionRequired(
+              Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
+          .build());
     } else {
       return Optional.empty();
     }
@@ -119,10 +127,18 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     if (pass.isPresent() && secret.equals(pass.get())) {
       return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(true)
           .requirePkce(app.isRequirePkce()).allowedGrants(DEFAULT_GRANTERS)
-          .allowedScopes(DEFAULT_SCOPES).build());
+          .allowedScopes(DEFAULT_SCOPES).postLogoutRedirectUris(postLogoutUris(app))
+          .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
+          .backchannelLogoutSessionRequired(
+              Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
+          .build());
     } else {
       return Optional.empty();
     }
+  }
+
+  private List<String> postLogoutUris(TrustedClient app) {
+    return app.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList();
   }
 
 }

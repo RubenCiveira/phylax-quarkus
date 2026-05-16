@@ -30,12 +30,14 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.AuthenticateUser;
+import net.civeira.phylax.features.oauth.authentication.application.BackChannelLogoutDispatcher;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
@@ -48,6 +50,8 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
  * Main HTML controller for the OAuth/OIDC authorization user interface.
@@ -138,6 +142,22 @@ public class AuthorizeHtml {
    * Used to read per-tenant SSO TTL policy for session expiry validation.
    */
   private final TenantConfigReadRepositoryGateway tenantConfigs;
+  /**
+   * Sends back-channel logout notifications to registered relying parties.
+   */
+  private final BackChannelLogoutDispatcher backChannelLogoutDispatcher;
+  /**
+   * Revokes tokens on logout.
+   */
+  private final TokenRevocationGateway tokenRevocationGateway;
+  /**
+   * Verifies id_token_hint signatures.
+   */
+  private final TokenSigner tokenSigner;
+  /**
+   * Resolves the public host for issuer computation.
+   */
+  private final CurrentRequest currentRequest;
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
@@ -273,20 +293,119 @@ public class AuthorizeHtml {
 
   @GET
   @Path("oauth/openid/{tenant}/logout")
+  public Response logoutGet(final @PathParam(TENANT) String tenant,
+      @CookieParam(AUTH_SESSION_ID) String cookie,
+      @QueryParam("post_logout_redirect_uri") String redirectUri,
+      @QueryParam("id_token_hint") String idTokenHint, @QueryParam("state") String state,
+      @QueryParam("client_id") String clientIdParam, @Context HttpHeaders headers) {
+    return doLogout(tenant, cookie, redirectUri, idTokenHint, state, clientIdParam, headers);
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/logout")
+  public Response logoutPost(final @PathParam(TENANT) String tenant,
+      @CookieParam(AUTH_SESSION_ID) String cookie,
+      @QueryParam("post_logout_redirect_uri") String redirectUri,
+      @QueryParam("id_token_hint") String idTokenHint, @QueryParam("state") String state,
+      @QueryParam("client_id") String clientIdParam, @Context HttpHeaders headers) {
+    return doLogout(tenant, cookie, redirectUri, idTokenHint, state, clientIdParam, headers);
+  }
+
   /**
-   * Logs out the current session and redirects to the post-logout URL.
+   * End-session endpoint: revokes tokens, clears the session and cookie, fires back-channel logout
+   * notifications, and redirects to the validated post-logout URI (or shows a logout page).
    */
-  public Response logout(final @PathParam(TENANT) String tenant,
-      @CookieParam("AUTH_SESSION_ID") String cookie,
-      @QueryParam("post_logout_redirect_uri") String redirect) {
-    sessionManager.removeSession(cookie);
-    String to = redirect;
-    int onClean = to.indexOf('?');
-    if (-1 != onClean) {
-      to = to.substring(0, onClean);
+  private Response doLogout(String tenant, String cookie, String redirectUri, String idTokenHint,
+      String state, String clientIdParam, HttpHeaders headers) {
+    // 1. Load session before removing it so we can read userId / clientId
+    Optional<SessionInfo> sessionOpt = sessionManager.loadSession(cookie);
+
+    // 2. Extract claims from id_token_hint when present
+    String clientId = clientIdParam;
+    String userSub = null;
+    String sessionId = cookie;
+
+    if (idTokenHint != null && !idTokenHint.isBlank()) {
+      java.util.Map<String, Object> hints = tokenSigner.verifyTokenPayload(tenant, idTokenHint);
+      if (!hints.isEmpty()) {
+        Object aud = hints.get("aud");
+        if (aud instanceof String s && (clientId == null || clientId.isBlank())) {
+          clientId = s;
+        }
+        if (hints.get("sub") instanceof String s) {
+          userSub = s;
+        }
+        if (hints.get("sid") instanceof String s) {
+          sessionId = s;
+        }
+      }
     }
-    return Response.status(302).cookie(cookieManager.clearAuthSession(tenant))
-        .location(buildUrl(to)).build();
+
+    // 3. Fall back to session data for any missing values
+    if (sessionOpt.isPresent()) {
+      SessionInfo si = sessionOpt.get();
+      if (userSub == null) {
+        userSub = si.getUserId();
+      }
+      if (clientId == null || clientId.isBlank()) {
+        clientId = si.getClientId();
+      }
+    }
+
+    // 4. Validate post_logout_redirect_uri against the client's registered allowlist
+    String safeRedirect = null;
+    if (redirectUri != null && !redirectUri.isBlank() && clientId != null && !clientId.isBlank()) {
+      final String cid = clientId;
+      safeRedirect = clientRetrieve.loadPreautorized(tenant, cid)
+          .filter(c -> c.getPostLogoutRedirectUris().stream()
+              .anyMatch(allowed -> redirectMatches(allowed, redirectUri)))
+          .map(_ -> stripQuery(redirectUri)).orElse(null);
+    }
+
+    // 5. Revoke all active tokens for the user
+    if (userSub != null && !userSub.isBlank() && clientId != null && !clientId.isBlank()) {
+      tokenRevocationGateway.revokeAllForUser(userSub, clientId, tenant);
+    }
+
+    // 6. Remove session and clear cookie
+    sessionManager.removeSession(cookie);
+    jakarta.ws.rs.core.NewCookie cleared = cookieManager.clearAuthSession(tenant);
+
+    // 7. Fire back-channel logout notifications (async — must not block the response)
+    if (userSub != null && !userSub.isBlank()) {
+      String issuer = currentRequest.getPublicHost() + "/oauth/openid/" + tenant;
+      backChannelLogoutDispatcher.dispatch(tenant, issuer, userSub, sessionId);
+    }
+
+    // 8. Redirect or show logout confirmation page
+    if (safeRedirect != null) {
+      String location =
+          (state != null && !state.isBlank()) ? safeRedirect + "?state=" + state : safeRedirect;
+      return Response.status(302).cookie(cleared).location(buildUrl(location)).build();
+    }
+
+    Locale locale = headers.getAcceptableLanguages().stream().findFirst().orElse(Locale.ENGLISH);
+    return Response
+        .ok(decorator.getGenericFullPage("Logged out",
+            "<h1>You have been logged out</h1>"
+                + "<p><a href=\"javascript:window.close()\">Close this window</a></p>",
+            locale))
+        .cookie(cleared).header("Content-Type", TEXT_HTML).build();
+  }
+
+  private static String stripQuery(String uri) {
+    int q = uri.indexOf('?');
+    return q == -1 ? uri : uri.substring(0, q);
+  }
+
+  private static boolean redirectMatches(String allowed, String redirect) {
+    if ("*".equals(allowed) || allowed.equals(redirect)) {
+      return true;
+    }
+    if (allowed.endsWith("/*")) {
+      return redirect.startsWith(allowed.substring(0, allowed.length() - 1));
+    }
+    return false;
   }
 
   @GET

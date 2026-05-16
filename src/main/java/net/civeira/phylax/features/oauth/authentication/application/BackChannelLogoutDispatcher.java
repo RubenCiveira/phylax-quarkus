@@ -74,10 +74,14 @@ public class BackChannelLogoutDispatcher {
           .header("Content-Type", "application/x-www-form-urlencoded")
           .POST(HttpRequest.BodyPublishers.ofString(body)).build();
 
-      http.send(request, HttpResponse.BodyHandlers.discarding());
+      http.sendAsync(request, HttpResponse.BodyHandlers.discarding()).exceptionally(ex -> {
+        log.warn("Back-channel logout notification failed for client={} uri={}: {}", clientId, uri,
+            ex.getMessage());
+        return null;
+      });
     } catch (Exception ex) {
       // Best-effort per spec — log but never propagate
-      log.warn("Back-channel logout notification failed for client={} uri={}: {}", clientId, uri,
+      log.warn("Back-channel logout dispatch error for client={} uri={}: {}", clientId, uri,
           ex.getMessage());
     }
   }
