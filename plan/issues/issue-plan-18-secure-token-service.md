@@ -13,7 +13,7 @@ This risks timing-attack vulnerabilities and inconsistent security properties.
 
 ### 1. Create `SecureTokenService`
 
-`features/common/crypto/SecureTokenService.java` (or a shared infrastructure module):
+`shared/security/SecureTokenService.java` (or a shared infrastructure module):
 
 ```java
 @ApplicationScoped
@@ -55,7 +55,7 @@ public class SecureTokenService {
 After creating `SecureTokenService`, replace inline hashing in:
 
 - `features/oauth/magiclink/infrastructure/driven/MagicLinkGatewayAdapter.java`
-- `features/access/userinvitation/infrastructure/driven/InvitationStoreAdapter.java`
+- `features/oauth/userinvitation/infrastructure/driven/InvitationStoreAdapter.java`
 - `features/oauth/session/infrastructure/driven/TemporalKeysSqlAdapter.java` (if it hashes tokens)
 - Any new use case that needs token hashing (Issue 1.6 MFA recovery codes, Issue 1.7 API keys).
 
@@ -75,6 +75,6 @@ After creating `SecureTokenService`, replace inline hashing in:
 
 | Action | File |
 |--------|------|
-| **Create** | `common/crypto/SecureTokenService.java` |
-| **Modify** | `magiclink/infrastructure/driven/MagicLinkGatewayAdapter.java` — use service |
-| **Modify** | `access/userinvitation/infrastructure/driven/InvitationStoreAdapter.java` — use service |
+| **Create** | `shared/security/SecureTokenService.java` |
+| **Modify** | `features/oauth/magiclink/infrastructure/driven/MagicLinkGatewayAdapter.java` — use service |
+| **Modify** | `features/oauth/userinvitation/infrastructure/driven/InvitationStoreAdapter.java` — use service |
