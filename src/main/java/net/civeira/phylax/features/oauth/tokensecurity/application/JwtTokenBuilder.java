@@ -346,6 +346,41 @@ public class JwtTokenBuilder {
   }
 
   /**
+   * Builds an M2M access token for the client_credentials grant.
+   *
+   * Issues only an access token — no refresh token, no ID token. The subject is the client id, not
+   * a user. TTL comes from the client's m2mTokenTtlSeconds, falling back to the global access token
+   * configuration.
+   *
+   * @param tenant tenant identifier
+   * @param client client details
+   * @param scopes granted scopes
+   * @return authorization token with access token only
+   */
+  public AutorizationToken buildClientCredentialsToken(String tenant, ClientDetails client,
+      List<String> scopes) {
+    Duration expiration =
+        client.getM2mTokenTtlSeconds() != null ? Duration.ofSeconds(client.getM2mTokenTtlSeconds())
+            : propiedadEntera(EXPIRATION_CONF);
+    Instant expires = Instant.now().plus(expiration);
+
+    AuthenticationData data = new AuthenticationData();
+    data.setUsername(client.getClientId());
+    data.setTenant(tenant);
+    data.setScopes(scopes != null ? scopes : List.of());
+
+    Builder accessTokenBuilder = accessToken(tenant, client, "client_credentials", data);
+
+    AutorizationToken token = new AutorizationToken();
+    token.setGrantType("client_credentials");
+    token.setTokenType(BEARER);
+    token.setUsername(client.getClientId());
+    token.setExpiresIn(expiration.getSeconds());
+    token.setAccessToken(tokenSigner.sign(tenant, accessTokenBuilder, expires));
+    return token;
+  }
+
+  /**
    * Verifies an MFA token and returns the username.
    *
    * Validates the token and ensures the MFA scope is present. Returns empty when verification

@@ -87,7 +87,7 @@ public class OpenIdConfigurationController {
         .frontchannelLogoutSessionSupported(false).frontchannelLogoutSupported(false)
         .jwksUri(base + "jwks").checkSessionIframe(base + "login-status-iframe")
         .grantTypesSupported(Arrays.asList("authorization_code", "refresh_token", "password", "mfa",
-            "urn:ietf:params:oauth:grant-type:device_code"))
+            "urn:ietf:params:oauth:grant-type:device_code", "client_credentials"))
         .acrValuesSupported(Arrays.asList("0", "1", "2"))
         .responseTypesSupported(Arrays.asList("code", "none", "id_token", "token", "id_token token",
             "code id_token", "code token", "code id_token token"))

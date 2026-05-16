@@ -1,0 +1,42 @@
+package net.civeira.phylax.features.oauth.authentication.application.granter;
+
+import java.util.List;
+import java.util.Map;
+
+import jakarta.enterprise.context.RequestScoped;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+
+/**
+ * Token granter for the OAuth client_credentials grant (RFC 6749 §4.4).
+ *
+ * Responsibilities: - Validate that the client is confidential (has a secret). - Build an
+ * AuthenticationData with the client id as subject — no user identity, no refresh token, no ID
+ * token.
+ *
+ * Design notes: - Scope intersection and token emission are handled by the caller. - Stateless and
+ * request-scoped following the existing granter pattern.
+ */
+@RequestScoped
+public class ClientCredentialsGranter implements TokenGranter {
+
+  @Override
+  public boolean canHandle(String grantType) {
+    return "client_credentials".equals(grantType);
+  }
+
+  @Override
+  public AuthenticationResult authenticate(AuthRequest request, ClientDetails client,
+      Map<String, List<String>> paramMap) {
+    if (!client.isProtectedWithSecret()) {
+      return AuthenticationResult.notAllowed(request.getTenant(), "",
+          "client_credentials is only allowed for confidential clients");
+    }
+    AuthenticationData data = new AuthenticationData();
+    data.setUsername(client.getClientId());
+    data.setTenant(request.getTenant());
+    return AuthenticationResult.right(data);
+  }
+}

@@ -71,6 +71,12 @@ public class ClientDetails {
    */
   private final boolean isResourceServer;
 
+  /**
+   * Access token TTL in seconds for machine-to-machine flows. Null means fall back to global
+   * configuration.
+   */
+  private final Integer m2mTokenTtlSeconds;
+
   public Optional<String> findBackchannelLogoutUri() {
     return Optional.ofNullable(backchannelLogoutUri).filter(u -> !u.isBlank());
   }

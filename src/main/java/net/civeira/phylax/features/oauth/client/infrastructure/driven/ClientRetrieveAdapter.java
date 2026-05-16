@@ -26,8 +26,8 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGatewa
 @RequiredArgsConstructor
 public class ClientRetrieveAdapter implements ClientStoreGateway {
   private static final List<String> DEFAULT_SCOPES = List.of("*");
-  private static final List<String> DEFAULT_GRANTERS =
-      List.of("password", "refresh", "mfa", "urn:ietf:params:oauth:grant-type:device_code");
+  private static final List<String> DEFAULT_GRANTERS = List.of("password", "refresh", "mfa",
+      "urn:ietf:params:oauth:grant-type:device_code", "client_credentials");
 
   private final AesCipherService cypher;
   private final TenantReadRepositoryGateway tenants;
@@ -125,13 +125,17 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     SecretOauthVO secretOauth = app.getSecretOauthValue();
     Optional<String> pass = secretOauth.getSecretOauthPlain(cypher);
     if (pass.isPresent() && secret.equals(pass.get())) {
+      Integer m2mTtl = app.getM2mTokenTtlSecondsValue() != null
+          ? app.getM2mTokenTtlSecondsValue().getM2mTokenTtlSeconds()
+          : null;
       return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(true)
           .requirePkce(app.isRequirePkce()).allowedGrants(DEFAULT_GRANTERS)
           .allowedScopes(DEFAULT_SCOPES).postLogoutRedirectUris(postLogoutUris(app))
           .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
           .backchannelLogoutSessionRequired(
               Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
-          .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer())).build());
+          .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
+          .m2mTokenTtlSeconds(m2mTtl).build());
     } else {
       return Optional.empty();
     }

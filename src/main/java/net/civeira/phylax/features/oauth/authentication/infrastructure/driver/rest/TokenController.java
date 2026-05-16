@@ -280,12 +280,17 @@ public class TokenController {
         authenticate.getData().setScopes(granted);
       }
     }
-    return authenticate.isRight()
-        ? Response.status(200)
-            .entity(emitAndBindToken(tenant, clientDetails, paramMap.getFirst("grant_type"),
-                authenticate.getData(), request, Optional.empty(), Optional.empty()))
-            .build()
-        : Response.status(401).entity(authenticate.getFail().entity(tokenBuilder)).build();
+    if (!authenticate.isRight()) {
+      return Response.status(401).entity(authenticate.getFail().entity(tokenBuilder)).build();
+    }
+    if ("client_credentials".equals(paramMap.getFirst("grant_type"))) {
+      return Response.status(200).entity(tokenBuilder.buildClientCredentialsToken(tenant,
+          clientDetails, authenticate.getData().getScopes())).build();
+    }
+    return Response.status(200)
+        .entity(emitAndBindToken(tenant, clientDetails, paramMap.getFirst("grant_type"),
+            authenticate.getData(), request, Optional.empty(), Optional.empty()))
+        .build();
   }
 
   private AutorizationToken emitAndBindToken(String tenant, ClientDetails clientDetails,
