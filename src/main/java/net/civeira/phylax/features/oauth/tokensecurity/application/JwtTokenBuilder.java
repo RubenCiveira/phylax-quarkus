@@ -548,6 +548,9 @@ public class JwtTokenBuilder {
     if (null != validationData.getTenant()) {
       accessTokenInfo = accessTokenInfo.withClaim("tid", validationData.getTenant());
     }
+    if (null != validationData.getUid() && !validationData.getUid().isBlank()) {
+      accessTokenInfo = accessTokenInfo.withClaim("uid", validationData.getUid());
+    }
 
     accessTokenInfo = accessTokenInfo.withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
         .withClaim("aud", validationData.getAudiences())
