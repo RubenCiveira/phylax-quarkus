@@ -291,4 +291,9 @@ public class OpenIdConfiguration {
    */
   @JsonProperty("authorization_response_iss_parameter_supported")
   private final boolean authorizationResponseIssParameterSupported;
+  /**
+   * Prompt values supported by this provider.
+   */
+  @JsonProperty("prompt_values_supported")
+  private final List<String> promptValuesSupported;
 }
