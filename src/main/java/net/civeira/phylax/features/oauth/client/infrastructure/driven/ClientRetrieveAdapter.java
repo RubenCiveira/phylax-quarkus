@@ -131,7 +131,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
           .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
           .backchannelLogoutSessionRequired(
               Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
-          .build());
+          .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer())).build());
     } else {
       return Optional.empty();
     }

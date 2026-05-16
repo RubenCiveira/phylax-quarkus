@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.tokensecurity.infrastructure.driver.re
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.Consumes;
@@ -16,6 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.usecase.IntrospectTokenUseCase;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospectionResult;
@@ -23,40 +25,25 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospection
 /**
  * REST controller for the RFC 7662 token introspection endpoint.
  *
- * Responsibilities: - Authenticate the requesting client via HTTP Basic Auth. - Delegate
- * introspection logic to {@link IntrospectTokenUseCase}. - Return the RFC 7662 JSON response.
+ * Responsibilities: - Authenticate the requesting client via client_secret_basic or
+ * client_secret_post. - Reject callers that are not resource servers with 403. - Delegate
+ * introspection logic to {@link IntrospectTokenUseCase}. - Return the RFC 7662 JSON response with
+ * required cache headers.
  *
  * Design notes: - Client credentials are validated before delegating to the use case. - An invalid
- * or missing Authorization header yields 401. - The introspection result always returns HTTP 200;
- * inactive tokens have {@code active: false}.
+ * or missing credential pair yields 401. - A valid client that lacks the resource-server flag
+ * yields 403. - The introspection result always returns HTTP 200; inactive tokens have
+ * {@code active:
+ * false}.
  */
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
 public class IntrospectionController {
 
-  /**
-   * Use case that verifies the token and returns its active status.
-   */
   private final IntrospectTokenUseCase introspectTokenUseCase;
-
-  /**
-   * Gateway used to validate the client credentials.
-   */
   private final ClientStoreGateway clientRetriever;
 
-  /**
-   * Introspects a token presented by a resource server.
-   *
-   * Validates the caller's Basic Auth client credentials first. Returns an RFC 7662 JSON body with
-   * {@code active: true} and token metadata for a valid token, or {@code active: false} for any
-   * invalid, expired, or revoked token.
-   *
-   * @param tenant tenant identifier from the path
-   * @param headers HTTP request headers (Authorization)
-   * @param paramMap form parameters (token, token_type_hint)
-   * @return 200 with introspection result, or 401 when credentials are missing or invalid
-   */
   @POST
   @Path("oauth/openid/{tenant}/introspect")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -64,27 +51,43 @@ public class IntrospectionController {
   public Response introspect(final @PathParam("tenant") String tenant,
       final @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap) {
 
+    String clientId = null;
+    String clientSecret = null;
+
     String autho = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
-    if (autho == null || !autho.startsWith("Basic ")) {
+    if (autho != null && autho.startsWith("Basic ")) {
+      String decoded = new String(Base64.getDecoder().decode(autho.substring(6).getBytes()),
+          StandardCharsets.UTF_8);
+      String[] parts = decoded.split(":", 2);
+      if (parts.length == 2 && !parts[0].isBlank()) {
+        clientId = parts[0];
+        clientSecret = parts[1];
+      }
+    }
+
+    if (clientId == null) {
+      clientId = paramMap.getFirst("client_id");
+      clientSecret = paramMap.getFirst("client_secret");
+    }
+
+    if (clientId == null || clientId.isBlank()) {
       return Response.status(401).build();
     }
 
-    String decoded = new String(Base64.getDecoder().decode(autho.substring(6).getBytes()),
-        StandardCharsets.UTF_8);
-    String[] parts = decoded.split(":", 2);
-    if (parts.length != 2 || parts[0].isBlank()) {
+    Optional<ClientDetails> clientOpt =
+        clientRetriever.loadPrivate(tenant, clientId, clientSecret != null ? clientSecret : "");
+    if (clientOpt.isEmpty()) {
       return Response.status(401).build();
     }
 
-    String clientId = parts[0];
-    String clientSecret = parts[1];
-    if (clientRetriever.loadPrivate(tenant, clientId, clientSecret).isEmpty()) {
-      return Response.status(401).build();
+    if (!clientOpt.get().isResourceServer()) {
+      return Response.status(403).build();
     }
 
     String rawToken = paramMap.getFirst("token");
     TokenIntrospectionResult result = introspectTokenUseCase.introspect(tenant, rawToken);
-    return Response.ok(result).build();
+    return Response.ok(result).header("Cache-Control", "no-store").header("Pragma", "no-cache")
+        .build();
   }
 
   @POST

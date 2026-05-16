@@ -66,6 +66,11 @@ public class ClientDetails {
    */
   private final boolean backchannelLogoutSessionRequired;
 
+  /**
+   * Whether this client is allowed to call the token introspection endpoint.
+   */
+  private final boolean isResourceServer;
+
   public Optional<String> findBackchannelLogoutUri() {
     return Optional.ofNullable(backchannelLogoutUri).filter(u -> !u.isBlank());
   }
