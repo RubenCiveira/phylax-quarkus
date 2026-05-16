@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -92,6 +93,21 @@ public class AuthRequest {
    * Requested audiences for token issuance.
    */
   private final List<String> audiences = List.of();
+  @Builder.Default
+  /**
+   * Hint to pre-fill the username field in the login form.
+   */
+  private final Optional<String> loginHint = Optional.empty();
+  @Builder.Default
+  /**
+   * Maximum age (seconds) of an existing authentication. -1 means not specified.
+   */
+  private final int maxAge = -1;
+  @Builder.Default
+  /**
+   * Space-separated list of requested authentication context class references.
+   */
+  private final Optional<String> acrValues = Optional.empty();
 
   /**
    * Creates an AuthRequest by parsing HTTP query parameters and headers.
@@ -118,6 +134,10 @@ public class AuthRequest {
     this.locale =
         Optional.ofNullable(headers.getAcceptableLanguages().get(0)).orElse(Locale.getDefault());
     this.responseType = Optional.ofNullable(params.getFirst("response_type"));
+    this.loginHint = Optional.ofNullable(params.getFirst("login_hint"));
+    this.acrValues = Optional.ofNullable(params.getFirst("acr_values"));
+    String maxAgeRaw = params.getFirst("max_age");
+    this.maxAge = maxAgeRaw != null ? parseMaxAge(maxAgeRaw) : -1;
     List<String> explicitAud =
         new ArrayList<>(null == aus ? List.of() : Arrays.asList(aus.split("\\,")));
     this.clientId.ifPresent(azp -> {
@@ -142,7 +162,35 @@ public class AuthRequest {
         + append("state", getState()) + append("nonce", getNonce())
         + append("code_challenge", getCodeChallenge())
         + append("code_challenge_method", getCodeChallengeMethod())
-        + append("redirect_uri", getRedirect()) + append("response_type", getResponseType());
+        + append("redirect_uri", getRedirect()) + append("response_type", getResponseType())
+        + append("login_hint", getLoginHint()) + append("acr_values", getAcrValues())
+        + (maxAge >= 0 ? "&max_age=" + maxAge : "");
+  }
+
+  /**
+   * Returns the highest numeric ACR level from acr_values, or 0 if not specified.
+   *
+   * Parses the space-separated acr_values list and returns the maximum integer value found.
+   * Non-numeric tokens are ignored.
+   */
+  public int getMinRequiredAcr() {
+    return acrValues
+        .map(vals -> Arrays.stream(vals.split("\\s+")).filter(s -> !s.isBlank()).flatMapToInt(s -> {
+          try {
+            return OptionalInt.of(Integer.parseInt(s)).stream();
+          } catch (NumberFormatException e) {
+            return OptionalInt.empty().stream();
+          }
+        }).max().orElse(0)).orElse(0);
+  }
+
+  private static int parseMaxAge(String raw) {
+    try {
+      int v = Integer.parseInt(raw.trim());
+      return v >= 0 ? v : -1;
+    } catch (NumberFormatException e) {
+      return -1;
+    }
   }
 
   /**

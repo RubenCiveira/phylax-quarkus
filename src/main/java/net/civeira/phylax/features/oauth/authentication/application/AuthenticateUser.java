@@ -64,7 +64,9 @@ public class AuthenticateUser {
    */
   public AuthenticationResult preAuthenticate(AuthRequest request,
       List<AuthenticationChallege> challenges, String username, ClientDetails client) {
-    return loginUsecase.fillPreAuthenticated(request, username, client, challenges,
-        AuthenticationMode.SESSION);
+    AuthenticationMode mode =
+        challenges.contains(AuthenticationChallege.MFA) ? AuthenticationMode.MFA
+            : AuthenticationMode.SESSION;
+    return loginUsecase.fillPreAuthenticated(request, username, client, challenges, mode);
   }
 }

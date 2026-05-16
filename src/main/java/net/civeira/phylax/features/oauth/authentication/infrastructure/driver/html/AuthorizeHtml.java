@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
@@ -24,6 +25,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationCha
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequiredException;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
@@ -78,6 +81,8 @@ public class AuthorizeHtml {
    * HTML content type value used by this controller.
    */
   public static final String TEXT_HTML = "text/html";
+
+  private static final Set<String> FORCE_REAUTH_PROMPTS = Set.of("login", "select_account");
 
 
   /**
@@ -159,12 +164,31 @@ public class AuthorizeHtml {
       @Context HttpHeaders headers) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
     return loadClient(request).map(loadClient -> {
-      return loadValidSession(session, tenant)
-          .map(sessionInfo -> doPaintVerifySession(sessionInfo, loadClient, request, session))
+      String prompt = request.getPrompt().orElse("");
+
+      // prompt=login / select_account: ignore existing session, force re-auth
+      Optional<SessionInfo> sessionInfo = FORCE_REAUTH_PROMPTS.contains(prompt) ? Optional.empty()
+          : resolveSession(session, tenant, request);
+
+      // prompt=none: must not render any UI
+      if ("none".equals(prompt)) {
+        if (sessionInfo.isEmpty()) {
+          return responseBuilder.errorRedirect(request, "login_required");
+        }
+        int requiredAcr = request.getMinRequiredAcr();
+        if (sessionInfo.get().getAcr() < requiredAcr) {
+          return responseBuilder.errorRedirect(request, "interaction_required");
+        }
+        return doNoneRedirect(sessionInfo.get(), loadClient, request, session);
+      }
+
+      // ACR step-up: session exists but ACR is insufficient
+      if (sessionInfo.isPresent() && sessionInfo.get().getAcr() < request.getMinRequiredAcr()) {
+        return doStepUp(sessionInfo.get(), loadClient, request);
+      }
+
+      return sessionInfo.map(si -> doPaintVerifySession(si, loadClient, request, session))
           .orElseGet(() -> {
-            if ("none".equals(request.getPrompt().orElse(""))) {
-              return responseBuilder.errorRedirect(request, "no session");
-            }
             StepInput input = StepInput.builder().request(request).clientDetails(loadClient)
                 .challenges(Optional.empty()).formParams(new MultivaluedHashMap<>()).build();
             return router.paintFallback(input, null);
@@ -189,12 +213,33 @@ public class AuthorizeHtml {
       @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap,
       @CookieParam(AUTH_SESSION_ID) String session, @CookieParam(PRE_SESSION_ID) String cookie) {
     AuthRequest request = new AuthRequest(tenant, req, headers);
+    String prompt = request.getPrompt().orElse("");
 
-    return loadClient(request)
-        .map(loadClient -> loadValidSession(session, tenant)
-            .map(sessionInfo -> doCheckSession(sessionInfo, loadClient, request, paramMap, session))
-            .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie)))
-        .orElseGet(() -> clientNotAllowedResponse(tenant, headers));
+    return loadClient(request).map(loadClient -> {
+      // prompt=login / select_account: ignore existing session, force re-auth
+      Optional<SessionInfo> sessionInfo = FORCE_REAUTH_PROMPTS.contains(prompt) ? Optional.empty()
+          : resolveSession(session, tenant, request);
+
+      // prompt=none with valid session: auto-redirect without UI
+      if ("none".equals(prompt)) {
+        if (sessionInfo.isEmpty()) {
+          return responseBuilder.errorRedirect(request, "login_required");
+        }
+        int requiredAcr = request.getMinRequiredAcr();
+        if (sessionInfo.get().getAcr() < requiredAcr) {
+          return responseBuilder.errorRedirect(request, "interaction_required");
+        }
+        return doNoneRedirect(sessionInfo.get(), loadClient, request, session);
+      }
+
+      // ACR step-up: session exists but ACR is insufficient
+      if (sessionInfo.isPresent() && sessionInfo.get().getAcr() < request.getMinRequiredAcr()) {
+        return doStepUp(sessionInfo.get(), loadClient, request);
+      }
+
+      return sessionInfo.map(si -> doCheckSession(si, loadClient, request, paramMap, session))
+          .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie));
+    }).orElseGet(() -> clientNotAllowedResponse(tenant, headers));
   }
 
   @POST
@@ -261,7 +306,13 @@ public class AuthorizeHtml {
     return checkSession(tenant);
   }
 
-  private Optional<SessionInfo> loadValidSession(String sessionId, String tenantName) {
+  /**
+   * Loads a session and applies SSO-TTL and max_age enforcement.
+   *
+   * Returns empty when the session is missing, expired by tenant TTL, or older than max_age.
+   */
+  private Optional<SessionInfo> resolveSession(String sessionId, String tenantName,
+      AuthRequest request) {
     return sessionManager.loadSession(sessionId).filter(info -> {
       Instant authTime = info.getValidationData().getTime();
       if (authTime == null) {
@@ -270,8 +321,47 @@ public class AuthorizeHtml {
       int ttl = tenantRepo.find(TenantFilter.builder().name(tenantName).build())
           .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
           .map(cfg -> cfg.getSessionSsoTtlSeconds()).orElse(3600);
-      return authTime.plusSeconds(ttl).isAfter(Instant.now());
+      if (!authTime.plusSeconds(ttl).isAfter(Instant.now())) {
+        return false;
+      }
+      int maxAge = request.getMaxAge();
+      if (maxAge >= 0 && authTime.plusSeconds(maxAge).isBefore(Instant.now())) {
+        return false;
+      }
+      return true;
     });
+  }
+
+  /**
+   * Redirects silently for prompt=none with a valid session (no UI rendered).
+   */
+  private Response doNoneRedirect(SessionInfo sessionInfo, ClientDetails loadClient,
+      AuthRequest request, String sessionCookie) {
+    oidcEventDispatcher.dispatchSuccess(sessionInfo.getValidationData(),
+        AuthenticationMode.SESSION);
+    return responseBuilder.successRedirect(Optional.of(sessionCookie), loadClient,
+        sessionInfo.getGrant(), request, sessionInfo.getValidationData(),
+        new MultivaluedHashMap<>());
+  }
+
+  /**
+   * Injects an MFA step-up challenge when sessionAcr < requiredAcr.
+   *
+   * Clears the AUTH_SESSION_ID cookie so the subsequent POST goes through the step flow.
+   */
+  private Response doStepUp(SessionInfo session, ClientDetails client, AuthRequest request) {
+    String username = session.getValidationData().getUsername();
+    // Mark PASSWORD as already completed so the step router skips to MFA
+    ChallengesState stepUpState =
+        ChallengesState.empty(username).withCompleted(AuthenticationChallege.PASSWORD);
+    NewCookie preSession = cookieManager.writePreSession(stepUpState, request.getTenant());
+    StepInput input = StepInput.builder().request(request).clientDetails(client)
+        .challenges(Optional.of(stepUpState)).formParams(new MultivaluedHashMap<>()).build();
+    Response base = router.paint(MfaRequiredException.class, input, preSession)
+        .orElseGet(() -> router.paintFallback(input, null));
+    // Clear AUTH_SESSION_ID so the POST goes to doExecStep (step flow, not session flow)
+    return Response.fromResponse(base).cookie(cookieManager.clearAuthSession(request.getTenant()))
+        .build();
   }
 
   /**

@@ -145,11 +145,12 @@ public class LoginStep implements OidcStep {
             + (null == error ? "" : "<p class=\"error\">" + errorMsg + "</p>")
             + "<form id=\"login\" method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + usernameLabel
-            + " <input type=\"text\" id=\"username\" name=\"username\" value=\"" + "\" /></label>"
-            + "<label>" + passwordLabel + " <input type=\"password\" id=\"type_password\" value=\""
-            + "\" /></label>" + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\""
-            + "\" />" + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-            + enter + "\" />" + "</form>" + delegatedLogins + execAuto
+            + " <input type=\"text\" id=\"username\" name=\"username\" value=\""
+            + request.getLoginHint().orElse("") + "\" /></label>" + "<label>" + passwordLabel
+            + " <input type=\"password\" id=\"type_password\" value=\"" + "\" /></label>"
+            + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"" + "\" />"
+            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + enter
+            + "\" />" + "</form>" + delegatedLogins + execAuto
             + (recoverStep.allowRecover(request.getTenant()) ? "<form method=\"POST\">"
                 + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />" + "<p>"
                 + recoverText + "</p></form>" : "")
