@@ -144,6 +144,8 @@ profile:
     recoveryCodes: "Recovery codes"
     manageConsents: "Authorized applications"
     managePasskeys: "Passkeys"
+    downloadMyData: "Download my data"
+    deleteAccount: "Delete account"
   recovery-codes:
     title: "Recovery codes"
     count: "You have {0} unused recovery codes"
@@ -225,6 +227,23 @@ profile:
     deleteConfirm: "Are you sure you want to remove this passkey?"
     empty: "No passkeys registered"
     backToProfile: "Back to profile"
+  data-export:
+    title: "Download my data"
+    help: "Request a copy of your personal data (GDPR Art. 20). It will be sent to your registered email address."
+    request: "Request data export"
+    sentTitle: "Export requested"
+    sentHelp: "Your data will be sent to your registered email address shortly."
+    backToProfile: "Back to profile"
+  delete-account:
+    title: "Delete account"
+    help: "Permanently delete your account and all associated data. This action cannot be undone."
+    request: "Send deletion confirmation email"
+    sentTitle: "Confirmation email sent"
+    sentHelp: "Check your email for a deletion confirmation link. The link expires in 24 hours."
+    backToProfile: "Back to profile"
+    confirmedTitle: "Account deleted"
+    confirmedHelp: "Your account and associated data have been permanently removed."
+    errorToken: "Invalid or expired confirmation link. Please request a new deletion confirmation."
   auth:
     title: "Not signed in"
     help: "You must be signed in to view this page"

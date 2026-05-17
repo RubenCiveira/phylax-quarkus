@@ -10,24 +10,29 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopesConsentGateway;
+import net.civeira.phylax.features.oauth.gdpr.application.GdprService;
 import net.civeira.phylax.features.oauth.mfa.application.MfaRecoveryService;
 import net.civeira.phylax.features.oauth.profile.application.ProfileService;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
+import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.AccountDeletionPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ChangePasswordPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ConsentedScopesPanel;
+import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.DataExportPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.MfaPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.PasskeysPanel;
 import net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.ProfileEditPanel;
@@ -57,6 +62,9 @@ public class ProfileHtmlController {
   private final ScopesConsentGateway scopesConsentGateway;
   private final ConsentedScopesPanel consentedScopesPanel;
   private final PasskeysPanel passkeysPanel;
+  private final GdprService gdprService;
+  private final DataExportPanel dataExportPanel;
+  private final AccountDeletionPanel accountDeletionPanel;
 
   @GET
   @Path("oauth/openid/{tenant}/profile")
@@ -76,9 +84,12 @@ public class ProfileHtmlController {
     return sessionManager.loadSession(cookie).map(session -> {
       OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = "<div class=\"section-card\">" + viewPanel.render(profile, base + "/edit",
-          base + "/password", base + "/mfa", base + "/sessions", base + "/recovery-codes",
-          base + "/consents", base + "/passkeys", t) + "</div>";
+      String html =
+          "<div class=\"section-card\">"
+              + viewPanel.render(profile, base + "/edit", base + "/password", base + "/mfa",
+                  base + "/sessions", base + "/recovery-codes", base + "/consents",
+                  base + "/passkeys", base + "/data-export", base + "/delete-account", t)
+              + "</div>";
       return page(tenant, headers, t.get("profile.view.title"), html, locale);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
   }
@@ -345,6 +356,111 @@ public class ProfileHtmlController {
       return Response.status(302).header("Location", "/oauth/openid/" + tenant + "/me/passkeys")
           .build();
     }).orElseGet(() -> Response.status(401).build());
+  }
+
+  @GET
+  @Path("oauth/openid/{tenant}/me/data-export")
+  @Produces(TEXT_HTML)
+  public Response dataExport(@PathParam("tenant") String tenant,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie, @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    return sessionManager.loadSession(cookie).map(_ -> {
+      String base = "/oauth/openid/" + tenant + "/me";
+      String html = "<div class=\"section-card\">"
+          + dataExportPanel.render(base + "/data-export", base, false, t) + "</div>";
+      return page(tenant, headers, t.get("profile.data-export.title"), html, locale);
+    }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/me/data-export")
+  @Produces(TEXT_HTML)
+  public Response requestDataExport(@PathParam("tenant") String tenant,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie, @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    return sessionManager.loadSession(cookie).map(session -> {
+      String userUid = resolveUserUid(session);
+      String username = session.getValidationData().getUsername();
+      User user = users.find(UserFilter.builder().uid(userUid).build()).orElse(null);
+      String email = user != null ? user.getEmail().orElse(null) : null;
+      if (email != null && !email.isBlank()) {
+        gdprService.requestDataExport(userUid, username, email, tenant);
+      }
+      String base = "/oauth/openid/" + tenant + "/me";
+      String html = "<div class=\"section-card\">"
+          + dataExportPanel.render(base + "/data-export", base, true, t) + "</div>";
+      return page(tenant, headers, t.get("profile.data-export.sentTitle"), html, locale);
+    }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
+  }
+
+  @GET
+  @Path("oauth/openid/{tenant}/me/delete-account")
+  @Produces(TEXT_HTML)
+  public Response deleteAccount(@PathParam("tenant") String tenant,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie, @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    return sessionManager.loadSession(cookie).map(_ -> {
+      String base = "/oauth/openid/" + tenant + "/me";
+      String html = "<div class=\"section-card\">"
+          + accountDeletionPanel.renderRequest(base + "/delete-account", base, null, t) + "</div>";
+      return page(tenant, headers, t.get("profile.delete-account.title"), html, locale);
+    }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/me/delete-account")
+  @Produces(TEXT_HTML)
+  public Response requestDeleteAccount(@PathParam("tenant") String tenant,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie, @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    return sessionManager.loadSession(cookie).map(session -> {
+      String userUid = resolveUserUid(session);
+      String username = session.getValidationData().getUsername();
+      User user = users.find(UserFilter.builder().uid(userUid).build()).orElse(null);
+      String email = user != null ? user.getEmail().orElse(null) : null;
+      String base = "/oauth/openid/" + tenant + "/me";
+      if (email != null && !email.isBlank()) {
+        String confirmUrl = "/oauth/openid/" + tenant + "/me/delete-account/confirm";
+        gdprService.requestAccountDeletion(userUid, username, email, tenant, confirmUrl);
+      }
+      String html =
+          "<div class=\"section-card\">" + accountDeletionPanel.renderSent(base, t) + "</div>";
+      return page(tenant, headers, t.get("profile.delete-account.sentTitle"), html, locale);
+    }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
+  }
+
+  @GET
+  @Path("oauth/openid/{tenant}/me/delete-account/confirm")
+  @Produces(TEXT_HTML)
+  public Response confirmDeleteAccount(@PathParam("tenant") String tenant,
+      @QueryParam("uid") String uid, @QueryParam("code") String code,
+      @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    String base = "/oauth/openid/" + tenant + "/me";
+    if (uid == null || uid.isBlank() || code == null || code.isBlank()) {
+      String html = "<div class=\"section-card\">" + accountDeletionPanel.renderTokenError(base, t)
+          + "</div>";
+      return Response.status(400).entity(decorator.getFullPage(tenant,
+          t.get("profile.delete-account.title"), html, locale, "full")).type(TEXT_HTML).build();
+    }
+    boolean deleted = gdprService.confirmAccountDeletion(uid, code, tenant);
+    String html;
+    if (deleted) {
+      html = "<div class=\"section-card\">" + accountDeletionPanel.renderConfirmed(t) + "</div>";
+      return Response.ok(decorator.getFullPage(tenant,
+          t.get("profile.delete-account.confirmedTitle"), html, locale, "full")).type(TEXT_HTML)
+          .build();
+    } else {
+      html = "<div class=\"section-card\">" + accountDeletionPanel.renderTokenError(base, t)
+          + "</div>";
+      return Response.status(400).entity(decorator.getFullPage(tenant,
+          t.get("profile.delete-account.title"), html, locale, "full")).type(TEXT_HTML).build();
+    }
   }
 
   private String resolveUserUid(SessionInfo session) {

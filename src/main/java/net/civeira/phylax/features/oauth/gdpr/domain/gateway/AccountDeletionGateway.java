@@ -1,0 +1,9 @@
+package net.civeira.phylax.features.oauth.gdpr.domain.gateway;
+
+public interface AccountDeletionGateway {
+
+  void requestDeletion(String userUid, String username, String email, String tenant,
+      String confirmUrl);
+
+  boolean confirmDeletion(String userUid, String code, String tenant);
+}

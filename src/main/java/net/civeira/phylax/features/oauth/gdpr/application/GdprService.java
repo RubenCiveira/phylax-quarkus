@@ -1,0 +1,27 @@
+package net.civeira.phylax.features.oauth.gdpr.application;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.gdpr.domain.gateway.AccountDeletionGateway;
+import net.civeira.phylax.features.oauth.gdpr.domain.gateway.UserDataExportGateway;
+
+@ApplicationScoped
+@RequiredArgsConstructor
+public class GdprService {
+
+  private final UserDataExportGateway exportGateway;
+  private final AccountDeletionGateway deletionGateway;
+
+  public void requestDataExport(String userUid, String username, String email, String tenant) {
+    exportGateway.requestExport(userUid, username, email, tenant);
+  }
+
+  public void requestAccountDeletion(String userUid, String username, String email, String tenant,
+      String confirmUrl) {
+    deletionGateway.requestDeletion(userUid, username, email, tenant, confirmUrl);
+  }
+
+  public boolean confirmAccountDeletion(String userUid, String code, String tenant) {
+    return deletionGateway.confirmDeletion(userUid, code, tenant);
+  }
+}

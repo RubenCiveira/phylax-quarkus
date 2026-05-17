@@ -1,0 +1,42 @@
+package net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels;
+
+import static net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.HtmlEscape.esc;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.common.value.YamlLocaleMessages;
+
+@ApplicationScoped
+public class AccountDeletionPanel {
+
+  public String renderRequest(String deleteUrl, String cancelUrl, String error,
+      YamlLocaleMessages t) {
+    String errorHtml = error != null ? "<p class=\"error-message\">" + esc(error) + "</p>" : "";
+    return "<h1>" + t.get("profile.delete-account.title") + "</h1>" + "<p class=\"warning-text\">"
+        + t.get("profile.delete-account.help") + "</p>" + errorHtml
+        + "<form method=\"POST\" action=\"" + esc(deleteUrl) + "\" class=\"profile-actions\">"
+        + "<input type=\"hidden\" name=\"confirm\" value=\"yes\" />"
+        + "<input type=\"submit\" class=\"danger-button\" value=\""
+        + esc(t.get("profile.delete-account.request")) + "\" />"
+        + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
+        + t.get("profile.delete-account.backToProfile") + "</a>" + "</form>";
+  }
+
+  public String renderSent(String cancelUrl, YamlLocaleMessages t) {
+    return "<h1>" + t.get("profile.delete-account.sentTitle") + "</h1>" + "<p>"
+        + t.get("profile.delete-account.sentHelp") + "</p>" + "<div class=\"profile-actions\">"
+        + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
+        + t.get("profile.delete-account.backToProfile") + "</a>" + "</div>";
+  }
+
+  public String renderConfirmed(YamlLocaleMessages t) {
+    return "<h1>" + t.get("profile.delete-account.confirmedTitle") + "</h1>" + "<p>"
+        + t.get("profile.delete-account.confirmedHelp") + "</p>";
+  }
+
+  public String renderTokenError(String cancelUrl, YamlLocaleMessages t) {
+    return "<h1>" + t.get("profile.delete-account.title") + "</h1>" + "<p class=\"error-message\">"
+        + t.get("profile.delete-account.errorToken") + "</p>" + "<div class=\"profile-actions\">"
+        + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
+        + t.get("profile.delete-account.backToProfile") + "</a>" + "</div>";
+  }
+}

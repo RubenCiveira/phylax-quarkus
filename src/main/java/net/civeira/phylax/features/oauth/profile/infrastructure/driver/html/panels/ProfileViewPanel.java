@@ -11,7 +11,7 @@ public class ProfileViewPanel {
 
   public String render(OidcProfile profile, String editUrl, String passwordUrl, String mfaUrl,
       String sessionsUrl, String recoveryCodesUrl, String consentsUrl, String passkeysUrl,
-      YamlLocaleMessages t) {
+      String dataExportUrl, String deleteAccountUrl, YamlLocaleMessages t) {
 
     String givenName = esc(profile == null ? null : profile.getGivenName().orElse(null));
     String familyName = esc(profile == null ? null : profile.getFamilyName().orElse(null));
@@ -55,7 +55,10 @@ public class ProfileViewPanel {
         + esc(recoveryCodesUrl) + "\">" + t.get("profile.view.recoveryCodes") + "</a>"
         + "<a class=\"secondary-button\" href=\"" + esc(consentsUrl) + "\">"
         + t.get("profile.view.manageConsents") + "</a>" + "<a class=\"secondary-button\" href=\""
-        + esc(passkeysUrl) + "\">" + t.get("profile.view.managePasskeys") + "</a>" + "</div>"
+        + esc(passkeysUrl) + "\">" + t.get("profile.view.managePasskeys") + "</a>"
+        + "<a class=\"secondary-button\" href=\"" + esc(dataExportUrl) + "\">"
+        + t.get("profile.view.downloadMyData") + "</a>" + "<a class=\"danger-button\" href=\""
+        + esc(deleteAccountUrl) + "\">" + t.get("profile.view.deleteAccount") + "</a>" + "</div>"
         + "</div>";
   }
 
