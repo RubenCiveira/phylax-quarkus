@@ -296,7 +296,7 @@ public class OidcFlowClient {
   public Response revoke(String tenant, String preSessionCookie) {
     return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
         .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
-        .post("/oauth/openid/" + tenant + "/revocation");
+        .post("/oauth/openid/" + tenant + "/revoke");
   }
 
   public Response logout(String tenant, String authSessionCookie, String postLogoutRedirectUri) {
@@ -337,8 +337,7 @@ public class OidcFlowClient {
         .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
         .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
         .queryParam("response_type", "code").queryParam("scope", OidcTestFixtures.SCOPE)
-        .queryParam("state", OidcTestFixtures.STATE)
-        .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE);
+        .queryParam("state", OidcTestFixtures.STATE);
   }
 
   private String nullToEmpty(String value) {

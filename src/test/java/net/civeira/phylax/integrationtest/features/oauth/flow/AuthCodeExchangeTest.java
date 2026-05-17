@@ -39,8 +39,8 @@ class AuthCodeExchangeTest extends OidcIntegrationTestBase {
 
   @Test
   void pkce_wrongVerifier_returns401() {
-    Response login = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
-        OidcTestFixtures.PASSWORD, null);
+    Response login = client.submitLoginWithPkce(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
+        OidcTestFixtures.PASSWORD, null, OidcTestFixtures.CODE_CHALLENGE, "S256");
     String code = client.extractAuthCode(login);
     Assertions.assertNotNull(code);
 

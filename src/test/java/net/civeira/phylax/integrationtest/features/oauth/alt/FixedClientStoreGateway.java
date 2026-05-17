@@ -62,6 +62,8 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   private ClientDetails buildClient() {
     return ClientDetails.builder().clientId(OidcTestFixtures.CLIENT_ID)
         .allowedScopes(allowedScopes.get()).allowedGrants(allowedGrants).protectedWithSecret(true)
+        .isResourceServer(true).postLogoutRedirectUris(
+            List.of("http://localhost/after-logout", "http://localhost/callback"))
         .build();
   }
 }

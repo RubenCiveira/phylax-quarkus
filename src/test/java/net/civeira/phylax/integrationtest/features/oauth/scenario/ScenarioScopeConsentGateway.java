@@ -106,6 +106,11 @@ public class ScenarioScopeConsentGateway implements ScopesConsentGateway, ScopeA
     // no-op in tests
   }
 
+  @Override
+  public void revokeScopeConsent(String tenant, String username, String clientUid, String scope) {
+    // no-op in tests
+  }
+
   private List<ScopePermission> buildPermissions(String clientId, List<String> requestedScopes) {
     return pendingProvider.apply(clientId, requestedScopes).stream()
         .map(s -> ScopePermission.builder().scope(s).required(true).build()).toList();
