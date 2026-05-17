@@ -205,7 +205,7 @@ profile:
     empty: "No active sessions"
     backToProfile: "Back to profile"
   consents:
-    title: "Authorized applications"
+    title: "Consent management"
     help: "These applications have been granted access to your account"
     client: "Application"
     scopes: "Permissions"
@@ -214,6 +214,18 @@ profile:
     empty: "No applications authorized"
     backToProfile: "Back to profile"
     unknown: "Unknown"
+    revokedClient: "Access for {0} has been revoked. Existing sessions for this app may remain active until they expire."
+    revokedScope: "Scope ''{0}'' for {1} has been revoked. Existing sessions for this app may remain active until they expire."
+    revokeScope: "Revoke scope"
+    terms:
+      title: "Terms of use"
+      help: "These are the terms and conditions you have accepted"
+      document: "Terms"
+      acceptedOn: "Accepted on"
+      outdated: "Re-acceptance required"
+      empty: "No terms accepted"
+    oauth:
+      title: "Authorized applications"
   passkeys:
     title: "Passkeys"
     help: "These are the passkeys registered on your account"

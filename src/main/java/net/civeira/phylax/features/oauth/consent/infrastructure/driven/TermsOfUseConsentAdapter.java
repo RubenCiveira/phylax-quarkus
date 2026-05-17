@@ -48,6 +48,7 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
     User user = userOpt.get();
     List<TenantTermsOfUse> activeTerms =
         terms.list(TenantTermsOfUseFilter.builder().tenant(user.getTenant()).build()).stream()
+            .filter(TenantTermsOfUse::isEnabled)
             .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
                 .orElse(false))
             .sorted(Comparator.comparing(t -> t.getActivationDate().orElse(OffsetDateTime.MIN)))

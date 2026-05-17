@@ -125,6 +125,19 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     }
   }
 
+  @Override
+  public void revokeScopeConsent(String tenant, String username, String clientUid, String scope) {
+    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    if (user == null) {
+      return;
+    }
+    consentWrite
+        .listForUpdate(UserConsentedScopesFilter.builder().user(user)
+            .trustedClient(TrustedClientReference.of(clientUid)).build())
+        .stream().filter(c -> scope.equals(c.getScope().orElse(null)))
+        .forEach(c -> consentWrite.delete(c.delete()));
+  }
+
   // -------------------------------------------------------------------------
   // ScopeApprovalGateway — delegates to the consent logic above
   // -------------------------------------------------------------------------

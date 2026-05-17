@@ -61,4 +61,14 @@ public interface ScopesConsentGateway {
    * @param clientUid UID of the trusted client whose consents are to be removed
    */
   void revokeClientConsent(String tenant, String username, String clientUid);
+
+  /**
+   * Revokes a single scope consent granted by the user to a specific client.
+   *
+   * @param tenant tenant identifier
+   * @param username username
+   * @param clientUid UID of the trusted client
+   * @param scope the scope to revoke
+   */
+  void revokeScopeConsent(String tenant, String username, String clientUid, String scope);
 }

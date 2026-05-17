@@ -2,11 +2,11 @@
 package net.civeira.phylax.features.oauth.consent.infrastructure;
 
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseFilter;
@@ -29,27 +29,14 @@ public class RequiredConsentService {
   private final UserAcceptedTermnsOfUseWriteRepositoryGateway userTermsWriter;
 
   public Optional<TenantTermsOfUse> findPendingTerms(User user) {
-    TenantRef tenantRef = user.getTenant();
-    Optional<TenantTermsOfUse> find =
-        terms.list(TenantTermsOfUseFilter.builder().tenant(tenantRef).build()).stream()
-            .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
-                .orElse(false))
-            .sorted((a, b) -> a.getActivationDate().orElseThrow()
-                .compareTo(b.getActivationDate().orElseThrow()))
-            .findFirst();
-    if (find.isPresent()) {
-      TenantTermsOfUse conditions = find.get();
-      Optional<OffsetDateTime> activationDateValue = conditions.getActivationDate();
-      if (activationDateValue.isPresent()
-          && activationDateValue.get().isBefore(OffsetDateTime.now())) {
-        Optional<UserAcceptedTermnsOfUse> accepted = userTerms.find(
-            UserAcceptedTermnsOfUseFilter.builder().conditions(conditions).user(user).build());
-        if (!accepted.isPresent()) {
-          return Optional.of(conditions);
-        }
-      }
-    }
-    return Optional.empty();
+    return terms.list(TenantTermsOfUseFilter.builder().tenant(user.getTenant()).build()).stream()
+        .filter(TenantTermsOfUse::isEnabled)
+        .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
+            .orElse(false))
+        .filter(term -> userTerms
+            .find(UserAcceptedTermnsOfUseFilter.builder().conditions(term).user(user).build())
+            .isEmpty())
+        .max(Comparator.comparing(t -> t.getActivationDate().orElse(OffsetDateTime.MIN)));
   }
 
   public void acceptPendingTerms(User user, String conditionsUid) {
