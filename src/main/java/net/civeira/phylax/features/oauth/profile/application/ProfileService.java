@@ -10,9 +10,11 @@ import net.civeira.phylax.features.oauth.profile.domain.ActiveSession;
 import net.civeira.phylax.features.oauth.profile.domain.MfaSetup;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
+import net.civeira.phylax.features.oauth.profile.domain.WebAuthnCredentialSummary;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.PasswordGateway;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.ProfileGateway;
+import net.civeira.phylax.features.oauth.profile.domain.gateway.ProfileWebAuthnGateway;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.SessionsGateway;
 
 /**
@@ -31,6 +33,7 @@ public class ProfileService {
   private final MfaGateway mfaGateway;
   private final PasswordGateway passwordGateway;
   private final SessionsGateway sessionsGateway;
+  private final ProfileWebAuthnGateway webAuthnGateway;
 
   public Optional<OidcProfile> getProfile(String userUid) {
     return profileGateway.findByUser(userUid);
@@ -66,5 +69,17 @@ public class ProfileService {
 
   public void revokeSession(String sessionId) {
     sessionsGateway.revoke(sessionId);
+  }
+
+  public List<WebAuthnCredentialSummary> listPasskeys(String userUid, String tenantId) {
+    return webAuthnGateway.listCredentials(userUid, tenantId);
+  }
+
+  public void renamePasskey(String credentialId, String userUid, String tenantId, String newName) {
+    webAuthnGateway.renameCredential(credentialId, userUid, tenantId, newName);
+  }
+
+  public void deletePasskey(String credentialId, String userUid, String tenantId) {
+    webAuthnGateway.deleteCredential(credentialId, userUid, tenantId);
   }
 }

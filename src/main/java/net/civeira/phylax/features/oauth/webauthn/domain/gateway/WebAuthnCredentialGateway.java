@@ -17,4 +17,8 @@ public interface WebAuthnCredentialGateway {
 
   void updateSignCount(String credentialId, String tenantId, int signCount,
       OffsetDateTime lastUsedAt);
+
+  void rename(String credentialId, String userUid, String tenantId, String newName);
+
+  void delete(String credentialId, String userUid, String tenantId);
 }

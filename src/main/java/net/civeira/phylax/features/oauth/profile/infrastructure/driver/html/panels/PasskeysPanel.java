@@ -1,0 +1,65 @@
+package net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels;
+
+import static net.civeira.phylax.features.oauth.profile.infrastructure.driver.html.panels.HtmlEscape.esc;
+
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.features.oauth.profile.domain.WebAuthnCredentialSummary;
+
+@ApplicationScoped
+public class PasskeysPanel {
+
+  private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+  public String render(List<WebAuthnCredentialSummary> credentials, String renameBaseUrl,
+      String deleteBaseUrl, String cancelUrl, String error, YamlLocaleMessages t) {
+
+    String title = "<h1>" + t.get("profile.passkeys.title") + "</h1>";
+    String help = "<p>" + t.get("profile.passkeys.help") + "</p>";
+    String errorHtml =
+        error != null && !error.isBlank() ? "<p class=\"error\">" + esc(error) + "</p>" : "";
+
+    StringBuilder cards = new StringBuilder();
+    for (WebAuthnCredentialSummary cred : credentials) {
+      String id = esc(cred.getId());
+      String name =
+          esc(cred.getName().filter(s -> !s.isBlank()).orElse(t.get("profile.passkeys.unnamed")));
+      String created =
+          esc(cred.getCreatedAt() != null ? cred.getCreatedAt().format(DATE_FMT) : "—");
+      String lastUsed = esc(cred.getLastUsedAt().map(d -> d.format(DATE_FMT))
+          .orElse(t.get("profile.passkeys.never")));
+
+      String renameForm = "<form method=\"POST\" action=\""
+          + esc(renameBaseUrl + "/" + cred.getId() + "/rename") + "\" class=\"profile-actions\">"
+          + "<input type=\"text\" name=\"name\" value=\"" + esc(cred.getName().orElse(""))
+          + "\" required />" + "<input class=\"secondary-button\" type=\"submit\" value=\""
+          + esc(t.get("profile.passkeys.rename")) + "\" />" + "</form>";
+
+      String deleteForm = "<form method=\"POST\" action=\""
+          + esc(deleteBaseUrl + "/" + cred.getId() + "/delete") + "\" class=\"profile-actions\">"
+          + "<input class=\"secondary-button\" type=\"submit\" value=\""
+          + esc(t.get("profile.passkeys.delete")) + "\" onclick=\"return confirm('"
+          + esc(t.get("profile.passkeys.deleteConfirm")) + "')\" />" + "</form>";
+
+      cards.append("<div class=\"section-card\" style=\"margin-bottom: 1rem;\">")
+          .append("<p><strong>").append(t.get("profile.passkeys.name")).append(":</strong> ")
+          .append(name).append("</p>").append("<p><strong>")
+          .append(t.get("profile.passkeys.createdAt")).append(":</strong> ").append(created)
+          .append("</p>").append("<p><strong>").append(t.get("profile.passkeys.lastUsed"))
+          .append(":</strong> ").append(lastUsed).append("</p>").append(renameForm)
+          .append(deleteForm).append("</div>");
+    }
+
+    if (cards.isEmpty()) {
+      cards.append("<p>").append(t.get("profile.passkeys.empty")).append("</p>");
+    }
+
+    String backLink = "<div class=\"profile-actions\"><a class=\"secondary-button\" href=\""
+        + esc(cancelUrl) + "\">" + t.get("profile.passkeys.backToProfile") + "</a></div>";
+
+    return title + help + errorHtml + cards + backLink;
+  }
+}

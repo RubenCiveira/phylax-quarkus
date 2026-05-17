@@ -143,6 +143,7 @@ profile:
     manageSessions: "Sessions"
     recoveryCodes: "Recovery codes"
     manageConsents: "Authorized applications"
+    managePasskeys: "Passkeys"
   recovery-codes:
     title: "Recovery codes"
     count: "You have {0} unused recovery codes"
@@ -211,6 +212,19 @@ profile:
     empty: "No applications authorized"
     backToProfile: "Back to profile"
     unknown: "Unknown"
+  passkeys:
+    title: "Passkeys"
+    help: "These are the passkeys registered on your account"
+    name: "Device name"
+    unnamed: "Unnamed passkey"
+    createdAt: "Registered"
+    lastUsed: "Last used"
+    never: "Never"
+    rename: "Rename"
+    delete: "Remove"
+    deleteConfirm: "Are you sure you want to remove this passkey?"
+    empty: "No passkeys registered"
+    backToProfile: "Back to profile"
   auth:
     title: "Not signed in"
     help: "You must be signed in to view this page"

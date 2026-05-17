@@ -1,0 +1,14 @@
+package net.civeira.phylax.features.oauth.profile.domain.gateway;
+
+import java.util.List;
+
+import net.civeira.phylax.features.oauth.profile.domain.WebAuthnCredentialSummary;
+
+public interface ProfileWebAuthnGateway {
+
+  List<WebAuthnCredentialSummary> listCredentials(String userUid, String tenantId);
+
+  void renameCredential(String credentialId, String userUid, String tenantId, String newName);
+
+  void deleteCredential(String credentialId, String userUid, String tenantId);
+}

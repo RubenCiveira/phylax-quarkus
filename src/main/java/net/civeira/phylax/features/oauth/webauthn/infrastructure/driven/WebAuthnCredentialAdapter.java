@@ -42,4 +42,14 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
       OffsetDateTime lastUsedAt) {
     log.warn("WebAuthnCredentialAdapter is a stub — sign count not updated for {}", credentialId);
   }
+
+  @Override
+  public void rename(String credentialId, String userUid, String tenantId, String newName) {
+    log.warn("WebAuthnCredentialAdapter is a stub — credential {} not renamed", credentialId);
+  }
+
+  @Override
+  public void delete(String credentialId, String userUid, String tenantId) {
+    log.warn("WebAuthnCredentialAdapter is a stub — credential {} not deleted", credentialId);
+  }
 }
