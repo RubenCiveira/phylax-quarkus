@@ -5,6 +5,9 @@
 
 ## Problem
 
+Wrog issue: the consent is not allowed to be updated. Consent policy cant be modified, the IAM management team must create a new consent policy, and then 
+the user must accept the new policy.
+
 Users are not prompted to re-accept when terms of use are updated. The system doesn't track
 which version of the terms a user accepted — any update to terms requires all users to accept
 again with no ability to grandfatherly-accept unchanged clauses.
