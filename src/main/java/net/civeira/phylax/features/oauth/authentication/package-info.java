@@ -15,11 +15,11 @@
  * the canonical entry object for every authorization request.</li>
  * <li>{@code AuthenticationResult} — right/left discriminated union returned by
  * {@code AuthenticateUser}. Carries either a fully authenticated principal or an active
- * {@code AuthenticationChallege} that the HTML step-router must present next.</li>
+ * {@code AuthenticationChallenge} that the HTML step-router must present next.</li>
  * <li>{@code AuthenticationData} — immutable snapshot of a pre-authenticated user loaded after
  * credential validation: roles, MFA enrollment status, required-challenge flags, active consent
  * obligations, and delegated-provider information.</li>
- * <li>{@code AuthenticationChallege} — enum encoding every interactive challenge the flow may
+ * <li>{@code AuthenticationChallenge} — enum encoding every interactive challenge the flow may
  * require: PASSWORD, MFA, FRESH_PASSWORD, USE_CONSENT, CLIENT_CONSENT, DELEGATED, MAGIC_LINK,
  * REGISTRATION, WEBAUTHN. Drives the {@code OidcStepRouter} dispatch table.</li>
  * <li>{@code ChallengesState} — serializable bag of challenge-progress flags attached to the OIDC
@@ -78,7 +78,7 @@
  * authentication/
  * ├── domain/
  * │   ├── AuthRequest.java / AuthenticationResult.java / AuthenticationData.java
- * │   ├── AuthenticationChallege.java / ChallengesState.java / PkceChallenge.java
+ * │   ├── AuthenticationChallenge.java / ChallengesState.java / PkceChallenge.java
  * │   ├── StepName.java / AuthenticationMode.java / AuthenticationRequest.java
  * │   ├── event/          — LoginSucceededEvent, LoginFailedEvent, UserLocked, UserUnlocked
  * │   └── exception/      — LoginException hierarchy (WrongCredentials, MfaRequired, etc.)

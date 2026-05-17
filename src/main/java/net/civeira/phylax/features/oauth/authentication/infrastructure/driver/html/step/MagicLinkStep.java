@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
@@ -28,7 +28,7 @@ public class MagicLinkStep implements OidcStep {
   private final RequestMagicLinkUsecase requestMagicLink;
 
   @Override
-  public AuthenticationChallege challenge() {
+  public AuthenticationChallenge challenge() {
     return null;
   }
 

@@ -40,7 +40,7 @@ import net.civeira.phylax.features.oauth.authentication.application.Authenticate
 import net.civeira.phylax.features.oauth.authentication.application.BackChannelLogoutDispatcher;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
@@ -488,7 +488,7 @@ public class AuthorizeHtml {
     String username = session.getValidationData().getUsername();
     // Mark PASSWORD as already completed so the step router skips to MFA
     ChallengesState stepUpState =
-        ChallengesState.empty(username).withCompleted(AuthenticationChallege.PASSWORD);
+        ChallengesState.empty(username).withCompleted(AuthenticationChallenge.PASSWORD);
     NewCookie preSession = cookieManager.writePreSession(stepUpState, request.getTenant());
     StepInput input = StepInput.builder().request(request).clientDetails(client)
         .challenges(Optional.of(stepUpState)).formParams(new MultivaluedHashMap<>()).build();
@@ -565,7 +565,7 @@ public class AuthorizeHtml {
       return stepOutcomeHandler.handle(outcome.get(), input, paramMap);
     }
 
-    List<AuthenticationChallege> challenges =
+    List<AuthenticationChallenge> challenges =
         challengeState.map(ChallengesState::getCompleted).orElseGet(List::of);
     return doExecLogin(clientDetails, request, paramMap, challenges);
   }
@@ -574,7 +574,7 @@ public class AuthorizeHtml {
    * Executes a username/password login and routes results.
    */
   private Response doExecLogin(ClientDetails clientDetails, AuthRequest request,
-      MultivaluedMap<String, String> paramMap, List<AuthenticationChallege> challenges) {
+      MultivaluedMap<String, String> paramMap, List<AuthenticationChallenge> challenges) {
     String password = securer.decrypt(first(paramMap, "password"));
     AuthenticationResult result = authenticateUser.authenticate(request, challenges,
         first(paramMap, USERNAME), password, clientDetails);

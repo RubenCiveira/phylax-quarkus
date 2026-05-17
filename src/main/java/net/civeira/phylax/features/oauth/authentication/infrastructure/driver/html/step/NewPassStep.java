@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.NewPasswordRequiredException;
@@ -38,8 +38,8 @@ public class NewPassStep implements OidcStep {
   private final ChangePasswordUsecase changePasswordUsecase;
 
   @Override
-  public AuthenticationChallege challenge() {
-    return AuthenticationChallege.FRESH_PASSWORD;
+  public AuthenticationChallenge challenge() {
+    return AuthenticationChallenge.FRESH_PASSWORD;
   }
 
   @Override

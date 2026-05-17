@@ -5,7 +5,7 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
 
@@ -29,7 +29,7 @@ public class NoOpScopeApprovalAdapter implements ScopeApprovalGateway {
    */
   @Override
   public List<ScopePermission> pendingApprovals(String tenant, String username, String clientId,
-      List<String> requestedScopes, List<AuthenticationChallege> completedChallenges) {
+      List<String> requestedScopes, List<AuthenticationChallenge> completedChallenges) {
     return List.of();
   }
 

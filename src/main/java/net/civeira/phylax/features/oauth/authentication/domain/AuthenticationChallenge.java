@@ -10,7 +10,7 @@ package net.civeira.phylax.features.oauth.authentication.domain;
  * Design notes: - Used to track which challenges are complete. - Used to decide next steps in the
  * UI flow.
  */
-public enum AuthenticationChallege {
+public enum AuthenticationChallenge {
 
   PASSWORD, MFA, FRESH_PASSWORD, USE_CONSENT, CLIENT_CONSENT;
 }

@@ -103,7 +103,7 @@ public class ClientDetails {
    * @param grant grant type name
    * @return true when the grant is allowed
    */
-  public boolean allowdedGrant(String grant) {
+  public boolean allowedGrant(String grant) {
     return allowedGrants.contains(grant);
   }
 

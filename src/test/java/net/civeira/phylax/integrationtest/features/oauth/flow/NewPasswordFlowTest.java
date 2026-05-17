@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
@@ -30,7 +30,7 @@ class NewPasswordFlowTest extends OidcIntegrationTestBase {
     String preSession = client.extractPreSessionCookie(response);
     Assertions.assertNotNull(preSession);
     Assertions.assertTrue(
-        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.FRESH_PASSWORD));
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallenge.FRESH_PASSWORD));
   }
 
   @Test

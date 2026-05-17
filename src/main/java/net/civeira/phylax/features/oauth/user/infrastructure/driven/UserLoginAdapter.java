@@ -7,7 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
@@ -24,7 +24,7 @@ public class UserLoginAdapter implements LoginGateway {
 
   @Override
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails appkey, List<AuthenticationChallege> challenges, AuthenticationMode mode) {
+      ClientDetails appkey, List<AuthenticationChallenge> challenges, AuthenticationMode mode) {
     AuthenticationResult result =
         login.validatePreAuthenticated(request, username, appkey, challenges, mode);
     eventDispatcher.dispatch(result);
@@ -33,7 +33,7 @@ public class UserLoginAdapter implements LoginGateway {
 
   @Override
   public AuthenticationResult validateUserData(AuthRequest request, String username,
-      String password, ClientDetails appkey, List<AuthenticationChallege> challenges) {
+      String password, ClientDetails appkey, List<AuthenticationChallenge> challenges) {
     AuthenticationResult result =
         login.validateUserData(request, username, password, appkey, challenges);
     eventDispatcher.dispatch(result);

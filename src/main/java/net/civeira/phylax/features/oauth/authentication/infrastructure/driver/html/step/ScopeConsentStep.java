@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.ClientScopeConsentRequiredException;
@@ -44,8 +44,8 @@ public class ScopeConsentStep implements OidcStep {
   private final ScopeApprovalUsecase scopeApprovalUsecase;
 
   @Override
-  public AuthenticationChallege challenge() {
-    return AuthenticationChallege.CLIENT_CONSENT;
+  public AuthenticationChallenge challenge() {
+    return AuthenticationChallenge.CLIENT_CONSENT;
   }
 
   @Override
@@ -82,7 +82,7 @@ public class ScopeConsentStep implements OidcStep {
   private ResponseBuilder buildForm(StepInput input, String username, String msg) {
     String clientId = input.getRequest().getClientId().orElse("");
     String scopeString = input.getRequest().getScope().orElse("");
-    List<AuthenticationChallege> completed =
+    List<AuthenticationChallenge> completed =
         input.getChallenges().map(ChallengesState::getCompleted).orElse(List.of());
     List<ScopePermission> pending = scopeApprovalUsecase.pendingApprovals(
         input.getRequest().getTenant(), username, clientId, scopeString, completed);

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.Response;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
@@ -37,14 +37,14 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
         OidcTestFixtures.PASSWORD, null);
     String preSession = client.extractPreSessionCookie(login);
     Assertions.assertTrue(
-        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.USE_CONSENT));
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallenge.USE_CONSENT));
 
     Response consent =
         client.submitConsent(OidcTestFixtures.TENANT, "on", OidcTestFixtures.CLIENT_ID, preSession);
     String preSessionAfterConsent = client.extractPreSessionCookie(consent);
     Assertions.assertNotNull(preSessionAfterConsent);
     Assertions.assertTrue(decodeChallenge(preSessionAfterConsent).getCompleted()
-        .contains(AuthenticationChallege.MFA));
+        .contains(AuthenticationChallenge.MFA));
 
     Response mfa = client.submitMfa(OidcTestFixtures.TENANT, OidcTestFixtures.MFA_CODE,
         preSessionAfterConsent);
@@ -70,14 +70,14 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
         OidcTestFixtures.PASSWORD, null);
     String preSession = client.extractPreSessionCookie(login);
     Assertions.assertTrue(
-        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.FRESH_PASSWORD));
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallenge.FRESH_PASSWORD));
 
     Response newPass = client.submitNewPass(OidcTestFixtures.TENANT, OidcTestFixtures.PASSWORD,
         "New@Password1", preSession);
     String preSessionAfterPass = client.extractPreSessionCookie(newPass);
     Assertions.assertNotNull(preSessionAfterPass);
     Assertions.assertTrue(decodeChallenge(preSessionAfterPass).getCompleted()
-        .contains(AuthenticationChallege.USE_CONSENT));
+        .contains(AuthenticationChallenge.USE_CONSENT));
 
     Response consent = client.submitConsent(OidcTestFixtures.TENANT, "on",
         OidcTestFixtures.CLIENT_ID, preSessionAfterPass);
@@ -102,7 +102,7 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Assertions
         .assertTrue(login.getBody().asString().contains("name=\"step\" value=\"scope_consent\""));
     Assertions.assertTrue(
-        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallege.CLIENT_CONSENT));
+        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallenge.CLIENT_CONSENT));
 
     Response scopeConsent = client.submitScopeConsent(OidcTestFixtures.TENANT, preSession,
         List.of("openid", "profile", "email"));

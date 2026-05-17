@@ -10,7 +10,7 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
@@ -43,13 +43,13 @@ public class ScenarioLoginGateway implements LoginGateway {
 
   @Override
   public AuthenticationResult validateUserData(AuthRequest request, String username,
-      String password, ClientDetails client, List<AuthenticationChallege> challenges) {
+      String password, ClientDetails client, List<AuthenticationChallenge> challenges) {
     return onValidate.get();
   }
 
   @Override
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails client, List<AuthenticationChallege> challenges, AuthenticationMode mode) {
+      ClientDetails client, List<AuthenticationChallenge> challenges, AuthenticationMode mode) {
     return onPreAuth.get();
   }
 

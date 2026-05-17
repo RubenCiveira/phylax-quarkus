@@ -41,7 +41,7 @@ permits StepOutcome.Render,StepOutcome.Proceed
    * {@code challengesState} carries the challenge state that was active when the step executed
    * (i.e. what was in {@link StepInput#getChallenges()} at that moment). The controller uses it
    * to call {@code fillPreAuthenticated()} and, if a further challenge is required, extends the
-   * state with {@link ChallengesState#withCompleted(net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege)}
+   * state with {@link ChallengesState#withCompleted(net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge)}
    * before writing a new {@code PRE_SESSION_ID} cookie.
    *
    * @param username         the authenticated username

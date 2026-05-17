@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
 
@@ -42,7 +42,7 @@ public class ScopeApprovalUsecase {
    * @return pending scopes requiring approval; empty list if none
    */
   public List<ScopePermission> pendingApprovals(String tenant, String username, String clientId,
-      String scopeString, List<AuthenticationChallege> completedChallenges) {
+      String scopeString, List<AuthenticationChallenge> completedChallenges) {
     List<String> scopes = normalizeScopes(scopeString);
     return gateway.pendingApprovals(tenant, username, clientId, scopes, completedChallenges);
   }

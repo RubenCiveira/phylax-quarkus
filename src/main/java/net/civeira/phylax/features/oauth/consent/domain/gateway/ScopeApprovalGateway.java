@@ -3,7 +3,7 @@ package net.civeira.phylax.features.oauth.consent.domain.gateway;
 
 import java.util.List;
 
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 
 /**
@@ -40,7 +40,7 @@ public interface ScopeApprovalGateway {
    * @return pending scopes requiring approval; empty list if none
    */
   List<ScopePermission> pendingApprovals(String tenant, String username, String clientId,
-      List<String> requestedScopes, List<AuthenticationChallege> completedChallenges);
+      List<String> requestedScopes, List<AuthenticationChallenge> completedChallenges);
 
   /**
    * Persists the set of scopes the user has accepted.

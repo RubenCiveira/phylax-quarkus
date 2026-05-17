@@ -230,7 +230,7 @@ public class TokenController {
     if (loadClient.isPresent()) {
       ClientDetails clientDetails = loadClient.get();
       String grant = paramMap.getFirst("grant_type");
-      if (clientDetails.allowdedGrant(grant)) {
+      if (clientDetails.allowedGrant(grant)) {
         for (TokenGranter granter : granters) {
           if (granter.canHandle(grant)) {
             return processGranterHandler(tenant, req, headers, paramMap, granter, clientDetails);

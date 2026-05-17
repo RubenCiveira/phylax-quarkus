@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
@@ -47,7 +47,7 @@ public class DelegatedStep implements OidcStep {
   private final DelegateLogin delegateLogin;
 
   @Override
-  public AuthenticationChallege challenge() {
+  public AuthenticationChallenge challenge() {
     return null;
   }
 

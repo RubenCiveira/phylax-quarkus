@@ -38,7 +38,7 @@ import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAss
 import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentFilter;
 import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentReadRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
@@ -77,7 +77,7 @@ public class UserLoginService {
   private final ScopesConsentUsecase scopesConsent;
 
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails appkey, List<AuthenticationChallege> challenges, AuthenticationMode mode) {
+      ClientDetails appkey, List<AuthenticationChallenge> challenges, AuthenticationMode mode) {
     if (log.isInfoEnabled()) {
       log.info("preAuth throught app {}, after {}", appkey, challenges);
     }
@@ -85,7 +85,7 @@ public class UserLoginService {
   }
 
   public AuthenticationResult validateUserData(AuthRequest request, String username,
-      String password, ClientDetails appkey, List<AuthenticationChallege> challenges) {
+      String password, ClientDetails appkey, List<AuthenticationChallenge> challenges) {
     if (log.isInfoEnabled()) {
       log.info("validate throught app {}, after {}", appkey, challenges);
     }
@@ -94,7 +94,7 @@ public class UserLoginService {
 
   // @Deprecated
   // public AuthenticationResult validateMfa(AuthRequest request, String username, String secreto,
-  // ClientDetails client, List<AuthenticationChallege> challenges) {
+  // ClientDetails client, List<AuthenticationChallenge> challenges) {
   // if (otp.validateOtp(request.getTenant(), username, request.getAudiences(), secreto)) {
   // return userData(request, username, null, AuthenticationMode.MFA);
   // } else {

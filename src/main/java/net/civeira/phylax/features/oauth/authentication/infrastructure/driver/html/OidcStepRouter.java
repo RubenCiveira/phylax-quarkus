@@ -11,7 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 
 /**
@@ -83,7 +83,7 @@ public class OidcStepRouter {
   }
 
   /**
-   * Returns the {@link AuthenticationChallege} associated with the given exception.
+   * Returns the {@link AuthenticationChallenge} associated with the given exception.
    *
    * Used by the controller to build the updated
    * {@link net.civeira.phylax.features.oauth.authentication.domain.ChallengesState} before writing
@@ -92,7 +92,7 @@ public class OidcStepRouter {
    * @param exceptionClass the exception thrown by {@code fillPreAuthenticated()}
    * @return the challenge, or {@code empty} if the exception is not mapped to any step
    */
-  public Optional<AuthenticationChallege> challengeFor(
+  public Optional<AuthenticationChallenge> challengeFor(
       Class<? extends AuthenticationException> exceptionClass) {
     initCache();
     OidcStep step = byException.get(exceptionClass);

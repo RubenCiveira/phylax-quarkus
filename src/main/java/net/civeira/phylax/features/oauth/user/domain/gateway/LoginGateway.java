@@ -4,7 +4,7 @@ package net.civeira.phylax.features.oauth.user.domain.gateway;
 import java.util.List;
 
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
@@ -34,7 +34,7 @@ public interface LoginGateway {
    * @return authentication result
    */
   AuthenticationResult validateUserData(AuthRequest request, String username, String password,
-      ClientDetails client, List<AuthenticationChallege> challenges);
+      ClientDetails client, List<AuthenticationChallenge> challenges);
 
   /**
    * Loads pre-authenticated user data without password.
@@ -49,5 +49,5 @@ public interface LoginGateway {
    * @return authentication result
    */
   AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
-      ClientDetails client, List<AuthenticationChallege> challenges, AuthenticationMode mode);
+      ClientDetails client, List<AuthenticationChallenge> challenges, AuthenticationMode mode);
 }

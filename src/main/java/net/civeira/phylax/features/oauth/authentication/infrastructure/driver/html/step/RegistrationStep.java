@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
@@ -45,7 +45,7 @@ public class RegistrationStep implements OidcStep {
   private final CurrentRequest current;
 
   @Override
-  public AuthenticationChallege challenge() {
+  public AuthenticationChallenge challenge() {
     return null;
   }
 

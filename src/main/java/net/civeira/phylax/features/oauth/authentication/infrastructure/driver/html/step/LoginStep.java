@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
@@ -51,7 +51,7 @@ public class LoginStep implements OidcStep {
   private final RequestMagicLinkUsecase magicLink;
 
   @Override
-  public AuthenticationChallege challenge() {
+  public AuthenticationChallenge challenge() {
     return null;
   }
 

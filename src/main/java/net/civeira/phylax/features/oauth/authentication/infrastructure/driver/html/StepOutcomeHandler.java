@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.application.AuthenticateUser;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
@@ -78,7 +78,7 @@ public class StepOutcomeHandler {
           result.getData(), paramMap);
     }
     AuthenticationException ex = result.getFail();
-    Optional<AuthenticationChallege> ch = router.challengeFor(ex.getClass());
+    Optional<AuthenticationChallenge> ch = router.challengeFor(ex.getClass());
     StepInput fallbackInput = StepInput.builder().request(request).clientDetails(client)
         .challenges(Optional.of(currentState)).formParams(paramMap).build();
     if (ch.isEmpty()) {

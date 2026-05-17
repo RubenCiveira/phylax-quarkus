@@ -85,7 +85,7 @@ public class DevicesAccessController {
     }
 
     ClientDetails client = clientOpt.get();
-    if (!client.allowdedGrant(DeviceAuthorizationService.grantType())) {
+    if (!client.allowedGrant(DeviceAuthorizationService.grantType())) {
       return errorResponse(400, "unauthorized_client", "Client not allowed to use device flow");
     }
 

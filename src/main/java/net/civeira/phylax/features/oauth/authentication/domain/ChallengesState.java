@@ -38,7 +38,7 @@ public class ChallengesState {
    */
   @JsonAlias("challenges")
   @Builder.Default
-  List<AuthenticationChallege> completed = List.of();
+  List<AuthenticationChallenge> completed = List.of();
 
   /**
    * Factory for a fresh state with no completed challenges.
@@ -56,8 +56,8 @@ public class ChallengesState {
    * @param challenge the challenge that was just satisfied
    * @return new immutable state with the challenge added
    */
-  public ChallengesState withCompleted(AuthenticationChallege challenge) {
-    List<AuthenticationChallege> next = new ArrayList<>(completed);
+  public ChallengesState withCompleted(AuthenticationChallenge challenge) {
+    List<AuthenticationChallenge> next = new ArrayList<>(completed);
     next.add(challenge);
     return toBuilder().completed(Collections.unmodifiableList(next)).build();
   }

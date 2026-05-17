@@ -21,7 +21,7 @@ import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsent
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesReadRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesWriteRepositoryGateway;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
@@ -131,7 +131,7 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
 
   @Override
   public List<ScopePermission> pendingApprovals(String tenant, String username, String clientId,
-      List<String> requestedScopes, List<AuthenticationChallege> completedChallenges) {
+      List<String> requestedScopes, List<AuthenticationChallenge> completedChallenges) {
     return pendingScopes(tenant, username, clientId, requestedScopes);
   }
 

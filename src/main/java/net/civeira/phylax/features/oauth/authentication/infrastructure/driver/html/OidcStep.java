@@ -6,7 +6,7 @@ import java.util.Set;
 
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallege;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 
 /**
@@ -27,7 +27,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.Authent
 public interface OidcStep {
 
   /**
-   * The {@link AuthenticationChallege} enum value that this step satisfies.
+   * The {@link AuthenticationChallenge} enum value that this step satisfies.
    *
    * Used by {@link OidcStepRouter} to build the challenge → step mapping so that when
    * {@code fillPreAuthenticated()} throws a challenge-related exception, the router knows which
@@ -36,7 +36,7 @@ public interface OidcStep {
    * @return the challenge this step satisfies, or {@code null} if this step is not associated with
    *         any authentication challenge (e.g. recover password, registration)
    */
-  AuthenticationChallege challenge();
+  AuthenticationChallenge challenge();
 
   /**
    * The exception class that triggers the {@link #paint} of this step.
