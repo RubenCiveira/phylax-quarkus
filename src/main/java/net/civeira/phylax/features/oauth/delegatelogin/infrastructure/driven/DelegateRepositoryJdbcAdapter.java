@@ -2,14 +2,13 @@
 package net.civeira.phylax.features.oauth.delegatelogin.infrastructure.driven;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Base64;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -57,13 +56,13 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
   public void cleanTemp() throws SQLException {
     try (Connection connection = source.getConnection()) {
       try (PreparedStatement prepareStatement =
-          connection.prepareStatement("DELETE FROM _oauth_delegated_codes where expiration < ?")) {
+          connection.prepareStatement("DELETE FROM _oauth_delegated_state where expires_at < ?")) {
         prepareStatement.setTimestamp(1, new Timestamp(System.currentTimeMillis() - 60000));
         prepareStatement.execute();
       }
     } catch (SQLException ex) {
       if (isMissingTable(ex)) {
-        log.debug("Skipping delegated token cleanup, table _oauth_delegated_codes is missing");
+        log.debug("Skipping delegated token cleanup, table _oauth_delegated_state is missing");
         return;
       }
       throw ex;
@@ -86,7 +85,21 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
    */
   @Override
   public void save(AuthRequest request, String code, TokenInfo token) {
-    write(code, Base64.getEncoder().encodeToString(format(token).getBytes(StandardCharsets.UTF_8)));
+    String json = format(token);
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(
+            "INSERT INTO _oauth_delegated_state (uid, tenant_id, state_token, provider_id, session_context_json, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      stat.setString(1, UUID.randomUUID().toString());
+      stat.setString(2, token.getRequest().getTenant());
+      stat.setString(3, code);
+      stat.setString(4, token.getProvider());
+      stat.setString(5, json);
+      stat.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+      stat.setTimestamp(7, new Timestamp(System.currentTimeMillis() + 60000));
+      stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
   }
 
   /**
@@ -110,27 +123,6 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
   }
 
   /**
-   * Writes a token record to the database.
-   *
-   * Inserts the token with a short expiration timestamp. Throws when database operations fail.
-   *
-   * @param code temporary code
-   * @param token token payload
-   */
-  private void write(String code, String token) {
-    try (Connection conn = source.getConnection();
-        PreparedStatement stat = conn.prepareStatement(
-            "INSERT INTO _oauth_delegated_codes (expiration, code, token) VALUES (?, ?, ?)")) {
-      stat.setTimestamp(1, new Timestamp(System.currentTimeMillis() + 60000));
-      stat.setString(2, code);
-      stat.setString(3, token);
-      stat.execute();
-    } catch (SQLException ex) {
-      throw new IllegalStateException(ex);
-    }
-  }
-
-  /**
    * Loads a delegated token by code.
    *
    * Reads and decodes the token payload if not expired. Filters out tokens from other tenants.
@@ -144,7 +136,7 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
     Optional<String> response = Optional.empty();
     try (Connection connection = source.getConnection();
         PreparedStatement stat = connection.prepareStatement(
-            "SELECT token from _oauth_delegated_codes where code=? and expiration > ?")) {
+            "SELECT session_context_json FROM _oauth_delegated_state WHERE state_token=? AND expires_at > ?")) {
       stat.setString(1, code);
       stat.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
       try (ResultSet res = stat.executeQuery()) {
@@ -174,9 +166,8 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
    * @return optional token info
    */
   public Optional<TokenInfo> readToken(String str) {
-    String res = new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
     try {
-      return Optional.of(mapper.readValue(res, TokenInfo.class));
+      return Optional.of(mapper.readValue(str, TokenInfo.class));
     } catch (IOException ex) {
       log.warn("Se intenta login con un token sso invalido", ex);
       return Optional.empty();
