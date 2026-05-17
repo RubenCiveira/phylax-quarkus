@@ -21,14 +21,14 @@ with client A is forced to re-enter credentials when client B initiates `/author
 Currently one cookie (`AUTH_SESSION_ID`) stores both the per-flow authorization request state
 and the SSO identity. These have different lifetimes and scopes:
 
-- **SSO cookie** (`PHYLAX_SSO`): long-lived (`sessionSsoTtlSeconds`), cross-client, set after
+- **SSO cookie** (`AUTH_SSO`): long-lived (`sessionSsoTtlSeconds`), cross-client, set after
   password/MFA completes. Points to the `_oauth_session.session` PK.
 - **Per-flow cookie** (`AUTH_SESSION_ID`): short-lived (authorization code lifetime), scoped to a
   single `/authorize` request. Can be deleted once the code is issued.
 
 Implement the split in `OidcCookieManager` (or equivalent):
 - On first successful login: set both cookies.
-- On subsequent `/authorize` from a different client: read `PHYLAX_SSO`, skip login steps.
+- On subsequent `/authorize` from a different client: read `AUTH_SSO`, skip login steps.
 - On logout: delete both.
 
 ### 2. Add `authTime` and SSO client tracking to `SessionInfo`
@@ -47,7 +47,7 @@ The session adapter must serialize/deserialize this field.
 ### 3. SSO session reuse in `AuthorizeHtml`
 
 When a new `/authorize` request arrives:
-1. Read `PHYLAX_SSO` cookie → load `SessionInfo`.
+1. Read `AUTH_SSO` cookie → load `SessionInfo`.
 2. Validate: not expired, not revoked, `prompt` allows reuse (see PLAN-07).
 3. If `max_age` is specified: check `authTime + max_age > now()` (see PLAN-07).
 4. If valid: skip login/MFA steps, add `clientId` to `ssoClientIds`, proceed to consent checks.
