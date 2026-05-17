@@ -2,7 +2,6 @@
 package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.rest;
 
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -26,12 +25,14 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.valueobject.PkceChallenge;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.application.RefreshTokenInfo;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
 import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
@@ -162,8 +163,7 @@ public class TokenController {
           if (!"S256".equals(code.request.getCodeChallengeMethod().orElse(""))) {
             return Response.status(401).build();
           }
-          String expected = generateCodeChallenge(codeVerifier);
-          if (!expected.equals(storedChallenge)) {
+          if (!PkceChallenge.fromRequest(storedChallenge, "S256").verify(codeVerifier)) {
             return Response.status(401).build();
           }
         }
@@ -180,12 +180,11 @@ public class TokenController {
       }).orElseGet(() -> Response.status(401).build());
     } else if ("refresh_token".equals(paramMap.getFirst("grant_type"))) {
       String refreshToken = paramMap.getFirst("refresh_token");
-      Optional<JwtTokenBuilder.RefreshTokenInfo> maybeInfo =
-          tokenBuilder.verifyRefreshInfo(refreshToken, tenant);
+      Optional<RefreshTokenInfo> maybeInfo = tokenBuilder.verifyRefreshInfo(refreshToken, tenant);
       if (maybeInfo.isEmpty()) {
         return Response.status(401).build();
       }
-      JwtTokenBuilder.RefreshTokenInfo info = maybeInfo.get();
+      RefreshTokenInfo info = maybeInfo.get();
       if (info.getJti() != null && revocationGateway.isRevoked(info.getJti(), tenant)) {
         // Replay detected — revoke all active refresh tokens for this user/client pair
         revocationGateway.revokeAllForUser(info.getUsername(), info.getClient(), tenant);
@@ -341,22 +340,4 @@ public class TokenController {
     return clientRetriever.loadPreautorized(tenant, clientId);
   }
 
-  /**
-   * Generates a PKCE code challenge using SHA-256.
-   *
-   * Encodes the hash using URL-safe Base64 without padding. Throws a runtime exception when crypto
-   * fails.
-   *
-   * @param codeVerifier PKCE code verifier
-   * @return code challenge string
-   */
-  private String generateCodeChallenge(String codeVerifier) {
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hash = digest.digest(codeVerifier.getBytes(StandardCharsets.UTF_8));
-      return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
-    } catch (Exception e) {
-      throw new RuntimeException("Error generating code challenge", e);
-    }
-  }
 }
