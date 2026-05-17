@@ -1,16 +1,13 @@
 package net.civeira.phylax.features.oauth.mfa.application;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCode;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCodeChangeSet;
@@ -27,6 +24,7 @@ public class MfaRecoveryService {
 
   private final UserMfaRecoveryCodeReadRepositoryGateway readGateway;
   private final UserMfaRecoveryCodeWriteRepositoryGateway writeGateway;
+  private final SecureTokenService secureTokenService;
 
   /** Generates {@code count} single-use codes, replacing any existing ones for the user. */
   public List<String> generateCodes(String userUid, int count) {
@@ -37,7 +35,7 @@ public class MfaRecoveryService {
     for (int i = 0; i < count; i++) {
       String raw = generateRawCode();
       UserMfaRecoveryCode entity = UserMfaRecoveryCode.create(new UserMfaRecoveryCodeChangeSet()
-          .newUid().user(UserReference.of(userUid)).codeHash(sha256hex(raw)));
+          .newUid().user(UserReference.of(userUid)).codeHash(secureTokenService.hash(raw)));
       writeGateway.create(entity);
       rawCodes.add(raw);
     }
@@ -46,7 +44,7 @@ public class MfaRecoveryService {
 
   /** Returns true and marks the code used if it matches an unused code; false otherwise. */
   public boolean consumeCode(String userUid, String rawCode) {
-    String hash = sha256hex(rawCode.trim());
+    String hash = secureTokenService.hash(rawCode.trim());
     return readGateway
         .list(UserMfaRecoveryCodeFilter.builder().userUnused(UserReference.of(userUid)).build())
         .stream().filter(c -> c.getCodeHash().equals(hash)).findFirst().map(code -> {
@@ -69,13 +67,4 @@ public class MfaRecoveryService {
     return new String(buf, 0, 4) + "-" + new String(buf, 4, 4);
   }
 
-  private String sha256hex(String input) {
-    try {
-      byte[] hash =
-          MessageDigest.getInstance("SHA-256").digest(input.getBytes(StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(hash);
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("SHA-256 not available", e);
-    }
-  }
 }

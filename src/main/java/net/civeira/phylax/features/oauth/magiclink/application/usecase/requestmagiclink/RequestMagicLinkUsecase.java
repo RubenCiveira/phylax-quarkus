@@ -2,12 +2,8 @@
 package net.civeira.phylax.features.oauth.magiclink.application.usecase.requestmagiclink;
 
 import java.net.URI;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.HexFormat;
 import java.util.UUID;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -15,6 +11,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
@@ -50,6 +47,7 @@ public class RequestMagicLinkUsecase {
   private final MagicLinkGateway gateway;
   private final MagicLinkMailGateway mailer;
   private final MagicLinkEnabledGateway enabled;
+  private final SecureTokenService secureTokenService;
 
   @ConfigProperty(name = "oauth.base-url", defaultValue = "")
   private final String baseUrl;
@@ -81,10 +79,8 @@ public class RequestMagicLinkUsecase {
     String tenantUid = tenant.get().getUid();
     String userUid = user.get().getUid();
 
-    byte[] rawBytes = new byte[32];
-    new SecureRandom().nextBytes(rawBytes);
-    String rawToken = HexFormat.of().formatHex(rawBytes);
-    String tokenHash = sha256(rawToken);
+    String rawToken = secureTokenService.generate();
+    String tokenHash = secureTokenService.hash(rawToken);
     int expiryMinutes =
         tenantConfigs.find(TenantConfigFilter.builder().tenant(tenant.get()).build())
             .map(c -> c.getMagicLinkExpiryMinutes()).orElse(DEFAULT_EXPIRES_MINUTES);
@@ -111,16 +107,6 @@ public class RequestMagicLinkUsecase {
         return tenantUid;
       }
     }, verifyUrl, expiresAt);
-  }
-
-  private static String sha256(String value) {
-    try {
-      byte[] hash = MessageDigest.getInstance("SHA-256")
-          .digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(hash);
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("SHA-256 not available", e);
-    }
   }
 
   private String resolveBaseUrl(String redirectUri) {
