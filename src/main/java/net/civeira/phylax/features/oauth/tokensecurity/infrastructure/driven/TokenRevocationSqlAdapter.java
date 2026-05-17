@@ -76,6 +76,26 @@ public class TokenRevocationSqlAdapter implements TokenRevocationGateway {
    * into {@code _oauth_revoked_jti}.
    */
   @Override
+  public void revokeAllForSession(String sessionId, String tenantId) {
+    String sql = "INSERT IGNORE INTO _oauth_revoked_jti (jti, tenant_id, token_type, expires_at)"
+        + " SELECT st.jti, ?, 'access', st.expires_at" + " FROM _oauth_session_token st"
+        + " WHERE st.session = ? AND st.jti IS NOT NULL AND st.expires_at > NOW() AND st.revoked_at IS NULL"
+        + " UNION ALL" + " SELECT st.refresh_jti, ?, 'refresh', st.expires_at"
+        + " FROM _oauth_session_token st"
+        + " WHERE st.session = ? AND st.refresh_jti IS NOT NULL AND st.expires_at > NOW() AND st.revoked_at IS NULL";
+    try (Connection conn = datasource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, tenantId);
+      ps.setString(2, sessionId);
+      ps.setString(3, tenantId);
+      ps.setString(4, sessionId);
+      ps.executeUpdate();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
   public void revokeAllForUser(String username, String clientId, String tenantId) {
     try (Connection conn = datasource.getConnection();
         PreparedStatement ps = conn.prepareStatement(

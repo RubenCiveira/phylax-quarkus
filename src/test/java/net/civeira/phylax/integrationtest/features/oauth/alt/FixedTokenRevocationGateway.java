@@ -49,4 +49,9 @@ public class FixedTokenRevocationGateway implements TokenRevocationGateway {
   public void revokeAllForUser(String username, String clientId, String tenantId) {
     // no-op in tests — theft detection side-effect; individual JTI revocation covers rotation tests
   }
+
+  @Override
+  public void revokeAllForSession(String sessionId, String tenantId) {
+    // no-op in tests — session revocation tracked via session store; JTI checks not needed
+  }
 }

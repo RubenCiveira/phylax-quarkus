@@ -55,4 +55,17 @@ public interface TokenRevocationGateway {
    * @param tenantId tenant identifier
    */
   void revokeAllForUser(String username, String clientId, String tenantId);
+
+  /**
+   * Revokes all non-expired access and refresh tokens issued for a given session.
+   *
+   * <p>
+   * Called when a session is explicitly revoked (e.g. from the active-sessions management API).
+   * Bulk-inserts matching JTIs from {@code _oauth_session_token} into {@code _oauth_revoked_jti}.
+   * </p>
+   *
+   * @param sessionId session identifier
+   * @param tenantId tenant identifier
+   */
+  void revokeAllForSession(String sessionId, String tenantId);
 }

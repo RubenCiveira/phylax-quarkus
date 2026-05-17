@@ -12,9 +12,10 @@ public final class ActiveSession {
   private final String userAgent;
   private final String lastUsedAt;
   private final String expiration;
+  private final String createdAt;
 
   public ActiveSession(String sessionId, String clientId, String clientName, String ipAddress,
-      String userAgent, String lastUsedAt, String expiration) {
+      String userAgent, String lastUsedAt, String expiration, String createdAt) {
     this.sessionId = sessionId;
     this.clientId = clientId;
     this.clientName = clientName;
@@ -22,6 +23,7 @@ public final class ActiveSession {
     this.userAgent = userAgent;
     this.lastUsedAt = lastUsedAt;
     this.expiration = expiration;
+    this.createdAt = createdAt;
   }
 
   public String getSessionId() {
@@ -50,5 +52,9 @@ public final class ActiveSession {
 
   public String getExpiration() {
     return expiration;
+  }
+
+  public Optional<String> getCreatedAt() {
+    return Optional.ofNullable(createdAt);
   }
 }

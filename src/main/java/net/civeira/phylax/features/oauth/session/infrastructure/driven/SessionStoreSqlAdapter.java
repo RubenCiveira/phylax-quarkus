@@ -97,13 +97,14 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
       AuthenticationData validationData, String csid) {
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(
-            "INSERT INTO _oauth_session (session, expiration, client_id, issuer, auth_data, csid) VALUES (?, ?, ?, ?, ?, ?)")) {
+            "INSERT INTO _oauth_session (session, expiration, client_id, issuer, auth_data, csid, user_uid) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
       stat.setString(1, state);
       stat.setTimestamp(2, new Timestamp(System.currentTimeMillis() + 360000000));
       stat.setString(3, clientDetails.getClientId());
       stat.setString(4, grant);
       stat.setString(5, mapper.writeValueAsString(validationData));
       stat.setString(6, csid);
+      stat.setString(7, validationData.getUid());
       stat.execute();
     } catch (SQLException | JsonProcessingException ex) {
       throw new IllegalStateException(ex);

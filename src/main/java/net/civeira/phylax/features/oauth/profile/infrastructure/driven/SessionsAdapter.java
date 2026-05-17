@@ -10,12 +10,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.profile.domain.ActiveSession;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.SessionsGateway;
 
@@ -27,29 +23,30 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.SessionsGateway;
  * </p>
  */
 @ApplicationScoped
-@Slf4j
 @RequiredArgsConstructor
 public class SessionsAdapter implements SessionsGateway {
 
   private final DataSource source;
-  private final ObjectMapper mapper;
 
   @Override
   public List<ActiveSession> listByUser(String userUid, String username) {
     List<ActiveSession> out = new ArrayList<>();
+    String sql = "SELECT session, expiration, client_id, client_name, ip_address, user_agent,"
+        + " last_used_at, auth_time FROM _oauth_session"
+        + " WHERE expiration > ? AND revoked_at IS NULL"
+        + " AND (user_uid = ? OR JSON_UNQUOTE(JSON_EXTRACT(auth_data, '$.username')) = ?)"
+        + " ORDER BY last_used_at DESC";
     try (Connection conn = source.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(
-            "SELECT session, expiration, client_id, client_name, ip_address, user_agent, last_used_at, auth_data FROM _oauth_session WHERE expiration > ? ORDER BY last_used_at DESC")) {
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+      stmt.setString(2, userUid);
+      stmt.setString(3, username);
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
-          String authData = rs.getString("auth_data");
-          if (!matchesUser(authData, userUid) && !matchesField(authData, "username", username)) {
-            continue;
-          }
           out.add(new ActiveSession(rs.getString("session"), rs.getString("client_id"),
               rs.getString("client_name"), rs.getString("ip_address"), rs.getString("user_agent"),
-              toString(rs.getTimestamp("last_used_at")), toString(rs.getTimestamp("expiration"))));
+              toString(rs.getTimestamp("last_used_at")), toString(rs.getTimestamp("expiration")),
+              toString(rs.getTimestamp("auth_time"))));
         }
       }
       return out;
@@ -70,23 +67,6 @@ public class SessionsAdapter implements SessionsGateway {
       stmt.executeUpdate();
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
-    }
-  }
-
-  private boolean matchesUser(String authData, String userUid) {
-    return matchesField(authData, "uid", userUid);
-  }
-
-  private boolean matchesField(String authData, String field, String value) {
-    if (authData == null || authData.isBlank() || value == null) {
-      return false;
-    }
-    try {
-      JsonNode node = mapper.readTree(authData);
-      return value.equals(node.path(field).asText(""));
-    } catch (Exception ex) {
-      log.debug("Cannot parse session auth_data", ex);
-      return false;
     }
   }
 

@@ -1,0 +1,111 @@
+package net.civeira.phylax.features.oauth.session.infrastructure.driver.rest;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.CookieParam;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
+import net.civeira.phylax.features.oauth.profile.application.ProfileService;
+import net.civeira.phylax.features.oauth.profile.domain.ActiveSession;
+import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
+
+/**
+ * REST API for active session management.
+ *
+ * <p>
+ * Exposes list and revoke operations for a user's OAuth sessions. A user may only manage their own
+ * sessions; the current session cannot be revoked via this API.
+ * </p>
+ */
+@Path("")
+@RequestScoped
+@RequiredArgsConstructor
+public class UserSessionController {
+
+  private final SessionManager sessionManager;
+  private final ProfileService profileService;
+  private final TokenRevocationGateway tokenRevocationGateway;
+
+  @GET
+  @Path("api/{tenant}/access/users/{userUid}/sessions")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response listSessions(@PathParam("tenant") String tenant,
+      @PathParam("userUid") String userUid,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie) {
+    return sessionManager.loadSession(cookie).filter(session -> isOwner(session, userUid))
+        .map(session -> {
+          String username = session.getValidationData().getUsername();
+          List<Map<String, Object>> result = profileService.listSessions(userUid, username).stream()
+              .map(s -> toMap(s, cookie)).toList();
+          return Response.ok(result).build();
+        }).orElseGet(() -> Response.status(401).build());
+  }
+
+  @DELETE
+  @Path("api/{tenant}/access/users/{userUid}/sessions/{sessionId}")
+  public Response revokeSession(@PathParam("tenant") String tenant,
+      @PathParam("userUid") String userUid, @PathParam("sessionId") String sessionId,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie) {
+    return sessionManager.loadSession(cookie).filter(session -> isOwner(session, userUid))
+        .map(session -> {
+          if (sessionId == null || sessionId.isBlank() || sessionId.equals(cookie)) {
+            return Response.status(400).build();
+          }
+          String username = session.getValidationData().getUsername();
+          boolean belongs = profileService.listSessions(userUid, username).stream()
+              .anyMatch(s -> s.getSessionId().equals(sessionId));
+          if (!belongs) {
+            return Response.status(403).build();
+          }
+          profileService.revokeSession(sessionId);
+          tokenRevocationGateway.revokeAllForSession(sessionId, tenant);
+          return Response.noContent().build();
+        }).orElseGet(() -> Response.status(401).build());
+  }
+
+  @DELETE
+  @Path("api/{tenant}/access/users/{userUid}/sessions")
+  public Response revokeAllSessions(@PathParam("tenant") String tenant,
+      @PathParam("userUid") String userUid,
+      @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie) {
+    return sessionManager.loadSession(cookie).filter(session -> isOwner(session, userUid))
+        .map(session -> {
+          String username = session.getValidationData().getUsername();
+          profileService.listSessions(userUid, username).stream()
+              .filter(s -> !s.getSessionId().equals(cookie)).forEach(s -> {
+                profileService.revokeSession(s.getSessionId());
+                tokenRevocationGateway.revokeAllForSession(s.getSessionId(), tenant);
+              });
+          return Response.noContent().build();
+        }).orElseGet(() -> Response.status(401).build());
+  }
+
+  private boolean isOwner(SessionInfo session, String userUid) {
+    return userUid != null && userUid.equals(session.getUserId());
+  }
+
+  private Map<String, Object> toMap(ActiveSession session, String currentCookie) {
+    Map<String, Object> m = new LinkedHashMap<>();
+    m.put("sessionId", session.getSessionId());
+    m.put("clientName", session.getClientName().orElse(null));
+    m.put("ipAddress", session.getIpAddress().orElse(null));
+    m.put("userAgent", session.getUserAgent().orElse(null));
+    m.put("createdAt", session.getCreatedAt().orElse(null));
+    m.put("lastUsedAt", session.getLastUsedAt().orElse(null));
+    m.put("expiresAt", session.getExpiration());
+    m.put("current", session.getSessionId().equals(currentCookie));
+    return m;
+  }
+}
