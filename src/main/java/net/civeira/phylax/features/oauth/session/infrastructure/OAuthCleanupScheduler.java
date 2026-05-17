@@ -41,8 +41,7 @@ public class OAuthCleanupScheduler {
       concurrentExecution = ConcurrentExecution.SKIP)
   public void cleanAuditLog() {
     log.debug("Running OAuth audit log cleanup");
-    Timestamp cutoff =
-        Timestamp.from(Instant.now().minus(90, ChronoUnit.DAYS));
+    Timestamp cutoff = Timestamp.from(Instant.now().minus(90, ChronoUnit.DAYS));
     try (Connection conn = source.getConnection();
         PreparedStatement stmt =
             conn.prepareStatement("DELETE FROM _oauth_audit_log WHERE created_at < ?")) {
