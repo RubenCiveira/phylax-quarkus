@@ -22,6 +22,10 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.device.application.DeviceAuthorizationService;
 import net.civeira.phylax.features.oauth.device.domain.DeviceAuthorization;
+import net.civeira.phylax.features.oauth.par.application.usecase.pushauthorization.PushAuthorizationParams;
+import net.civeira.phylax.features.oauth.par.application.usecase.pushauthorization.PushAuthorizationResult;
+import net.civeira.phylax.features.oauth.par.application.usecase.pushauthorization.PushAuthorizationUsecase;
+import net.civeira.phylax.features.oauth.par.domain.exception.ParException;
 
 /**
  * REST endpoints for device, PAR, and CIBA flows.
@@ -37,6 +41,7 @@ public class DevicesAccessController {
   private final ClientStoreGateway clientRetriever;
   private final DeviceAuthorizationService deviceService;
   private final CurrentRequest current;
+  private final PushAuthorizationUsecase pushAuthorizationUsecase;
 
   /**
    * Handles device authorization requests (RFC 8628 §3.1).
@@ -104,26 +109,65 @@ public class DevicesAccessController {
   }
 
   /**
-   * Handles pushed authorization requests (PAR).
+   * Handles pushed authorization requests (PAR) — RFC 9126 §2.
    *
-   * Currently returns forbidden for all clients. Reserved for future PAR support.
+   * Authenticates the client via client_secret_basic or client_secret_post, validates the
+   * authorization parameters, stores the PAR, and returns request_uri + expires_in.
    *
    * @param tenant tenant identifier
-   * @param paramMap request parameters
-   * @return forbidden response
+   * @param headers HTTP request headers (used for Basic auth)
+   * @param paramMap request body parameters
+   * @return 201 with request_uri/expires_in, or 400/401 on error
    */
   @POST
   @Path("oauth/openid/{tenant}/par-request")
-  public Response par(final @PathParam("tenant") String tenant,
+  public Response par(final @PathParam("tenant") String tenant, @Context HttpHeaders headers,
       final MultivaluedMap<String, String> paramMap) {
-    return Response.status(403, "Client not allowed.").build();
+    String clientId = null;
+    String clientSecret = null;
+    String autho = headers.getHeaderString("Authorization");
+    if (autho != null && autho.startsWith("Basic ")) {
+      String decoded = new String(Base64.getDecoder().decode(autho.substring(6).getBytes()),
+          StandardCharsets.UTF_8);
+      String[] parts = decoded.split(":", 2);
+      if (parts.length == 2) {
+        clientId = parts[0];
+        clientSecret = parts[1];
+      }
+    }
+    if (clientId == null || clientId.isBlank()) {
+      clientId = paramMap.getFirst("client_id");
+      clientSecret = paramMap.getFirst("client_secret");
+    }
+    if (clientId == null || clientId.isBlank()) {
+      return errorResponse(401, "invalid_client", "Client authentication required");
+    }
+
+    Map<String, String> authParams = new LinkedHashMap<>();
+    for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
+      if (!entry.getValue().isEmpty()) {
+        authParams.put(entry.getKey(), entry.getValue().get(0));
+      }
+    }
+
+    try {
+      PushAuthorizationParams params = PushAuthorizationParams.builder().tenant(tenant)
+          .clientId(clientId).clientSecret(clientSecret != null ? clientSecret : "")
+          .authParams(authParams).build();
+      PushAuthorizationResult result = pushAuthorizationUsecase.push(params);
+      return Response.status(201)
+          .entity(Map.of("request_uri", result.requestUri(), "expires_in", result.expiresIn()))
+          .build();
+    } catch (ParException ex) {
+      return errorResponse(ex.getStatusCode(), ex.getError(), ex.getMessage());
+    }
   }
 
   @POST
   @Path("oauth/openid/{tenant}/par")
-  public Response parAlias(final @PathParam("tenant") String tenant,
+  public Response parAlias(final @PathParam("tenant") String tenant, @Context HttpHeaders headers,
       final MultivaluedMap<String, String> paramMap) {
-    return par(tenant, paramMap);
+    return par(tenant, headers, paramMap);
   }
 
   /**

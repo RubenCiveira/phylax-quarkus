@@ -48,6 +48,8 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequ
 import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
+import net.civeira.phylax.features.oauth.par.application.usecase.resolveparrequest.ResolveParRequestUsecase;
+import net.civeira.phylax.features.oauth.par.domain.exception.ParException;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
@@ -158,6 +160,10 @@ public class AuthorizeHtml {
    * Resolves the public host for issuer computation.
    */
   private final CurrentRequest currentRequest;
+  /**
+   * Resolves a PAR request_uri into stored authorization parameters.
+   */
+  private final ResolveParRequestUsecase resolveParRequest;
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
@@ -182,7 +188,12 @@ public class AuthorizeHtml {
   public Response showForm(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String session, final @Context UriInfo req,
       @Context HttpHeaders headers) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
+    AuthRequest request;
+    try {
+      request = resolveAuthRequest(tenant, req, headers);
+    } catch (ParException ex) {
+      return parErrorResponse(ex);
+    }
     return loadClient(request).map(loadClient -> {
       String prompt = request.getPrompt().orElse("");
 
@@ -232,7 +243,12 @@ public class AuthorizeHtml {
   public Response processForm(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap,
       @CookieParam(AUTH_SESSION_ID) String session, @CookieParam(PRE_SESSION_ID) String cookie) {
-    AuthRequest request = new AuthRequest(tenant, req, headers);
+    AuthRequest request;
+    try {
+      request = resolveAuthRequest(tenant, req, headers);
+    } catch (ParException ex) {
+      return parErrorResponse(ex);
+    }
     String prompt = request.getPrompt().orElse("");
 
     return loadClient(request).map(loadClient -> {
@@ -611,5 +627,29 @@ public class AuthorizeHtml {
     } catch (URISyntaxException ex) {
       throw new IllegalArgumentException("Source url " + url + " is illegal", ex);
     }
+  }
+
+  /**
+   * Resolves the AuthRequest, merging stored PAR params when request_uri is present.
+   *
+   * PAR stored params win on conflict (RFC 9126 §4). Throws ParException if the request_uri is
+   * invalid, expired, or already used.
+   */
+  private AuthRequest resolveAuthRequest(String tenant, UriInfo req, HttpHeaders headers) {
+    String requestUri = req.getQueryParameters().getFirst("request_uri");
+    if (requestUri == null || requestUri.isBlank()) {
+      return new AuthRequest(tenant, req, headers);
+    }
+    // Resolve PAR — throws ParException on invalid/expired/used URI
+    var parRequest = resolveParRequest.resolve(requestUri, tenant);
+    // Merge: query params as base, stored PAR params override (PAR wins on conflict)
+    MultivaluedMap<String, String> merged = new MultivaluedHashMap<>(req.getQueryParameters());
+    parRequest.getParams().forEach(merged::putSingle);
+    return new AuthRequest(tenant, merged, headers);
+  }
+
+  private Response parErrorResponse(ParException ex) {
+    return Response.status(ex.getStatusCode())
+        .entity(Map.of("error", ex.getError(), "error_description", ex.getMessage())).build();
   }
 }

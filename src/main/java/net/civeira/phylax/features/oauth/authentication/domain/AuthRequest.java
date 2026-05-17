@@ -110,6 +110,41 @@ public class AuthRequest {
   private final Optional<String> acrValues = Optional.empty();
 
   /**
+   * Creates an AuthRequest from a pre-built parameter map (used when PAR params are merged).
+   *
+   * @param tenant tenant identifier
+   * @param params merged authorization parameters
+   * @param headers request headers
+   */
+  public AuthRequest(String tenant, MultivaluedMap<String, String> params, HttpHeaders headers) {
+    this.tenant = tenant;
+    this.prompt = Optional.ofNullable(params.getFirst("prompt"));
+    this.clientId = Optional.ofNullable(params.getFirst("client_id"));
+    this.scope = Optional.ofNullable(params.getFirst("scope"));
+    this.state = Optional.ofNullable(params.getFirst("state"));
+    this.nonce = Optional.ofNullable(params.getFirst("nonce"));
+    this.codeChallenge = Optional.ofNullable(params.getFirst("code_challenge"));
+    this.codeChallengeMethod = Optional.ofNullable(params.getFirst("code_challenge_method"));
+    this.redirect = Optional.ofNullable(params.getFirst("redirect_uri"));
+    this.locale =
+        Optional.ofNullable(headers.getAcceptableLanguages().get(0)).orElse(Locale.getDefault());
+    this.responseType = Optional.ofNullable(params.getFirst("response_type"));
+    this.loginHint = Optional.ofNullable(params.getFirst("login_hint"));
+    this.acrValues = Optional.ofNullable(params.getFirst("acr_values"));
+    String maxAgeRaw = params.getFirst("max_age");
+    this.maxAge = maxAgeRaw != null ? parseMaxAge(maxAgeRaw) : -1;
+    String aus = params.getFirst("audience");
+    List<String> explicitAud =
+        new ArrayList<>(null == aus ? List.of() : Arrays.asList(aus.split("\\,")));
+    this.clientId.ifPresent(azp -> {
+      if (!explicitAud.contains(azp)) {
+        explicitAud.add(azp);
+      }
+    });
+    this.audiences = explicitAud.stream().toList();
+  }
+
+  /**
    * Creates an AuthRequest by parsing HTTP query parameters and headers.
    *
    * This constructor extracts standard OAuth/OIDC parameters. It also normalizes audiences and
