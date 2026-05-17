@@ -10,3 +10,4 @@ public record AcceptedTermsSummary(
     Optional<OffsetDateTime> acceptDate,
     boolean outdated) {
 }
+

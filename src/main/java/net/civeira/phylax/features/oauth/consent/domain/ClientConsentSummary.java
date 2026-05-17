@@ -14,3 +14,4 @@ public record ClientConsentSummary(
     List<String> grantedScopes,
     Optional<OffsetDateTime> lastGrantedAt) {
 }
+
