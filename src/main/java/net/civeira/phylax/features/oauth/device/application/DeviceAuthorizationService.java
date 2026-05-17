@@ -91,6 +91,7 @@ public class DeviceAuthorizationService {
         record.getLastPollAt().ifPresent(lastPoll -> {
           long nextPollAt = lastPoll.toEpochSecond() + record.getInterval();
           if (now.toEpochSecond() < nextPollAt) {
+            gateway.slowDown(deviceCode, now);
             throw DeviceAuthorizationException.slowDown();
           }
         });

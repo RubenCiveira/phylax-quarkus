@@ -136,6 +136,20 @@ public class DeviceAuthorizationSqlAdapter implements DeviceAuthorizationGateway
   }
 
   @Override
+  public void slowDown(String deviceCode, OffsetDateTime now) {
+    String sql =
+        "UPDATE _oauth_device_codes SET last_poll_at = ?, interval_sec = interval_sec + 5 WHERE device_code = ?";
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      stat.setTimestamp(1, Timestamp.from(now.toInstant()));
+      stat.setString(2, deviceCode);
+      stat.execute();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
   public void consume(String deviceCode) {
     String sql = "DELETE FROM _oauth_device_codes WHERE device_code = ?";
     try (Connection conn = source.getConnection();

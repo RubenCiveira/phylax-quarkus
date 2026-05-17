@@ -24,6 +24,9 @@ public interface DeviceAuthorizationGateway {
 
   void touchPoll(String deviceCode, OffsetDateTime now);
 
+  /** Updates last_poll_at and increments interval_sec by 5 (RFC 8628 §3.5 slow_down). */
+  void slowDown(String deviceCode, OffsetDateTime now);
+
   /** Marks the record as consumed after token exchange. */
   void consume(String deviceCode);
 }
