@@ -96,15 +96,28 @@ public class OidcResponseBuilder {
               .nonce(request.getNonce().orElse(null)).data(validationData).sessionId(uid).build());
       to = redirectUri + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
     } else {
+      boolean hybrid = type.contains("code");
+      String authCode = null;
+      if (hybrid) {
+        authCode = temporalStore.registerTemporalAuthCode(TemporalAuthCode.builder()
+            .client(clientDetails).request(request).nonce(request.getNonce().orElse(null))
+            .data(validationData).sessionId(uid).build());
+      }
       IdToken buildIdToken =
           tokenBuilder.buildIdToken(request.getTenant(), request.getState().orElseThrow(),
-              request.getNonce().orElse(null), clientDetails, grant, validationData);
-      to = request.getRedirect().orElseThrow() + "#state=" + request.getState().orElseThrow()
-          + "&session_state=" + buildIdToken.getSessionState() + "&iss="
-          + URLEncoder.encode(buildIdToken.getIss(), StandardCharsets.UTF_8) + "&id_token="
-          + buildIdToken.getIdToken() + "&access_token=" + buildIdToken.getAccessToken()
-          + "&token_type=" + buildIdToken.getTokenType() + "&expires_in="
-          + buildIdToken.getExpiresIn();
+              request.getNonce().orElse(null), clientDetails, grant, validationData, authCode);
+      StringBuilder fragment = new StringBuilder();
+      fragment.append("#state=").append(request.getState().orElseThrow());
+      if (authCode != null) {
+        fragment.append("&code=").append(authCode);
+      }
+      fragment.append("&session_state=").append(buildIdToken.getSessionState()).append("&iss=")
+          .append(URLEncoder.encode(buildIdToken.getIss(), StandardCharsets.UTF_8))
+          .append("&id_token=").append(buildIdToken.getIdToken()).append("&access_token=")
+          .append(buildIdToken.getAccessToken()).append("&token_type=")
+          .append(buildIdToken.getTokenType()).append("&expires_in=")
+          .append(buildIdToken.getExpiresIn());
+      to = request.getRedirect().orElseThrow() + fragment.toString();
     }
     return securer
         .secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to)).cookie(

@@ -47,6 +47,11 @@ public class JwtTokenBuilder {
 
   public IdToken buildIdToken(String tenant, String state, String nonce, ClientDetails details,
       String grantType, AuthenticationData validationData) {
+    return buildIdToken(tenant, state, nonce, details, grantType, validationData, null);
+  }
+
+  public IdToken buildIdToken(String tenant, String state, String nonce, ClientDetails details,
+      String grantType, AuthenticationData validationData, String authorizationCode) {
     Duration expiration = claimsMapper.accessTokenTtl();
     Instant authExpires = Instant.now().plus(expiration);
     Instant refreshExpires = Instant.now().plus(claimsMapper.refreshTtl(tenant));
@@ -58,6 +63,7 @@ public class JwtTokenBuilder {
     Builder identityBuilder =
         claimsMapper.identityToken(tenant, accessToken, details, grantType, validationData);
     claimsMapper.withChallengeClaims(identityBuilder, state, sessionState, nonce);
+    claimsMapper.withCodeHash(identityBuilder, authorizationCode);
 
     IdToken idToken = new IdToken();
     idToken.setIss(claimsMapper.issuer(tenant));

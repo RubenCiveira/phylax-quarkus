@@ -69,8 +69,8 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Response login = client.submitLogin(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null);
     String preSession = client.extractPreSessionCookie(login);
-    Assertions.assertTrue(
-        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallenge.FRESH_PASSWORD));
+    Assertions.assertTrue(decodeChallenge(preSession).getCompleted()
+        .contains(AuthenticationChallenge.FRESH_PASSWORD));
 
     Response newPass = client.submitNewPass(OidcTestFixtures.TENANT, OidcTestFixtures.PASSWORD,
         "New@Password1", preSession);
@@ -101,8 +101,8 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(200, login.statusCode());
     Assertions
         .assertTrue(login.getBody().asString().contains("name=\"step\" value=\"scope_consent\""));
-    Assertions.assertTrue(
-        decodeChallenge(preSession).getCompleted().contains(AuthenticationChallenge.CLIENT_CONSENT));
+    Assertions.assertTrue(decodeChallenge(preSession).getCompleted()
+        .contains(AuthenticationChallenge.CLIENT_CONSENT));
 
     Response scopeConsent = client.submitScopeConsent(OidcTestFixtures.TENANT, preSession,
         List.of("openid", "profile", "email"));

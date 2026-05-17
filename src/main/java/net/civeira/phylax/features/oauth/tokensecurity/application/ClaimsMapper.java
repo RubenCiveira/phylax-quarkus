@@ -119,6 +119,13 @@ public class ClaimsMapper {
     return builder;
   }
 
+  public Builder withCodeHash(Builder builder, String authorizationCode) {
+    if (null != authorizationCode) {
+      builder = builder.withClaim("c_hash", generateHash(authorizationCode));
+    }
+    return builder;
+  }
+
   public String issuer(String tenant) {
     return current.getPublicHost() + "/oauth/openid/" + tenant;
   }
