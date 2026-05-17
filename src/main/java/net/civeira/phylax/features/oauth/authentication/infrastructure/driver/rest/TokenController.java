@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -225,7 +226,6 @@ public class TokenController {
       return Response.status(401).build();
     }
 
-    Response response = Response.status(401).build();
     Optional<ClientDetails> loadClient = loadClient(tenant, clientId, clientSecret);
     if (loadClient.isPresent()) {
       ClientDetails clientDetails = loadClient.get();
@@ -233,14 +233,14 @@ public class TokenController {
       if (clientDetails.allowdedGrant(grant)) {
         for (TokenGranter granter : granters) {
           if (granter.canHandle(grant)) {
-            response =
-                processGranterHandler(tenant, req, headers, paramMap, granter, clientDetails);
-            break;
+            return processGranterHandler(tenant, req, headers, paramMap, granter, clientDetails);
           }
         }
+        return Response.status(400).entity(Map.of("error", "unsupported_grant_type")).build();
       }
+      return Response.status(400).entity(Map.of("error", "unsupported_grant_type")).build();
     }
-    return response;
+    return Response.status(401).build();
   }
 
   /**

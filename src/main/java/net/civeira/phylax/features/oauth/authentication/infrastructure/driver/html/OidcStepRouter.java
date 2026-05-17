@@ -52,9 +52,14 @@ public class OidcStepRouter {
    */
   public Optional<StepOutcome> process(StepInput input) {
     initCache();
-    OidcStep step = byStepName.get(input.step());
-    if (step == null) {
+    String stepName = input.step();
+    if (stepName.isBlank()) {
       return Optional.empty();
+    }
+    OidcStep step = byStepName.get(stepName);
+    if (step == null) {
+      throw new IllegalStateException("No handler registered for step: " + stepName
+          + ". Register the step in OidcStepRouter or check for typos in StepName.");
     }
     return step.process(input);
   }
