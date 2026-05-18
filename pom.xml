@@ -162,6 +162,11 @@
       <artifactId>handlebars</artifactId>
       <version>4.4.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.webauthn4j</groupId>
+      <artifactId>webauthn4j-core</artifactId>
+      <version>0.31.5.RELEASE</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -456,8 +461,8 @@
         </plugins>
       </build>
       <properties>
-        <surefire.argLine></surefire.argLine>
         <jacoco.skip>true</jacoco.skip>
+        <surefire.argLine></surefire.argLine>
       </properties>
     </profile>
   </profiles>

@@ -2,54 +2,160 @@
 package net.civeira.phylax.features.oauth.webauthn.infrastructure.driven;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.inject.Inject;
+import net.civeira.phylax.features.access.user.domain.UserRef;
+import net.civeira.phylax.features.access.user.domain.UserReference;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.UserWebauthnCredential;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.UserWebauthnCredentialChangeSet;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialFilter;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialReadRepositoryGateway;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnCredential;
+import net.civeira.phylax.features.oauth.webauthn.domain.exception.WebAuthnException;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnCredentialGateway;
 
 /**
- * Stub adapter for WebAuthn credential persistence.
+ * Bridges the webauthn bounded context's {@link WebAuthnCredentialGateway} port to the
+ * {@code userwebauthncredential} bounded context's repository gateways.
  *
  * <p>
- * Marked {@code @Vetoed} — replace with a real database-backed implementation.
+ * {@link UserWebauthnCredentialFilter} does not expose an {@code autenticator} field, so
+ * {@link #findByCredentialId} lists by tenant/user scope and filters in memory. WebAuthn credential
+ * counts per tenant are inherently small, so this is acceptable. Add an {@code autenticator} filter
+ * field to {@link UserWebauthnCredentialFilter} and its backing repository if this becomes a
+ * bottleneck.
  * </p>
  */
 @ApplicationScoped
-@Slf4j
 public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
+
+  @Inject
+  UserWebauthnCredentialReadRepositoryGateway reader;
+
+  @Inject
+  UserWebauthnCredentialWriteRepositoryGateway writer;
+
+  @Inject
+  UserReadRepositoryGateway users;
 
   @Override
   public void store(WebAuthnCredential credential) {
-    log.warn("WebAuthnCredentialAdapter is a stub — credential {} not persisted",
-        credential.getCredentialId());
+    UserWebauthnCredentialChangeSet cs = new UserWebauthnCredentialChangeSet().newUid();
+    cs.user(UserReference.of(credential.getUserUid()));
+    cs.autenticator(credential.getCredentialId());
+    cs.name(credential.getDeviceName().orElse(credential.getCredentialId()));
+    cs.publicKey(credential.getPublicKey());
+    cs.signCount(credential.getSignCount());
+    credential.getAaguid().ifPresent(cs::aaguid);
+    credential.getDeviceName().ifPresent(cs::deviceName);
+    credential.getTransports().ifPresent(t -> cs.transportsJson(toJson(t)));
+    credential.getLastUsedAt().ifPresent(cs::lastUsedAt);
+
+    UserWebauthnCredential entity = writer.create(UserWebauthnCredential.create(cs));
+    if (credential.isEnabled()) {
+      writer.update(entity, entity.enable());
+    }
   }
 
   @Override
   public Optional<WebAuthnCredential> findByCredentialId(String credentialId, String tenantId) {
-    return Optional.empty();
+    return reader
+        .list(UserWebauthnCredentialFilter.builder().userTenantTenantAccesible(tenantId).build())
+        .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
+        .map(e -> toDomain(e, resolveUsername(e.getUserUid())));
   }
 
   @Override
   public List<WebAuthnCredential> findByUser(String userUid, String tenantId) {
-    return List.of();
+    return reader
+        .list(UserWebauthnCredentialFilter.builder().user(UserReference.of(userUid)).build())
+        .stream().map(e -> toDomain(e, null)).toList();
   }
 
   @Override
   public void updateSignCount(String credentialId, String tenantId, int signCount,
       OffsetDateTime lastUsedAt) {
-    log.warn("WebAuthnCredentialAdapter is a stub — sign count not updated for {}", credentialId);
+    UserWebauthnCredential entity = findForUpdateByCredentialId(credentialId, tenantId);
+    UserWebauthnCredentialChangeSet cs = new UserWebauthnCredentialChangeSet();
+    cs.signCount(signCount);
+    cs.lastUsedAt(lastUsedAt);
+    writer.update(entity, entity.update(cs));
   }
 
   @Override
   public void rename(String credentialId, String userUid, String tenantId, String newName) {
-    log.warn("WebAuthnCredentialAdapter is a stub — credential {} not renamed", credentialId);
+    UserWebauthnCredential entity = findForUpdateByUserAndCredentialId(credentialId, userUid);
+    UserWebauthnCredentialChangeSet cs = new UserWebauthnCredentialChangeSet();
+    cs.name(newName);
+    writer.update(entity, entity.update(cs));
   }
 
   @Override
   public void delete(String credentialId, String userUid, String tenantId) {
-    log.warn("WebAuthnCredentialAdapter is a stub — credential {} not deleted", credentialId);
+    UserWebauthnCredential entity = findForUpdateByUserAndCredentialId(credentialId, userUid);
+    writer.delete(entity.delete());
+  }
+
+  private UserWebauthnCredential findForUpdateByCredentialId(String credentialId, String tenantId) {
+    return writer
+        .listForUpdate(
+            UserWebauthnCredentialFilter.builder().userTenantTenantAccesible(tenantId).build())
+        .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
+        .orElseThrow(WebAuthnException::credentialNotFound);
+  }
+
+  private UserWebauthnCredential findForUpdateByUserAndCredentialId(String credentialId,
+      String userUid) {
+    return writer
+        .listForUpdate(
+            UserWebauthnCredentialFilter.builder().user(UserReference.of(userUid)).build())
+        .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
+        .orElseThrow(WebAuthnException::credentialNotFound);
+  }
+
+  private String resolveUsername(String userUid) {
+    return users.find(UserFilter.builder().uid(userUid).build())
+        .map(u -> u.getEmail().orElseGet(u::getName)).orElse(null);
+  }
+
+  private WebAuthnCredential toDomain(UserWebauthnCredential e, String username) {
+    UserRef userRef = e.getUser();
+    return WebAuthnCredential.builder().uid(e.getUid())
+        .userUid(userRef != null ? userRef.getUid() : null).username(username)
+        .credentialId(e.getAutenticator()).publicKey(e.getPublicKey())
+        .signCount(Optional.ofNullable(e.getSignCount()).orElse(0))
+        .aaguid(e.getAaguid().orElse(null)).deviceName(e.getDeviceName().orElse(null))
+        .transports(e.getTransportsJson().map(this::fromJson).orElse(null))
+        .createdAt(e.getCreatedAt().orElse(null)).lastUsedAt(e.getLastUsedAt().orElse(null))
+        .enabled(Boolean.TRUE.equals(e.isEnabled())).build();
+  }
+
+  private String toJson(List<String> transports) {
+    if (transports == null || transports.isEmpty()) {
+      return null;
+    }
+    return transports.stream().map(t -> "\"" + t.replace("\\", "\\\\").replace("\"", "\\\"") + "\"")
+        .collect(Collectors.joining(",", "[", "]"));
+  }
+
+  private List<String> fromJson(String json) {
+    if (json == null || json.isBlank()) {
+      return null;
+    }
+    String trimmed = json.trim();
+    if ("[]".equals(trimmed)) {
+      return List.of();
+    }
+    String inner = trimmed.substring(1, trimmed.length() - 1);
+    return Arrays.stream(inner.split(",")).map(s -> s.trim().replaceAll("^\"|\"$", ""))
+        .filter(s -> !s.isEmpty()).toList();
   }
 }

@@ -2,43 +2,47 @@
 package net.civeira.phylax.features.oauth.webauthn.infrastructure.driven;
 
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnChallenge;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallengeGateway;
 
 /**
- * Stub adapter for WebAuthn challenge persistence.
+ * In-memory store for WebAuthn challenges.
  *
  * <p>
- * Marked {@code @Vetoed} — replace with a real implementation backed by a database or cache store
- * with TTL support.
+ * Challenges are short-lived (5-minute TTL) and do not need to survive restarts or cluster
+ * failover, so a per-instance ConcurrentHashMap is sufficient. Call {@link #purgeExpired()} on a
+ * scheduler to prevent unbounded growth in high-traffic deployments.
  * </p>
  */
 @ApplicationScoped
-@Slf4j
 public class WebAuthnChallengeAdapter implements WebAuthnChallengeGateway {
+
+  private final ConcurrentHashMap<String, WebAuthnChallenge> store = new ConcurrentHashMap<>();
 
   @Override
   public void store(WebAuthnChallenge challenge) {
-    log.warn("WebAuthnChallengeAdapter is a stub — challenge {} not persisted",
-        challenge.getChallengeId());
+    store.put(challenge.getChallengeId(), challenge);
   }
 
   @Override
   public Optional<WebAuthnChallenge> findById(String challengeId, String tenantId) {
-    return Optional.empty();
+    if (challengeId == null || tenantId == null) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(store.get(challengeId))
+        .filter(c -> tenantId.equals(c.getTenantId()));
   }
 
   @Override
   public void markVerified(WebAuthnChallenge challenge) {
-    log.warn("WebAuthnChallengeAdapter is a stub — challenge {} not marked verified",
-        challenge.getChallengeId());
+    store.put(challenge.getChallengeId(), challenge);
   }
 
   @Override
   public void purgeExpired() {
-    log.warn("WebAuthnChallengeAdapter is a stub — no challenges to purge");
+    store.entrySet().removeIf(entry -> entry.getValue().isExpired());
   }
 }
