@@ -23,15 +23,17 @@ public class AccountDeletionPanel {
   }
 
   public String renderSent(String cancelUrl, YamlLocaleMessages t) {
-    return "<h1>" + t.get("profile.delete-account.sentTitle") + "</h1>" + "<p>"
-        + t.get("profile.delete-account.sentHelp") + "</p>" + "<div class=\"profile-actions\">"
-        + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
-        + t.get("profile.delete-account.backToProfile") + "</a>" + "</div>";
+    return "<h1>" + t.get("profile.delete-account.sentTitle") + "</h1>"
+        + "<p class=\"change-password-success\">" + t.get("profile.delete-account.sentHelp")
+        + "</p>" + "<div class=\"profile-actions\">" + "<a class=\"secondary-button\" href=\""
+        + esc(cancelUrl) + "\">" + t.get("profile.delete-account.backToProfile") + "</a>"
+        + "</div>";
   }
 
   public String renderConfirmed(YamlLocaleMessages t) {
-    return "<h1>" + t.get("profile.delete-account.confirmedTitle") + "</h1>" + "<p>"
-        + t.get("profile.delete-account.confirmedHelp") + "</p>";
+    return "<h1>" + t.get("profile.delete-account.confirmedTitle") + "</h1>"
+        + "<p class=\"change-password-success\">" + t.get("profile.delete-account.confirmedHelp")
+        + "</p>";
   }
 
   public String renderTokenError(String cancelUrl, YamlLocaleMessages t) {

@@ -12,10 +12,10 @@ public class DataExportPanel {
   public String render(String exportUrl, String cancelUrl, boolean requested,
       YamlLocaleMessages t) {
     if (requested) {
-      return "<h1>" + t.get("profile.data-export.sentTitle") + "</h1>" + "<p>"
-          + t.get("profile.data-export.sentHelp") + "</p>" + "<div class=\"profile-actions\">"
-          + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
-          + t.get("profile.data-export.backToProfile") + "</a>" + "</div>";
+      return "<h1>" + t.get("profile.data-export.sentTitle") + "</h1>"
+          + "<p class=\"change-password-success\">" + t.get("profile.data-export.sentHelp") + "</p>"
+          + "<div class=\"profile-actions\">" + "<a class=\"secondary-button\" href=\""
+          + esc(cancelUrl) + "\">" + t.get("profile.data-export.backToProfile") + "</a>" + "</div>";
     }
 
     return "<h1>" + t.get("profile.data-export.title") + "</h1>" + "<p>"

@@ -39,16 +39,17 @@ public class ConsentedScopesPanel {
             ? esc(term.termsText().substring(0, 80)) + "&hellip;"
             : esc(term.termsText() != null ? term.termsText() : term.termsUid());
 
-        html.append("<div class=\"section-card\" style=\"margin-bottom: 1rem;\">")
-            .append("<p><strong>").append(t.get("profile.consents.terms.document"))
-            .append(":</strong> ").append(preview).append("</p>").append("<p><strong>")
-            .append(t.get("profile.consents.terms.acceptedOn")).append(":</strong> ")
-            .append(acceptedOn).append("</p>");
+        html.append("<div class=\"consent-client-card\">")
+            .append("<div class=\"consent-client-header\">").append("<div>")
+            .append("<div class=\"consent-client-name\">").append(preview).append("</div>")
+            .append("<div class=\"consent-client-meta\">")
+            .append(esc(t.get("profile.consents.terms.acceptedOn"))).append(": ").append(acceptedOn)
+            .append("</div>").append("</div>");
         if (term.outdated()) {
-          html.append("<p><span class=\"badge badge-warning\">")
-              .append(esc(t.get("profile.consents.terms.outdated"))).append("</span></p>");
+          html.append("<span class=\"badge badge-warning\">")
+              .append(esc(t.get("profile.consents.terms.outdated"))).append("</span>");
         }
-        html.append("</div>");
+        html.append("</div>").append("</div>");
       }
     }
 
@@ -56,47 +57,43 @@ public class ConsentedScopesPanel {
     html.append("<h2>").append(t.get("profile.consents.oauth.title")).append("</h2>");
     html.append("<p>").append(t.get("profile.consents.help")).append("</p>");
 
-    StringBuilder cards = new StringBuilder();
-    for (ClientConsentSummary summary : consents) {
-      String name = esc(summary.clientName().orElse(summary.clientId()));
-      String grantedAt = summary.lastGrantedAt().map(dt -> esc(dt.format(DATE_FMT)))
-          .orElse(esc(t.get("profile.consents.unknown")));
-      String revokeClientAction = esc(revokeBaseUrl + "/" + summary.clientUid());
-      String revokeScopeBase = revokeBaseUrl + "/" + summary.clientUid() + "/scope";
+    if (consents.isEmpty()) {
+      html.append("<p>").append(t.get("profile.consents.empty")).append("</p>");
+    } else {
+      for (ClientConsentSummary summary : consents) {
+        String name = esc(summary.clientName().orElse(summary.clientId()));
+        String grantedAt = summary.lastGrantedAt().map(dt -> esc(dt.format(DATE_FMT)))
+            .orElse(esc(t.get("profile.consents.unknown")));
+        String revokeClientAction = esc(revokeBaseUrl + "/" + summary.clientUid());
+        String revokeScopeBase = revokeBaseUrl + "/" + summary.clientUid() + "/scope";
 
-      cards.append("<div class=\"section-card\" style=\"margin-bottom: 1rem;\">")
-          .append("<p><strong>").append(t.get("profile.consents.client")).append(":</strong> ")
-          .append(name).append("</p>").append("<p><strong>")
-          .append(t.get("profile.consents.grantedAt")).append(":</strong> ").append(grantedAt)
-          .append("</p>");
+        html.append("<div class=\"consent-client-card\">")
+            .append("<div class=\"consent-client-header\">").append("<div>")
+            .append("<div class=\"consent-client-name\">").append(name).append("</div>")
+            .append("<div class=\"consent-client-meta\">")
+            .append(esc(t.get("profile.consents.grantedAt"))).append(": ").append(grantedAt)
+            .append("</div>").append("</div>").append("<form method=\"POST\" action=\"")
+            .append(revokeClientAction).append("\" style=\"display:inline\">")
+            .append("<input class=\"link-button\" type=\"submit\" value=\"")
+            .append(esc(t.get("profile.consents.revoke"))).append("\" />").append("</form>")
+            .append("</div>");
 
-      // Per-scope list with individual revoke buttons
-      cards.append("<ul class=\"scopes-list\">");
-      for (String scope : summary.grantedScopes()) {
-        String revokeScopeAction = esc(revokeScopeBase);
-        cards.append("<li class=\"scope-item\">").append("<span>").append(esc(scope))
-            .append("</span>").append("<form method=\"POST\" action=\"").append(revokeScopeAction)
-            .append("\" style=\"display:inline;\">")
-            .append("<input type=\"hidden\" name=\"scope\" value=\"").append(esc(scope))
-            .append("\" />").append("<input class=\"link-button\" type=\"submit\" value=\"")
-            .append(esc(t.get("profile.consents.revokeScope"))).append("\" />").append("</form>")
-            .append("</li>");
+        html.append("<ul class=\"scopes-list\">");
+        for (String scope : summary.grantedScopes()) {
+          String revokeScopeAction = esc(revokeScopeBase);
+          html.append("<li class=\"scope-item\">").append("<span class=\"scope-tag\">")
+              .append(esc(scope)).append("</span>").append("<form method=\"POST\" action=\"")
+              .append(revokeScopeAction).append("\" style=\"display:inline;\">")
+              .append("<input type=\"hidden\" name=\"scope\" value=\"").append(esc(scope))
+              .append("\" />").append("<input class=\"link-button\" type=\"submit\" value=\"")
+              .append(esc(t.get("profile.consents.revokeScope"))).append("\" />").append("</form>")
+              .append("</li>");
+        }
+        html.append("</ul>");
+        html.append("</div>");
       }
-      cards.append("</ul>");
-
-      // Revoke all scopes for this client
-      cards.append("<form method=\"POST\" action=\"").append(revokeClientAction)
-          .append("\" class=\"profile-actions\">")
-          .append("<input class=\"secondary-button\" type=\"submit\" value=\"")
-          .append(esc(t.get("profile.consents.revoke"))).append("\" />").append("</form>")
-          .append("</div>");
     }
 
-    if (cards.isEmpty()) {
-      cards.append("<p>").append(t.get("profile.consents.empty")).append("</p>");
-    }
-
-    html.append(cards);
     html.append("<div class=\"profile-actions\">").append("<a class=\"secondary-button\" href=\"")
         .append(esc(cancelUrl)).append("\">").append(t.get("profile.consents.backToProfile"))
         .append("</a>").append("</div>");

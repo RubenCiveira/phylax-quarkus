@@ -33,12 +33,12 @@ public class RecoveryCodesPanel {
       codesHtml = sb.toString();
     }
 
-    String form = "<form method=\"POST\" action=\"" + esc(regenerateUrl)
-        + "\" class=\"change-password-form\">" + "<div class=\"profile-actions\">"
-        + "<input class=\"primary-button\" type=\"submit\" value=\""
-        + esc(t.get("profile.recovery-codes.regenerate")) + "\" />"
-        + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
-        + t.get("profile.recovery-codes.back") + "</a>" + "</div>" + "</form>";
+    String form =
+        "<form method=\"POST\" action=\"" + esc(regenerateUrl) + "\" class=\"profile-actions\">"
+            + "<input class=\"primary-button\" type=\"submit\" value=\""
+            + esc(t.get("profile.recovery-codes.regenerate")) + "\" />"
+            + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
+            + t.get("profile.recovery-codes.back") + "</a>" + "</form>";
 
     return title + countHtml + codesHtml + form;
   }

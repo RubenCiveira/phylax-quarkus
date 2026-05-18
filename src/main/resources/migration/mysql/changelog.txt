@@ -1,3 +1,1 @@
-/migration/mysql/000.001.001/20260514125137-model.changelog.mysql.sql
-/migration/mysql/000.001.001/20260515120055-model.changelog.mysql.sql
-/migration/mysql/000.001.001/20260517000001-cleanup-indexes.changelog.mysql.sql
+/migration/mysql/000.001.001/20260517202122-model.changelog.mysql.sql

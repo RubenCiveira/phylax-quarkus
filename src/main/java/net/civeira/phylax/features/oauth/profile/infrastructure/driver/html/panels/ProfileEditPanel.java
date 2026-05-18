@@ -17,29 +17,36 @@ public class ProfileEditPanel {
 
     return "<h1>" + t.get("profile.edit.title") + "</h1>" + errorHtml
         + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"profile-edit-form\">"
+        + "<div class=\"form-row\">"
         + field(t.get("profile.edit.givenName"), "givenName", "text",
             val(profile, profile == null ? null : profile.getGivenName().orElse(null)), "")
         + field(t.get("profile.edit.familyName"), "familyName", "text",
             val(profile, profile == null ? null : profile.getFamilyName().orElse(null)), "")
+        + "</div>" + "<div class=\"form-row\">"
         + field(t.get("profile.edit.middleName"), "middleName", "text",
             val(profile, profile == null ? null : profile.getMiddleName().orElse(null)), "")
         + field(t.get("profile.edit.nickname"), "nickname", "text",
             val(profile, profile == null ? null : profile.getNickname().orElse(null)), "")
+        + "</div>"
         + field(t.get("profile.edit.preferredUsername"), "preferredUsername", "text",
             val(profile, profile == null ? null : profile.getPreferredUsername().orElse(null)), "")
+        + "<div class=\"form-row\">"
         + field(t.get("profile.edit.pictureUrl"), "pictureUrl", "url",
             val(profile, profile == null ? null : profile.getPictureUrl().orElse(null)), "")
         + field(t.get("profile.edit.website"), "websiteUrl", "url",
             val(profile, profile == null ? null : profile.getWebsiteUrl().orElse(null)), "")
+        + "</div>" + "<div class=\"form-row\">"
         + field(t.get("profile.edit.gender"), "gender", "text",
             val(profile, profile == null ? null : profile.getGender().orElse(null)), "")
         + field(t.get("profile.edit.birthdate"), "birthdate", "date",
             val(profile, profile == null ? null : profile.getBirthdate().orElse(null)), "")
+        + "</div>" + "<div class=\"form-row\">"
         + field(t.get("profile.edit.timezone"), "zoneinfo", "text",
             val(profile, profile == null ? null : profile.getZoneinfo().orElse(null)),
             "Europe/Madrid")
         + field(t.get("profile.edit.locale"), "locale", "text",
             val(profile, profile == null ? null : profile.getLocale().orElse(null)), "es-ES")
+        + "</div>"
         + field(t.get("profile.edit.phoneNumber"), "phoneNumber", "tel",
             val(profile, profile == null ? null : profile.getPhoneNumber().orElse(null)), "")
         + "<div class=\"profile-actions\">"

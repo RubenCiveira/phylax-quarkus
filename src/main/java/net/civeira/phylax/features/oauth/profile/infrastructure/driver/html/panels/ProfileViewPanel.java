@@ -10,6 +10,111 @@ import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 @ApplicationScoped
 public class ProfileViewPanel {
 
+  private static final String SVG_OPEN =
+      "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\""
+          + " fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\""
+          + " stroke-linejoin=\"round\">";
+  private static final String SVG_CLOSE = "</svg>";
+
+  private static final String ICON_EDIT =
+      SVG_OPEN + "<path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"/>"
+          + "<path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"/>" + SVG_CLOSE;
+
+  private static final String ICON_LOCK =
+      SVG_OPEN + "<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\" ry=\"2\"/>"
+          + "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>" + SVG_CLOSE;
+
+  private static final String ICON_SHIELD =
+      SVG_OPEN + "<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/>" + SVG_CLOSE;
+
+  private static final String ICON_MONITOR =
+      SVG_OPEN + "<rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"/>"
+          + "<line x1=\"8\" y1=\"21\" x2=\"16\" y2=\"21\"/>"
+          + "<line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"21\"/>" + SVG_CLOSE;
+
+  private static final String ICON_KEY = SVG_OPEN
+      + "<path d=\"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4\"/>"
+      + SVG_CLOSE;
+
+  private static final String ICON_CHECK =
+      SVG_OPEN + "<path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"/>"
+          + "<polyline points=\"22 4 12 14.01 9 11.01\"/>" + SVG_CLOSE;
+
+  private static final String ICON_FINGERPRINT = SVG_OPEN
+      + "<path d=\"M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4\"/>"
+      + "<path d=\"M14 13.12c0 2.38 0 6.38-1 8.88\"/>"
+      + "<path d=\"M17.29 21.02c.12-.6.43-2.3.5-3.02\"/>" + "<path d=\"M2 12a10 10 0 0 1 18-6\"/>"
+      + "<path d=\"M2 17.5a14.5 14.5 0 0 0 4.28 5.5\"/>"
+      + "<path d=\"M6 10a6 6 0 0 1 11.29-2.97\"/>" + SVG_CLOSE;
+
+  private static final String ICON_DOWNLOAD =
+      SVG_OPEN + "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/>"
+          + "<polyline points=\"7 10 12 15 17 10\"/>"
+          + "<line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"/>" + SVG_CLOSE;
+
+  private static final String ICON_TRASH = SVG_OPEN + "<polyline points=\"3 6 5 6 21 6\"/>"
+      + "<path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/>"
+      + SVG_CLOSE;
+
+  private static final String ICON_CHEVRON =
+      "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\""
+          + " fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\""
+          + " stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"/></svg>";
+
+  // Inline critical styles so the dropdown works even when profile.css in DB is stale.
+  private static final String DROPDOWN_STYLE = "<style>"
+      + ".profile-actions-menu{position:relative;margin-left:auto;flex-shrink:0}"
+      + ".profile-actions-trigger{display:inline-flex;align-items:center;gap:6px;"
+      + "padding:7px 13px;border:1.5px solid #e5e8f0;border-radius:8px;background:#f9fafb;"
+      + "color:#374151;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;"
+      + "transition:background .14s,border-color .14s,box-shadow .14s}"
+      + ".profile-actions-trigger:hover,.profile-actions-menu.open .profile-actions-trigger{"
+      + "background:#eef2ff;border-color:#c7d2fe;color:#4338ca;"
+      + "box-shadow:0 2px 8px rgba(99,102,241,.12)}" + ".profile-actions-trigger svg{flex-shrink:0}"
+      + ".profile-actions-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;"
+      + "min-width:220px;background:#fff;border:1px solid #e5e8f0;border-radius:12px;"
+      + "box-shadow:0 8px 28px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.06);"
+      + "padding:6px;z-index:200;flex-direction:column;gap:1px}"
+      + ".profile-actions-menu.open .profile-actions-dropdown{display:flex}"
+      + ".profile-menu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;"
+      + "border-radius:7px;font-size:13.5px;font-weight:500;color:#374151;"
+      + "text-decoration:none;white-space:nowrap}"
+      + ".profile-menu-item svg{width:16px;height:16px;flex-shrink:0;color:#9ca3af}"
+      + ".profile-menu-item:hover{background:#f3f4f6;color:#111827;text-decoration:none}"
+      + ".profile-menu-item:hover svg{color:#6366f1}"
+      + ".profile-menu-item.menu-item-primary{font-weight:600;color:#1e40af}"
+      + ".profile-menu-item.menu-item-primary svg{color:#3b82f6}"
+      + ".profile-menu-item.menu-item-primary:hover{background:#eff6ff;color:#1e3a8a}"
+      + ".profile-menu-item.menu-item-danger{color:#b91c1c}"
+      + ".profile-menu-item.menu-item-danger svg{color:#ef4444}"
+      + ".profile-menu-item.menu-item-danger:hover{background:#fef2f2;color:#7f1d1d}"
+      + ".profile-menu-separator{height:1px;background:#f0f2f7;margin:4px 6px}"
+      + "@media(prefers-color-scheme:dark){"
+      + ".profile-actions-trigger{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:rgba(212,224,245,.7)}"
+      + ".profile-actions-trigger:hover,.profile-actions-menu.open .profile-actions-trigger{"
+      + "background:rgba(99,102,241,.14);border-color:rgba(99,102,241,.4);color:#a5b4fc}"
+      + ".profile-actions-dropdown{background:#1a2035;border-color:rgba(255,255,255,.1);"
+      + "box-shadow:0 10px 32px rgba(0,0,0,.45)}" + ".profile-menu-item{color:rgba(212,224,245,.8)}"
+      + ".profile-menu-item svg{color:rgba(212,224,245,.35)}"
+      + ".profile-menu-item:hover{background:rgba(255,255,255,.07);color:#d4e0f5}"
+      + ".profile-menu-item:hover svg{color:#a5b4fc}"
+      + ".profile-menu-item.menu-item-primary{color:#93c5fd}"
+      + ".profile-menu-item.menu-item-primary:hover{background:rgba(59,130,246,.1)}"
+      + ".profile-menu-item.menu-item-danger{color:#fca5a5}"
+      + ".profile-menu-item.menu-item-danger:hover{background:rgba(239,68,68,.1)}"
+      + ".profile-menu-separator{background:rgba(255,255,255,.08)}" + "}" + "</style>";
+
+  private static final String ICON_GEAR = SVG_OPEN + "<circle cx=\"12\" cy=\"12\" r=\"3\"/>"
+      + "<path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06"
+      + "a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09"
+      + "A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06"
+      + "A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09"
+      + "A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06"
+      + "A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09"
+      + "a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06"
+      + "A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09"
+      + "a1.65 1.65 0 0 0-1.51 1z\"/>" + SVG_CLOSE;
+
   public String render(OidcProfile profile, String editUrl, String passwordUrl, String mfaUrl,
       String sessionsUrl, String recoveryCodesUrl, String consentsUrl, String passkeysUrl,
       String dataExportUrl, String deleteAccountUrl, YamlLocaleMessages t) {
@@ -27,17 +132,39 @@ public class ProfileViewPanel {
     String birthdate = esc(profile == null ? null : profile.getBirthdate().orElse(null));
     String gender = esc(profile == null ? null : profile.getGender().orElse(null));
 
+    String initials = computeInitials(givenName, familyName, preferredUsername);
     String avatar = !pictureUrl.isEmpty()
-        ? "<img src=\"" + pictureUrl + "\" alt=\"Profile picture\" class=\"profile-avatar\" />"
-        : "<div class=\"profile-avatar-placeholder\"></div>";
+        ? "<img src=\"" + pictureUrl + "\" alt=\"\" class=\"profile-avatar\" />"
+        : "<div class=\"profile-avatar-placeholder\"><span class=\"profile-avatar-initials\">"
+            + initials + "</span></div>";
 
     String name = (givenName + " " + familyName).trim();
     String displayName =
         !name.isEmpty() ? name : (!nickname.isEmpty() ? nickname : preferredUsername);
 
+    String menu = DROPDOWN_STYLE + "<div class=\"profile-actions-menu\">"
+        + "<button type=\"button\" class=\"profile-actions-trigger\""
+        + " onclick=\"this.parentElement.classList.toggle('open');event.stopPropagation()\">"
+        + ICON_GEAR + "<span>" + esc(t.get("profile.view.actions")) + "</span>" + ICON_CHEVRON
+        + "</button>" + "<div class=\"profile-actions-dropdown\">"
+        + menuItem(esc(editUrl), ICON_EDIT, t.get("profile.view.editProfile"), "menu-item-primary")
+        + menuItem(esc(passwordUrl), ICON_LOCK, t.get("profile.view.changePassword"), "")
+        + menuItem(esc(mfaUrl), ICON_SHIELD, t.get("profile.view.configureMfa"), "")
+        + menuItem(esc(sessionsUrl), ICON_MONITOR, t.get("profile.view.manageSessions"), "")
+        + menuItem(esc(recoveryCodesUrl), ICON_KEY, t.get("profile.view.recoveryCodes"), "")
+        + menuItem(esc(consentsUrl), ICON_CHECK, t.get("profile.view.manageConsents"), "")
+        + menuItem(esc(passkeysUrl), ICON_FINGERPRINT, t.get("profile.view.managePasskeys"), "")
+        + menuItem(esc(dataExportUrl), ICON_DOWNLOAD, t.get("profile.view.downloadMyData"), "")
+        + "<div class=\"profile-menu-separator\"></div>"
+        + menuItem(esc(deleteAccountUrl), ICON_TRASH, t.get("profile.view.deleteAccount"),
+            "menu-item-danger")
+        + "</div>" + "</div>" + "<script>document.addEventListener('click',function(e){"
+        + "var m=document.querySelector('.profile-actions-menu');"
+        + "if(m&&!m.contains(e.target))m.classList.remove('open');});</script>";
+
     return "<h1>" + t.get("profile.view.title") + "</h1>" + "<div class=\"profile-view\">"
         + "<div class=\"profile-header\">" + avatar + "<div class=\"profile-display-name\">"
-        + displayName + "</div>" + "</div>" + "<dl class=\"profile-fields\">"
+        + displayName + "</div>" + menu + "</div>" + "<dl class=\"profile-fields\">"
         + dt(t.get("profile.view.givenName"), givenName)
         + dt(t.get("profile.view.familyName"), familyName)
         + dt(t.get("profile.view.nickname"), nickname)
@@ -45,22 +172,27 @@ public class ProfileViewPanel {
         + dt(t.get("profile.view.phone"), phoneNumber) + dt(t.get("profile.view.locale"), locale)
         + dt(t.get("profile.view.timezone"), zoneinfo)
         + dt(t.get("profile.view.birthdate"), birthdate) + dt(t.get("profile.view.gender"), gender)
-        + dt(t.get("profile.view.website"), websiteUrl) + "</dl>"
-        + "<div class=\"profile-actions\">" + "<a class=\"primary-button\" href=\"" + esc(editUrl)
-        + "\">" + t.get("profile.view.editProfile") + "</a>"
-        + "<a class=\"secondary-button\" href=\"" + esc(passwordUrl) + "\">"
-        + t.get("profile.view.changePassword") + "</a>" + "<a class=\"secondary-button\" href=\""
-        + esc(mfaUrl) + "\">" + t.get("profile.view.configureMfa") + "</a>"
-        + "<a class=\"secondary-button\" href=\"" + esc(sessionsUrl) + "\">"
-        + t.get("profile.view.manageSessions") + "</a>" + "<a class=\"secondary-button\" href=\""
-        + esc(recoveryCodesUrl) + "\">" + t.get("profile.view.recoveryCodes") + "</a>"
-        + "<a class=\"secondary-button\" href=\"" + esc(consentsUrl) + "\">"
-        + t.get("profile.view.manageConsents") + "</a>" + "<a class=\"secondary-button\" href=\""
-        + esc(passkeysUrl) + "\">" + t.get("profile.view.managePasskeys") + "</a>"
-        + "<a class=\"secondary-button\" href=\"" + esc(dataExportUrl) + "\">"
-        + t.get("profile.view.downloadMyData") + "</a>" + "<a class=\"danger-button\" href=\""
-        + esc(deleteAccountUrl) + "\">" + t.get("profile.view.deleteAccount") + "</a>" + "</div>"
-        + "</div>";
+        + dt(t.get("profile.view.website"), websiteUrl) + "</dl>" + "</div>";
+  }
+
+  private String menuItem(String url, String icon, String label, String extraClass) {
+    String cls = "profile-menu-item" + (extraClass.isEmpty() ? "" : " " + extraClass);
+    return "<a class=\"" + cls + "\" href=\"" + url + "\">" + icon + "<span>" + esc(label)
+        + "</span>" + "</a>";
+  }
+
+  private String computeInitials(String givenName, String familyName, String preferredUsername) {
+    if (!givenName.isEmpty() && !familyName.isEmpty()) {
+      return String.valueOf(givenName.charAt(0)).toUpperCase()
+          + String.valueOf(familyName.charAt(0)).toUpperCase();
+    }
+    if (!givenName.isEmpty()) {
+      return String.valueOf(givenName.charAt(0)).toUpperCase();
+    }
+    if (!preferredUsername.isEmpty()) {
+      return String.valueOf(preferredUsername.charAt(0)).toUpperCase();
+    }
+    return "?";
   }
 
   private String dt(String label, String value) {

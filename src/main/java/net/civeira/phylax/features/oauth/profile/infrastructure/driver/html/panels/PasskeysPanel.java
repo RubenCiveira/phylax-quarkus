@@ -15,6 +15,17 @@ public class PasskeysPanel {
 
   private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+  private static final String PASSKEY_SVG =
+      "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\""
+          + " fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\""
+          + " stroke-linejoin=\"round\">"
+          + "<path d=\"M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4\"/>"
+          + "<path d=\"M14 13.12c0 2.38 0 6.38-1 8.88\"/>"
+          + "<path d=\"M17.29 21.02c.12-.6.43-2.3.5-3.02\"/>"
+          + "<path d=\"M2 12a10 10 0 0 1 18-6\"/>"
+          + "<path d=\"M2 17.5a14.5 14.5 0 0 0 4.28 5.5\"/>"
+          + "<path d=\"M6 10a6 6 0 0 1 11.29-2.97\"/>" + "</svg>";
+
   public String render(List<WebAuthnCredentialSummary> credentials, String renameBaseUrl,
       String deleteBaseUrl, String cancelUrl, String error, YamlLocaleMessages t) {
 
@@ -25,7 +36,6 @@ public class PasskeysPanel {
 
     StringBuilder cards = new StringBuilder();
     for (WebAuthnCredentialSummary cred : credentials) {
-      String id = esc(cred.getId());
       String name =
           esc(cred.getName().filter(s -> !s.isBlank()).orElse(t.get("profile.passkeys.unnamed")));
       String created =
@@ -33,25 +43,29 @@ public class PasskeysPanel {
       String lastUsed = esc(cred.getLastUsedAt().map(d -> d.format(DATE_FMT))
           .orElse(t.get("profile.passkeys.never")));
 
-      String renameForm = "<form method=\"POST\" action=\""
-          + esc(renameBaseUrl + "/" + cred.getId() + "/rename") + "\" class=\"profile-actions\">"
-          + "<input type=\"text\" name=\"name\" value=\"" + esc(cred.getName().orElse(""))
-          + "\" required />" + "<input class=\"secondary-button\" type=\"submit\" value=\""
-          + esc(t.get("profile.passkeys.rename")) + "\" />" + "</form>";
-
       String deleteForm = "<form method=\"POST\" action=\""
-          + esc(deleteBaseUrl + "/" + cred.getId() + "/delete") + "\" class=\"profile-actions\">"
-          + "<input class=\"secondary-button\" type=\"submit\" value=\""
+          + esc(deleteBaseUrl + "/" + cred.getId() + "/delete") + "\" style=\"display:inline\">"
+          + "<input class=\"link-button\" type=\"submit\" value=\""
           + esc(t.get("profile.passkeys.delete")) + "\" onclick=\"return confirm('"
           + esc(t.get("profile.passkeys.deleteConfirm")) + "')\" />" + "</form>";
 
-      cards.append("<div class=\"section-card\" style=\"margin-bottom: 1rem;\">")
-          .append("<p><strong>").append(t.get("profile.passkeys.name")).append(":</strong> ")
-          .append(name).append("</p>").append("<p><strong>")
-          .append(t.get("profile.passkeys.createdAt")).append(":</strong> ").append(created)
-          .append("</p>").append("<p><strong>").append(t.get("profile.passkeys.lastUsed"))
-          .append(":</strong> ").append(lastUsed).append("</p>").append(renameForm)
-          .append(deleteForm).append("</div>");
+      String renameForm =
+          "<form method=\"POST\" action=\"" + esc(renameBaseUrl + "/" + cred.getId() + "/rename")
+              + "\" class=\"passkey-rename-form\">" + "<input type=\"text\" name=\"name\" value=\""
+              + esc(cred.getName().orElse("")) + "\" placeholder=\""
+              + esc(t.get("profile.passkeys.name")) + "\" required />"
+              + "<input type=\"submit\" value=\"" + esc(t.get("profile.passkeys.rename")) + "\" />"
+              + "</form>";
+
+      cards.append("<div class=\"passkey-card\">").append("<div class=\"passkey-card-top\">")
+          .append("<div class=\"passkey-icon\">").append(PASSKEY_SVG).append("</div>")
+          .append("<div class=\"passkey-info\">").append("<div class=\"passkey-name\">")
+          .append(name).append("</div>").append("<div class=\"passkey-dates\">").append("<span>")
+          .append(esc(t.get("profile.passkeys.createdAt"))).append(": ").append(created)
+          .append("</span>").append("<span>").append(esc(t.get("profile.passkeys.lastUsed")))
+          .append(": ").append(lastUsed).append("</span>").append("</div>").append("</div>")
+          .append("<div class=\"passkey-actions\">").append(deleteForm).append("</div>")
+          .append("</div>").append(renameForm).append("</div>");
     }
 
     if (cards.isEmpty()) {

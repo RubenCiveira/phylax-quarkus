@@ -22,10 +22,10 @@ public class MfaPanel {
 
     if (enabled) {
       return title + successHtml + errorHtml + "<p>" + t.get("profile.mfa.enabledHelp") + "</p>"
-          + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"change-password-form\">"
+          + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"mfa-form\">"
           + "<input type=\"hidden\" name=\"action\" value=\"disable\" />"
           + "<div class=\"profile-actions\">"
-          + "<input class=\"primary-button\" type=\"submit\" value=\""
+          + "<input class=\"danger-button\" type=\"submit\" value=\""
           + esc(t.get("profile.mfa.disable")) + "\" />" + "<a class=\"secondary-button\" href=\""
           + esc(cancelUrl) + "\">" + t.get("profile.mfa.backToProfile") + "</a>" + "</div>"
           + "</form>";
@@ -36,19 +36,19 @@ public class MfaPanel {
     if (setup != null) {
       String qrImage = setup.getQrImage().orElse(null);
       if (qrImage != null && !qrImage.isBlank()) {
-        qrBlock = "<p><img src=\"" + esc(qrImage)
-            + "\" alt=\"MFA QR\" style=\"max-width:220px;height:auto;\" /></p>";
+        qrBlock = "<div class=\"mfa-qr-container\"><img src=\"" + esc(qrImage)
+            + "\" alt=\"MFA QR\" style=\"display:block;max-width:200px;height:auto;\" /></div>";
       }
     }
 
     return title + successHtml + errorHtml + "<p>" + t.get("profile.mfa.help") + "</p>" + qrBlock
-        + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"change-password-form\">"
+        + "<form method=\"POST\" action=\"" + esc(saveUrl) + "\" class=\"mfa-form\">"
         + "<input type=\"hidden\" name=\"action\" value=\"enable\" />"
         + "<input type=\"hidden\" name=\"seed\" value=\"" + esc(seed) + "\" />" + "<label>"
         + t.get("profile.mfa.secret") + "<input type=\"text\" value=\"" + esc(seed)
         + "\" readonly />" + "</label>" + "<label>" + t.get("profile.mfa.otp")
-        + "<input type=\"text\" name=\"otp\" required />" + "</label>"
-        + "<div class=\"profile-actions\">"
+        + "<input type=\"text\" name=\"otp\" required autocomplete=\"one-time-code\" />"
+        + "</label>" + "<div class=\"profile-actions\">"
         + "<input class=\"primary-button\" type=\"submit\" value=\""
         + esc(t.get("profile.mfa.enable")) + "\" />" + "<a class=\"secondary-button\" href=\""
         + esc(cancelUrl) + "\">" + t.get("profile.mfa.cancel") + "</a>" + "</div>" + "</form>";

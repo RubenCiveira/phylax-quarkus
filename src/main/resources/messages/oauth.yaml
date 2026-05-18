@@ -137,6 +137,7 @@ profile:
     birthdate: "Date of birth"
     gender: "Gender"
     website: "Website"
+    actions: "Account settings"
     editProfile: "Edit profile"
     changePassword: "Change password"
     configureMfa: "Two-factor authentication"
@@ -256,6 +257,7 @@ profile:
     confirmedTitle: "Account deleted"
     confirmedHelp: "Your account and associated data have been permanently removed."
     errorToken: "Invalid or expired confirmation link. Please request a new deletion confirmation."
+  backToOrigin: "Close and go back"
   auth:
     title: "Not signed in"
     help: "You must be signed in to view this page"

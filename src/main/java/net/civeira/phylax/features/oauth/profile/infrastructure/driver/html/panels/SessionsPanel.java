@@ -17,7 +17,6 @@ public class SessionsPanel {
 
     StringBuilder cards = new StringBuilder();
     for (ActiveSession session : sessions) {
-      // String sessionId = esc(session.getSessionId());
       String client =
           esc(session.getClientName().filter(s -> !s.isBlank()).orElseGet(session::getClientId));
       String ip = esc(session.getIpAddress().orElse(t.get("profile.sessions.unknown")));
@@ -26,29 +25,41 @@ public class SessionsPanel {
       String expiration = esc(session.getExpiration());
       boolean isCurrent =
           currentSessionId != null && currentSessionId.equals(session.getSessionId());
+
       String badge =
-          isCurrent ? "<strong>" + t.get("profile.sessions.currentSession") + "</strong>" : "";
+          isCurrent
+              ? "<span class=\"badge badge-current\">" + t.get("profile.sessions.currentSession")
+                  + "</span>"
+              : "";
 
       String actions;
       if (isCurrent) {
-        actions = "<div class=\"profile-actions\"><span class=\"secondary-button\">"
-            + t.get("profile.sessions.thisDevice") + "</span></div>";
+        actions = "<span class=\"secondary-button\" style=\"pointer-events:none;opacity:0.6\">"
+            + t.get("profile.sessions.thisDevice") + "</span>";
       } else {
         actions = "<form method=\"POST\" action=\""
-            + esc(revokeBaseUrl + "/" + session.getSessionId()) + "\" class=\"profile-actions\">"
+            + esc(revokeBaseUrl + "/" + session.getSessionId()) + "\" style=\"display:inline\">"
             + "<input class=\"secondary-button\" type=\"submit\" value=\""
             + esc(t.get("profile.sessions.closeSession")) + "\" />" + "</form>";
       }
 
-      cards.append("<div class=\"section-card\" style=\"margin-bottom: 1rem;\">")
-          .append("<p><strong>").append(t.get("profile.sessions.client")).append(":</strong> ")
-          .append(client).append(" ").append(badge).append("</p>").append("<p><strong>")
-          .append(t.get("profile.sessions.ip")).append(":</strong> ").append(ip).append("</p>")
-          .append("<p><strong>").append(t.get("profile.sessions.userAgent")).append(":</strong> ")
-          .append(agent).append("</p>").append("<p><strong>")
-          .append(t.get("profile.sessions.lastUsed")).append(":</strong> ").append(lastUsed)
-          .append("</p>").append("<p><strong>").append(t.get("profile.sessions.expires"))
-          .append(":</strong> ").append(expiration).append("</p>").append(actions).append("</div>");
+      cards.append("<div class=\"session-card").append(isCurrent ? " session-current" : "")
+          .append("\">").append("<div class=\"session-meta\">")
+          .append("<div class=\"session-client\">").append(client).append(" ").append(badge)
+          .append("</div>").append("<div class=\"session-details\">")
+          .append("<span class=\"session-detail-item\"><span class=\"session-detail-label\">")
+          .append(esc(t.get("profile.sessions.ip"))).append(":</span> ").append(ip)
+          .append("</span>")
+          .append("<span class=\"session-detail-item\"><span class=\"session-detail-label\">")
+          .append(esc(t.get("profile.sessions.userAgent"))).append(":</span> ").append(agent)
+          .append("</span>")
+          .append("<span class=\"session-detail-item\"><span class=\"session-detail-label\">")
+          .append(esc(t.get("profile.sessions.lastUsed"))).append(":</span> ").append(lastUsed)
+          .append("</span>")
+          .append("<span class=\"session-detail-item\"><span class=\"session-detail-label\">")
+          .append(esc(t.get("profile.sessions.expires"))).append(":</span> ").append(expiration)
+          .append("</span>").append("</div>").append("</div>").append("<div>").append(actions)
+          .append("</div>").append("</div>");
     }
 
     if (cards.isEmpty()) {

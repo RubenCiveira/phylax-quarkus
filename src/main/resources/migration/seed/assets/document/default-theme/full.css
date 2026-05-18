@@ -64,8 +64,8 @@ body.full-window {
 
 .section-card {
   background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.05);
   padding: 32px;
   margin-bottom: 24px;
 }

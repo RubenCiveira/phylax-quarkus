@@ -66,8 +66,13 @@ public class DecorateHtml implements DecoratePageGateway {
     String pageBody =
         renderPageTemplate(templateCode, tenantOpt, locale, innerContent, title, themeAssetsPath);
 
-    // Step 2 — wrap in the theme layout
-    return themeOpt
+    // Step 2 — wrap in the appropriate theme layout.
+    // Full-window pages use a companion "<base-theme>-full" layout theme so they get
+    // body.full-window, full.css and profile.css instead of the login-shell layout.
+    Optional<Theme> layoutThemeOpt =
+        "full".equals(template) ? resolveFullLayoutTheme(themeOpt) : themeOpt;
+
+    return layoutThemeOpt
         .flatMap(theme -> renderThemeLayout(theme, locale, pageBody, title, themeAssetsPath))
         .orElseGet(() -> {
           log.debug("No theme layout found for theme='{}', using built-in fallback", themeName);
@@ -120,7 +125,20 @@ public class DecorateHtml implements DecoratePageGateway {
 
   private Optional<Theme> resolveGlobalTheme() {
     return themeGateway.list(ThemeFilter.builder().global(true).build()).stream()
-        .filter(Theme::isEnabled).findFirst();
+        .filter(Theme::isEnabled).filter(t -> !t.getName().endsWith("-full")).findFirst();
+  }
+
+  private Optional<Theme> resolveFullLayoutTheme(final Optional<Theme> baseTheme) {
+    // Try "<base-theme-name>-full" first (e.g. "corporate" → "corporate-full")
+    Optional<Theme> named = baseTheme.map(t -> t.getName() + "-full")
+        .flatMap(fullName -> themeGateway.list(ThemeFilter.builder().name(fullName).build())
+            .stream().filter(Theme::isEnabled).findFirst());
+    if (named.isPresent()) {
+      return named;
+    }
+    // Fallback: any global theme whose name ends with "-full"
+    return themeGateway.list(ThemeFilter.builder().global(true).build()).stream()
+        .filter(Theme::isEnabled).filter(t -> t.getName().endsWith("-full")).findFirst();
   }
 
   private String builtInFallback(final String title, final String body, final String theme) {
