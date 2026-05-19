@@ -112,7 +112,7 @@ public class TenantConfigDeleteUsecase {
         TenantConfigVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TenantConfigDeleteAllInBatchCommand command =
         new TenantConfigDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

@@ -508,9 +508,9 @@ public class TenantTermsOfUseRepository {
       sq.where(RELYING_PARTY_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getRelyingPartys()));
     }
-    filter.getTenantTenantAccesible()
-        .ifPresent(tenantTenantAccesibleParam -> sq.where(ACCESS_TENANT_TERMS_OF_USE_TENANT,
-            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
+    filter.getTenantAccesible()
+        .ifPresent(tenantAccesibleParam -> sq.where(ACCESS_TENANT_TERMS_OF_USE_TENANT,
+            SqlOperator.EQ, SqlParameterValue.of(tenantAccesibleParam)));
     return sq;
   }
 

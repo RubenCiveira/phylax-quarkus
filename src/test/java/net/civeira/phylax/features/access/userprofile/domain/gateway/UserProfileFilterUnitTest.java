@@ -41,10 +41,10 @@ class UserProfileFilterUnitTest {
     filter.setUsers(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getUsers(),
         "Users must be the same as the assigned");
-    Assertions.assertFalse(filter.getUserTenantTenantAccesible().isPresent(),
-        "UserTenantTenantAccesible must be empty if filter is build without it");
-    filter.setUserTenantTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getUserTenantTenantAccesible().get(),
-        "UserTenantTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getUserTenantAccesible().isPresent(),
+        "UserTenantAccesible must be empty if filter is build without it");
+    filter.setUserTenantAccesible("one");
+    Assertions.assertEquals("one", filter.getUserTenantAccesible().get(),
+        "UserTenantAccesible must be the same as the assigned");
   }
 }

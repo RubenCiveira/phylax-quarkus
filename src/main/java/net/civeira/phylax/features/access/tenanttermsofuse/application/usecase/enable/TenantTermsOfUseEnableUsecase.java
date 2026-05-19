@@ -113,7 +113,7 @@ public class TenantTermsOfUseEnableUsecase {
         .search(filter.getSearch().orElse(null)).tenant(filter.getTenant().orElse(null))
         .tenants(filter.getTenants()).relyingParty(filter.getRelyingParty().orElse(null))
         .relyingPartys(filter.getRelyingPartys())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TenantTermsOfUseEnableAllInBatchCommand command =
         new TenantTermsOfUseEnableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

@@ -478,11 +478,11 @@ public class ThemeVersionRepository {
     if (!filter.getThemes().isEmpty()) {
       sq.where(THEME, SqlOperator.IN, SqlListParameterValue.strings(filter.getThemes()));
     }
-    filter.getThemeTenantTenantAccesible().ifPresent(themeTenantTenantAccesibleParam -> {
+    filter.getThemeTenantAccesible().ifPresent(themeTenantAccesibleParam -> {
       sq.join("document_theme", "document_theme_version_theme", "document_theme_version.theme",
           "document_theme_version_theme.uid");
       sq.where(DOCUMENT_THEME_VERSION_THEME_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(themeTenantTenantAccesibleParam));
+          SqlParameterValue.of(themeTenantAccesibleParam));
     });
     return sq;
   }

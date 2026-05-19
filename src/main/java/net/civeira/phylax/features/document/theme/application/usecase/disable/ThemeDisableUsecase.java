@@ -112,7 +112,7 @@ public class ThemeDisableUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .global(filter.getGlobal().orElse(null)).name(filter.getName().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     ThemeDisableAllInBatchCommand command =
         new ThemeDisableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

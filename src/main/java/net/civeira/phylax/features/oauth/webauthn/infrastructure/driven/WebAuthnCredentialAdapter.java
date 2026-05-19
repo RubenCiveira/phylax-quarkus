@@ -68,7 +68,7 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
   @Override
   public Optional<WebAuthnCredential> findByCredentialId(String credentialId, String tenantId) {
     return reader
-        .list(UserWebauthnCredentialFilter.builder().userTenantTenantAccesible(tenantId).build())
+        .list(UserWebauthnCredentialFilter.builder().userTenantAccesible(tenantId).build())
         .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
         .map(e -> toDomain(e, resolveUsername(e.getUserUid())));
   }
@@ -107,7 +107,7 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
   private UserWebauthnCredential findForUpdateByCredentialId(String credentialId, String tenantId) {
     return writer
         .listForUpdate(
-            UserWebauthnCredentialFilter.builder().userTenantTenantAccesible(tenantId).build())
+            UserWebauthnCredentialFilter.builder().userTenantAccesible(tenantId).build())
         .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
         .orElseThrow(WebAuthnException::credentialNotFound);
   }

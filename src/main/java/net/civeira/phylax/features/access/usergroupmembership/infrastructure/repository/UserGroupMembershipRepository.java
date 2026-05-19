@@ -494,11 +494,11 @@ public class UserGroupMembershipRepository {
       sq.where(TRUSTED_CLIENT_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getTrustedClients()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_group_membership_user",
           "access_user_group_membership.user", "access_user_group_membership_user.uid");
       sq.where(ACCESS_USER_GROUP_MEMBERSHIP_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

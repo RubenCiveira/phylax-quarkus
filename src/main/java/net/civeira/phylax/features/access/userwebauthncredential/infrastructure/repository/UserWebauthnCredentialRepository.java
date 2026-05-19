@@ -613,11 +613,11 @@ public class UserWebauthnCredentialRepository {
     if (!filter.getUsers().isEmpty()) {
       sq.where(USER, SqlOperator.IN, SqlListParameterValue.strings(filter.getUsers()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_webauthn_credential_user",
           "access_user_webauthn_credential.user", "access_user_webauthn_credential_user.uid");
       sq.where(ACCESS_USER_WEBAUTHN_CREDENTIAL_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

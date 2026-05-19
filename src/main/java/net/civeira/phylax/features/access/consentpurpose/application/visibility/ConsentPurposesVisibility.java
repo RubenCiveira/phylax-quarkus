@@ -306,7 +306,7 @@ public class ConsentPurposesVisibility {
     return ConsentPurposeFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .tenant(modified.getTenant().orElse(null)).tenants(modified.getTenants())
-        .tenantTenantAccesible(modified.getTenantTenantAccesible().orElse(null)).build();
+        .tenantAccesible(modified.getTenantAccesible().orElse(null)).build();
   }
 
   /**

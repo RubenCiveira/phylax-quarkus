@@ -137,7 +137,7 @@ public class UserAcceptUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     UserAcceptAllInBatchCommand command =
         new UserAcceptAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

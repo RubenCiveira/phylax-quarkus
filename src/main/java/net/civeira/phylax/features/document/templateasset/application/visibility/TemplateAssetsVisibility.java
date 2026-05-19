@@ -314,8 +314,8 @@ public class TemplateAssetsVisibility {
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .code(modified.getCode().orElse(null)).template(modified.getTemplate().orElse(null))
         .templates(modified.getTemplates()).tenant(modified.getTenant().orElse(null))
-        .tenants(modified.getTenants())
-        .tenantTenantAccesible(modified.getTenantTenantAccesible().orElse(null)).build();
+        .tenants(modified.getTenants()).tenantAccesible(modified.getTenantAccesible().orElse(null))
+        .build();
   }
 
   /**

@@ -45,10 +45,10 @@ class UserPersonalApiKeyFilterUnitTest {
         "Name must be empty if filter is build without it");
     filter.setName("one");
     Assertions.assertEquals("one", filter.getName().get(), "Name must be the same as the assigned");
-    Assertions.assertFalse(filter.getUserTenantTenantAccesible().isPresent(),
-        "UserTenantTenantAccesible must be empty if filter is build without it");
-    filter.setUserTenantTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getUserTenantTenantAccesible().get(),
-        "UserTenantTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getUserTenantAccesible().isPresent(),
+        "UserTenantAccesible must be empty if filter is build without it");
+    filter.setUserTenantAccesible("one");
+    Assertions.assertEquals("one", filter.getUserTenantAccesible().get(),
+        "UserTenantAccesible must be the same as the assigned");
   }
 }

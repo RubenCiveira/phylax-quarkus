@@ -112,7 +112,7 @@ public class UserPersonalApiKeyDeleteUsecase {
         .builder().uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).keyHash(filter.getKeyHash().orElse(null))
         .user(filter.getUser().orElse(null)).name(filter.getName().orElse(null))
-        .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
+        .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserPersonalApiKeyDeleteAllInBatchCommand command =
         new UserPersonalApiKeyDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

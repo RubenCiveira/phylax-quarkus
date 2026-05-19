@@ -66,7 +66,7 @@ public class TemplateVariableListUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TemplateVariableCursor gatewayCursor = TemplateVariableCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(TemplateVariableOrder::valueOf)

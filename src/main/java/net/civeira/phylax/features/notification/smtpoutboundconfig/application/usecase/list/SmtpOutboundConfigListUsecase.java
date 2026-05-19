@@ -65,7 +65,7 @@ public class SmtpOutboundConfigListUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).globalOnly(filter.getGlobalOnly().orElse(null))
         .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     SmtpOutboundConfigCursor gatewayCursor = SmtpOutboundConfigCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     SmtpOutboundConfigCached values =

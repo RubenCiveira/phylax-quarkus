@@ -310,8 +310,8 @@ public class TenantLoginProvidersVisibility {
     return TenantLoginProviderFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .name(modified.getName().orElse(null)).tenant(modified.getTenant().orElse(null))
-        .tenants(modified.getTenants())
-        .tenantTenantAccesible(modified.getTenantTenantAccesible().orElse(null)).build();
+        .tenants(modified.getTenants()).tenantAccesible(modified.getTenantAccesible().orElse(null))
+        .build();
   }
 
   /**

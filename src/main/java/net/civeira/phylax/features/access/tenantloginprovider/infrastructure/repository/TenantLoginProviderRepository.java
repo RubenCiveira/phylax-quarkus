@@ -699,9 +699,9 @@ public class TenantLoginProviderRepository {
     if (!filter.getTenants().isEmpty()) {
       sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
     }
-    filter.getTenantTenantAccesible()
-        .ifPresent(tenantTenantAccesibleParam -> sq.where(ACCESS_TENANT_LOGIN_PROVIDER_TENANT,
-            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
+    filter.getTenantAccesible()
+        .ifPresent(tenantAccesibleParam -> sq.where(ACCESS_TENANT_LOGIN_PROVIDER_TENANT,
+            SqlOperator.EQ, SqlParameterValue.of(tenantAccesibleParam)));
     return sq;
   }
 

@@ -41,10 +41,10 @@ class MessageFilterUnitTest {
     filter.setTenants(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getTenants(),
         "Tenants must be the same as the assigned");
-    Assertions.assertFalse(filter.getTenantTenantAccesible().isPresent(),
-        "TenantTenantAccesible must be empty if filter is build without it");
-    filter.setTenantTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getTenantTenantAccesible().get(),
-        "TenantTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getTenantAccesible().isPresent(),
+        "TenantAccesible must be empty if filter is build without it");
+    filter.setTenantAccesible("one");
+    Assertions.assertEquals("one", filter.getTenantAccesible().get(),
+        "TenantAccesible must be the same as the assigned");
   }
 }

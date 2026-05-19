@@ -638,9 +638,9 @@ public class UserInvitationRepository {
       sq.where(ACCEPTED_BY_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getAcceptedBys()));
     }
-    filter.getTenantTenantAccesible()
-        .ifPresent(tenantTenantAccesibleParam -> sq.where(ACCESS_USER_INVITATION_TENANT,
-            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
+    filter.getTenantAccesible()
+        .ifPresent(tenantAccesibleParam -> sq.where(ACCESS_USER_INVITATION_TENANT, SqlOperator.EQ,
+            SqlParameterValue.of(tenantAccesibleParam)));
     return sq;
   }
 

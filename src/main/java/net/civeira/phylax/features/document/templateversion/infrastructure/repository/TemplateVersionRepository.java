@@ -485,11 +485,11 @@ public class TemplateVersionRepository {
     if (!filter.getTemplates().isEmpty()) {
       sq.where(TEMPLATE, SqlOperator.IN, SqlListParameterValue.strings(filter.getTemplates()));
     }
-    filter.getTemplateTenantTenantAccesible().ifPresent(templateTenantTenantAccesibleParam -> {
+    filter.getTemplateTenantAccesible().ifPresent(templateTenantAccesibleParam -> {
       sq.join("document_template", "document_template_version_template",
           "document_template_version.template", "document_template_version_template.uid");
       sq.where(DOCUMENT_TEMPLATE_VERSION_TEMPLATE_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(templateTenantTenantAccesibleParam));
+          SqlParameterValue.of(templateTenantAccesibleParam));
     });
     return sq;
   }

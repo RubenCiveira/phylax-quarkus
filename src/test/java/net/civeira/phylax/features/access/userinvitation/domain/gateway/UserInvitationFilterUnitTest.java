@@ -35,8 +35,8 @@ class UserInvitationFilterUnitTest {
     Assertions.assertFalse(filter.getStatus().isPresent(),
         "Status must be empty if filter is build without it");
     filter.setStatus(null);
-    Assertions.assertFalse(filter.getStatus().isPresent(),
-        "Status must be empty when null is assigned");
+    Assertions.assertEquals(null, filter.getStatus().get(),
+        "Status must be the same as the assigned");
     Assertions.assertFalse(filter.getEmail().isPresent(),
         "Email must be empty if filter is build without it");
     filter.setEmail("one");
@@ -72,10 +72,10 @@ class UserInvitationFilterUnitTest {
     filter.setAcceptedBys(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getAcceptedBys(),
         "AcceptedBys must be the same as the assigned");
-    Assertions.assertFalse(filter.getTenantTenantAccesible().isPresent(),
-        "TenantTenantAccesible must be empty if filter is build without it");
-    filter.setTenantTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getTenantTenantAccesible().get(),
-        "TenantTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getTenantAccesible().isPresent(),
+        "TenantAccesible must be empty if filter is build without it");
+    filter.setTenantAccesible("one");
+    Assertions.assertEquals("one", filter.getTenantAccesible().get(),
+        "TenantAccesible must be the same as the assigned");
   }
 }

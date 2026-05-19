@@ -41,10 +41,10 @@ class TemplateVersionFilterUnitTest {
     filter.setTemplates(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getTemplates(),
         "Templates must be the same as the assigned");
-    Assertions.assertFalse(filter.getTemplateTenantTenantAccesible().isPresent(),
-        "TemplateTenantTenantAccesible must be empty if filter is build without it");
-    filter.setTemplateTenantTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getTemplateTenantTenantAccesible().get(),
-        "TemplateTenantTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getTemplateTenantAccesible().isPresent(),
+        "TemplateTenantAccesible must be empty if filter is build without it");
+    filter.setTemplateTenantAccesible("one");
+    Assertions.assertEquals("one", filter.getTemplateTenantAccesible().get(),
+        "TemplateTenantAccesible must be the same as the assigned");
   }
 }

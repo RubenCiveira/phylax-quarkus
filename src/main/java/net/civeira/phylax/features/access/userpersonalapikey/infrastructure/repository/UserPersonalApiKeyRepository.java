@@ -577,11 +577,11 @@ public class UserPersonalApiKeyRepository {
         userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
     filter.getName()
         .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_personal_api_key_user",
           "access_user_personal_api_key.user", "access_user_personal_api_key_user.uid");
       sq.where(ACCESS_USER_PERSONAL_API_KEY_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

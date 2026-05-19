@@ -547,11 +547,11 @@ public class UserRoleAssignamentRepository {
       sq.where(TRUSTED_CLIENT_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getTrustedClients()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_role_assignament_user",
           "access_user_role_assignament.user", "access_user_role_assignament_user.uid");
       sq.where(ACCESS_USER_ROLE_ASSIGNAMENT_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

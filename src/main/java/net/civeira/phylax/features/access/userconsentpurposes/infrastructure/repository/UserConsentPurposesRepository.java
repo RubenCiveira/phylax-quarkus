@@ -527,11 +527,11 @@ public class UserConsentPurposesRepository {
       sq.where(CONSENT_PURPOSE_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getConsentPurposes()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_consent_purposes_user",
           "access_user_consent_purposes.user", "access_user_consent_purposes_user.uid");
       sq.where(ACCESS_USER_CONSENT_PURPOSES_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

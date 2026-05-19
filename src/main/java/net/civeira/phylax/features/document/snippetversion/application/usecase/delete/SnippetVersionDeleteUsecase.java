@@ -112,8 +112,7 @@ public class SnippetVersionDeleteUsecase {
         SnippetVersionVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .snippet(filter.getSnippet().orElse(null)).snippets(filter.getSnippets())
-            .snippetTenantTenantAccesible(filter.getSnippetTenantTenantAccesible().orElse(null))
-            .build();
+            .snippetTenantAccesible(filter.getSnippetTenantAccesible().orElse(null)).build();
     SnippetVersionDeleteAllInBatchCommand command =
         new SnippetVersionDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

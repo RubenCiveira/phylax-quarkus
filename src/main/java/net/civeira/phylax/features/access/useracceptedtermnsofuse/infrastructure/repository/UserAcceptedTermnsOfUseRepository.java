@@ -513,11 +513,11 @@ public class UserAcceptedTermnsOfUseRepository {
     if (!filter.getConditionss().isEmpty()) {
       sq.where(CONDITIONS, SqlOperator.IN, SqlListParameterValue.strings(filter.getConditionss()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_accepted_termns_of_use_user",
           "access_user_accepted_termns_of_use.user", "access_user_accepted_termns_of_use_user.uid");
       sq.where(ACCESS_USER_ACCEPTED_TERMNS_OF_USE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

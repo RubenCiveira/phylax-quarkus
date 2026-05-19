@@ -70,7 +70,7 @@ public class UserRoleAssignamentListUsecase {
             .relyingPartys(filter.getRelyingPartys())
             .trustedClient(filter.getTrustedClient().orElse(null))
             .trustedClients(filter.getTrustedClients())
-            .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
+            .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserRoleAssignamentCursor gatewayCursor = UserRoleAssignamentCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     UserRoleAssignamentCached values =

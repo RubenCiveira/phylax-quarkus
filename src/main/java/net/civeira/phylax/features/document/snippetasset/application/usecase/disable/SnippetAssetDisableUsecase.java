@@ -112,8 +112,7 @@ public class SnippetAssetDisableUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .snippet(filter.getSnippet().orElse(null)).snippets(filter.getSnippets())
-        .snippetTenantTenantAccesible(filter.getSnippetTenantTenantAccesible().orElse(null))
-        .build();
+        .snippetTenantAccesible(filter.getSnippetTenantAccesible().orElse(null)).build();
     SnippetAssetDisableAllInBatchCommand command =
         new SnippetAssetDisableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

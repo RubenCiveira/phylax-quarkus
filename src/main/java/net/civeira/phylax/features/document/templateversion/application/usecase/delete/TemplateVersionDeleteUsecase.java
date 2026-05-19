@@ -112,8 +112,7 @@ public class TemplateVersionDeleteUsecase {
         TemplateVersionVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .template(filter.getTemplate().orElse(null)).templates(filter.getTemplates())
-            .templateTenantTenantAccesible(filter.getTemplateTenantTenantAccesible().orElse(null))
-            .build();
+            .templateTenantAccesible(filter.getTemplateTenantAccesible().orElse(null)).build();
     TemplateVersionDeleteAllInBatchCommand command =
         new TemplateVersionDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

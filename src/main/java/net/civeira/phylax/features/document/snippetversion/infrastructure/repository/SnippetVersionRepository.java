@@ -482,11 +482,11 @@ public class SnippetVersionRepository {
     if (!filter.getSnippets().isEmpty()) {
       sq.where(SNIPPET, SqlOperator.IN, SqlListParameterValue.strings(filter.getSnippets()));
     }
-    filter.getSnippetTenantTenantAccesible().ifPresent(snippetTenantTenantAccesibleParam -> {
+    filter.getSnippetTenantAccesible().ifPresent(snippetTenantAccesibleParam -> {
       sq.join("document_snippet", "document_snippet_version_snippet",
           "document_snippet_version.snippet", "document_snippet_version_snippet.uid");
       sq.where(DOCUMENT_SNIPPET_VERSION_SNIPPET_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(snippetTenantTenantAccesibleParam));
+          SqlParameterValue.of(snippetTenantAccesibleParam));
     });
     return sq;
   }

@@ -117,7 +117,7 @@ public class UserRoleAssignamentDeleteUsecase {
             .relyingPartys(filter.getRelyingPartys())
             .trustedClient(filter.getTrustedClient().orElse(null))
             .trustedClients(filter.getTrustedClients())
-            .userTenantTenantAccesible(filter.getUserTenantTenantAccesible().orElse(null)).build();
+            .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserRoleAssignamentDeleteAllInBatchCommand command =
         new UserRoleAssignamentDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

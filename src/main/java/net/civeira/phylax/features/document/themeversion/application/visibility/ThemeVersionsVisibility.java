@@ -304,7 +304,7 @@ public class ThemeVersionsVisibility {
     return ThemeVersionFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .theme(modified.getTheme().orElse(null)).themes(modified.getThemes())
-        .themeTenantTenantAccesible(modified.getThemeTenantTenantAccesible().orElse(null)).build();
+        .themeTenantAccesible(modified.getThemeTenantAccesible().orElse(null)).build();
   }
 
   /**

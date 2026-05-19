@@ -492,11 +492,11 @@ public class UserMfaRecoveryCodeRepository {
             SqlOperator.IS_NULL, SqlParameterValue.ofNullOffsetDateTime()))));
     filter.getUser().ifPresent(
         userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_mfa_recovery_code_user",
           "access_user_mfa_recovery_code.user", "access_user_mfa_recovery_code_user.uid");
       sq.where(ACCESS_USER_MFA_RECOVERY_CODE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

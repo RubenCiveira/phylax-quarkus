@@ -305,8 +305,7 @@ public class SnippetAssetsVisibility {
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .code(modified.getCode().orElse(null)).snippet(modified.getSnippet().orElse(null))
         .snippets(modified.getSnippets())
-        .snippetTenantTenantAccesible(modified.getSnippetTenantTenantAccesible().orElse(null))
-        .build();
+        .snippetTenantAccesible(modified.getSnippetTenantAccesible().orElse(null)).build();
   }
 
   /**

@@ -677,11 +677,11 @@ public class UserProfileRepository {
     if (!filter.getUsers().isEmpty()) {
       sq.where(USER, SqlOperator.IN, SqlListParameterValue.strings(filter.getUsers()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_profile_user", "access_user_profile.user",
           "access_user_profile_user.uid");
       sq.where(ACCESS_USER_PROFILE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

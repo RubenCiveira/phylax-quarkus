@@ -66,7 +66,7 @@ public class UserListUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     UserCursor gatewayCursor = UserCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(UserOrder::valueOf).toList())

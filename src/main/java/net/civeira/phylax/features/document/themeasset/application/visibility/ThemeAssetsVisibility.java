@@ -304,7 +304,7 @@ public class ThemeAssetsVisibility {
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .code(modified.getCode().orElse(null)).theme(modified.getTheme().orElse(null))
         .themes(modified.getThemes())
-        .themeTenantTenantAccesible(modified.getThemeTenantTenantAccesible().orElse(null)).build();
+        .themeTenantAccesible(modified.getThemeTenantAccesible().orElse(null)).build();
   }
 
   /**

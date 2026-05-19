@@ -485,11 +485,11 @@ public class SnippetAssetRepository {
     if (!filter.getSnippets().isEmpty()) {
       sq.where(SNIPPET, SqlOperator.IN, SqlListParameterValue.strings(filter.getSnippets()));
     }
-    filter.getSnippetTenantTenantAccesible().ifPresent(snippetTenantTenantAccesibleParam -> {
+    filter.getSnippetTenantAccesible().ifPresent(snippetTenantAccesibleParam -> {
       sq.join("document_snippet", "document_snippet_asset_snippet",
           "document_snippet_asset.snippet", "document_snippet_asset_snippet.uid");
       sq.where(DOCUMENT_SNIPPET_ASSET_SNIPPET_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(snippetTenantTenantAccesibleParam));
+          SqlParameterValue.of(snippetTenantAccesibleParam));
     });
     return sq;
   }

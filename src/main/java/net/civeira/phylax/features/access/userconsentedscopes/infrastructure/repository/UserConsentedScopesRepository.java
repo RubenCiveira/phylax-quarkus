@@ -542,11 +542,11 @@ public class UserConsentedScopesRepository {
       sq.where(TRUSTED_CLIENT_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getTrustedClients()));
     }
-    filter.getUserTenantTenantAccesible().ifPresent(userTenantTenantAccesibleParam -> {
+    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_consented_scopes_user",
           "access_user_consented_scopes.user", "access_user_consented_scopes_user.uid");
       sq.where(ACCESS_USER_CONSENTED_SCOPES_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccesibleParam));
     });
     return sq;
   }

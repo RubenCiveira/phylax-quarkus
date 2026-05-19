@@ -113,7 +113,7 @@ public class TemplateAssetEnableUsecase {
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .template(filter.getTemplate().orElse(null)).templates(filter.getTemplates())
         .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantTenantAccesible(filter.getTenantTenantAccesible().orElse(null)).build();
+        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TemplateAssetEnableAllInBatchCommand command =
         new TemplateAssetEnableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

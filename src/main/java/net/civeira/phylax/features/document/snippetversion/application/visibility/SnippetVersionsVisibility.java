@@ -306,8 +306,7 @@ public class SnippetVersionsVisibility {
     return SnippetVersionFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .snippet(modified.getSnippet().orElse(null)).snippets(modified.getSnippets())
-        .snippetTenantTenantAccesible(modified.getSnippetTenantTenantAccesible().orElse(null))
-        .build();
+        .snippetTenantAccesible(modified.getSnippetTenantAccesible().orElse(null)).build();
   }
 
   /**

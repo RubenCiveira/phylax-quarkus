@@ -316,7 +316,7 @@ public class TenantTermsOfUsesVisibility {
         .tenant(modified.getTenant().orElse(null)).tenants(modified.getTenants())
         .relyingParty(modified.getRelyingParty().orElse(null))
         .relyingPartys(modified.getRelyingPartys())
-        .tenantTenantAccesible(modified.getTenantTenantAccesible().orElse(null)).build();
+        .tenantAccesible(modified.getTenantAccesible().orElse(null)).build();
   }
 
   /**

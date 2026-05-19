@@ -108,11 +108,11 @@ public class ThemeVersionDeleteUsecase {
           "The policies for theme version dont allow to delete: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    ThemeVersionVisibilityFilter filterOnVisibles = ThemeVersionVisibilityFilter.builder()
-        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
-        .search(filter.getSearch().orElse(null)).theme(filter.getTheme().orElse(null))
-        .themes(filter.getThemes())
-        .themeTenantTenantAccesible(filter.getThemeTenantTenantAccesible().orElse(null)).build();
+    ThemeVersionVisibilityFilter filterOnVisibles =
+        ThemeVersionVisibilityFilter.builder().uid(filter.getUid().orElse(null))
+            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
+            .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
+            .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
     ThemeVersionDeleteAllInBatchCommand command =
         new ThemeVersionDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

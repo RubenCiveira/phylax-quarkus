@@ -300,7 +300,7 @@ public class SnippetsVisibility {
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .global(modified.getGlobal().orElse(null)).code(modified.getCode().orElse(null))
         .tenant(modified.getTenant().orElse(null)).tenants(modified.getTenants())
-        .tenantTenantAccesible(modified.getTenantTenantAccesible().orElse(null)).build();
+        .tenantAccesible(modified.getTenantAccesible().orElse(null)).build();
   }
 
   /**

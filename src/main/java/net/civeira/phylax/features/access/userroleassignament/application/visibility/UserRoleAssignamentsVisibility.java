@@ -336,7 +336,7 @@ public class UserRoleAssignamentsVisibility {
         .relyingPartys(modified.getRelyingPartys())
         .trustedClient(modified.getTrustedClient().orElse(null))
         .trustedClients(modified.getTrustedClients())
-        .userTenantTenantAccesible(modified.getUserTenantTenantAccesible().orElse(null)).build();
+        .userTenantAccesible(modified.getUserTenantAccesible().orElse(null)).build();
   }
 
   /**

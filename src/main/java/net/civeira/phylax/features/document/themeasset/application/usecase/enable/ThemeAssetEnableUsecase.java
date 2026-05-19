@@ -112,7 +112,7 @@ public class ThemeAssetEnableUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
-        .themeTenantTenantAccesible(filter.getThemeTenantTenantAccesible().orElse(null)).build();
+        .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
     ThemeAssetEnableAllInBatchCommand command =
         new ThemeAssetEnableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan

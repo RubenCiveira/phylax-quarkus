@@ -45,10 +45,10 @@ class SnippetAssetFilterUnitTest {
     filter.setSnippets(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getSnippets(),
         "Snippets must be the same as the assigned");
-    Assertions.assertFalse(filter.getSnippetTenantTenantAccesible().isPresent(),
-        "SnippetTenantTenantAccesible must be empty if filter is build without it");
-    filter.setSnippetTenantTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getSnippetTenantTenantAccesible().get(),
-        "SnippetTenantTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getSnippetTenantAccesible().isPresent(),
+        "SnippetTenantAccesible must be empty if filter is build without it");
+    filter.setSnippetTenantAccesible("one");
+    Assertions.assertEquals("one", filter.getSnippetTenantAccesible().get(),
+        "SnippetTenantAccesible must be the same as the assigned");
   }
 }

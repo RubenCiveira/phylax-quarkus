@@ -306,8 +306,7 @@ public class TemplateVersionsVisibility {
     return TemplateVersionFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .template(modified.getTemplate().orElse(null)).templates(modified.getTemplates())
-        .templateTenantTenantAccesible(modified.getTemplateTenantTenantAccesible().orElse(null))
-        .build();
+        .templateTenantAccesible(modified.getTemplateTenantAccesible().orElse(null)).build();
   }
 
   /**

@@ -501,9 +501,9 @@ public class TemplateAssetRepository {
     if (!filter.getTenants().isEmpty()) {
       sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
     }
-    filter.getTenantTenantAccesible()
-        .ifPresent(tenantTenantAccesibleParam -> sq.where(DOCUMENT_TEMPLATE_ASSET_TENANT,
-            SqlOperator.EQ, SqlParameterValue.of(tenantTenantAccesibleParam)));
+    filter.getTenantAccesible()
+        .ifPresent(tenantAccesibleParam -> sq.where(DOCUMENT_TEMPLATE_ASSET_TENANT, SqlOperator.EQ,
+            SqlParameterValue.of(tenantAccesibleParam)));
     return sq;
   }
 
