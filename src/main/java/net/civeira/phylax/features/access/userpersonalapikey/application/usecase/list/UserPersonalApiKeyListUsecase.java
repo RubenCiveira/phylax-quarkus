@@ -66,6 +66,7 @@ public class UserPersonalApiKeyListUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).keyHash(filter.getKeyHash().orElse(null))
         .user(filter.getUser().orElse(null)).name(filter.getName().orElse(null))
+        .onlySelfAccesibles(filter.getOnlySelfAccesibles().orElse(null))
         .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserPersonalApiKeyCursor gatewayCursor = UserPersonalApiKeyCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))

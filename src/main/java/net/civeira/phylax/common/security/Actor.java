@@ -2,49 +2,36 @@
 package net.civeira.phylax.common.security;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import lombok.Builder;
-import lombok.Getter;
+public interface Actor {
+  String getUid();
+  
+  String getTenant();
 
-@Getter
-@Builder
-public class Actor {
-  private final String name;
-  private final String tenant;
-  private final boolean authenticated;
-  private final List<String> roles;
-  private final List<String> groups;
-  private final List<String> scopes;
-  private final Map<String, String> claims;
+  String getName();
 
-  public Optional<String> getTenant() {
-    return Optional.ofNullable(tenant);
+  boolean isAuthenticated();
+  
+  List<String> getRoles();
+
+  List<String> getGroups();
+  
+  List<String> getScopes();
+
+  default boolean isIdentifiedAs(String u) {
+    return getUid().equals(u);
   }
 
-  public Optional<String> getName() {
-    return Optional.ofNullable(name);
-  }
-
-  public boolean isAuthenticated() {
-    return authenticated;
-  }
-
-  public String getClaim(String name) {
-    return claims.get(name);
-  }
-
-  public boolean isInGroup(String group) {
+  default boolean isInGroup(String group) {
     if (group.endsWith(":*")) {
       String prefix = group.substring(0, group.length() - 1);
-      return groups.stream().anyMatch(has -> has.startsWith(prefix));
+      return getGroups().stream().anyMatch(has -> has.startsWith(prefix));
     } else {
-      return groups.contains(group);
+      return getGroups().contains(group);
     }
   }
 
-  public boolean isInAnyGroup(String... groups) {
+  default boolean isInAnyGroup(String... groups) {
     for (String group : groups) {
       if (isInGroup(group)) {
         return true;
@@ -53,16 +40,17 @@ public class Actor {
     return false;
   }
 
-  public boolean hasScope(String scope) {
+  default boolean hasScope(String scope) {
     if (scope.endsWith(":*")) {
       String prefix = scope.substring(0, scope.length() - 1);
-      return scopes.stream().anyMatch(has -> has.startsWith(prefix));
+      return getScopes().stream().anyMatch(has -> has.startsWith(prefix));
     } else {
-      return scopes.contains(scope);
+      return getScopes().contains(scope);
     }
+
   }
 
-  public boolean hasAnyScope(String... scopes) {
+  default boolean hasAnyScope(String... scopes) {
     for (String scope : scopes) {
       if (hasScope(scope)) {
         return true;
@@ -71,16 +59,17 @@ public class Actor {
     return false;
   }
 
-  public boolean hasRole(String role) {
+  default boolean hasRole(String role) {
     if (role.endsWith(":*")) {
       String prefix = role.substring(0, role.length() - 1);
-      return roles.stream().anyMatch(has -> has.startsWith(prefix));
+      return getRoles().stream().anyMatch(has -> has.startsWith(prefix));
     } else {
-      return roles.contains(role);
+      return getRoles().contains(role);
     }
+
   }
 
-  public boolean hasAnyRole(String... roles) {
+  default boolean hasAnyRole(String... roles) {
     for (String role : roles) {
       if (hasRole(role)) {
         return true;

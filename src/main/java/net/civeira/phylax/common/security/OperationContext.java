@@ -8,10 +8,10 @@ import lombok.NonNull;
 @Getter
 @AllArgsConstructor
 public final class OperationContext {
-
   @NonNull
   private final Actor actor;
   @NonNull
   private final InvocationSource source;
-
+  @NonNull
+  private final AuthenticationContext authentication;
 }

@@ -10,37 +10,82 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.Actor;
+import net.civeira.phylax.common.security.AuthenticationContext;
 import net.civeira.phylax.common.security.InvocationSource;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 public class MdcRegisterFilter {
-
-  private static final String MDC_KEY_ACTOR = "actor";
-  private static final String MDC_KEY_TENANT = "tenant";
-  private static final String MDC_KEY_DEVICE = "device";
-
   private final CurrentRequest currentRequest;
 
   @ServerRequestFilter
   public void getRequestFilter() {
     Actor actor = currentRequest.getActor();
     InvocationSource connection = currentRequest.getInvocationSource();
+    AuthenticationContext authenticationContext = currentRequest.getAuthenticationContext();
     Span currentSpan = Span.current();
     if (currentSpan.getSpanContext().isValid()) {
-      currentSpan.setAttribute(MDC_KEY_ACTOR, actor.getName().orElse("-"));
-      currentSpan.setAttribute(MDC_KEY_TENANT, actor.getTenant().orElse("-"));
-      currentSpan.setAttribute(MDC_KEY_DEVICE, connection.getRemoteDevice().orElse("-"));
+      enrichSpan(currentSpan, actor, connection, authenticationContext);
     }
-    MDC.put(MDC_KEY_ACTOR, actor.getName().orElse("-"));
-    MDC.put(MDC_KEY_TENANT, actor.getTenant().orElse("-"));
-    MDC.put(MDC_KEY_DEVICE, connection.getRemoteDevice().orElse("-"));
+    enrichMdc(actor, connection, authenticationContext);
   }
 
   @ServerResponseFilter
   public void getResponseFilter() {
-    MDC.remove(MDC_KEY_ACTOR);
-    MDC.remove(MDC_KEY_TENANT);
-    MDC.remove(MDC_KEY_DEVICE);
+    MDC.clear();
+  }
+
+  private void enrichSpan(Span span, Actor actor, InvocationSource source,
+      AuthenticationContext auth) {
+    // Actor
+    span.setAttribute("security.actor.uid", actor.getUid());
+    span.setAttribute("security.actor.name", actor.getName());
+    span.setAttribute("security.actor.tenant", actor.getTenant());
+    span.setAttribute("security.actor.authenticated", actor.isAuthenticated());
+    // Roles / scopes
+    span.setAttribute("security.roles", String.join(",", actor.getRoles()));
+    span.setAttribute("security.scopes", String.join(",", actor.getScopes()));
+    // Invocation source
+    span.setAttribute("security.channel", source.getChannel().name());
+    span.setAttribute("client.address", source.getIp());
+    span.setAttribute("client.device.id", source.getDevice());
+    span.setAttribute("client.user_agent", source.getUserAgent());
+    span.setAttribute("client.application", source.getApplication());
+    span.setAttribute("client.id", source.getClientId());
+    span.setAttribute("request.id", source.getRequestId());
+    // Authentication
+    span.setAttribute("security.authentication.level", auth.getLevel().name());
+    span.setAttribute("security.authentication.mfa", auth.isMfa());
+    span.setAttribute("security.authentication.remember_me", auth.isRememberMe());
+    span.setAttribute("security.authentication.impersonated", auth.isImpersonated());
+
+    span.setAttribute("security.authentication.secure_transport", auth.isSecureTransport());
+    span.setAttribute("security.authentication.method", auth.getAuthenticationMethod());
+    span.setAttribute("security.session.id", auth.getSessionId());
+    // Impersonation
+    if (auth.isImpersonated()) {
+      span.setAttribute("security.impersonator.uid", auth.getAuthenticatedActor().getUid());
+      span.setAttribute("security.impersonator.name", auth.getAuthenticatedActor().getName());
+
+    }
+  }
+
+  private void enrichMdc(Actor actor, InvocationSource source, AuthenticationContext auth) {
+    putMdc("actor", actor.getName());
+    putMdc("uid", actor.getUid());
+    putMdc("tenant", actor.getTenant());
+    putMdc("device", source.getDevice());
+    putMdc("ip", source.getIp());
+    putMdc("channel", source.getChannel().name());
+    putMdc("requestId", source.getRequestId());
+    putMdc("authLevel", auth.getLevel().name());
+    putMdc("mfa", Boolean.toString(auth.isMfa()));
+    putMdc("impersonated", Boolean.toString(auth.isImpersonated()));
+  }
+
+  private void putMdc(String key, String value) {
+    if (value != null && !value.isBlank()) {
+      MDC.put(key, value);
+    }
   }
 }

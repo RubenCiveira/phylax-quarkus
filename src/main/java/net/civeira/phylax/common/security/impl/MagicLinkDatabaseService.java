@@ -14,9 +14,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,12 +24,13 @@ import javax.sql.DataSource;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.security.Actor;
+import net.civeira.phylax.common.security.AuthenticationContext;
 import net.civeira.phylax.common.security.InvocationSource;
 import net.civeira.phylax.common.security.MagicLinkResult;
 import net.civeira.phylax.common.security.MagicLinkService;
@@ -66,7 +65,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
     if (jwtToken == null || jwtToken.isBlank()) {
       throw new IllegalArgumentException("Magic link requires a JWT token.");
     }
-    return store(url, jwtToken, null, null);
+    return store(url, jwtToken, null, null, null);
   }
 
   @Override
@@ -74,15 +73,15 @@ public class MagicLinkDatabaseService implements MagicLinkService {
     if (context == null) {
       throw new IllegalArgumentException("Magic link requires an actor.");
     }
-    return store(url, null, context.getActor(), context.getSource());
+    return store(url, null, context.getActor(), context.getAuthentication(), context.getSource());
   }
 
   @Override
-  public String create(String url, Actor actor, InvocationSource source) {
+  public String create(String url, Actor actor, AuthenticationContext auth, InvocationSource source) {
     if (actor == null) {
       throw new IllegalArgumentException("Magic link requires an actor.");
     }
-    return store(url, null, actor, source);
+    return store(url, null, actor, auth, source);
   }
 
   @Override
@@ -93,7 +92,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
     cleanExpired();
     try (Connection conn = datasource.getConnection()) {
       try (PreparedStatement ps = conn.prepareStatement(
-          "SELECT path, jwt_token, actor_json, source_json, current_reads, max_reads"
+          "SELECT path, jwt_token, actor_json, auth_json, source_json, current_reads, max_reads"
               + " FROM _security_magic_links WHERE token = ? AND expiration > ? FOR UPDATE")) {
         ps.setString(1, magicToken);
         ps.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
@@ -109,6 +108,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
           String jwtToken = rs.getString("jwt_token");
           Actor actor = deserializeActor(rs.getString("actor_json"));
           InvocationSource source = deserializeSource(rs.getString("source_json"));
+          AuthenticationContext auth = deserializeAuth(rs.getString("auth_json"));
 
           if (jwtToken == null && actor == null) {
             return Optional.empty();
@@ -118,7 +118,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
           } else {
             incrementReads(conn, magicToken, reads);
           }
-          return Optional.of(new MagicLinkResult(jwtToken, actor, source));
+          return Optional.of(new MagicLinkResult(jwtToken, actor, auth, source));
         }
       }
     } catch (SQLException | JsonProcessingException ex) {
@@ -155,21 +155,22 @@ public class MagicLinkDatabaseService implements MagicLinkService {
   // Private helpers
   // -------------------------------------------------------------------------
 
-  private String store(String url, String jwtToken, Actor actor, InvocationSource source) {
+  private String store(String url, String jwtToken, Actor actor, AuthenticationContext auth, InvocationSource source) {
     String token = generateToken();
     String path = normalizePathAndQuery(url);
     Timestamp expiration = new Timestamp(Instant.now().plus(ttl).toEpochMilli());
     try (Connection conn = datasource.getConnection()) {
       try (PreparedStatement ps = conn.prepareStatement("INSERT INTO _security_magic_links"
-          + " (token, path, jwt_token, actor_json, source_json, current_reads, max_reads, expiration)"
-          + " VALUES (?, ?, ?, ?, ?, 0, ?, ?)")) {
+          + " (token, path, jwt_token, actor_json, source_json, auth_json, current_reads, max_reads, expiration)"
+          + " VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)")) {
         ps.setString(1, token);
         ps.setString(2, path);
         ps.setString(3, jwtToken);
         ps.setString(4, serializeActor(actor));
         ps.setString(5, serializeSource(source));
-        ps.setInt(6, maxReads);
-        ps.setTimestamp(7, expiration);
+        ps.setString(6, serializeAuth(auth));
+        ps.setInt(7, maxReads);
+        ps.setTimestamp(8, expiration);
         ps.executeUpdate();
       }
     } catch (SQLException | JsonProcessingException ex) {
@@ -207,57 +208,39 @@ public class MagicLinkDatabaseService implements MagicLinkService {
   }
 
   private String serializeActor(Actor actor) throws JsonProcessingException {
-    if (actor == null) {
-      return null;
-    }
-    Map<String, Object> data = new LinkedHashMap<>();
-    data.put("name", actor.getName().orElse(null));
-    data.put("tenant", actor.getTenant().orElse(null));
-    data.put("authenticated", actor.isAuthenticated());
-    data.put("roles", actor.getRoles());
-    data.put("groups", actor.getGroups());
-    data.put("claims", actor.getClaims());
-    return mapper.writeValueAsString(data);
+    return actor == null ? null : mapper.writeValueAsString(ActorImpl.toMap(actor));
   }
 
   private Actor deserializeActor(String json) throws JsonProcessingException {
     if (json == null || json.isBlank()) {
       return null;
     }
-    JsonNode node = mapper.readTree(json);
-    List<String> roles = new ArrayList<>();
-    node.path("roles").forEach(n -> roles.add(n.asText()));
-    List<String> groups = new ArrayList<>();
-    node.path("groups").forEach(n -> groups.add(n.asText()));
-    Map<String, String> claims = new LinkedHashMap<>();
-    node.path("claims").properties().forEach(e -> claims.put(e.getKey(), e.getValue().asText()));
-    return Actor.builder().name(textOrNull(node, "name")).tenant(textOrNull(node, "tenant"))
-        .authenticated(node.path("authenticated").asBoolean(false)).roles(roles).groups(groups)
-        .claims(claims).build();
+    return ActorImpl.fromMap( mapper.readValue(json,new TypeReference<Map<String, Object>>() {}) );
+  }
+
+  private String serializeAuth(AuthenticationContext auth) throws JsonProcessingException {
+    return auth == null ? null : mapper.writeValueAsString(AuthenticationContextImpl.toMap(auth));
   }
 
   private String serializeSource(InvocationSource source) throws JsonProcessingException {
-    if (source == null) {
-      return null;
-    }
-    Map<String, Object> data = new LinkedHashMap<>();
-    data.put("request", source.getRequest());
-    data.put("remote", source.getRemote().orElse(null));
-    data.put("remoteApplication", source.getRemoteApplication().orElse(null));
-    data.put("remoteDevice", source.getRemoteDevice().orElse(null));
-    return mapper.writeValueAsString(data);
+    return source == null ? null : mapper.writeValueAsString(InvocationSourceImpl.toMap(source));
   }
 
   private InvocationSource deserializeSource(String json) throws JsonProcessingException {
     if (json == null || json.isBlank()) {
       return null;
     }
-    JsonNode node = mapper.readTree(json);
-    return InvocationSource.builder().request(node.path("request").asText(""))
-        .remote(textOrNull(node, "remote")).remoteApplication(textOrNull(node, "remoteApplication"))
-        .remoteDevice(textOrNull(node, "remoteDevice")).build();
+    return InvocationSourceImpl.fromMap( mapper.readValue(json,new TypeReference<Map<String, Object>>() {}) );
   }
 
+  private AuthenticationContext deserializeAuth(String json) throws JsonProcessingException {
+    if (json == null || json.isBlank()) {
+      return null;
+    }
+    return AuthenticationContextImpl.fromMap( mapper.readValue(json,new TypeReference<Map<String, Object>>() {}) );
+  }
+
+  
   private String appendParam(String url, String token) {
     try {
       URI uri = new URI(url);
@@ -295,11 +278,6 @@ public class MagicLinkDatabaseService implements MagicLinkService {
 
   private String decode(String value) {
     return URLDecoder.decode(value, StandardCharsets.UTF_8);
-  }
-
-  private String textOrNull(JsonNode node, String field) {
-    JsonNode child = node.path(field);
-    return child.isNull() || child.isMissingNode() ? null : child.asText();
   }
 
   private String generateToken() {

@@ -3,36 +3,49 @@ package net.civeira.phylax.common.security;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
-import java.util.Optional;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
+public interface InvocationSource {
 
-@Getter
-@Builder
-public class InvocationSource {
-  private final ZonedDateTime startTime = ZonedDateTime.now();
-  private final Locale locale;
-  @NonNull
-  private final String request;
-  private final String remote;
-  private final String remoteApplication;
-  private final String remoteDevice;
+  InvocationChannel getChannel();
 
-  public Optional<String> getRemoteDevice() {
-    return Optional.ofNullable(remoteDevice);
+  String getRequestId();
+
+  String getClientId();
+
+  String getApplication();
+
+  String getDevice();
+
+  String getHost();
+
+  String getIp();
+
+  String getUserAgent();
+
+  Locale getLocale();
+
+  ZonedDateTime getStartTime();
+
+  default boolean isInteractive() {
+    return switch (getChannel()) {
+      case WEB, MOBILE, DESKTOP -> true;
+      default -> false;
+    };
   }
 
-  public Optional<String> getRemoteApplication() {
-    return Optional.ofNullable(remoteApplication);
+  default boolean isBatch() {
+    return getChannel() == InvocationChannel.BATCH;
   }
 
-  public Optional<String> getRemote() {
-    return Optional.ofNullable(remote);
+  default boolean isApi() {
+    return getChannel() == InvocationChannel.API;
   }
 
-  public Locale getLocale() {
-    return locale == null ? locale : Locale.getDefault();
+  default boolean isInternal() {
+    return getChannel() == InvocationChannel.INTERNAL;
+  }
+
+  default boolean isRemote() {
+    return !isInternal();
   }
 }

@@ -112,6 +112,7 @@ public class UserPersonalApiKeyRevokeUsecase {
         .builder().uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).keyHash(filter.getKeyHash().orElse(null))
         .user(filter.getUser().orElse(null)).name(filter.getName().orElse(null))
+        .onlySelfAccesibles(filter.getOnlySelfAccesibles().orElse(null))
         .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserPersonalApiKeyRevokeAllInBatchCommand command =
         new UserPersonalApiKeyRevokeAllInBatchCommand(context, filterWithVisibility);

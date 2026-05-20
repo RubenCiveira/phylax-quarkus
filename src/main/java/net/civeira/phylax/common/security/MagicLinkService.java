@@ -20,7 +20,7 @@ public interface MagicLinkService {
   /**
    * Creates a magic link carrying an Actor and optional InvocationSource.
    */
-  String create(String url, Actor actor, InvocationSource source);
+  String create(String url, Actor actor, AuthenticationContext auth, InvocationSource source);
 
   /**
    * Consumes a magic link token for the given normalised path+query string.

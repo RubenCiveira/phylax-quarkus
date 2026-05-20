@@ -309,6 +309,7 @@ public class UserPersonalApiKeysVisibility {
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
         .keyHash(modified.getKeyHash().orElse(null)).user(modified.getUser().orElse(null))
         .name(modified.getName().orElse(null))
+        .onlySelfAccesibles(modified.getOnlySelfAccesibles().orElse(null))
         .userTenantAccesible(modified.getUserTenantAccesible().orElse(null)).build();
   }
 

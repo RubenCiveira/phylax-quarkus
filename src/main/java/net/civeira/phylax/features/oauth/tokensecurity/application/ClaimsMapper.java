@@ -57,6 +57,8 @@ public class ClaimsMapper {
     List<String> scopes = validationData.getScopes().isEmpty() ? new ArrayList<>()
         : new ArrayList<>(validationData.getScopes());
 
+    String authLevel = null == validationData.getMode() ? "0" : validationData.getMode().getAcr();
+    
     Builder builder = JWT.create().withIssuer(issuer(tenant)).withJWTId(jti)
         .withIssuedAt(new Date()).withSubject(validationData.getUsername())
         .withClaim("aud", validationData.getAudiences()).withClaim(CLAIM_GRANT_TYPE, grantType)
@@ -71,6 +73,8 @@ public class ClaimsMapper {
 
     return builder.withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
         .withClaim("aud", validationData.getAudiences())
+        .withClaim("acr", authLevel)
+        .withClaim("amr", authLevel)
         .withClaim(CLAIM_ROLES, validationData.getRoles())
         .withArrayClaim(CLAIM_SCOPE, scopes.toArray(new String[0]));
   }

@@ -4,9 +4,8 @@ package net.civeira.phylax.common.security;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +13,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import lombok.NonNull;
+import net.civeira.phylax.common.security.impl.ActorImpl;
+import net.civeira.phylax.common.security.impl.AuthenticationContextImpl;
+import net.civeira.phylax.common.security.impl.InvocationSourceImpl;
 
 @DisplayName("AllowDecision abstract security decision")
 class AuthorizationDecisionUnitTest {
@@ -39,9 +41,11 @@ class AuthorizationDecisionUnitTest {
 
   @BeforeEach
   void setUp() {
-    Actor actor = Actor.builder().authenticated(true).roles(List.of()).claims(Map.of()).build();
-    InvocationSource conn = InvocationSource.builder().request("/test").build();
-    interaction = new OperationContext(actor, conn);
+    Actor actor = ActorImpl.builder().authenticated(true).roles(List.of()).build();
+    InvocationSource conn = InvocationSourceImpl.builder().channel(InvocationChannel.TEST)
+        .startTime(ZonedDateTime.now()).build();
+    AuthenticationContext auth = AuthenticationContextImpl.builder().build();
+    interaction = new OperationContext(actor, conn, auth);
   }
 
   @Nested
