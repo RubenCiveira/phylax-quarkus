@@ -77,7 +77,8 @@ public class MagicLinkDatabaseService implements MagicLinkService {
   }
 
   @Override
-  public String create(String url, Actor actor, AuthenticationContext auth, InvocationSource source) {
+  public String create(String url, Actor actor, AuthenticationContext auth,
+      InvocationSource source) {
     if (actor == null) {
       throw new IllegalArgumentException("Magic link requires an actor.");
     }
@@ -155,7 +156,8 @@ public class MagicLinkDatabaseService implements MagicLinkService {
   // Private helpers
   // -------------------------------------------------------------------------
 
-  private String store(String url, String jwtToken, Actor actor, AuthenticationContext auth, InvocationSource source) {
+  private String store(String url, String jwtToken, Actor actor, AuthenticationContext auth,
+      InvocationSource source) {
     String token = generateToken();
     String path = normalizePathAndQuery(url);
     Timestamp expiration = new Timestamp(Instant.now().plus(ttl).toEpochMilli());
@@ -215,7 +217,7 @@ public class MagicLinkDatabaseService implements MagicLinkService {
     if (json == null || json.isBlank()) {
       return null;
     }
-    return ActorImpl.fromMap( mapper.readValue(json,new TypeReference<Map<String, Object>>() {}) );
+    return ActorImpl.fromMap(mapper.readValue(json, new TypeReference<Map<String, Object>>() {}));
   }
 
   private String serializeAuth(AuthenticationContext auth) throws JsonProcessingException {
@@ -230,17 +232,19 @@ public class MagicLinkDatabaseService implements MagicLinkService {
     if (json == null || json.isBlank()) {
       return null;
     }
-    return InvocationSourceImpl.fromMap( mapper.readValue(json,new TypeReference<Map<String, Object>>() {}) );
+    return InvocationSourceImpl
+        .fromMap(mapper.readValue(json, new TypeReference<Map<String, Object>>() {}));
   }
 
   private AuthenticationContext deserializeAuth(String json) throws JsonProcessingException {
     if (json == null || json.isBlank()) {
       return null;
     }
-    return AuthenticationContextImpl.fromMap( mapper.readValue(json,new TypeReference<Map<String, Object>>() {}) );
+    return AuthenticationContextImpl
+        .fromMap(mapper.readValue(json, new TypeReference<Map<String, Object>>() {}));
   }
 
-  
+
   private String appendParam(String url, String token) {
     try {
       URI uri = new URI(url);

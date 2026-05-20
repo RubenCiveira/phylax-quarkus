@@ -2,14 +2,5 @@
 package net.civeira.phylax.common.security;
 
 public enum InvocationChannel {
-  WEB,
-  MOBILE,
-  DESKTOP,
-  API,
-  BATCH,
-  SCHEDULER,
-  MESSAGE_QUEUE,
-  CLI,
-  TEST,
-  INTERNAL
+  WEB, MOBILE, DESKTOP, API, BATCH, SCHEDULER, MESSAGE_QUEUE, CLI, TEST, INTERNAL
 }

@@ -19,8 +19,10 @@ import java.util.Locale.LanguageRange;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.json.JsonObject;

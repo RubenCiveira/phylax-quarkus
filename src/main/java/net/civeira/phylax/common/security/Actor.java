@@ -5,17 +5,17 @@ import java.util.List;
 
 public interface Actor {
   String getUid();
-  
+
   String getTenant();
 
   String getName();
 
   boolean isAuthenticated();
-  
+
   List<String> getRoles();
 
   List<String> getGroups();
-  
+
   List<String> getScopes();
 
   default boolean isIdentifiedAs(String u) {
