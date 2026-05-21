@@ -116,7 +116,7 @@ public class TrustedClientEnableUsecase {
             .code(filter.getCode().orElse(null)).build();
     TrustedClientEnableAllInBatchCommand command =
         new TrustedClientEnableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TrustedClientEnableAllInBatchCommand>builder().params(command)
         .name("enable-trusted-client")
         .executor(
@@ -141,8 +141,8 @@ public class TrustedClientEnableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TrustedClientEnableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

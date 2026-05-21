@@ -13,7 +13,7 @@ public class TenantAccesible {
   public void filterVisibles(@Observes SnippetVersionVisibilityCheck filter) {
     Actor actor = filter.getActor();
     if (!(actor.hasScope("platform:global_access"))) {
-      filter.peek(fl -> fl.setSnippetTenantAccesible(actor.getTenant().orElse(null)));
+      filter.peek(fl -> fl.setSnippetTenantAccesible(actor.getTenant()));
     }
   }
 }

@@ -116,7 +116,7 @@ public class TrustedClientDeleteUsecase {
             .code(filter.getCode().orElse(null)).build();
     TrustedClientDeleteAllInBatchCommand command =
         new TrustedClientDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TrustedClientDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<TrustedClient, TrustedClient, TrustedClientDeleteAllInBatchCommand, TrustedClientsInBatchExecutor.TrustedClientPaginableBatch>builder()
@@ -140,8 +140,8 @@ public class TrustedClientDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TrustedClientCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

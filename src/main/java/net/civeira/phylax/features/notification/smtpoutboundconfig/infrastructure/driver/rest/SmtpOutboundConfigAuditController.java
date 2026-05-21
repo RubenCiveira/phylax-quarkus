@@ -38,7 +38,7 @@ public class SmtpOutboundConfigAuditController implements SmtpOutboundConfigAudi
   @Override
   public Response smtpOutboundConfigApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("notification_smtp_outbound_config_audit", "smtpOutboundConfig",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class SmtpOutboundConfigAuditController implements SmtpOutboundConfigAudi
    */
   @Override
   public Response smtpOutboundConfigApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("notification_smtp_outbound_config_audit", "smtpOutboundConfig",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

@@ -113,7 +113,7 @@ public class ApiKeyClientDisableUsecase {
         .search(filter.getSearch().orElse(null)).key(filter.getKey().orElse(null)).build();
     ApiKeyClientDisableAllInBatchCommand command =
         new ApiKeyClientDisableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ApiKeyClientDisableAllInBatchCommand>builder().params(command)
         .name("disable-api-key-client")
         .executor(
@@ -138,8 +138,8 @@ public class ApiKeyClientDisableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final ApiKeyClientDisableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

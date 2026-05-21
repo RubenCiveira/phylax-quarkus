@@ -115,7 +115,7 @@ public class TenantLoginProviderDeleteUsecase {
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TenantLoginProviderDeleteAllInBatchCommand command =
         new TenantLoginProviderDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TenantLoginProviderDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<TenantLoginProvider, TenantLoginProvider, TenantLoginProviderDeleteAllInBatchCommand, TenantLoginProvidersInBatchExecutor.TenantLoginProviderPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class TenantLoginProviderDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TenantLoginProviderCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

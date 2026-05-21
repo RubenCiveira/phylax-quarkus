@@ -28,18 +28,16 @@ public class SmtpOutboundConfigAuditAdapter implements SmtpOutboundConfigAuditGa
   @Override
   public void created(final String usecase, final SmtpOutboundConfig smtpOutboundConfig,
       final OperationContext context) {
-    writer.record("_audit_notification_smtp_outbound_config", AuditEvent.builder()
-        .operation("create").usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
-        .entityType("smtpOutboundConfig").entityId(smtpOutboundConfig.getUid())
-        .newValue(smtpOutboundConfig.toMap())
-        .performedBy(context.getActor().getName().orElse("<<no-user>>"))
-        .tenant(context.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(context.getSource().getStartTime())
-        .sourceRequest(context.getSource().getRequest())
-        .remoteAddress(context.getSource().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(context.getSource().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(context.getSource().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(context.getActor().getClaims()).build());
+    writer.record("_audit_notification_smtp_outbound_config",
+        AuditEvent.builder().operation("create").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("smtpOutboundConfig")
+            .entityId(smtpOutboundConfig.getUid()).newValue(smtpOutboundConfig.toMap())
+            .performedBy(context.getActor().getName()).tenant(context.getActor().getTenant())
+            .timestamp(context.getSource().getStartTime())
+            .sourceRequest(context.getSource().getRequestId())
+            .remoteAddress(context.getSource().getIp())
+            .remoteApplication(context.getSource().getApplication())
+            .remoteDevice(context.getSource().getDevice()).build());
   }
 
   /**
@@ -51,18 +49,16 @@ public class SmtpOutboundConfigAuditAdapter implements SmtpOutboundConfigAuditGa
   @Override
   public void deleted(final String usecase, final SmtpOutboundConfig smtpOutboundConfig,
       final OperationContext context) {
-    writer.record("_audit_notification_smtp_outbound_config", AuditEvent.builder()
-        .operation("delete").usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
-        .entityType("smtpOutboundConfig").entityId(smtpOutboundConfig.getUid())
-        .oldValue(smtpOutboundConfig.toMap())
-        .performedBy(context.getActor().getName().orElse("<<no-user>>"))
-        .tenant(context.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(context.getSource().getStartTime())
-        .sourceRequest(context.getSource().getRequest())
-        .remoteAddress(context.getSource().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(context.getSource().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(context.getSource().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(context.getActor().getClaims()).build());
+    writer.record("_audit_notification_smtp_outbound_config",
+        AuditEvent.builder().operation("delete").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("smtpOutboundConfig")
+            .entityId(smtpOutboundConfig.getUid()).oldValue(smtpOutboundConfig.toMap())
+            .performedBy(context.getActor().getName()).tenant(context.getActor().getTenant())
+            .timestamp(context.getSource().getStartTime())
+            .sourceRequest(context.getSource().getRequestId())
+            .remoteAddress(context.getSource().getIp())
+            .remoteApplication(context.getSource().getApplication())
+            .remoteDevice(context.getSource().getDevice()).build());
   }
 
   /**
@@ -75,18 +71,16 @@ public class SmtpOutboundConfigAuditAdapter implements SmtpOutboundConfigAuditGa
   @Override
   public void updated(final String usecase, final SmtpOutboundConfig smtpOutboundConfig,
       final SmtpOutboundConfig smtpOutboundConfigOriginal, final OperationContext context) {
-    writer.record("_audit_notification_smtp_outbound_config", AuditEvent.builder()
-        .operation("update").usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
-        .entityType("smtpOutboundConfig").entityId(smtpOutboundConfig.getUid())
-        .newValue(smtpOutboundConfig.toMap()).oldValue(smtpOutboundConfigOriginal.toMap())
-        .performedBy(context.getActor().getName().orElse("<<no-user>>"))
-        .tenant(context.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(context.getSource().getStartTime())
-        .sourceRequest(context.getSource().getRequest())
-        .remoteAddress(context.getSource().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(context.getSource().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(context.getSource().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(context.getActor().getClaims()).build());
+    writer.record("_audit_notification_smtp_outbound_config",
+        AuditEvent.builder().operation("update").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("smtpOutboundConfig")
+            .entityId(smtpOutboundConfig.getUid()).newValue(smtpOutboundConfig.toMap())
+            .oldValue(smtpOutboundConfigOriginal.toMap()).performedBy(context.getActor().getName())
+            .tenant(context.getActor().getTenant()).timestamp(context.getSource().getStartTime())
+            .sourceRequest(context.getSource().getRequestId())
+            .remoteAddress(context.getSource().getIp())
+            .remoteApplication(context.getSource().getApplication())
+            .remoteDevice(context.getSource().getDevice()).build());
   }
 
   /**

@@ -115,7 +115,7 @@ public class SnippetVersionDeleteUsecase {
             .snippetTenantAccesible(filter.getSnippetTenantAccesible().orElse(null)).build();
     SnippetVersionDeleteAllInBatchCommand command =
         new SnippetVersionDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SnippetVersionDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<SnippetVersion, SnippetVersion, SnippetVersionDeleteAllInBatchCommand, SnippetVersionsInBatchExecutor.SnippetVersionPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class SnippetVersionDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final SnippetVersionCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

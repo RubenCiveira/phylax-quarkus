@@ -120,7 +120,7 @@ public class UserRoleAssignamentDeleteUsecase {
             .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserRoleAssignamentDeleteAllInBatchCommand command =
         new UserRoleAssignamentDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserRoleAssignamentDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<UserRoleAssignament, UserRoleAssignament, UserRoleAssignamentDeleteAllInBatchCommand, UserRoleAssignamentsInBatchExecutor.UserRoleAssignamentPaginableBatch>builder()
@@ -144,8 +144,8 @@ public class UserRoleAssignamentDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final UserRoleAssignamentCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

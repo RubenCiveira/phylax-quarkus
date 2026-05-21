@@ -38,7 +38,7 @@ public class UserPersonalApiKeyAuditController implements UserPersonalApiKeyAudi
   @Override
   public Response userPersonalApiKeyApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_user_personal_api_key_audit", "userPersonalApiKey",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class UserPersonalApiKeyAuditController implements UserPersonalApiKeyAudi
    */
   @Override
   public Response userPersonalApiKeyApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_user_personal_api_key_audit", "userPersonalApiKey",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

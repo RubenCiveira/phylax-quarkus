@@ -114,7 +114,7 @@ public class RelyingPartyEnableUsecase {
             .apiKey(filter.getApiKey().orElse(null)).code(filter.getCode().orElse(null)).build();
     RelyingPartyEnableAllInBatchCommand command =
         new RelyingPartyEnableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<RelyingPartyEnableAllInBatchCommand>builder().params(command).name("enable-relying-party")
         .executor(
             ExecutorByDeferSteps.<RelyingParty, RelyingParty, RelyingPartyEnableAllInBatchCommand, RelyingPartyEnablesInBatchExecutor.RelyingPartyPaginableBatch>builder()
@@ -138,8 +138,8 @@ public class RelyingPartyEnableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final RelyingPartyEnableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

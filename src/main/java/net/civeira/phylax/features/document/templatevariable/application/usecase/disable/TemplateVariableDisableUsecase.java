@@ -115,7 +115,7 @@ public class TemplateVariableDisableUsecase {
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TemplateVariableDisableAllInBatchCommand command =
         new TemplateVariableDisableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TemplateVariableDisableAllInBatchCommand>builder().params(command)
         .name("disable-template-variable")
         .executor(
@@ -140,8 +140,8 @@ public class TemplateVariableDisableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TemplateVariableDisableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

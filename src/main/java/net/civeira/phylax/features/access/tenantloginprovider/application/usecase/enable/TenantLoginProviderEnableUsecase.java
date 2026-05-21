@@ -115,7 +115,7 @@ public class TenantLoginProviderEnableUsecase {
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TenantLoginProviderEnableAllInBatchCommand command =
         new TenantLoginProviderEnableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TenantLoginProviderEnableAllInBatchCommand>builder().params(command)
         .name("enable-tenant-login-provider")
         .executor(
@@ -140,8 +140,8 @@ public class TenantLoginProviderEnableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TenantLoginProviderEnableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

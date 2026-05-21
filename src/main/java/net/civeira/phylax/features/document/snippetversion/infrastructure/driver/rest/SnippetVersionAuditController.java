@@ -38,7 +38,7 @@ public class SnippetVersionAuditController implements SnippetVersionAuditApi {
   @Override
   public Response snippetVersionApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("document_snippet_version_audit", "snippetVersion",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class SnippetVersionAuditController implements SnippetVersionAuditApi {
    */
   @Override
   public Response snippetVersionApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("document_snippet_version_audit", "snippetVersion",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

@@ -13,7 +13,7 @@ public class TenantAccesible {
   public void filterVisibles(@Observes ConsentPurposeVisibilityCheck filter) {
     Actor actor = filter.getActor();
     if (!(actor.hasScope("platform:global_access"))) {
-      filter.peek(fl -> fl.setTenantAccesible(actor.getTenant().orElse(null)));
+      filter.peek(fl -> fl.setTenantAccesible(actor.getTenant()));
     }
   }
 }

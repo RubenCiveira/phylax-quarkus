@@ -115,7 +115,7 @@ public class TemplateDisableUsecase {
             .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TemplateDisableAllInBatchCommand command =
         new TemplateDisableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TemplateDisableAllInBatchCommand>builder().params(command).name("disable-template")
         .executor(
             ExecutorByDeferSteps.<Template, Template, TemplateDisableAllInBatchCommand, TemplateDisablesInBatchExecutor.TemplatePaginableBatch>builder()
@@ -139,8 +139,8 @@ public class TemplateDisableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TemplateDisableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

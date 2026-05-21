@@ -38,7 +38,7 @@ public class TemplateVersionAuditController implements TemplateVersionAuditApi {
   @Override
   public Response templateVersionApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("document_template_version_audit", "templateVersion",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class TemplateVersionAuditController implements TemplateVersionAuditApi {
    */
   @Override
   public Response templateVersionApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("document_template_version_audit", "templateVersion",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

@@ -578,7 +578,7 @@ public class UserPersonalApiKeyRepository {
     filter.getName()
         .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
     filter.getOnlySelfAccesibles().ifPresent(onlySelfAccesiblesParam -> sq.where(USER,
-        SqlOperator.EQ, SqlParameterValue.of(onlySelfAccesiblesParam.getUid())));
+        SqlOperator.EQ, SqlParameterValue.of(onlySelfAccesiblesParam)));
     filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
       sq.join("access_user", "access_user_personal_api_key_user",
           "access_user_personal_api_key.user", "access_user_personal_api_key_user.uid");

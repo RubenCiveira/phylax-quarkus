@@ -116,7 +116,7 @@ public class UserPersonalApiKeyDeleteUsecase {
         .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserPersonalApiKeyDeleteAllInBatchCommand command =
         new UserPersonalApiKeyDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserPersonalApiKeyDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<UserPersonalApiKey, UserPersonalApiKey, UserPersonalApiKeyDeleteAllInBatchCommand, UserPersonalApiKeysInBatchExecutor.UserPersonalApiKeyPaginableBatch>builder()
@@ -140,8 +140,8 @@ public class UserPersonalApiKeyDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final UserPersonalApiKeyCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

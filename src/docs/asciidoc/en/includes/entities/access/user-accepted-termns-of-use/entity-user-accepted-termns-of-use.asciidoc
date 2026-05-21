@@ -25,11 +25,3 @@ include::properties-user-accepted-termns-of-use.asciidoc[]
 include::../../../diagrams/model/access/user-accepted-termns-of-use//usecase-diagram-user-accepted-termns-of-use.puml[]
 ....
 
-.Restricciones
-
-include::_constraint-self-user-acceptation.partial.asciidoc[]
-include::_constraint-tech-self-user-acceptation.partial.asciidoc[]
-
-
-
-

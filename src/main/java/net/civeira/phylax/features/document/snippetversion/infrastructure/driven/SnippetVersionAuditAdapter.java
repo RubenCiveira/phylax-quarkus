@@ -28,18 +28,15 @@ public class SnippetVersionAuditAdapter implements SnippetVersionAuditGateway {
   @Override
   public void created(final String usecase, final SnippetVersion snippetVersion,
       final OperationContext context) {
-    writer.record("_audit_document_snippet_version", AuditEvent.builder().operation("create")
-        .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
-        .entityType("snippetVersion").entityId(snippetVersion.getUid())
-        .newValue(snippetVersion.toMap())
-        .performedBy(context.getActor().getName().orElse("<<no-user>>"))
-        .tenant(context.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(context.getSource().getStartTime())
-        .sourceRequest(context.getSource().getRequest())
-        .remoteAddress(context.getSource().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(context.getSource().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(context.getSource().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(context.getActor().getClaims()).build());
+    writer.record("_audit_document_snippet_version",
+        AuditEvent.builder().operation("create").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("snippetVersion").entityId(snippetVersion.getUid())
+            .newValue(snippetVersion.toMap()).performedBy(context.getActor().getName())
+            .tenant(context.getActor().getTenant()).timestamp(context.getSource().getStartTime())
+            .sourceRequest(context.getSource().getRequestId())
+            .remoteAddress(context.getSource().getIp())
+            .remoteApplication(context.getSource().getApplication())
+            .remoteDevice(context.getSource().getDevice()).build());
   }
 
   /**
@@ -51,18 +48,15 @@ public class SnippetVersionAuditAdapter implements SnippetVersionAuditGateway {
   @Override
   public void deleted(final String usecase, final SnippetVersion snippetVersion,
       final OperationContext context) {
-    writer.record("_audit_document_snippet_version", AuditEvent.builder().operation("delete")
-        .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
-        .entityType("snippetVersion").entityId(snippetVersion.getUid())
-        .oldValue(snippetVersion.toMap())
-        .performedBy(context.getActor().getName().orElse("<<no-user>>"))
-        .tenant(context.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(context.getSource().getStartTime())
-        .sourceRequest(context.getSource().getRequest())
-        .remoteAddress(context.getSource().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(context.getSource().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(context.getSource().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(context.getActor().getClaims()).build());
+    writer.record("_audit_document_snippet_version",
+        AuditEvent.builder().operation("delete").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("snippetVersion").entityId(snippetVersion.getUid())
+            .oldValue(snippetVersion.toMap()).performedBy(context.getActor().getName())
+            .tenant(context.getActor().getTenant()).timestamp(context.getSource().getStartTime())
+            .sourceRequest(context.getSource().getRequestId())
+            .remoteAddress(context.getSource().getIp())
+            .remoteApplication(context.getSource().getApplication())
+            .remoteDevice(context.getSource().getDevice()).build());
   }
 
   /**
@@ -75,18 +69,16 @@ public class SnippetVersionAuditAdapter implements SnippetVersionAuditGateway {
   @Override
   public void updated(final String usecase, final SnippetVersion snippetVersion,
       final SnippetVersion snippetVersionOriginal, final OperationContext context) {
-    writer.record("_audit_document_snippet_version", AuditEvent.builder().operation("update")
-        .usecase(usecase).traceId(currentTraceId()).spanId(currentSpanId())
-        .entityType("snippetVersion").entityId(snippetVersion.getUid())
-        .newValue(snippetVersion.toMap()).oldValue(snippetVersionOriginal.toMap())
-        .performedBy(context.getActor().getName().orElse("<<no-user>>"))
-        .tenant(context.getActor().getTenant().orElse("<<no-tenant>>"))
-        .timestamp(context.getSource().getStartTime())
-        .sourceRequest(context.getSource().getRequest())
-        .remoteAddress(context.getSource().getRemote().orElse("<<no-device>>"))
-        .remoteApplication(context.getSource().getRemoteApplication().orElse("<<no-application>>"))
-        .remoteDevice(context.getSource().getRemoteDevice().orElse("<<no-device>>"))
-        .claims(context.getActor().getClaims()).build());
+    writer.record("_audit_document_snippet_version",
+        AuditEvent.builder().operation("update").usecase(usecase).traceId(currentTraceId())
+            .spanId(currentSpanId()).entityType("snippetVersion").entityId(snippetVersion.getUid())
+            .newValue(snippetVersion.toMap()).oldValue(snippetVersionOriginal.toMap())
+            .performedBy(context.getActor().getName()).tenant(context.getActor().getTenant())
+            .timestamp(context.getSource().getStartTime())
+            .sourceRequest(context.getSource().getRequestId())
+            .remoteAddress(context.getSource().getIp())
+            .remoteApplication(context.getSource().getApplication())
+            .remoteDevice(context.getSource().getDevice()).build());
   }
 
   /**

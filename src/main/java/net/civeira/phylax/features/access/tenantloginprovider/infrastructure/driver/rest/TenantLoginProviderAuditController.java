@@ -38,7 +38,7 @@ public class TenantLoginProviderAuditController implements TenantLoginProviderAu
   @Override
   public Response tenantLoginProviderApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_tenant_login_provider_audit", "tenantLoginProvider",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class TenantLoginProviderAuditController implements TenantLoginProviderAu
    */
   @Override
   public Response tenantLoginProviderApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_tenant_login_provider_audit", "tenantLoginProvider",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

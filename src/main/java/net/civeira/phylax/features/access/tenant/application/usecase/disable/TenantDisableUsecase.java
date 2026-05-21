@@ -113,7 +113,7 @@ public class TenantDisableUsecase {
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TenantDisableAllInBatchCommand command =
         new TenantDisableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TenantDisableAllInBatchCommand>builder().params(command).name("disable-tenant")
         .executor(
             ExecutorByDeferSteps.<Tenant, Tenant, TenantDisableAllInBatchCommand, TenantDisablesInBatchExecutor.TenantPaginableBatch>builder()
@@ -137,8 +137,8 @@ public class TenantDisableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TenantDisableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

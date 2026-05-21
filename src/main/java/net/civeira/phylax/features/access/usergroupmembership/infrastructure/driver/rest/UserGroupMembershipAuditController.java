@@ -38,7 +38,7 @@ public class UserGroupMembershipAuditController implements UserGroupMembershipAu
   @Override
   public Response userGroupMembershipApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_user_group_membership_audit", "userGroupMembership",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class UserGroupMembershipAuditController implements UserGroupMembershipAu
    */
   @Override
   public Response userGroupMembershipApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_user_group_membership_audit", "userGroupMembership",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

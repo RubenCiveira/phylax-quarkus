@@ -38,7 +38,7 @@ public class TenantTermsOfUseAuditController implements TenantTermsOfUseAuditApi
   @Override
   public Response tenantTermsOfUseApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_tenant_terms_of_use_audit", "tenantTermsOfUse",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class TenantTermsOfUseAuditController implements TenantTermsOfUseAuditApi
    */
   @Override
   public Response tenantTermsOfUseApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_tenant_terms_of_use_audit", "tenantTermsOfUse",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

@@ -114,7 +114,7 @@ public class RelyingPartyDisableUsecase {
             .apiKey(filter.getApiKey().orElse(null)).code(filter.getCode().orElse(null)).build();
     RelyingPartyDisableAllInBatchCommand command =
         new RelyingPartyDisableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<RelyingPartyDisableAllInBatchCommand>builder().params(command)
         .name("disable-relying-party")
         .executor(
@@ -139,8 +139,8 @@ public class RelyingPartyDisableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final RelyingPartyDisableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

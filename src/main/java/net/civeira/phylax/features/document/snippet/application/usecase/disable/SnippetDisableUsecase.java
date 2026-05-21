@@ -115,7 +115,7 @@ public class SnippetDisableUsecase {
             .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     SnippetDisableAllInBatchCommand command =
         new SnippetDisableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SnippetDisableAllInBatchCommand>builder().params(command).name("disable-snippet")
         .executor(
             ExecutorByDeferSteps.<Snippet, Snippet, SnippetDisableAllInBatchCommand, SnippetDisablesInBatchExecutor.SnippetPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class SnippetDisableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final SnippetDisableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

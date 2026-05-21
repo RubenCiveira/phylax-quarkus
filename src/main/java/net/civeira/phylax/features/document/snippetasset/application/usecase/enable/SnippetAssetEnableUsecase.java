@@ -115,7 +115,7 @@ public class SnippetAssetEnableUsecase {
         .snippetTenantAccesible(filter.getSnippetTenantAccesible().orElse(null)).build();
     SnippetAssetEnableAllInBatchCommand command =
         new SnippetAssetEnableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SnippetAssetEnableAllInBatchCommand>builder().params(command).name("enable-snippet-asset")
         .executor(
             ExecutorByDeferSteps.<SnippetAsset, SnippetAsset, SnippetAssetEnableAllInBatchCommand, SnippetAssetEnablesInBatchExecutor.SnippetAssetPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class SnippetAssetEnableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final SnippetAssetEnableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

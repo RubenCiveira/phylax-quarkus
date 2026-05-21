@@ -115,7 +115,7 @@ public class UserDisableUsecase {
             .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     UserDisableAllInBatchCommand command =
         new UserDisableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserDisableAllInBatchCommand>builder().params(command).name("disable-user")
         .executor(
             ExecutorByDeferSteps.<User, User, UserDisableAllInBatchCommand, UserDisablesInBatchExecutor.UserPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class UserDisableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final UserDisableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

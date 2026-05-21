@@ -116,7 +116,7 @@ public class UserPersonalApiKeyRevokeUsecase {
         .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
     UserPersonalApiKeyRevokeAllInBatchCommand command =
         new UserPersonalApiKeyRevokeAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserPersonalApiKeyRevokeAllInBatchCommand>builder().params(command)
         .name("revoke-user-personal-api-key")
         .executor(
@@ -141,8 +141,8 @@ public class UserPersonalApiKeyRevokeUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final UserPersonalApiKeyRevokeStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

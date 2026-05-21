@@ -114,7 +114,7 @@ public class RoleDeleteUsecase {
             .relyingPartys(filter.getRelyingPartys()).build();
     RoleDeleteAllInBatchCommand command =
         new RoleDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<RoleDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<Role, Role, RoleDeleteAllInBatchCommand, RolesInBatchExecutor.RolePaginableBatch>builder()
@@ -135,8 +135,8 @@ public class RoleDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final RoleCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

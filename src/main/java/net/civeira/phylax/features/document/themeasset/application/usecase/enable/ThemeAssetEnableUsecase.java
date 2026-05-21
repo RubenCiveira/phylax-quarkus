@@ -115,7 +115,7 @@ public class ThemeAssetEnableUsecase {
         .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
     ThemeAssetEnableAllInBatchCommand command =
         new ThemeAssetEnableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ThemeAssetEnableAllInBatchCommand>builder().params(command).name("enable-theme-asset")
         .executor(
             ExecutorByDeferSteps.<ThemeAsset, ThemeAsset, ThemeAssetEnableAllInBatchCommand, ThemeAssetEnablesInBatchExecutor.ThemeAssetPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class ThemeAssetEnableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final ThemeAssetEnableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

@@ -115,7 +115,7 @@ public class ThemeAssetDeleteUsecase {
         .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
     ThemeAssetDeleteAllInBatchCommand command =
         new ThemeAssetDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ThemeAssetDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<ThemeAsset, ThemeAsset, ThemeAssetDeleteAllInBatchCommand, ThemeAssetsInBatchExecutor.ThemeAssetPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class ThemeAssetDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final ThemeAssetCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

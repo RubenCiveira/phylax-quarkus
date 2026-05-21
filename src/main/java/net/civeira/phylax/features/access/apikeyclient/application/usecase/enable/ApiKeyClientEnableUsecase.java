@@ -113,7 +113,7 @@ public class ApiKeyClientEnableUsecase {
         .search(filter.getSearch().orElse(null)).key(filter.getKey().orElse(null)).build();
     ApiKeyClientEnableAllInBatchCommand command =
         new ApiKeyClientEnableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ApiKeyClientEnableAllInBatchCommand>builder().params(command)
         .name("enable-api-key-client")
         .executor(
@@ -138,8 +138,8 @@ public class ApiKeyClientEnableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final ApiKeyClientEnableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

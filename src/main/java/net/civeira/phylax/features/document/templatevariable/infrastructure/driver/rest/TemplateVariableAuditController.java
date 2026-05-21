@@ -38,7 +38,7 @@ public class TemplateVariableAuditController implements TemplateVariableAuditApi
   @Override
   public Response templateVariableApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("document_template_variable_audit", "templateVariable",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class TemplateVariableAuditController implements TemplateVariableAuditApi
    */
   @Override
   public Response templateVariableApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("document_template_variable_audit", "templateVariable",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

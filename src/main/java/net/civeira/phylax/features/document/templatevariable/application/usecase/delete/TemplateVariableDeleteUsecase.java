@@ -115,7 +115,7 @@ public class TemplateVariableDeleteUsecase {
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TemplateVariableDeleteAllInBatchCommand command =
         new TemplateVariableDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TemplateVariableDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<TemplateVariable, TemplateVariable, TemplateVariableDeleteAllInBatchCommand, TemplateVariablesInBatchExecutor.TemplateVariablePaginableBatch>builder()
@@ -139,8 +139,8 @@ public class TemplateVariableDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TemplateVariableCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

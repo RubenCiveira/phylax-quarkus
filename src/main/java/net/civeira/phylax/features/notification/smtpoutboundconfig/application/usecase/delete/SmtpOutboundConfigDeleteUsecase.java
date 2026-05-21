@@ -115,7 +115,7 @@ public class SmtpOutboundConfigDeleteUsecase {
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     SmtpOutboundConfigDeleteAllInBatchCommand command =
         new SmtpOutboundConfigDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SmtpOutboundConfigDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<SmtpOutboundConfig, SmtpOutboundConfig, SmtpOutboundConfigDeleteAllInBatchCommand, SmtpOutboundConfigsInBatchExecutor.SmtpOutboundConfigPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class SmtpOutboundConfigDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final SmtpOutboundConfigCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

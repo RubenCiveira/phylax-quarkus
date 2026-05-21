@@ -140,7 +140,7 @@ public class UserAcceptUsecase {
             .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     UserAcceptAllInBatchCommand command =
         new UserAcceptAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserAcceptAllInBatchCommand>builder().params(command).name("accept-user")
         .executor(
             ExecutorByDeferSteps.<User, User, UserAcceptAllInBatchCommand, UserAcceptsInBatchExecutor.UserPaginableBatch>builder()
@@ -163,8 +163,8 @@ public class UserAcceptUsecase {
    * @return The slide with some values
    */
   public BatchProgress checkProgress(final OperationContext context, final UserAcceptStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

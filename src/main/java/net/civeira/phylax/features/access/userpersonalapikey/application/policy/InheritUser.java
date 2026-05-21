@@ -2,6 +2,7 @@ package net.civeira.phylax.features.access.userpersonalapikey.application.policy
 
 import jakarta.enterprise.event.Observes;
 import net.civeira.phylax.common.security.Actor;
+import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userpersonalapikey.application.visibility.UserPersonalApiKeyEntityEnrichment;
 
 public class InheritUser {
@@ -12,6 +13,6 @@ public class InheritUser {
    */
   public void calculate(@Observes UserPersonalApiKeyEntityEnrichment builder) {
     Actor actor = builder.getActor();
-    builder.peek(dto -> dto.setUser(actor.getUuid().orElse(null)));
+    builder.peek(dto -> dto.user(UserReference.of(actor.getUid())));
   }
 }

@@ -115,7 +115,7 @@ public class ThemeVersionDeleteUsecase {
             .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
     ThemeVersionDeleteAllInBatchCommand command =
         new ThemeVersionDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ThemeVersionDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<ThemeVersion, ThemeVersion, ThemeVersionDeleteAllInBatchCommand, ThemeVersionsInBatchExecutor.ThemeVersionPaginableBatch>builder()
@@ -139,8 +139,8 @@ public class ThemeVersionDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final ThemeVersionCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

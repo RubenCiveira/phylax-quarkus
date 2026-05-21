@@ -38,7 +38,7 @@ public class ConsentPurposeAuditController implements ConsentPurposeAuditApi {
   @Override
   public Response consentPurposeApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events = reader.findByFilters("access_consent_purpose_audit", "consentPurpose",
         AuditQueryFilter.builder().performedBy(self).from(from.atStartOfDay(ZoneId.systemDefault()))
             .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
@@ -53,7 +53,7 @@ public class ConsentPurposeAuditController implements ConsentPurposeAuditApi {
    */
   @Override
   public Response consentPurposeApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events = reader.findByFilters("access_consent_purpose_audit", "consentPurpose",
         AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
     return Response.ok(events.stream().map(this::map).toList()).build();

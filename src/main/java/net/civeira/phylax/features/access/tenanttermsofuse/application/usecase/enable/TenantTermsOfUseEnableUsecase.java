@@ -116,7 +116,7 @@ public class TenantTermsOfUseEnableUsecase {
         .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     TenantTermsOfUseEnableAllInBatchCommand command =
         new TenantTermsOfUseEnableAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TenantTermsOfUseEnableAllInBatchCommand>builder().params(command)
         .name("enable-tenant-terms-of-use")
         .executor(
@@ -141,8 +141,8 @@ public class TenantTermsOfUseEnableUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final TenantTermsOfUseEnableStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

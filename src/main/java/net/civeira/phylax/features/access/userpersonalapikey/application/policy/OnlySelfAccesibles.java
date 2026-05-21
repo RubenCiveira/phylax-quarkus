@@ -12,6 +12,6 @@ public class OnlySelfAccesibles {
    */
   public void filterVisibles(@Observes UserPersonalApiKeyVisibilityCheck filter) {
     Actor actor = filter.getActor();
-    filter.peek(fl -> fl.setOnlySelfAccesibles(actor.getUuid().orElse(null)));
+    filter.peek(fl -> fl.setOnlySelfAccesibles(actor.getUid()));
   }
 }

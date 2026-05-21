@@ -115,7 +115,7 @@ public class UserUnlockUsecase {
             .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     UserUnlockAllInBatchCommand command =
         new UserUnlockAllInBatchCommand(context, filterWithVisibility);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserUnlockAllInBatchCommand>builder().params(command).name("unlock-user")
         .executor(
             ExecutorByDeferSteps.<User, User, UserUnlockAllInBatchCommand, UserUnlocksInBatchExecutor.UserPaginableBatch>builder()
@@ -138,8 +138,8 @@ public class UserUnlockUsecase {
    * @return The slide with some values
    */
   public BatchProgress checkProgress(final OperationContext context, final UserUnlockStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

@@ -27,3 +27,8 @@ include::properties-user-personal-api-key.asciidoc[]
 include::../../../diagrams/model/access/user-personal-api-key//usecase-diagram-user-personal-api-key.puml[]
 ....
 
+.Eventos
+include::trigger-inherit-user.asciidoc[]
+
+
+

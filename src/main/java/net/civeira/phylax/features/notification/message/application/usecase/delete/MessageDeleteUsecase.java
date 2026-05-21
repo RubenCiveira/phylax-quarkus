@@ -115,7 +115,7 @@ public class MessageDeleteUsecase {
             .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
     MessageDeleteAllInBatchCommand command =
         new MessageDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<MessageDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<Message, Message, MessageDeleteAllInBatchCommand, MessagesInBatchExecutor.MessagePaginableBatch>builder()
@@ -136,8 +136,8 @@ public class MessageDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final MessageCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 

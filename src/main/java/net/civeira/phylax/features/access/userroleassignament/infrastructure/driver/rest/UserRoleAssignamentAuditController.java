@@ -38,7 +38,7 @@ public class UserRoleAssignamentAuditController implements UserRoleAssignamentAu
   @Override
   public Response userRoleAssignamentApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_user_role_assignament_audit", "userRoleAssignament",
             AuditQueryFilter.builder().performedBy(self)
@@ -55,7 +55,7 @@ public class UserRoleAssignamentAuditController implements UserRoleAssignamentAu
    */
   @Override
   public Response userRoleAssignamentApiEntityAudit(final String uid) {
-    String self = currentRequest.getActor().getName().orElse("-");
+    String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
         reader.findByFilters("access_user_role_assignament_audit", "userRoleAssignament",
             AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);

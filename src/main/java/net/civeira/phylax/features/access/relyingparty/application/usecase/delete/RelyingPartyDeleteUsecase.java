@@ -114,7 +114,7 @@ public class RelyingPartyDeleteUsecase {
             .apiKey(filter.getApiKey().orElse(null)).code(filter.getCode().orElse(null)).build();
     RelyingPartyDeleteAllInBatchCommand command =
         new RelyingPartyDeleteAllInBatchCommand(context, filterOnVisibles);
-    return batch.start(context.getActor().getName().orElse("-"), Duration.ofHours(6), ExecutorPlan
+    return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<RelyingPartyDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
             ExecutorByDeferSteps.<RelyingParty, RelyingParty, RelyingPartyDeleteAllInBatchCommand, RelyingPartysInBatchExecutor.RelyingPartyPaginableBatch>builder()
@@ -138,8 +138,8 @@ public class RelyingPartyDeleteUsecase {
    */
   public BatchProgress checkProgress(final OperationContext context,
       final RelyingPartyCheckBatchDeleteStatus query) {
-    return context.getActor().getName()
-        .flatMap(name -> batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name))
+    String name = context.getActor().getName();
+    return batch.retrieve(query.getTaskId(), context.getSource().getLocale(), name)
         .orElseThrow(() -> new NotFoundException());
   }
 
