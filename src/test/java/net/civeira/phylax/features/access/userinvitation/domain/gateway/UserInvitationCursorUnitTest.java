@@ -32,6 +32,6 @@ class UserInvitationCursorUnitTest {
         "The value since for CreatedAt must be empty");
     cursor.setSinceCreatedAt(null);
     Assertions.assertFalse(cursor.getSinceCreatedAt().isPresent(),
-        "The value since for CreatedAt must be empty when set to null");
+        "The value since for CreatedAt must be the same that was assinged");
   }
 }
