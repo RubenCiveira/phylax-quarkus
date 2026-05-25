@@ -18,8 +18,9 @@ public class InvocationSourceImpl implements InvocationSource {
 
   private static final String EMPTY = "";
 
+  @Builder.Default
   @NonNull
-  private final InvocationChannel channel;
+  private final InvocationChannel channel = InvocationChannel.API;
 
   @Builder.Default
   private final String requestId = EMPTY;
@@ -45,8 +46,9 @@ public class InvocationSourceImpl implements InvocationSource {
   @Builder.Default
   private final Locale locale = Locale.getDefault();
 
+  @Builder.Default
   @NonNull
-  private final ZonedDateTime startTime;
+  private final ZonedDateTime startTime = ZonedDateTime.now();
 
   public static Map<String, Object> toMap(InvocationSource source) {
     Map<String, Object> map = new LinkedHashMap<>();

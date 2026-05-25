@@ -338,7 +338,7 @@ public class CurrentRequest {
   private Locale getRequestHeaderLocale() {
     Locale locale = Locale.getDefault();
     String localeHeader = header("Accept-Language");
-    if (null != localeHeader) {
+    if (null != localeHeader && !localeHeader.isBlank()) {
       List<LanguageRange> parse = Locale.LanguageRange.parse(localeHeader);
       if (!parse.isEmpty()) {
         Locale lookup = Locale.lookup(parse, Arrays.asList(Locale.getAvailableLocales()));
@@ -427,15 +427,18 @@ public class CurrentRequest {
 
 
   private ZonedDateTime resolveAuthenticatedAt() {
-    if (jwt == null) {
+    if (jwt == null || security.isAnonymous()) {
       return ZonedDateTime.now();
     }
     Object authTime = jwt.getClaim("auth_time");
     if (authTime != null) {
       return asZonedDateTime(authTime);
     }
-    long issuedAt = jwt.getIssuedAtTime();
-    return Instant.ofEpochSecond(issuedAt).atZone(ZoneId.systemDefault());
+    Number iat = jwt.getClaim(org.eclipse.microprofile.jwt.Claims.iat);
+    if (iat == null) {
+      return ZonedDateTime.now();
+    }
+    return Instant.ofEpochSecond(iat.longValue()).atZone(ZoneId.systemDefault());
   }
 
   private ZonedDateTime asZonedDateTime(Object value) {

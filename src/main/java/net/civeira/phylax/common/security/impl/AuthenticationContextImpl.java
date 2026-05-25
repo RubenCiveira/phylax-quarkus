@@ -19,37 +19,40 @@ public class AuthenticationContextImpl implements AuthenticationContext {
 
   private static final String EMPTY = "";
 
+  @Builder.Default
   @NonNull
-  private final AuthenticationLevel level;
+  private final AuthenticationLevel level = AuthenticationLevel.ANONYMOUS;
 
   @Builder.Default
-  boolean mfa = false;
+  private final boolean mfa = false;
 
   @Builder.Default
-  boolean rememberMe = false;
+  private final boolean rememberMe = false;
 
   @Builder.Default
-  boolean impersonated = false;
+  private final boolean impersonated = false;
 
   @Builder.Default
-  boolean secureTransport = false;
+  private final boolean secureTransport = false;
 
   @Builder.Default
-  ZonedDateTime authenticatedAt = ZonedDateTime.now();
+  private final ZonedDateTime authenticatedAt = ZonedDateTime.now();
 
   @Builder.Default
-  Duration authenticationAge = Duration.ofMinutes(1);
+  private final Duration authenticationAge = Duration.ofMinutes(1);
 
-  String authenticationMethod;
+  private final String authenticationMethod;
 
   @Builder.Default
-  String sessionId = "";
+  private final String sessionId = "";
 
+  @Builder.Default
   @NonNull
-  Actor authenticatedActor;
+  private final Actor authenticatedActor = ActorImpl.builder().build();
 
+  @Builder.Default
   @NonNull
-  Actor effectiveActor;
+  private final Actor effectiveActor = ActorImpl.builder().build();
 
 
   public static Map<String, Object> toMap(AuthenticationContext context) {

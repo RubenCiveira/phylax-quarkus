@@ -6,13 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import net.civeira.phylax.common.security.impl.ActorImpl;
+import net.civeira.phylax.common.security.impl.AuthenticationContextImpl;
+import net.civeira.phylax.common.security.impl.InvocationSourceImpl;
 
 @DisplayName("PropertiesProposal field management")
 class PropertiesProposalUnitTest {
@@ -42,9 +45,10 @@ class PropertiesProposalUnitTest {
 
   @BeforeEach
   void setUp() {
-    Actor actor = Actor.builder().authenticated(true).roles(List.of()).claims(Map.of()).build();
-    InvocationSource conn = InvocationSource.builder().request("/test").build();
-    interaction = new OperationContext(actor, conn);
+    Actor actor = ActorImpl.builder().authenticated(true).roles(List.of("admin")).build();
+    InvocationSource conn = InvocationSourceImpl.builder().build();
+    AuthenticationContext auth = AuthenticationContextImpl.builder().build();
+    interaction = new OperationContext(actor, conn, auth);
   }
 
   @Nested
