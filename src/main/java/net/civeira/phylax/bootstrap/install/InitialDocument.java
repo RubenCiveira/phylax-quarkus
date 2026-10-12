@@ -69,6 +69,9 @@ public class InitialDocument implements MigrationSeed {
   private final TemplateVersionWriteRepositoryGateway templateVersions;
 
   public void install() {
+    // @FIXME read-replica: la comprobación de idempotencia del seed debe ir al primario:
+    // themes.count (primario, sin bloqueo). Con réplica retrasada o varios nodos arrancando a la
+    // vez se duplicarían temas y plantillas.
     if (themesRead.count(ThemeFilter.builder().build()) > 0) {
       return;
     }

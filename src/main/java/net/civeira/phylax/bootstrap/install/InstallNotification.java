@@ -35,6 +35,9 @@ public class InstallNotification implements MigrationSeed {
   }
 
   public void install() {
+    // @FIXME read-replica: la comprobación de idempotencia del seed debe ir al primario:
+    // smtpConfigs.count (primario, sin bloqueo). Con réplica retrasada o varios nodos arrancando
+    // a la vez se insertaría la configuración duplicada.
     if (smtpConfigsRead.count(SmtpOutboundConfigFilter.builder().build()) > 0) {
       return;
     }

@@ -105,6 +105,9 @@ public class UserLoginService {
 
   public boolean updatePassword(AuthRequest request, String username, String oldPassword,
       String newPassword) {
+    // @FIXME read-replica: el usuario se lee de la réplica (ActiveUserFindService) y luego se
+    // actualiza: con una versión obsoleta saltaría OptimistLockException. Leerlo con
+    // users.findForUpdate (se lee para modificarlo).
     return activeUser.findEnabledUser(request.getTenant(), username, request.getAudiences())
         .map(user -> {
           if (oldPassword.equals(user.getPasswordPlain(cypher))) {
@@ -118,6 +121,10 @@ public class UserLoginService {
 
   private AuthenticationResult userData(AuthRequest request, String name, String password,
       AuthenticationMode mode) {
+    // @FIXME read-replica: el login valida contraseña y bloqueo con datos de la réplica: durante el
+    // retraso seguiría valiendo la contraseña anterior y un usuario recién bloqueado podría
+    // seguir probando. Leer el usuario con users.find (primario, sin bloqueo); el bloqueo
+    // optimista ya protege el users.update de markLoginFails.
     return activeUser.findEnabledTenant(request.getTenant(), request.getAudiences())
         .flatMap(tenant -> activeUser.findEnabledUser(tenant, name)
             .map(user -> userToGrant(request, mode, name, password, tenant, user)))

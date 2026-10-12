@@ -101,6 +101,8 @@ public class RoleCreateUsecase {
     Role entity = Role.create(dto);
     Trace.addEvent("A created entity for role is ready");
     // Use the write gateway to store the entity on a persistent way
+    // @FIXME read-replica: el verificador tiene que leer (primario, sin bloqueo): usar
+    // visibility.checkVisibilityOnWrite(context, attempt.getUid()).
     Role created =
         gateway.create(entity, attempt -> visibility.checkVisibility(context, attempt.getUid()));
     Trace.addEvent("The created entity of role was saved");

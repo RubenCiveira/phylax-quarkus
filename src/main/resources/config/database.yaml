@@ -1,4 +1,8 @@
 quarkus:
+  # @FIXME read-replica: este datasource (default) sigue siendo el de escritura (primario). Añadir
+  #   uno con nombre "read" (quarkus.datasource.read.*) cuyos valores por defecto sean los de este y
+  #   con jdbc.transactions: disabled para que no se enliste en JTA. No crear un "write" aparte:
+  #   serían dos pools al primario y una transacción que usase ambos fallaría (dos recursos no-XA).
   datasource:
     db-kind: mariadb
      # test_read luego, por ahora test_write

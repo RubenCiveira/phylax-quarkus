@@ -49,6 +49,10 @@ public class RoleWriteGatewayAdapter implements RoleWriteRepositoryGateway {
         .spanBuilder("Count on the repository for update the matches entities of role")
         .setParent(Context.current().with(Span.current())).setSpanKind(SpanKind.SERVER).startSpan();
     try {
+      // @FIXME read-replica: countForUpdate no bloquea (llama a count()). Sustituirlo por count
+      // (primario, sin bloqueo) y añadir al WriteGateway list/find/exists/retrieve/slide sin
+      // bloqueo, para leer lo recién escrito dentro de un flujo de escritura. Dejar *ForUpdate
+      // solo para leer y modificar las mismas filas con SELECT ... FOR UPDATE.
       return repository.count(filter);
     } catch (RuntimeException ex) {
       span.setAttribute("error", true);

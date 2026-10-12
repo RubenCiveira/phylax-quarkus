@@ -80,6 +80,11 @@ public class MessagesVisibility {
    * @return The input entity with the copy values without hidden
    */
   public boolean checkVisibility(OperationContext prev, String uid) {
+    // @FIXME read-replica: se usa como verificador de create() justo tras el INSERT, en la misma
+    // transacción. Por el datasource de lectura (otra conexión, fuera de JTA) la fila aún no
+    // confirmada no se ve y TODOS los create fallarían. Añadir checkVisibilityOnWrite(prev, uid)
+    // que lea con el WriteGateway (primario, sin bloqueo); la fila ya está bloqueada por el
+    // propio INSERT.
     return retrieveVisible(prev, uid).isPresent();
   }
 

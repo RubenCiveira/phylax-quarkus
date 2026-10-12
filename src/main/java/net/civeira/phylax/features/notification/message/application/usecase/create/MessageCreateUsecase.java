@@ -103,6 +103,8 @@ public class MessageCreateUsecase {
     Message entity = Message.create(dto);
     Trace.addEvent("A created entity for message is ready");
     // Use the write gateway to store the entity on a persistent way
+    // @FIXME read-replica: el verificador tiene que leer (primario, sin bloqueo): usar
+    // visibility.checkVisibilityOnWrite(context, attempt.getUid()).
     Message created =
         gateway.create(entity, attempt -> visibility.checkVisibility(context, attempt.getUid()));
     Trace.addEvent("The created entity of message was saved");

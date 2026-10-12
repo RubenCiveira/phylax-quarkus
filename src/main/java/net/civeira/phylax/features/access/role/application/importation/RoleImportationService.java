@@ -117,6 +117,10 @@ public class RoleImportationService {
       final ConstraintFailList fails, final RoleImportationRelatedResolver resolver) {
     String relyingParty = row.get("relyingParty");
     if (relyingParty != null) {
+      // @FIXME read-replica: en una importación por lotes (una transacción) una fila puede crear el
+      // RelyingParty que buscan las siguientes; por la réplica no se vería y se crearía
+      // duplicado. Buscar con relyingPartyWriteRepository.find (primario, sin bloqueo); la
+      // carrera real la cubre el índice único.
       Optional<RelyingParty> existing =
           relyingPartyReadRepository.find(RelyingPartyFilter.builder().code(relyingParty).build());
       if (existing.isPresent()) {

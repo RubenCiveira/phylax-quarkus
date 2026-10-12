@@ -299,6 +299,10 @@ public class UserImportationService {
       final ConstraintFailList fails, final UserImportationRelatedResolver resolver) {
     String tenant = row.get("tenant");
     if (tenant != null) {
+      // @FIXME read-replica: en una importación por lotes (una transacción) una fila puede crear el
+      // Tenant que buscan las siguientes; por la réplica no se vería y se crearía duplicado.
+      // Buscar con tenantWriteRepository.find (primario, sin bloqueo); la carrera real la cubre
+      // el índice único.
       Optional<Tenant> existing =
           tenantReadRepository.find(TenantFilter.builder().name(tenant).build());
       if (existing.isPresent()) {

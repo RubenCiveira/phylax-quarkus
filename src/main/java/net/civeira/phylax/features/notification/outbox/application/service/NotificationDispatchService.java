@@ -83,6 +83,10 @@ public class NotificationDispatchService {
   @Transactional
   public void dispatch() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    // @FIXME read-replica: outbox con varios nodos: por la réplica un mensaje ya enviado y borrado
+    // seguiría apareciendo como pendiente y se enviaría otra vez. Aquí sí hace falta bloqueo:
+    // messageWriter.listForUpdate, idealmente con SKIP LOCKED para que los nodos no se esperen
+    // entre sí.
     List<Message> all = messageReader.list(MessageFilter.builder().build());
     all.stream().filter(m -> isPending(m, now)).limit(dispatchRate).forEach(this::dispatchMessage);
   }
@@ -94,6 +98,9 @@ public class NotificationDispatchService {
   @Transactional
   public void cleanup() {
     OffsetDateTime cutoff = OffsetDateTime.now(ZoneOffset.UTC).minusHours(retentionHours);
+    // @FIXME read-replica: borrar a partir de una lectura de la réplica usa versiones obsoletas
+    // (OptimistLockException). Usar messageWriter.list (primario, sin bloqueo): si una fila
+    // cambia entremedias, el bloqueo optimista hará fallar solo ese borrado.
     messageReader.list(MessageFilter.builder().build()).stream()
         .filter(m -> m.getCreatedAt().isBefore(cutoff)).forEach(messageWriter::delete);
     log.debug("Outbox cleanup finished; retention cutoff={}", cutoff);

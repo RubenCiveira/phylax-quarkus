@@ -101,6 +101,8 @@ public class UserCreateUsecase {
     User entity = User.create(dto);
     Trace.addEvent("A created entity for user is ready");
     // Use the write gateway to store the entity on a persistent way
+    // @FIXME read-replica: el verificador tiene que leer (primario, sin bloqueo): usar
+    // visibility.checkVisibilityOnWrite(context, attempt.getUid()).
     User created =
         gateway.create(entity, attempt -> visibility.checkVisibility(context, attempt.getUid()));
     Trace.addEvent("The created entity of user was saved");
