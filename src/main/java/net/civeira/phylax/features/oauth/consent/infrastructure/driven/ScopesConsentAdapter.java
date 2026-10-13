@@ -63,9 +63,6 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     if (client == null) {
       return toPermissions(scopes);
     }
-    // @FIXME read-replica: se evalúa justo después de storeAcceptedScopes: por la réplica los
-    // scopes recién aceptados seguirían pendientes (bucle de consentimiento). Leer con
-    // consentWrite.list (primario, sin bloqueo).
     Set<String> granted = loadGrantedScopes(user, client);
     return scopes.stream().filter(s -> !granted.contains(s)).map(this::toPermission).toList();
   }
@@ -170,11 +167,6 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
   }
 
   private void persistScopes(User user, TrustedClient client, List<String> scopes) {
-    // @FIXME read-replica: comprobar-e-insertar contra la réplica: con doble envío o reintento se
-    // crearían consentimientos duplicados. Leer con consentWrite.list (primario, sin bloqueo). No
-    // usar listForUpdate: con REPEATABLE READ un FOR UPDATE sin resultados bloquea el hueco del
-    // índice y dos envíos simultáneos acabarían en deadlock al insertar. La carrera real la cubre
-    // un índice único (user, trusted_client, scope).
     Set<String> existing = loadGrantedScopes(user, client);
     for (String scope : scopes) {
       if (!existing.contains(scope)) {

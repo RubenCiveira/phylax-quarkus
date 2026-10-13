@@ -49,9 +49,6 @@ public class GdprConsentAdapter implements GdprConsentGateway {
     return purposes.list(ConsentPurposeFilter.builder().tenant(user.getTenant()).build()).stream()
         .filter(purpose -> purpose.getActivationDate().isBefore(OffsetDateTime.now()))
         .sorted(Comparator.comparing(ConsentPurpose::getActivationDate))
-        // @FIXME read-replica: se consulta justo después de storePurposeDecisions: por la réplica
-        // las decisiones recién guardadas seguirían pendientes. Leer con userPurposesWriter.find
-        // (primario, sin bloqueo).
         .filter(purpose -> userPurposes
             .find(UserConsentPurposesFilter.builder().consentPurpose(purpose).user(user).build())
             .isEmpty())
@@ -76,9 +73,6 @@ public class GdprConsentAdapter implements GdprConsentGateway {
         continue;
       }
       ConsentPurpose purpose = purposeOpt.get();
-      // @FIXME read-replica: comprobar-e-insertar contra la réplica: usar userPurposesWriter.find
-      // (primario, sin bloqueo) (no findForUpdate, por el riesgo de deadlock) y un índice único
-      // (user, consent_purpose).
       boolean exists = userPurposes
           .find(UserConsentPurposesFilter.builder().consentPurpose(purpose).user(user).build())
           .isPresent();

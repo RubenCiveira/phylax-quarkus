@@ -32,9 +32,6 @@ public class InvitationCreateUsecase {
   private final SecureTokenService secureTokenService;
 
   public InvitationCreateResult create(InvitationCreateParams params) {
-    // @FIXME read-replica: UserInvitationQueryAdapter es un stub; al implementarlo, esta
-    // comprobación previa al insert debe usar el WriteGateway (primario, sin bloqueo) o con doble
-    // envío se crearían dos invitaciones pendientes para el mismo email.
     queryGateway.findPendingByEmail(params.getEmail(), params.getTenantId()).ifPresent(existing -> {
       var exp = existing.getExpiredAt();
       if (exp.isAfter(OffsetDateTime.now(ZoneOffset.UTC))) {

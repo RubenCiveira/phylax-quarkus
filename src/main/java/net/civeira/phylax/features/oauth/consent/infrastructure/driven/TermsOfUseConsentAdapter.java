@@ -55,9 +55,6 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
             .toList();
 
     return activeTerms.stream()
-        // @FIXME read-replica: se consulta justo después de storeAcceptedConsent: por la réplica
-        // los términos recién aceptados seguirían pendientes. Leer con acceptedTermsWriter.find
-        // (primario, sin bloqueo).
         .filter(term -> acceptedTerms
             .find(UserAcceptedTermnsOfUseFilter.builder().conditions(term).user(user).build())
             .isEmpty())
@@ -78,9 +75,6 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
       return;
     }
     TenantTermsOfUse currentTerms = termsOpt.get();
-    // @FIXME read-replica: comprobar-e-insertar contra la réplica: usar acceptedTermsWriter.find
-    // (primario, sin bloqueo) (no findForUpdate, por el riesgo de deadlock) y un índice único
-    // (user, conditions).
     boolean alreadyAccepted = acceptedTerms
         .find(UserAcceptedTermnsOfUseFilter.builder().conditions(currentTerms).user(user).build())
         .isPresent();

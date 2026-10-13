@@ -69,14 +69,14 @@ public class InstallAccess implements MigrationSeed {
       return;
     }
 
-    RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("phylax-api")
+    RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid().code("civi-acme-api")
         .apiKey("1111").enabled(Boolean.TRUE);
 
     AllowedRedirects localhost =
         AllowedRedirects.builder().newUid().url("http://localhost:4200/*").build();
 
     TrustedClientChangeSet client =
-        new TrustedClientChangeSet().newUid().code("phylax-ui").allowAllScopes(Boolean.TRUE)
+        new TrustedClientChangeSet().newUid().code("civi-acme-ui").allowAllScopes(Boolean.TRUE)
             .secretOauthPlain("123456").publicAllow(Boolean.TRUE).isResourceServer(Boolean.FALSE)
             .requirePkce(Boolean.TRUE).tokenEndpointAuthMethod("client_secret_post")
             .m2mTokenTtlSeconds(3600).allowedRedirects(List.of(localhost)).enabled(Boolean.TRUE);

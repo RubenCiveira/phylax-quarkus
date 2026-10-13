@@ -33,10 +33,6 @@ public class RequiredConsentService {
         .filter(TenantTermsOfUse::isEnabled)
         .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
             .orElse(false))
-        // @FIXME read-replica: se consulta justo después de acceptPendingTerms (siguiente paso del
-        // login): por la réplica los términos recién aceptados seguirían pendientes y el usuario
-        // volvería a la pantalla de aceptación. Leer con userTermsWriter.find (primario, sin
-        // bloqueo).
         .filter(term -> userTerms
             .find(UserAcceptedTermnsOfUseFilter.builder().conditions(term).user(user).build())
             .isEmpty())

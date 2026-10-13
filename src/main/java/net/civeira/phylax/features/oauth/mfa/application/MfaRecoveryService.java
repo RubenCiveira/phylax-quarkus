@@ -29,9 +29,6 @@ public class MfaRecoveryService {
 
   /** Generates {@code count} single-use codes, replacing any existing ones for the user. */
   public List<String> generateCodes(String userUid, int count) {
-    // @FIXME read-replica: leer los códigos a sustituir con writeGateway.listForUpdate (se leen
-    // para borrarlos): con la réplica retrasada los recién generados no se borrarían y seguirían
-    // siendo válidos; además el delete usaría una versión obsoleta.
     readGateway.list(UserMfaRecoveryCodeFilter.builder().user(UserReference.of(userUid)).build())
         .forEach(code -> writeGateway.delete(code.delete()));
 
@@ -49,9 +46,6 @@ public class MfaRecoveryService {
   /** Returns true and marks the code used if it matches an unused code; false otherwise. */
   public boolean consumeCode(String userUid, String rawCode) {
     String hash = secureTokenService.hash(rawCode.trim());
-    // @FIXME read-replica: leer con writeGateway.listForUpdate (se lee para marcar el código como
-    // usado y así se serializan los consumos simultáneos): por la réplica un código recién
-    // generado no aparecería y uno ya consumido seguiría como no usado.
     return readGateway
         .list(UserMfaRecoveryCodeFilter.builder().userUnused(UserReference.of(userUid)).build())
         .stream().filter(c -> c.getCodeHash().equals(hash)).findFirst().map(code -> {
