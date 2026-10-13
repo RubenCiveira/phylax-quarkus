@@ -52,7 +52,12 @@ public class InstallAccess implements MigrationSeed {
   @Override
   @Transactional
   public void run() {
-    install("sesamo");
+    System.err.println("INSTALL");
+    try {
+      install("sesamo");
+    } catch(RuntimeException re) {
+      re.printStackTrace();
+    }
   }
 
   private final UserCommandRepositoryGateway users;
@@ -65,7 +70,9 @@ public class InstallAccess implements MigrationSeed {
   private final ApiKeyClientCommandRepositoryGateway apiKeys;
 
   void install(String password) {
+    System.err.println("INSTALL FOR ");
     if (users.countForUpdate(UserFilter.builder().build()) != 0) {
+      System.err.println("COUNT");
       return;
     }
 
@@ -131,6 +138,7 @@ public class InstallAccess implements MigrationSeed {
             .key("sck_01jtteh99vbsv4qrj22trvh3wg35g2n3tgkcxngqv0034y2cby7dceaf43").scopes("sync")
             .enabled(true);
     apiKeys.create(ApiKeyClient.create(syncApiKey).enable());
+    System.err.println("INSTALL IN DATABASE....");
 
   }
 }

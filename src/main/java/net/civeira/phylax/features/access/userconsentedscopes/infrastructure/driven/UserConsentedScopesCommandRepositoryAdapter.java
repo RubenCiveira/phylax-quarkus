@@ -40,7 +40,7 @@ public class UserConsentedScopesCommandRepositoryAdapter
    */
   public UserConsentedScopesCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserConsentedScopesEventDispatcher eventDispatcher) {
-    this.repository = new UserConsentedScopesJdbcDao(datasource, tracer, true);
+    this.repository = new UserConsentedScopesJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

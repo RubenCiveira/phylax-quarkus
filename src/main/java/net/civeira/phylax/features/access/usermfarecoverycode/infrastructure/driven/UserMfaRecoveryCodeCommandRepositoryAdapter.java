@@ -40,7 +40,7 @@ public class UserMfaRecoveryCodeCommandRepositoryAdapter
    */
   public UserMfaRecoveryCodeCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserMfaRecoveryCodeEventDispatcher eventDispatcher) {
-    this.repository = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, true);
+    this.repository = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

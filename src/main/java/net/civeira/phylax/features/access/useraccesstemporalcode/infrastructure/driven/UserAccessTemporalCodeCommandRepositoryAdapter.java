@@ -43,7 +43,7 @@ public class UserAccessTemporalCodeCommandRepositoryAdapter
   public UserAccessTemporalCodeCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserAccessTemporalCodeEventDispatcher eventDispatcher,
       AesCipherService cypher) {
-    this.repository = new UserAccessTemporalCodeJdbcDao(datasource, tracer, true, cypher);
+    this.repository = new UserAccessTemporalCodeJdbcDao(datasource, tracer, false, cypher);
     this.eventDispatcher = eventDispatcher;
   }
 

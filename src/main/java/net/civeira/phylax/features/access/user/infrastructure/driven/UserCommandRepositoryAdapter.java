@@ -41,7 +41,7 @@ public class UserCommandRepositoryAdapter implements UserCommandRepositoryGatewa
    */
   public UserCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final UserEventDispatcher eventDispatcher, AesCipherService cypher) {
-    this.repository = new UserJdbcDao(datasource, tracer, true, cypher);
+    this.repository = new UserJdbcDao(datasource, tracer, false, cypher);
     this.eventDispatcher = eventDispatcher;
   }
 

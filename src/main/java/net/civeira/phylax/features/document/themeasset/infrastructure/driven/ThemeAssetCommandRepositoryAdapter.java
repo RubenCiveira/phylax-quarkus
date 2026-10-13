@@ -47,7 +47,7 @@ public class ThemeAssetCommandRepositoryAdapter implements ThemeAssetCommandRepo
   public ThemeAssetCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final ThemeAssetEventDispatcher eventDispatcher,
       ThemeAssetContentUploadGatewayAdapter themeAssetContentUploadGatewayAdapter) {
-    this.repository = new ThemeAssetJdbcDao(datasource, tracer, true);
+    this.repository = new ThemeAssetJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
     this.themeAssetContentUploadGatewayAdapter = themeAssetContentUploadGatewayAdapter;
   }

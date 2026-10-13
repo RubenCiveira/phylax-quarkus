@@ -39,7 +39,7 @@ public class RoleCommandRepositoryAdapter implements RoleCommandRepositoryGatewa
    */
   public RoleCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final RoleEventDispatcher eventDispatcher) {
-    this.repository = new RoleJdbcDao(datasource, tracer, true);
+    this.repository = new RoleJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

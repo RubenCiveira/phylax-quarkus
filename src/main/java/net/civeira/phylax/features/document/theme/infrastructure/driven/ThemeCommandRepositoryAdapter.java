@@ -39,7 +39,7 @@ public class ThemeCommandRepositoryAdapter implements ThemeCommandRepositoryGate
    */
   public ThemeCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final ThemeEventDispatcher eventDispatcher) {
-    this.repository = new ThemeJdbcDao(datasource, tracer, true);
+    this.repository = new ThemeJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

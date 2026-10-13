@@ -42,7 +42,7 @@ public class UserRoleAssignamentCommandRepositoryAdapter
    */
   public UserRoleAssignamentCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserRoleAssignamentEventDispatcher eventDispatcher) {
-    this.repository = new UserRoleAssignamentJdbcDao(datasource, tracer, true);
+    this.repository = new UserRoleAssignamentJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

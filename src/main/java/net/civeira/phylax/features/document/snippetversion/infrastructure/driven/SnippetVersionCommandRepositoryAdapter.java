@@ -40,7 +40,7 @@ public class SnippetVersionCommandRepositoryAdapter
    */
   public SnippetVersionCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final SnippetVersionEventDispatcher eventDispatcher) {
-    this.repository = new SnippetVersionJdbcDao(datasource, tracer, true);
+    this.repository = new SnippetVersionJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

@@ -39,7 +39,7 @@ public class MessageCommandRepositoryAdapter implements MessageCommandRepository
    */
   public MessageCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final MessageEventDispatcher eventDispatcher) {
-    this.repository = new MessageJdbcDao(datasource, tracer, true);
+    this.repository = new MessageJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

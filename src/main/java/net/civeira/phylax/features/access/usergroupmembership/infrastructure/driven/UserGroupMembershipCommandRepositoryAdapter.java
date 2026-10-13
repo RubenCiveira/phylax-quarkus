@@ -40,7 +40,7 @@ public class UserGroupMembershipCommandRepositoryAdapter
    */
   public UserGroupMembershipCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserGroupMembershipEventDispatcher eventDispatcher) {
-    this.repository = new UserGroupMembershipJdbcDao(datasource, tracer, true);
+    this.repository = new UserGroupMembershipJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

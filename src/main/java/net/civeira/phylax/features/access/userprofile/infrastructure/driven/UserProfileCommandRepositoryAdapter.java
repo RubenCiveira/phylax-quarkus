@@ -39,7 +39,7 @@ public class UserProfileCommandRepositoryAdapter implements UserProfileCommandRe
    */
   public UserProfileCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final UserProfileEventDispatcher eventDispatcher) {
-    this.repository = new UserProfileJdbcDao(datasource, tracer, true);
+    this.repository = new UserProfileJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

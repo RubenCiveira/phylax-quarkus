@@ -39,7 +39,7 @@ public class RelyingPartyCommandRepositoryAdapter implements RelyingPartyCommand
    */
   public RelyingPartyCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final RelyingPartyEventDispatcher eventDispatcher) {
-    this.repository = new RelyingPartyJdbcDao(datasource, tracer, true);
+    this.repository = new RelyingPartyJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

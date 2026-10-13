@@ -39,7 +39,7 @@ public class ApiKeyClientCommandRepositoryAdapter implements ApiKeyClientCommand
    */
   public ApiKeyClientCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final ApiKeyClientEventDispatcher eventDispatcher) {
-    this.repository = new ApiKeyClientJdbcDao(datasource, tracer, true);
+    this.repository = new ApiKeyClientJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

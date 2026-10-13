@@ -39,7 +39,7 @@ public class TemplateCommandRepositoryAdapter implements TemplateCommandReposito
    */
   public TemplateCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final TemplateEventDispatcher eventDispatcher) {
-    this.repository = new TemplateJdbcDao(datasource, tracer, true);
+    this.repository = new TemplateJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

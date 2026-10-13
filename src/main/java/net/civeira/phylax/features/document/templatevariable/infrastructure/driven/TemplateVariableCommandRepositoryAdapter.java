@@ -40,7 +40,7 @@ public class TemplateVariableCommandRepositoryAdapter
    */
   public TemplateVariableCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final TemplateVariableEventDispatcher eventDispatcher) {
-    this.repository = new TemplateVariableJdbcDao(datasource, tracer, true);
+    this.repository = new TemplateVariableJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

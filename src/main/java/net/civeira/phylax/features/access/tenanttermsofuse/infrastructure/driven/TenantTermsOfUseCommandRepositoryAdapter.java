@@ -48,7 +48,7 @@ public class TenantTermsOfUseCommandRepositoryAdapter
   public TenantTermsOfUseCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final TenantTermsOfUseEventDispatcher eventDispatcher,
       TenantTermsOfUseAttachedUploadGatewayAdapter tenantTermsOfUseAttachedUploadGatewayAdapter) {
-    this.repository = new TenantTermsOfUseJdbcDao(datasource, tracer, true);
+    this.repository = new TenantTermsOfUseJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
     this.tenantTermsOfUseAttachedUploadGatewayAdapter =
         tenantTermsOfUseAttachedUploadGatewayAdapter;

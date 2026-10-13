@@ -40,7 +40,7 @@ public class UserPersonalApiKeyCommandRepositoryAdapter
    */
   public UserPersonalApiKeyCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserPersonalApiKeyEventDispatcher eventDispatcher) {
-    this.repository = new UserPersonalApiKeyJdbcDao(datasource, tracer, true);
+    this.repository = new UserPersonalApiKeyJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

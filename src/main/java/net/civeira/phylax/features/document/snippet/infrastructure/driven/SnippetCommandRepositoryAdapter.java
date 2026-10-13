@@ -39,7 +39,7 @@ public class SnippetCommandRepositoryAdapter implements SnippetCommandRepository
    */
   public SnippetCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final SnippetEventDispatcher eventDispatcher) {
-    this.repository = new SnippetJdbcDao(datasource, tracer, true);
+    this.repository = new SnippetJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

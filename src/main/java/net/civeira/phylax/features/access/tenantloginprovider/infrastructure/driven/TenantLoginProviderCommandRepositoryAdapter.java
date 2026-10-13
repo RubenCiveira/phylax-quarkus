@@ -56,7 +56,7 @@ public class TenantLoginProviderCommandRepositoryAdapter
       final Tracer tracer, final TenantLoginProviderEventDispatcher eventDispatcher,
       TenantLoginProviderMetadataUploadGatewayAdapter tenantLoginProviderMetadataUploadGatewayAdapter,
       TenantLoginProviderSamlIdpIdpCertUploadGatewayAdapter tenantLoginProviderSamlIdpIdpCertUploadGatewayAdapter) {
-    this.repository = new TenantLoginProviderJdbcDao(datasource, tracer, true);
+    this.repository = new TenantLoginProviderJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
     this.tenantLoginProviderMetadataUploadGatewayAdapter =
         tenantLoginProviderMetadataUploadGatewayAdapter;

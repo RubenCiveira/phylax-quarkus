@@ -42,7 +42,7 @@ public class TrustedClientCommandRepositoryAdapter
    */
   public TrustedClientCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final TrustedClientEventDispatcher eventDispatcher, AesCipherService cypher) {
-    this.repository = new TrustedClientJdbcDao(datasource, tracer, true, cypher);
+    this.repository = new TrustedClientJdbcDao(datasource, tracer, false, cypher);
     this.eventDispatcher = eventDispatcher;
   }
 

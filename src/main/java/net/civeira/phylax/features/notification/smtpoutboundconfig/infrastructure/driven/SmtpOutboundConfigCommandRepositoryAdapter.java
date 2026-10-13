@@ -43,7 +43,7 @@ public class SmtpOutboundConfigCommandRepositoryAdapter
   public SmtpOutboundConfigCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final SmtpOutboundConfigEventDispatcher eventDispatcher,
       AesCipherService cypher) {
-    this.repository = new SmtpOutboundConfigJdbcDao(datasource, tracer, true, cypher);
+    this.repository = new SmtpOutboundConfigJdbcDao(datasource, tracer, false, cypher);
     this.eventDispatcher = eventDispatcher;
   }
 

@@ -47,7 +47,7 @@ public class SnippetAssetCommandRepositoryAdapter implements SnippetAssetCommand
   public SnippetAssetCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final SnippetAssetEventDispatcher eventDispatcher,
       SnippetAssetContentUploadGatewayAdapter snippetAssetContentUploadGatewayAdapter) {
-    this.repository = new SnippetAssetJdbcDao(datasource, tracer, true);
+    this.repository = new SnippetAssetJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
     this.snippetAssetContentUploadGatewayAdapter = snippetAssetContentUploadGatewayAdapter;
   }

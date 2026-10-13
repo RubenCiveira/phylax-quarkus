@@ -40,7 +40,7 @@ public class UserWebauthnCredentialCommandRepositoryAdapter
    */
   public UserWebauthnCredentialCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserWebauthnCredentialEventDispatcher eventDispatcher) {
-    this.repository = new UserWebauthnCredentialJdbcDao(datasource, tracer, true);
+    this.repository = new UserWebauthnCredentialJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

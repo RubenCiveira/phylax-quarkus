@@ -39,7 +39,7 @@ public class TenantCommandRepositoryAdapter implements TenantCommandRepositoryGa
    */
   public TenantCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final TenantEventDispatcher eventDispatcher) {
-    this.repository = new TenantJdbcDao(datasource, tracer, true);
+    this.repository = new TenantJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

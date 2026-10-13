@@ -40,7 +40,7 @@ public class UserAcceptedTermnsOfUseCommandRepositoryAdapter
    */
   public UserAcceptedTermnsOfUseCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserAcceptedTermnsOfUseEventDispatcher eventDispatcher) {
-    this.repository = new UserAcceptedTermnsOfUseJdbcDao(datasource, tracer, true);
+    this.repository = new UserAcceptedTermnsOfUseJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

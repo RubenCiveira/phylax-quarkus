@@ -48,7 +48,7 @@ public class TemplateAssetCommandRepositoryAdapter
   public TemplateAssetCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final TemplateAssetEventDispatcher eventDispatcher,
       TemplateAssetContentUploadGatewayAdapter templateAssetContentUploadGatewayAdapter) {
-    this.repository = new TemplateAssetJdbcDao(datasource, tracer, true);
+    this.repository = new TemplateAssetJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
     this.templateAssetContentUploadGatewayAdapter = templateAssetContentUploadGatewayAdapter;
   }

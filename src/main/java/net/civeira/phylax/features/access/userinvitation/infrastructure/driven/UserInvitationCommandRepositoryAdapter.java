@@ -40,7 +40,7 @@ public class UserInvitationCommandRepositoryAdapter
    */
   public UserInvitationCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final UserInvitationEventDispatcher eventDispatcher) {
-    this.repository = new UserInvitationJdbcDao(datasource, tracer, true);
+    this.repository = new UserInvitationJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 

@@ -39,7 +39,7 @@ public class ThemeVersionCommandRepositoryAdapter implements ThemeVersionCommand
    */
   public ThemeVersionCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final ThemeVersionEventDispatcher eventDispatcher) {
-    this.repository = new ThemeVersionJdbcDao(datasource, tracer, true);
+    this.repository = new ThemeVersionJdbcDao(datasource, tracer, false);
     this.eventDispatcher = eventDispatcher;
   }
 
