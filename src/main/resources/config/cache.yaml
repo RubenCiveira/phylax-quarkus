@@ -6,3 +6,17 @@ quarkus:
       maximum-size: 100
       expire-after-write: 10M
       initial-capacity: 10
+      # Marcas de escrituras recientes del PendingWritesRegistry (una por entidad); caducan con la
+      # ventana, que ya se comprueba en el valor de la marca.
+      pending-writes:
+        expire-after-write: ${phylax.consistency.pending-writes.window}
+        maximum-size: 1000
+
+phylax:
+  consistency:
+    pending-writes:
+      # Tiempo durante el que, tras una escritura, las lecturas van al primario y no se cachean.
+      # Debe superar el retraso máximo de la réplica.
+      window: ${pending-writes.window:60S}
+      # Limpieza de las marcas caducadas cuando la caché de Quarkus está desactivada.
+      purge: 5m
