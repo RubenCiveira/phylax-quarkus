@@ -11,19 +11,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseFilter;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUseChangeSet;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseReadRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseWriteRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.consent.domain.TermsOfUseAcceptance;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.TermsOfUseConsentGateway;
 
@@ -32,11 +32,11 @@ import net.civeira.phylax.features.oauth.consent.domain.gateway.TermsOfUseConsen
 @RequiredArgsConstructor
 public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
 
-  private final TenantReadRepositoryGateway tenants;
-  private final UserReadRepositoryGateway users;
-  private final TenantTermsOfUseReadRepositoryGateway terms;
-  private final UserAcceptedTermnsOfUseReadRepositoryGateway acceptedTerms;
-  private final UserAcceptedTermnsOfUseWriteRepositoryGateway acceptedTermsWriter;
+  private final TenantQueryRepositoryGateway tenants;
+  private final UserQueryRepositoryGateway users;
+  private final TenantTermsOfUseQueryRepositoryGateway terms;
+  private final UserAcceptedTermnsOfUseQueryRepositoryGateway acceptedTerms;
+  private final UserAcceptedTermnsOfUseCommandRepositoryGateway acceptedTermsWriter;
 
   @Override
   public List<TermsOfUseAcceptance> getPendingConsent(String tenant, String username,

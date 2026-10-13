@@ -12,12 +12,12 @@ import jakarta.inject.Inject;
 import net.civeira.phylax.features.access.user.domain.UserRef;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.access.userwebauthncredential.domain.UserWebauthnCredential;
 import net.civeira.phylax.features.access.userwebauthncredential.domain.UserWebauthnCredentialChangeSet;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialCommandRepositoryGateway;
 import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialFilter;
-import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialReadRepositoryGateway;
-import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialWriteRepositoryGateway;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.gateway.UserWebauthnCredentialQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnCredential;
 import net.civeira.phylax.features.oauth.webauthn.domain.exception.WebAuthnException;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnCredentialGateway;
@@ -38,13 +38,13 @@ import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnCredent
 public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
 
   @Inject
-  UserWebauthnCredentialReadRepositoryGateway reader;
+  UserWebauthnCredentialQueryRepositoryGateway reader;
 
   @Inject
-  UserWebauthnCredentialWriteRepositoryGateway writer;
+  UserWebauthnCredentialCommandRepositoryGateway writer;
 
   @Inject
-  UserReadRepositoryGateway users;
+  UserQueryRepositoryGateway users;
 
   @Override
   public void store(WebAuthnCredential credential) {

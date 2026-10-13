@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
@@ -35,7 +35,7 @@ public class RecoverMfaStep implements OidcStep {
   private final SecureHtmlBuilder securer;
   private final DecoratePageGateway decorator;
   private final MfaRecoveryService mfaRecoveryService;
-  private final UserReadRepositoryGateway users;
+  private final UserQueryRepositoryGateway users;
 
   @Override
   public AuthenticationChallenge challenge() {

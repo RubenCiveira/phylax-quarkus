@@ -26,7 +26,7 @@ comprobado previamente. El canal de llegada del usuario determina su estado inic
 
 - `access_user.email_verified BIT DEFAULT 0` column exists in DB ✅.
 - Domain: `EmailVerifiedVO`, `EmailVerifiedValueHolder`, `UserVerifyEmailEvent` ✅.
-- `UserWriteRepositoryGateway` + `UserReadRepositoryGateway` inyectables ✅.
+- `UserCommandRepositoryGateway` + `UserQueryRepositoryGateway` inyectables ✅.
 - `UserLoginService.userToGrant` ejecuta checks en cadena: `checkPassword` → `checkFirstPass`
   (temporal password) → `checkMfa` → `checkTerms` → `checkScopesConsent`.
 - **Falta**: `checkEmailVerification` en esa cadena + step handler + link de verificación.
@@ -39,20 +39,20 @@ comprobado previamente. El canal de llegada del usuario determina su estado inic
 
 Añadir un nuevo check en la cadena de `userToGrant`, entre `checkFirstPass` y `checkMfa`.
 El método `userToGrant` ya recibe un `Tenant tenant` resuelto, por lo que se pasa directamente
-como `TenantRef` al filtro de `TenantConfigReadRepositoryGateway` — igual que el patrón
+como `TenantRef` al filtro de `TenantConfigQueryRepositoryGateway` — igual que el patrón
 establecido en Issue 1.5 (ver `OidcResponseBuilder.ssoTtl`, `AuthorizeHtml.loadValidSession`).
 
 Inyectar en `UserLoginService`:
 
 ```java
-private final TenantConfigReadRepositoryGateway tenantConfigs;
+private final TenantConfigQueryRepositoryGateway tenantConfigs;
 ```
 
 Importaciones necesarias (mismas que en issue-1.5):
 
 ```java
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
-import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 ```
 
 Añadir el check en la cadena de `userToGrant`:
@@ -70,7 +70,7 @@ List.of(
 
 Implementación del check — la obligatoriedad la determina el flag `requireEmailVerification`
 del `TenantConfig` del tenant (campo gestionado por Issue 1.5, ya disponible vía
-`TenantConfigReadRepositoryGateway`):
+`TenantConfigQueryRepositoryGateway`):
 
 ```java
 private Optional<AuthenticationResult> checkEmailVerification(
@@ -107,7 +107,7 @@ el mismo patrón que `newPasswordRequired`.
 ```java
 @ApplicationScoped
 public class InvitationAcceptedObserver {
-    @Inject UserWriteRepositoryGateway users;
+    @Inject UserCommandRepositoryGateway users;
 
     void onAccepted(@Observes UserInvitationAcceptEvent event) {
         // El usuario aceptó la invitación → el email queda verificado implícitamente
@@ -135,7 +135,7 @@ users.update(user, new UserChangeSet().withEmailVerified(providerEmailVerified))
 `features/oauth/authentication/infrastructure/driver/html/step/VerifyEmailStep.java`
 
 - `GET` → muestra página "Revisa tu bandeja de entrada" con botón "Reenviar email".
-- `POST /resend` → genera un nuevo token temporal (via `UserAccessTemporalCodeWriteRepositoryGateway`),
+- `POST /resend` → genera un nuevo token temporal (via `UserAccessTemporalCodeCommandRepositoryGateway`),
   envía el email de verificación.
 - El link de verificación incluye el contexto de sesión OAuth:
   `/{tenant}/oidc/verify-email?token={token}&session={sessionId}`
@@ -148,8 +148,8 @@ users.update(user, new UserChangeSet().withEmailVerified(providerEmailVerified))
 GET /{tenant}/oidc/verify-email?token={token}&session={sessionId}
 ```
 
-1. Consume el token temporal via `UserAccessTemporalCodeReadRepositoryGateway`.
-2. Actualiza `email_verified = true` via `UserWriteRepositoryGateway`.
+1. Consume el token temporal via `UserAccessTemporalCodeQueryRepositoryGateway`.
+2. Actualiza `email_verified = true` via `UserCommandRepositoryGateway`.
 3. Si `session` está presente y es válida: redirige de vuelta al flujo OAuth
    (`/{tenant}/oidc/authorize?...` con los parámetros originales) — el check
    `checkEmailVerification` ya no bloqueará porque el flag está a `true`.
@@ -163,10 +163,10 @@ GET /{tenant}/oidc/verify-email?token={token}&session={sessionId}
 
 ## Dependencies
 
-- `UserAccessTemporalCodeWriteRepositoryGateway` — para generar el token de verificación.
+- `UserAccessTemporalCodeCommandRepositoryGateway` — para generar el token de verificación.
 - Evento de aceptación de `userinvitation` BC — para el listener del paso 2.
 - Issue 1.5 (tenant config) ✅ — `requireEmailVerification` ya está disponible vía
-  `TenantConfigReadRepositoryGateway.find(TenantConfigFilter.builder().tenant(tenant).build())
+  `TenantConfigQueryRepositoryGateway.find(TenantConfigFilter.builder().tenant(tenant).build())
   .map(cfg -> cfg.getRequireEmailVerification())`. El patrón de inyección está establecido
   en `UserLoginService` tal como se describe en el paso 1 de esta issue.
 - PLAN-05 (Userinfo) — consume `email_verified` claim.
@@ -175,7 +175,7 @@ GET /{tenant}/oidc/verify-email?token={token}&session={sessionId}
 
 | Action | File |
 |--------|------|
-| **Modify** | `oauth/user/infrastructure/UserLoginService.java` — inyectar `TenantConfigReadRepositoryGateway`, añadir `checkEmailVerification(request, user, tenant)` en la cadena |
+| **Modify** | `oauth/user/infrastructure/UserLoginService.java` — inyectar `TenantConfigQueryRepositoryGateway`, añadir `checkEmailVerification(request, user, tenant)` en la cadena |
 | **Modify** | `oauth/authentication/domain/AuthenticationResult.java` — añadir `emailVerificationRequired` |
 | **Create** | `oauth/authentication/infrastructure/driver/html/step/VerifyEmailStep.java` |
 | **Create** | `oauth/authentication/infrastructure/driver/html/EmailVerificationController.java` |

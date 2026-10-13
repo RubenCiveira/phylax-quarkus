@@ -11,18 +11,18 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderInput;
 import net.civeira.phylax.features.document.rendering.application.usecase.render.TemplateRenderUsecase;
 import net.civeira.phylax.features.document.rendering.domain.RenderedTemplate;
 import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
 import net.civeira.phylax.features.document.theme.domain.Theme;
 import net.civeira.phylax.features.document.theme.domain.gateway.ThemeFilter;
-import net.civeira.phylax.features.document.theme.domain.gateway.ThemeReadRepositoryGateway;
+import net.civeira.phylax.features.document.theme.domain.gateway.ThemeQueryRepositoryGateway;
 import net.civeira.phylax.features.document.themeversion.domain.ThemeVersion;
 import net.civeira.phylax.features.document.themeversion.domain.ThemeVersionChannelOptions;
 import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionFilter;
-import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionReadRepositoryGateway;
+import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 
 /**
@@ -48,9 +48,9 @@ public class DecorateHtml implements DecoratePageGateway {
   static final String DEFAULT_THEME = "blue";
 
   private final TemplateRenderUsecase renderUsecase;
-  private final TenantReadRepositoryGateway tenants;
-  private final ThemeReadRepositoryGateway themeGateway;
-  private final ThemeVersionReadRepositoryGateway themeVersionGateway;
+  private final TenantQueryRepositoryGateway tenants;
+  private final ThemeQueryRepositoryGateway themeGateway;
+  private final ThemeVersionQueryRepositoryGateway themeVersionGateway;
 
   @Override
   public String getFullPage(final String tenantName, final String title, final String innerContent,

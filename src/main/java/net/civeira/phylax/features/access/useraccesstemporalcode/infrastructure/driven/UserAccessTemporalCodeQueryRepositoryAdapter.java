@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Named;
 import net.civeira.phylax.common.algorithms.Slider;
 import net.civeira.phylax.common.crypto.AesCipherService;
@@ -35,7 +36,7 @@ public class UserAccessTemporalCodeQueryRepositoryAdapter
    * @param cypher
    */
   public UserAccessTemporalCodeQueryRepositoryAdapter(final DataSource datasource,
-      @Named("replica") final Optional<DataSource> replicaDatasource, final Tracer tracer,
+      @Named("replica") final Instance<DataSource> replicaDatasource, final Tracer tracer,
       AesCipherService cypher) {
     this.repository = new UserAccessTemporalCodeJdbcDao(datasource, tracer, true, cypher);
   }

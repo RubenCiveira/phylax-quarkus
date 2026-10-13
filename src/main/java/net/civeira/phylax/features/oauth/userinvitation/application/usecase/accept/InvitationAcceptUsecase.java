@@ -8,22 +8,22 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitationStatusOptions;
 import net.civeira.phylax.features.oauth.userinvitation.domain.UserInvitationSession;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.InvitationAcceptGateway;
-import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationQueryGateway;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationLookupGateway;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationSessionGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 public class InvitationAcceptUsecase {
 
-  private final UserInvitationQueryGateway queryGateway;
+  private final UserInvitationLookupGateway queryGateway;
   private final InvitationAcceptGateway acceptGateway;
   private final UserInvitationSessionGateway sessionGateway;
-  private final TenantReadRepositoryGateway tenants;
+  private final TenantQueryRepositoryGateway tenants;
   private final SecureTokenService secureTokenService;
 
   public InvitationAcceptResult accept(InvitationAcceptParams params) {

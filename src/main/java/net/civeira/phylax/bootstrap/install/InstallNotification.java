@@ -7,16 +7,14 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.migration.MigrationSeed;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfig;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfigChangeSet;
+import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigCommandRepositoryGateway;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigFilter;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigReadRepositoryGateway;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigWriteRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 public class InstallNotification implements MigrationSeed {
 
-  private final SmtpOutboundConfigReadRepositoryGateway smtpConfigsRead;
-  private final SmtpOutboundConfigWriteRepositoryGateway smtpConfigs;
+  private final SmtpOutboundConfigCommandRepositoryGateway smtpConfigs;
 
   @Override
   public String id() {
@@ -35,7 +33,7 @@ public class InstallNotification implements MigrationSeed {
   }
 
   public void install() {
-    if (smtpConfigsRead.count(SmtpOutboundConfigFilter.builder().build()) > 0) {
+    if (smtpConfigs.count(SmtpOutboundConfigFilter.builder().build()) > 0) {
       return;
     }
     SmtpOutboundConfigChangeSet change = new SmtpOutboundConfigChangeSet().newUid()

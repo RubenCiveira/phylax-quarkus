@@ -18,9 +18,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
-import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.webauthn.application.usecase.beginauthentication.BeginAuthenticationUsecase;
 import net.civeira.phylax.features.oauth.webauthn.application.usecase.beginregistration.BeginRegistrationUsecase;
 import net.civeira.phylax.features.oauth.webauthn.application.usecase.finishauthentication.FinishAuthenticationUsecase;
@@ -31,8 +31,8 @@ import net.civeira.phylax.features.oauth.webauthn.application.usecase.finishregi
 @RequiredArgsConstructor
 public class WebAuthnController {
 
-  private final TenantReadRepositoryGateway tenants;
-  private final TenantConfigReadRepositoryGateway tenantConfigs;
+  private final TenantQueryRepositoryGateway tenants;
+  private final TenantConfigQueryRepositoryGateway tenantConfigs;
   private final BeginRegistrationUsecase beginRegistration;
   private final FinishRegistrationUsecase finishRegistration;
   private final BeginAuthenticationUsecase beginAuthentication;

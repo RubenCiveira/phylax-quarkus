@@ -11,11 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
@@ -30,8 +30,8 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
       "urn:ietf:params:oauth:grant-type:device_code", "client_credentials");
 
   private final AesCipherService cypher;
-  private final TenantReadRepositoryGateway tenants;
-  private final TrustedClientReadRepositoryGateway clients;
+  private final TenantQueryRepositoryGateway tenants;
+  private final TrustedClientQueryRepositoryGateway clients;
 
   @Override
   public Optional<ClientDetails> loadPreautorized(String tenant, String clientId) {

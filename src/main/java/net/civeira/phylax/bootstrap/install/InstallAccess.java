@@ -9,31 +9,31 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.migration.MigrationSeed;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClientChangeSet;
-import net.civeira.phylax.features.access.apikeyclient.domain.gateway.ApiKeyClientWriteRepositoryGateway;
+import net.civeira.phylax.features.access.apikeyclient.domain.gateway.ApiKeyClientCommandRepositoryGateway;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyWriteRepositoryGateway;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyCommandRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.role.domain.RoleChangeSet;
-import net.civeira.phylax.features.access.role.domain.gateway.RoleWriteRepositoryGateway;
+import net.civeira.phylax.features.access.role.domain.gateway.RoleCommandRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantWriteRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantCommandRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientWriteRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
+import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembershipChangeSet;
-import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipWriteRepositoryGateway;
+import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipCommandRepositoryGateway;
 import net.civeira.phylax.features.access.userroleassignament.domain.Roles;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignamentChangeSet;
-import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentWriteRepositoryGateway;
+import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentCommandRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -55,14 +55,14 @@ public class InstallAccess implements MigrationSeed {
     install("sesamo");
   }
 
-  private final UserWriteRepositoryGateway users;
-  private final RoleWriteRepositoryGateway roles;
-  private final TenantWriteRepositoryGateway tenants;
-  private final TrustedClientWriteRepositoryGateway clients;
-  private final RelyingPartyWriteRepositoryGateway parties;
-  private final UserRoleAssignamentWriteRepositoryGateway rolesAssignament;
-  private final UserGroupMembershipWriteRepositoryGateway groupsMembership;
-  private final ApiKeyClientWriteRepositoryGateway apiKeys;
+  private final UserCommandRepositoryGateway users;
+  private final RoleCommandRepositoryGateway roles;
+  private final TenantCommandRepositoryGateway tenants;
+  private final TrustedClientCommandRepositoryGateway clients;
+  private final RelyingPartyCommandRepositoryGateway parties;
+  private final UserRoleAssignamentCommandRepositoryGateway rolesAssignament;
+  private final UserGroupMembershipCommandRepositoryGateway groupsMembership;
+  private final ApiKeyClientCommandRepositoryGateway apiKeys;
 
   void install(String password) {
     if (users.countForUpdate(UserFilter.builder().build()) != 0) {

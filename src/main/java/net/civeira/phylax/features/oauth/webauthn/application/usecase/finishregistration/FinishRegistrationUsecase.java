@@ -9,9 +9,9 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnCredential;
 import net.civeira.phylax.features.oauth.webauthn.domain.exception.WebAuthnException;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallengeGateway;
@@ -22,8 +22,8 @@ import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnVerifie
 @RequiredArgsConstructor
 public class FinishRegistrationUsecase {
 
-  private final TenantReadRepositoryGateway tenants;
-  private final UserReadRepositoryGateway users;
+  private final TenantQueryRepositoryGateway tenants;
+  private final UserQueryRepositoryGateway users;
   private final WebAuthnChallengeGateway challengeGateway;
   private final WebAuthnCredentialGateway credentialGateway;
   private final WebAuthnVerifierGateway verifier;

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
 
-public interface UserInvitationQueryGateway {
+public interface UserInvitationLookupGateway {
 
   Optional<UserInvitation> findByTokenHash(String tokenHash, String tenantId);
 

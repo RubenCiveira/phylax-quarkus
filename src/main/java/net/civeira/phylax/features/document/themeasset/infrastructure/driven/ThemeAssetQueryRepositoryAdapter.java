@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Named;
 import net.civeira.phylax.common.algorithms.Slider;
 import net.civeira.phylax.common.telemetry.Observed;
@@ -32,7 +33,7 @@ public class ThemeAssetQueryRepositoryAdapter implements ThemeAssetQueryReposito
    * @param tracer
    */
   public ThemeAssetQueryRepositoryAdapter(final DataSource datasource,
-      @Named("replica") final Optional<DataSource> replicaDatasource, final Tracer tracer) {
+      @Named("replica") final Instance<DataSource> replicaDatasource, final Tracer tracer) {
     this.repository = new ThemeAssetJdbcDao(datasource, tracer, true);
   }
 

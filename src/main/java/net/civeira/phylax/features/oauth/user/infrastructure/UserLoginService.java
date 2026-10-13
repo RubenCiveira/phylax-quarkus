@@ -19,24 +19,24 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyReadRepositoryGateway;
+import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyQueryRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
-import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipFilter;
-import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipReadRepositoryGateway;
+import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipQueryRepositoryGateway;
 import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
 import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentFilter;
-import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentReadRepositoryGateway;
+import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
@@ -58,17 +58,17 @@ public class UserLoginService {
 
   private final ActiveUserFindService activeUser;
 
-  private final UserWriteRepositoryGateway users;
+  private final UserCommandRepositoryGateway users;
 
-  private final UserGroupMembershipReadRepositoryGateway userGroups;
+  private final UserGroupMembershipQueryRepositoryGateway userGroups;
 
-  private final UserRoleAssignamentReadRepositoryGateway userRoles;
+  private final UserRoleAssignamentQueryRepositoryGateway userRoles;
 
-  private final UserAccessTemporalCodeWriteRepositoryGateway codes;
+  private final UserAccessTemporalCodeCommandRepositoryGateway codes;
 
-  private final TrustedClientReadRepositoryGateway clients;
+  private final TrustedClientQueryRepositoryGateway clients;
 
-  private final RelyingPartyReadRepositoryGateway parties;
+  private final RelyingPartyQueryRepositoryGateway parties;
 
   private final AesCipherService cypher;
 

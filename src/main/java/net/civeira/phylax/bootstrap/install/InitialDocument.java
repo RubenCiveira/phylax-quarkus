@@ -14,23 +14,22 @@ import net.civeira.phylax.common.infrastructure.store.BinaryContent;
 import net.civeira.phylax.features.document.template.domain.Template;
 import net.civeira.phylax.features.document.template.domain.TemplateChangeSet;
 import net.civeira.phylax.features.document.template.domain.TemplateChannelOptions;
-import net.civeira.phylax.features.document.template.domain.gateway.TemplateWriteRepositoryGateway;
+import net.civeira.phylax.features.document.template.domain.gateway.TemplateCommandRepositoryGateway;
 import net.civeira.phylax.features.document.templateversion.domain.TemplateVersion;
 import net.civeira.phylax.features.document.templateversion.domain.TemplateVersionChangeSet;
-import net.civeira.phylax.features.document.templateversion.domain.gateway.TemplateVersionWriteRepositoryGateway;
+import net.civeira.phylax.features.document.templateversion.domain.gateway.TemplateVersionCommandRepositoryGateway;
 import net.civeira.phylax.features.document.theme.domain.Theme;
 import net.civeira.phylax.features.document.theme.domain.ThemeChangeSet;
+import net.civeira.phylax.features.document.theme.domain.gateway.ThemeCommandRepositoryGateway;
 import net.civeira.phylax.features.document.theme.domain.gateway.ThemeFilter;
-import net.civeira.phylax.features.document.theme.domain.gateway.ThemeReadRepositoryGateway;
-import net.civeira.phylax.features.document.theme.domain.gateway.ThemeWriteRepositoryGateway;
 import net.civeira.phylax.features.document.themeasset.domain.ThemeAsset;
 import net.civeira.phylax.features.document.themeasset.domain.ThemeAssetChangeSet;
+import net.civeira.phylax.features.document.themeasset.domain.gateway.ThemeAssetCommandRepositoryGateway;
 import net.civeira.phylax.features.document.themeasset.domain.gateway.ThemeAssetContentUploadGateway;
-import net.civeira.phylax.features.document.themeasset.domain.gateway.ThemeAssetWriteRepositoryGateway;
 import net.civeira.phylax.features.document.themeversion.domain.ThemeVersion;
 import net.civeira.phylax.features.document.themeversion.domain.ThemeVersionChangeSet;
 import net.civeira.phylax.features.document.themeversion.domain.ThemeVersionChannelOptions;
-import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionWriteRepositoryGateway;
+import net.civeira.phylax.features.document.themeversion.domain.gateway.ThemeVersionCommandRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -60,16 +59,15 @@ public class InitialDocument implements MigrationSeed {
       "office_1024x768.webp", "office_1440x900.jpeg", "office_1440x900.webp",
       "office_1920x1080.jpeg", "office_1920x1080.webp");
 
-  private final ThemeReadRepositoryGateway themesRead;
-  private final ThemeWriteRepositoryGateway themes;
-  private final ThemeVersionWriteRepositoryGateway themeVersions;
-  private final ThemeAssetWriteRepositoryGateway themeAssets;
+  private final ThemeCommandRepositoryGateway themes;
+  private final ThemeVersionCommandRepositoryGateway themeVersions;
+  private final ThemeAssetCommandRepositoryGateway themeAssets;
   private final ThemeAssetContentUploadGateway themeAssetContent;
-  private final TemplateWriteRepositoryGateway templates;
-  private final TemplateVersionWriteRepositoryGateway templateVersions;
+  private final TemplateCommandRepositoryGateway templates;
+  private final TemplateVersionCommandRepositoryGateway templateVersions;
 
   public void install() {
-    if (themesRead.count(ThemeFilter.builder().build()) > 0) {
+    if (themes.count(ThemeFilter.builder().build()) > 0) {
       return;
     }
     Theme corporateTheme = createTheme("corporate", true);

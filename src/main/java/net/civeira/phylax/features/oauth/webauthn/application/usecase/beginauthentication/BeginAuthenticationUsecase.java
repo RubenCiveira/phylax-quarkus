@@ -12,7 +12,7 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.webauthn.domain.WebAuthnChallenge;
 import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallengeGateway;
 
@@ -20,7 +20,7 @@ import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnChallen
 @RequiredArgsConstructor
 public class BeginAuthenticationUsecase {
 
-  private final TenantReadRepositoryGateway tenants;
+  private final TenantQueryRepositoryGateway tenants;
   private final WebAuthnChallengeGateway challengeGateway;
 
   public Map<String, Object> begin(String tenantName, String rpId) {

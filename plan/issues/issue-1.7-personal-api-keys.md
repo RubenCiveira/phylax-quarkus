@@ -16,7 +16,7 @@
 - Domain: `UserPersonalApiKey` entity with `uid`, `user`, `name`, `keyHash`, `scopes`,
   `lastUsedAt`, `expiresAt`, `createdAt`, `enabled` ✅.
 - Application use cases CRUD generated: `create`, `delete`, `list`, `retrieve`, `update` ✅.
-- `UserPersonalApiKeyReadRepositoryGateway` + `UserPersonalApiKeyWriteRepositoryGateway` ✅.
+- `UserPersonalApiKeyQueryRepositoryGateway` + `UserPersonalApiKeyCommandRepositoryGateway` ✅.
 - **No REST driver** for self-service key management.
 - **No authentication path** that accepts API keys as bearer credentials.
 
@@ -35,8 +35,8 @@ DELETE /{tenant}/account/me/api-keys/{uid}     — hard delete
 PUT    /{tenant}/account/me/api-keys/{uid}/disable — disable without deleting
 ```
 
-The controller uses `UserPersonalApiKeyReadRepositoryGateway` and
-`UserPersonalApiKeyWriteRepositoryGateway` (Access gateways) directly.
+The controller uses `UserPersonalApiKeyQueryRepositoryGateway` and
+`UserPersonalApiKeyCommandRepositoryGateway` (Access gateways) directly.
 The existing generated use cases (`UserPersonalApiKeyCreateUsecase`, etc.) can also be
 reused if their authorization policy allows it.
 
@@ -46,7 +46,7 @@ reused if their authorization policy allows it.
 2. Compute `SHA-256` hex → `keyHash`.
 3. Build a `UserPersonalApiKeyChangeSet` with `keyHash`, `name`, `scopes`, optional `expiresAt`,
    `enabled=true`, `createdAt=now()`, `user=currentUserUid`.
-4. Call `UserPersonalApiKeyWriteRepositoryGateway.create(entity)`.
+4. Call `UserPersonalApiKeyCommandRepositoryGateway.create(entity)`.
 5. Return the raw key in the response **once** — never stored, never returned again.
 
 ### 2. API Key authentication adapter — in OAuth
@@ -57,11 +57,11 @@ Called from the bearer token filter before JWT verification:
 
 1. Extract raw bearer value from `Authorization: Bearer {rawKey}`.
 2. Compute `SHA-256` of raw value.
-3. Query `UserPersonalApiKeyReadRepositoryGateway` by `keyHash` (filter already supports this).
+3. Query `UserPersonalApiKeyQueryRepositoryGateway` by `keyHash` (filter already supports this).
 4. Reject if: not found, `enabled=false`, or `expiresAt < now()`.
-5. Update `lastUsedAt = now()` via `UserPersonalApiKeyWriteRepositoryGateway.update(...)`.
+5. Update `lastUsedAt = now()` via `UserPersonalApiKeyCommandRepositoryGateway.update(...)`.
    Use fire-and-forget (best-effort); do not fail the request if the touch fails.
-6. Load the associated user via `UserReadRepositoryGateway`.
+6. Load the associated user via `UserQueryRepositoryGateway`.
 7. Return `AuthenticationData` with `userId`, `scopes` from the key's `scopes` field,
    `acr=1` (password-equivalent — no MFA for API keys).
 

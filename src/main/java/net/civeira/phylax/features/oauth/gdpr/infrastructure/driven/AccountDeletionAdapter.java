@@ -21,15 +21,15 @@ import net.civeira.phylax.common.infrastructure.mail.EmailService;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 import net.civeira.phylax.features.access.user.domain.UserReference;
+import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopes;
+import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesCommandRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.gdpr.domain.gateway.AccountDeletionGateway;
 
 @ApplicationScoped
@@ -39,9 +39,9 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
 
   private static final long TOKEN_TTL_HOURS = 24L;
 
-  private final UserWriteRepositoryGateway userWrite;
-  private final UserAccessTemporalCodeWriteRepositoryGateway temporalCodeWrite;
-  private final UserConsentedScopesWriteRepositoryGateway consentWrite;
+  private final UserCommandRepositoryGateway userWrite;
+  private final UserAccessTemporalCodeCommandRepositoryGateway temporalCodeWrite;
+  private final UserConsentedScopesCommandRepositoryGateway consentWrite;
   private final DataSource dataSource;
   private final EmailService emailService;
 

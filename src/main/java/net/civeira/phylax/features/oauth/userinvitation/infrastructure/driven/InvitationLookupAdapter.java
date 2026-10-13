@@ -6,19 +6,19 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
-import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationQueryGateway;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationLookupGateway;
 
 /**
  * Stub adapter for invitation token and email lookups.
  *
  * <p>
  * Marked {@code @Vetoed} — replace with a real implementation backed by
- * {@link net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationReadRepositoryGateway}.
+ * {@link net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationCommandRepositoryGateway}.
  * </p>
  */
 @ApplicationScoped
 @Slf4j
-public class UserInvitationQueryAdapter implements UserInvitationQueryGateway {
+public class InvitationLookupAdapter implements UserInvitationLookupGateway {
 
   @Override
   public Optional<UserInvitation> findByTokenHash(String tokenHash, String tenantId) {

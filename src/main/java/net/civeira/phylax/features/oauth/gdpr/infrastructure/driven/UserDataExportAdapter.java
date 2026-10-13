@@ -23,10 +23,10 @@ import net.civeira.phylax.common.infrastructure.mail.EmailMessage;
 import net.civeira.phylax.common.infrastructure.mail.EmailService;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopes;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesReadRepositoryGateway;
+import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.gdpr.domain.gateway.UserDataExportGateway;
 
 @ApplicationScoped
@@ -34,8 +34,8 @@ import net.civeira.phylax.features.oauth.gdpr.domain.gateway.UserDataExportGatew
 @Slf4j
 public class UserDataExportAdapter implements UserDataExportGateway {
 
-  private final UserReadRepositoryGateway userRead;
-  private final UserConsentedScopesReadRepositoryGateway consentRead;
+  private final UserQueryRepositoryGateway userRead;
+  private final UserConsentedScopesQueryRepositoryGateway consentRead;
   private final DataSource dataSource;
   private final EmailService emailService;
 

@@ -10,23 +10,23 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseFilter;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUseChangeSet;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseReadRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseWriteRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseQueryRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
 public class RequiredConsentService {
 
-  private final TenantTermsOfUseReadRepositoryGateway terms;
+  private final TenantTermsOfUseQueryRepositoryGateway terms;
 
-  private final UserAcceptedTermnsOfUseReadRepositoryGateway userTerms;
+  private final UserAcceptedTermnsOfUseQueryRepositoryGateway userTerms;
 
-  private final UserAcceptedTermnsOfUseWriteRepositoryGateway userTermsWriter;
+  private final UserAcceptedTermnsOfUseCommandRepositoryGateway userTermsWriter;
 
   public Optional<TenantTermsOfUse> findPendingTerms(User user) {
     return terms.list(TenantTermsOfUseFilter.builder().tenant(user.getTenant()).build()).stream()

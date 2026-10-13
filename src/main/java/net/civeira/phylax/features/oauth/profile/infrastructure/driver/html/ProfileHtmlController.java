@@ -25,14 +25,14 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUse;
-import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
 import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseReadRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
@@ -65,7 +65,7 @@ public class ProfileHtmlController {
 
   private final SessionManager sessionManager;
   private final ProfileService profileService;
-  private final UserReadRepositoryGateway users;
+  private final UserQueryRepositoryGateway users;
   private final DecoratePageGateway decorator;
   private final ProfileViewPanel viewPanel;
   private final ProfileEditPanel editPanel;
@@ -76,8 +76,8 @@ public class ProfileHtmlController {
   private final RecoveryCodesPanel recoveryCodesPanel;
   private final ScopesConsentGateway scopesConsentGateway;
   private final ConsentedScopesPanel consentedScopesPanel;
-  private final UserAcceptedTermnsOfUseReadRepositoryGateway acceptedTermsGateway;
-  private final TenantTermsOfUseReadRepositoryGateway termsGateway;
+  private final UserAcceptedTermnsOfUseQueryRepositoryGateway acceptedTermsGateway;
+  private final TenantTermsOfUseQueryRepositoryGateway termsGateway;
   private final PasskeysPanel passkeysPanel;
   private final GdprService gdprService;
   private final DataExportPanel dataExportPanel;

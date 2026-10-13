@@ -9,15 +9,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigCommandRepositoryGateway;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
-import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitationChangeSet;
 import net.civeira.phylax.features.access.userinvitation.domain.UserInvitationStatusOptions;
-import net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationWriteRepositoryGateway;
+import net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationCommandRepositoryGateway;
+import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationLookupGateway;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationMailGateway;
-import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationQueryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -25,10 +25,10 @@ public class InvitationCreateUsecase {
 
   private static final int DEFAULT_EXPIRES_DAYS = 7;
 
-  private final UserInvitationWriteRepositoryGateway writeGateway;
-  private final UserInvitationQueryGateway queryGateway;
+  private final UserInvitationCommandRepositoryGateway writeGateway;
+  private final UserInvitationLookupGateway queryGateway;
   private final UserInvitationMailGateway mailer;
-  private final TenantConfigReadRepositoryGateway tenantConfigs;
+  private final TenantConfigCommandRepositoryGateway tenantConfigs;
   private final SecureTokenService secureTokenService;
 
   public InvitationCreateResult create(InvitationCreateParams params) {

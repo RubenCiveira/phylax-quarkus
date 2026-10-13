@@ -11,8 +11,8 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.Invitatio
  *
  * <p>
  * Marked {@code @Vetoed} — replace with a real implementation in {@code access/oauth} that uses
- * {@link net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway} and
- * {@link net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationWriteRepositoryGateway}.
+ * {@link net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway} and
+ * {@link net.civeira.phylax.features.access.userinvitation.domain.gateway.UserInvitationCommandRepositoryGateway}.
  * </p>
  */
 @ApplicationScoped

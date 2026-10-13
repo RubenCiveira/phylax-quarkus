@@ -16,11 +16,11 @@ import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.user.domain.RecoveryNotificationData;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
@@ -34,8 +34,8 @@ public class ChangePasswordAdapter implements ChangePasswordGateway {
   private final static TemporalAmount RECOVER_TIME = Duration.ofHours(12);
 
   private final ActiveUserFindService activeUser;
-  private final UserWriteRepositoryGateway users;
-  private final UserAccessTemporalCodeWriteRepositoryGateway codes;
+  private final UserCommandRepositoryGateway users;
+  private final UserAccessTemporalCodeCommandRepositoryGateway codes;
   private final UserLoginService loginUsecase;
 
   @Override

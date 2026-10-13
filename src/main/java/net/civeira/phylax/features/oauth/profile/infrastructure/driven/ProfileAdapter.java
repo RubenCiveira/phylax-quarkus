@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userprofile.domain.UserProfile;
 import net.civeira.phylax.features.access.userprofile.domain.UserProfileChangeSet;
+import net.civeira.phylax.features.access.userprofile.domain.gateway.UserProfileCommandRepositoryGateway;
 import net.civeira.phylax.features.access.userprofile.domain.gateway.UserProfileFilter;
-import net.civeira.phylax.features.access.userprofile.domain.gateway.UserProfileReadRepositoryGateway;
-import net.civeira.phylax.features.access.userprofile.domain.gateway.UserProfileWriteRepositoryGateway;
+import net.civeira.phylax.features.access.userprofile.domain.gateway.UserProfileQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfileData;
 import net.civeira.phylax.features.oauth.profile.domain.gateway.ProfileGateway;
@@ -27,8 +27,8 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.ProfileGateway;
 @RequiredArgsConstructor
 public class ProfileAdapter implements ProfileGateway {
 
-  private final UserProfileReadRepositoryGateway reader;
-  private final UserProfileWriteRepositoryGateway writer;
+  private final UserProfileQueryRepositoryGateway reader;
+  private final UserProfileCommandRepositoryGateway writer;
 
   @Override
   public Optional<OidcProfile> findByUser(String userUid) {

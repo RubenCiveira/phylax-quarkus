@@ -11,10 +11,10 @@ import org.mockito.Mockito;
 
 import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
-import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkEnabledGateway;
@@ -23,10 +23,10 @@ import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkMailG
 
 class RequestMagicLinkUsecaseUnitTest {
 
-  private UserReadRepositoryGateway users = Mockito.mock(UserReadRepositoryGateway.class);
-  private TenantReadRepositoryGateway tenants = Mockito.mock(TenantReadRepositoryGateway.class);
-  private TenantConfigReadRepositoryGateway tenantConfigs =
-      Mockito.mock(TenantConfigReadRepositoryGateway.class);
+  private UserQueryRepositoryGateway users = Mockito.mock(UserQueryRepositoryGateway.class);
+  private TenantQueryRepositoryGateway tenants = Mockito.mock(TenantQueryRepositoryGateway.class);
+  private TenantConfigQueryRepositoryGateway tenantConfigs =
+      Mockito.mock(TenantConfigQueryRepositoryGateway.class);
   private ClientStoreGateway clients = Mockito.mock(ClientStoreGateway.class);
   private MagicLinkGateway gateway = Mockito.mock(MagicLinkGateway.class);
   private MagicLinkMailGateway mailer = Mockito.mock(MagicLinkMailGateway.class);

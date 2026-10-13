@@ -13,9 +13,9 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
-import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
@@ -44,8 +44,8 @@ public class OidcResponseBuilder {
   private final TemporalKeysGateway temporalStore;
   private final JwtTokenBuilder tokenBuilder;
   private final OidcCookieManager cookieManager;
-  private final TenantReadRepositoryGateway tenantRepo;
-  private final TenantConfigReadRepositoryGateway tenantConfigs;
+  private final TenantQueryRepositoryGateway tenantRepo;
+  private final TenantConfigQueryRepositoryGateway tenantConfigs;
 
   /**
    * Builds a redirect response after successful authentication.

@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
@@ -38,7 +38,7 @@ public class BackChannelLogoutDispatcher {
   private static final String LOGOUT_TOKEN_SCOPE = "backchannel_logout";
   private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(5);
 
-  private final TrustedClientReadRepositoryGateway clients;
+  private final TrustedClientQueryRepositoryGateway clients;
   private final TokenSigner signer;
 
   private final HttpClient http = HttpClient.newBuilder().connectTimeout(HTTP_TIMEOUT).build();

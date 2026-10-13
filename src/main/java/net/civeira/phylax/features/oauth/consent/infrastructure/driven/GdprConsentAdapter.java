@@ -13,18 +13,18 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.consentpurpose.domain.ConsentPurpose;
 import net.civeira.phylax.features.access.consentpurpose.domain.ConsentPurposeReference;
 import net.civeira.phylax.features.access.consentpurpose.domain.gateway.ConsentPurposeFilter;
-import net.civeira.phylax.features.access.consentpurpose.domain.gateway.ConsentPurposeReadRepositoryGateway;
+import net.civeira.phylax.features.access.consentpurpose.domain.gateway.ConsentPurposeQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentpurposes.domain.UserConsentPurposes;
 import net.civeira.phylax.features.access.userconsentpurposes.domain.UserConsentPurposesChangeSet;
+import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesCommandRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesFilter;
-import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesReadRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesWriteRepositoryGateway;
+import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.consent.domain.GdprConsentPurposeItem;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.GdprConsentGateway;
 
@@ -33,11 +33,11 @@ import net.civeira.phylax.features.oauth.consent.domain.gateway.GdprConsentGatew
 @RequiredArgsConstructor
 public class GdprConsentAdapter implements GdprConsentGateway {
 
-  private final TenantReadRepositoryGateway tenants;
-  private final UserReadRepositoryGateway users;
-  private final ConsentPurposeReadRepositoryGateway purposes;
-  private final UserConsentPurposesReadRepositoryGateway userPurposes;
-  private final UserConsentPurposesWriteRepositoryGateway userPurposesWriter;
+  private final TenantQueryRepositoryGateway tenants;
+  private final UserQueryRepositoryGateway users;
+  private final ConsentPurposeQueryRepositoryGateway purposes;
+  private final UserConsentPurposesQueryRepositoryGateway userPurposes;
+  private final UserConsentPurposesCommandRepositoryGateway userPurposesWriter;
 
   @Override
   public List<GdprConsentPurposeItem> pendingPurposes(String tenant, String username) {

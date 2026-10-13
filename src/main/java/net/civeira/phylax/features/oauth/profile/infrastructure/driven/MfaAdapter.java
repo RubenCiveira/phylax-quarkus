@@ -10,9 +10,9 @@ import jakarta.activation.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
-import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.valueobject.SecondFactorSeedVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.UseSecondFactorsVO;
 import net.civeira.phylax.features.oauth.mfa.infrastructure.OtpMfaService;
@@ -30,8 +30,8 @@ import net.civeira.phylax.features.oauth.profile.domain.gateway.MfaGateway;
 @RequiredArgsConstructor
 public class MfaAdapter implements MfaGateway {
 
-  private final UserReadRepositoryGateway readers;
-  private final UserWriteRepositoryGateway users;
+  private final UserQueryRepositoryGateway readers;
+  private final UserCommandRepositoryGateway users;
   private final OtpMfaService otp;
 
   @Override

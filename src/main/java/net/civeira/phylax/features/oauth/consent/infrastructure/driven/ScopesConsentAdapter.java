@@ -13,15 +13,15 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientReadRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopes;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopesChangeSet;
+import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesCommandRepositoryGateway;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesReadRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesWriteRepositoryGateway;
+import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
@@ -39,10 +39,10 @@ import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopesConsentGat
 @RequiredArgsConstructor
 public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApprovalGateway {
 
-  private final UserReadRepositoryGateway users;
-  private final TrustedClientReadRepositoryGateway clients;
-  private final UserConsentedScopesReadRepositoryGateway consentRead;
-  private final UserConsentedScopesWriteRepositoryGateway consentWrite;
+  private final UserQueryRepositoryGateway users;
+  private final TrustedClientQueryRepositoryGateway clients;
+  private final UserConsentedScopesQueryRepositoryGateway consentRead;
+  private final UserConsentedScopesCommandRepositoryGateway consentWrite;
 
   // -------------------------------------------------------------------------
   // ScopesConsentGateway

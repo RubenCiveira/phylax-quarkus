@@ -16,11 +16,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.AesCipherService;
-import net.civeira.phylax.features.access.user.domain.gateway.UserWriteRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
+import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeWriteRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
@@ -37,8 +37,8 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
 
   private final OtpMfaService otp;
   private final ActiveUserFindService finder;
-  private final UserWriteRepositoryGateway users;
-  private final UserAccessTemporalCodeWriteRepositoryGateway codes;
+  private final UserCommandRepositoryGateway users;
+  private final UserAccessTemporalCodeCommandRepositoryGateway codes;
   private final AesCipherService cypher;
 
   @Override

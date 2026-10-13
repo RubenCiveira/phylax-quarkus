@@ -11,19 +11,19 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ActiveUserFindService {
 
-  private final TenantReadRepositoryGateway tenants;
+  private final TenantQueryRepositoryGateway tenants;
 
-  private final UserReadRepositoryGateway users;
+  private final UserQueryRepositoryGateway users;
 
   public Optional<Tenant> findEnabledTenant(String tenantName, List<String> audiences) {
     Object[] res = checkTenant(tenantName, audiences);

@@ -12,9 +12,9 @@ import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCode;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCodeChangeSet;
+import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeCommandRepositoryGateway;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeFilter;
-import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeReadRepositoryGateway;
-import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeWriteRepositoryGateway;
+import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeQueryRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -23,13 +23,14 @@ public class MfaRecoveryService {
   private static final String ALPHABET = "BCDFGHJKLMNPQRSTVWXZ";
   private static final SecureRandom RANDOM = new SecureRandom();
 
-  private final UserMfaRecoveryCodeReadRepositoryGateway readGateway;
-  private final UserMfaRecoveryCodeWriteRepositoryGateway writeGateway;
+  private final UserMfaRecoveryCodeQueryRepositoryGateway readGateway;
+  private final UserMfaRecoveryCodeCommandRepositoryGateway writeGateway;
   private final SecureTokenService secureTokenService;
 
   /** Generates {@code count} single-use codes, replacing any existing ones for the user. */
   public List<String> generateCodes(String userUid, int count) {
-    readGateway.list(UserMfaRecoveryCodeFilter.builder().user(UserReference.of(userUid)).build())
+    writeGateway
+        .listForUpdate(UserMfaRecoveryCodeFilter.builder().user(UserReference.of(userUid)).build())
         .forEach(code -> writeGateway.delete(code.delete()));
 
     List<String> rawCodes = new ArrayList<>(count);

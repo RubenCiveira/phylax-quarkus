@@ -33,9 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
-import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.AuthenticateUser;
 import net.civeira.phylax.features.oauth.authentication.application.BackChannelLogoutDispatcher;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
@@ -139,11 +139,11 @@ public class AuthorizeHtml {
   /**
    * Used to resolve tenant name for SSO TTL lookup.
    */
-  private final TenantReadRepositoryGateway tenantRepo;
+  private final TenantQueryRepositoryGateway tenantRepo;
   /**
    * Used to read per-tenant SSO TTL policy for session expiry validation.
    */
-  private final TenantConfigReadRepositoryGateway tenantConfigs;
+  private final TenantConfigQueryRepositoryGateway tenantConfigs;
   /**
    * Sends back-channel logout notifications to registered relying parties.
    */

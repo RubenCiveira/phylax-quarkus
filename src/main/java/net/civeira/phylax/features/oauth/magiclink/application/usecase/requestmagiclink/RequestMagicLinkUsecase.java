@@ -14,11 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
-import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigReadRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserReadRepositoryGateway;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.magiclink.domain.MagicLink;
 import net.civeira.phylax.features.oauth.magiclink.domain.gateway.MagicLinkEnabledGateway;
@@ -40,9 +40,9 @@ public class RequestMagicLinkUsecase {
 
   private static final int DEFAULT_EXPIRES_MINUTES = 15;
 
-  private final UserReadRepositoryGateway users;
-  private final TenantReadRepositoryGateway tenants;
-  private final TenantConfigReadRepositoryGateway tenantConfigs;
+  private final UserQueryRepositoryGateway users;
+  private final TenantQueryRepositoryGateway tenants;
+  private final TenantConfigQueryRepositoryGateway tenantConfigs;
   private final ClientStoreGateway clients;
   private final MagicLinkGateway gateway;
   private final MagicLinkMailGateway mailer;
