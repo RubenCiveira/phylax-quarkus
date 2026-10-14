@@ -1,0 +1,10 @@
+root:
+  name: root
+  password: ${SAMPLE_ROOT_PASSWORD:}
+  attempts: 3
+client:
+  secret: classpath-secret
+
+"%dev":
+  root:
+    password: dev-password

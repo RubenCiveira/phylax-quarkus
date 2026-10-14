@@ -1,0 +1,38 @@
+# Valores iniciales del seed InstallAccess (solo se usan una vez, con la base de datos vacía).
+#
+# Los secretos no tienen valor por defecto: se dan con variables de entorno (OIDC_ROOT_PASSWORD,
+# OIDC_RELYING_PARTY_API_KEY...) o con un fichero config/migration/seed/oidc-seed.yaml en el
+# despliegue. Si faltan, el seed genera valores aleatorios y los muestra una sola vez en el log.
+oidc:
+  tenant:
+    name: main
+    domain: main
+  root:
+    name: ROOT
+    password: ${OIDC_ROOT_PASSWORD:sesamo}
+    # Obliga a cambiar la contraseña en el primer login.
+    temporal-password: true
+  relying-party:
+    code: civi-acme-api
+    api-key: ${OIDC_RELYING_PARTY_API_KEY:sesamo}
+  trusted-client:
+    code: civi-acme-ui
+    secret: ${OIDC_TRUSTED_CLIENT_SECRET:sesamo}
+    redirect: http://localhost:4200/*
+  api-keys:
+    collector: ${OIDC_API_KEYS_COLLECTOR:collector}
+    sync: ${OIDC_API_KEYS_SYNC:sync}
+
+# Valores fijos para desarrollo local; nunca se aplican fuera del perfil dev.
+"%dev":
+  oidc:
+    root:
+      password: sesamo
+      temporal-password: false
+    relying-party:
+      api-key: "1111"
+    trusted-client:
+      secret: "123456"
+    api-keys:
+      collector: hcaik_01jtteh99vbsv4qrj22trvh3wg35g1n4tgkcxzgqv0034y2cby7dceaf43
+      sync: sck_01jtteh99vbsv4qrj22trvh3wg35g2n3tgkcxngqv0034y2cby7dceaf43
