@@ -108,8 +108,8 @@ public class TenantConfigCreateController {
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());
-    tenantConfigApiDto.setWellcomeEmail(dto.getWellcomeEmail());
-    tenantConfigApiDto.setRegisterdEmail(dto.getRegisterdEmail());
+    tenantConfigApiDto.setWelcomeEmail(dto.getWelcomeEmail());
+    tenantConfigApiDto.setRegisteredEmail(dto.getRegisteredEmail());
     tenantConfigApiDto.setDisabledUserEmail(dto.getDisabledUserEmail());
     tenantConfigApiDto.setEnabledUserEmail(dto.getEnabledUserEmail());
     tenantConfigApiDto.setAllowRecoverPass(dto.getAllowRecoverPass());
@@ -174,11 +174,11 @@ public class TenantConfigCreateController {
     if (null != tenantConfigApiDto.getWebauthnRpName()) {
       dto.setWebauthnRpName(tenantConfigApiDto.getWebauthnRpName());
     }
-    if (null != tenantConfigApiDto.getWellcomeEmail()) {
-      dto.setWellcomeEmail(tenantConfigApiDto.getWellcomeEmail());
+    if (null != tenantConfigApiDto.getWelcomeEmail()) {
+      dto.setWelcomeEmail(tenantConfigApiDto.getWelcomeEmail());
     }
-    if (null != tenantConfigApiDto.getRegisterdEmail()) {
-      dto.setRegisterdEmail(tenantConfigApiDto.getRegisterdEmail());
+    if (null != tenantConfigApiDto.getRegisteredEmail()) {
+      dto.setRegisteredEmail(tenantConfigApiDto.getRegisteredEmail());
     }
     if (null != tenantConfigApiDto.getDisabledUserEmail()) {
       dto.setDisabledUserEmail(tenantConfigApiDto.getDisabledUserEmail());

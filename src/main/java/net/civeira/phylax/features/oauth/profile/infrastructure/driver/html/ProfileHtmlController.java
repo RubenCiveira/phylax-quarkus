@@ -30,9 +30,9 @@ import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseQueryRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.UserAcceptedTermsOfUse;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseFilter;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
@@ -76,7 +76,7 @@ public class ProfileHtmlController {
   private final RecoveryCodesPanel recoveryCodesPanel;
   private final ScopesConsentGateway scopesConsentGateway;
   private final ConsentedScopesPanel consentedScopesPanel;
-  private final UserAcceptedTermnsOfUseQueryRepositoryGateway acceptedTermsGateway;
+  private final UserAcceptedTermsOfUseQueryRepositoryGateway acceptedTermsGateway;
   private final TenantTermsOfUseQueryRepositoryGateway termsGateway;
   private final PasskeysPanel passkeysPanel;
   private final GdprService gdprService;
@@ -336,8 +336,8 @@ public class ProfileHtmlController {
   }
 
   private List<AcceptedTermsSummary> loadAcceptedTerms(String userUid) {
-    List<UserAcceptedTermnsOfUse> accepted = acceptedTermsGateway
-        .list(UserAcceptedTermnsOfUseFilter.builder().user(UserReference.of(userUid)).build());
+    List<UserAcceptedTermsOfUse> accepted = acceptedTermsGateway
+        .list(UserAcceptedTermsOfUseFilter.builder().user(UserReference.of(userUid)).build());
     return accepted.stream().map(a -> {
       Optional<TenantTermsOfUse> terms =
           termsGateway.retrieve(a.getConditionsUid(), Optional.empty());

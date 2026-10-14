@@ -57,25 +57,25 @@ class UserInvitationFilterUnitTest {
     filter.setInvitedBy(UserReference.of("$ref"));
     Assertions.assertEquals(UserReference.of("$ref"), filter.getInvitedBy().get(),
         "InvitedBy must be the same as the assigned");
-    Assertions.assertTrue(filter.getInvitedBys().isEmpty(),
-        "InvitedBys must be empty if filter is build without it");
-    filter.setInvitedBys(List.of("one"));
-    Assertions.assertEquals(List.of("one"), filter.getInvitedBys(),
-        "InvitedBys must be the same as the assigned");
+    Assertions.assertTrue(filter.getInvitedBies().isEmpty(),
+        "InvitedBies must be empty if filter is build without it");
+    filter.setInvitedBies(List.of("one"));
+    Assertions.assertEquals(List.of("one"), filter.getInvitedBies(),
+        "InvitedBies must be the same as the assigned");
     Assertions.assertFalse(filter.getAcceptedBy().isPresent(),
         "AcceptedBy must be empty if filter is build without it");
     filter.setAcceptedBy(UserReference.of("$ref"));
     Assertions.assertEquals(UserReference.of("$ref"), filter.getAcceptedBy().get(),
         "AcceptedBy must be the same as the assigned");
-    Assertions.assertTrue(filter.getAcceptedBys().isEmpty(),
-        "AcceptedBys must be empty if filter is build without it");
-    filter.setAcceptedBys(List.of("one"));
-    Assertions.assertEquals(List.of("one"), filter.getAcceptedBys(),
-        "AcceptedBys must be the same as the assigned");
-    Assertions.assertFalse(filter.getTenantAccesible().isPresent(),
-        "TenantAccesible must be empty if filter is build without it");
-    filter.setTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getTenantAccesible().get(),
-        "TenantAccesible must be the same as the assigned");
+    Assertions.assertTrue(filter.getAcceptedBies().isEmpty(),
+        "AcceptedBies must be empty if filter is build without it");
+    filter.setAcceptedBies(List.of("one"));
+    Assertions.assertEquals(List.of("one"), filter.getAcceptedBies(),
+        "AcceptedBies must be the same as the assigned");
+    Assertions.assertFalse(filter.getTenantAccessible().isPresent(),
+        "TenantAccessible must be empty if filter is build without it");
+    filter.setTenantAccessible("one");
+    Assertions.assertEquals("one", filter.getTenantAccessible().get(),
+        "TenantAccessible must be the same as the assigned");
   }
 }

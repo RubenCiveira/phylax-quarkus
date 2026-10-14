@@ -55,12 +55,12 @@ class BatchServiceUnitTest {
         return null;
       });
 
-      BatchIdentificator identificator = service.start("user1", Duration.ofMinutes(5), plan);
+      BatchIdentifier identifier = service.start("user1", Duration.ofMinutes(5), plan);
 
-      assertNotNull(identificator.getUid());
-      assertEquals(List.of("step1"), identificator.getSteps());
-      verify(storage, atLeastOnce()).save(eq(identificator.getUid()), eq("user1"), any());
-      verify(storage).finish(eq(identificator.getUid()), any(), eq("user1"));
+      assertNotNull(identifier.getUid());
+      assertEquals(List.of("step1"), identifier.getSteps());
+      verify(storage, atLeastOnce()).save(eq(identifier.getUid()), eq("user1"), any());
+      verify(storage).finish(eq(identifier.getUid()), any(), eq("user1"));
     }
 
     @Test
@@ -77,11 +77,11 @@ class BatchServiceUnitTest {
         return null;
       });
 
-      BatchIdentificator identificator = service.start("user1", Duration.ofSeconds(1), plan);
+      BatchIdentifier identifier = service.start("user1", Duration.ofSeconds(1), plan);
 
-      assertNotNull(identificator);
-      verify(storage, atLeastOnce()).save(eq(identificator.getUid()), eq("user1"), any());
-      verify(storage).finish(eq(identificator.getUid()), any(), eq("user1"));
+      assertNotNull(identifier);
+      verify(storage, atLeastOnce()).save(eq(identifier.getUid()), eq("user1"), any());
+      verify(storage).finish(eq(identifier.getUid()), any(), eq("user1"));
     }
 
     @Test
@@ -102,7 +102,7 @@ class BatchServiceUnitTest {
         return null;
       });
 
-      BatchIdentificator id = service.start("actor", Duration.ofMinutes(1), step1, step2, step3);
+      BatchIdentifier id = service.start("actor", Duration.ofMinutes(1), step1, step2, step3);
 
       assertEquals(List.of("step-a", "step-b", "step-c"), executionOrder,
           "Steps must execute in the declared order");
@@ -125,7 +125,7 @@ class BatchServiceUnitTest {
         return null;
       });
 
-      BatchIdentificator id = service.start("actor", Duration.ofSeconds(30), failing, following);
+      BatchIdentifier id = service.start("actor", Duration.ofSeconds(30), failing, following);
 
       verify(storage).finish(eq(id.getUid()), any(), eq("actor"));
     }
@@ -148,7 +148,7 @@ class BatchServiceUnitTest {
         return null;
       });
 
-      BatchIdentificator id = localService.start("actor42", Duration.ofMinutes(1), plan);
+      BatchIdentifier id = localService.start("actor42", Duration.ofMinutes(1), plan);
 
       ArgumentCaptor<BatchStepProgress> progressCaptor =
           ArgumentCaptor.forClass(BatchStepProgress.class);

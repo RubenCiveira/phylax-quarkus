@@ -36,10 +36,10 @@ import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembershipChangeSet;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipCommandRepositoryGateway;
-import net.civeira.phylax.features.access.userroleassignament.domain.Roles;
-import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
-import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignamentChangeSet;
-import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentCommandRepositoryGateway;
+import net.civeira.phylax.features.access.userroleassignment.domain.Roles;
+import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssignment;
+import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssignmentChangeSet;
+import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentCommandRepositoryGateway;
 
 @Slf4j
 @ApplicationScoped
@@ -72,7 +72,7 @@ public class InstallAccess implements MigrationSeed {
   private final TenantCommandRepositoryGateway tenants;
   private final TrustedClientCommandRepositoryGateway clients;
   private final RelyingPartyCommandRepositoryGateway parties;
-  private final UserRoleAssignamentCommandRepositoryGateway rolesAssignament;
+  private final UserRoleAssignmentCommandRepositoryGateway rolesAssignment;
   private final UserGroupMembershipCommandRepositoryGateway groupsMembership;
   private final ApiKeyClientCommandRepositoryGateway apiKeys;
   private final IsolatedConfigLoader configs;
@@ -131,17 +131,17 @@ public class InstallAccess implements MigrationSeed {
     groupsMembership.create(UserGroupMembership.create(userClientGroups));
 
 
-    UserRoleAssignamentChangeSet adminAssign = new UserRoleAssignamentChangeSet().newUid()
+    UserRoleAssignmentChangeSet adminAssign = new UserRoleAssignmentChangeSet().newUid()
         .user(createdRoot).roles(List.of(Roles.builder().newUid().role(createdAdminRole).build()));
-    rolesAssignament.create(UserRoleAssignament.create(adminAssign));
+    rolesAssignment.create(UserRoleAssignment.create(adminAssign));
 
-    UserRoleAssignamentChangeSet rootAssign = new UserRoleAssignamentChangeSet().newUid()
+    UserRoleAssignmentChangeSet rootAssign = new UserRoleAssignmentChangeSet().newUid()
         .user(createdRoot).roles(List.of(Roles.builder().newUid().role(createdRootRole).build()));
-    rolesAssignament.create(UserRoleAssignament.create(rootAssign));
+    rolesAssignment.create(UserRoleAssignment.create(rootAssign));
 
-    UserRoleAssignamentChangeSet iamAssign = new UserRoleAssignamentChangeSet().newUid()
+    UserRoleAssignmentChangeSet iamAssign = new UserRoleAssignmentChangeSet().newUid()
         .user(createdRoot).roles(List.of(Roles.builder().newUid().role(createdIamRole).build()));
-    rolesAssignament.create(UserRoleAssignament.create(iamAssign));
+    rolesAssignment.create(UserRoleAssignment.create(iamAssign));
 
     ApiKeyClientChangeSet collectorApiKey =
         new ApiKeyClientChangeSet().newUid().code("Initial collector")

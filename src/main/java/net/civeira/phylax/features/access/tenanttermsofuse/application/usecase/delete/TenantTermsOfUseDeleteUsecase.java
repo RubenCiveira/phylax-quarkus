@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class TenantTermsOfUseDeleteUsecase {
    * @return The slide with some values
    */
   @Observed("Deleting a set of entities of tenant terms of use")
-  public BatchIdentificator batchDelete(final OperationContext context,
+  public BatchIdentifier batchDelete(final OperationContext context,
       final TenantTermsOfUseDeleteFilter filter) {
     Permission permission = checkPermission(context);
     if (!permission.isAllowed()) {
@@ -112,8 +112,8 @@ public class TenantTermsOfUseDeleteUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).tenant(filter.getTenant().orElse(null))
         .tenants(filter.getTenants()).relyingParty(filter.getRelyingParty().orElse(null))
-        .relyingPartys(filter.getRelyingPartys())
-        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+        .relyingParties(filter.getRelyingParties())
+        .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TenantTermsOfUseDeleteAllInBatchCommand command =
         new TenantTermsOfUseDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

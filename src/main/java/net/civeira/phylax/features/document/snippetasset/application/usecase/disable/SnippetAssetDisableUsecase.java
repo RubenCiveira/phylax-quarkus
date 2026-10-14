@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class SnippetAssetDisableUsecase {
    * @return The slide with some values
    */
   @Observed("disable a set of entity of snippet asset")
-  public BatchIdentificator batchDisable(final OperationContext context,
+  public BatchIdentifier batchDisable(final OperationContext context,
       final SnippetAssetDisableFilter filter) {
     Permission detail = checkPermission(context);
     if (!detail.isAllowed()) {
@@ -112,7 +112,7 @@ public class SnippetAssetDisableUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .snippet(filter.getSnippet().orElse(null)).snippets(filter.getSnippets())
-        .snippetTenantAccesible(filter.getSnippetTenantAccesible().orElse(null)).build();
+        .snippetTenantAccessible(filter.getSnippetTenantAccessible().orElse(null)).build();
     SnippetAssetDisableAllInBatchCommand command =
         new SnippetAssetDisableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

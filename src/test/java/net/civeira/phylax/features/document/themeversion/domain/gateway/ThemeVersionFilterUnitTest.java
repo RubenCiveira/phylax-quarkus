@@ -41,10 +41,10 @@ class ThemeVersionFilterUnitTest {
     filter.setThemes(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getThemes(),
         "Themes must be the same as the assigned");
-    Assertions.assertFalse(filter.getThemeTenantAccesible().isPresent(),
-        "ThemeTenantAccesible must be empty if filter is build without it");
-    filter.setThemeTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getThemeTenantAccesible().get(),
-        "ThemeTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getThemeTenantAccessible().isPresent(),
+        "ThemeTenantAccessible must be empty if filter is build without it");
+    filter.setThemeTenantAccessible("one");
+    Assertions.assertEquals("one", filter.getThemeTenantAccessible().get(),
+        "ThemeTenantAccessible must be the same as the assigned");
   }
 }

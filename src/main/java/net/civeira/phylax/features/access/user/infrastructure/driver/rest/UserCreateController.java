@@ -97,7 +97,7 @@ public class UserCreateController {
     userApiDto.setName(dto.getName());
     userApiDto.setPassword("*****");
     userApiDto.setEmail(dto.getEmail());
-    userApiDto.setWellcomeAt(dto.getWellcomeAt());
+    userApiDto.setWelcomeAt(dto.getWelcomeAt());
     userApiDto.setEmailVerified(dto.getEmailVerified());
     userApiDto.setEnabled(dto.getEnabled());
     userApiDto.setApprove(approveEnumToApi(dto.getApprove()));
@@ -132,8 +132,8 @@ public class UserCreateController {
     if (null != userApiDto.getEmail()) {
       dto.setEmail(userApiDto.getEmail());
     }
-    if (null != userApiDto.getWellcomeAt()) {
-      dto.setWellcomeAt(userApiDto.getWellcomeAt());
+    if (null != userApiDto.getWelcomeAt()) {
+      dto.setWelcomeAt(userApiDto.getWelcomeAt());
     }
     if (null != userApiDto.getEmailVerified()) {
       dto.setEmailVerified(userApiDto.getEmailVerified());

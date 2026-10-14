@@ -74,17 +74,17 @@ public class UserRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("name")
         .description("The user name to identify on the login screen").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("password")
-        .description("If the user is not delegated, the phrasse to identify").build());
+        .description("If the user is not delegated, the phrase to identify").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("email")
         .description("An optional email used to send notifications to the user").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("wellcomeAt")
-        .description("The date when a wellcome email is send").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("welcomeAt")
+        .description("The date when a welcome email is sent").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("emailVerified").description(
             "Indicates whether the user has confirmed ownership of their email address by clicking the verification link sent at registration. Used by the OIDC flow to emit the email_verified claim and optionally block login until confirmed.")
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled").description(
-        "A disabled user cant login on the system. On his login attempts, he will recive a specific warn of his disabled account.")
+        "A disabled user cant login on the system. On his login attempts, he will receive a specific warn of his disabled account.")
         .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("approve").description("El approve de user").build());
@@ -96,7 +96,7 @@ public class UserRbacRegister {
         .description("the seed used to the otp login").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("blockedUntil").description(
-            "A bloqued user cant login on the system, until these date. On his login attempst, hue will recive a generic not allowed message.")
+            "A blocked user cant login on the system, until these date. On his login attempts, the user will receive a generic not allowed message.")
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("provider").description(
         "Si se identificó con un proveedor, se marca con cual (aunque el provvedor cambie luego)")

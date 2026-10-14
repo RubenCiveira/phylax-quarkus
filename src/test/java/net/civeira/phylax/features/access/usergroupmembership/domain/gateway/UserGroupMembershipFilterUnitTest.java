@@ -53,11 +53,11 @@ class UserGroupMembershipFilterUnitTest {
     filter.setRelyingParty(RelyingPartyReference.of("$ref"));
     Assertions.assertEquals(RelyingPartyReference.of("$ref"), filter.getRelyingParty().get(),
         "RelyingParty must be the same as the assigned");
-    Assertions.assertTrue(filter.getRelyingPartys().isEmpty(),
-        "RelyingPartys must be empty if filter is build without it");
-    filter.setRelyingPartys(List.of("one"));
-    Assertions.assertEquals(List.of("one"), filter.getRelyingPartys(),
-        "RelyingPartys must be the same as the assigned");
+    Assertions.assertTrue(filter.getRelyingParties().isEmpty(),
+        "RelyingParties must be empty if filter is build without it");
+    filter.setRelyingParties(List.of("one"));
+    Assertions.assertEquals(List.of("one"), filter.getRelyingParties(),
+        "RelyingParties must be the same as the assigned");
     Assertions.assertFalse(filter.getTrustedClient().isPresent(),
         "TrustedClient must be empty if filter is build without it");
     filter.setTrustedClient(TrustedClientReference.of("$ref"));
@@ -68,10 +68,10 @@ class UserGroupMembershipFilterUnitTest {
     filter.setTrustedClients(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getTrustedClients(),
         "TrustedClients must be the same as the assigned");
-    Assertions.assertFalse(filter.getUserTenantAccesible().isPresent(),
-        "UserTenantAccesible must be empty if filter is build without it");
-    filter.setUserTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getUserTenantAccesible().get(),
-        "UserTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getUserTenantAccessible().isPresent(),
+        "UserTenantAccessible must be empty if filter is build without it");
+    filter.setUserTenantAccessible("one");
+    Assertions.assertEquals("one", filter.getUserTenantAccessible().get(),
+        "UserTenantAccessible must be the same as the assigned");
   }
 }

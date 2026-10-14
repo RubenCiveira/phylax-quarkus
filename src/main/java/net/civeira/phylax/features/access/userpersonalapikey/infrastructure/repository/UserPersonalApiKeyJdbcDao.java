@@ -616,13 +616,13 @@ public class UserPersonalApiKeyJdbcDao {
         userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
     filter.getName()
         .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
-    filter.getOnlySelfAccesibles().ifPresent(onlySelfAccesiblesParam -> sq.where(USER,
-        SqlOperator.EQ, SqlParameterValue.of(onlySelfAccesiblesParam)));
-    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
+    filter.getOnlySelfAccessibles().ifPresent(onlySelfAccessiblesParam -> sq.where(USER,
+        SqlOperator.EQ, SqlParameterValue.of(onlySelfAccessiblesParam)));
+    filter.getUserTenantAccessible().ifPresent(userTenantAccessibleParam -> {
       sq.join("access_user", "access_user_personal_api_key_user",
           "access_user_personal_api_key.user", "access_user_personal_api_key_user.uid");
       sq.where(ACCESS_USER_PERSONAL_API_KEY_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccessibleParam));
     });
     return sq;
   }

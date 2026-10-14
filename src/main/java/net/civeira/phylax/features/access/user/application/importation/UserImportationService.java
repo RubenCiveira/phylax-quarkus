@@ -20,7 +20,7 @@ import net.civeira.phylax.features.access.user.domain.valueobject.EmailVerifiedV
 import net.civeira.phylax.features.access.user.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.TemporalPasswordVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.UseSecondFactorsVO;
-import net.civeira.phylax.features.access.user.domain.valueobject.WellcomeAtVO;
+import net.civeira.phylax.features.access.user.domain.valueobject.WelcomeAtVO;
 
 @RequiredArgsConstructor
 public class UserImportationService {
@@ -87,7 +87,7 @@ public class UserImportationService {
     change = readName(change, row, fails, resolver);
     change = readPassword(change, row, fails, resolver);
     change = readEmail(change, row, fails, resolver);
-    change = readWellcomeAt(change, row, fails, resolver);
+    change = readWelcomeAt(change, row, fails, resolver);
     change = readEmailVerified(change, row, fails, resolver);
     change = readEnabled(change, row, fails, resolver);
     change = readApprove(change, row, fails, resolver);
@@ -338,13 +338,13 @@ public class UserImportationService {
    * @param resolver
    * @return
    */
-  private UserChangeSet readWellcomeAt(final UserChangeSet change, final Map<String, String> row,
+  private UserChangeSet readWelcomeAt(final UserChangeSet change, final Map<String, String> row,
       final ConstraintFailList fails, final UserImportationRelatedResolver resolver) {
-    String wellcomeAt = row.get("wellcomeAt");
-    if (wellcomeAt != null) {
-      return change.wellcomeAt(WellcomeAtVO.tryFromString(wellcomeAt, fails));
+    String welcomeAt = row.get("welcomeAt");
+    if (welcomeAt != null) {
+      return change.welcomeAt(WelcomeAtVO.tryFromString(welcomeAt, fails));
     } else {
-      return change.unsetWellcomeAt();
+      return change.unsetWelcomeAt();
     }
   }
 }

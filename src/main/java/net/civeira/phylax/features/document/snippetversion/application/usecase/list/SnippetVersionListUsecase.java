@@ -65,7 +65,7 @@ public class SnippetVersionListUsecase {
         SnippetVersionVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .snippet(filter.getSnippet().orElse(null)).snippets(filter.getSnippets())
-            .snippetTenantAccesible(filter.getSnippetTenantAccesible().orElse(null)).build();
+            .snippetTenantAccessible(filter.getSnippetTenantAccessible().orElse(null)).build();
     SnippetVersionCursor gatewayCursor = SnippetVersionCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     SnippetVersionCached values =

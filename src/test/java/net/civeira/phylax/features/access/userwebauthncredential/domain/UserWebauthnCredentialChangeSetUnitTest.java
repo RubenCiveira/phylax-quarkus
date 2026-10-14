@@ -18,8 +18,8 @@ class UserWebauthnCredentialChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_user_webauthn_credential_change_set_builder() {
     UserWebauthnCredentialChangeSet one = new UserWebauthnCredentialChangeSet().uid("one")
-        .user(UserReference.of("one")).autenticator("one").name("one").publicKey("one").signCount(1)
-        .aaguid("one").deviceName("one").transportsJson("one")
+        .user(UserReference.of("one")).authenticator("one").name("one").publicKey("one")
+        .signCount(1).aaguid("one").deviceName("one").transportsJson("one")
         .createdAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
             .toOffsetDateTime())
         .lastUsedAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
@@ -36,13 +36,13 @@ class UserWebauthnCredentialChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("user");
     Assertions.assertFalse(one.getUser().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getAutenticator().get(),
+    Assertions.assertEquals("one", one.getAuthenticator().get(),
         "Value must equals to the intial value");
-    one.autenticator("two");
-    Assertions.assertEquals("two", one.getAutenticator().get(),
+    one.authenticator("two");
+    Assertions.assertEquals("two", one.getAuthenticator().get(),
         "Value must equals to the assigned value");
-    one.unset("autenticator");
-    Assertions.assertFalse(one.getAutenticator().isPresent(),
+    one.unset("authenticator");
+    Assertions.assertFalse(one.getAuthenticator().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getName().get(), "Value must equals to the intial value");
     one.name("two");

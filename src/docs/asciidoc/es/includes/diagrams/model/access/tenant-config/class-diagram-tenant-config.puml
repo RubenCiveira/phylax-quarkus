@@ -35,8 +35,8 @@ refreshTokenTtlSeconds:integer
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
-wellcomeEmail:blob
-registerdEmail:blob
+welcomeEmail:blob
+registeredEmail:blob
 disabledUserEmail:blob
 enabledUserEmail:blob
 allowRecoverPass:boolean

@@ -39,14 +39,6 @@ tags:
     description: Audit operations for changes on snippet
   - name: snippet-acl
     description: Access control for snippet
-  - name: user-role-assignament
-    description: user-role-assignament
-  - name: user-role-assignament-batch
-    description: Massive operations for user role assignament
-  - name: user-role-assignament-audit
-    description: Audit operations for changes on user role assignament
-  - name: user-role-assignament-acl
-    description: Access control for user role assignament
   - name: role
     description: role
   - name: role-batch
@@ -183,6 +175,14 @@ tags:
     description: Audit operations for changes on tenant config
   - name: tenant-config-acl
     description: Access control for tenant config
+  - name: user-role-assignment
+    description: user-role-assignment
+  - name: user-role-assignment-batch
+    description: Massive operations for user role assignment
+  - name: user-role-assignment-audit
+    description: Audit operations for changes on user role assignment
+  - name: user-role-assignment-acl
+    description: Access control for user role assignment
   - name: consent-purpose
     description: consent-purpose
   - name: consent-purpose-batch
@@ -278,13 +278,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -328,7 +328,7 @@ paths:
     delete:
       tags:
         - template-batch
-      summary: Delete a colection of template by filter
+      summary: Delete a collection of template by filter
       operationId: template-api-batch-delete
       parameters:
         - name: uids
@@ -381,12 +381,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template/{uid}:
     get:
       tags:
         - template
-      summary: Retrive on  template by their uid
+      summary: Retrieve on  template by their uid
       operationId: template-api-retrieve
       parameters:
         - name: uid
@@ -615,7 +615,7 @@ paths:
     patch:
       tags:
         - template-batch
-      summary: enable a colection of template by filter
+      summary: enable a collection of template by filter
       operationId: template-api-batch-enable
       parameters:
         - name: uids
@@ -668,7 +668,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template/~/enable-status/{uid}:
     get:
       tags:
@@ -695,7 +695,7 @@ paths:
     patch:
       tags:
         - template-batch
-      summary: disable a colection of template by filter
+      summary: disable a collection of template by filter
       operationId: template-api-batch-disable
       parameters:
         - name: uids
@@ -748,7 +748,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template/~/disable-status/{uid}:
     get:
       tags:
@@ -824,13 +824,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -874,7 +874,7 @@ paths:
     delete:
       tags:
         - snippet-batch
-      summary: Delete a colection of snippet by filter
+      summary: Delete a collection of snippet by filter
       operationId: snippet-api-batch-delete
       parameters:
         - name: uids
@@ -927,12 +927,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/snippet/{uid}:
     get:
       tags:
         - snippet
-      summary: Retrive on  snippet by their uid
+      summary: Retrieve on  snippet by their uid
       operationId: snippet-api-retrieve
       parameters:
         - name: uid
@@ -1161,7 +1161,7 @@ paths:
     patch:
       tags:
         - snippet-batch
-      summary: enable a colection of snippet by filter
+      summary: enable a collection of snippet by filter
       operationId: snippet-api-batch-enable
       parameters:
         - name: uids
@@ -1214,7 +1214,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/snippet/~/enable-status/{uid}:
     get:
       tags:
@@ -1241,7 +1241,7 @@ paths:
     patch:
       tags:
         - snippet-batch
-      summary: disable a colection of snippet by filter
+      summary: disable a collection of snippet by filter
       operationId: snippet-api-batch-disable
       parameters:
         - name: uids
@@ -1294,7 +1294,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/snippet/~/disable-status/{uid}:
     get:
       tags:
@@ -1315,376 +1315,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/user-role-assignament:
-    get:
-      tags:
-        - user-role-assignament
-      summary: List of user role assignament
-      operationId: user-role-assignament-api-list
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: limit
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximun number of results
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRoleAssignamentApiDtoList'
-    post:
-      tags:
-        - user-role-assignament
-      summary: Create a new user role assignament
-      operationId: user-role-assignament-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRoleAssignamentApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRoleAssignamentApiDto'
-    delete:
-      tags:
-        - user-role-assignament-batch
-      summary: Delete a colection of user role assignament by filter
-      operationId: user-role-assignament-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: user
-          in: query
-          description: user
-          required: false
-          schema:
-            type: string
-        - name: users
-          in: query
-          description: users
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: relying-party
-          in: query
-          description: relying party
-          required: false
-          schema:
-            type: string
-        - name: relying-partys
-          in: query
-          description: relying partys
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: trusted-client
-          in: query
-          description: trusted client
-          required: false
-          schema:
-            type: string
-        - name: trusted-clients
-          in: query
-          description: trusted clients
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
-  /api/access/user-role-assignament/{uid}:
-    get:
-      tags:
-        - user-role-assignament
-      summary: Retrive on  user role assignament by their uid
-      operationId: user-role-assignament-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRoleAssignamentApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - user-role-assignament
-      summary: Update a user role assignament by their uid
-      operationId: user-role-assignament-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRoleAssignamentApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRoleAssignamentApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - user-role-assignament
-      summary: Delete a  user role assignament by their uid
-      operationId: user-role-assignament-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/user-role-assignament/~/delete-status/{uid}:
-    get:
-      tags:
-        - user-role-assignament-batch
-      summary: Query the result of an massive delete
-      operationId: user-role-assignament-api-batch-delete-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/user-role-assignament/-/audit/entity/{uid}:
-    get:
-      tags:
-        - user-role-assignament-audit
-      summary: Update a user role assignament by their uid
-      operationId: user-role-assignament-api-entity-audit
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/user-role-assignament/-/audit/actor/{actor}/{from}/{to}:
-    get:
-      tags:
-        - user-role-assignament-audit
-      summary: Update a user role assignament by their uid
-      operationId: user-role-assignament-api-actor-audit
-      parameters:
-        - name: actor
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-        - name: from
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/me/acl/access/user-role-assignament:
-    get:
-      tags:
-        - user-role-assignament-acl
-      summary: Check for allow permissions for the current user on user role assignament
-      operationId: user-role-assignament-api-generic-acl
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRoleAssignamentGenericAcl'
-  /api/me/acl/access/user-role-assignament/{uid}:
-    get:
-      tags:
-        - user-role-assignament-acl
-      summary: Check for allow permissions for the current user on user role assignament by their uid
-      operationId: user-role-assignament-api-contextual-acl
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRoleAssignamentSpecificAcl'
         '404':
           description: The item dont exists
   /api/access/roles:
@@ -1722,9 +1352,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -1734,13 +1364,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -1784,7 +1414,7 @@ paths:
     delete:
       tags:
         - role-batch
-      summary: Delete a colection of role by filter
+      summary: Delete a collection of role by filter
       operationId: role-api-batch-delete
       parameters:
         - name: uids
@@ -1815,9 +1445,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -1831,12 +1461,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/roles/{uid}:
     get:
       tags:
         - role
-      summary: Retrive on  role by their uid
+      summary: Retrieve on  role by their uid
       operationId: role-api-retrieve
       parameters:
         - name: uid
@@ -2062,9 +1692,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -2090,13 +1720,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -2128,7 +1758,7 @@ paths:
     delete:
       tags:
         - user-group-membership-batch
-      summary: Delete a colection of user group membership by filter
+      summary: Delete a collection of user group membership by filter
       operationId: user-group-membership-api-batch-delete
       parameters:
         - name: uids
@@ -2169,9 +1799,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -2201,12 +1831,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/user-group-membership/{uid}:
     get:
       tags:
         - user-group-membership
-      summary: Retrive on  user group membership by their uid
+      summary: Retrieve on  user group membership by their uid
       operationId: user-group-membership-api-retrieve
       parameters:
         - name: uid
@@ -2428,13 +2058,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -2466,7 +2096,7 @@ paths:
     delete:
       tags:
         - theme-version-batch
-      summary: Delete a colection of theme version by filter
+      summary: Delete a collection of theme version by filter
       operationId: theme-version-api-batch-delete
       parameters:
         - name: uids
@@ -2507,12 +2137,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/theme-versions/{uid}:
     get:
       tags:
         - theme-version
-      summary: Retrive on  theme version by their uid
+      summary: Retrieve on  theme version by their uid
       operationId: theme-version-api-retrieve
       parameters:
         - name: uid
@@ -2730,13 +2360,13 @@ paths:
             type: string
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -2780,7 +2410,7 @@ paths:
     delete:
       tags:
         - relying-party-batch
-      summary: Delete a colection of relying party by filter
+      summary: Delete a collection of relying party by filter
       operationId: relying-party-api-batch-delete
       parameters:
         - name: uids
@@ -2817,12 +2447,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/relying-parties/{uid}:
     get:
       tags:
         - relying-party
-      summary: Retrive on  relying party by their uid
+      summary: Retrieve on  relying party by their uid
       operationId: relying-party-api-retrieve
       parameters:
         - name: uid
@@ -3051,7 +2681,7 @@ paths:
     patch:
       tags:
         - relying-party-batch
-      summary: enable a colection of relying party by filter
+      summary: enable a collection of relying party by filter
       operationId: relying-party-api-batch-enable
       parameters:
         - name: uids
@@ -3088,7 +2718,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/relying-parties/~/enable-status/{uid}:
     get:
       tags:
@@ -3115,7 +2745,7 @@ paths:
     patch:
       tags:
         - relying-party-batch
-      summary: disable a colection of relying party by filter
+      summary: disable a collection of relying party by filter
       operationId: relying-party-api-batch-disable
       parameters:
         - name: uids
@@ -3152,7 +2782,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/relying-parties/~/disable-status/{uid}:
     get:
       tags:
@@ -3216,13 +2846,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -3254,7 +2884,7 @@ paths:
     delete:
       tags:
         - snippet-version-batch
-      summary: Delete a colection of snippet version by filter
+      summary: Delete a collection of snippet version by filter
       operationId: snippet-version-api-batch-delete
       parameters:
         - name: uids
@@ -3295,12 +2925,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/snippet-versions/{uid}:
     get:
       tags:
         - snippet-version
-      summary: Retrive on  snippet version by their uid
+      summary: Retrieve on  snippet version by their uid
       operationId: snippet-version-api-retrieve
       parameters:
         - name: uid
@@ -3522,13 +3152,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -3560,7 +3190,7 @@ paths:
     delete:
       tags:
         - template-version-batch
-      summary: Delete a colection of template version by filter
+      summary: Delete a collection of template version by filter
       operationId: template-version-api-batch-delete
       parameters:
         - name: uids
@@ -3601,12 +3231,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template-versions/{uid}:
     get:
       tags:
         - template-version
-      summary: Retrive on  template version by their uid
+      summary: Retrieve on  template version by their uid
       operationId: template-version-api-retrieve
       parameters:
         - name: uid
@@ -3834,13 +3464,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -3884,7 +3514,7 @@ paths:
     delete:
       tags:
         - snippet-asset-batch
-      summary: Delete a colection of snippet asset by filter
+      summary: Delete a collection of snippet asset by filter
       operationId: snippet-asset-api-batch-delete
       parameters:
         - name: uids
@@ -3931,12 +3561,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/snippet-asset/{uid}:
     get:
       tags:
         - snippet-asset
-      summary: Retrive on  snippet asset by their uid
+      summary: Retrieve on  snippet asset by their uid
       operationId: snippet-asset-api-retrieve
       parameters:
         - name: uid
@@ -4239,7 +3869,7 @@ paths:
     patch:
       tags:
         - snippet-asset-batch
-      summary: enable a colection of snippet asset by filter
+      summary: enable a collection of snippet asset by filter
       operationId: snippet-asset-api-batch-enable
       parameters:
         - name: uids
@@ -4286,7 +3916,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/snippet-asset/~/enable-status/{uid}:
     get:
       tags:
@@ -4313,7 +3943,7 @@ paths:
     patch:
       tags:
         - snippet-asset-batch
-      summary: disable a colection of snippet asset by filter
+      summary: disable a collection of snippet asset by filter
       operationId: snippet-asset-api-batch-disable
       parameters:
         - name: uids
@@ -4360,7 +3990,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/snippet-asset/~/disable-status/{uid}:
     get:
       tags:
@@ -4414,13 +4044,13 @@ paths:
             type: string
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -4452,7 +4082,7 @@ paths:
     delete:
       tags:
         - api-key-client-batch
-      summary: Delete a colection of api key client by filter
+      summary: Delete a collection of api key client by filter
       operationId: api-key-client-api-batch-delete
       parameters:
         - name: uids
@@ -4483,12 +4113,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/api-key-clients/{uid}:
     get:
       tags:
         - api-key-client
-      summary: Retrive on  api key client by their uid
+      summary: Retrieve on  api key client by their uid
       operationId: api-key-client-api-retrieve
       parameters:
         - name: uid
@@ -4717,7 +4347,7 @@ paths:
     patch:
       tags:
         - api-key-client-batch
-      summary: enable a colection of api key client by filter
+      summary: enable a collection of api key client by filter
       operationId: api-key-client-api-batch-enable
       parameters:
         - name: uids
@@ -4748,7 +4378,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/api-key-clients/~/enable-status/{uid}:
     get:
       tags:
@@ -4775,7 +4405,7 @@ paths:
     patch:
       tags:
         - api-key-client-batch
-      summary: disable a colection of api key client by filter
+      summary: disable a collection of api key client by filter
       operationId: api-key-client-api-batch-disable
       parameters:
         - name: uids
@@ -4806,7 +4436,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/api-key-clients/~/disable-status/{uid}:
     get:
       tags:
@@ -4872,13 +4502,13 @@ paths:
             type: string
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -4922,7 +4552,7 @@ paths:
     delete:
       tags:
         - user-personal-api-key-batch
-      summary: Delete a colection of user personal api key by filter
+      summary: Delete a collection of user personal api key by filter
       operationId: user-personal-api-key-api-batch-delete
       parameters:
         - name: uids
@@ -4965,12 +4595,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/me/api-keys/{uid}:
     get:
       tags:
         - user-personal-api-key
-      summary: Retrive on  user personal api key by their uid
+      summary: Retrieve on  user personal api key by their uid
       operationId: user-personal-api-key-api-retrieve
       parameters:
         - name: uid
@@ -5177,7 +4807,7 @@ paths:
     patch:
       tags:
         - user-personal-api-key-batch
-      summary: revoke a colection of user personal api key by filter
+      summary: revoke a collection of user personal api key by filter
       operationId: user-personal-api-key-api-batch-revoke
       parameters:
         - name: uids
@@ -5220,7 +4850,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/me/api-keys/~/revoke-status/{uid}:
     get:
       tags:
@@ -5290,13 +4920,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -5340,7 +4970,7 @@ paths:
     delete:
       tags:
         - template-variable-batch
-      summary: Delete a colection of template variable by filter
+      summary: Delete a collection of template variable by filter
       operationId: template-variable-api-batch-delete
       parameters:
         - name: uids
@@ -5387,12 +5017,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template-variable/{uid}:
     get:
       tags:
         - template-variable
-      summary: Retrive on  template variable by their uid
+      summary: Retrieve on  template variable by their uid
       operationId: template-variable-api-retrieve
       parameters:
         - name: uid
@@ -5621,7 +5251,7 @@ paths:
     patch:
       tags:
         - template-variable-batch
-      summary: enable a colection of template variable by filter
+      summary: enable a collection of template variable by filter
       operationId: template-variable-api-batch-enable
       parameters:
         - name: uids
@@ -5668,7 +5298,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template-variable/~/enable-status/{uid}:
     get:
       tags:
@@ -5695,7 +5325,7 @@ paths:
     patch:
       tags:
         - template-variable-batch
-      summary: disable a colection of template variable by filter
+      summary: disable a collection of template variable by filter
       operationId: template-variable-api-batch-disable
       parameters:
         - name: uids
@@ -5742,7 +5372,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template-variable/~/disable-status/{uid}:
     get:
       tags:
@@ -5818,13 +5448,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -5868,7 +5498,7 @@ paths:
     delete:
       tags:
         - theme-batch
-      summary: Delete a colection of theme by filter
+      summary: Delete a collection of theme by filter
       operationId: theme-api-batch-delete
       parameters:
         - name: uids
@@ -5921,12 +5551,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/theme/{uid}:
     get:
       tags:
         - theme
-      summary: Retrive on  theme by their uid
+      summary: Retrieve on  theme by their uid
       operationId: theme-api-retrieve
       parameters:
         - name: uid
@@ -6155,7 +5785,7 @@ paths:
     patch:
       tags:
         - theme-batch
-      summary: enable a colection of theme by filter
+      summary: enable a collection of theme by filter
       operationId: theme-api-batch-enable
       parameters:
         - name: uids
@@ -6208,7 +5838,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/theme/~/enable-status/{uid}:
     get:
       tags:
@@ -6235,7 +5865,7 @@ paths:
     patch:
       tags:
         - theme-batch
-      summary: disable a colection of theme by filter
+      summary: disable a collection of theme by filter
       operationId: theme-api-batch-disable
       parameters:
         - name: uids
@@ -6288,7 +5918,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/theme/~/disable-status/{uid}:
     get:
       tags:
@@ -6374,13 +6004,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -6424,7 +6054,7 @@ paths:
     delete:
       tags:
         - template-asset-batch
-      summary: Delete a colection of template asset by filter
+      summary: Delete a collection of template asset by filter
       operationId: template-asset-api-batch-delete
       parameters:
         - name: uids
@@ -6487,12 +6117,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template-asset/{uid}:
     get:
       tags:
         - template-asset
-      summary: Retrive on  template asset by their uid
+      summary: Retrieve on  template asset by their uid
       operationId: template-asset-api-retrieve
       parameters:
         - name: uid
@@ -6795,7 +6425,7 @@ paths:
     patch:
       tags:
         - template-asset-batch
-      summary: enable a colection of template asset by filter
+      summary: enable a collection of template asset by filter
       operationId: template-asset-api-batch-enable
       parameters:
         - name: uids
@@ -6858,7 +6488,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template-asset/~/enable-status/{uid}:
     get:
       tags:
@@ -6885,7 +6515,7 @@ paths:
     patch:
       tags:
         - template-asset-batch
-      summary: disable a colection of template asset by filter
+      summary: disable a collection of template asset by filter
       operationId: template-asset-api-batch-disable
       parameters:
         - name: uids
@@ -6948,7 +6578,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/template-asset/~/disable-status/{uid}:
     get:
       tags:
@@ -7002,13 +6632,13 @@ paths:
             type: string
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -7058,7 +6688,7 @@ paths:
     delete:
       tags:
         - tenant-batch
-      summary: Delete a colection of tenant by filter
+      summary: Delete a collection of tenant by filter
       operationId: tenant-api-batch-delete
       parameters:
         - name: uids
@@ -7089,12 +6719,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/tenants/{uid}:
     get:
       tags:
         - tenant
-      summary: Retrive on  tenant by their uid
+      summary: Retrieve on  tenant by their uid
       operationId: tenant-api-retrieve
       parameters:
         - name: uid
@@ -7323,7 +6953,7 @@ paths:
     patch:
       tags:
         - tenant-batch
-      summary: enable a colection of tenant by filter
+      summary: enable a collection of tenant by filter
       operationId: tenant-api-batch-enable
       parameters:
         - name: uids
@@ -7354,7 +6984,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/tenants/~/enable-status/{uid}:
     get:
       tags:
@@ -7381,7 +7011,7 @@ paths:
     patch:
       tags:
         - tenant-batch
-      summary: disable a colection of tenant by filter
+      summary: disable a collection of tenant by filter
       operationId: tenant-api-batch-disable
       parameters:
         - name: uids
@@ -7412,7 +7042,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/tenants/~/disable-status/{uid}:
     get:
       tags:
@@ -7476,13 +7106,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -7514,7 +7144,7 @@ paths:
     delete:
       tags:
         - message-batch
-      summary: Delete a colection of message by filter
+      summary: Delete a collection of message by filter
       operationId: message-api-batch-delete
       parameters:
         - name: uids
@@ -7555,12 +7185,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/template/template/{uid}:
     get:
       tags:
         - message
-      summary: Retrive on  message by their uid
+      summary: Retrieve on  message by their uid
       operationId: message-api-retrieve
       parameters:
         - name: uid
@@ -7784,13 +7414,13 @@ paths:
             type: string
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -7834,7 +7464,7 @@ paths:
     delete:
       tags:
         - trusted-client-batch
-      summary: Delete a colection of trusted client by filter
+      summary: Delete a collection of trusted client by filter
       operationId: trusted-client-api-batch-delete
       parameters:
         - name: uids
@@ -7877,12 +7507,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/trusted-clients/{uid}:
     get:
       tags:
         - trusted-client
-      summary: Retrive on  trusted client by their uid
+      summary: Retrieve on  trusted client by their uid
       operationId: trusted-client-api-retrieve
       parameters:
         - name: uid
@@ -8111,7 +7741,7 @@ paths:
     patch:
       tags:
         - trusted-client-batch
-      summary: enable a colection of trusted client by filter
+      summary: enable a collection of trusted client by filter
       operationId: trusted-client-api-batch-enable
       parameters:
         - name: uids
@@ -8154,7 +7784,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/trusted-clients/~/enable-status/{uid}:
     get:
       tags:
@@ -8181,7 +7811,7 @@ paths:
     patch:
       tags:
         - trusted-client-batch
-      summary: disable a colection of trusted client by filter
+      summary: disable a collection of trusted client by filter
       operationId: trusted-client-api-batch-disable
       parameters:
         - name: uids
@@ -8224,7 +7854,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/trusted-clients/~/disable-status/{uid}:
     get:
       tags:
@@ -8294,13 +7924,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -8344,7 +7974,7 @@ paths:
     delete:
       tags:
         - theme-asset-batch
-      summary: Delete a colection of theme asset by filter
+      summary: Delete a collection of theme asset by filter
       operationId: theme-asset-api-batch-delete
       parameters:
         - name: uids
@@ -8391,12 +8021,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/theme-asset/{uid}:
     get:
       tags:
         - theme-asset
-      summary: Retrive on  theme asset by their uid
+      summary: Retrieve on  theme asset by their uid
       operationId: theme-asset-api-retrieve
       parameters:
         - name: uid
@@ -8699,7 +8329,7 @@ paths:
     patch:
       tags:
         - theme-asset-batch
-      summary: enable a colection of theme asset by filter
+      summary: enable a collection of theme asset by filter
       operationId: theme-asset-api-batch-enable
       parameters:
         - name: uids
@@ -8746,7 +8376,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/theme-asset/~/enable-status/{uid}:
     get:
       tags:
@@ -8773,7 +8403,7 @@ paths:
     patch:
       tags:
         - theme-asset-batch
-      summary: disable a colection of theme asset by filter
+      summary: disable a collection of theme asset by filter
       operationId: theme-asset-api-batch-disable
       parameters:
         - name: uids
@@ -8820,7 +8450,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/document/theme-asset/~/disable-status/{uid}:
     get:
       tags:
@@ -8884,13 +8514,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -8922,7 +8552,7 @@ paths:
     delete:
       tags:
         - tenant-config-batch
-      summary: Delete a colection of tenant config by filter
+      summary: Delete a collection of tenant config by filter
       operationId: tenant-config-api-batch-delete
       parameters:
         - name: uids
@@ -8963,12 +8593,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/tenants-config/{uid}:
     get:
       tags:
         - tenant-config
-      summary: Retrive on  tenant config by their uid
+      summary: Retrieve on  tenant config by their uid
       operationId: tenant-config-api-retrieve
       parameters:
         - name: uid
@@ -9149,6 +8779,376 @@ paths:
                 $ref: '#/components/schemas/TenantConfigSpecificAcl'
         '404':
           description: The item dont exists
+  /api/access/user-role-assignment:
+    get:
+      tags:
+        - user-role-assignment
+      summary: List of user role assignment
+      operationId: user-role-assignment-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-parties
+          in: query
+          description: relying parties
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignmentApiDtoList'
+    post:
+      tags:
+        - user-role-assignment
+      summary: Create a new user role assignment
+      operationId: user-role-assignment-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleAssignmentApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignmentApiDto'
+    delete:
+      tags:
+        - user-role-assignment-batch
+      summary: Delete a collection of user role assignment by filter
+      operationId: user-role-assignment-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: relying-party
+          in: query
+          description: relying party
+          required: false
+          schema:
+            type: string
+        - name: relying-parties
+          in: query
+          description: relying parties
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: trusted-client
+          in: query
+          description: trusted client
+          required: false
+          schema:
+            type: string
+        - name: trusted-clients
+          in: query
+          description: trusted clients
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/user-role-assignment/{uid}:
+    get:
+      tags:
+        - user-role-assignment
+      summary: Retrieve on  user role assignment by their uid
+      operationId: user-role-assignment-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignmentApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - user-role-assignment
+      summary: Update a user role assignment by their uid
+      operationId: user-role-assignment-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleAssignmentApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignmentApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - user-role-assignment
+      summary: Delete a  user role assignment by their uid
+      operationId: user-role-assignment-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/user-role-assignment/~/delete-status/{uid}:
+    get:
+      tags:
+        - user-role-assignment-batch
+      summary: Query the result of an massive delete
+      operationId: user-role-assignment-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/user-role-assignment/-/audit/entity/{uid}:
+    get:
+      tags:
+        - user-role-assignment-audit
+      summary: Update a user role assignment by their uid
+      operationId: user-role-assignment-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/user-role-assignment/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - user-role-assignment-audit
+      summary: Update a user role assignment by their uid
+      operationId: user-role-assignment-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/user-role-assignment:
+    get:
+      tags:
+        - user-role-assignment-acl
+      summary: Check for allow permissions for the current user on user role assignment
+      operationId: user-role-assignment-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignmentGenericAcl'
+  /api/me/acl/access/user-role-assignment/{uid}:
+    get:
+      tags:
+        - user-role-assignment-acl
+      summary: Check for allow permissions for the current user on user role assignment by their uid
+      operationId: user-role-assignment-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleAssignmentSpecificAcl'
+        '404':
+          description: The item dont exists
   /api/access/consent-purposes:
     get:
       tags:
@@ -9190,13 +9190,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -9228,7 +9228,7 @@ paths:
     delete:
       tags:
         - consent-purpose-batch
-      summary: Delete a colection of consent purpose by filter
+      summary: Delete a collection of consent purpose by filter
       operationId: consent-purpose-api-batch-delete
       parameters:
         - name: uids
@@ -9269,12 +9269,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/consent-purposes/{uid}:
     get:
       tags:
         - consent-purpose
-      summary: Retrive on  consent purpose by their uid
+      summary: Retrieve on  consent purpose by their uid
       operationId: consent-purpose-api-retrieve
       parameters:
         - name: uid
@@ -9502,13 +9502,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -9540,7 +9540,7 @@ paths:
     delete:
       tags:
         - smtp-outbound-config-batch
-      summary: Delete a colection of smtp outbound config by filter
+      summary: Delete a collection of smtp outbound config by filter
       operationId: smtp-outbound-config-api-batch-delete
       parameters:
         - name: uids
@@ -9587,12 +9587,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/template/smtp-outbound-config/{uid}:
     get:
       tags:
         - smtp-outbound-config
-      summary: Retrive on  smtp outbound config by their uid
+      summary: Retrieve on  smtp outbound config by their uid
       operationId: smtp-outbound-config-api-retrieve
       parameters:
         - name: uid
@@ -9820,13 +9820,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -9870,7 +9870,7 @@ paths:
     delete:
       tags:
         - tenant-login-provider-batch
-      summary: Delete a colection of tenant login provider by filter
+      summary: Delete a collection of tenant login provider by filter
       operationId: tenant-login-provider-api-batch-delete
       parameters:
         - name: uids
@@ -9917,12 +9917,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/login-providers/{uid}:
     get:
       tags:
         - tenant-login-provider
-      summary: Retrive on  tenant login provider by their uid
+      summary: Retrieve on  tenant login provider by their uid
       operationId: tenant-login-provider-api-retrieve
       parameters:
         - name: uid
@@ -10221,12 +10221,12 @@ paths:
                 type: string
         '400':
           description: Invalid input or missing file
-  /api/access/login-providers/{uid}/saml-idp-idp-cert:
+  /api/access/login-providers/{uid}/saml-idp-cert:
     get:
       tags:
         - tenant-login-provider
-      summary: Retrieve binary content for saml idp idp cert of tenant login provider
-      operationId: tenant-login-provider-api-retrieve-saml-idp-idp-cert
+      summary: Retrieve binary content for saml idp cert of tenant login provider
+      operationId: tenant-login-provider-api-retrieve-saml-idp-cert
       parameters:
         - name: uid
           in: path
@@ -10242,12 +10242,12 @@ paths:
               schema:
                 type: string
                 format: binary
-  /api/access/login-providers/-/temp-saml-idp-idp-cert:
+  /api/access/login-providers/-/temp-saml-idp-cert:
     get:
       tags:
         - tenant-login-provider
-      summary: Retrieve binary content of a temporal upload for saml idp idp cert of tenant login provider
-      operationId: tenant-login-provider-api-retrieve-temp-upload-saml-idp-idp-cert
+      summary: Retrieve binary content of a temporal upload for saml idp cert of tenant login provider
+      operationId: tenant-login-provider-api-retrieve-temp-upload-saml-idp-cert
       parameters:
         - name: temp
           in: query
@@ -10266,8 +10266,8 @@ paths:
     post:
       tags:
         - tenant-login-provider
-      summary: Retrieve binary content of a temporal upload for saml idp idp cert of tenant login provider
-      operationId: tenant-login-provider-api-upload-temp-upload-saml-idp-idp-cert
+      summary: Retrieve binary content of a temporal upload for saml idp cert of tenant login provider
+      operationId: tenant-login-provider-api-upload-temp-upload-saml-idp-cert
       requestBody:
         content:
           multipart/form-data:
@@ -10299,7 +10299,7 @@ paths:
     patch:
       tags:
         - tenant-login-provider-batch
-      summary: enable a colection of tenant login provider by filter
+      summary: enable a collection of tenant login provider by filter
       operationId: tenant-login-provider-api-batch-enable
       parameters:
         - name: uids
@@ -10346,7 +10346,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/login-providers/~/enable-status/{uid}:
     get:
       tags:
@@ -10373,7 +10373,7 @@ paths:
     patch:
       tags:
         - tenant-login-provider-batch
-      summary: disable a colection of tenant login provider by filter
+      summary: disable a collection of tenant login provider by filter
       operationId: tenant-login-provider-api-batch-disable
       parameters:
         - name: uids
@@ -10420,7 +10420,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/login-providers/~/disable-status/{uid}:
     get:
       tags:
@@ -10488,9 +10488,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -10500,13 +10500,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -10538,7 +10538,7 @@ paths:
     delete:
       tags:
         - tenant-terms-of-use-batch
-      summary: Delete a colection of tenant terms of use by filter
+      summary: Delete a collection of tenant terms of use by filter
       operationId: tenant-terms-of-use-api-batch-delete
       parameters:
         - name: uids
@@ -10579,9 +10579,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -10595,12 +10595,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/tenants-terms-of-use/{uid}:
     get:
       tags:
         - tenant-terms-of-use
-      summary: Retrive on  tenant terms of use by their uid
+      summary: Retrieve on  tenant terms of use by their uid
       operationId: tenant-terms-of-use-api-retrieve
       parameters:
         - name: uid
@@ -10903,7 +10903,7 @@ paths:
     patch:
       tags:
         - tenant-terms-of-use-batch
-      summary: enable a colection of tenant terms of use by filter
+      summary: enable a collection of tenant terms of use by filter
       operationId: tenant-terms-of-use-api-batch-enable
       parameters:
         - name: uids
@@ -10944,9 +10944,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -10960,7 +10960,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/tenants-terms-of-use/~/enable-status/{uid}:
     get:
       tags:
@@ -10987,7 +10987,7 @@ paths:
     patch:
       tags:
         - tenant-terms-of-use-batch
-      summary: disable a colection of tenant terms of use by filter
+      summary: disable a collection of tenant terms of use by filter
       operationId: tenant-terms-of-use-api-batch-disable
       parameters:
         - name: uids
@@ -11028,9 +11028,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-partys
+        - name: relying-parties
           in: query
-          description: relying partys
+          description: relying parties
           required: false
           schema:
             type: array
@@ -11044,7 +11044,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/tenants-terms-of-use/~/disable-status/{uid}:
     get:
       tags:
@@ -11114,13 +11114,13 @@ paths:
           explode: false
         - name: limit
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: integer
         - name: since-uid
           in: query
-          description: The maximun number of results
+          description: The maximum number of results
           required: false
           schema:
             type: string
@@ -11164,7 +11164,7 @@ paths:
     delete:
       tags:
         - user-batch
-      summary: Delete a colection of user by filter
+      summary: Delete a collection of user by filter
       operationId: user-api-batch-delete
       parameters:
         - name: uids
@@ -11211,12 +11211,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/users/{uid}:
     get:
       tags:
         - user
-      summary: Retrive on  user by their uid
+      summary: Retrieve on  user by their uid
       operationId: user-api-retrieve
       parameters:
         - name: uid
@@ -11511,7 +11511,7 @@ paths:
     patch:
       tags:
         - user-batch
-      summary: accept a colection of user by filter
+      summary: accept a collection of user by filter
       operationId: user-api-batch-accept
       parameters:
         - name: uids
@@ -11558,7 +11558,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/users/~/accept-status/{uid}:
     get:
       tags:
@@ -11585,7 +11585,7 @@ paths:
     patch:
       tags:
         - user-batch
-      summary: reject a colection of user by filter
+      summary: reject a collection of user by filter
       operationId: user-api-batch-reject
       parameters:
         - name: uids
@@ -11632,7 +11632,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/users/~/reject-status/{uid}:
     get:
       tags:
@@ -11659,7 +11659,7 @@ paths:
     patch:
       tags:
         - user-batch
-      summary: disable a colection of user by filter
+      summary: disable a collection of user by filter
       operationId: user-api-batch-disable
       parameters:
         - name: uids
@@ -11706,7 +11706,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/users/~/disable-status/{uid}:
     get:
       tags:
@@ -11733,7 +11733,7 @@ paths:
     patch:
       tags:
         - user-batch
-      summary: enable a colection of user by filter
+      summary: enable a collection of user by filter
       operationId: user-api-batch-enable
       parameters:
         - name: uids
@@ -11780,7 +11780,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/users/~/enable-status/{uid}:
     get:
       tags:
@@ -11807,7 +11807,7 @@ paths:
     patch:
       tags:
         - user-batch
-      summary: unlock a colection of user by filter
+      summary: unlock a collection of user by filter
       operationId: user-api-batch-unlock
       parameters:
         - name: uids
@@ -11854,7 +11854,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchTaskLocalizator'
+                $ref: '#/components/schemas/BatchTaskLocator'
   /api/access/users/~/unlock-status/{uid}:
     get:
       tags:
@@ -11966,7 +11966,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BatchResultErrorItem'
-    BatchTaskLocalizator:
+    BatchTaskLocator:
       type: object
       properties:
         uid:
@@ -12283,19 +12283,6 @@ components:
           type: array
           items:
             type: string
-    UserApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/users"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - user
     RelyingPartyApiRef:
       type: object
       properties:
@@ -12308,141 +12295,7 @@ components:
             batch-query-param: "uids"
       required:
         - uid
-        - user
-    TrustedClientApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/trusted-clients"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - user
-    RoleApiRef:
-      type: object
-      properties:
-        $ref:
-          type: string
-          x-relationship:
-            url: "/api/access/roles"
-            method: "GET"
-            reference: "uid"
-            batch-query-param: "uids"
-      required:
-        - uid
-        - role
-    RolesApiDto:
-      type: object
-      description: user-role-assignament-role
-      properties:
-        uid:
-          description: A uid string to identify the entity
-          type: string
-        role:
-          $ref: '#/components/schemas/RoleApiRef'
-        version:
-          description: Campo con el número de version de user role assignament role para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    UserRoleAssignamentApiDto:
-      type: object
-      description: user-role-assignament
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        user:
-          $ref: '#/components/schemas/UserApiRef'
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        trustedClient:
-          $ref: '#/components/schemas/TrustedClientApiRef'
-        roles:
-          description: El roles de user role assignament
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesApiDto'
-        version:
-          description: Campo con el número de version de user role assignament para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    UserRoleAssignamentApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserRoleAssignamentApiDto'
-    UserRoleAssignamentGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/UserRoleAssignamentAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/UserRoleAssignamentAclFields'
-    UserRoleAssignamentSpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/UserRoleAssignamentAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/UserRoleAssignamentAclFields'
-    UserRoleAssignamentAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - list
-    UserRoleAssignamentAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-    UserRoleAssignamentAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
+        - name
     RoleApiDto:
       type: object
       description: role
@@ -12532,6 +12385,32 @@ components:
           type: array
           items:
             type: string
+    UserApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/users"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - user
+    TrustedClientApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/trusted-clients"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - user
     UserGroupMembershipApiDto:
       type: object
       description: user-group-membership
@@ -12748,7 +12627,7 @@ components:
           description: El código identificativo de la aplicación
           type: string
         apiKey:
-          description: A identification for the aplication
+          description: An identifier for the application
           type: string
         enabled:
           description: Una marca que permite quitar el acceso a una cuenta sin borrarla
@@ -13995,7 +13874,7 @@ components:
           items:
             $ref: '#/components/schemas/AllowedRedirectsApiDto'
         secretOauth:
-          description: If the user is not delegated, the phrasse to identify
+          description: If the user is not delegated, the phrase to identify
           type: string
         isResourceServer:
           description: If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.
@@ -14326,10 +14205,10 @@ components:
         webauthnRpName:
           description: El webauthn rp name de tenant config
           type: string
-        wellcomeEmail:
+        welcomeEmail:
           description: Email send to the enabled user
           type: string
-        registerdEmail:
+        registeredEmail:
           description: Email send when a user register
           type: string
         disabledUserEmail:
@@ -14411,6 +14290,127 @@ components:
         - update
         - delete
     TenantConfigAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    RoleApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/roles"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - role
+    RolesApiDto:
+      type: object
+      description: user-role-assignment-role
+      properties:
+        uid:
+          description: A uid string to identify the entity
+          type: string
+        role:
+          $ref: '#/components/schemas/RoleApiRef'
+        version:
+          description: Campo con el número de version de user role assignment role para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    UserRoleAssignmentApiDto:
+      type: object
+      description: user-role-assignment
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        user:
+          $ref: '#/components/schemas/UserApiRef'
+        relyingParty:
+          $ref: '#/components/schemas/RelyingPartyApiRef'
+        trustedClient:
+          $ref: '#/components/schemas/TrustedClientApiRef'
+        roles:
+          description: El roles de user role assignment
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesApiDto'
+        version:
+          description: Campo con el número de version de user role assignment para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    UserRoleAssignmentApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRoleAssignmentApiDto'
+    UserRoleAssignmentGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserRoleAssignmentAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/UserRoleAssignmentAclFields'
+    UserRoleAssignmentSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserRoleAssignmentAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/UserRoleAssignmentAclFields'
+    UserRoleAssignmentAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    UserRoleAssignmentAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    UserRoleAssignmentAclFields:
       type: object
       properties:
         noEditables:
@@ -14694,8 +14694,8 @@ components:
         samlIdpSsoUrl:
           description: El saml idp sso url de tenant login provider
           type: string
-        samlIdpIdpCert:
-          description: El saml idp idp cert de tenant login provider
+        samlIdpCert:
+          description: El saml idp cert de tenant login provider
           type: string
         usersEnabledByDefault:
           description: Defines whether the users created with this provider are enabled by default.
@@ -14750,7 +14750,7 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         uploadMetadata:
           $ref: '#/components/schemas/CommonAllow'
-        uploadSamlIdpIdpCert:
+        uploadSamlIdpCert:
           $ref: '#/components/schemas/CommonAllow'
       required:
         - retrieve
@@ -14761,7 +14761,7 @@ components:
         - disable
         - list
         - uploadMetadata
-        - uploadSamlIdpIdpCert
+        - uploadSamlIdpCert
     TenantLoginProviderAclSpecificAllows:
       type: object
       properties:
@@ -14924,20 +14924,20 @@ components:
           description: The user name to identify on the login screen
           type: string
         password:
-          description: If the user is not delegated, the phrasse to identify
+          description: If the user is not delegated, the phrase to identify
           type: string
         email:
           description: An optional email used to send notifications to the user
           type: string
-        wellcomeAt:
-          description: The date when a wellcome email is send
+        welcomeAt:
+          description: The date when a welcome email is sent
           type: string
           format: date-time
         emailVerified:
           description: Indicates whether the user has confirmed ownership of their email address by clicking the verification link sent at registration. Used by the OIDC flow to emit the email_verified claim and optionally block login until confirmed.
           type: boolean
         enabled:
-          description: A disabled user cant login on the system. On his login attempts, he will recive a specific warn of his disabled account.
+          description: A disabled user cant login on the system. On his login attempts, he will receive a specific warn of his disabled account.
           type: boolean
         approve:
           description: El approve de user
@@ -14953,7 +14953,7 @@ components:
           description: the seed used to the otp login
           type: string
         blockedUntil:
-          description: A bloqued user cant login on the system, until these date. On his login attempst, hue will recive a generic not allowed message.
+          description: A blocked user cant login on the system, until these date. On his login attempts, the user will receive a generic not allowed message.
           type: string
           format: date-time
         provider:

@@ -52,10 +52,10 @@ class UserConsentPurposesFilterUnitTest {
     filter.setConsentPurposes(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getConsentPurposes(),
         "ConsentPurposes must be the same as the assigned");
-    Assertions.assertFalse(filter.getUserTenantAccesible().isPresent(),
-        "UserTenantAccesible must be empty if filter is build without it");
-    filter.setUserTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getUserTenantAccesible().get(),
-        "UserTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getUserTenantAccessible().isPresent(),
+        "UserTenantAccessible must be empty if filter is build without it");
+    filter.setUserTenantAccessible("one");
+    Assertions.assertEquals("one", filter.getUserTenantAccessible().get(),
+        "UserTenantAccessible must be the same as the assigned");
   }
 }

@@ -667,19 +667,19 @@ public class UserInvitationJdbcDao {
     }
     filter.getInvitedBy().ifPresent(invitedByParam -> sq.where(INVITED_BY_SNAKE, SqlOperator.EQ,
         SqlParameterValue.of(invitedByParam.getUid())));
-    if (!filter.getInvitedBys().isEmpty()) {
+    if (!filter.getInvitedBies().isEmpty()) {
       sq.where(INVITED_BY_SNAKE, SqlOperator.IN,
-          SqlListParameterValue.strings(filter.getInvitedBys()));
+          SqlListParameterValue.strings(filter.getInvitedBies()));
     }
     filter.getAcceptedBy().ifPresent(acceptedByParam -> sq.where(ACCEPTED_BY_SNAKE, SqlOperator.EQ,
         SqlParameterValue.of(acceptedByParam.getUid())));
-    if (!filter.getAcceptedBys().isEmpty()) {
+    if (!filter.getAcceptedBies().isEmpty()) {
       sq.where(ACCEPTED_BY_SNAKE, SqlOperator.IN,
-          SqlListParameterValue.strings(filter.getAcceptedBys()));
+          SqlListParameterValue.strings(filter.getAcceptedBies()));
     }
-    filter.getTenantAccesible()
-        .ifPresent(tenantAccesibleParam -> sq.where(ACCESS_USER_INVITATION_TENANT, SqlOperator.EQ,
-            SqlParameterValue.of(tenantAccesibleParam)));
+    filter.getTenantAccessible()
+        .ifPresent(tenantAccessibleParam -> sq.where(ACCESS_USER_INVITATION_TENANT, SqlOperator.EQ,
+            SqlParameterValue.of(tenantAccessibleParam)));
     return sq;
   }
 

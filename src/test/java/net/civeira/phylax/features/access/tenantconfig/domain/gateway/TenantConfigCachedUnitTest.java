@@ -23,7 +23,7 @@ import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicL
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkExpiryMinutesVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RecoverPassEmailVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenTtlSecondsVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisterdEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisteredEmailVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequireEmailVerificationVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SessionSsoTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.TenantVO;
@@ -32,7 +32,7 @@ import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.Versio
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnRpIdVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnRpNameVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WellcomeEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WelcomeEmailVO;
 
 class TenantConfigCachedUnitTest {
 
@@ -58,8 +58,8 @@ class TenantConfigCachedUnitTest {
         .webauthnEnabledValue(WebauthnEnabledVO.from(true))
         .webauthnRpIdValue(WebauthnRpIdVO.from("one"))
         .webauthnRpNameValue(WebauthnRpNameVO.from("one"))
-        .wellcomeEmailValue(WellcomeEmailVO.from("one"))
-        .registerdEmailValue(RegisterdEmailVO.from("one"))
+        .welcomeEmailValue(WelcomeEmailVO.from("one"))
+        .registeredEmailValue(RegisteredEmailVO.from("one"))
         .disabledUserEmailValue(DisabledUserEmailVO.from("one"))
         .enabledUserEmailValue(EnabledUserEmailVO.from("one"))
         .allowRecoverPassValue(AllowRecoverPassVO.from(true))

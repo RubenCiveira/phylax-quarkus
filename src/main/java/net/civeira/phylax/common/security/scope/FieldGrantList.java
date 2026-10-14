@@ -11,7 +11,7 @@ public class FieldGrantList {
     fields.add(field);
   }
 
-  public List<String> innacesiblesFor(String resource, String view) {
+  public List<String> inaccessiblesFor(String resource, String view) {
     return fields.stream().filter(fg -> fg.match(resource, view)).map(FieldGrant::getName).toList();
   }
 }

@@ -18,8 +18,8 @@ import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcDiscoveryUrlVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PrivateKeyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PublicKeyVO;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpCertVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpEntityIdVO;
-import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpIdpCertVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpMetadataUrlVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpSsoUrlVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SourceVO;
@@ -46,7 +46,7 @@ class TenantLoginProviderCachedUnitTest {
         .samlIdpMetadataUrlValue(SamlIdpMetadataUrlVO.from("one"))
         .samlIdpEntityIdValue(SamlIdpEntityIdVO.from("one"))
         .samlIdpSsoUrlValue(SamlIdpSsoUrlVO.from("one"))
-        .samlIdpIdpCertValue(SamlIdpIdpCertVO.from("file_1"))
+        .samlIdpCertValue(SamlIdpCertVO.from("file_1"))
         .usersEnabledByDefaultValue(UsersEnabledByDefaultVO.from(true))
         .versionValue(VersionVO.from(1)).build();
     OffsetDateTime now = OffsetDateTime.now();

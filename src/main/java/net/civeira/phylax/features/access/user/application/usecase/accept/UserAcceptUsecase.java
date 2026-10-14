@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -125,7 +125,7 @@ public class UserAcceptUsecase {
    * @return The slide with some values
    */
   @Observed("accept a set of entity of user")
-  public BatchIdentificator batchAccept(final OperationContext context,
+  public BatchIdentifier batchAccept(final OperationContext context,
       final UserAcceptFilter filter) {
     Permission detail = checkPermission(context);
     if (!detail.isAllowed()) {
@@ -137,7 +137,7 @@ public class UserAcceptUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     UserAcceptAllInBatchCommand command =
         new UserAcceptAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

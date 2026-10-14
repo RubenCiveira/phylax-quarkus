@@ -20,7 +20,7 @@ class TenantConfigChangeSetUnitTest {
         .allowRegister(true).enableRegisterUsers(true).magicLinkEnabled(true)
         .requireEmailVerification(true).invitationExpiryDays(1).magicLinkExpiryMinutes(1)
         .sessionSsoTtlSeconds(1).refreshTokenTtlSeconds(1).webauthnEnabled(true).webauthnRpId("one")
-        .webauthnRpName("one").wellcomeEmail("one").registerdEmail("one").disabledUserEmail("one")
+        .webauthnRpName("one").welcomeEmail("one").registeredEmail("one").disabledUserEmail("one")
         .enabledUserEmail("one").allowRecoverPass(true).recoverPassEmail("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
@@ -145,21 +145,21 @@ class TenantConfigChangeSetUnitTest {
     one.unset("webauthnRpName");
     Assertions.assertFalse(one.getWebauthnRpName().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getWellcomeEmail().get(),
+    Assertions.assertEquals("one", one.getWelcomeEmail().get(),
         "Value must equals to the intial value");
-    one.wellcomeEmail("two");
-    Assertions.assertEquals("two", one.getWellcomeEmail().get(),
+    one.welcomeEmail("two");
+    Assertions.assertEquals("two", one.getWelcomeEmail().get(),
         "Value must equals to the assigned value");
-    one.unset("wellcomeEmail");
-    Assertions.assertFalse(one.getWellcomeEmail().isPresent(),
+    one.unset("welcomeEmail");
+    Assertions.assertFalse(one.getWelcomeEmail().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getRegisterdEmail().get(),
+    Assertions.assertEquals("one", one.getRegisteredEmail().get(),
         "Value must equals to the intial value");
-    one.registerdEmail("two");
-    Assertions.assertEquals("two", one.getRegisterdEmail().get(),
+    one.registeredEmail("two");
+    Assertions.assertEquals("two", one.getRegisteredEmail().get(),
         "Value must equals to the assigned value");
-    one.unset("registerdEmail");
-    Assertions.assertFalse(one.getRegisterdEmail().isPresent(),
+    one.unset("registeredEmail");
+    Assertions.assertFalse(one.getRegisteredEmail().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getDisabledUserEmail().get(),
         "Value must equals to the intial value");

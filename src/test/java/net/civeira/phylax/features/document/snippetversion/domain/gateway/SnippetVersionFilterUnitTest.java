@@ -41,10 +41,10 @@ class SnippetVersionFilterUnitTest {
     filter.setSnippets(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getSnippets(),
         "Snippets must be the same as the assigned");
-    Assertions.assertFalse(filter.getSnippetTenantAccesible().isPresent(),
-        "SnippetTenantAccesible must be empty if filter is build without it");
-    filter.setSnippetTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getSnippetTenantAccesible().get(),
-        "SnippetTenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getSnippetTenantAccessible().isPresent(),
+        "SnippetTenantAccessible must be empty if filter is build without it");
+    filter.setSnippetTenantAccessible("one");
+    Assertions.assertEquals("one", filter.getSnippetTenantAccessible().get(),
+        "SnippetTenantAccessible must be the same as the assigned");
   }
 }

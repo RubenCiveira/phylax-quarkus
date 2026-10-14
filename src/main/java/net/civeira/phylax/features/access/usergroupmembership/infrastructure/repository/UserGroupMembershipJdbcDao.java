@@ -516,9 +516,9 @@ public class UserGroupMembershipJdbcDao {
     }
     filter.getRelyingParty().ifPresent(relyingPartyParam -> sq.where(RELYING_PARTY_SNAKE,
         SqlOperator.EQ, SqlParameterValue.of(relyingPartyParam.getUid())));
-    if (!filter.getRelyingPartys().isEmpty()) {
+    if (!filter.getRelyingParties().isEmpty()) {
       sq.where(RELYING_PARTY_SNAKE, SqlOperator.IN,
-          SqlListParameterValue.strings(filter.getRelyingPartys()));
+          SqlListParameterValue.strings(filter.getRelyingParties()));
     }
     filter.getTrustedClient().ifPresent(trustedClientParam -> sq.where(TRUSTED_CLIENT_SNAKE,
         SqlOperator.EQ, SqlParameterValue.of(trustedClientParam.getUid())));
@@ -526,11 +526,11 @@ public class UserGroupMembershipJdbcDao {
       sq.where(TRUSTED_CLIENT_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getTrustedClients()));
     }
-    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
+    filter.getUserTenantAccessible().ifPresent(userTenantAccessibleParam -> {
       sq.join("access_user", "access_user_group_membership_user",
           "access_user_group_membership.user", "access_user_group_membership_user.uid");
       sq.where(ACCESS_USER_GROUP_MEMBERSHIP_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccessibleParam));
     });
     return sq;
   }

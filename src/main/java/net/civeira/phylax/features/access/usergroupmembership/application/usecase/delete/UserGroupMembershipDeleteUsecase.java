@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class UserGroupMembershipDeleteUsecase {
    * @return The slide with some values
    */
   @Observed("Deleting a set of entities of user group membership")
-  public BatchIdentificator batchDelete(final OperationContext context,
+  public BatchIdentifier batchDelete(final OperationContext context,
       final UserGroupMembershipDeleteFilter filter) {
     Permission permission = checkPermission(context);
     if (!permission.isAllowed()) {
@@ -114,10 +114,10 @@ public class UserGroupMembershipDeleteUsecase {
             .forAllAudiences(filter.getForAllAudiences().orElse(null))
             .user(filter.getUser().orElse(null)).users(filter.getUsers())
             .relyingParty(filter.getRelyingParty().orElse(null))
-            .relyingPartys(filter.getRelyingPartys())
+            .relyingParties(filter.getRelyingParties())
             .trustedClient(filter.getTrustedClient().orElse(null))
             .trustedClients(filter.getTrustedClients())
-            .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
+            .userTenantAccessible(filter.getUserTenantAccessible().orElse(null)).build();
     UserGroupMembershipDeleteAllInBatchCommand command =
         new UserGroupMembershipDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

@@ -22,7 +22,7 @@ import net.civeira.phylax.features.access.user.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.UseSecondFactorsVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.VersionVO;
-import net.civeira.phylax.features.access.user.domain.valueobject.WellcomeAtVO;
+import net.civeira.phylax.features.access.user.domain.valueobject.WelcomeAtVO;
 
 class UserUnitTest {
 
@@ -35,7 +35,7 @@ class UserUnitTest {
     User one = User.builder().uidValue(UidVO.from("one"))
         .tenantValue(TenantVO.from(TenantReference.of("one"))).nameValue(NameVO.from("one"))
         .passwordValue(PasswordVO.fromCyphered("one")).emailValue(EmailVO.from("one"))
-        .wellcomeAtValue(WellcomeAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
+        .welcomeAtValue(WelcomeAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .emailVerifiedValue(EmailVerifiedVO.from(true)).enabledValue(EnabledVO.from(true))
         .approveValue(ApproveVO.from(UserApproveOptions.UNVERIFIED))

@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class TemplateDeleteUsecase {
    * @return The slide with some values
    */
   @Observed("Deleting a set of entities of template")
-  public BatchIdentificator batchDelete(final OperationContext context,
+  public BatchIdentifier batchDelete(final OperationContext context,
       final TemplateDeleteFilter filter) {
     Permission permission = checkPermission(context);
     if (!permission.isAllowed()) {
@@ -113,7 +113,7 @@ public class TemplateDeleteUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .global(filter.getGlobal().orElse(null)).code(filter.getCode().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TemplateDeleteAllInBatchCommand command =
         new TemplateDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

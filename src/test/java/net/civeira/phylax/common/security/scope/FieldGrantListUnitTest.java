@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class FieldGrantListUnitTest {
 
   @Nested
-  @DisplayName("innacesiblesFor()")
+  @DisplayName("inaccessiblesFor()")
   class InnacesiblesFor {
 
     @Test
@@ -27,7 +27,7 @@ class FieldGrantListUnitTest {
       list.add(FieldGrant.builder().name("name").resource("tenant").view("detail").build());
 
       // Act — Query inaccessible fields for resource "tenant" and view "list"
-      List<String> result = list.innacesiblesFor("tenant", "list");
+      List<String> result = list.inaccessiblesFor("tenant", "list");
 
       // Assert — Only the two fields matching "tenant:list" should be returned
       assertEquals(2, result.size(),
@@ -44,7 +44,7 @@ class FieldGrantListUnitTest {
       list.add(FieldGrant.builder().name("field").resource("user").view("list").build());
 
       // Act — Query inaccessible fields for resource "tenant" which has no matching grants
-      List<String> result = list.innacesiblesFor("tenant", "list");
+      List<String> result = list.inaccessiblesFor("tenant", "list");
 
       // Assert — No fields should be returned when none match the requested resource and view
       assertTrue(result.isEmpty(),
@@ -58,7 +58,7 @@ class FieldGrantListUnitTest {
       FieldGrantList list = new FieldGrantList();
 
       // Act — Query inaccessible fields on the empty list
-      List<String> result = list.innacesiblesFor("tenant", "list");
+      List<String> result = list.inaccessiblesFor("tenant", "list");
 
       // Assert — An empty list should return no inaccessible fields
       assertTrue(result.isEmpty(), "Should return empty list when there are no field grants");

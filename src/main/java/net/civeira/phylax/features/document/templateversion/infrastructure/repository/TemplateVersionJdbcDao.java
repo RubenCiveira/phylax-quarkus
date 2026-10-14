@@ -524,11 +524,11 @@ public class TemplateVersionJdbcDao {
     if (!filter.getTemplates().isEmpty()) {
       sq.where(TEMPLATE, SqlOperator.IN, SqlListParameterValue.strings(filter.getTemplates()));
     }
-    filter.getTemplateTenantAccesible().ifPresent(templateTenantAccesibleParam -> {
+    filter.getTemplateTenantAccessible().ifPresent(templateTenantAccessibleParam -> {
       sq.join("document_template", "document_template_version_template",
           "document_template_version.template", "document_template_version_template.uid");
       sq.where(DOCUMENT_TEMPLATE_VERSION_TEMPLATE_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(templateTenantAccesibleParam));
+          SqlParameterValue.of(templateTenantAccessibleParam));
     });
     return sq;
   }

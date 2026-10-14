@@ -111,7 +111,7 @@ public class ThemeAssetCreateUsecase {
     cache.update(created);
     // Register audit operation
     audit.created("create", created, context);
-    // Convert the entity into a proyection and filter non visible fields
+    // Convert the entity into a projection and filter non visible fields
     return ThemeAssetCreateProjection.from(visibility.copyWithHidden(context, created));
   }
 

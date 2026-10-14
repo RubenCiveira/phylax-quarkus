@@ -56,10 +56,10 @@ class TemplateAssetFilterUnitTest {
     filter.setTenants(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getTenants(),
         "Tenants must be the same as the assigned");
-    Assertions.assertFalse(filter.getTenantAccesible().isPresent(),
-        "TenantAccesible must be empty if filter is build without it");
-    filter.setTenantAccesible("one");
-    Assertions.assertEquals("one", filter.getTenantAccesible().get(),
-        "TenantAccesible must be the same as the assigned");
+    Assertions.assertFalse(filter.getTenantAccessible().isPresent(),
+        "TenantAccessible must be empty if filter is build without it");
+    filter.setTenantAccessible("one");
+    Assertions.assertEquals("one", filter.getTenantAccessible().get(),
+        "TenantAccessible must be the same as the assigned");
   }
 }

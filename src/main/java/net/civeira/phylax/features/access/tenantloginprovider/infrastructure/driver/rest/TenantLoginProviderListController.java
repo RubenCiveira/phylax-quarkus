@@ -195,12 +195,11 @@ public class TenantLoginProviderListController {
     tenantLoginProviderApiDto.setSamlIdpMetadataUrl(dto.getSamlIdpMetadataUrl());
     tenantLoginProviderApiDto.setSamlIdpEntityId(dto.getSamlIdpEntityId());
     tenantLoginProviderApiDto.setSamlIdpSsoUrl(dto.getSamlIdpSsoUrl());
-    String samlIdpIdpCert = dto.getSamlIdpIdpCert();
-    if (null != samlIdpIdpCert) {
+    String samlIdpCert = dto.getSamlIdpCert();
+    if (null != samlIdpCert) {
       String url = currentRequest.getPublicHost() + "/api/access/login-providers/"
-          + dto.getUidOrDefault("-") + "/saml-idp-idp-cert";
-      tenantLoginProviderApiDto
-          .setSamlIdpIdpCert(magicLink.create(url, currentRequest.interaction()));
+          + dto.getUidOrDefault("-") + "/saml-idp-cert";
+      tenantLoginProviderApiDto.setSamlIdpCert(magicLink.create(url, currentRequest.interaction()));
     }
     tenantLoginProviderApiDto.setUsersEnabledByDefault(dto.getUsersEnabledByDefault());
     tenantLoginProviderApiDto.setVersion(dto.getVersion());

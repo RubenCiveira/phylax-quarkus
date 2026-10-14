@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userwebauthncredential.domain.valueobject.AaguidVO;
-import net.civeira.phylax.features.access.userwebauthncredential.domain.valueobject.AutenticatorVO;
+import net.civeira.phylax.features.access.userwebauthncredential.domain.valueobject.AuthenticatorVO;
 import net.civeira.phylax.features.access.userwebauthncredential.domain.valueobject.CreatedAtVO;
 import net.civeira.phylax.features.access.userwebauthncredential.domain.valueobject.DeviceNameVO;
 import net.civeira.phylax.features.access.userwebauthncredential.domain.valueobject.EnabledVO;
@@ -32,7 +32,7 @@ class UserWebauthnCredentialUnitTest {
   void test_user_webauthn_credential_builder() {
     UserWebauthnCredential one = UserWebauthnCredential.builder().uidValue(UidVO.from("one"))
         .userValue(UserVO.from(UserReference.of("one")))
-        .autenticatorValue(AutenticatorVO.from("one")).nameValue(NameVO.from("one"))
+        .authenticatorValue(AuthenticatorVO.from("one")).nameValue(NameVO.from("one"))
         .publicKeyValue(PublicKeyVO.from("one")).signCountValue(SignCountVO.from(1))
         .aaguidValue(AaguidVO.from("one")).deviceNameValue(DeviceNameVO.from("one"))
         .transportsJsonValue(TransportsJsonVO.from("one"))

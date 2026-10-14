@@ -104,8 +104,8 @@ public class TenantConfigImportationService {
     change = readWebauthnEnabled(change, row, fails, resolver);
     change = readWebauthnRpId(change, row, fails, resolver);
     change = readWebauthnRpName(change, row, fails, resolver);
-    change = readWellcomeEmail(change, row, fails, resolver);
-    change = readRegisterdEmail(change, row, fails, resolver);
+    change = readWelcomeEmail(change, row, fails, resolver);
+    change = readRegisteredEmail(change, row, fails, resolver);
     change = readDisabledUserEmail(change, row, fails, resolver);
     change = readEnabledUserEmail(change, row, fails, resolver);
     change = readAllowRecoverPass(change, row, fails, resolver);
@@ -373,14 +373,14 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readRegisterdEmail(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readRegisteredEmail(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String registerdEmail = row.get("registerdEmail");
-    if (registerdEmail != null) {
-      return change.registerdEmail(registerdEmail);
+    String registeredEmail = row.get("registeredEmail");
+    if (registeredEmail != null) {
+      return change.registeredEmail(registeredEmail);
     } else {
-      return change.unsetRegisterdEmail();
+      return change.unsetRegisteredEmail();
     }
   }
 
@@ -520,14 +520,14 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readWellcomeEmail(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readWelcomeEmail(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String wellcomeEmail = row.get("wellcomeEmail");
-    if (wellcomeEmail != null) {
-      return change.wellcomeEmail(wellcomeEmail);
+    String welcomeEmail = row.get("welcomeEmail");
+    if (welcomeEmail != null) {
+      return change.welcomeEmail(welcomeEmail);
     } else {
-      return change.unsetWellcomeEmail();
+      return change.unsetWelcomeEmail();
     }
   }
 }

@@ -566,11 +566,11 @@ public class UserConsentPurposesJdbcDao {
       sq.where(CONSENT_PURPOSE_SNAKE, SqlOperator.IN,
           SqlListParameterValue.strings(filter.getConsentPurposes()));
     }
-    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
+    filter.getUserTenantAccessible().ifPresent(userTenantAccessibleParam -> {
       sq.join("access_user", "access_user_consent_purposes_user",
           "access_user_consent_purposes.user", "access_user_consent_purposes_user.uid");
       sq.where(ACCESS_USER_CONSENT_PURPOSES_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccessibleParam));
     });
     return sq;
   }

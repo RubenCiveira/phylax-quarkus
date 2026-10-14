@@ -67,7 +67,7 @@ public class TemplateAssetListUsecase {
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .template(filter.getTemplate().orElse(null)).templates(filter.getTemplates())
         .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+        .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TemplateAssetCursor gatewayCursor = TemplateAssetCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(TemplateAssetOrder::valueOf)

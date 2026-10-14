@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class TemplateAssetDeleteUsecase {
    * @return The slide with some values
    */
   @Observed("Deleting a set of entities of template asset")
-  public BatchIdentificator batchDelete(final OperationContext context,
+  public BatchIdentifier batchDelete(final OperationContext context,
       final TemplateAssetDeleteFilter filter) {
     Permission permission = checkPermission(context);
     if (!permission.isAllowed()) {
@@ -113,7 +113,7 @@ public class TemplateAssetDeleteUsecase {
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .template(filter.getTemplate().orElse(null)).templates(filter.getTemplates())
         .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+        .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TemplateAssetDeleteAllInBatchCommand command =
         new TemplateAssetDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

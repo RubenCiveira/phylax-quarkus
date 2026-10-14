@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class UserRejectUsecase {
    * @return The slide with some values
    */
   @Observed("reject a set of entity of user")
-  public BatchIdentificator batchReject(final OperationContext context,
+  public BatchIdentifier batchReject(final OperationContext context,
       final UserRejectFilter filter) {
     Permission detail = checkPermission(context);
     if (!detail.isAllowed()) {
@@ -112,7 +112,7 @@ public class UserRejectUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     UserRejectAllInBatchCommand command =
         new UserRejectAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

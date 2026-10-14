@@ -116,7 +116,7 @@ public class TenantTermsOfUseController implements TenantTermsOfUseApi {
    * @param tenant
    * @param tenants
    * @param relyingParty
-   * @param relyingPartys
+   * @param relyingParties
    * @param limit
    * @param sinceUid
    * @return
@@ -124,9 +124,9 @@ public class TenantTermsOfUseController implements TenantTermsOfUseApi {
   @Override
   public Response tenantTermsOfUseApiList(final List<String> uids, final String search,
       final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingPartys, final Integer limit, final String sinceUid) {
+      final List<String> relyingParties, final Integer limit, final String sinceUid) {
     return listController.tenantTermsOfUseApiList(uids, search, tenant, tenants, relyingParty,
-        relyingPartys, limit, sinceUid);
+        relyingParties, limit, sinceUid);
   }
 
   /**

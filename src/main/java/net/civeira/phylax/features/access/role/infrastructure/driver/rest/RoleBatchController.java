@@ -24,13 +24,13 @@ public class RoleBatchController implements RoleBatchApi {
    * @param search
    * @param name
    * @param relyingParty
-   * @param relyingPartys
+   * @param relyingParties
    * @return
    */
   @Override
   public Response roleApiBatchDelete(final List<String> uids, final String search,
-      final String name, final String relyingParty, final List<String> relyingPartys) {
-    return deleteController.roleApiBatchDelete(uids, search, name, relyingParty, relyingPartys);
+      final String name, final String relyingParty, final List<String> relyingParties) {
+    return deleteController.roleApiBatchDelete(uids, search, name, relyingParty, relyingParties);
   }
 
   /**

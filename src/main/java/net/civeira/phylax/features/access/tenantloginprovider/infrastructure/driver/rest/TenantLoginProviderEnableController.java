@@ -12,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchProgress.GlobalStatus;
 import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
@@ -33,7 +33,7 @@ import net.civeira.phylax.generated.openapi.model.BatchStepProgress;
 import net.civeira.phylax.generated.openapi.model.BatchStepProgress.StepStatusEnum;
 import net.civeira.phylax.generated.openapi.model.BatchTaskDetail;
 import net.civeira.phylax.generated.openapi.model.BatchTaskDetail.DetailStatusEnum;
-import net.civeira.phylax.generated.openapi.model.BatchTaskLocalizator;
+import net.civeira.phylax.generated.openapi.model.BatchTaskLocator;
 import net.civeira.phylax.generated.openapi.model.ConstraintFail;
 import net.civeira.phylax.generated.openapi.model.MultipleErrorCodes;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
@@ -86,9 +86,9 @@ public class TenantLoginProviderEnableController {
     filterBuilder = filterBuilder.tenants(null == tenants ? null
         : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TenantLoginProviderEnableFilter filter = filterBuilder.build();
-    BatchIdentificator task = enable.batchEnable(currentRequest.interaction(), filter);
+    BatchIdentifier task = enable.batchEnable(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
-    BatchTaskLocalizator response = new BatchTaskLocalizator();
+    BatchTaskLocator response = new BatchTaskLocator();
     response.setUid(task.getUid());
     response.setSteps(task.getSteps());
     return Response.ok(response).build();
@@ -238,12 +238,11 @@ public class TenantLoginProviderEnableController {
     tenantLoginProviderApiDto.setSamlIdpMetadataUrl(dto.getSamlIdpMetadataUrl());
     tenantLoginProviderApiDto.setSamlIdpEntityId(dto.getSamlIdpEntityId());
     tenantLoginProviderApiDto.setSamlIdpSsoUrl(dto.getSamlIdpSsoUrl());
-    String samlIdpIdpCert = dto.getSamlIdpIdpCert();
-    if (null != samlIdpIdpCert) {
+    String samlIdpCert = dto.getSamlIdpCert();
+    if (null != samlIdpCert) {
       String url = currentRequest.getPublicHost() + "/api/access/login-providers/"
-          + dto.getUidOrDefault("-") + "/saml-idp-idp-cert";
-      tenantLoginProviderApiDto
-          .setSamlIdpIdpCert(magicLink.create(url, currentRequest.interaction()));
+          + dto.getUidOrDefault("-") + "/saml-idp-cert";
+      tenantLoginProviderApiDto.setSamlIdpCert(magicLink.create(url, currentRequest.interaction()));
     }
     tenantLoginProviderApiDto.setUsersEnabledByDefault(dto.getUsersEnabledByDefault());
     tenantLoginProviderApiDto.setVersion(dto.getVersion());

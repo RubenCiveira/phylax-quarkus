@@ -478,9 +478,9 @@ public class RoleJdbcDao {
         .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
     filter.getRelyingParty().ifPresent(relyingPartyParam -> sq.where(RELYING_PARTY_SNAKE,
         SqlOperator.EQ, SqlParameterValue.of(relyingPartyParam.getUid())));
-    if (!filter.getRelyingPartys().isEmpty()) {
+    if (!filter.getRelyingParties().isEmpty()) {
       sq.where(RELYING_PARTY_SNAKE, SqlOperator.IN,
-          SqlListParameterValue.strings(filter.getRelyingPartys()));
+          SqlListParameterValue.strings(filter.getRelyingParties()));
     }
     return sq;
   }

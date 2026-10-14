@@ -14,13 +14,12 @@ class TenantLoginProviderChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_tenant_login_provider_change_set_builder() {
-    TenantLoginProviderChangeSet one =
-        new TenantLoginProviderChangeSet().uid("one").tenant(TenantReference.of("one")).name("one")
-            .source(TenantLoginProviderSourceOptions.GOOGLE).disabled(true).directAccess(true)
-            .publicKey("one").privateKey("one").certificate("one").metadata("file_1")
-            .oidcDiscoveryUrl("one").samlIdpMetadataUrl("one").samlIdpEntityId("one")
-            .samlIdpSsoUrl("one").samlIdpIdpCert("file_1").usersEnabledByDefault(true).version(1)
-            .newUid();
+    TenantLoginProviderChangeSet one = new TenantLoginProviderChangeSet().uid("one")
+        .tenant(TenantReference.of("one")).name("one")
+        .source(TenantLoginProviderSourceOptions.GOOGLE).disabled(true).directAccess(true)
+        .publicKey("one").privateKey("one").certificate("one").metadata("file_1")
+        .oidcDiscoveryUrl("one").samlIdpMetadataUrl("one").samlIdpEntityId("one")
+        .samlIdpSsoUrl("one").samlIdpCert("file_1").usersEnabledByDefault(true).version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -125,13 +124,13 @@ class TenantLoginProviderChangeSetUnitTest {
     one.unset("samlIdpSsoUrl");
     Assertions.assertFalse(one.getSamlIdpSsoUrl().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("file_1", one.getSamlIdpIdpCert().get(),
+    Assertions.assertEquals("file_1", one.getSamlIdpCert().get(),
         "Value must equals to the intial value");
-    one.samlIdpIdpCert("file_2");
-    Assertions.assertEquals("file_2", one.getSamlIdpIdpCert().get(),
+    one.samlIdpCert("file_2");
+    Assertions.assertEquals("file_2", one.getSamlIdpCert().get(),
         "Value must equals to the assigned value");
-    one.unset("samlIdpIdpCert");
-    Assertions.assertFalse(one.getSamlIdpIdpCert().isPresent(),
+    one.unset("samlIdpCert");
+    Assertions.assertFalse(one.getSamlIdpCert().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getUsersEnabledByDefault().get(),
         "Value must equals to the intial value");

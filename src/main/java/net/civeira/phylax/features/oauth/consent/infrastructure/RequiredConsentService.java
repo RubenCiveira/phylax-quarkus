@@ -12,11 +12,11 @@ import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfU
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseFilter;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.TenantTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUseChangeSet;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseQueryRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.UserAcceptedTermsOfUse;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.UserAcceptedTermsOfUseChangeSet;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseCommandRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseFilter;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseQueryRepositoryGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -24,9 +24,9 @@ public class RequiredConsentService {
 
   private final TenantTermsOfUseQueryRepositoryGateway terms;
 
-  private final UserAcceptedTermnsOfUseQueryRepositoryGateway userTerms;
+  private final UserAcceptedTermsOfUseQueryRepositoryGateway userTerms;
 
-  private final UserAcceptedTermnsOfUseCommandRepositoryGateway userTermsWriter;
+  private final UserAcceptedTermsOfUseCommandRepositoryGateway userTermsWriter;
 
   public Optional<TenantTermsOfUse> findPendingTerms(User user) {
     return terms.list(TenantTermsOfUseFilter.builder().tenant(user.getTenant()).build()).stream()
@@ -34,13 +34,13 @@ public class RequiredConsentService {
         .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
             .orElse(false))
         .filter(term -> userTerms
-            .find(UserAcceptedTermnsOfUseFilter.builder().conditions(term).user(user).build())
+            .find(UserAcceptedTermsOfUseFilter.builder().conditions(term).user(user).build())
             .isEmpty())
         .max(Comparator.comparing(t -> t.getActivationDate().orElse(OffsetDateTime.MIN)));
   }
 
   public void acceptPendingTerms(User user, String conditionsUid) {
-    userTermsWriter.create(UserAcceptedTermnsOfUse.create(new UserAcceptedTermnsOfUseChangeSet()
+    userTermsWriter.create(UserAcceptedTermsOfUse.create(new UserAcceptedTermsOfUseChangeSet()
         .newUid().user(user).conditions(TenantTermsOfUseReference.of(conditionsUid))
         .acceptDate(OffsetDateTime.now())));
   }

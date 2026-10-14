@@ -64,7 +64,7 @@ public class MessageListUsecase {
         MessageVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     MessageCursor gatewayCursor = MessageCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null)).build();
     MessageCached values = visibility.listCachedVisibles(context, visibleFilter, gatewayCursor);

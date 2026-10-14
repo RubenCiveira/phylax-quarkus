@@ -2,19 +2,6 @@
 @startuml Paquete de access
 title Paquete de access
 left to right direction
-class access.UserRoleAssignament{
-uid:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-access.User "1"  o--  "N*" access.UserRoleAssignament: user 
-access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty 
-access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient 
-
 class access.UserConsentPurposes{
 uid:string
 granted:boolean
@@ -100,7 +87,7 @@ enable()
 disable()
 }
 
-class access.UserAcceptedTermnsOfUse{
+class access.UserAcceptedTermsOfUse{
 uid:string
 acceptDate:datetime
 ipAddress:string
@@ -112,8 +99,8 @@ create()
 update()
 delete()
 }
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
+access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user 
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions 
 
 class access.ApiKeyClient{
 uid:string
@@ -250,8 +237,8 @@ refreshTokenTtlSeconds:integer
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
-wellcomeEmail:blob
-registerdEmail:blob
+welcomeEmail:blob
+registeredEmail:blob
 disabledUserEmail:blob
 enabledUserEmail:blob
 allowRecoverPass:boolean
@@ -264,6 +251,19 @@ update()
 delete()
 }
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant 
+
+class access.UserRoleAssignment{
+uid:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserRoleAssignment: user 
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignment: relyingParty 
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignment: trustedClient 
 
 class access.ConsentPurpose{
 uid:string
@@ -316,7 +316,7 @@ oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
 samlIdpSsoUrl:string
-samlIdpIdpCert:binary
+samlIdpCert:binary
 usersEnabledByDefault:boolean
 version:integer
 list()
@@ -381,7 +381,7 @@ access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient
 
 class access.UserWebauthnCredential{
 uid:string
-autenticator:string
+authenticator:string
 name:string
 publicKey:blob
 signCount:integer
@@ -407,7 +407,7 @@ uid:string
 name:string
 password:string
 email:string
-wellcomeAt:datetime
+welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
@@ -436,10 +436,6 @@ verifyEmail()
 }
 access.Tenant "1"  o--  "N*" access.User: tenant 
 
-access.User "1"  o--  "N*" access.UserRoleAssignament: user  
-access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty  
-access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient  
-access.UserRoleAssignament "N*"  o--*  "N*" access.Role: roles
 access.User "1"  o--  "N*" access.UserConsentPurposes: user  
 access.ConsentPurpose "1"  o--  "N*" access.UserConsentPurposes: consentPurpose  
 access.RelyingParty "1"  o--  "N*" access.Role: relyingParty  
@@ -447,12 +443,16 @@ access.User "1"  o--  "N*" access.UserGroupMembership: user
 access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty  
 access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient  
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions  
+access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user  
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions  
 access.User "1"  o--  "N*" access.UserPersonalApiKey: user  
 access.User "1"  o--  "N*" access.UserProfile: user  
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
+access.User "1"  o--  "N*" access.UserRoleAssignment: user  
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignment: relyingParty  
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignment: trustedClient  
+access.UserRoleAssignment "N*"  o--*  "N*" access.Role: roles
 access.Tenant "1"  o--  "N*" access.ConsentPurpose: tenant  
 access.Tenant "1"  o--  "N*" access.UserInvitation: tenant  
 access.User "1"  o--  "N*" access.UserInvitation: invitedBy  

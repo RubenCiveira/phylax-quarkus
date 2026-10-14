@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
  * Value Object representing a disabled user cant login on the system. On his login attempts, he
- * will recive a specific warn of his disabled account. of user.
+ * will receive a specific warn of his disabled account. of user.
  * <p>
  * This class ensures that the enabled is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -67,7 +67,7 @@ public class TemplateListUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .global(filter.getGlobal().orElse(null)).code(filter.getCode().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TemplateCursor gatewayCursor = TemplateCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(

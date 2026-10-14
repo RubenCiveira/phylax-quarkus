@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class TenantTermsOfUseDisableUsecase {
    * @return The slide with some values
    */
   @Observed("disable a set of entity of tenant terms of use")
-  public BatchIdentificator batchDisable(final OperationContext context,
+  public BatchIdentifier batchDisable(final OperationContext context,
       final TenantTermsOfUseDisableFilter filter) {
     Permission detail = checkPermission(context);
     if (!detail.isAllowed()) {
@@ -112,8 +112,8 @@ public class TenantTermsOfUseDisableUsecase {
         .builder().uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).tenant(filter.getTenant().orElse(null))
         .tenants(filter.getTenants()).relyingParty(filter.getRelyingParty().orElse(null))
-        .relyingPartys(filter.getRelyingPartys())
-        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+        .relyingParties(filter.getRelyingParties())
+        .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TenantTermsOfUseDisableAllInBatchCommand command =
         new TenantTermsOfUseDisableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

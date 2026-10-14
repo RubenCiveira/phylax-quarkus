@@ -28,7 +28,7 @@ public class EmailMessage {
   private final String content;
   @NonNull
   private final String htmlContent;
-  private final MailSended sendedObserver;
+  private final MailSent sentObserver;
   private final MailFail failObserver;
 
   @Builder.Default
@@ -45,8 +45,8 @@ public class EmailMessage {
    *
    * @return optional success observer
    */
-  public Optional<MailSended> getSendedObserver() {
-    return Optional.ofNullable(sendedObserver);
+  public Optional<MailSent> getSentObserver() {
+    return Optional.ofNullable(sentObserver);
   }
 
   /**

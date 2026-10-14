@@ -25,7 +25,7 @@ public class UserGroupMembershipBatchController implements UserGroupMembershipBa
    * @param user
    * @param users
    * @param relyingParty
-   * @param relyingPartys
+   * @param relyingParties
    * @param trustedClient
    * @param trustedClients
    * @return
@@ -33,10 +33,10 @@ public class UserGroupMembershipBatchController implements UserGroupMembershipBa
   @Override
   public Response userGroupMembershipApiBatchDelete(final List<String> uids, final String search,
       final String user, final List<String> users, final String relyingParty,
-      final List<String> relyingPartys, final String trustedClient,
+      final List<String> relyingParties, final String trustedClient,
       final List<String> trustedClients) {
     return deleteController.userGroupMembershipApiBatchDelete(uids, search, user, users,
-        relyingParty, relyingPartys, trustedClient, trustedClients);
+        relyingParty, relyingParties, trustedClient, trustedClients);
   }
 
   /**

@@ -67,10 +67,10 @@ public class UserGroupMembershipListUsecase {
             .forAllAudiences(filter.getForAllAudiences().orElse(null))
             .user(filter.getUser().orElse(null)).users(filter.getUsers())
             .relyingParty(filter.getRelyingParty().orElse(null))
-            .relyingPartys(filter.getRelyingPartys())
+            .relyingParties(filter.getRelyingParties())
             .trustedClient(filter.getTrustedClient().orElse(null))
             .trustedClients(filter.getTrustedClients())
-            .userTenantAccesible(filter.getUserTenantAccesible().orElse(null)).build();
+            .userTenantAccessible(filter.getUserTenantAccessible().orElse(null)).build();
     UserGroupMembershipCursor gatewayCursor = UserGroupMembershipCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     UserGroupMembershipCached values =

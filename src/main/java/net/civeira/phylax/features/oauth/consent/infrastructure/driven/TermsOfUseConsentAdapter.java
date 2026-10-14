@@ -19,11 +19,11 @@ import net.civeira.phylax.features.access.tenanttermsofuse.domain.gateway.Tenant
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUse;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.UserAcceptedTermnsOfUseChangeSet;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseFilter;
-import net.civeira.phylax.features.access.useracceptedtermnsofuse.domain.gateway.UserAcceptedTermnsOfUseQueryRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.UserAcceptedTermsOfUse;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.UserAcceptedTermsOfUseChangeSet;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseCommandRepositoryGateway;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseFilter;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.consent.domain.TermsOfUseAcceptance;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.TermsOfUseConsentGateway;
 
@@ -35,8 +35,8 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
   private final TenantQueryRepositoryGateway tenants;
   private final UserQueryRepositoryGateway users;
   private final TenantTermsOfUseQueryRepositoryGateway terms;
-  private final UserAcceptedTermnsOfUseQueryRepositoryGateway acceptedTerms;
-  private final UserAcceptedTermnsOfUseCommandRepositoryGateway acceptedTermsWriter;
+  private final UserAcceptedTermsOfUseQueryRepositoryGateway acceptedTerms;
+  private final UserAcceptedTermsOfUseCommandRepositoryGateway acceptedTermsWriter;
 
   @Override
   public List<TermsOfUseAcceptance> getPendingConsent(String tenant, String username,
@@ -54,10 +54,8 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
             .sorted(Comparator.comparing(t -> t.getActivationDate().orElse(OffsetDateTime.MIN)))
             .toList();
 
-    return activeTerms.stream()
-        .filter(term -> acceptedTerms
-            .find(UserAcceptedTermnsOfUseFilter.builder().conditions(term).user(user).build())
-            .isEmpty())
+    return activeTerms.stream().filter(term -> acceptedTerms
+        .find(UserAcceptedTermsOfUseFilter.builder().conditions(term).user(user).build()).isEmpty())
         .map(term -> new TermsOfUseAcceptance(term.getUid(), term.getText())).toList();
   }
 
@@ -76,13 +74,13 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
     }
     TenantTermsOfUse currentTerms = termsOpt.get();
     boolean alreadyAccepted = acceptedTerms
-        .find(UserAcceptedTermnsOfUseFilter.builder().conditions(currentTerms).user(user).build())
+        .find(UserAcceptedTermsOfUseFilter.builder().conditions(currentTerms).user(user).build())
         .isPresent();
     if (alreadyAccepted) {
       return;
     }
-    UserAcceptedTermnsOfUse entity =
-        UserAcceptedTermnsOfUse.create(new UserAcceptedTermnsOfUseChangeSet().newUid().user(user)
+    UserAcceptedTermsOfUse entity =
+        UserAcceptedTermsOfUse.create(new UserAcceptedTermsOfUseChangeSet().newUid().user(user)
             .conditions(TenantTermsOfUseReference.of(consent.id()))
             .acceptDate(OffsetDateTime.now()));
     acceptedTermsWriter.create(entity);

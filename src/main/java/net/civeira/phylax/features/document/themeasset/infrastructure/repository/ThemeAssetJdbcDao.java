@@ -523,11 +523,11 @@ public class ThemeAssetJdbcDao {
     if (!filter.getThemes().isEmpty()) {
       sq.where(THEME, SqlOperator.IN, SqlListParameterValue.strings(filter.getThemes()));
     }
-    filter.getThemeTenantAccesible().ifPresent(themeTenantAccesibleParam -> {
+    filter.getThemeTenantAccessible().ifPresent(themeTenantAccessibleParam -> {
       sq.join("document_theme", "document_theme_asset_theme", "document_theme_asset.theme",
           "document_theme_asset_theme.uid");
       sq.where(DOCUMENT_THEME_ASSET_THEME_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(themeTenantAccesibleParam));
+          SqlParameterValue.of(themeTenantAccessibleParam));
     });
     return sq;
   }

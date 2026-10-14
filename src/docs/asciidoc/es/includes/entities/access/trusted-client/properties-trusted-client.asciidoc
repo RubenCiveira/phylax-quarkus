@@ -10,7 +10,7 @@ If true, users can use these client to access with public code flow
 Allowed redirects (xref:#entidad-trusted-client-allowed-redirect[TrustedClientAllowedRedirect])::
 El allowed redirects de trusted client
 Secret oauth (string)::
-If the user is not delegated, the phrasse to identify
+If the user is not delegated, the phrase to identify
 Is resource server* (boolean)::
 If true, this client is allowed to call the token introspection endpoint       (POST /introspect) to validate access tokens. Resource servers must authenticate at       the introspection endpoint using their client credentials.
 Require pkce* (boolean)::

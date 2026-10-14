@@ -543,13 +543,13 @@ public class TenantTermsOfUseJdbcDao {
     }
     filter.getRelyingParty().ifPresent(relyingPartyParam -> sq.where(RELYING_PARTY_SNAKE,
         SqlOperator.EQ, SqlParameterValue.of(relyingPartyParam.getUid())));
-    if (!filter.getRelyingPartys().isEmpty()) {
+    if (!filter.getRelyingParties().isEmpty()) {
       sq.where(RELYING_PARTY_SNAKE, SqlOperator.IN,
-          SqlListParameterValue.strings(filter.getRelyingPartys()));
+          SqlListParameterValue.strings(filter.getRelyingParties()));
     }
-    filter.getTenantAccesible()
-        .ifPresent(tenantAccesibleParam -> sq.where(ACCESS_TENANT_TERMS_OF_USE_TENANT,
-            SqlOperator.EQ, SqlParameterValue.of(tenantAccesibleParam)));
+    filter.getTenantAccessible()
+        .ifPresent(tenantAccessibleParam -> sq.where(ACCESS_TENANT_TERMS_OF_USE_TENANT,
+            SqlOperator.EQ, SqlParameterValue.of(tenantAccessibleParam)));
     return sq;
   }
 

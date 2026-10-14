@@ -65,7 +65,7 @@ public class RoleListUsecase {
         RoleVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .name(filter.getName().orElse(null)).relyingParty(filter.getRelyingParty().orElse(null))
-            .relyingPartys(filter.getRelyingPartys()).build();
+            .relyingParties(filter.getRelyingParties()).build();
     RoleCursor gatewayCursor = RoleCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(RoleOrder::valueOf).toList())

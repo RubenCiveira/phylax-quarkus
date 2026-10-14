@@ -22,7 +22,7 @@ class UserChangeSetUnitTest {
     AesCipherService cypher = Mockito.mock(AesCipherService.class);
     UserChangeSet one = new UserChangeSet().uid("one").tenant(TenantReference.of("one")).name("one")
         .passwordPlain("one").email("one")
-        .wellcomeAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+        .welcomeAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
             .toOffsetDateTime())
         .emailVerified(true).enabled(true).approve(UserApproveOptions.UNVERIFIED)
         .temporalPassword(true).useSecondFactors(true).secondFactorSeedPlain("one")
@@ -61,14 +61,14 @@ class UserChangeSetUnitTest {
     Assertions.assertFalse(one.getEmail().isPresent(), "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
-        one.getWellcomeAt().get(), "Value must equals to the intial value");
-    one.wellcomeAt(
+        one.getWelcomeAt().get(), "Value must equals to the intial value");
+    one.welcomeAt(
         LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime());
     Assertions.assertEquals(
         LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
-        one.getWellcomeAt().get(), "Value must equals to the assigned value");
-    one.unset("wellcomeAt");
-    Assertions.assertFalse(one.getWellcomeAt().isPresent(),
+        one.getWelcomeAt().get(), "Value must equals to the assigned value");
+    one.unset("welcomeAt");
+    Assertions.assertFalse(one.getWelcomeAt().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getEmailVerified().get(),
         "Value must equals to the intial value");

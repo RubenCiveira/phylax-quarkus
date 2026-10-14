@@ -54,25 +54,25 @@ class EmailMessageUnitTest {
 
     @Test
     @DisplayName("Should return present optional when sended observer is set")
-    void shouldReturnPresentOptionalWhenSendedObserverIsSet() {
+    void shouldReturnPresentOptionalWhenSentObserverIsSet() {
       // Arrange — Build an EmailMessage with a sended observer configured
-      MailSended observer = mock(MailSended.class);
+      MailSent observer = mock(MailSent.class);
       EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
-          .htmlContent("h").sendedObserver(observer).build();
+          .htmlContent("h").sentObserver(observer).build();
 
       // Act / Assert — Verify the sended observer Optional is present
-      assertTrue(msg.getSendedObserver().isPresent(), "Sended observer should be present when set");
+      assertTrue(msg.getSentObserver().isPresent(), "Sent observer should be present when set");
     }
 
     @Test
     @DisplayName("Should return empty optional when sended observer is not set")
-    void shouldReturnEmptyOptionalWhenSendedObserverIsNotSet() {
+    void shouldReturnEmptyOptionalWhenSentObserverIsNotSet() {
       // Arrange — Build an EmailMessage without a sended observer
       EmailMessage msg = EmailMessage.builder().targetAddress("a@b.com").subject("s").content("c")
           .htmlContent("h").build();
 
       // Act / Assert — Verify the sended observer Optional is empty
-      assertTrue(msg.getSendedObserver().isEmpty(), "Sended observer should be empty when not set");
+      assertTrue(msg.getSentObserver().isEmpty(), "Sent observer should be empty when not set");
     }
 
     @Test

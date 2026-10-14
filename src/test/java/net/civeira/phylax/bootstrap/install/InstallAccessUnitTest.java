@@ -34,8 +34,8 @@ import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipCommandRepositoryGateway;
-import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
-import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentCommandRepositoryGateway;
+import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssignment;
+import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentCommandRepositoryGateway;
 
 class InstallAccessUnitTest {
   private UserCommandRepositoryGateway users;
@@ -104,14 +104,14 @@ class InstallAccessUnitTest {
     when(roles.create(any(Role.class))).thenAnswer(inv -> inv.getArgument(0));
     TenantCommandRepositoryGateway tenants = mock(TenantCommandRepositoryGateway.class);
     when(tenants.create(any(Tenant.class))).thenAnswer(inv -> inv.getArgument(0));
-    UserRoleAssignamentCommandRepositoryGateway assignaments =
-        mock(UserRoleAssignamentCommandRepositoryGateway.class);
-    when(assignaments.create(any(UserRoleAssignament.class))).thenAnswer(inv -> inv.getArgument(0));
+    UserRoleAssignmentCommandRepositoryGateway assignments =
+        mock(UserRoleAssignmentCommandRepositoryGateway.class);
+    when(assignments.create(any(UserRoleAssignment.class))).thenAnswer(inv -> inv.getArgument(0));
     UserGroupMembershipCommandRepositoryGateway memberships =
         mock(UserGroupMembershipCommandRepositoryGateway.class);
     when(memberships.create(any(UserGroupMembership.class))).thenAnswer(inv -> inv.getArgument(0));
     when(apiKeys.create(any(ApiKeyClient.class))).thenAnswer(inv -> inv.getArgument(0));
-    return new InstallAccess(users, roles, tenants, clients, parties, assignaments, memberships,
+    return new InstallAccess(users, roles, tenants, clients, parties, assignments, memberships,
         apiKeys, IsolatedConfigLoaderTestSupport.loader(external, profiles, environment),
         new SecureTokenService());
   }

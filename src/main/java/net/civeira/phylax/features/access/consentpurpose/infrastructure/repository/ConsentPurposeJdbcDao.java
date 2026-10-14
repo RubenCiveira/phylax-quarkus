@@ -527,9 +527,9 @@ public class ConsentPurposeJdbcDao {
     if (!filter.getTenants().isEmpty()) {
       sq.where(TENANT, SqlOperator.IN, SqlListParameterValue.strings(filter.getTenants()));
     }
-    filter.getTenantAccesible()
-        .ifPresent(tenantAccesibleParam -> sq.where(ACCESS_CONSENT_PURPOSE_TENANT, SqlOperator.EQ,
-            SqlParameterValue.of(tenantAccesibleParam)));
+    filter.getTenantAccessible()
+        .ifPresent(tenantAccessibleParam -> sq.where(ACCESS_CONSENT_PURPOSE_TENANT, SqlOperator.EQ,
+            SqlParameterValue.of(tenantAccessibleParam)));
     return sq;
   }
 

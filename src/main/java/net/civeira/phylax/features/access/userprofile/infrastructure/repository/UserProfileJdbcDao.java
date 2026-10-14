@@ -716,11 +716,11 @@ public class UserProfileJdbcDao {
     if (!filter.getUsers().isEmpty()) {
       sq.where(USER, SqlOperator.IN, SqlListParameterValue.strings(filter.getUsers()));
     }
-    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
+    filter.getUserTenantAccessible().ifPresent(userTenantAccessibleParam -> {
       sq.join("access_user", "access_user_profile_user", "access_user_profile.user",
           "access_user_profile_user.uid");
       sq.where(ACCESS_USER_PROFILE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccessibleParam));
     });
     return sq;
   }

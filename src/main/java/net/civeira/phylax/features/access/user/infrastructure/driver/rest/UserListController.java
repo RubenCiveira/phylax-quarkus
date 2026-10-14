@@ -168,7 +168,7 @@ public class UserListController {
     userApiDto.setName(dto.getName());
     userApiDto.setPassword("*****");
     userApiDto.setEmail(dto.getEmail());
-    userApiDto.setWellcomeAt(dto.getWellcomeAt());
+    userApiDto.setWelcomeAt(dto.getWelcomeAt());
     userApiDto.setEmailVerified(dto.getEmailVerified());
     userApiDto.setEnabled(dto.getEnabled());
     userApiDto.setApprove(approveEnumToApi(dto.getApprove()));

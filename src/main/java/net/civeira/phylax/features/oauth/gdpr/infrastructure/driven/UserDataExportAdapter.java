@@ -159,7 +159,7 @@ public class UserDataExportAdapter implements UserDataExportGateway {
     sb.append("[");
     try (Connection conn = dataSource.getConnection();
         PreparedStatement stmt = conn.prepareStatement(
-            "SELECT terms_uid, accepted_at, ip_address FROM access_user_accepted_termns_of_use WHERE user_uid = ?")) {
+            "SELECT terms_uid, accepted_at, ip_address FROM access_user_accepted_terms_of_use WHERE user_uid = ?")) {
       stmt.setString(1, userUid);
       try (ResultSet rs = stmt.executeQuery()) {
         boolean first = true;
@@ -225,7 +225,7 @@ public class UserDataExportAdapter implements UserDataExportGateway {
           .htmlContent("<p>Please find your personal data export attached to this email.</p>"
               + "<p>This export was generated in response to your data portability request (GDPR Art. 20). "
               + "The file contains your profile, active sessions, consented scopes, accepted terms, and audit log entries.</p>")
-          .attacheds(List.of(new Attach("user-data-export.json", tmpFile))).sendedObserver(() -> {
+          .attacheds(List.of(new Attach("user-data-export.json", tmpFile))).sentObserver(() -> {
             if (!tmpFile.delete()) {
               log.warn("Could not delete temporary export file: {}", tmpFile.getAbsolutePath());
             }

@@ -33,7 +33,7 @@ oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
 samlIdpSsoUrl:string
-samlIdpIdpCert:binary
+samlIdpCert:binary
 usersEnabledByDefault:boolean
 version:integer
 list()

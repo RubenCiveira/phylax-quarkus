@@ -65,7 +65,7 @@ public class TemplateVersionListUsecase {
         TemplateVersionVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .template(filter.getTemplate().orElse(null)).templates(filter.getTemplates())
-            .templateTenantAccesible(filter.getTemplateTenantAccesible().orElse(null)).build();
+            .templateTenantAccessible(filter.getTemplateTenantAccessible().orElse(null)).build();
     TemplateVersionCursor gatewayCursor = TemplateVersionCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     TemplateVersionCached values =

@@ -66,7 +66,7 @@ public class ThemeAssetListUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
-        .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
+        .themeTenantAccessible(filter.getThemeTenantAccessible().orElse(null)).build();
     ThemeAssetCursor gatewayCursor = ThemeAssetCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(

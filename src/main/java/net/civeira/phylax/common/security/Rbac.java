@@ -129,7 +129,8 @@ public class Rbac {
       return List.of();
     }
     return activeStores.stream()
-        .flatMap(store -> store.checkRoleProperties(actor).innacesiblesFor(resource, view).stream())
+        .flatMap(
+            store -> store.checkRoleProperties(actor).inaccessiblesFor(resource, view).stream())
         .distinct().toList();
   }
 

@@ -6,16 +6,16 @@ mp:
     audiences: phylax-api
     roles:
       claim: roles
-  rcab:
+  rbac:
     # model: phylax
     # phylax:
     #  api-key: 1111
     #  audience: phylax-api
     #  register:
-    #    scope: ${security.rcab.host}/resource/scope
-    #    schema: ${security.rcab.host}/resource/schema
+    #    scope: ${security.rbac.host}/resource/scope
+    #    schema: ${security.rbac.host}/resource/schema
     #  check:
-    #    grant: ${security.rcab.host}/grant
+    #    grant: ${security.rbac.host}/grant
 
 app:
   security:

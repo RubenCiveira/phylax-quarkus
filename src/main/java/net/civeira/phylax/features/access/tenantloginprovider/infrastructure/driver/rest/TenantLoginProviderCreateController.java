@@ -128,12 +128,11 @@ public class TenantLoginProviderCreateController {
     tenantLoginProviderApiDto.setSamlIdpMetadataUrl(dto.getSamlIdpMetadataUrl());
     tenantLoginProviderApiDto.setSamlIdpEntityId(dto.getSamlIdpEntityId());
     tenantLoginProviderApiDto.setSamlIdpSsoUrl(dto.getSamlIdpSsoUrl());
-    String samlIdpIdpCert = dto.getSamlIdpIdpCert();
-    if (null != samlIdpIdpCert) {
+    String samlIdpCert = dto.getSamlIdpCert();
+    if (null != samlIdpCert) {
       String url = currentRequest.getPublicHost() + "/api/access/login-providers/"
-          + dto.getUidOrDefault("-") + "/saml-idp-idp-cert";
-      tenantLoginProviderApiDto
-          .setSamlIdpIdpCert(magicLink.create(url, currentRequest.interaction()));
+          + dto.getUidOrDefault("-") + "/saml-idp-cert";
+      tenantLoginProviderApiDto.setSamlIdpCert(magicLink.create(url, currentRequest.interaction()));
     }
     tenantLoginProviderApiDto.setUsersEnabledByDefault(dto.getUsersEnabledByDefault());
     tenantLoginProviderApiDto.setVersion(dto.getVersion());
@@ -199,15 +198,15 @@ public class TenantLoginProviderCreateController {
     if (null != tenantLoginProviderApiDto.getSamlIdpSsoUrl()) {
       dto.setSamlIdpSsoUrl(tenantLoginProviderApiDto.getSamlIdpSsoUrl());
     }
-    if (!StringUtils.isBlank(tenantLoginProviderApiDto.getSamlIdpIdpCert())) {
-      String url = tenantLoginProviderApiDto.getSamlIdpIdpCert();
-      if (tenantLoginProviderApiDto.getSamlIdpIdpCert().startsWith(currentRequest.getPublicHost()
-          + "/api/access/login-providers/-/temp-saml-idp-idp-cert?temp=")) {
-        dto.setSamlIdpIdpCert("temp://" + (url.substring((currentRequest.getPublicHost()
-            + "/api/access/login-providers/-/temp-saml-idp-idp-cert?temp=").length())));
+    if (!StringUtils.isBlank(tenantLoginProviderApiDto.getSamlIdpCert())) {
+      String url = tenantLoginProviderApiDto.getSamlIdpCert();
+      if (tenantLoginProviderApiDto.getSamlIdpCert().startsWith(currentRequest.getPublicHost()
+          + "/api/access/login-providers/-/temp-saml-idp-cert?temp=")) {
+        dto.setSamlIdpCert("temp://" + (url.substring((currentRequest.getPublicHost()
+            + "/api/access/login-providers/-/temp-saml-idp-cert?temp=").length())));
       } else if (!(url.equals(currentRequest.getPublicHost() + "/api/access/login-providers/"
-          + tenantLoginProviderApiDto.getUid() + "/saml-idp-idp-cert"))) {
-        dto.setSamlIdpIdpCert(tenantLoginProviderApiDto.getSamlIdpIdpCert());
+          + tenantLoginProviderApiDto.getUid() + "/saml-idp-cert"))) {
+        dto.setSamlIdpCert(tenantLoginProviderApiDto.getSamlIdpCert());
       }
     }
     if (null != tenantLoginProviderApiDto.getUsersEnabledByDefault()) {

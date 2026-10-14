@@ -52,7 +52,7 @@ public class RelyingPartyRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
         .description("El código identificativo de la aplicación").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("apiKey")
-        .description("A identification for the aplication").build());
+        .description("An identifier for the application").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
         .description("Una marca que permite quitar el acceso a una cuenta sin borrarla").build());
     rbac.registerResourceField(RESOURCE,

@@ -86,8 +86,8 @@ public class TenantConfigRetrieveController {
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());
-    tenantConfigApiDto.setWellcomeEmail(dto.getWellcomeEmail());
-    tenantConfigApiDto.setRegisterdEmail(dto.getRegisterdEmail());
+    tenantConfigApiDto.setWelcomeEmail(dto.getWelcomeEmail());
+    tenantConfigApiDto.setRegisteredEmail(dto.getRegisteredEmail());
     tenantConfigApiDto.setDisabledUserEmail(dto.getDisabledUserEmail());
     tenantConfigApiDto.setEnabledUserEmail(dto.getEnabledUserEmail());
     tenantConfigApiDto.setAllowRecoverPass(dto.getAllowRecoverPass());

@@ -12,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchProgress.GlobalStatus;
 import net.civeira.phylax.common.batch.BatchStepProgress.ErrorInfo;
@@ -31,7 +31,7 @@ import net.civeira.phylax.generated.openapi.model.BatchStepProgress;
 import net.civeira.phylax.generated.openapi.model.BatchStepProgress.StepStatusEnum;
 import net.civeira.phylax.generated.openapi.model.BatchTaskDetail;
 import net.civeira.phylax.generated.openapi.model.BatchTaskDetail.DetailStatusEnum;
-import net.civeira.phylax.generated.openapi.model.BatchTaskLocalizator;
+import net.civeira.phylax.generated.openapi.model.BatchTaskLocator;
 import net.civeira.phylax.generated.openapi.model.ConstraintFail;
 import net.civeira.phylax.generated.openapi.model.MultipleErrorCodes;
 
@@ -56,13 +56,13 @@ public class TenantTermsOfUseDeleteController {
    * @param tenant
    * @param tenants
    * @param relyingParty
-   * @param relyingPartys
+   * @param relyingParties
    * @return
    */
   @ApiObserved("Api to delete on massive entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDelete(final List<String> uids, final String search,
       final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingPartys) {
+      final List<String> relyingParties) {
     TenantTermsOfUseDeleteFilter.TenantTermsOfUseDeleteFilterBuilder filterBuilder =
         TenantTermsOfUseDeleteFilter.builder();
     filterBuilder =
@@ -79,12 +79,12 @@ public class TenantTermsOfUseDeleteController {
     if (null != relyingParty) {
       filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
     }
-    filterBuilder = filterBuilder.relyingPartys(null == relyingPartys ? null
-        : relyingPartys.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.relyingParties(null == relyingParties ? null
+        : relyingParties.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TenantTermsOfUseDeleteFilter filter = filterBuilder.build();
-    BatchIdentificator task = delete.batchDelete(currentRequest.interaction(), filter);
+    BatchIdentifier task = delete.batchDelete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
-    BatchTaskLocalizator response = new BatchTaskLocalizator();
+    BatchTaskLocator response = new BatchTaskLocator();
     response.setUid(task.getUid());
     response.setSteps(task.getSteps());
     return Response.ok(response).build();

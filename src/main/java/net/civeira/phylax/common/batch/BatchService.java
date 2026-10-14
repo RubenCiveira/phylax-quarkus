@@ -60,10 +60,10 @@ public class BatchService {
    * @param actor the identifier of the user or system initiating the batch job
    * @param preservation how long the batch result should be preserved after completion
    * @param plans ordered set of execution plans that compose the batch
-   * @return a {@link BatchIdentificator} containing the batch UID and step names
+   * @return a {@link BatchIdentifier} containing the batch UID and step names
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public BatchIdentificator start(String actor, Duration preservation, ExecutorPlan<?>... plans) {
+  public BatchIdentifier start(String actor, Duration preservation, ExecutorPlan<?>... plans) {
     String taskUid = UUID.randomUUID().toString();
     List<BatchStepProgress> map = new ArrayList<>();
     for (int i = 0; i < plans.length; i++) {
@@ -103,7 +103,7 @@ public class BatchService {
         storage.finish(taskUid, Instant.now().plus(preservation), actor);
       }
     });
-    return BatchIdentificator.builder()
+    return BatchIdentifier.builder()
         .steps(progress.getSteps().stream().map(BatchStepProgress::getName).toList()).uid(taskUid)
         .build();
   }

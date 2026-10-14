@@ -34,9 +34,9 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipFilter;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipQueryRepositoryGateway;
-import net.civeira.phylax.features.access.userroleassignament.domain.UserRoleAssignament;
-import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentFilter;
-import net.civeira.phylax.features.access.userroleassignament.domain.gateway.UserRoleAssignamentQueryRepositoryGateway;
+import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssignment;
+import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentFilter;
+import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
@@ -62,7 +62,7 @@ public class UserLoginService {
 
   private final UserGroupMembershipQueryRepositoryGateway userGroups;
 
-  private final UserRoleAssignamentQueryRepositoryGateway userRoles;
+  private final UserRoleAssignmentQueryRepositoryGateway userRoles;
 
   private final UserAccessTemporalCodeCommandRepositoryGateway codes;
 
@@ -149,11 +149,9 @@ public class UserLoginService {
             userGroups
                 .list(UserGroupMembershipFilter.builder().user(user).forAllAudiences(true).build()),
             tenant);
-    List<String> forAllPlatform =
-        rolesFromIdentities(
-            userRoles
-                .list(UserRoleAssignamentFilter.builder().user(user).forAllAudiences(true).build()),
-            tenant);
+    List<String> forAllPlatform = rolesFromIdentities(
+        userRoles.list(UserRoleAssignmentFilter.builder().user(user).forAllAudiences(true).build()),
+        tenant);
     request.getAudiences().forEach(aud -> {
       List<String> audRoles = new ArrayList<>(forAllPlatform);
       List<String> audGroups = new ArrayList<>(forAllClient);
@@ -162,7 +160,7 @@ public class UserLoginService {
           clients.find(TrustedClientFilter.builder().code(aud).build());
       if (isClient.isPresent()) {
         audRoles.addAll(rolesFromIdentities(userRoles.list(
-            UserRoleAssignamentFilter.builder().user(user).trustedClient(isClient.get()).build()),
+            UserRoleAssignmentFilter.builder().user(user).trustedClient(isClient.get()).build()),
             tenant));
       }
       Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
@@ -173,7 +171,7 @@ public class UserLoginService {
             tenant));
         audRoles.addAll(rolesFromIdentities(
             userRoles.list(
-                UserRoleAssignamentFilter.builder().user(user).relyingParty(isParty.get()).build()),
+                UserRoleAssignmentFilter.builder().user(user).relyingParty(isParty.get()).build()),
             tenant));
       }
       if (!audRoles.isEmpty()) {
@@ -198,9 +196,9 @@ public class UserLoginService {
     return new ArrayList<>(groups);
   }
 
-  private List<String> rolesFromIdentities(List<UserRoleAssignament> identities, Tenant tenant) {
+  private List<String> rolesFromIdentities(List<UserRoleAssignment> identities, Tenant tenant) {
     LinkedHashSet<String> roles = new LinkedHashSet<>();
-    identities.stream().map(UserRoleAssignament::getRoles).flatMap(List::stream)
+    identities.stream().map(UserRoleAssignment::getRoles).flatMap(List::stream)
         .collect(Collectors.collectingAndThen(Collectors.toList(), userRoles::resolveRoles))
         .stream().map(Role::getName).map(String::toLowerCase).forEach(roles::add);
     return new ArrayList<>(roles);

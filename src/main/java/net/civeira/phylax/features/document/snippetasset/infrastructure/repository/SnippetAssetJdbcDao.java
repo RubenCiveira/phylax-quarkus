@@ -524,11 +524,11 @@ public class SnippetAssetJdbcDao {
     if (!filter.getSnippets().isEmpty()) {
       sq.where(SNIPPET, SqlOperator.IN, SqlListParameterValue.strings(filter.getSnippets()));
     }
-    filter.getSnippetTenantAccesible().ifPresent(snippetTenantAccesibleParam -> {
+    filter.getSnippetTenantAccessible().ifPresent(snippetTenantAccessibleParam -> {
       sq.join("document_snippet", "document_snippet_asset_snippet",
           "document_snippet_asset.snippet", "document_snippet_asset_snippet.uid");
       sq.where(DOCUMENT_SNIPPET_ASSET_SNIPPET_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(snippetTenantAccesibleParam));
+          SqlParameterValue.of(snippetTenantAccessibleParam));
     });
     return sq;
   }

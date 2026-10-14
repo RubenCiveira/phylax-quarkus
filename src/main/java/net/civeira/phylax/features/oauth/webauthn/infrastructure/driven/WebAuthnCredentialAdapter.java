@@ -27,10 +27,10 @@ import net.civeira.phylax.features.oauth.webauthn.domain.gateway.WebAuthnCredent
  * {@code userwebauthncredential} bounded context's repository gateways.
  *
  * <p>
- * {@link UserWebauthnCredentialFilter} does not expose an {@code autenticator} field, so
+ * {@link UserWebauthnCredentialFilter} does not expose an {@code authenticator} field, so
  * {@link #findByCredentialId} lists by tenant/user scope and filters in memory. WebAuthn credential
- * counts per tenant are inherently small, so this is acceptable. Add an {@code autenticator} filter
- * field to {@link UserWebauthnCredentialFilter} and its backing repository if this becomes a
+ * counts per tenant are inherently small, so this is acceptable. Add an {@code authenticator}
+ * filter field to {@link UserWebauthnCredentialFilter} and its backing repository if this becomes a
  * bottleneck.
  * </p>
  */
@@ -50,7 +50,7 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
   public void store(WebAuthnCredential credential) {
     UserWebauthnCredentialChangeSet cs = new UserWebauthnCredentialChangeSet().newUid();
     cs.user(UserReference.of(credential.getUserUid()));
-    cs.autenticator(credential.getCredentialId());
+    cs.authenticator(credential.getCredentialId());
     cs.name(credential.getDeviceName().orElse(credential.getCredentialId()));
     cs.publicKey(credential.getPublicKey());
     cs.signCount(credential.getSignCount());
@@ -67,8 +67,9 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
 
   @Override
   public Optional<WebAuthnCredential> findByCredentialId(String credentialId, String tenantId) {
-    return reader.list(UserWebauthnCredentialFilter.builder().userTenantAccesible(tenantId).build())
-        .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
+    return reader
+        .list(UserWebauthnCredentialFilter.builder().userTenantAccessible(tenantId).build())
+        .stream().filter(e -> credentialId.equals(e.getAuthenticator())).findFirst()
         .map(e -> toDomain(e, resolveUsername(e.getUserUid())));
   }
 
@@ -105,8 +106,9 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
 
   private UserWebauthnCredential findForUpdateByCredentialId(String credentialId, String tenantId) {
     return writer
-        .listForUpdate(UserWebauthnCredentialFilter.builder().userTenantAccesible(tenantId).build())
-        .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
+        .listForUpdate(
+            UserWebauthnCredentialFilter.builder().userTenantAccessible(tenantId).build())
+        .stream().filter(e -> credentialId.equals(e.getAuthenticator())).findFirst()
         .orElseThrow(WebAuthnException::credentialNotFound);
   }
 
@@ -115,7 +117,7 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
     return writer
         .listForUpdate(
             UserWebauthnCredentialFilter.builder().user(UserReference.of(userUid)).build())
-        .stream().filter(e -> credentialId.equals(e.getAutenticator())).findFirst()
+        .stream().filter(e -> credentialId.equals(e.getAuthenticator())).findFirst()
         .orElseThrow(WebAuthnException::credentialNotFound);
   }
 
@@ -128,7 +130,7 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
     UserRef userRef = e.getUser();
     return WebAuthnCredential.builder().uid(e.getUid())
         .userUid(userRef != null ? userRef.getUid() : null).username(username)
-        .credentialId(e.getAutenticator()).publicKey(e.getPublicKey())
+        .credentialId(e.getAuthenticator()).publicKey(e.getPublicKey())
         .signCount(Optional.ofNullable(e.getSignCount()).orElse(0))
         .aaguid(e.getAaguid().orElse(null)).deviceName(e.getDeviceName().orElse(null))
         .transports(e.getTransportsJson().map(this::fromJson).orElse(null))

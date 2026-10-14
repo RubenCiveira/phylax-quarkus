@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class ThemeVersionDeleteUsecase {
    * @return The slide with some values
    */
   @Observed("Deleting a set of entities of theme version")
-  public BatchIdentificator batchDelete(final OperationContext context,
+  public BatchIdentifier batchDelete(final OperationContext context,
       final ThemeVersionDeleteFilter filter) {
     Permission permission = checkPermission(context);
     if (!permission.isAllowed()) {
@@ -112,7 +112,7 @@ public class ThemeVersionDeleteUsecase {
         ThemeVersionVisibilityFilter.builder().uid(filter.getUid().orElse(null))
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
-            .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
+            .themeTenantAccessible(filter.getThemeTenantAccessible().orElse(null)).build();
     ThemeVersionDeleteAllInBatchCommand command =
         new ThemeVersionDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

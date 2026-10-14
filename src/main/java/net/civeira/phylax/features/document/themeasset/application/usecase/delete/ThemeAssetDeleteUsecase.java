@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class ThemeAssetDeleteUsecase {
    * @return The slide with some values
    */
   @Observed("Deleting a set of entities of theme asset")
-  public BatchIdentificator batchDelete(final OperationContext context,
+  public BatchIdentifier batchDelete(final OperationContext context,
       final ThemeAssetDeleteFilter filter) {
     Permission permission = checkPermission(context);
     if (!permission.isAllowed()) {
@@ -112,7 +112,7 @@ public class ThemeAssetDeleteUsecase {
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).code(filter.getCode().orElse(null))
         .theme(filter.getTheme().orElse(null)).themes(filter.getThemes())
-        .themeTenantAccesible(filter.getThemeTenantAccesible().orElse(null)).build();
+        .themeTenantAccessible(filter.getThemeTenantAccessible().orElse(null)).build();
     ThemeAssetDeleteAllInBatchCommand command =
         new ThemeAssetDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

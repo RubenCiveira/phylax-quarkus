@@ -63,7 +63,7 @@ public class TrustedClientRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedRedirects")
         .description("El allowed redirects de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
-        .description("If the user is not delegated, the phrasse to identify").build());
+        .description("If the user is not delegated, the phrase to identify").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("isResourceServer").description(
             "If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.")

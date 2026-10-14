@@ -24,7 +24,7 @@ uid:string
 name:string
 password:string
 email:string
-wellcomeAt:datetime
+welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
@@ -56,7 +56,7 @@ uid:string
 name:string
 password:string
 email:string
-wellcomeAt:datetime
+welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions

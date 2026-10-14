@@ -132,7 +132,7 @@ public class EmailService {
         } else {
           sendWithDefaultMailer(to, message);
         }
-        message.getSendedObserver().ifPresent(MailSended::ok);
+        message.getSentObserver().ifPresent(MailSent::ok);
       } catch (Exception ex) {
         message.getFailObserver().ifPresent(obs -> obs.fail(ex));
         LOGGER.error("Imposible enviar email {} a {} <{}> por {}", message.getSubject(),

@@ -14,8 +14,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a bloqued user cant login on the system, until these date. On his login
- * attempst, hue will recive a generic not allowed message. of user.
+ * Value Object representing a blocked user cant login on the system, until these date. On his login
+ * attempts, the user will receive a generic not allowed message. of user.
  * <p>
  * This class ensures that the blocked until is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

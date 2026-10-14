@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class TenantEnableUsecase {
    * @return The slide with some values
    */
   @Observed("enable a set of entity of tenant")
-  public BatchIdentificator batchEnable(final OperationContext context,
+  public BatchIdentifier batchEnable(final OperationContext context,
       final TenantEnableFilter filter) {
     Permission detail = checkPermission(context);
     if (!detail.isAllowed()) {
@@ -110,7 +110,7 @@ public class TenantEnableUsecase {
     TenantVisibilityFilter filterWithVisibility = TenantVisibilityFilter.builder()
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).name(filter.getName().orElse(null))
-        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+        .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TenantEnableAllInBatchCommand command =
         new TenantEnableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

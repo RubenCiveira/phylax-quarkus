@@ -521,11 +521,11 @@ public class SnippetVersionJdbcDao {
     if (!filter.getSnippets().isEmpty()) {
       sq.where(SNIPPET, SqlOperator.IN, SqlListParameterValue.strings(filter.getSnippets()));
     }
-    filter.getSnippetTenantAccesible().ifPresent(snippetTenantAccesibleParam -> {
+    filter.getSnippetTenantAccessible().ifPresent(snippetTenantAccessibleParam -> {
       sq.join("document_snippet", "document_snippet_version_snippet",
           "document_snippet_version.snippet", "document_snippet_version_snippet.uid");
       sq.where(DOCUMENT_SNIPPET_VERSION_SNIPPET_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(snippetTenantAccesibleParam));
+          SqlParameterValue.of(snippetTenantAccessibleParam));
     });
     return sq;
   }

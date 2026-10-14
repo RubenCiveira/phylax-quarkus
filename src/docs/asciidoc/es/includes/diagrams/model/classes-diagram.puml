@@ -34,19 +34,6 @@ disable()
 }
 access.Tenant "1"  o--  "N*" document.Snippet: tenant 
 
-class access.UserRoleAssignament{
-uid:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-access.User "1"  o--  "N*" access.UserRoleAssignament: user 
-access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty 
-access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient 
-
 class access.UserConsentPurposes{
 uid:string
 granted:boolean
@@ -162,21 +149,6 @@ delete()
 }
 document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet 
 
-class access.UserAcceptedTermnsOfUse{
-uid:string
-acceptDate:datetime
-ipAddress:string
-userAgent:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
-
 class document.TemplateVersion{
 uid:string
 locale:string
@@ -208,6 +180,21 @@ enable()
 disable()
 }
 document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet 
+
+class access.UserAcceptedTermsOfUse{
+uid:string
+acceptDate:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user 
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions 
 
 class access.ApiKeyClient{
 uid:string
@@ -430,8 +417,8 @@ refreshTokenTtlSeconds:integer
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
-wellcomeEmail:blob
-registerdEmail:blob
+welcomeEmail:blob
+registeredEmail:blob
 disabledUserEmail:blob
 enabledUserEmail:blob
 allowRecoverPass:boolean
@@ -444,6 +431,19 @@ update()
 delete()
 }
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant 
+
+class access.UserRoleAssignment{
+uid:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserRoleAssignment: user 
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignment: relyingParty 
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignment: trustedClient 
 
 class access.ConsentPurpose{
 uid:string
@@ -518,7 +518,7 @@ oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
 samlIdpSsoUrl:string
-samlIdpIdpCert:binary
+samlIdpCert:binary
 usersEnabledByDefault:boolean
 version:integer
 list()
@@ -583,7 +583,7 @@ access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient
 
 class access.UserWebauthnCredential{
 uid:string
-autenticator:string
+authenticator:string
 name:string
 publicKey:blob
 signCount:integer
@@ -609,7 +609,7 @@ uid:string
 name:string
 password:string
 email:string
-wellcomeAt:datetime
+welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
@@ -670,19 +670,6 @@ disable()
 }
 access.Tenant "1"  o--  "N*" document.Snippet: tenant 
 
-class access.UserRoleAssignament{
-uid:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-access.User "1"  o--  "N*" access.UserRoleAssignament: user 
-access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty 
-access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient 
-
 class access.UserConsentPurposes{
 uid:string
 granted:boolean
@@ -798,21 +785,6 @@ delete()
 }
 document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet 
 
-class access.UserAcceptedTermnsOfUse{
-uid:string
-acceptDate:datetime
-ipAddress:string
-userAgent:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user 
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions 
-
 class document.TemplateVersion{
 uid:string
 locale:string
@@ -844,6 +816,21 @@ enable()
 disable()
 }
 document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet 
+
+class access.UserAcceptedTermsOfUse{
+uid:string
+acceptDate:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user 
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions 
 
 class access.ApiKeyClient{
 uid:string
@@ -1066,8 +1053,8 @@ refreshTokenTtlSeconds:integer
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
-wellcomeEmail:blob
-registerdEmail:blob
+welcomeEmail:blob
+registeredEmail:blob
 disabledUserEmail:blob
 enabledUserEmail:blob
 allowRecoverPass:boolean
@@ -1080,6 +1067,19 @@ update()
 delete()
 }
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant 
+
+class access.UserRoleAssignment{
+uid:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserRoleAssignment: user 
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignment: relyingParty 
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignment: trustedClient 
 
 class access.ConsentPurpose{
 uid:string
@@ -1154,7 +1154,7 @@ oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
 samlIdpSsoUrl:string
-samlIdpIdpCert:binary
+samlIdpCert:binary
 usersEnabledByDefault:boolean
 version:integer
 list()
@@ -1219,7 +1219,7 @@ access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient
 
 class access.UserWebauthnCredential{
 uid:string
-autenticator:string
+authenticator:string
 name:string
 publicKey:blob
 signCount:integer
@@ -1245,7 +1245,7 @@ uid:string
 name:string
 password:string
 email:string
-wellcomeAt:datetime
+welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
 approve:UserApproveOptions
@@ -1276,10 +1276,6 @@ access.Tenant "1"  o--  "N*" access.User: tenant
 
 access.Tenant "1"  o--  "N*" document.Template: tenant  
 access.Tenant "1"  o--  "N*" document.Snippet: tenant  
-access.User "1"  o--  "N*" access.UserRoleAssignament: user  
-access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty  
-access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient  
-access.UserRoleAssignament "N*"  o--*  "N*" access.Role: roles
 access.User "1"  o--  "N*" access.UserConsentPurposes: user  
 access.ConsentPurpose "1"  o--  "N*" access.UserConsentPurposes: consentPurpose  
 access.RelyingParty "1"  o--  "N*" access.Role: relyingParty  
@@ -1289,10 +1285,10 @@ access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient
 document.Theme "1"  o--  "N*" document.ThemeVersion: theme  
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
 document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet  
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions  
 document.Template "1"  o--  "N*" document.TemplateVersion: template  
 document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet  
+access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user  
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions  
 access.User "1"  o--  "N*" access.UserPersonalApiKey: user  
 access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant  
 access.Tenant "1"  o--  "N*" document.Theme: tenant  
@@ -1303,6 +1299,10 @@ access.Tenant "1"  o--  "N*" notification.Message: tenant
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
 document.Theme "1"  o--  "N*" document.ThemeAsset: theme  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
+access.User "1"  o--  "N*" access.UserRoleAssignment: user  
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignment: relyingParty  
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignment: trustedClient  
+access.UserRoleAssignment "N*"  o--*  "N*" access.Role: roles
 access.Tenant "1"  o--  "N*" access.ConsentPurpose: tenant  
 access.Tenant "1"  o--  "N*" access.UserInvitation: tenant  
 access.User "1"  o--  "N*" access.UserInvitation: invitedBy  
@@ -1318,10 +1318,6 @@ access.User "1"  o--  "N*" access.UserWebauthnCredential: user
 access.Tenant "1"  o--  "N*" access.User: tenant  
 access.Tenant "1"  o--  "N*" document.Template: tenant  
 access.Tenant "1"  o--  "N*" document.Snippet: tenant  
-access.User "1"  o--  "N*" access.UserRoleAssignament: user  
-access.RelyingParty "1"  o--  "N*" access.UserRoleAssignament: relyingParty  
-access.TrustedClient "1"  o--  "N*" access.UserRoleAssignament: trustedClient  
-access.UserRoleAssignament "N*"  o--*  "N*" access.Role: roles
 access.User "1"  o--  "N*" access.UserConsentPurposes: user  
 access.ConsentPurpose "1"  o--  "N*" access.UserConsentPurposes: consentPurpose  
 access.RelyingParty "1"  o--  "N*" access.Role: relyingParty  
@@ -1331,10 +1327,10 @@ access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient
 document.Theme "1"  o--  "N*" document.ThemeVersion: theme  
 access.User "1"  o--  "N*" access.UserAccessTemporalCode: user  
 document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet  
-access.User "1"  o--  "N*" access.UserAcceptedTermnsOfUse: user  
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermnsOfUse: conditions  
 document.Template "1"  o--  "N*" document.TemplateVersion: template  
 document.Snippet "1"  o--  "N*" document.SnippetAsset: snippet  
+access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user  
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions  
 access.User "1"  o--  "N*" access.UserPersonalApiKey: user  
 access.Tenant "1"  o--  "N*" document.TemplateVariable: tenant  
 access.Tenant "1"  o--  "N*" document.Theme: tenant  
@@ -1345,6 +1341,10 @@ access.Tenant "1"  o--  "N*" notification.Message: tenant
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
 document.Theme "1"  o--  "N*" document.ThemeAsset: theme  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
+access.User "1"  o--  "N*" access.UserRoleAssignment: user  
+access.RelyingParty "1"  o--  "N*" access.UserRoleAssignment: relyingParty  
+access.TrustedClient "1"  o--  "N*" access.UserRoleAssignment: trustedClient  
+access.UserRoleAssignment "N*"  o--*  "N*" access.Role: roles
 access.Tenant "1"  o--  "N*" access.ConsentPurpose: tenant  
 access.Tenant "1"  o--  "N*" access.UserInvitation: tenant  
 access.User "1"  o--  "N*" access.UserInvitation: invitedBy  

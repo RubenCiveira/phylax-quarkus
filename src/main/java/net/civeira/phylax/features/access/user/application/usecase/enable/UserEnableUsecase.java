@@ -5,7 +5,7 @@ import java.time.Duration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.batch.BatchIdentificator;
+import net.civeira.phylax.common.batch.BatchIdentifier;
 import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
@@ -100,7 +100,7 @@ public class UserEnableUsecase {
    * @return The slide with some values
    */
   @Observed("enable a set of entity of user")
-  public BatchIdentificator batchEnable(final OperationContext context,
+  public BatchIdentifier batchEnable(final OperationContext context,
       final UserEnableFilter filter) {
     Permission detail = checkPermission(context);
     if (!detail.isAllowed()) {
@@ -112,7 +112,7 @@ public class UserEnableUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .nameOrEmail(filter.getNameOrEmail().orElse(null)).name(filter.getName().orElse(null))
             .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     UserEnableAllInBatchCommand command =
         new UserEnableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

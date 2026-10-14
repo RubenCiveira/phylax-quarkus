@@ -660,11 +660,11 @@ public class UserAccessTemporalCodeJdbcDao {
     if (!filter.getUsers().isEmpty()) {
       sq.where(USER, SqlOperator.IN, SqlListParameterValue.strings(filter.getUsers()));
     }
-    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
+    filter.getUserTenantAccessible().ifPresent(userTenantAccessibleParam -> {
       sq.join("access_user", "access_user_access_temporal_code_user",
           "access_user_access_temporal_code.user", "access_user_access_temporal_code_user.uid");
       sq.where(ACCESS_USER_ACCESS_TEMPORAL_CODE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccessibleParam));
     });
     return sq;
   }

@@ -546,8 +546,8 @@ public class TenantJdbcDao {
         search -> sq.where("name", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
     filter.getName()
         .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
-    filter.getTenantAccesible().ifPresent(tenantAccesibleParam -> sq.where(UID, SqlOperator.EQ,
-        SqlParameterValue.of(tenantAccesibleParam)));
+    filter.getTenantAccessible().ifPresent(tenantAccessibleParam -> sq.where(UID, SqlOperator.EQ,
+        SqlParameterValue.of(tenantAccessibleParam)));
     return sq;
   }
 

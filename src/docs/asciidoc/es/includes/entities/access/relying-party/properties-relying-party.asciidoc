@@ -4,7 +4,7 @@ El identificador de la aplicacion
 Code* (string)::
 El código identificativo de la aplicación
 Api key* (string)::
-A identification for the aplication
+An identifier for the application
 Enabled (boolean)::
 Una marca que permite quitar el acceso a una cuenta sin borrarla
 Version (integer)::

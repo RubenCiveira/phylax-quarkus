@@ -35,9 +35,9 @@ Webauthn rp id (string)::
 El webauthn rp id de tenant config
 Webauthn rp name (string)::
 El webauthn rp name de tenant config
-Wellcome email (blob)::
+Welcome email (blob)::
 Email send to the enabled user
-Registerd email (blob)::
+Registered email (blob)::
 Email send when a user register
 Disabled user email (blob)::
 Email send when a user is disabled

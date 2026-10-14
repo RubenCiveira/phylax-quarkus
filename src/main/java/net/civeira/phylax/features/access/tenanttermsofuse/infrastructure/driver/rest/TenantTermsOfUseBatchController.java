@@ -39,15 +39,15 @@ public class TenantTermsOfUseBatchController implements TenantTermsOfUseBatchApi
    * @param tenant
    * @param tenants
    * @param relyingParty
-   * @param relyingPartys
+   * @param relyingParties
    * @return
    */
   @Override
   public Response tenantTermsOfUseApiBatchDelete(final List<String> uids, final String search,
       final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingPartys) {
+      final List<String> relyingParties) {
     return deleteController.tenantTermsOfUseApiBatchDelete(uids, search, tenant, tenants,
-        relyingParty, relyingPartys);
+        relyingParty, relyingParties);
   }
 
   /**
@@ -67,15 +67,15 @@ public class TenantTermsOfUseBatchController implements TenantTermsOfUseBatchApi
    * @param tenant
    * @param tenants
    * @param relyingParty
-   * @param relyingPartys
+   * @param relyingParties
    * @return
    */
   @Override
   public Response tenantTermsOfUseApiBatchDisable(final List<String> uids, final String search,
       final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingPartys) {
+      final List<String> relyingParties) {
     return disableController.tenantTermsOfUseApiBatchDisable(uids, search, tenant, tenants,
-        relyingParty, relyingPartys);
+        relyingParty, relyingParties);
   }
 
   /**
@@ -95,15 +95,15 @@ public class TenantTermsOfUseBatchController implements TenantTermsOfUseBatchApi
    * @param tenant
    * @param tenants
    * @param relyingParty
-   * @param relyingPartys
+   * @param relyingParties
    * @return
    */
   @Override
   public Response tenantTermsOfUseApiBatchEnable(final List<String> uids, final String search,
       final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingPartys) {
+      final List<String> relyingParties) {
     return enableController.tenantTermsOfUseApiBatchEnable(uids, search, tenant, tenants,
-        relyingParty, relyingPartys);
+        relyingParty, relyingParties);
   }
 
   /**

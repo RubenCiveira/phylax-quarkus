@@ -524,11 +524,11 @@ public class UserMfaRecoveryCodeJdbcDao {
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
     filter.getUser().ifPresent(
         userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
-    filter.getUserTenantAccesible().ifPresent(userTenantAccesibleParam -> {
+    filter.getUserTenantAccessible().ifPresent(userTenantAccessibleParam -> {
       sq.join("access_user", "access_user_mfa_recovery_code_user",
           "access_user_mfa_recovery_code.user", "access_user_mfa_recovery_code_user.uid");
       sq.where(ACCESS_USER_MFA_RECOVERY_CODE_USER_TENANT, SqlOperator.EQ,
-          SqlParameterValue.of(userTenantAccesibleParam));
+          SqlParameterValue.of(userTenantAccessibleParam));
     });
     return sq;
   }

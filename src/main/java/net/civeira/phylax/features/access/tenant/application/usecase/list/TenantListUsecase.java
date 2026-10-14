@@ -64,7 +64,7 @@ public class TenantListUsecase {
     TenantVisibilityFilter visibleFilter = TenantVisibilityFilter.builder()
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).name(filter.getName().orElse(null))
-        .tenantAccesible(filter.getTenantAccesible().orElse(null)).build();
+        .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TenantCursor gatewayCursor = TenantCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(TenantOrder::valueOf).toList())
