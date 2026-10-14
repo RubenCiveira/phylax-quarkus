@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.With;
 import net.civeira.phylax.features.access.user.domain.User;
 
-@Data
+@Getter
+@ToString
 @Builder(toBuilder = true)
 @With
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserCached {
 
   /**

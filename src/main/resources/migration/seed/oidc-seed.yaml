@@ -9,19 +9,19 @@ oidc:
     domain: main
   root:
     name: ROOT
-    password: ${OIDC_ROOT_PASSWORD:sesamo}
+    password: ${OIDC_ROOT_PASSWORD:}
     # Obliga a cambiar la contraseña en el primer login.
     temporal-password: true
   relying-party:
     code: civi-acme-api
-    api-key: ${OIDC_RELYING_PARTY_API_KEY:sesamo}
+    api-key: ${OIDC_RELYING_PARTY_API_KEY:}
   trusted-client:
     code: civi-acme-ui
-    secret: ${OIDC_TRUSTED_CLIENT_SECRET:sesamo}
+    secret: ${OIDC_TRUSTED_CLIENT_SECRET:}
     redirect: http://localhost:4200/*
   api-keys:
-    collector: ${OIDC_API_KEYS_COLLECTOR:collector}
-    sync: ${OIDC_API_KEYS_SYNC:sync}
+    collector: ${OIDC_API_KEYS_COLLECTOR:}
+    sync: ${OIDC_API_KEYS_SYNC:}
 
 # Valores fijos para desarrollo local; nunca se aplican fuera del perfil dev.
 "%dev":
