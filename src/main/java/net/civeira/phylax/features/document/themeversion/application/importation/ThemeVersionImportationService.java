@@ -53,7 +53,7 @@ public class ThemeVersionImportationService {
     }
     boolean exists = false;
     ThemeVersion entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<ThemeVersion> existing =
           repository.findForUpdate(ThemeVersionFilter.builder().uid(uid).build());
       ThemeVersionChangeSet change = toChangeSet(row, fails, resolver);

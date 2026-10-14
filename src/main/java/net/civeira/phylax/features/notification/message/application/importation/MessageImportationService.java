@@ -57,7 +57,7 @@ public class MessageImportationService {
     }
     boolean exists = false;
     Message entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<Message> existing =
           repository.findForUpdate(MessageFilter.builder().uid(uid).build());
       MessageChangeSet change = toChangeSet(row, fails, resolver);

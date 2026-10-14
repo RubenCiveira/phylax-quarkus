@@ -33,7 +33,7 @@ public class RelyingPartyImportationService {
     }
     boolean exists = false;
     RelyingParty entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<RelyingParty> existing =
           repository.findForUpdate(RelyingPartyFilter.builder().code(code).build());
       RelyingPartyChangeSet change = toChangeSet(row, fails);

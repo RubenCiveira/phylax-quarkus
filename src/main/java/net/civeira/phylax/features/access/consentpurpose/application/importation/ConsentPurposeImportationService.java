@@ -55,7 +55,7 @@ public class ConsentPurposeImportationService {
     }
     boolean exists = false;
     ConsentPurpose entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<ConsentPurpose> existing =
           repository.findForUpdate(ConsentPurposeFilter.builder().uid(uid).build());
       ConsentPurposeChangeSet change = toChangeSet(row, fails, resolver);

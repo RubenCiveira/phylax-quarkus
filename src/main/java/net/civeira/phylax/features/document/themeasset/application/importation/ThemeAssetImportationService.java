@@ -53,7 +53,7 @@ public class ThemeAssetImportationService {
     }
     boolean exists = false;
     ThemeAsset entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<ThemeAsset> existing =
           repository.findForUpdate(ThemeAssetFilter.builder().code(code).build());
       ThemeAssetChangeSet change = toChangeSet(row, fails, resolver);

@@ -58,7 +58,7 @@ public class SmtpOutboundConfigImportationService {
     }
     boolean exists = false;
     SmtpOutboundConfig entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<SmtpOutboundConfig> existing =
           repository.findForUpdate(SmtpOutboundConfigFilter.builder().uid(uid).build());
       SmtpOutboundConfigChangeSet change = toChangeSet(row, fails, resolver);

@@ -56,7 +56,7 @@ public class UserPersonalApiKeyImportationService {
     }
     boolean exists = false;
     UserPersonalApiKey entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<UserPersonalApiKey> existing =
           repository.findForUpdate(UserPersonalApiKeyFilter.builder().name(name).build());
       UserPersonalApiKeyChangeSet change = toChangeSet(row, fails, resolver);

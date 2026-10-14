@@ -52,7 +52,7 @@ public class SnippetVersionImportationService {
     }
     boolean exists = false;
     SnippetVersion entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<SnippetVersion> existing =
           repository.findForUpdate(SnippetVersionFilter.builder().uid(uid).build());
       SnippetVersionChangeSet change = toChangeSet(row, fails, resolver);

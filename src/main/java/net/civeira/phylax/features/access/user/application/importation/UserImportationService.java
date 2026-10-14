@@ -59,7 +59,7 @@ public class UserImportationService {
     }
     boolean exists = false;
     User entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<User> existing = repository.findForUpdate(UserFilter.builder().name(name).build());
       UserChangeSet change = toChangeSet(row, fails, resolver);
       if (existing.isPresent()) {

@@ -53,7 +53,7 @@ public class SnippetAssetImportationService {
     }
     boolean exists = false;
     SnippetAsset entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<SnippetAsset> existing =
           repository.findForUpdate(SnippetAssetFilter.builder().code(code).build());
       SnippetAssetChangeSet change = toChangeSet(row, fails, resolver);

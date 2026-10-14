@@ -42,7 +42,7 @@ public class TrustedClientImportationService {
     }
     boolean exists = false;
     TrustedClient entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<TrustedClient> existing =
           repository.findForUpdate(TrustedClientFilter.builder().code(code).build());
       TrustedClientChangeSet change = toChangeSet(row, fails);

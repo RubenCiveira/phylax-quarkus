@@ -36,7 +36,7 @@ public class TenantImportationService {
     }
     boolean exists = false;
     Tenant entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<Tenant> existing =
           repository.findForUpdate(TenantFilter.builder().name(name).build());
       TenantChangeSet change = toChangeSet(row, fails);

@@ -53,7 +53,7 @@ public class TemplateVariableImportationService {
     }
     boolean exists = false;
     TemplateVariable entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<TemplateVariable> existing =
           repository.findForUpdate(TemplateVariableFilter.builder().code(code).build());
       TemplateVariableChangeSet change = toChangeSet(row, fails, resolver);

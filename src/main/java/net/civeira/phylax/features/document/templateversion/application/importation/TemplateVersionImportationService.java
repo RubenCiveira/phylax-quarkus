@@ -52,7 +52,7 @@ public class TemplateVersionImportationService {
     }
     boolean exists = false;
     TemplateVersion entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<TemplateVersion> existing =
           repository.findForUpdate(TemplateVersionFilter.builder().uid(uid).build());
       TemplateVersionChangeSet change = toChangeSet(row, fails, resolver);

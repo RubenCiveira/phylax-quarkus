@@ -64,7 +64,7 @@ public class TenantConfigImportationService {
     }
     boolean exists = false;
     TenantConfig entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<TenantConfig> existing =
           repository.findForUpdate(TenantConfigFilter.builder().uid(uid).build());
       TenantConfigChangeSet change = toChangeSet(row, fails, resolver);

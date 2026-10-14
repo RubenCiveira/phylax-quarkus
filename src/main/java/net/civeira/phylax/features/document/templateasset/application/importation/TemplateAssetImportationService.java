@@ -62,7 +62,7 @@ public class TemplateAssetImportationService {
     }
     boolean exists = false;
     TemplateAsset entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<TemplateAsset> existing =
           repository.findForUpdate(TemplateAssetFilter.builder().code(code).build());
       TemplateAssetChangeSet change = toChangeSet(row, fails, resolver);

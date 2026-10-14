@@ -70,7 +70,7 @@ public class UserGroupMembershipImportationService {
     }
     boolean exists = false;
     UserGroupMembership entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<UserGroupMembership> existing =
           repository.findForUpdate(UserGroupMembershipFilter.builder().uid(uid).build());
       UserGroupMembershipChangeSet change = toChangeSet(row, fails, resolver);

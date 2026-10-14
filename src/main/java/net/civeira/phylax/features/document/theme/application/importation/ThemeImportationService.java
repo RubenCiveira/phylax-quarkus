@@ -54,7 +54,7 @@ public class ThemeImportationService {
     }
     boolean exists = false;
     Theme entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<Theme> existing = repository.findForUpdate(ThemeFilter.builder().name(name).build());
       ThemeChangeSet change = toChangeSet(row, fails, resolver);
       if (existing.isPresent()) {

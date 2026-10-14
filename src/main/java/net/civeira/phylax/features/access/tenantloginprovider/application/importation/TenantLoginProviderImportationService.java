@@ -56,7 +56,7 @@ public class TenantLoginProviderImportationService {
     }
     boolean exists = false;
     TenantLoginProvider entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<TenantLoginProvider> existing =
           repository.findForUpdate(TenantLoginProviderFilter.builder().name(name).build());
       TenantLoginProviderChangeSet change = toChangeSet(row, fails, resolver);

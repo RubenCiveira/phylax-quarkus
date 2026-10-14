@@ -70,7 +70,7 @@ public class UserRoleAssignamentImportationService {
     }
     boolean exists = false;
     UserRoleAssignament entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<UserRoleAssignament> existing =
           repository.findForUpdate(UserRoleAssignamentFilter.builder().uid(uid).build());
       UserRoleAssignamentChangeSet change = toChangeSet(row, fails, resolver);

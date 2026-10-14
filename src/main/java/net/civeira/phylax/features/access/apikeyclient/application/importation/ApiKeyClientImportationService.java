@@ -33,7 +33,7 @@ public class ApiKeyClientImportationService {
     }
     boolean exists = false;
     ApiKeyClient entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<ApiKeyClient> existing =
           repository.findForUpdate(ApiKeyClientFilter.builder().uid(uid).build());
       ApiKeyClientChangeSet change = toChangeSet(row, fails);

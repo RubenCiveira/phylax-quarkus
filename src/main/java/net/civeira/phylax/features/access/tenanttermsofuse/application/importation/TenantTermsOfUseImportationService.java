@@ -63,7 +63,7 @@ public class TenantTermsOfUseImportationService {
     }
     boolean exists = false;
     TenantTermsOfUse entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<TenantTermsOfUse> existing =
           repository.findForUpdate(TenantTermsOfUseFilter.builder().uid(uid).build());
       TenantTermsOfUseChangeSet change = toChangeSet(row, fails, resolver);

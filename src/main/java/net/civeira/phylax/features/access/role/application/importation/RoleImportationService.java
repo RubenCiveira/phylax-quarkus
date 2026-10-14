@@ -52,7 +52,7 @@ public class RoleImportationService {
     }
     boolean exists = false;
     Role entity = null;
-    if (!fails.isEmpty()) {
+    if (fails.isEmpty()) {
       Optional<Role> existing = repository.findForUpdate(RoleFilter.builder().name(name).build());
       RoleChangeSet change = toChangeSet(row, fails, resolver);
       if (existing.isPresent()) {
