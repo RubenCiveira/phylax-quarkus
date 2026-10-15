@@ -118,14 +118,14 @@ public class TenantConfigDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TenantConfigDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<TenantConfig, TenantConfig, TenantConfigDeleteAllInBatchCommand, TenantConfigsInBatchExecutor.TenantConfigPaginableBatch>builder()
-                .initializer(TenantConfigsInBatchExecutor.class)
-                .counter(TenantConfigsInBatchExecutor.class)
-                .descriptor(TenantConfigsInBatchExecutor.class)
-                .reader(TenantConfigsInBatchExecutor.class)
-                .processor(TenantConfigsInBatchExecutor.class)
-                .writer(TenantConfigsInBatchExecutor.class)
-                .finalizer(TenantConfigsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<TenantConfig, TenantConfig, TenantConfigDeleteAllInBatchCommand, TenantConfigDeleteInBatchExecutor.TenantConfigPaginableBatch>builder()
+                .initializer(TenantConfigDeleteInBatchExecutor.class)
+                .counter(TenantConfigDeleteInBatchExecutor.class)
+                .descriptor(TenantConfigDeleteInBatchExecutor.class)
+                .reader(TenantConfigDeleteInBatchExecutor.class)
+                .processor(TenantConfigDeleteInBatchExecutor.class)
+                .writer(TenantConfigDeleteInBatchExecutor.class)
+                .finalizer(TenantConfigDeleteInBatchExecutor.class).build())
         .build());
   }
 

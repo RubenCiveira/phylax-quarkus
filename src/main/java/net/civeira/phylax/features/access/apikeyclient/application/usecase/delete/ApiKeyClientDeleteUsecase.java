@@ -116,14 +116,14 @@ public class ApiKeyClientDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ApiKeyClientDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<ApiKeyClient, ApiKeyClient, ApiKeyClientDeleteAllInBatchCommand, ApiKeyClientsInBatchExecutor.ApiKeyClientPaginableBatch>builder()
-                .initializer(ApiKeyClientsInBatchExecutor.class)
-                .counter(ApiKeyClientsInBatchExecutor.class)
-                .descriptor(ApiKeyClientsInBatchExecutor.class)
-                .reader(ApiKeyClientsInBatchExecutor.class)
-                .processor(ApiKeyClientsInBatchExecutor.class)
-                .writer(ApiKeyClientsInBatchExecutor.class)
-                .finalizer(ApiKeyClientsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<ApiKeyClient, ApiKeyClient, ApiKeyClientDeleteAllInBatchCommand, ApiKeyClientDeleteInBatchExecutor.ApiKeyClientPaginableBatch>builder()
+                .initializer(ApiKeyClientDeleteInBatchExecutor.class)
+                .counter(ApiKeyClientDeleteInBatchExecutor.class)
+                .descriptor(ApiKeyClientDeleteInBatchExecutor.class)
+                .reader(ApiKeyClientDeleteInBatchExecutor.class)
+                .processor(ApiKeyClientDeleteInBatchExecutor.class)
+                .writer(ApiKeyClientDeleteInBatchExecutor.class)
+                .finalizer(ApiKeyClientDeleteInBatchExecutor.class).build())
         .build());
   }
 

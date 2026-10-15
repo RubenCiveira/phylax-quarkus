@@ -118,14 +118,14 @@ public class SmtpOutboundConfigDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SmtpOutboundConfigDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<SmtpOutboundConfig, SmtpOutboundConfig, SmtpOutboundConfigDeleteAllInBatchCommand, SmtpOutboundConfigsInBatchExecutor.SmtpOutboundConfigPaginableBatch>builder()
-                .initializer(SmtpOutboundConfigsInBatchExecutor.class)
-                .counter(SmtpOutboundConfigsInBatchExecutor.class)
-                .descriptor(SmtpOutboundConfigsInBatchExecutor.class)
-                .reader(SmtpOutboundConfigsInBatchExecutor.class)
-                .processor(SmtpOutboundConfigsInBatchExecutor.class)
-                .writer(SmtpOutboundConfigsInBatchExecutor.class)
-                .finalizer(SmtpOutboundConfigsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<SmtpOutboundConfig, SmtpOutboundConfig, SmtpOutboundConfigDeleteAllInBatchCommand, SmtpOutboundConfigDeleteInBatchExecutor.SmtpOutboundConfigPaginableBatch>builder()
+                .initializer(SmtpOutboundConfigDeleteInBatchExecutor.class)
+                .counter(SmtpOutboundConfigDeleteInBatchExecutor.class)
+                .descriptor(SmtpOutboundConfigDeleteInBatchExecutor.class)
+                .reader(SmtpOutboundConfigDeleteInBatchExecutor.class)
+                .processor(SmtpOutboundConfigDeleteInBatchExecutor.class)
+                .writer(SmtpOutboundConfigDeleteInBatchExecutor.class)
+                .finalizer(SmtpOutboundConfigDeleteInBatchExecutor.class).build())
         .build());
   }
 

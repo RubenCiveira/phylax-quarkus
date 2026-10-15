@@ -14,7 +14,7 @@ class FieldGrantListUnitTest {
 
   @Nested
   @DisplayName("inaccessiblesFor()")
-  class InnacesiblesFor {
+  class InaccesiblesFor {
 
     @Test
     @DisplayName("Should return names of matching fields")

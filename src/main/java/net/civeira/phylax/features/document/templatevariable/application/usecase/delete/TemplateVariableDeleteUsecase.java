@@ -118,14 +118,14 @@ public class TemplateVariableDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TemplateVariableDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<TemplateVariable, TemplateVariable, TemplateVariableDeleteAllInBatchCommand, TemplateVariablesInBatchExecutor.TemplateVariablePaginableBatch>builder()
-                .initializer(TemplateVariablesInBatchExecutor.class)
-                .counter(TemplateVariablesInBatchExecutor.class)
-                .descriptor(TemplateVariablesInBatchExecutor.class)
-                .reader(TemplateVariablesInBatchExecutor.class)
-                .processor(TemplateVariablesInBatchExecutor.class)
-                .writer(TemplateVariablesInBatchExecutor.class)
-                .finalizer(TemplateVariablesInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<TemplateVariable, TemplateVariable, TemplateVariableDeleteAllInBatchCommand, TemplateVariableDeleteInBatchExecutor.TemplateVariablePaginableBatch>builder()
+                .initializer(TemplateVariableDeleteInBatchExecutor.class)
+                .counter(TemplateVariableDeleteInBatchExecutor.class)
+                .descriptor(TemplateVariableDeleteInBatchExecutor.class)
+                .reader(TemplateVariableDeleteInBatchExecutor.class)
+                .processor(TemplateVariableDeleteInBatchExecutor.class)
+                .writer(TemplateVariableDeleteInBatchExecutor.class)
+                .finalizer(TemplateVariableDeleteInBatchExecutor.class).build())
         .build());
   }
 

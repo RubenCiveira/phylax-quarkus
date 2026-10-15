@@ -118,14 +118,14 @@ public class SnippetAssetDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SnippetAssetDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<SnippetAsset, SnippetAsset, SnippetAssetDeleteAllInBatchCommand, SnippetAssetsInBatchExecutor.SnippetAssetPaginableBatch>builder()
-                .initializer(SnippetAssetsInBatchExecutor.class)
-                .counter(SnippetAssetsInBatchExecutor.class)
-                .descriptor(SnippetAssetsInBatchExecutor.class)
-                .reader(SnippetAssetsInBatchExecutor.class)
-                .processor(SnippetAssetsInBatchExecutor.class)
-                .writer(SnippetAssetsInBatchExecutor.class)
-                .finalizer(SnippetAssetsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<SnippetAsset, SnippetAsset, SnippetAssetDeleteAllInBatchCommand, SnippetAssetDeleteInBatchExecutor.SnippetAssetPaginableBatch>builder()
+                .initializer(SnippetAssetDeleteInBatchExecutor.class)
+                .counter(SnippetAssetDeleteInBatchExecutor.class)
+                .descriptor(SnippetAssetDeleteInBatchExecutor.class)
+                .reader(SnippetAssetDeleteInBatchExecutor.class)
+                .processor(SnippetAssetDeleteInBatchExecutor.class)
+                .writer(SnippetAssetDeleteInBatchExecutor.class)
+                .finalizer(SnippetAssetDeleteInBatchExecutor.class).build())
         .build());
   }
 

@@ -117,11 +117,12 @@ public class RoleDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<RoleDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<Role, Role, RoleDeleteAllInBatchCommand, RolesInBatchExecutor.RolePaginableBatch>builder()
-                .initializer(RolesInBatchExecutor.class).counter(RolesInBatchExecutor.class)
-                .descriptor(RolesInBatchExecutor.class).reader(RolesInBatchExecutor.class)
-                .processor(RolesInBatchExecutor.class).writer(RolesInBatchExecutor.class)
-                .finalizer(RolesInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<Role, Role, RoleDeleteAllInBatchCommand, RoleDeleteInBatchExecutor.RolePaginableBatch>builder()
+                .initializer(RoleDeleteInBatchExecutor.class)
+                .counter(RoleDeleteInBatchExecutor.class)
+                .descriptor(RoleDeleteInBatchExecutor.class).reader(RoleDeleteInBatchExecutor.class)
+                .processor(RoleDeleteInBatchExecutor.class).writer(RoleDeleteInBatchExecutor.class)
+                .finalizer(RoleDeleteInBatchExecutor.class).build())
         .build());
   }
 

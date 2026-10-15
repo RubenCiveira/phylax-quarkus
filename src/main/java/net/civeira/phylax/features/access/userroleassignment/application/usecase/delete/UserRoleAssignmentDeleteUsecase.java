@@ -123,14 +123,14 @@ public class UserRoleAssignmentDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserRoleAssignmentDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<UserRoleAssignment, UserRoleAssignment, UserRoleAssignmentDeleteAllInBatchCommand, UserRoleAssignmentsInBatchExecutor.UserRoleAssignmentPaginableBatch>builder()
-                .initializer(UserRoleAssignmentsInBatchExecutor.class)
-                .counter(UserRoleAssignmentsInBatchExecutor.class)
-                .descriptor(UserRoleAssignmentsInBatchExecutor.class)
-                .reader(UserRoleAssignmentsInBatchExecutor.class)
-                .processor(UserRoleAssignmentsInBatchExecutor.class)
-                .writer(UserRoleAssignmentsInBatchExecutor.class)
-                .finalizer(UserRoleAssignmentsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<UserRoleAssignment, UserRoleAssignment, UserRoleAssignmentDeleteAllInBatchCommand, UserRoleAssignmentDeleteInBatchExecutor.UserRoleAssignmentPaginableBatch>builder()
+                .initializer(UserRoleAssignmentDeleteInBatchExecutor.class)
+                .counter(UserRoleAssignmentDeleteInBatchExecutor.class)
+                .descriptor(UserRoleAssignmentDeleteInBatchExecutor.class)
+                .reader(UserRoleAssignmentDeleteInBatchExecutor.class)
+                .processor(UserRoleAssignmentDeleteInBatchExecutor.class)
+                .writer(UserRoleAssignmentDeleteInBatchExecutor.class)
+                .finalizer(UserRoleAssignmentDeleteInBatchExecutor.class).build())
         .build());
   }
 

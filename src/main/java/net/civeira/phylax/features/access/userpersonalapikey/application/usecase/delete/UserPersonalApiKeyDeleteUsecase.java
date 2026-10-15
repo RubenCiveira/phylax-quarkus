@@ -119,14 +119,14 @@ public class UserPersonalApiKeyDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserPersonalApiKeyDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<UserPersonalApiKey, UserPersonalApiKey, UserPersonalApiKeyDeleteAllInBatchCommand, UserPersonalApiKeysInBatchExecutor.UserPersonalApiKeyPaginableBatch>builder()
-                .initializer(UserPersonalApiKeysInBatchExecutor.class)
-                .counter(UserPersonalApiKeysInBatchExecutor.class)
-                .descriptor(UserPersonalApiKeysInBatchExecutor.class)
-                .reader(UserPersonalApiKeysInBatchExecutor.class)
-                .processor(UserPersonalApiKeysInBatchExecutor.class)
-                .writer(UserPersonalApiKeysInBatchExecutor.class)
-                .finalizer(UserPersonalApiKeysInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<UserPersonalApiKey, UserPersonalApiKey, UserPersonalApiKeyDeleteAllInBatchCommand, UserPersonalApiKeyDeleteInBatchExecutor.UserPersonalApiKeyPaginableBatch>builder()
+                .initializer(UserPersonalApiKeyDeleteInBatchExecutor.class)
+                .counter(UserPersonalApiKeyDeleteInBatchExecutor.class)
+                .descriptor(UserPersonalApiKeyDeleteInBatchExecutor.class)
+                .reader(UserPersonalApiKeyDeleteInBatchExecutor.class)
+                .processor(UserPersonalApiKeyDeleteInBatchExecutor.class)
+                .writer(UserPersonalApiKeyDeleteInBatchExecutor.class)
+                .finalizer(UserPersonalApiKeyDeleteInBatchExecutor.class).build())
         .build());
   }
 

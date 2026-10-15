@@ -123,14 +123,14 @@ public class UserGroupMembershipDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserGroupMembershipDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<UserGroupMembership, UserGroupMembership, UserGroupMembershipDeleteAllInBatchCommand, UserGroupMembershipsInBatchExecutor.UserGroupMembershipPaginableBatch>builder()
-                .initializer(UserGroupMembershipsInBatchExecutor.class)
-                .counter(UserGroupMembershipsInBatchExecutor.class)
-                .descriptor(UserGroupMembershipsInBatchExecutor.class)
-                .reader(UserGroupMembershipsInBatchExecutor.class)
-                .processor(UserGroupMembershipsInBatchExecutor.class)
-                .writer(UserGroupMembershipsInBatchExecutor.class)
-                .finalizer(UserGroupMembershipsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<UserGroupMembership, UserGroupMembership, UserGroupMembershipDeleteAllInBatchCommand, UserGroupMembershipDeleteInBatchExecutor.UserGroupMembershipPaginableBatch>builder()
+                .initializer(UserGroupMembershipDeleteInBatchExecutor.class)
+                .counter(UserGroupMembershipDeleteInBatchExecutor.class)
+                .descriptor(UserGroupMembershipDeleteInBatchExecutor.class)
+                .reader(UserGroupMembershipDeleteInBatchExecutor.class)
+                .processor(UserGroupMembershipDeleteInBatchExecutor.class)
+                .writer(UserGroupMembershipDeleteInBatchExecutor.class)
+                .finalizer(UserGroupMembershipDeleteInBatchExecutor.class).build())
         .build());
   }
 

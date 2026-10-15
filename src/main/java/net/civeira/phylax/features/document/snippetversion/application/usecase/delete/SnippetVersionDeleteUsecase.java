@@ -118,14 +118,14 @@ public class SnippetVersionDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SnippetVersionDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<SnippetVersion, SnippetVersion, SnippetVersionDeleteAllInBatchCommand, SnippetVersionsInBatchExecutor.SnippetVersionPaginableBatch>builder()
-                .initializer(SnippetVersionsInBatchExecutor.class)
-                .counter(SnippetVersionsInBatchExecutor.class)
-                .descriptor(SnippetVersionsInBatchExecutor.class)
-                .reader(SnippetVersionsInBatchExecutor.class)
-                .processor(SnippetVersionsInBatchExecutor.class)
-                .writer(SnippetVersionsInBatchExecutor.class)
-                .finalizer(SnippetVersionsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<SnippetVersion, SnippetVersion, SnippetVersionDeleteAllInBatchCommand, SnippetVersionDeleteInBatchExecutor.SnippetVersionPaginableBatch>builder()
+                .initializer(SnippetVersionDeleteInBatchExecutor.class)
+                .counter(SnippetVersionDeleteInBatchExecutor.class)
+                .descriptor(SnippetVersionDeleteInBatchExecutor.class)
+                .reader(SnippetVersionDeleteInBatchExecutor.class)
+                .processor(SnippetVersionDeleteInBatchExecutor.class)
+                .writer(SnippetVersionDeleteInBatchExecutor.class)
+                .finalizer(SnippetVersionDeleteInBatchExecutor.class).build())
         .build());
   }
 

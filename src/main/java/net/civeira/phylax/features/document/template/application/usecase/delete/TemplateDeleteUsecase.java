@@ -119,11 +119,14 @@ public class TemplateDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TemplateDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<Template, Template, TemplateDeleteAllInBatchCommand, TemplatesInBatchExecutor.TemplatePaginableBatch>builder()
-                .initializer(TemplatesInBatchExecutor.class).counter(TemplatesInBatchExecutor.class)
-                .descriptor(TemplatesInBatchExecutor.class).reader(TemplatesInBatchExecutor.class)
-                .processor(TemplatesInBatchExecutor.class).writer(TemplatesInBatchExecutor.class)
-                .finalizer(TemplatesInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<Template, Template, TemplateDeleteAllInBatchCommand, TemplateDeleteInBatchExecutor.TemplatePaginableBatch>builder()
+                .initializer(TemplateDeleteInBatchExecutor.class)
+                .counter(TemplateDeleteInBatchExecutor.class)
+                .descriptor(TemplateDeleteInBatchExecutor.class)
+                .reader(TemplateDeleteInBatchExecutor.class)
+                .processor(TemplateDeleteInBatchExecutor.class)
+                .writer(TemplateDeleteInBatchExecutor.class)
+                .finalizer(TemplateDeleteInBatchExecutor.class).build())
         .build());
   }
 

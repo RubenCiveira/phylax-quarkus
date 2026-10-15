@@ -118,11 +118,14 @@ public class MessageDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<MessageDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<Message, Message, MessageDeleteAllInBatchCommand, MessagesInBatchExecutor.MessagePaginableBatch>builder()
-                .initializer(MessagesInBatchExecutor.class).counter(MessagesInBatchExecutor.class)
-                .descriptor(MessagesInBatchExecutor.class).reader(MessagesInBatchExecutor.class)
-                .processor(MessagesInBatchExecutor.class).writer(MessagesInBatchExecutor.class)
-                .finalizer(MessagesInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<Message, Message, MessageDeleteAllInBatchCommand, MessageDeleteInBatchExecutor.MessagePaginableBatch>builder()
+                .initializer(MessageDeleteInBatchExecutor.class)
+                .counter(MessageDeleteInBatchExecutor.class)
+                .descriptor(MessageDeleteInBatchExecutor.class)
+                .reader(MessageDeleteInBatchExecutor.class)
+                .processor(MessageDeleteInBatchExecutor.class)
+                .writer(MessageDeleteInBatchExecutor.class)
+                .finalizer(MessageDeleteInBatchExecutor.class).build())
         .build());
   }
 

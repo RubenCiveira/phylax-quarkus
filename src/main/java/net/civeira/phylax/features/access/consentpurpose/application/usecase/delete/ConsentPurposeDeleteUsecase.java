@@ -118,14 +118,14 @@ public class ConsentPurposeDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ConsentPurposeDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<ConsentPurpose, ConsentPurpose, ConsentPurposeDeleteAllInBatchCommand, ConsentPurposesInBatchExecutor.ConsentPurposePaginableBatch>builder()
-                .initializer(ConsentPurposesInBatchExecutor.class)
-                .counter(ConsentPurposesInBatchExecutor.class)
-                .descriptor(ConsentPurposesInBatchExecutor.class)
-                .reader(ConsentPurposesInBatchExecutor.class)
-                .processor(ConsentPurposesInBatchExecutor.class)
-                .writer(ConsentPurposesInBatchExecutor.class)
-                .finalizer(ConsentPurposesInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<ConsentPurpose, ConsentPurpose, ConsentPurposeDeleteAllInBatchCommand, ConsentPurposeDeleteInBatchExecutor.ConsentPurposePaginableBatch>builder()
+                .initializer(ConsentPurposeDeleteInBatchExecutor.class)
+                .counter(ConsentPurposeDeleteInBatchExecutor.class)
+                .descriptor(ConsentPurposeDeleteInBatchExecutor.class)
+                .reader(ConsentPurposeDeleteInBatchExecutor.class)
+                .processor(ConsentPurposeDeleteInBatchExecutor.class)
+                .writer(ConsentPurposeDeleteInBatchExecutor.class)
+                .finalizer(ConsentPurposeDeleteInBatchExecutor.class).build())
         .build());
   }
 

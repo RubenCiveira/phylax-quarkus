@@ -118,11 +118,12 @@ public class UserDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<UserDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<User, User, UserDeleteAllInBatchCommand, UsersInBatchExecutor.UserPaginableBatch>builder()
-                .initializer(UsersInBatchExecutor.class).counter(UsersInBatchExecutor.class)
-                .descriptor(UsersInBatchExecutor.class).reader(UsersInBatchExecutor.class)
-                .processor(UsersInBatchExecutor.class).writer(UsersInBatchExecutor.class)
-                .finalizer(UsersInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<User, User, UserDeleteAllInBatchCommand, UserDeleteInBatchExecutor.UserPaginableBatch>builder()
+                .initializer(UserDeleteInBatchExecutor.class)
+                .counter(UserDeleteInBatchExecutor.class)
+                .descriptor(UserDeleteInBatchExecutor.class).reader(UserDeleteInBatchExecutor.class)
+                .processor(UserDeleteInBatchExecutor.class).writer(UserDeleteInBatchExecutor.class)
+                .finalizer(UserDeleteInBatchExecutor.class).build())
         .build());
   }
 

@@ -119,14 +119,14 @@ public class TrustedClientDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TrustedClientDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<TrustedClient, TrustedClient, TrustedClientDeleteAllInBatchCommand, TrustedClientsInBatchExecutor.TrustedClientPaginableBatch>builder()
-                .initializer(TrustedClientsInBatchExecutor.class)
-                .counter(TrustedClientsInBatchExecutor.class)
-                .descriptor(TrustedClientsInBatchExecutor.class)
-                .reader(TrustedClientsInBatchExecutor.class)
-                .processor(TrustedClientsInBatchExecutor.class)
-                .writer(TrustedClientsInBatchExecutor.class)
-                .finalizer(TrustedClientsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<TrustedClient, TrustedClient, TrustedClientDeleteAllInBatchCommand, TrustedClientDeleteInBatchExecutor.TrustedClientPaginableBatch>builder()
+                .initializer(TrustedClientDeleteInBatchExecutor.class)
+                .counter(TrustedClientDeleteInBatchExecutor.class)
+                .descriptor(TrustedClientDeleteInBatchExecutor.class)
+                .reader(TrustedClientDeleteInBatchExecutor.class)
+                .processor(TrustedClientDeleteInBatchExecutor.class)
+                .writer(TrustedClientDeleteInBatchExecutor.class)
+                .finalizer(TrustedClientDeleteInBatchExecutor.class).build())
         .build());
   }
 

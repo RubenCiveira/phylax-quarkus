@@ -119,11 +119,14 @@ public class SnippetDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<SnippetDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<Snippet, Snippet, SnippetDeleteAllInBatchCommand, SnippetsInBatchExecutor.SnippetPaginableBatch>builder()
-                .initializer(SnippetsInBatchExecutor.class).counter(SnippetsInBatchExecutor.class)
-                .descriptor(SnippetsInBatchExecutor.class).reader(SnippetsInBatchExecutor.class)
-                .processor(SnippetsInBatchExecutor.class).writer(SnippetsInBatchExecutor.class)
-                .finalizer(SnippetsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<Snippet, Snippet, SnippetDeleteAllInBatchCommand, SnippetDeleteInBatchExecutor.SnippetPaginableBatch>builder()
+                .initializer(SnippetDeleteInBatchExecutor.class)
+                .counter(SnippetDeleteInBatchExecutor.class)
+                .descriptor(SnippetDeleteInBatchExecutor.class)
+                .reader(SnippetDeleteInBatchExecutor.class)
+                .processor(SnippetDeleteInBatchExecutor.class)
+                .writer(SnippetDeleteInBatchExecutor.class)
+                .finalizer(SnippetDeleteInBatchExecutor.class).build())
         .build());
   }
 

@@ -117,14 +117,14 @@ public class RelyingPartyDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<RelyingPartyDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<RelyingParty, RelyingParty, RelyingPartyDeleteAllInBatchCommand, RelyingPartysInBatchExecutor.RelyingPartyPaginableBatch>builder()
-                .initializer(RelyingPartysInBatchExecutor.class)
-                .counter(RelyingPartysInBatchExecutor.class)
-                .descriptor(RelyingPartysInBatchExecutor.class)
-                .reader(RelyingPartysInBatchExecutor.class)
-                .processor(RelyingPartysInBatchExecutor.class)
-                .writer(RelyingPartysInBatchExecutor.class)
-                .finalizer(RelyingPartysInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<RelyingParty, RelyingParty, RelyingPartyDeleteAllInBatchCommand, RelyingPartyDeleteInBatchExecutor.RelyingPartyPaginableBatch>builder()
+                .initializer(RelyingPartyDeleteInBatchExecutor.class)
+                .counter(RelyingPartyDeleteInBatchExecutor.class)
+                .descriptor(RelyingPartyDeleteInBatchExecutor.class)
+                .reader(RelyingPartyDeleteInBatchExecutor.class)
+                .processor(RelyingPartyDeleteInBatchExecutor.class)
+                .writer(RelyingPartyDeleteInBatchExecutor.class)
+                .finalizer(RelyingPartyDeleteInBatchExecutor.class).build())
         .build());
   }
 

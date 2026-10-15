@@ -118,14 +118,14 @@ public class TenantLoginProviderDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TenantLoginProviderDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<TenantLoginProvider, TenantLoginProvider, TenantLoginProviderDeleteAllInBatchCommand, TenantLoginProvidersInBatchExecutor.TenantLoginProviderPaginableBatch>builder()
-                .initializer(TenantLoginProvidersInBatchExecutor.class)
-                .counter(TenantLoginProvidersInBatchExecutor.class)
-                .descriptor(TenantLoginProvidersInBatchExecutor.class)
-                .reader(TenantLoginProvidersInBatchExecutor.class)
-                .processor(TenantLoginProvidersInBatchExecutor.class)
-                .writer(TenantLoginProvidersInBatchExecutor.class)
-                .finalizer(TenantLoginProvidersInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<TenantLoginProvider, TenantLoginProvider, TenantLoginProviderDeleteAllInBatchCommand, TenantLoginProviderDeleteInBatchExecutor.TenantLoginProviderPaginableBatch>builder()
+                .initializer(TenantLoginProviderDeleteInBatchExecutor.class)
+                .counter(TenantLoginProviderDeleteInBatchExecutor.class)
+                .descriptor(TenantLoginProviderDeleteInBatchExecutor.class)
+                .reader(TenantLoginProviderDeleteInBatchExecutor.class)
+                .processor(TenantLoginProviderDeleteInBatchExecutor.class)
+                .writer(TenantLoginProviderDeleteInBatchExecutor.class)
+                .finalizer(TenantLoginProviderDeleteInBatchExecutor.class).build())
         .build());
   }
 

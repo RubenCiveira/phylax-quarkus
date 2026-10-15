@@ -119,14 +119,14 @@ public class TenantTermsOfUseDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<TenantTermsOfUseDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<TenantTermsOfUse, TenantTermsOfUse, TenantTermsOfUseDeleteAllInBatchCommand, TenantTermsOfUsesInBatchExecutor.TenantTermsOfUsePaginableBatch>builder()
-                .initializer(TenantTermsOfUsesInBatchExecutor.class)
-                .counter(TenantTermsOfUsesInBatchExecutor.class)
-                .descriptor(TenantTermsOfUsesInBatchExecutor.class)
-                .reader(TenantTermsOfUsesInBatchExecutor.class)
-                .processor(TenantTermsOfUsesInBatchExecutor.class)
-                .writer(TenantTermsOfUsesInBatchExecutor.class)
-                .finalizer(TenantTermsOfUsesInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<TenantTermsOfUse, TenantTermsOfUse, TenantTermsOfUseDeleteAllInBatchCommand, TenantTermsOfUseDeleteInBatchExecutor.TenantTermsOfUsePaginableBatch>builder()
+                .initializer(TenantTermsOfUseDeleteInBatchExecutor.class)
+                .counter(TenantTermsOfUseDeleteInBatchExecutor.class)
+                .descriptor(TenantTermsOfUseDeleteInBatchExecutor.class)
+                .reader(TenantTermsOfUseDeleteInBatchExecutor.class)
+                .processor(TenantTermsOfUseDeleteInBatchExecutor.class)
+                .writer(TenantTermsOfUseDeleteInBatchExecutor.class)
+                .finalizer(TenantTermsOfUseDeleteInBatchExecutor.class).build())
         .build());
   }
 

@@ -118,14 +118,14 @@ public class ThemeAssetDeleteUsecase {
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan
         .<ThemeAssetDeleteAllInBatchCommand>builder().params(command).name("delete-color")
         .executor(
-            ExecutorByDeferSteps.<ThemeAsset, ThemeAsset, ThemeAssetDeleteAllInBatchCommand, ThemeAssetsInBatchExecutor.ThemeAssetPaginableBatch>builder()
-                .initializer(ThemeAssetsInBatchExecutor.class)
-                .counter(ThemeAssetsInBatchExecutor.class)
-                .descriptor(ThemeAssetsInBatchExecutor.class)
-                .reader(ThemeAssetsInBatchExecutor.class)
-                .processor(ThemeAssetsInBatchExecutor.class)
-                .writer(ThemeAssetsInBatchExecutor.class)
-                .finalizer(ThemeAssetsInBatchExecutor.class).build())
+            ExecutorByDeferSteps.<ThemeAsset, ThemeAsset, ThemeAssetDeleteAllInBatchCommand, ThemeAssetDeleteInBatchExecutor.ThemeAssetPaginableBatch>builder()
+                .initializer(ThemeAssetDeleteInBatchExecutor.class)
+                .counter(ThemeAssetDeleteInBatchExecutor.class)
+                .descriptor(ThemeAssetDeleteInBatchExecutor.class)
+                .reader(ThemeAssetDeleteInBatchExecutor.class)
+                .processor(ThemeAssetDeleteInBatchExecutor.class)
+                .writer(ThemeAssetDeleteInBatchExecutor.class)
+                .finalizer(ThemeAssetDeleteInBatchExecutor.class).build())
         .build());
   }
 
