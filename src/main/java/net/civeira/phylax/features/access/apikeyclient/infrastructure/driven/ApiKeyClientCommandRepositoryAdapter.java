@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.common.algorithms.Slider;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
@@ -48,11 +49,12 @@ public class ApiKeyClientCommandRepositoryAdapter implements ApiKeyClientCommand
    * @param tracer
    * @param eventDispatcher
    * @param pendingWrites
+   * @param secretDigester
    */
   public ApiKeyClientCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
-      final ApiKeyClientEventDispatcher eventDispatcher,
-      final PendingWritesRegistry pendingWrites) {
-    this.repository = new ApiKeyClientJdbcDao(datasource, tracer, false);
+      final ApiKeyClientEventDispatcher eventDispatcher, final PendingWritesRegistry pendingWrites,
+      SecretDigester secretDigester) {
+    this.repository = new ApiKeyClientJdbcDao(datasource, tracer, false, secretDigester);
     this.eventDispatcher = eventDispatcher;
     this.pendingWrites = pendingWrites;
   }

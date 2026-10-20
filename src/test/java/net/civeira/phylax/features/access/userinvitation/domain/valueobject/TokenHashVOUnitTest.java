@@ -3,8 +3,9 @@ package net.civeira.phylax.features.access.userinvitation.domain.valueobject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.common.crypto.SecretDigester;
 
 class TokenHashVOUnitTest {
 
@@ -14,10 +15,10 @@ class TokenHashVOUnitTest {
   @Test
   @DisplayName("Test value object contruction for property token hash of user invitation ")
   void test_token_hash_v_o_builder() {
-    Assertions.assertThrows(ConstraintException.class, () -> TokenHashVO.tryFrom(null));
-    Assertions.assertEquals("one", TokenHashVO.from("one").getTokenHash());
-    Object falingInstance = new Object() {};
-    Assertions.assertThrows(ConstraintException.class, () -> TokenHashVO.tryFrom(falingInstance));
-    Assertions.assertEquals("[" + "one" + "]", TokenHashVO.from("one").toString());
+    SecretDigester service = Mockito.mock(SecretDigester.class);
+    Mockito.when(service.digest("small")).thenReturn("hmac-sha256:p0:example");
+    Assertions.assertEquals("hmac-sha256:p0:example",
+        TokenHashVO.fromPlain("small").getTokenHashStored(service));
+    Assertions.assertEquals("****", TokenHashVO.fromPlain("small").toString());
   }
 }

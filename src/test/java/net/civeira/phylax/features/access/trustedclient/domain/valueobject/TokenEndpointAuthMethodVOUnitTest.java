@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 
 class TokenEndpointAuthMethodVOUnitTest {
 
@@ -15,12 +16,21 @@ class TokenEndpointAuthMethodVOUnitTest {
   @DisplayName("Test value object contruction for property token endpoint auth method of trusted client ")
   void test_token_endpoint_auth_method_v_o_builder() {
     Assertions.assertThrows(ConstraintException.class,
+        () -> TokenEndpointAuthMethodVO.tryFrom("_CLIENT_SECRET_BASIC_"));
+    Assertions.assertEquals(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_BASIC,
+        TokenEndpointAuthMethodVO.tryFrom("CLIENT_SECRET_BASIC").getTokenEndpointAuthMethod());
+    Assertions.assertThrows(ConstraintException.class,
         () -> TokenEndpointAuthMethodVO.tryFrom(null));
-    Assertions.assertEquals("one",
-        TokenEndpointAuthMethodVO.from("one").getTokenEndpointAuthMethod());
+    Assertions.assertEquals(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_BASIC,
+        TokenEndpointAuthMethodVO
+            .from(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_BASIC)
+            .getTokenEndpointAuthMethod());
     Object falingInstance = new Object() {};
     Assertions.assertThrows(ConstraintException.class,
         () -> TokenEndpointAuthMethodVO.tryFrom(falingInstance));
-    Assertions.assertEquals("[" + "one" + "]", TokenEndpointAuthMethodVO.from("one").toString());
+    Assertions.assertEquals(
+        "[" + TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_BASIC + "]",
+        TokenEndpointAuthMethodVO
+            .from(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_BASIC).toString());
   }
 }

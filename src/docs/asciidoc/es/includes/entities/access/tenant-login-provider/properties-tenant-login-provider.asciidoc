@@ -26,6 +26,16 @@ Certificate (blob)::
 The provider certificate used for signature verification, if required.
 Metadata (binary)::
 A metadata file required by some providers for configuration (e.g., SAML descriptor).
+Oidc scopes (string)::
+El oidc scopes de tenant login provider
+Oidc claim mapping (blob)::
+El oidc claim mapping de tenant login provider
+Account link policy* (TenantLoginProviderAccountLinkPolicyOptions)::
+El account link policy de tenant login providerLos posibles valores que toma el campo son:
+ * none
+ * verified-email
+ * manual
+
 Oidc discovery url (string)::
 For source=OIDC: the /.well-known/openid-configuration URL of the external       OIDC identity provider. The system will fetch authorization_endpoint, token_endpoint, and       jwks_uri from this document at startup. public-key holds the OIDC client_id;       private-key holds the OIDC client_secret.
 Saml idp metadata url (string)::

@@ -51,7 +51,7 @@ public class ApiKeyClientUpdateController {
     ApiKeyClientApiDto apiKeyClientApiDto = new ApiKeyClientApiDto();
     apiKeyClientApiDto.setUid(dto.getUid());
     apiKeyClientApiDto.setCode(dto.getCode());
-    apiKeyClientApiDto.setKey(dto.getKey());
+    apiKeyClientApiDto.setKey("*****");
     apiKeyClientApiDto.setEnabled(dto.getEnabled());
     apiKeyClientApiDto.setScopes(dto.getScopes());
     apiKeyClientApiDto.setVersion(dto.getVersion());
@@ -71,7 +71,7 @@ public class ApiKeyClientUpdateController {
     if (null != apiKeyClientApiDto.getCode()) {
       dto.setCode(apiKeyClientApiDto.getCode());
     }
-    if (null != apiKeyClientApiDto.getKey()) {
+    if (null != apiKeyClientApiDto.getKey() && !"*****".equals(apiKeyClientApiDto.getKey())) {
       dto.setKey(apiKeyClientApiDto.getKey());
     }
     if (null != apiKeyClientApiDto.getEnabled()) {

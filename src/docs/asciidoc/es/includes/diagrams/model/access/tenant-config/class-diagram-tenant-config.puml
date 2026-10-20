@@ -32,6 +32,12 @@ invitationExpiryDays:integer
 magicLinkExpiryMinutes:integer
 sessionSsoTtlSeconds:integer
 refreshTokenTtlSeconds:integer
+refreshTokenMaxLifetimeSeconds:integer
+dcrAllowedGrantTypes:blob
+dcrAllowedAuthMethods:blob
+allowPasswordGrant:boolean
+requirePushedAuthorizationRequests:boolean
+acrValuesSupported:blob
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string

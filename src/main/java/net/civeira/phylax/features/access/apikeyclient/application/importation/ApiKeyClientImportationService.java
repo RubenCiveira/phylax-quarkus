@@ -109,7 +109,7 @@ public class ApiKeyClientImportationService {
       final Map<String, String> row, final ConstraintFailList fails) {
     String key = row.get("key");
     if (key != null) {
-      return change.key(key);
+      return change.keyPlain(key);
     } else {
       return change.unsetKey();
     }

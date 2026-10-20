@@ -32,7 +32,7 @@ class UserPersonalApiKeyCachedUnitTest {
   void test_user_personal_api_key_cached_builder() {
     UserPersonalApiKey one = UserPersonalApiKey.builder().uidValue(UidVO.from("one"))
         .userValue(UserVO.from(UserReference.of("one"))).nameValue(NameVO.from("one"))
-        .keyHashValue(KeyHashVO.from("one")).scopesValue(ScopesVO.from("one"))
+        .keyHashValue(KeyHashVO.fromPlain("one")).scopesValue(ScopesVO.from("one"))
         .lastUsedAtValue(LastUsedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .expiresAtValue(ExpiresAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)

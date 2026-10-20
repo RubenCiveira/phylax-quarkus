@@ -23,7 +23,7 @@ public class UserPersonalApiKeyRbacRegister {
   private static final ResourceDescription RESOURCE = ResourceDescription.builder()
       .name("user-personal-api-key")
       .description(
-          "A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication uses the SHA-256 hash for constant-time comparison.")
+          "A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication searches by its digest (HMAC with pepper) and compares it in constant time.")
       .build();
 
   /**
@@ -60,8 +60,10 @@ public class UserPersonalApiKeyRbacRegister {
         .description("El user de user personal api key").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("name")
         .description("A label to identify the key (e.g. 'CI pipeline', 'local dev').").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("keyHash")
-        .description("SHA-256 hex digest of the raw key. Never stored in plain text.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("keyHash")
+            .description("Digest (HMAC with pepper) of the raw key. Never stored in plain text.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("scopes")
         .description("Space-separated OAuth scopes granted to this key.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("lastUsedAt")

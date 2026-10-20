@@ -6,7 +6,7 @@ El user de user personal api key
 Name* (string)::
 A label to identify the key (e.g. 'CI pipeline', 'local dev').
 Key hash* (string)::
-SHA-256 hex digest of the raw key. Never stored in plain text.
+Digest (HMAC with pepper) of the raw key. Never stored in plain text.
 Scopes* (string)::
 Space-separated OAuth scopes granted to this key.
 Last used at (datetime)::

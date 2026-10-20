@@ -4,18 +4,29 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.value.Uuid;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.AllowAllScopesValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.AllowedAudiencesValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.AllowedRedirectsValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.AllowedScopesM2mValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.AuthorizationDetailsTypesValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.AuthorizationSignedResponseAlgValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.BackChannelLogoutSessionRequiredValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.BackChannelLogoutUriValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.BackchannelClientNotificationEndpointValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.BackchannelTokenDeliveryModeValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.ClientNameValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.ClientUriValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.CodeValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.DefaultAcrValuesValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.DefaultMaxAgeValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.DpopBoundAccessTokensValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.DynamicallyRegisteredValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.EnabledValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.FrontChannelLogoutSessionRequiredValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.FrontChannelLogoutUriValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.GrantTypesJsonValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.IdTokenEncryptedResponseAlgValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.IdTokenEncryptedResponseEncValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.IdTokenSignedResponseAlgValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.IsResourceServerValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.JwksJsonValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.JwksUriValueHolder;
@@ -27,11 +38,21 @@ import net.civeira.phylax.features.access.trustedclient.domain.valueholder.Regis
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.RegistrationAccessValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.RequestObjectSigningAlgValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.RequirePkceValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.RequirePushedAuthorizationRequestsValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.ResponseTypesJsonValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.SecretOauthValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.SectorIdentifierUriValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.SubjectTypeValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.TenantValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.TlsClientAuthSubjectDnValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.TlsClientCertificateBoundAccessTokensValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.TokenEndpointAuthMethodValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.TokenEndpointAuthSigningAlgValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.TosUriValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.UidValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.UserinfoEncryptedResponseAlgValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.UserinfoEncryptedResponseEncValueHolder;
+import net.civeira.phylax.features.access.trustedclient.domain.valueholder.UserinfoSignedResponseAlgValueHolder;
 import net.civeira.phylax.features.access.trustedclient.domain.valueholder.VersionValueHolder;
 
 /**
@@ -48,6 +69,15 @@ public class TrustedClientChangeSet {
   @Delegate
   private AllowAllScopesValueHolder<TrustedClientChangeSet> allowAllScopesValue =
       new AllowAllScopesValueHolder<>(this);
+
+  /**
+   * El allowed audiences de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private AllowedAudiencesValueHolder<TrustedClientChangeSet> allowedAudiencesValue =
+      new AllowedAudiencesValueHolder<>(this);
 
   /**
    * El allowed redirects de trusted client
@@ -68,6 +98,24 @@ public class TrustedClientChangeSet {
       new AllowedScopesM2mValueHolder<>(this);
 
   /**
+   * El authorization details types de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private AuthorizationDetailsTypesValueHolder<TrustedClientChangeSet> authorizationDetailsTypesValue =
+      new AuthorizationDetailsTypesValueHolder<>(this);
+
+  /**
+   * El authorization signed response alg de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private AuthorizationSignedResponseAlgValueHolder<TrustedClientChangeSet> authorizationSignedResponseAlgValue =
+      new AuthorizationSignedResponseAlgValueHolder<>(this);
+
+  /**
    * El back channel logout session required de trusted client
    *
    * @autogenerated EntityChangeSetGenerator
@@ -84,6 +132,24 @@ public class TrustedClientChangeSet {
   @Delegate
   private BackChannelLogoutUriValueHolder<TrustedClientChangeSet> backChannelLogoutUriValue =
       new BackChannelLogoutUriValueHolder<>(this);
+
+  /**
+   * El backchannel client notification endpoint de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private BackchannelClientNotificationEndpointValueHolder<TrustedClientChangeSet> backchannelClientNotificationEndpointValue =
+      new BackchannelClientNotificationEndpointValueHolder<>(this);
+
+  /**
+   * El backchannel token delivery mode de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private BackchannelTokenDeliveryModeValueHolder<TrustedClientChangeSet> backchannelTokenDeliveryModeValue =
+      new BackchannelTokenDeliveryModeValueHolder<>(this);
 
   /**
    * El client name de trusted client
@@ -110,6 +176,33 @@ public class TrustedClientChangeSet {
    */
   @Delegate
   private CodeValueHolder<TrustedClientChangeSet> codeValue = new CodeValueHolder<>(this);
+
+  /**
+   * El default acr values de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private DefaultAcrValuesValueHolder<TrustedClientChangeSet> defaultAcrValuesValue =
+      new DefaultAcrValuesValueHolder<>(this);
+
+  /**
+   * El default max age de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private DefaultMaxAgeValueHolder<TrustedClientChangeSet> defaultMaxAgeValue =
+      new DefaultMaxAgeValueHolder<>(this);
+
+  /**
+   * El dpop bound access tokens de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private DpopBoundAccessTokensValueHolder<TrustedClientChangeSet> dpopBoundAccessTokensValue =
+      new DpopBoundAccessTokensValueHolder<>(this);
 
   /**
    * El dynamically registered de trusted client
@@ -154,6 +247,33 @@ public class TrustedClientChangeSet {
   @Delegate
   private GrantTypesJsonValueHolder<TrustedClientChangeSet> grantTypesJsonValue =
       new GrantTypesJsonValueHolder<>(this);
+
+  /**
+   * El id token encrypted response alg de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private IdTokenEncryptedResponseAlgValueHolder<TrustedClientChangeSet> idTokenEncryptedResponseAlgValue =
+      new IdTokenEncryptedResponseAlgValueHolder<>(this);
+
+  /**
+   * El id token encrypted response enc de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private IdTokenEncryptedResponseEncValueHolder<TrustedClientChangeSet> idTokenEncryptedResponseEncValue =
+      new IdTokenEncryptedResponseEncValueHolder<>(this);
+
+  /**
+   * El id token signed response alg de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private IdTokenSignedResponseAlgValueHolder<TrustedClientChangeSet> idTokenSignedResponseAlgValue =
+      new IdTokenSignedResponseAlgValueHolder<>(this);
 
   /**
    * If true, this client is allowed to call the token introspection endpoint (POST /introspect) to
@@ -257,6 +377,15 @@ public class TrustedClientChangeSet {
       new RequirePkceValueHolder<>(this);
 
   /**
+   * El require pushed authorization requests de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private RequirePushedAuthorizationRequestsValueHolder<TrustedClientChangeSet> requirePushedAuthorizationRequestsValue =
+      new RequirePushedAuthorizationRequestsValueHolder<>(this);
+
+  /**
    * El response types json de trusted client
    *
    * @autogenerated EntityChangeSetGenerator
@@ -266,13 +395,57 @@ public class TrustedClientChangeSet {
       new ResponseTypesJsonValueHolder<>(this);
 
   /**
-   * If the user is not delegated, the phrase to identify
+   * El secret oauth de trusted client
    *
    * @autogenerated EntityChangeSetGenerator
    */
   @Delegate
   private SecretOauthValueHolder<TrustedClientChangeSet> secretOauthValue =
       new SecretOauthValueHolder<>(this);
+
+  /**
+   * El sector identifier uri de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private SectorIdentifierUriValueHolder<TrustedClientChangeSet> sectorIdentifierUriValue =
+      new SectorIdentifierUriValueHolder<>(this);
+
+  /**
+   * El subject type de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private SubjectTypeValueHolder<TrustedClientChangeSet> subjectTypeValue =
+      new SubjectTypeValueHolder<>(this);
+
+  /**
+   * Owner tenant. Null means a global client, manageable only by root.
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private TenantValueHolder<TrustedClientChangeSet> tenantValue = new TenantValueHolder<>(this);
+
+  /**
+   * El tls client auth subject dn de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private TlsClientAuthSubjectDnValueHolder<TrustedClientChangeSet> tlsClientAuthSubjectDnValue =
+      new TlsClientAuthSubjectDnValueHolder<>(this);
+
+  /**
+   * El tls client certificate bound access tokens de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private TlsClientCertificateBoundAccessTokensValueHolder<TrustedClientChangeSet> tlsClientCertificateBoundAccessTokensValue =
+      new TlsClientCertificateBoundAccessTokensValueHolder<>(this);
 
   /**
    * El token endpoint auth method de trusted client
@@ -282,6 +455,15 @@ public class TrustedClientChangeSet {
   @Delegate
   private TokenEndpointAuthMethodValueHolder<TrustedClientChangeSet> tokenEndpointAuthMethodValue =
       new TokenEndpointAuthMethodValueHolder<>(this);
+
+  /**
+   * El token endpoint auth signing alg de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private TokenEndpointAuthSigningAlgValueHolder<TrustedClientChangeSet> tokenEndpointAuthSigningAlgValue =
+      new TokenEndpointAuthSigningAlgValueHolder<>(this);
 
   /**
    * El tos uri de trusted client
@@ -298,6 +480,33 @@ public class TrustedClientChangeSet {
    */
   @Delegate
   private UidValueHolder<TrustedClientChangeSet> uidValue = new UidValueHolder<>(this);
+
+  /**
+   * El userinfo encrypted response alg de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private UserinfoEncryptedResponseAlgValueHolder<TrustedClientChangeSet> userinfoEncryptedResponseAlgValue =
+      new UserinfoEncryptedResponseAlgValueHolder<>(this);
+
+  /**
+   * El userinfo encrypted response enc de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private UserinfoEncryptedResponseEncValueHolder<TrustedClientChangeSet> userinfoEncryptedResponseEncValue =
+      new UserinfoEncryptedResponseEncValueHolder<>(this);
+
+  /**
+   * El userinfo signed response alg de trusted client
+   *
+   * @autogenerated EntityChangeSetGenerator
+   */
+  @Delegate
+  private UserinfoSignedResponseAlgValueHolder<TrustedClientChangeSet> userinfoSignedResponseAlgValue =
+      new UserinfoSignedResponseAlgValueHolder<>(this);
 
   /**
    * Campo con el número de version de trusted client para controlar bloqueos optimistas
@@ -325,25 +534,48 @@ public class TrustedClientChangeSet {
   public void unset(final String field) {
     uidValue.unsetUidIfMatches(field);
     codeValue.unsetCodeIfMatches(field);
+    tenantValue.unsetTenantIfMatches(field);
     allowAllScopesValue.unsetAllowAllScopesIfMatches(field);
     publicAllowValue.unsetPublicAllowIfMatches(field);
-    allowedRedirectsValue.unsetAllowedRedirectsIfMatches(field);
+    tokenEndpointAuthMethodValue.unsetTokenEndpointAuthMethodIfMatches(field);
+    tokenEndpointAuthSigningAlgValue.unsetTokenEndpointAuthSigningAlgIfMatches(field);
+    dpopBoundAccessTokensValue.unsetDpopBoundAccessTokensIfMatches(field);
+    idTokenSignedResponseAlgValue.unsetIdTokenSignedResponseAlgIfMatches(field);
+    tlsClientAuthSubjectDnValue.unsetTlsClientAuthSubjectDnIfMatches(field);
+    tlsClientCertificateBoundAccessTokensValue
+        .unsetTlsClientCertificateBoundAccessTokensIfMatches(field);
+    authorizationSignedResponseAlgValue.unsetAuthorizationSignedResponseAlgIfMatches(field);
+    backchannelTokenDeliveryModeValue.unsetBackchannelTokenDeliveryModeIfMatches(field);
+    backchannelClientNotificationEndpointValue
+        .unsetBackchannelClientNotificationEndpointIfMatches(field);
+    subjectTypeValue.unsetSubjectTypeIfMatches(field);
+    idTokenEncryptedResponseAlgValue.unsetIdTokenEncryptedResponseAlgIfMatches(field);
+    idTokenEncryptedResponseEncValue.unsetIdTokenEncryptedResponseEncIfMatches(field);
+    userinfoEncryptedResponseAlgValue.unsetUserinfoEncryptedResponseAlgIfMatches(field);
+    userinfoEncryptedResponseEncValue.unsetUserinfoEncryptedResponseEncIfMatches(field);
+    authorizationDetailsTypesValue.unsetAuthorizationDetailsTypesIfMatches(field);
+    userinfoSignedResponseAlgValue.unsetUserinfoSignedResponseAlgIfMatches(field);
     secretOauthValue.unsetSecretOauthIfMatches(field);
+    registrationAccessValue.unsetRegistrationAccessIfMatches(field);
+    defaultAcrValuesValue.unsetDefaultAcrValuesIfMatches(field);
+    defaultMaxAgeValue.unsetDefaultMaxAgeIfMatches(field);
+    sectorIdentifierUriValue.unsetSectorIdentifierUriIfMatches(field);
+    allowedRedirectsValue.unsetAllowedRedirectsIfMatches(field);
+    allowedAudiencesValue.unsetAllowedAudiencesIfMatches(field);
+    grantTypesJsonValue.unsetGrantTypesJsonIfMatches(field);
     isResourceServerValue.unsetIsResourceServerIfMatches(field);
+    requirePushedAuthorizationRequestsValue.unsetRequirePushedAuthorizationRequestsIfMatches(field);
     requirePkceValue.unsetRequirePkceIfMatches(field);
     backChannelLogoutUriValue.unsetBackChannelLogoutUriIfMatches(field);
     backChannelLogoutSessionRequiredValue.unsetBackChannelLogoutSessionRequiredIfMatches(field);
     frontChannelLogoutUriValue.unsetFrontChannelLogoutUriIfMatches(field);
     frontChannelLogoutSessionRequiredValue.unsetFrontChannelLogoutSessionRequiredIfMatches(field);
     enabledValue.unsetEnabledIfMatches(field);
-    registrationAccessValue.unsetRegistrationAccessIfMatches(field);
     clientNameValue.unsetClientNameIfMatches(field);
     logoUriValue.unsetLogoUriIfMatches(field);
     clientUriValue.unsetClientUriIfMatches(field);
     policyUriValue.unsetPolicyUriIfMatches(field);
     tosUriValue.unsetTosUriIfMatches(field);
-    tokenEndpointAuthMethodValue.unsetTokenEndpointAuthMethodIfMatches(field);
-    grantTypesJsonValue.unsetGrantTypesJsonIfMatches(field);
     responseTypesJsonValue.unsetResponseTypesJsonIfMatches(field);
     dynamicallyRegisteredValue.unsetDynamicallyRegisteredIfMatches(field);
     registeredAtValue.unsetRegisteredAtIfMatches(field);

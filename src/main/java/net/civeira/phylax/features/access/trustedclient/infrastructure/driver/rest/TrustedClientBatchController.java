@@ -39,13 +39,16 @@ public class TrustedClientBatchController implements TrustedClientBatchApi {
    * @param withBackChannelUrl
    * @param withFrontChannelUrl
    * @param code
+   * @param tenant
+   * @param tenants
    * @return
    */
   @Override
   public Response trustedClientApiBatchDelete(final List<String> uids, final String search,
-      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code,
+      final String tenant, final List<String> tenants) {
     return deleteController.trustedClientApiBatchDelete(uids, search, withBackChannelUrl,
-        withFrontChannelUrl, code);
+        withFrontChannelUrl, code, tenant, tenants);
   }
 
   /**
@@ -65,13 +68,16 @@ public class TrustedClientBatchController implements TrustedClientBatchApi {
    * @param withBackChannelUrl
    * @param withFrontChannelUrl
    * @param code
+   * @param tenant
+   * @param tenants
    * @return
    */
   @Override
   public Response trustedClientApiBatchDisable(final List<String> uids, final String search,
-      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code,
+      final String tenant, final List<String> tenants) {
     return disableController.trustedClientApiBatchDisable(uids, search, withBackChannelUrl,
-        withFrontChannelUrl, code);
+        withFrontChannelUrl, code, tenant, tenants);
   }
 
   /**
@@ -91,13 +97,16 @@ public class TrustedClientBatchController implements TrustedClientBatchApi {
    * @param withBackChannelUrl
    * @param withFrontChannelUrl
    * @param code
+   * @param tenant
+   * @param tenants
    * @return
    */
   @Override
   public Response trustedClientApiBatchEnable(final List<String> uids, final String search,
-      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code,
+      final String tenant, final List<String> tenants) {
     return enableController.trustedClientApiBatchEnable(uids, search, withBackChannelUrl,
-        withFrontChannelUrl, code);
+        withFrontChannelUrl, code, tenant, tenants);
   }
 
   /**

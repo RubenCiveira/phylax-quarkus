@@ -24,7 +24,7 @@ class UserMfaRecoveryCodeUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_user_mfa_recovery_code_builder() {
     UserMfaRecoveryCode one = UserMfaRecoveryCode.builder().uidValue(UidVO.from("one"))
-        .userValue(UserVO.from(UserReference.of("one"))).codeHashValue(CodeHashVO.from("one"))
+        .userValue(UserVO.from(UserReference.of("one"))).codeHashValue(CodeHashVO.fromPlain("one"))
         .usedAtValue(UsedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .createdAtValue(CreatedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)

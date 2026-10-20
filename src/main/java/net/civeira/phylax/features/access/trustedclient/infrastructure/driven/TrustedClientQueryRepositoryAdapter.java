@@ -10,7 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Named;
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
@@ -49,16 +49,17 @@ public class TrustedClientQueryRepositoryAdapter implements TrustedClientQueryRe
    * @param replicaDatasource
    * @param tracer
    * @param pendingWrites
-   * @param cypher
+   * @param secretDigester
    */
   public TrustedClientQueryRepositoryAdapter(final DataSource datasource,
       @Named("replica") final Instance<DataSource> replicaDatasource, final Tracer tracer,
-      final PendingWritesRegistry pendingWrites, AesCipherService cypher) {
+      final PendingWritesRegistry pendingWrites, SecretDigester secretDigester) {
     if (replicaDatasource.isResolvable()) {
-      this.repository = new TrustedClientJdbcDao(replicaDatasource.get(), tracer, true, cypher);
-      this.primary = new TrustedClientJdbcDao(datasource, tracer, true, cypher);
+      this.repository =
+          new TrustedClientJdbcDao(replicaDatasource.get(), tracer, true, secretDigester);
+      this.primary = new TrustedClientJdbcDao(datasource, tracer, true, secretDigester);
     } else {
-      this.repository = new TrustedClientJdbcDao(datasource, tracer, true, cypher);
+      this.repository = new TrustedClientJdbcDao(datasource, tracer, true, secretDigester);
       this.primary = this.repository;
     }
     this.pendingWrites = pendingWrites;

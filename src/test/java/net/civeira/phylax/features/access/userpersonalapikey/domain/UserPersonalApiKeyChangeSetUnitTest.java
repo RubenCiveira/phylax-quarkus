@@ -18,7 +18,7 @@ class UserPersonalApiKeyChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_user_personal_api_key_change_set_builder() {
     UserPersonalApiKeyChangeSet one = new UserPersonalApiKeyChangeSet().uid("one")
-        .user(UserReference.of("one")).name("one").keyHash("one").scopes("one")
+        .user(UserReference.of("one")).name("one").keyHashPlain("one").scopes("one")
         .lastUsedAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
             .toOffsetDateTime())
         .expiresAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
@@ -42,13 +42,6 @@ class UserPersonalApiKeyChangeSetUnitTest {
     Assertions.assertEquals("two", one.getName().get(), "Value must equals to the assigned value");
     one.unset("name");
     Assertions.assertFalse(one.getName().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getKeyHash().get(), "Value must equals to the intial value");
-    one.keyHash("two");
-    Assertions.assertEquals("two", one.getKeyHash().get(),
-        "Value must equals to the assigned value");
-    one.unset("keyHash");
-    Assertions.assertFalse(one.getKeyHash().isPresent(),
-        "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getScopes().get(), "Value must equals to the intial value");
     one.scopes("two");
     Assertions.assertEquals("two", one.getScopes().get(),

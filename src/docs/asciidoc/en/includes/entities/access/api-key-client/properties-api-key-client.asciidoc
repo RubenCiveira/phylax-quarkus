@@ -4,7 +4,7 @@ El identificador de la aplicacion
 Code* (string)::
 El código identificativo de la aplicación
 Key (string)::
-The key for the api
+The key for the api (only its digest is stored)
 Enabled* (boolean)::
 The indicator to allow the account be used without deleting it
 Scopes (string)::

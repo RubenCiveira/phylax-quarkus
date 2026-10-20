@@ -17,13 +17,13 @@ class UserMfaRecoveryCodeChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_user_mfa_recovery_code_change_set_builder() {
-    UserMfaRecoveryCodeChangeSet one =
-        new UserMfaRecoveryCodeChangeSet().uid("one").user(UserReference.of("one")).codeHash("one")
-            .usedAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
-                .toOffsetDateTime())
-            .createdAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
-                .toOffsetDateTime())
-            .version(1).newUid();
+    UserMfaRecoveryCodeChangeSet one = new UserMfaRecoveryCodeChangeSet().uid("one")
+        .user(UserReference.of("one")).codeHashPlain("one")
+        .usedAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+            .toOffsetDateTime())
+        .createdAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+            .toOffsetDateTime())
+        .version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -35,14 +35,6 @@ class UserMfaRecoveryCodeChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("user");
     Assertions.assertFalse(one.getUser().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getCodeHash().get(),
-        "Value must equals to the intial value");
-    one.codeHash("two");
-    Assertions.assertEquals("two", one.getCodeHash().get(),
-        "Value must equals to the assigned value");
-    one.unset("codeHash");
-    Assertions.assertFalse(one.getCodeHash().isPresent(),
-        "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
         one.getUsedAt().get(), "Value must equals to the intial value");

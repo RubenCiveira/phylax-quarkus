@@ -83,6 +83,13 @@ public class TenantConfigRetrieveController {
     tenantConfigApiDto.setMagicLinkExpiryMinutes(dto.getMagicLinkExpiryMinutes());
     tenantConfigApiDto.setSessionSsoTtlSeconds(dto.getSessionSsoTtlSeconds());
     tenantConfigApiDto.setRefreshTokenTtlSeconds(dto.getRefreshTokenTtlSeconds());
+    tenantConfigApiDto.setRefreshTokenMaxLifetimeSeconds(dto.getRefreshTokenMaxLifetimeSeconds());
+    tenantConfigApiDto.setDcrAllowedGrantTypes(dto.getDcrAllowedGrantTypes());
+    tenantConfigApiDto.setDcrAllowedAuthMethods(dto.getDcrAllowedAuthMethods());
+    tenantConfigApiDto.setAllowPasswordGrant(dto.getAllowPasswordGrant());
+    tenantConfigApiDto
+        .setRequirePushedAuthorizationRequests(dto.getRequirePushedAuthorizationRequests());
+    tenantConfigApiDto.setAcrValuesSupported(dto.getAcrValuesSupported());
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());

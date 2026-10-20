@@ -6,9 +6,7 @@ import java.time.ZoneId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 class UserChangeSetUnitTest {
@@ -19,7 +17,6 @@ class UserChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_user_change_set_builder() {
-    AesCipherService cypher = Mockito.mock(AesCipherService.class);
     UserChangeSet one = new UserChangeSet().uid("one").tenant(TenantReference.of("one")).name("one")
         .passwordPlain("one").email("one")
         .welcomeAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
@@ -46,14 +43,6 @@ class UserChangeSetUnitTest {
     Assertions.assertEquals("two", one.getName().get(), "Value must equals to the assigned value");
     one.unset("name");
     Assertions.assertFalse(one.getName().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getPasswordPlain(cypher).get(),
-        "Value must equals to the intial value");
-    one.passwordPlain("two");
-    Assertions.assertEquals("two", one.getPasswordPlain(cypher).get(),
-        "Value must equals to the assigned value");
-    one.unset("password");
-    Assertions.assertFalse(one.getPasswordPlain(cypher).isPresent(),
-        "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getEmail().get(), "Value must equals to the intial value");
     one.email("two");
     Assertions.assertEquals("two", one.getEmail().get(), "Value must equals to the assigned value");
@@ -108,14 +97,6 @@ class UserChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("useSecondFactors");
     Assertions.assertFalse(one.getUseSecondFactors().isPresent(),
-        "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getSecondFactorSeedPlain(cypher).get(),
-        "Value must equals to the intial value");
-    one.secondFactorSeedPlain("two");
-    Assertions.assertEquals("two", one.getSecondFactorSeedPlain(cypher).get(),
-        "Value must equals to the assigned value");
-    one.unset("secondFactorSeed");
-    Assertions.assertFalse(one.getSecondFactorSeedPlain(cypher).isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),

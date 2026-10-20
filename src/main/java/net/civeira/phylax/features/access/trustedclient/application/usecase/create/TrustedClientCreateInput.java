@@ -8,21 +8,38 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import net.civeira.phylax.common.value.Uuid;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientBackchannelTokenDeliveryModeOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientIdTokenSignedResponseAlgOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedAudiencesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedScopesM2mVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationDetailsTypesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelClientNotificationEndpointVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelTokenDeliveryModeVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientNameVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultAcrValuesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultMaxAgeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DpopBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DynamicallyRegisteredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.GrantTypesJsonVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IsResourceServerVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksUriVO;
@@ -34,11 +51,21 @@ import net.civeira.phylax.features.access.trustedclient.domain.valueobject.Regis
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegistrationAccessVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequestObjectSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePkceVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePushedAuthorizationRequestsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ResponseTypesJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SectorIdentifierUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SubjectTypeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TenantVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientAuthSubjectDnVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientCertificateBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthMethodVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TosUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UidVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.VersionVO;
 
 /**
@@ -76,6 +103,32 @@ public class TrustedClientCreateInput {
         final Optional<AllowAllScopesVO> allowAllScopes) {
       this.allowAllScopes$value = allowAllScopes;
       this.allowAllScopes$set = true;
+      return this;
+    }
+
+    /**
+     * Append AllowedAudiences crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param allowedAudiences The AllowedAudiences value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder allowedAudiences(
+        final List<AllowedAudiences> allowedAudiences) {
+      return allowedAudiences(Optional.of(AllowedAudiencesVO.from(allowedAudiences)));
+    }
+
+    /**
+     * Append AllowedAudiences value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param allowedAudiences The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder allowedAudiences(
+        final Optional<AllowedAudiencesVO> allowedAudiences) {
+      this.allowedAudiences$value = allowedAudiences;
+      this.allowedAudiences$set = true;
       return this;
     }
 
@@ -131,6 +184,62 @@ public class TrustedClientCreateInput {
     }
 
     /**
+     * Append AuthorizationDetailsTypes crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param authorizationDetailsTypes The AuthorizationDetailsTypes value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder authorizationDetailsTypes(
+        final String authorizationDetailsTypes) {
+      return authorizationDetailsTypes(
+          Optional.of(AuthorizationDetailsTypesVO.from(authorizationDetailsTypes)));
+    }
+
+    /**
+     * Append AuthorizationDetailsTypes value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param authorizationDetailsTypes The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder authorizationDetailsTypes(
+        final Optional<AuthorizationDetailsTypesVO> authorizationDetailsTypes) {
+      this.authorizationDetailsTypes$value = authorizationDetailsTypes;
+      this.authorizationDetailsTypes$set = true;
+      return this;
+    }
+
+    /**
+     * Append AuthorizationSignedResponseAlg crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param authorizationSignedResponseAlg The AuthorizationSignedResponseAlg value to wrap in a
+     *        value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder authorizationSignedResponseAlg(
+        final String authorizationSignedResponseAlg) {
+      return authorizationSignedResponseAlg(
+          Optional.of(AuthorizationSignedResponseAlgVO.from(authorizationSignedResponseAlg)));
+    }
+
+    /**
+     * Append AuthorizationSignedResponseAlg value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param authorizationSignedResponseAlg The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder authorizationSignedResponseAlg(
+        final Optional<AuthorizationSignedResponseAlgVO> authorizationSignedResponseAlg) {
+      this.authorizationSignedResponseAlg$value = authorizationSignedResponseAlg;
+      this.authorizationSignedResponseAlg$set = true;
+      return this;
+    }
+
+    /**
      * Append BackChannelLogoutSessionRequired crud value and convert as value object.
      *
      * @autogenerated CreateInputGenerator
@@ -180,6 +289,62 @@ public class TrustedClientCreateInput {
         final Optional<BackChannelLogoutUriVO> backChannelLogoutUri) {
       this.backChannelLogoutUri$value = backChannelLogoutUri;
       this.backChannelLogoutUri$set = true;
+      return this;
+    }
+
+    /**
+     * Append BackchannelClientNotificationEndpoint crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param backchannelClientNotificationEndpoint The BackchannelClientNotificationEndpoint value
+     *        to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder backchannelClientNotificationEndpoint(
+        final String backchannelClientNotificationEndpoint) {
+      return backchannelClientNotificationEndpoint(Optional
+          .of(BackchannelClientNotificationEndpointVO.from(backchannelClientNotificationEndpoint)));
+    }
+
+    /**
+     * Append BackchannelClientNotificationEndpoint value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param backchannelClientNotificationEndpoint The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder backchannelClientNotificationEndpoint(
+        final Optional<BackchannelClientNotificationEndpointVO> backchannelClientNotificationEndpoint) {
+      this.backchannelClientNotificationEndpoint$value = backchannelClientNotificationEndpoint;
+      this.backchannelClientNotificationEndpoint$set = true;
+      return this;
+    }
+
+    /**
+     * Append BackchannelTokenDeliveryMode crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param backchannelTokenDeliveryMode The BackchannelTokenDeliveryMode value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder backchannelTokenDeliveryMode(
+        final TrustedClientBackchannelTokenDeliveryModeOptions backchannelTokenDeliveryMode) {
+      return backchannelTokenDeliveryMode(
+          Optional.of(BackchannelTokenDeliveryModeVO.from(backchannelTokenDeliveryMode)));
+    }
+
+    /**
+     * Append BackchannelTokenDeliveryMode value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param backchannelTokenDeliveryMode The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder backchannelTokenDeliveryMode(
+        final Optional<BackchannelTokenDeliveryModeVO> backchannelTokenDeliveryMode) {
+      this.backchannelTokenDeliveryMode$value = backchannelTokenDeliveryMode;
+      this.backchannelTokenDeliveryMode$set = true;
       return this;
     }
 
@@ -252,6 +417,83 @@ public class TrustedClientCreateInput {
     public TrustedClientCreateInputBuilder code(final Optional<CodeVO> code) {
       this.code$value = code;
       this.code$set = true;
+      return this;
+    }
+
+    /**
+     * Append DefaultAcrValues crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param defaultAcrValues The DefaultAcrValues value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder defaultAcrValues(final String defaultAcrValues) {
+      return defaultAcrValues(Optional.of(DefaultAcrValuesVO.from(defaultAcrValues)));
+    }
+
+    /**
+     * Append DefaultAcrValues value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param defaultAcrValues The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder defaultAcrValues(
+        final Optional<DefaultAcrValuesVO> defaultAcrValues) {
+      this.defaultAcrValues$value = defaultAcrValues;
+      this.defaultAcrValues$set = true;
+      return this;
+    }
+
+    /**
+     * Append DefaultMaxAge crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param defaultMaxAge The DefaultMaxAge value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder defaultMaxAge(final Integer defaultMaxAge) {
+      return defaultMaxAge(Optional.of(DefaultMaxAgeVO.from(defaultMaxAge)));
+    }
+
+    /**
+     * Append DefaultMaxAge value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param defaultMaxAge The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder defaultMaxAge(
+        final Optional<DefaultMaxAgeVO> defaultMaxAge) {
+      this.defaultMaxAge$value = defaultMaxAge;
+      this.defaultMaxAge$set = true;
+      return this;
+    }
+
+    /**
+     * Append DpopBoundAccessTokens crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param dpopBoundAccessTokens The DpopBoundAccessTokens value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder dpopBoundAccessTokens(
+        final Boolean dpopBoundAccessTokens) {
+      return dpopBoundAccessTokens(
+          Optional.of(DpopBoundAccessTokensVO.from(dpopBoundAccessTokens)));
+    }
+
+    /**
+     * Append DpopBoundAccessTokens value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param dpopBoundAccessTokens The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder dpopBoundAccessTokens(
+        final Optional<DpopBoundAccessTokensVO> dpopBoundAccessTokens) {
+      this.dpopBoundAccessTokens$value = dpopBoundAccessTokens;
+      this.dpopBoundAccessTokens$set = true;
       return this;
     }
 
@@ -383,6 +625,89 @@ public class TrustedClientCreateInput {
         final Optional<GrantTypesJsonVO> grantTypesJson) {
       this.grantTypesJson$value = grantTypesJson;
       this.grantTypesJson$set = true;
+      return this;
+    }
+
+    /**
+     * Append IdTokenEncryptedResponseAlg crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param idTokenEncryptedResponseAlg The IdTokenEncryptedResponseAlg value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder idTokenEncryptedResponseAlg(
+        final String idTokenEncryptedResponseAlg) {
+      return idTokenEncryptedResponseAlg(
+          Optional.of(IdTokenEncryptedResponseAlgVO.from(idTokenEncryptedResponseAlg)));
+    }
+
+    /**
+     * Append IdTokenEncryptedResponseAlg value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param idTokenEncryptedResponseAlg The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder idTokenEncryptedResponseAlg(
+        final Optional<IdTokenEncryptedResponseAlgVO> idTokenEncryptedResponseAlg) {
+      this.idTokenEncryptedResponseAlg$value = idTokenEncryptedResponseAlg;
+      this.idTokenEncryptedResponseAlg$set = true;
+      return this;
+    }
+
+    /**
+     * Append IdTokenEncryptedResponseEnc crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param idTokenEncryptedResponseEnc The IdTokenEncryptedResponseEnc value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder idTokenEncryptedResponseEnc(
+        final String idTokenEncryptedResponseEnc) {
+      return idTokenEncryptedResponseEnc(
+          Optional.of(IdTokenEncryptedResponseEncVO.from(idTokenEncryptedResponseEnc)));
+    }
+
+    /**
+     * Append IdTokenEncryptedResponseEnc value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param idTokenEncryptedResponseEnc The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder idTokenEncryptedResponseEnc(
+        final Optional<IdTokenEncryptedResponseEncVO> idTokenEncryptedResponseEnc) {
+      this.idTokenEncryptedResponseEnc$value = idTokenEncryptedResponseEnc;
+      this.idTokenEncryptedResponseEnc$set = true;
+      return this;
+    }
+
+    /**
+     * Append IdTokenSignedResponseAlg crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param idTokenSignedResponseAlg The IdTokenSignedResponseAlg value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder idTokenSignedResponseAlg(
+        final TrustedClientIdTokenSignedResponseAlgOptions idTokenSignedResponseAlg) {
+      return idTokenSignedResponseAlg(
+          Optional.of(IdTokenSignedResponseAlgVO.from(idTokenSignedResponseAlg)));
+    }
+
+    /**
+     * Append IdTokenSignedResponseAlg value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param idTokenSignedResponseAlg The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder idTokenSignedResponseAlg(
+        final Optional<IdTokenSignedResponseAlgVO> idTokenSignedResponseAlg) {
+      this.idTokenSignedResponseAlg$value = idTokenSignedResponseAlg;
+      this.idTokenSignedResponseAlg$set = true;
       return this;
     }
 
@@ -597,7 +922,7 @@ public class TrustedClientCreateInput {
      * @return Self instance to continue with a flow build
      */
     public TrustedClientCreateInputBuilder registrationAccess(final String registrationAccess) {
-      return registrationAccess(Optional.of(RegistrationAccessVO.from(registrationAccess)));
+      return registrationAccess(Optional.of(RegistrationAccessVO.fromPlain(registrationAccess)));
     }
 
     /**
@@ -666,6 +991,34 @@ public class TrustedClientCreateInput {
     }
 
     /**
+     * Append RequirePushedAuthorizationRequests crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param requirePushedAuthorizationRequests The RequirePushedAuthorizationRequests value to
+     *        wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder requirePushedAuthorizationRequests(
+        final Boolean requirePushedAuthorizationRequests) {
+      return requirePushedAuthorizationRequests(Optional
+          .of(RequirePushedAuthorizationRequestsVO.from(requirePushedAuthorizationRequests)));
+    }
+
+    /**
+     * Append RequirePushedAuthorizationRequests value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param requirePushedAuthorizationRequests The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder requirePushedAuthorizationRequests(
+        final Optional<RequirePushedAuthorizationRequestsVO> requirePushedAuthorizationRequests) {
+      this.requirePushedAuthorizationRequests$value = requirePushedAuthorizationRequests;
+      this.requirePushedAuthorizationRequests$set = true;
+      return this;
+    }
+
+    /**
      * Append ResponseTypesJson crud value and convert as value object.
      *
      * @autogenerated CreateInputGenerator
@@ -715,6 +1068,135 @@ public class TrustedClientCreateInput {
     }
 
     /**
+     * Append SectorIdentifierUri crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param sectorIdentifierUri The SectorIdentifierUri value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder sectorIdentifierUri(final String sectorIdentifierUri) {
+      return sectorIdentifierUri(Optional.of(SectorIdentifierUriVO.from(sectorIdentifierUri)));
+    }
+
+    /**
+     * Append SectorIdentifierUri value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param sectorIdentifierUri The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder sectorIdentifierUri(
+        final Optional<SectorIdentifierUriVO> sectorIdentifierUri) {
+      this.sectorIdentifierUri$value = sectorIdentifierUri;
+      this.sectorIdentifierUri$set = true;
+      return this;
+    }
+
+    /**
+     * Append SubjectType crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param subjectType The SubjectType value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder subjectType(
+        final TrustedClientSubjectTypeOptions subjectType) {
+      return subjectType(Optional.of(SubjectTypeVO.from(subjectType)));
+    }
+
+    /**
+     * Append SubjectType value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param subjectType The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder subjectType(final Optional<SubjectTypeVO> subjectType) {
+      this.subjectType$value = subjectType;
+      this.subjectType$set = true;
+      return this;
+    }
+
+    /**
+     * Append Tenant crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tenant The Tenant value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tenant(final TenantRef tenant) {
+      return tenant(Optional.of(TenantVO.from(tenant)));
+    }
+
+    /**
+     * Append Tenant value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tenant The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tenant(final Optional<TenantVO> tenant) {
+      this.tenant$value = tenant;
+      this.tenant$set = true;
+      return this;
+    }
+
+    /**
+     * Append TlsClientAuthSubjectDn crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tlsClientAuthSubjectDn The TlsClientAuthSubjectDn value to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tlsClientAuthSubjectDn(
+        final String tlsClientAuthSubjectDn) {
+      return tlsClientAuthSubjectDn(
+          Optional.of(TlsClientAuthSubjectDnVO.from(tlsClientAuthSubjectDn)));
+    }
+
+    /**
+     * Append TlsClientAuthSubjectDn value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tlsClientAuthSubjectDn The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tlsClientAuthSubjectDn(
+        final Optional<TlsClientAuthSubjectDnVO> tlsClientAuthSubjectDn) {
+      this.tlsClientAuthSubjectDn$value = tlsClientAuthSubjectDn;
+      this.tlsClientAuthSubjectDn$set = true;
+      return this;
+    }
+
+    /**
+     * Append TlsClientCertificateBoundAccessTokens crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tlsClientCertificateBoundAccessTokens The TlsClientCertificateBoundAccessTokens value
+     *        to wrap in a value object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tlsClientCertificateBoundAccessTokens(
+        final Boolean tlsClientCertificateBoundAccessTokens) {
+      return tlsClientCertificateBoundAccessTokens(Optional
+          .of(TlsClientCertificateBoundAccessTokensVO.from(tlsClientCertificateBoundAccessTokens)));
+    }
+
+    /**
+     * Append TlsClientCertificateBoundAccessTokens value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tlsClientCertificateBoundAccessTokens The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tlsClientCertificateBoundAccessTokens(
+        final Optional<TlsClientCertificateBoundAccessTokensVO> tlsClientCertificateBoundAccessTokens) {
+      this.tlsClientCertificateBoundAccessTokens$value = tlsClientCertificateBoundAccessTokens;
+      this.tlsClientCertificateBoundAccessTokens$set = true;
+      return this;
+    }
+
+    /**
      * Append TokenEndpointAuthMethod crud value and convert as value object.
      *
      * @autogenerated CreateInputGenerator
@@ -722,7 +1204,7 @@ public class TrustedClientCreateInput {
      * @return Self instance to continue with a flow build
      */
     public TrustedClientCreateInputBuilder tokenEndpointAuthMethod(
-        final String tokenEndpointAuthMethod) {
+        final TrustedClientTokenEndpointAuthMethodOptions tokenEndpointAuthMethod) {
       return tokenEndpointAuthMethod(
           Optional.of(TokenEndpointAuthMethodVO.from(tokenEndpointAuthMethod)));
     }
@@ -738,6 +1220,34 @@ public class TrustedClientCreateInput {
         final Optional<TokenEndpointAuthMethodVO> tokenEndpointAuthMethod) {
       this.tokenEndpointAuthMethod$value = tokenEndpointAuthMethod;
       this.tokenEndpointAuthMethod$set = true;
+      return this;
+    }
+
+    /**
+     * Append TokenEndpointAuthSigningAlg crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tokenEndpointAuthSigningAlg The TokenEndpointAuthSigningAlg value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tokenEndpointAuthSigningAlg(
+        final String tokenEndpointAuthSigningAlg) {
+      return tokenEndpointAuthSigningAlg(
+          Optional.of(TokenEndpointAuthSigningAlgVO.from(tokenEndpointAuthSigningAlg)));
+    }
+
+    /**
+     * Append TokenEndpointAuthSigningAlg value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param tokenEndpointAuthSigningAlg The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder tokenEndpointAuthSigningAlg(
+        final Optional<TokenEndpointAuthSigningAlgVO> tokenEndpointAuthSigningAlg) {
+      this.tokenEndpointAuthSigningAlg$value = tokenEndpointAuthSigningAlg;
+      this.tokenEndpointAuthSigningAlg$set = true;
       return this;
     }
 
@@ -790,6 +1300,90 @@ public class TrustedClientCreateInput {
     }
 
     /**
+     * Append UserinfoEncryptedResponseAlg crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param userinfoEncryptedResponseAlg The UserinfoEncryptedResponseAlg value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder userinfoEncryptedResponseAlg(
+        final String userinfoEncryptedResponseAlg) {
+      return userinfoEncryptedResponseAlg(
+          Optional.of(UserinfoEncryptedResponseAlgVO.from(userinfoEncryptedResponseAlg)));
+    }
+
+    /**
+     * Append UserinfoEncryptedResponseAlg value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param userinfoEncryptedResponseAlg The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder userinfoEncryptedResponseAlg(
+        final Optional<UserinfoEncryptedResponseAlgVO> userinfoEncryptedResponseAlg) {
+      this.userinfoEncryptedResponseAlg$value = userinfoEncryptedResponseAlg;
+      this.userinfoEncryptedResponseAlg$set = true;
+      return this;
+    }
+
+    /**
+     * Append UserinfoEncryptedResponseEnc crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param userinfoEncryptedResponseEnc The UserinfoEncryptedResponseEnc value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder userinfoEncryptedResponseEnc(
+        final String userinfoEncryptedResponseEnc) {
+      return userinfoEncryptedResponseEnc(
+          Optional.of(UserinfoEncryptedResponseEncVO.from(userinfoEncryptedResponseEnc)));
+    }
+
+    /**
+     * Append UserinfoEncryptedResponseEnc value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param userinfoEncryptedResponseEnc The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder userinfoEncryptedResponseEnc(
+        final Optional<UserinfoEncryptedResponseEncVO> userinfoEncryptedResponseEnc) {
+      this.userinfoEncryptedResponseEnc$value = userinfoEncryptedResponseEnc;
+      this.userinfoEncryptedResponseEnc$set = true;
+      return this;
+    }
+
+    /**
+     * Append UserinfoSignedResponseAlg crud value and convert as value object.
+     *
+     * @autogenerated CreateInputGenerator
+     * @param userinfoSignedResponseAlg The UserinfoSignedResponseAlg value to wrap in a value
+     *        object.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder userinfoSignedResponseAlg(
+        final String userinfoSignedResponseAlg) {
+      return userinfoSignedResponseAlg(
+          Optional.of(UserinfoSignedResponseAlgVO.from(userinfoSignedResponseAlg)));
+    }
+
+    /**
+     * Append UserinfoSignedResponseAlg value
+     *
+     * @autogenerated CreateInputGenerator
+     * @param userinfoSignedResponseAlg The value object with the information.
+     * @return Self instance to continue with a flow build
+     */
+    public TrustedClientCreateInputBuilder userinfoSignedResponseAlg(
+        final Optional<UserinfoSignedResponseAlgVO> userinfoSignedResponseAlg) {
+      this.userinfoSignedResponseAlg$value = userinfoSignedResponseAlg;
+      this.userinfoSignedResponseAlg$set = true;
+      return this;
+    }
+
+    /**
      * Append Version crud value and convert as value object.
      *
      * @autogenerated CreateInputGenerator
@@ -821,19 +1415,44 @@ public class TrustedClientCreateInput {
    */
   static TrustedClientCreateInput fromChangeSet(final TrustedClientChangeSet input) {
     return TrustedClientCreateInput.builder().uid(input.getUidValue()).code(input.getCodeValue())
-        .allowAllScopes(input.getAllowAllScopesValue()).publicAllow(input.getPublicAllowValue())
-        .allowedRedirects(input.getAllowedRedirectsValue()).secretOauth(input.getSecretOauthValue())
-        .isResourceServer(input.getIsResourceServerValue()).requirePkce(input.getRequirePkceValue())
+        .tenant(input.getTenantValue()).allowAllScopes(input.getAllowAllScopesValue())
+        .publicAllow(input.getPublicAllowValue())
+        .tokenEndpointAuthMethod(input.getTokenEndpointAuthMethodValue())
+        .tokenEndpointAuthSigningAlg(input.getTokenEndpointAuthSigningAlgValue())
+        .dpopBoundAccessTokens(input.getDpopBoundAccessTokensValue())
+        .idTokenSignedResponseAlg(input.getIdTokenSignedResponseAlgValue())
+        .tlsClientAuthSubjectDn(input.getTlsClientAuthSubjectDnValue())
+        .tlsClientCertificateBoundAccessTokens(
+            input.getTlsClientCertificateBoundAccessTokensValue())
+        .authorizationSignedResponseAlg(input.getAuthorizationSignedResponseAlgValue())
+        .backchannelTokenDeliveryMode(input.getBackchannelTokenDeliveryModeValue())
+        .backchannelClientNotificationEndpoint(
+            input.getBackchannelClientNotificationEndpointValue())
+        .subjectType(input.getSubjectTypeValue())
+        .idTokenEncryptedResponseAlg(input.getIdTokenEncryptedResponseAlgValue())
+        .idTokenEncryptedResponseEnc(input.getIdTokenEncryptedResponseEncValue())
+        .userinfoEncryptedResponseAlg(input.getUserinfoEncryptedResponseAlgValue())
+        .userinfoEncryptedResponseEnc(input.getUserinfoEncryptedResponseEncValue())
+        .authorizationDetailsTypes(input.getAuthorizationDetailsTypesValue())
+        .userinfoSignedResponseAlg(input.getUserinfoSignedResponseAlgValue())
+        .secretOauth(input.getSecretOauthValue())
+        .registrationAccess(input.getRegistrationAccessValue())
+        .defaultAcrValues(input.getDefaultAcrValuesValue())
+        .defaultMaxAge(input.getDefaultMaxAgeValue())
+        .sectorIdentifierUri(input.getSectorIdentifierUriValue())
+        .allowedRedirects(input.getAllowedRedirectsValue())
+        .allowedAudiences(input.getAllowedAudiencesValue())
+        .grantTypesJson(input.getGrantTypesJsonValue())
+        .isResourceServer(input.getIsResourceServerValue())
+        .requirePushedAuthorizationRequests(input.getRequirePushedAuthorizationRequestsValue())
+        .requirePkce(input.getRequirePkceValue())
         .backChannelLogoutUri(input.getBackChannelLogoutUriValue())
         .backChannelLogoutSessionRequired(input.getBackChannelLogoutSessionRequiredValue())
         .frontChannelLogoutUri(input.getFrontChannelLogoutUriValue())
         .frontChannelLogoutSessionRequired(input.getFrontChannelLogoutSessionRequiredValue())
-        .enabled(input.getEnabledValue()).registrationAccess(input.getRegistrationAccessValue())
-        .clientName(input.getClientNameValue()).logoUri(input.getLogoUriValue())
-        .clientUri(input.getClientUriValue()).policyUri(input.getPolicyUriValue())
-        .tosUri(input.getTosUriValue())
-        .tokenEndpointAuthMethod(input.getTokenEndpointAuthMethodValue())
-        .grantTypesJson(input.getGrantTypesJsonValue())
+        .enabled(input.getEnabledValue()).clientName(input.getClientNameValue())
+        .logoUri(input.getLogoUriValue()).clientUri(input.getClientUriValue())
+        .policyUri(input.getPolicyUriValue()).tosUri(input.getTosUriValue())
         .responseTypesJson(input.getResponseTypesJsonValue())
         .dynamicallyRegistered(input.getDynamicallyRegisteredValue())
         .registeredAt(input.getRegisteredAtValue())
@@ -853,6 +1472,14 @@ public class TrustedClientCreateInput {
   private Optional<AllowAllScopesVO> allowAllScopes = Optional.empty();
 
   /**
+   * El allowed audiences de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<AllowedAudiencesVO> allowedAudiences = Optional.empty();
+
+  /**
    * El allowed redirects de trusted client
    *
    * @autogenerated CreateInputGenerator
@@ -867,6 +1494,23 @@ public class TrustedClientCreateInput {
    */
   @Builder.Default
   private Optional<AllowedScopesM2mVO> allowedScopesM2m = Optional.empty();
+
+  /**
+   * El authorization details types de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<AuthorizationDetailsTypesVO> authorizationDetailsTypes = Optional.empty();
+
+  /**
+   * El authorization signed response alg de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<AuthorizationSignedResponseAlgVO> authorizationSignedResponseAlg =
+      Optional.empty();
 
   /**
    * El back channel logout session required de trusted client
@@ -884,6 +1528,23 @@ public class TrustedClientCreateInput {
    */
   @Builder.Default
   private Optional<BackChannelLogoutUriVO> backChannelLogoutUri = Optional.empty();
+
+  /**
+   * El backchannel client notification endpoint de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<BackchannelClientNotificationEndpointVO> backchannelClientNotificationEndpoint =
+      Optional.empty();
+
+  /**
+   * El backchannel token delivery mode de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<BackchannelTokenDeliveryModeVO> backchannelTokenDeliveryMode = Optional.empty();
 
   /**
    * El client name de trusted client
@@ -908,6 +1569,30 @@ public class TrustedClientCreateInput {
    */
   @Builder.Default
   private Optional<CodeVO> code = Optional.empty();
+
+  /**
+   * El default acr values de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<DefaultAcrValuesVO> defaultAcrValues = Optional.empty();
+
+  /**
+   * El default max age de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<DefaultMaxAgeVO> defaultMaxAge = Optional.empty();
+
+  /**
+   * El dpop bound access tokens de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<DpopBoundAccessTokensVO> dpopBoundAccessTokens = Optional.empty();
 
   /**
    * El dynamically registered de trusted client
@@ -949,6 +1634,30 @@ public class TrustedClientCreateInput {
    */
   @Builder.Default
   private Optional<GrantTypesJsonVO> grantTypesJson = Optional.empty();
+
+  /**
+   * El id token encrypted response alg de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<IdTokenEncryptedResponseAlgVO> idTokenEncryptedResponseAlg = Optional.empty();
+
+  /**
+   * El id token encrypted response enc de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<IdTokenEncryptedResponseEncVO> idTokenEncryptedResponseEnc = Optional.empty();
+
+  /**
+   * El id token signed response alg de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<IdTokenSignedResponseAlgVO> idTokenSignedResponseAlg = Optional.empty();
 
   /**
    * If true, this client is allowed to call the token introspection endpoint (POST /introspect) to
@@ -1043,6 +1752,15 @@ public class TrustedClientCreateInput {
   private Optional<RequirePkceVO> requirePkce = Optional.empty();
 
   /**
+   * El require pushed authorization requests de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<RequirePushedAuthorizationRequestsVO> requirePushedAuthorizationRequests =
+      Optional.empty();
+
+  /**
    * El response types json de trusted client
    *
    * @autogenerated CreateInputGenerator
@@ -1051,12 +1769,53 @@ public class TrustedClientCreateInput {
   private Optional<ResponseTypesJsonVO> responseTypesJson = Optional.empty();
 
   /**
-   * If the user is not delegated, the phrase to identify
+   * El secret oauth de trusted client
    *
    * @autogenerated CreateInputGenerator
    */
   @Builder.Default
   private Optional<SecretOauthVO> secretOauth = Optional.empty();
+
+  /**
+   * El sector identifier uri de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<SectorIdentifierUriVO> sectorIdentifierUri = Optional.empty();
+
+  /**
+   * El subject type de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<SubjectTypeVO> subjectType = Optional.empty();
+
+  /**
+   * Owner tenant. Null means a global client, manageable only by root.
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<TenantVO> tenant = Optional.empty();
+
+  /**
+   * El tls client auth subject dn de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<TlsClientAuthSubjectDnVO> tlsClientAuthSubjectDn = Optional.empty();
+
+  /**
+   * El tls client certificate bound access tokens de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<TlsClientCertificateBoundAccessTokensVO> tlsClientCertificateBoundAccessTokens =
+      Optional.empty();
 
   /**
    * El token endpoint auth method de trusted client
@@ -1065,6 +1824,14 @@ public class TrustedClientCreateInput {
    */
   @Builder.Default
   private Optional<TokenEndpointAuthMethodVO> tokenEndpointAuthMethod = Optional.empty();
+
+  /**
+   * El token endpoint auth signing alg de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<TokenEndpointAuthSigningAlgVO> tokenEndpointAuthSigningAlg = Optional.empty();
 
   /**
    * El tos uri de trusted client
@@ -1083,6 +1850,30 @@ public class TrustedClientCreateInput {
   private Optional<UidVO> uid = Optional.empty();
 
   /**
+   * El userinfo encrypted response alg de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<UserinfoEncryptedResponseAlgVO> userinfoEncryptedResponseAlg = Optional.empty();
+
+  /**
+   * El userinfo encrypted response enc de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<UserinfoEncryptedResponseEncVO> userinfoEncryptedResponseEnc = Optional.empty();
+
+  /**
+   * El userinfo signed response alg de trusted client
+   *
+   * @autogenerated CreateInputGenerator
+   */
+  @Builder.Default
+  private Optional<UserinfoSignedResponseAlgVO> userinfoSignedResponseAlg = Optional.empty();
+
+  /**
    * Campo con el número de version de trusted client para controlar bloqueos optimistas
    *
    * @autogenerated CreateInputGenerator
@@ -1099,6 +1890,17 @@ public class TrustedClientCreateInput {
    */
   public Optional<AllowAllScopesVO> getAllowAllScopes() {
     return allowAllScopes;
+  }
+
+  /**
+   * Inform for a possible change propolsal in AllowedAudiences
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for AllowedAudiences, otherwise the value for
+   *         AllowedAudiences
+   */
+  public Optional<AllowedAudiencesVO> getAllowedAudiences() {
+    return allowedAudiences;
   }
 
   /**
@@ -1124,6 +1926,28 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Inform for a possible change propolsal in AuthorizationDetailsTypes
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for AuthorizationDetailsTypes, otherwise the value
+   *         for AuthorizationDetailsTypes
+   */
+  public Optional<AuthorizationDetailsTypesVO> getAuthorizationDetailsTypes() {
+    return authorizationDetailsTypes;
+  }
+
+  /**
+   * Inform for a possible change propolsal in AuthorizationSignedResponseAlg
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for AuthorizationSignedResponseAlg, otherwise the
+   *         value for AuthorizationSignedResponseAlg
+   */
+  public Optional<AuthorizationSignedResponseAlgVO> getAuthorizationSignedResponseAlg() {
+    return authorizationSignedResponseAlg;
+  }
+
+  /**
    * Inform for a possible change propolsal in BackChannelLogoutSessionRequired
    *
    * @autogenerated CreateInputGenerator
@@ -1143,6 +1967,28 @@ public class TrustedClientCreateInput {
    */
   public Optional<BackChannelLogoutUriVO> getBackChannelLogoutUri() {
     return backChannelLogoutUri;
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelClientNotificationEndpoint
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for BackchannelClientNotificationEndpoint,
+   *         otherwise the value for BackchannelClientNotificationEndpoint
+   */
+  public Optional<BackchannelClientNotificationEndpointVO> getBackchannelClientNotificationEndpoint() {
+    return backchannelClientNotificationEndpoint;
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelTokenDeliveryMode
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for BackchannelTokenDeliveryMode, otherwise the
+   *         value for BackchannelTokenDeliveryMode
+   */
+  public Optional<BackchannelTokenDeliveryModeVO> getBackchannelTokenDeliveryMode() {
+    return backchannelTokenDeliveryMode;
   }
 
   /**
@@ -1173,6 +2019,39 @@ public class TrustedClientCreateInput {
    */
   public Optional<CodeVO> getCode() {
     return code;
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultAcrValues
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for DefaultAcrValues, otherwise the value for
+   *         DefaultAcrValues
+   */
+  public Optional<DefaultAcrValuesVO> getDefaultAcrValues() {
+    return defaultAcrValues;
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultMaxAge
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for DefaultMaxAge, otherwise the value for
+   *         DefaultMaxAge
+   */
+  public Optional<DefaultMaxAgeVO> getDefaultMaxAge() {
+    return defaultMaxAge;
+  }
+
+  /**
+   * Inform for a possible change propolsal in DpopBoundAccessTokens
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for DpopBoundAccessTokens, otherwise the value for
+   *         DpopBoundAccessTokens
+   */
+  public Optional<DpopBoundAccessTokensVO> getDpopBoundAccessTokens() {
+    return dpopBoundAccessTokens;
   }
 
   /**
@@ -1227,6 +2106,39 @@ public class TrustedClientCreateInput {
    */
   public Optional<GrantTypesJsonVO> getGrantTypesJson() {
     return grantTypesJson;
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseAlg
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseAlg, otherwise the
+   *         value for IdTokenEncryptedResponseAlg
+   */
+  public Optional<IdTokenEncryptedResponseAlgVO> getIdTokenEncryptedResponseAlg() {
+    return idTokenEncryptedResponseAlg;
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseEnc
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseEnc, otherwise the
+   *         value for IdTokenEncryptedResponseEnc
+   */
+  public Optional<IdTokenEncryptedResponseEncVO> getIdTokenEncryptedResponseEnc() {
+    return idTokenEncryptedResponseEnc;
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenSignedResponseAlg
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for IdTokenSignedResponseAlg, otherwise the value
+   *         for IdTokenSignedResponseAlg
+   */
+  public Optional<IdTokenSignedResponseAlgVO> getIdTokenSignedResponseAlg() {
+    return idTokenSignedResponseAlg;
   }
 
   /**
@@ -1347,6 +2259,17 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Inform for a possible change propolsal in RequirePushedAuthorizationRequests
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for RequirePushedAuthorizationRequests, otherwise
+   *         the value for RequirePushedAuthorizationRequests
+   */
+  public Optional<RequirePushedAuthorizationRequestsVO> getRequirePushedAuthorizationRequests() {
+    return requirePushedAuthorizationRequests;
+  }
+
+  /**
    * Inform for a possible change propolsal in ResponseTypesJson
    *
    * @autogenerated CreateInputGenerator
@@ -1369,6 +2292,60 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Inform for a possible change propolsal in SectorIdentifierUri
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for SectorIdentifierUri, otherwise the value for
+   *         SectorIdentifierUri
+   */
+  public Optional<SectorIdentifierUriVO> getSectorIdentifierUri() {
+    return sectorIdentifierUri;
+  }
+
+  /**
+   * Inform for a possible change propolsal in SubjectType
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for SubjectType, otherwise the value for
+   *         SubjectType
+   */
+  public Optional<SubjectTypeVO> getSubjectType() {
+    return subjectType;
+  }
+
+  /**
+   * Inform for a possible change propolsal in Tenant
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for Tenant, otherwise the value for Tenant
+   */
+  public Optional<TenantVO> getTenant() {
+    return tenant;
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientAuthSubjectDn
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for TlsClientAuthSubjectDn, otherwise the value
+   *         for TlsClientAuthSubjectDn
+   */
+  public Optional<TlsClientAuthSubjectDnVO> getTlsClientAuthSubjectDn() {
+    return tlsClientAuthSubjectDn;
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientCertificateBoundAccessTokens
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for TlsClientCertificateBoundAccessTokens,
+   *         otherwise the value for TlsClientCertificateBoundAccessTokens
+   */
+  public Optional<TlsClientCertificateBoundAccessTokensVO> getTlsClientCertificateBoundAccessTokens() {
+    return tlsClientCertificateBoundAccessTokens;
+  }
+
+  /**
    * Inform for a possible change propolsal in TokenEndpointAuthMethod
    *
    * @autogenerated CreateInputGenerator
@@ -1377,6 +2354,17 @@ public class TrustedClientCreateInput {
    */
   public Optional<TokenEndpointAuthMethodVO> getTokenEndpointAuthMethod() {
     return tokenEndpointAuthMethod;
+  }
+
+  /**
+   * Inform for a possible change propolsal in TokenEndpointAuthSigningAlg
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for TokenEndpointAuthSigningAlg, otherwise the
+   *         value for TokenEndpointAuthSigningAlg
+   */
+  public Optional<TokenEndpointAuthSigningAlgVO> getTokenEndpointAuthSigningAlg() {
+    return tokenEndpointAuthSigningAlg;
   }
 
   /**
@@ -1400,6 +2388,39 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseAlg
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseAlg, otherwise the
+   *         value for UserinfoEncryptedResponseAlg
+   */
+  public Optional<UserinfoEncryptedResponseAlgVO> getUserinfoEncryptedResponseAlg() {
+    return userinfoEncryptedResponseAlg;
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseEnc
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseEnc, otherwise the
+   *         value for UserinfoEncryptedResponseEnc
+   */
+  public Optional<UserinfoEncryptedResponseEncVO> getUserinfoEncryptedResponseEnc() {
+    return userinfoEncryptedResponseEnc;
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoSignedResponseAlg
+   *
+   * @autogenerated CreateInputGenerator
+   * @return empty if there is no change proposal for UserinfoSignedResponseAlg, otherwise the value
+   *         for UserinfoSignedResponseAlg
+   */
+  public Optional<UserinfoSignedResponseAlgVO> getUserinfoSignedResponseAlg() {
+    return userinfoSignedResponseAlg;
+  }
+
+  /**
    * Inform for a possible change propolsal in Version
    *
    * @autogenerated CreateInputGenerator
@@ -1418,6 +2439,18 @@ public class TrustedClientCreateInput {
    */
   public TrustedClientCreateInput setAllowAllScopes(final Boolean value) {
     this.allowAllScopes = Optional.of(AllowAllScopesVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for AllowedAudiences to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setAllowedAudiences(final List<AllowedAudiences> value) {
+    this.allowedAudiences = Optional.of(AllowedAudiencesVO.from(null == value ? List.of() : value));
     return this;
   }
 
@@ -1446,6 +2479,30 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Assigna change proposal for AuthorizationDetailsTypes to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setAuthorizationDetailsTypes(final String value) {
+    this.authorizationDetailsTypes = Optional.of(AuthorizationDetailsTypesVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for AuthorizationSignedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setAuthorizationSignedResponseAlg(final String value) {
+    this.authorizationSignedResponseAlg = Optional.of(AuthorizationSignedResponseAlgVO.from(value));
+    return this;
+  }
+
+  /**
    * Assigna change proposal for BackChannelLogoutSessionRequired to be apply for the aggregate.
    *
    * @autogenerated CreateInputGenerator
@@ -1467,6 +2524,33 @@ public class TrustedClientCreateInput {
    */
   public TrustedClientCreateInput setBackChannelLogoutUri(final String value) {
     this.backChannelLogoutUri = Optional.of(BackChannelLogoutUriVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for BackchannelClientNotificationEndpoint to be apply for the
+   * aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setBackchannelClientNotificationEndpoint(final String value) {
+    this.backchannelClientNotificationEndpoint =
+        Optional.of(BackchannelClientNotificationEndpointVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for BackchannelTokenDeliveryMode to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setBackchannelTokenDeliveryMode(
+      final TrustedClientBackchannelTokenDeliveryModeOptions value) {
+    this.backchannelTokenDeliveryMode = Optional.of(BackchannelTokenDeliveryModeVO.from(value));
     return this;
   }
 
@@ -1503,6 +2587,42 @@ public class TrustedClientCreateInput {
    */
   public TrustedClientCreateInput setCode(final String value) {
     this.code = Optional.of(CodeVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for DefaultAcrValues to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setDefaultAcrValues(final String value) {
+    this.defaultAcrValues = Optional.of(DefaultAcrValuesVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for DefaultMaxAge to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setDefaultMaxAge(final Integer value) {
+    this.defaultMaxAge = Optional.of(DefaultMaxAgeVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for DpopBoundAccessTokens to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setDpopBoundAccessTokens(final Boolean value) {
+    this.dpopBoundAccessTokens = Optional.of(DpopBoundAccessTokensVO.from(value));
     return this;
   }
 
@@ -1564,6 +2684,43 @@ public class TrustedClientCreateInput {
    */
   public TrustedClientCreateInput setGrantTypesJson(final String value) {
     this.grantTypesJson = Optional.of(GrantTypesJsonVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for IdTokenEncryptedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setIdTokenEncryptedResponseAlg(final String value) {
+    this.idTokenEncryptedResponseAlg = Optional.of(IdTokenEncryptedResponseAlgVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for IdTokenEncryptedResponseEnc to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setIdTokenEncryptedResponseEnc(final String value) {
+    this.idTokenEncryptedResponseEnc = Optional.of(IdTokenEncryptedResponseEncVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for IdTokenSignedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setIdTokenSignedResponseAlg(
+      final TrustedClientIdTokenSignedResponseAlgOptions value) {
+    this.idTokenSignedResponseAlg = Optional.of(IdTokenSignedResponseAlgVO.from(value));
     return this;
   }
 
@@ -1671,7 +2828,7 @@ public class TrustedClientCreateInput {
    * @return self instance to enable a flow code
    */
   public TrustedClientCreateInput setRegistrationAccess(final String value) {
-    this.registrationAccess = Optional.of(RegistrationAccessVO.from(value));
+    this.registrationAccess = Optional.of(RegistrationAccessVO.fromPlain(value));
     return this;
   }
 
@@ -1700,6 +2857,19 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Assigna change proposal for RequirePushedAuthorizationRequests to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setRequirePushedAuthorizationRequests(final Boolean value) {
+    this.requirePushedAuthorizationRequests =
+        Optional.of(RequirePushedAuthorizationRequestsVO.from(value));
+    return this;
+  }
+
+  /**
    * Assigna change proposal for ResponseTypesJson to be apply for the aggregate.
    *
    * @autogenerated CreateInputGenerator
@@ -1724,14 +2894,89 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Assigna change proposal for SectorIdentifierUri to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setSectorIdentifierUri(final String value) {
+    this.sectorIdentifierUri = Optional.of(SectorIdentifierUriVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for SubjectType to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setSubjectType(final TrustedClientSubjectTypeOptions value) {
+    this.subjectType = Optional.of(SubjectTypeVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for Tenant to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setTenant(final TenantRef value) {
+    this.tenant = Optional.of(TenantVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for TlsClientAuthSubjectDn to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setTlsClientAuthSubjectDn(final String value) {
+    this.tlsClientAuthSubjectDn = Optional.of(TlsClientAuthSubjectDnVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for TlsClientCertificateBoundAccessTokens to be apply for the
+   * aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setTlsClientCertificateBoundAccessTokens(final Boolean value) {
+    this.tlsClientCertificateBoundAccessTokens =
+        Optional.of(TlsClientCertificateBoundAccessTokensVO.from(value));
+    return this;
+  }
+
+  /**
    * Assigna change proposal for TokenEndpointAuthMethod to be apply for the aggregate.
    *
    * @autogenerated CreateInputGenerator
    * @param value The proposal value for TrustedClientCreateInput
    * @return self instance to enable a flow code
    */
-  public TrustedClientCreateInput setTokenEndpointAuthMethod(final String value) {
+  public TrustedClientCreateInput setTokenEndpointAuthMethod(
+      final TrustedClientTokenEndpointAuthMethodOptions value) {
     this.tokenEndpointAuthMethod = Optional.of(TokenEndpointAuthMethodVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for TokenEndpointAuthSigningAlg to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setTokenEndpointAuthSigningAlg(final String value) {
+    this.tokenEndpointAuthSigningAlg = Optional.of(TokenEndpointAuthSigningAlgVO.from(value));
     return this;
   }
 
@@ -1760,6 +3005,42 @@ public class TrustedClientCreateInput {
   }
 
   /**
+   * Assigna change proposal for UserinfoEncryptedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setUserinfoEncryptedResponseAlg(final String value) {
+    this.userinfoEncryptedResponseAlg = Optional.of(UserinfoEncryptedResponseAlgVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for UserinfoEncryptedResponseEnc to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setUserinfoEncryptedResponseEnc(final String value) {
+    this.userinfoEncryptedResponseEnc = Optional.of(UserinfoEncryptedResponseEncVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for UserinfoSignedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated CreateInputGenerator
+   * @param value The proposal value for TrustedClientCreateInput
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientCreateInput setUserinfoSignedResponseAlg(final String value) {
+    this.userinfoSignedResponseAlg = Optional.of(UserinfoSignedResponseAlgVO.from(value));
+    return this;
+  }
+
+  /**
    * Assigna change proposal for Version to be apply for the aggregate.
    *
    * @autogenerated CreateInputGenerator
@@ -1776,19 +3057,37 @@ public class TrustedClientCreateInput {
    * @return
    */
   TrustedClientChangeSet toChangeSet() {
-    return new TrustedClientChangeSet().uid(uid).code(code).allowAllScopes(allowAllScopes)
-        .publicAllow(publicAllow).allowedRedirects(allowedRedirects).secretOauth(secretOauth)
-        .isResourceServer(isResourceServer).requirePkce(requirePkce)
-        .backChannelLogoutUri(backChannelLogoutUri)
+    return new TrustedClientChangeSet().uid(uid).code(code).tenant(tenant)
+        .allowAllScopes(allowAllScopes).publicAllow(publicAllow)
+        .tokenEndpointAuthMethod(tokenEndpointAuthMethod)
+        .tokenEndpointAuthSigningAlg(tokenEndpointAuthSigningAlg)
+        .dpopBoundAccessTokens(dpopBoundAccessTokens)
+        .idTokenSignedResponseAlg(idTokenSignedResponseAlg)
+        .tlsClientAuthSubjectDn(tlsClientAuthSubjectDn)
+        .tlsClientCertificateBoundAccessTokens(tlsClientCertificateBoundAccessTokens)
+        .authorizationSignedResponseAlg(authorizationSignedResponseAlg)
+        .backchannelTokenDeliveryMode(backchannelTokenDeliveryMode)
+        .backchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint)
+        .subjectType(subjectType).idTokenEncryptedResponseAlg(idTokenEncryptedResponseAlg)
+        .idTokenEncryptedResponseEnc(idTokenEncryptedResponseEnc)
+        .userinfoEncryptedResponseAlg(userinfoEncryptedResponseAlg)
+        .userinfoEncryptedResponseEnc(userinfoEncryptedResponseEnc)
+        .authorizationDetailsTypes(authorizationDetailsTypes)
+        .userinfoSignedResponseAlg(userinfoSignedResponseAlg).secretOauth(secretOauth)
+        .registrationAccess(registrationAccess).defaultAcrValues(defaultAcrValues)
+        .defaultMaxAge(defaultMaxAge).sectorIdentifierUri(sectorIdentifierUri)
+        .allowedRedirects(allowedRedirects).allowedAudiences(allowedAudiences)
+        .grantTypesJson(grantTypesJson).isResourceServer(isResourceServer)
+        .requirePushedAuthorizationRequests(requirePushedAuthorizationRequests)
+        .requirePkce(requirePkce).backChannelLogoutUri(backChannelLogoutUri)
         .backChannelLogoutSessionRequired(backChannelLogoutSessionRequired)
         .frontChannelLogoutUri(frontChannelLogoutUri)
         .frontChannelLogoutSessionRequired(frontChannelLogoutSessionRequired).enabled(enabled)
-        .registrationAccess(registrationAccess).clientName(clientName).logoUri(logoUri)
-        .clientUri(clientUri).policyUri(policyUri).tosUri(tosUri)
-        .tokenEndpointAuthMethod(tokenEndpointAuthMethod).grantTypesJson(grantTypesJson)
-        .responseTypesJson(responseTypesJson).dynamicallyRegistered(dynamicallyRegistered)
-        .registeredAt(registeredAt).allowedScopesM2m(allowedScopesM2m)
-        .m2mTokenTtlSeconds(m2mTokenTtlSeconds).requestObjectSigningAlg(requestObjectSigningAlg)
-        .jwksUri(jwksUri).jwksJson(jwksJson).version(version);
+        .clientName(clientName).logoUri(logoUri).clientUri(clientUri).policyUri(policyUri)
+        .tosUri(tosUri).responseTypesJson(responseTypesJson)
+        .dynamicallyRegistered(dynamicallyRegistered).registeredAt(registeredAt)
+        .allowedScopesM2m(allowedScopesM2m).m2mTokenTtlSeconds(m2mTokenTtlSeconds)
+        .requestObjectSigningAlg(requestObjectSigningAlg).jwksUri(jwksUri).jwksJson(jwksJson)
+        .version(version);
   }
 }

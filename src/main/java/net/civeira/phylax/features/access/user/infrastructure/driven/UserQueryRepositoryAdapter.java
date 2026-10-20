@@ -10,7 +10,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Named;
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.user.domain.User;
@@ -49,16 +50,19 @@ public class UserQueryRepositoryAdapter implements UserQueryRepositoryGateway {
    * @param replicaDatasource
    * @param tracer
    * @param pendingWrites
-   * @param cypher
+   * @param secretStorage
+   * @param passwordHasher
    */
   public UserQueryRepositoryAdapter(final DataSource datasource,
       @Named("replica") final Instance<DataSource> replicaDatasource, final Tracer tracer,
-      final PendingWritesRegistry pendingWrites, AesCipherService cypher) {
+      final PendingWritesRegistry pendingWrites, KeyRingSecretStorage secretStorage,
+      PasswordHasher passwordHasher) {
     if (replicaDatasource.isResolvable()) {
-      this.repository = new UserJdbcDao(replicaDatasource.get(), tracer, true, cypher);
-      this.primary = new UserJdbcDao(datasource, tracer, true, cypher);
+      this.repository =
+          new UserJdbcDao(replicaDatasource.get(), tracer, true, secretStorage, passwordHasher);
+      this.primary = new UserJdbcDao(datasource, tracer, true, secretStorage, passwordHasher);
     } else {
-      this.repository = new UserJdbcDao(datasource, tracer, true, cypher);
+      this.repository = new UserJdbcDao(datasource, tracer, true, secretStorage, passwordHasher);
       this.primary = this.repository;
     }
     this.pendingWrites = pendingWrites;

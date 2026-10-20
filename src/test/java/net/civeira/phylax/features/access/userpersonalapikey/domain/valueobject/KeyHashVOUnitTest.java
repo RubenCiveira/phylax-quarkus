@@ -3,8 +3,9 @@ package net.civeira.phylax.features.access.userpersonalapikey.domain.valueobject
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.common.crypto.SecretDigester;
 
 class KeyHashVOUnitTest {
 
@@ -14,10 +15,10 @@ class KeyHashVOUnitTest {
   @Test
   @DisplayName("Test value object contruction for property key hash of user personal api key ")
   void test_key_hash_v_o_builder() {
-    Assertions.assertThrows(ConstraintException.class, () -> KeyHashVO.tryFrom(null));
-    Assertions.assertEquals("one", KeyHashVO.from("one").getKeyHash());
-    Object falingInstance = new Object() {};
-    Assertions.assertThrows(ConstraintException.class, () -> KeyHashVO.tryFrom(falingInstance));
-    Assertions.assertEquals("[" + "one" + "]", KeyHashVO.from("one").toString());
+    SecretDigester service = Mockito.mock(SecretDigester.class);
+    Mockito.when(service.digest("small")).thenReturn("hmac-sha256:p0:example");
+    Assertions.assertEquals("hmac-sha256:p0:example",
+        KeyHashVO.fromPlain("small").getKeyHashStored(service));
+    Assertions.assertEquals("****", KeyHashVO.fromPlain("small").toString());
   }
 }

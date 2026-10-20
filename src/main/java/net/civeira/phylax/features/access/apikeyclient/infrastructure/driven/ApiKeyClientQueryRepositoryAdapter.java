@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Named;
 import net.civeira.phylax.common.algorithms.Slider;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
@@ -48,15 +49,17 @@ public class ApiKeyClientQueryRepositoryAdapter implements ApiKeyClientQueryRepo
    * @param replicaDatasource
    * @param tracer
    * @param pendingWrites
+   * @param secretDigester
    */
   public ApiKeyClientQueryRepositoryAdapter(final DataSource datasource,
       @Named("replica") final Instance<DataSource> replicaDatasource, final Tracer tracer,
-      final PendingWritesRegistry pendingWrites) {
+      final PendingWritesRegistry pendingWrites, SecretDigester secretDigester) {
     if (replicaDatasource.isResolvable()) {
-      this.repository = new ApiKeyClientJdbcDao(replicaDatasource.get(), tracer, true);
-      this.primary = new ApiKeyClientJdbcDao(datasource, tracer, true);
+      this.repository =
+          new ApiKeyClientJdbcDao(replicaDatasource.get(), tracer, true, secretDigester);
+      this.primary = new ApiKeyClientJdbcDao(datasource, tracer, true, secretDigester);
     } else {
-      this.repository = new ApiKeyClientJdbcDao(datasource, tracer, true);
+      this.repository = new ApiKeyClientJdbcDao(datasource, tracer, true, secretDigester);
       this.primary = this.repository;
     }
     this.pendingWrites = pendingWrites;

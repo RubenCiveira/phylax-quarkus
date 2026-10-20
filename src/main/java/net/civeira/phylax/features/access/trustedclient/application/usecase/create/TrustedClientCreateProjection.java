@@ -7,23 +7,39 @@ import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
 import net.civeira.phylax.features.access.trustedclient.application.visibility.TrustedClientVisibleProjection;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientBackchannelTokenDeliveryModeOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientIdTokenSignedResponseAlgOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedAudiencesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedScopesM2mVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationDetailsTypesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelClientNotificationEndpointVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelTokenDeliveryModeVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientNameVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultAcrValuesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultMaxAgeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DpopBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DynamicallyRegisteredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.GrantTypesJsonVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IsResourceServerVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksUriVO;
@@ -35,11 +51,21 @@ import net.civeira.phylax.features.access.trustedclient.domain.valueobject.Regis
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegistrationAccessVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequestObjectSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePkceVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePushedAuthorizationRequestsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ResponseTypesJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SectorIdentifierUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SubjectTypeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TenantVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientAuthSubjectDnVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientCertificateBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthMethodVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TosUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UidVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.VersionVO;
 
 /**
@@ -60,11 +86,38 @@ public class TrustedClientCreateProjection {
     TrustedClientCreateProjection instance = new TrustedClientCreateProjection();
     instance.uidValue = visible.getUid();
     instance.codeValue = visible.getCode();
+    instance.tenantValue = visible.getTenant();
     instance.allowAllScopesValue = visible.getAllowAllScopes();
     instance.publicAllowValue = visible.getPublicAllow();
-    instance.allowedRedirectsValue = visible.getAllowedRedirects();
+    instance.tokenEndpointAuthMethodValue = visible.getTokenEndpointAuthMethod();
+    instance.tokenEndpointAuthSigningAlgValue = visible.getTokenEndpointAuthSigningAlg();
+    instance.dpopBoundAccessTokensValue = visible.getDpopBoundAccessTokens();
+    instance.idTokenSignedResponseAlgValue = visible.getIdTokenSignedResponseAlg();
+    instance.tlsClientAuthSubjectDnValue = visible.getTlsClientAuthSubjectDn();
+    instance.tlsClientCertificateBoundAccessTokensValue =
+        visible.getTlsClientCertificateBoundAccessTokens();
+    instance.authorizationSignedResponseAlgValue = visible.getAuthorizationSignedResponseAlg();
+    instance.backchannelTokenDeliveryModeValue = visible.getBackchannelTokenDeliveryMode();
+    instance.backchannelClientNotificationEndpointValue =
+        visible.getBackchannelClientNotificationEndpoint();
+    instance.subjectTypeValue = visible.getSubjectType();
+    instance.idTokenEncryptedResponseAlgValue = visible.getIdTokenEncryptedResponseAlg();
+    instance.idTokenEncryptedResponseEncValue = visible.getIdTokenEncryptedResponseEnc();
+    instance.userinfoEncryptedResponseAlgValue = visible.getUserinfoEncryptedResponseAlg();
+    instance.userinfoEncryptedResponseEncValue = visible.getUserinfoEncryptedResponseEnc();
+    instance.authorizationDetailsTypesValue = visible.getAuthorizationDetailsTypes();
+    instance.userinfoSignedResponseAlgValue = visible.getUserinfoSignedResponseAlg();
     instance.secretOauthValue = visible.getSecretOauth();
+    instance.registrationAccessValue = visible.getRegistrationAccess();
+    instance.defaultAcrValuesValue = visible.getDefaultAcrValues();
+    instance.defaultMaxAgeValue = visible.getDefaultMaxAge();
+    instance.sectorIdentifierUriValue = visible.getSectorIdentifierUri();
+    instance.allowedRedirectsValue = visible.getAllowedRedirects();
+    instance.allowedAudiencesValue = visible.getAllowedAudiences();
+    instance.grantTypesJsonValue = visible.getGrantTypesJson();
     instance.isResourceServerValue = visible.getIsResourceServer();
+    instance.requirePushedAuthorizationRequestsValue =
+        visible.getRequirePushedAuthorizationRequests();
     instance.requirePkceValue = visible.getRequirePkce();
     instance.backChannelLogoutUriValue = visible.getBackChannelLogoutUri();
     instance.backChannelLogoutSessionRequiredValue = visible.getBackChannelLogoutSessionRequired();
@@ -72,14 +125,11 @@ public class TrustedClientCreateProjection {
     instance.frontChannelLogoutSessionRequiredValue =
         visible.getFrontChannelLogoutSessionRequired();
     instance.enabledValue = visible.getEnabled();
-    instance.registrationAccessValue = visible.getRegistrationAccess();
     instance.clientNameValue = visible.getClientName();
     instance.logoUriValue = visible.getLogoUri();
     instance.clientUriValue = visible.getClientUri();
     instance.policyUriValue = visible.getPolicyUri();
     instance.tosUriValue = visible.getTosUri();
-    instance.tokenEndpointAuthMethodValue = visible.getTokenEndpointAuthMethod();
-    instance.grantTypesJsonValue = visible.getGrantTypesJson();
     instance.responseTypesJsonValue = visible.getResponseTypesJson();
     instance.dynamicallyRegisteredValue = visible.getDynamicallyRegistered();
     instance.registeredAtValue = visible.getRegisteredAt();
@@ -100,6 +150,13 @@ public class TrustedClientCreateProjection {
   private Optional<AllowAllScopesVO> allowAllScopesValue;
 
   /**
+   * El allowed audiences de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<AllowedAudiencesVO> allowedAudiencesValue;
+
+  /**
    * El allowed redirects de trusted client
    *
    * @autogenerated CreateProjectionGenerator
@@ -114,6 +171,20 @@ public class TrustedClientCreateProjection {
   private Optional<AllowedScopesM2mVO> allowedScopesM2mValue;
 
   /**
+   * El authorization details types de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<AuthorizationDetailsTypesVO> authorizationDetailsTypesValue;
+
+  /**
+   * El authorization signed response alg de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<AuthorizationSignedResponseAlgVO> authorizationSignedResponseAlgValue;
+
+  /**
    * El back channel logout session required de trusted client
    *
    * @autogenerated CreateProjectionGenerator
@@ -126,6 +197,20 @@ public class TrustedClientCreateProjection {
    * @autogenerated CreateProjectionGenerator
    */
   private Optional<BackChannelLogoutUriVO> backChannelLogoutUriValue;
+
+  /**
+   * El backchannel client notification endpoint de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<BackchannelClientNotificationEndpointVO> backchannelClientNotificationEndpointValue;
+
+  /**
+   * El backchannel token delivery mode de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<BackchannelTokenDeliveryModeVO> backchannelTokenDeliveryModeValue;
 
   /**
    * El client name de trusted client
@@ -147,6 +232,27 @@ public class TrustedClientCreateProjection {
    * @autogenerated CreateProjectionGenerator
    */
   private Optional<CodeVO> codeValue;
+
+  /**
+   * El default acr values de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<DefaultAcrValuesVO> defaultAcrValuesValue;
+
+  /**
+   * El default max age de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<DefaultMaxAgeVO> defaultMaxAgeValue;
+
+  /**
+   * El dpop bound access tokens de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<DpopBoundAccessTokensVO> dpopBoundAccessTokensValue;
 
   /**
    * El dynamically registered de trusted client
@@ -182,6 +288,27 @@ public class TrustedClientCreateProjection {
    * @autogenerated CreateProjectionGenerator
    */
   private Optional<GrantTypesJsonVO> grantTypesJsonValue;
+
+  /**
+   * El id token encrypted response alg de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<IdTokenEncryptedResponseAlgVO> idTokenEncryptedResponseAlgValue;
+
+  /**
+   * El id token encrypted response enc de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<IdTokenEncryptedResponseEncVO> idTokenEncryptedResponseEncValue;
+
+  /**
+   * El id token signed response alg de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<IdTokenSignedResponseAlgVO> idTokenSignedResponseAlgValue;
 
   /**
    * If true, this client is allowed to call the token introspection endpoint (POST /introspect) to
@@ -265,6 +392,13 @@ public class TrustedClientCreateProjection {
   private Optional<RequirePkceVO> requirePkceValue;
 
   /**
+   * El require pushed authorization requests de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<RequirePushedAuthorizationRequestsVO> requirePushedAuthorizationRequestsValue;
+
+  /**
    * El response types json de trusted client
    *
    * @autogenerated CreateProjectionGenerator
@@ -272,11 +406,46 @@ public class TrustedClientCreateProjection {
   private Optional<ResponseTypesJsonVO> responseTypesJsonValue;
 
   /**
-   * If the user is not delegated, the phrase to identify
+   * El secret oauth de trusted client
    *
    * @autogenerated CreateProjectionGenerator
    */
   private Optional<SecretOauthVO> secretOauthValue;
+
+  /**
+   * El sector identifier uri de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<SectorIdentifierUriVO> sectorIdentifierUriValue;
+
+  /**
+   * El subject type de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<SubjectTypeVO> subjectTypeValue;
+
+  /**
+   * Owner tenant. Null means a global client, manageable only by root.
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<TenantVO> tenantValue;
+
+  /**
+   * El tls client auth subject dn de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<TlsClientAuthSubjectDnVO> tlsClientAuthSubjectDnValue;
+
+  /**
+   * El tls client certificate bound access tokens de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<TlsClientCertificateBoundAccessTokensVO> tlsClientCertificateBoundAccessTokensValue;
 
   /**
    * El token endpoint auth method de trusted client
@@ -284,6 +453,13 @@ public class TrustedClientCreateProjection {
    * @autogenerated CreateProjectionGenerator
    */
   private Optional<TokenEndpointAuthMethodVO> tokenEndpointAuthMethodValue;
+
+  /**
+   * El token endpoint auth signing alg de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<TokenEndpointAuthSigningAlgVO> tokenEndpointAuthSigningAlgValue;
 
   /**
    * El tos uri de trusted client
@@ -298,6 +474,27 @@ public class TrustedClientCreateProjection {
    * @autogenerated CreateProjectionGenerator
    */
   private Optional<UidVO> uidValue;
+
+  /**
+   * El userinfo encrypted response alg de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<UserinfoEncryptedResponseAlgVO> userinfoEncryptedResponseAlgValue;
+
+  /**
+   * El userinfo encrypted response enc de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<UserinfoEncryptedResponseEncVO> userinfoEncryptedResponseEncValue;
+
+  /**
+   * El userinfo signed response alg de trusted client
+   *
+   * @autogenerated CreateProjectionGenerator
+   */
+  private Optional<UserinfoSignedResponseAlgVO> userinfoSignedResponseAlgValue;
 
   /**
    * Campo con el número de version de trusted client para controlar bloqueos optimistas
@@ -315,11 +512,39 @@ public class TrustedClientCreateProjection {
   public TrustedClientCreateProjection(final TrustedClient entity) {
     uidValue = Optional.of(entity.getUidValue());
     codeValue = Optional.of(entity.getCodeValue());
+    tenantValue = Optional.of(entity.getTenantValue());
     allowAllScopesValue = Optional.of(entity.getAllowAllScopesValue());
     publicAllowValue = Optional.of(entity.getPublicAllowValue());
-    allowedRedirectsValue = Optional.of(entity.getAllowedRedirectsValue());
+    tokenEndpointAuthMethodValue = Optional.of(entity.getTokenEndpointAuthMethodValue());
+    tokenEndpointAuthSigningAlgValue = Optional.of(entity.getTokenEndpointAuthSigningAlgValue());
+    dpopBoundAccessTokensValue = Optional.of(entity.getDpopBoundAccessTokensValue());
+    idTokenSignedResponseAlgValue = Optional.of(entity.getIdTokenSignedResponseAlgValue());
+    tlsClientAuthSubjectDnValue = Optional.of(entity.getTlsClientAuthSubjectDnValue());
+    tlsClientCertificateBoundAccessTokensValue =
+        Optional.of(entity.getTlsClientCertificateBoundAccessTokensValue());
+    authorizationSignedResponseAlgValue =
+        Optional.of(entity.getAuthorizationSignedResponseAlgValue());
+    backchannelTokenDeliveryModeValue = Optional.of(entity.getBackchannelTokenDeliveryModeValue());
+    backchannelClientNotificationEndpointValue =
+        Optional.of(entity.getBackchannelClientNotificationEndpointValue());
+    subjectTypeValue = Optional.of(entity.getSubjectTypeValue());
+    idTokenEncryptedResponseAlgValue = Optional.of(entity.getIdTokenEncryptedResponseAlgValue());
+    idTokenEncryptedResponseEncValue = Optional.of(entity.getIdTokenEncryptedResponseEncValue());
+    userinfoEncryptedResponseAlgValue = Optional.of(entity.getUserinfoEncryptedResponseAlgValue());
+    userinfoEncryptedResponseEncValue = Optional.of(entity.getUserinfoEncryptedResponseEncValue());
+    authorizationDetailsTypesValue = Optional.of(entity.getAuthorizationDetailsTypesValue());
+    userinfoSignedResponseAlgValue = Optional.of(entity.getUserinfoSignedResponseAlgValue());
     secretOauthValue = Optional.of(entity.getSecretOauthValue());
+    registrationAccessValue = Optional.of(entity.getRegistrationAccessValue());
+    defaultAcrValuesValue = Optional.of(entity.getDefaultAcrValuesValue());
+    defaultMaxAgeValue = Optional.of(entity.getDefaultMaxAgeValue());
+    sectorIdentifierUriValue = Optional.of(entity.getSectorIdentifierUriValue());
+    allowedRedirectsValue = Optional.of(entity.getAllowedRedirectsValue());
+    allowedAudiencesValue = Optional.of(entity.getAllowedAudiencesValue());
+    grantTypesJsonValue = Optional.of(entity.getGrantTypesJsonValue());
     isResourceServerValue = Optional.of(entity.getIsResourceServerValue());
+    requirePushedAuthorizationRequestsValue =
+        Optional.of(entity.getRequirePushedAuthorizationRequestsValue());
     requirePkceValue = Optional.of(entity.getRequirePkceValue());
     backChannelLogoutUriValue = Optional.of(entity.getBackChannelLogoutUriValue());
     backChannelLogoutSessionRequiredValue =
@@ -328,14 +553,11 @@ public class TrustedClientCreateProjection {
     frontChannelLogoutSessionRequiredValue =
         Optional.of(entity.getFrontChannelLogoutSessionRequiredValue());
     enabledValue = Optional.of(entity.getEnabledValue());
-    registrationAccessValue = Optional.of(entity.getRegistrationAccessValue());
     clientNameValue = Optional.of(entity.getClientNameValue());
     logoUriValue = Optional.of(entity.getLogoUriValue());
     clientUriValue = Optional.of(entity.getClientUriValue());
     policyUriValue = Optional.of(entity.getPolicyUriValue());
     tosUriValue = Optional.of(entity.getTosUriValue());
-    tokenEndpointAuthMethodValue = Optional.of(entity.getTokenEndpointAuthMethodValue());
-    grantTypesJsonValue = Optional.of(entity.getGrantTypesJsonValue());
     responseTypesJsonValue = Optional.of(entity.getResponseTypesJsonValue());
     dynamicallyRegisteredValue = Optional.of(entity.getDynamicallyRegisteredValue());
     registeredAtValue = Optional.of(entity.getRegisteredAtValue());
@@ -371,6 +593,17 @@ public class TrustedClientCreateProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in AllowedAudiences
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for AllowedAudiences, otherwise the value for
+   *         AllowedAudiences
+   */
+  public List<AllowedAudiences> getAllowedAudiences() {
+    return allowedAudiencesValue.map(AllowedAudiencesVO::getAllowedAudiences).orElseGet(List::of);
+  }
+
+  /**
    * Inform for a possible change propolsal in AllowedRedirects
    *
    * @autogenerated CreateProjectionGenerator
@@ -402,6 +635,55 @@ public class TrustedClientCreateProjection {
    */
   public String getAllowedScopesM2mOrDefault(final String orDefault) {
     return allowedScopesM2mValue.flatMap(AllowedScopesM2mVO::getAllowedScopesM2m).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in AuthorizationDetailsTypes
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for AuthorizationDetailsTypes, otherwise the value
+   *         for AuthorizationDetailsTypes
+   */
+  public String getAuthorizationDetailsTypes() {
+    return getAuthorizationDetailsTypesOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in AuthorizationDetailsTypes
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for AuthorizationDetailsTypes, otherwise the value
+   *         for AuthorizationDetailsTypes
+   */
+  public String getAuthorizationDetailsTypesOrDefault(final String orDefault) {
+    return authorizationDetailsTypesValue
+        .flatMap(AuthorizationDetailsTypesVO::getAuthorizationDetailsTypes).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in AuthorizationSignedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for AuthorizationSignedResponseAlg, otherwise the
+   *         value for AuthorizationSignedResponseAlg
+   */
+  public String getAuthorizationSignedResponseAlg() {
+    return getAuthorizationSignedResponseAlgOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in AuthorizationSignedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for AuthorizationSignedResponseAlg, otherwise the
+   *         value for AuthorizationSignedResponseAlg
+   */
+  public String getAuthorizationSignedResponseAlgOrDefault(final String orDefault) {
+    return authorizationSignedResponseAlgValue
+        .flatMap(AuthorizationSignedResponseAlgVO::getAuthorizationSignedResponseAlg)
+        .orElse(orDefault);
   }
 
   /**
@@ -451,6 +733,56 @@ public class TrustedClientCreateProjection {
   public String getBackChannelLogoutUriOrDefault(final String orDefault) {
     return backChannelLogoutUriValue.flatMap(BackChannelLogoutUriVO::getBackChannelLogoutUri)
         .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelClientNotificationEndpoint
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for BackchannelClientNotificationEndpoint,
+   *         otherwise the value for BackchannelClientNotificationEndpoint
+   */
+  public String getBackchannelClientNotificationEndpoint() {
+    return getBackchannelClientNotificationEndpointOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelClientNotificationEndpoint
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for BackchannelClientNotificationEndpoint,
+   *         otherwise the value for BackchannelClientNotificationEndpoint
+   */
+  public String getBackchannelClientNotificationEndpointOrDefault(final String orDefault) {
+    return backchannelClientNotificationEndpointValue
+        .flatMap(BackchannelClientNotificationEndpointVO::getBackchannelClientNotificationEndpoint)
+        .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelTokenDeliveryMode
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for BackchannelTokenDeliveryMode, otherwise the
+   *         value for BackchannelTokenDeliveryMode
+   */
+  public TrustedClientBackchannelTokenDeliveryModeOptions getBackchannelTokenDeliveryMode() {
+    return getBackchannelTokenDeliveryModeOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelTokenDeliveryMode
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for BackchannelTokenDeliveryMode, otherwise the
+   *         value for BackchannelTokenDeliveryMode
+   */
+  public TrustedClientBackchannelTokenDeliveryModeOptions getBackchannelTokenDeliveryModeOrDefault(
+      final TrustedClientBackchannelTokenDeliveryModeOptions orDefault) {
+    return backchannelTokenDeliveryModeValue
+        .flatMap(BackchannelTokenDeliveryModeVO::getBackchannelTokenDeliveryMode).orElse(orDefault);
   }
 
   /**
@@ -514,6 +846,76 @@ public class TrustedClientCreateProjection {
    */
   public String getCodeOrDefault(final String orDefault) {
     return codeValue.map(CodeVO::getCode).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultAcrValues
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for DefaultAcrValues, otherwise the value for
+   *         DefaultAcrValues
+   */
+  public String getDefaultAcrValues() {
+    return getDefaultAcrValuesOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultAcrValues
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for DefaultAcrValues, otherwise the value for
+   *         DefaultAcrValues
+   */
+  public String getDefaultAcrValuesOrDefault(final String orDefault) {
+    return defaultAcrValuesValue.flatMap(DefaultAcrValuesVO::getDefaultAcrValues).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultMaxAge
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for DefaultMaxAge, otherwise the value for
+   *         DefaultMaxAge
+   */
+  public Integer getDefaultMaxAge() {
+    return getDefaultMaxAgeOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultMaxAge
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for DefaultMaxAge, otherwise the value for
+   *         DefaultMaxAge
+   */
+  public Integer getDefaultMaxAgeOrDefault(final Integer orDefault) {
+    return defaultMaxAgeValue.flatMap(DefaultMaxAgeVO::getDefaultMaxAge).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DpopBoundAccessTokens
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for DpopBoundAccessTokens, otherwise the value for
+   *         DpopBoundAccessTokens
+   */
+  public Boolean getDpopBoundAccessTokens() {
+    return getDpopBoundAccessTokensOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DpopBoundAccessTokens
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for DpopBoundAccessTokens, otherwise the value for
+   *         DpopBoundAccessTokens
+   */
+  public Boolean getDpopBoundAccessTokensOrDefault(final Boolean orDefault) {
+    return dpopBoundAccessTokensValue.map(DpopBoundAccessTokensVO::isDpopBoundAccessTokens)
+        .orElse(orDefault);
   }
 
   /**
@@ -631,6 +1033,79 @@ public class TrustedClientCreateProjection {
    */
   public String getGrantTypesJsonOrDefault(final String orDefault) {
     return grantTypesJsonValue.flatMap(GrantTypesJsonVO::getGrantTypesJson).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseAlg, otherwise the
+   *         value for IdTokenEncryptedResponseAlg
+   */
+  public String getIdTokenEncryptedResponseAlg() {
+    return getIdTokenEncryptedResponseAlgOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseAlg, otherwise the
+   *         value for IdTokenEncryptedResponseAlg
+   */
+  public String getIdTokenEncryptedResponseAlgOrDefault(final String orDefault) {
+    return idTokenEncryptedResponseAlgValue
+        .flatMap(IdTokenEncryptedResponseAlgVO::getIdTokenEncryptedResponseAlg).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseEnc
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseEnc, otherwise the
+   *         value for IdTokenEncryptedResponseEnc
+   */
+  public String getIdTokenEncryptedResponseEnc() {
+    return getIdTokenEncryptedResponseEncOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseEnc
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseEnc, otherwise the
+   *         value for IdTokenEncryptedResponseEnc
+   */
+  public String getIdTokenEncryptedResponseEncOrDefault(final String orDefault) {
+    return idTokenEncryptedResponseEncValue
+        .flatMap(IdTokenEncryptedResponseEncVO::getIdTokenEncryptedResponseEnc).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenSignedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for IdTokenSignedResponseAlg, otherwise the value
+   *         for IdTokenSignedResponseAlg
+   */
+  public TrustedClientIdTokenSignedResponseAlgOptions getIdTokenSignedResponseAlg() {
+    return getIdTokenSignedResponseAlgOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenSignedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for IdTokenSignedResponseAlg, otherwise the value
+   *         for IdTokenSignedResponseAlg
+   */
+  public TrustedClientIdTokenSignedResponseAlgOptions getIdTokenSignedResponseAlgOrDefault(
+      final TrustedClientIdTokenSignedResponseAlgOptions orDefault) {
+    return idTokenSignedResponseAlgValue
+        .flatMap(IdTokenSignedResponseAlgVO::getIdTokenSignedResponseAlg).orElse(orDefault);
   }
 
   /**
@@ -811,27 +1286,13 @@ public class TrustedClientCreateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in RegistrationAccess
+   * Masked protected value
    *
    * @autogenerated CreateProjectionGenerator
-   * @return empty if there is no change proposal for RegistrationAccess, otherwise the value for
-   *         RegistrationAccess
+   * @return
    */
   public String getRegistrationAccess() {
-    return getRegistrationAccessOrDefault(null);
-  }
-
-  /**
-   * Inform for a possible change propolsal in RegistrationAccess
-   *
-   * @autogenerated CreateProjectionGenerator
-   * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for RegistrationAccess, otherwise the value for
-   *         RegistrationAccess
-   */
-  public String getRegistrationAccessOrDefault(final String orDefault) {
-    return registrationAccessValue.flatMap(RegistrationAccessVO::getRegistrationAccess)
-        .orElse(orDefault);
+    return registrationAccessValue.isPresent() ? "****" : null;
   }
 
   /**
@@ -882,6 +1343,31 @@ public class TrustedClientCreateProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in RequirePushedAuthorizationRequests
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for RequirePushedAuthorizationRequests, otherwise
+   *         the value for RequirePushedAuthorizationRequests
+   */
+  public Boolean getRequirePushedAuthorizationRequests() {
+    return getRequirePushedAuthorizationRequestsOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RequirePushedAuthorizationRequests
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for RequirePushedAuthorizationRequests, otherwise
+   *         the value for RequirePushedAuthorizationRequests
+   */
+  public Boolean getRequirePushedAuthorizationRequestsOrDefault(final Boolean orDefault) {
+    return requirePushedAuthorizationRequestsValue
+        .map(RequirePushedAuthorizationRequestsVO::isRequirePushedAuthorizationRequests)
+        .orElse(orDefault);
+  }
+
+  /**
    * Inform for a possible change propolsal in ResponseTypesJson
    *
    * @autogenerated CreateProjectionGenerator
@@ -906,55 +1392,141 @@ public class TrustedClientCreateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in SecretOauth
+   * Masked protected value
    *
    * @autogenerated CreateProjectionGenerator
-   * @param cypher
-   * @return empty if there is no change proposal for SecretOauth, otherwise the value for
-   *         SecretOauth
+   * @return
    */
-  public String getSecretOauthCyphered(final AesCipherService cypher) {
-    return getSecretOauthCypheredOrDefault(cypher, null);
+  public String getSecretOauth() {
+    return secretOauthValue.isPresent() ? "****" : null;
   }
 
   /**
-   * Inform for a possible change propolsal in SecretOauth
+   * Inform for a possible change propolsal in SectorIdentifierUri
    *
    * @autogenerated CreateProjectionGenerator
-   * @param cypher
+   * @return empty if there is no change proposal for SectorIdentifierUri, otherwise the value for
+   *         SectorIdentifierUri
+   */
+  public String getSectorIdentifierUri() {
+    return getSectorIdentifierUriOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in SectorIdentifierUri
+   *
+   * @autogenerated CreateProjectionGenerator
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for SecretOauth, otherwise the value for
-   *         SecretOauth
+   * @return empty if there is no change proposal for SectorIdentifierUri, otherwise the value for
+   *         SectorIdentifierUri
    */
-  public String getSecretOauthCypheredOrDefault(final AesCipherService cypher,
-      final String orDefault) {
-    return secretOauthValue.flatMap(vo -> vo.getSecretOauthCyphered(cypher)).orElse(orDefault);
+  public String getSectorIdentifierUriOrDefault(final String orDefault) {
+    return sectorIdentifierUriValue.flatMap(SectorIdentifierUriVO::getSectorIdentifierUri)
+        .orElse(orDefault);
   }
 
   /**
-   * Inform for a possible change propolsal in SecretOauth
+   * Inform for a possible change propolsal in SubjectType
    *
    * @autogenerated CreateProjectionGenerator
-   * @param cypher
-   * @return empty if there is no change proposal for SecretOauth, otherwise the value for
-   *         SecretOauth
+   * @return empty if there is no change proposal for SubjectType, otherwise the value for
+   *         SubjectType
    */
-  public String getSecretOauthPlain(final AesCipherService cypher) {
-    return getSecretOauthPlainOrDefault(cypher, null);
+  public TrustedClientSubjectTypeOptions getSubjectType() {
+    return getSubjectTypeOrDefault(null);
   }
 
   /**
-   * Inform for a possible change propolsal in SecretOauth
+   * Inform for a possible change propolsal in SubjectType
    *
    * @autogenerated CreateProjectionGenerator
-   * @param cypher
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for SecretOauth, otherwise the value for
-   *         SecretOauth
+   * @return empty if there is no change proposal for SubjectType, otherwise the value for
+   *         SubjectType
    */
-  public String getSecretOauthPlainOrDefault(final AesCipherService cypher,
-      final String orDefault) {
-    return secretOauthValue.flatMap(vo -> vo.getSecretOauthPlain(cypher)).orElse(orDefault);
+  public TrustedClientSubjectTypeOptions getSubjectTypeOrDefault(
+      final TrustedClientSubjectTypeOptions orDefault) {
+    return subjectTypeValue.map(SubjectTypeVO::getSubjectType).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in Tenant
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for Tenant, otherwise the value for Tenant
+   */
+  public TenantRef getTenant() {
+    return tenantValue.flatMap(TenantVO::getTenant).orElse(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in Tenant
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for Tenant, otherwise the value for Tenant
+   */
+  public String getTenantReference() {
+    return getTenantReferenceOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in Tenant
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault
+   * @return empty if there is no change proposal for Tenant, otherwise the value for Tenant
+   */
+  public String getTenantReferenceOrDefault(final String orDefault) {
+    return tenantValue.flatMap(TenantVO::getTenant).map(TenantRef::getUid).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientAuthSubjectDn
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for TlsClientAuthSubjectDn, otherwise the value
+   *         for TlsClientAuthSubjectDn
+   */
+  public String getTlsClientAuthSubjectDn() {
+    return getTlsClientAuthSubjectDnOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientAuthSubjectDn
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for TlsClientAuthSubjectDn, otherwise the value
+   *         for TlsClientAuthSubjectDn
+   */
+  public String getTlsClientAuthSubjectDnOrDefault(final String orDefault) {
+    return tlsClientAuthSubjectDnValue.flatMap(TlsClientAuthSubjectDnVO::getTlsClientAuthSubjectDn)
+        .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientCertificateBoundAccessTokens
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for TlsClientCertificateBoundAccessTokens,
+   *         otherwise the value for TlsClientCertificateBoundAccessTokens
+   */
+  public Boolean getTlsClientCertificateBoundAccessTokens() {
+    return getTlsClientCertificateBoundAccessTokensOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientCertificateBoundAccessTokens
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for TlsClientCertificateBoundAccessTokens,
+   *         otherwise the value for TlsClientCertificateBoundAccessTokens
+   */
+  public Boolean getTlsClientCertificateBoundAccessTokensOrDefault(final Boolean orDefault) {
+    return tlsClientCertificateBoundAccessTokensValue
+        .map(TlsClientCertificateBoundAccessTokensVO::isTlsClientCertificateBoundAccessTokens)
+        .orElse(orDefault);
   }
 
   /**
@@ -964,7 +1536,7 @@ public class TrustedClientCreateProjection {
    * @return empty if there is no change proposal for TokenEndpointAuthMethod, otherwise the value
    *         for TokenEndpointAuthMethod
    */
-  public String getTokenEndpointAuthMethod() {
+  public TrustedClientTokenEndpointAuthMethodOptions getTokenEndpointAuthMethod() {
     return getTokenEndpointAuthMethodOrDefault(null);
   }
 
@@ -976,9 +1548,34 @@ public class TrustedClientCreateProjection {
    * @return empty if there is no change proposal for TokenEndpointAuthMethod, otherwise the value
    *         for TokenEndpointAuthMethod
    */
-  public String getTokenEndpointAuthMethodOrDefault(final String orDefault) {
+  public TrustedClientTokenEndpointAuthMethodOptions getTokenEndpointAuthMethodOrDefault(
+      final TrustedClientTokenEndpointAuthMethodOptions orDefault) {
     return tokenEndpointAuthMethodValue.map(TokenEndpointAuthMethodVO::getTokenEndpointAuthMethod)
         .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TokenEndpointAuthSigningAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for TokenEndpointAuthSigningAlg, otherwise the
+   *         value for TokenEndpointAuthSigningAlg
+   */
+  public String getTokenEndpointAuthSigningAlg() {
+    return getTokenEndpointAuthSigningAlgOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in TokenEndpointAuthSigningAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for TokenEndpointAuthSigningAlg, otherwise the
+   *         value for TokenEndpointAuthSigningAlg
+   */
+  public String getTokenEndpointAuthSigningAlgOrDefault(final String orDefault) {
+    return tokenEndpointAuthSigningAlgValue
+        .flatMap(TokenEndpointAuthSigningAlgVO::getTokenEndpointAuthSigningAlg).orElse(orDefault);
   }
 
   /**
@@ -1021,6 +1618,78 @@ public class TrustedClientCreateProjection {
    */
   public String getUidOrDefault(final String orDefault) {
     return uidValue.map(UidVO::getUid).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseAlg, otherwise the
+   *         value for UserinfoEncryptedResponseAlg
+   */
+  public String getUserinfoEncryptedResponseAlg() {
+    return getUserinfoEncryptedResponseAlgOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseAlg, otherwise the
+   *         value for UserinfoEncryptedResponseAlg
+   */
+  public String getUserinfoEncryptedResponseAlgOrDefault(final String orDefault) {
+    return userinfoEncryptedResponseAlgValue
+        .flatMap(UserinfoEncryptedResponseAlgVO::getUserinfoEncryptedResponseAlg).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseEnc
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseEnc, otherwise the
+   *         value for UserinfoEncryptedResponseEnc
+   */
+  public String getUserinfoEncryptedResponseEnc() {
+    return getUserinfoEncryptedResponseEncOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseEnc
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseEnc, otherwise the
+   *         value for UserinfoEncryptedResponseEnc
+   */
+  public String getUserinfoEncryptedResponseEncOrDefault(final String orDefault) {
+    return userinfoEncryptedResponseEncValue
+        .flatMap(UserinfoEncryptedResponseEncVO::getUserinfoEncryptedResponseEnc).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoSignedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @return empty if there is no change proposal for UserinfoSignedResponseAlg, otherwise the value
+   *         for UserinfoSignedResponseAlg
+   */
+  public String getUserinfoSignedResponseAlg() {
+    return getUserinfoSignedResponseAlgOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoSignedResponseAlg
+   *
+   * @autogenerated CreateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for UserinfoSignedResponseAlg, otherwise the value
+   *         for UserinfoSignedResponseAlg
+   */
+  public String getUserinfoSignedResponseAlgOrDefault(final String orDefault) {
+    return userinfoSignedResponseAlgValue
+        .flatMap(UserinfoSignedResponseAlgVO::getUserinfoSignedResponseAlg).orElse(orDefault);
   }
 
   /**

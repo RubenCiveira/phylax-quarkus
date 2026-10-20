@@ -3,7 +3,7 @@
 = User mfa recovery code
 
 Single-use MFA recovery codes generated at TOTP enrollment time.
-	        Each code is stored as a SHA-256 hash; the raw value is shown to the user only once.
+	        Each code is stored as a slow hash (argon2id); the raw value is shown to the user only once.
 	        A consumed code has used-at set; unused codes have used-at null.
 	        All codes for a user are replaced atomically when the user regenerates their recovery set.
 

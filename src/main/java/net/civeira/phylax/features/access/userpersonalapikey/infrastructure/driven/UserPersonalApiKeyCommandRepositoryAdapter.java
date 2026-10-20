@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.common.algorithms.Slider;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.userpersonalapikey.domain.UserPersonalApiKey;
@@ -49,11 +50,12 @@ public class UserPersonalApiKeyCommandRepositoryAdapter
    * @param tracer
    * @param eventDispatcher
    * @param pendingWrites
+   * @param secretDigester
    */
   public UserPersonalApiKeyCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserPersonalApiKeyEventDispatcher eventDispatcher,
-      final PendingWritesRegistry pendingWrites) {
-    this.repository = new UserPersonalApiKeyJdbcDao(datasource, tracer, false);
+      final PendingWritesRegistry pendingWrites, SecretDigester secretDigester) {
+    this.repository = new UserPersonalApiKeyJdbcDao(datasource, tracer, false, secretDigester);
     this.eventDispatcher = eventDispatcher;
     this.pendingWrites = pendingWrites;
   }

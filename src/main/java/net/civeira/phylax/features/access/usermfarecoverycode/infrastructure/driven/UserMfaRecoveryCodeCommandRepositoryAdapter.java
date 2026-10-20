@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.common.algorithms.Slider;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCode;
@@ -49,11 +50,12 @@ public class UserMfaRecoveryCodeCommandRepositoryAdapter
    * @param tracer
    * @param eventDispatcher
    * @param pendingWrites
+   * @param passwordHasher
    */
   public UserMfaRecoveryCodeCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserMfaRecoveryCodeEventDispatcher eventDispatcher,
-      final PendingWritesRegistry pendingWrites) {
-    this.repository = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, false);
+      final PendingWritesRegistry pendingWrites, PasswordHasher passwordHasher) {
+    this.repository = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, false, passwordHasher);
     this.eventDispatcher = eventDispatcher;
     this.pendingWrites = pendingWrites;
   }

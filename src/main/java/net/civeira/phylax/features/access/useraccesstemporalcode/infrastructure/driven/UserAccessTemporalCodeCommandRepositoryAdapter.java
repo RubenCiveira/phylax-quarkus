@@ -9,7 +9,8 @@ import javax.sql.DataSource;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
@@ -50,12 +51,15 @@ public class UserAccessTemporalCodeCommandRepositoryAdapter
    * @param tracer
    * @param eventDispatcher
    * @param pendingWrites
-   * @param cypher
+   * @param secretStorage
+   * @param secretDigester
    */
   public UserAccessTemporalCodeCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final UserAccessTemporalCodeEventDispatcher eventDispatcher,
-      final PendingWritesRegistry pendingWrites, AesCipherService cypher) {
-    this.repository = new UserAccessTemporalCodeJdbcDao(datasource, tracer, false, cypher);
+      final PendingWritesRegistry pendingWrites, KeyRingSecretStorage secretStorage,
+      SecretDigester secretDigester) {
+    this.repository =
+        new UserAccessTemporalCodeJdbcDao(datasource, tracer, false, secretStorage, secretDigester);
     this.eventDispatcher = eventDispatcher;
     this.pendingWrites = pendingWrites;
   }

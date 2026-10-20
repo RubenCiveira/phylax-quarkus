@@ -4,7 +4,7 @@ A uid string to identify the entity
 User* (xref:#entidad-user[User])::
 The user who owns these recovery codes.
 Code hash* (string)::
-SHA-256 hex digest of the raw recovery code. The raw code is never stored.
+Slow hash (argon2id) of the raw recovery code: short codes need a slow hash. The raw code is never stored.
 Used at (datetime)::
 Timestamp when this code was consumed via the MFA recovery step.          Null means the code is still valid and unused.
 Created at* (datetime)::

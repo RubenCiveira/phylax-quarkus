@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfig;
@@ -50,12 +50,12 @@ public class SmtpOutboundConfigCommandRepositoryAdapter
    * @param tracer
    * @param eventDispatcher
    * @param pendingWrites
-   * @param cypher
+   * @param secretStorage
    */
   public SmtpOutboundConfigCommandRepositoryAdapter(final DataSource datasource,
       final Tracer tracer, final SmtpOutboundConfigEventDispatcher eventDispatcher,
-      final PendingWritesRegistry pendingWrites, AesCipherService cypher) {
-    this.repository = new SmtpOutboundConfigJdbcDao(datasource, tracer, false, cypher);
+      final PendingWritesRegistry pendingWrites, KeyRingSecretStorage secretStorage) {
+    this.repository = new SmtpOutboundConfigJdbcDao(datasource, tracer, false, secretStorage);
     this.eventDispatcher = eventDispatcher;
     this.pendingWrites = pendingWrites;
   }

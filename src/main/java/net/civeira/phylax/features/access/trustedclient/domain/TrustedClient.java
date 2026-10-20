@@ -24,18 +24,29 @@ import net.civeira.phylax.features.access.trustedclient.domain.event.TrustedClie
 import net.civeira.phylax.features.access.trustedclient.domain.event.TrustedClientEvent;
 import net.civeira.phylax.features.access.trustedclient.domain.event.TrustedClientUpdateEvent;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedAudiencesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedScopesM2mVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationDetailsTypesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelClientNotificationEndpointVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelTokenDeliveryModeVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientNameVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultAcrValuesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultMaxAgeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DpopBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DynamicallyRegisteredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.GrantTypesJsonVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IsResourceServerVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksUriVO;
@@ -47,11 +58,21 @@ import net.civeira.phylax.features.access.trustedclient.domain.valueobject.Regis
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegistrationAccessVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequestObjectSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePkceVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePushedAuthorizationRequestsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ResponseTypesJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SectorIdentifierUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SubjectTypeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TenantVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientAuthSubjectDnVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientCertificateBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthMethodVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TosUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UidVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.VersionVO;
 
 /**
@@ -92,6 +113,15 @@ public class TrustedClient implements TrustedClientRef {
   private AllowAllScopesVO allowAllScopesValue = AllowAllScopesVO.nullValue();
 
   /**
+   * El allowed audiences de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private AllowedAudiencesVO allowedAudiencesValue;
+
+  /**
    * El allowed redirects de trusted client
    *
    * @autogenerated EntityGenerator
@@ -108,6 +138,26 @@ public class TrustedClient implements TrustedClientRef {
   @Delegate
   @Builder.Default
   private AllowedScopesM2mVO allowedScopesM2mValue = AllowedScopesM2mVO.nullValue();
+
+  /**
+   * El authorization details types de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private AuthorizationDetailsTypesVO authorizationDetailsTypesValue =
+      AuthorizationDetailsTypesVO.nullValue();
+
+  /**
+   * El authorization signed response alg de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private AuthorizationSignedResponseAlgVO authorizationSignedResponseAlgValue =
+      AuthorizationSignedResponseAlgVO.nullValue();
 
   /**
    * El back channel logout session required de trusted client
@@ -127,6 +177,26 @@ public class TrustedClient implements TrustedClientRef {
   @Delegate
   @Builder.Default
   private BackChannelLogoutUriVO backChannelLogoutUriValue = BackChannelLogoutUriVO.nullValue();
+
+  /**
+   * El backchannel client notification endpoint de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private BackchannelClientNotificationEndpointVO backchannelClientNotificationEndpointValue =
+      BackchannelClientNotificationEndpointVO.nullValue();
+
+  /**
+   * El backchannel token delivery mode de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private BackchannelTokenDeliveryModeVO backchannelTokenDeliveryModeValue =
+      BackchannelTokenDeliveryModeVO.nullValue();
 
   /**
    * El client name de trusted client
@@ -154,6 +224,33 @@ public class TrustedClient implements TrustedClientRef {
   @Delegate
   @NonNull
   private CodeVO codeValue;
+
+  /**
+   * El default acr values de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private DefaultAcrValuesVO defaultAcrValuesValue = DefaultAcrValuesVO.nullValue();
+
+  /**
+   * El default max age de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private DefaultMaxAgeVO defaultMaxAgeValue = DefaultMaxAgeVO.nullValue();
+
+  /**
+   * El dpop bound access tokens de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private DpopBoundAccessTokensVO dpopBoundAccessTokensValue;
 
   /**
    * El dynamically registered de trusted client
@@ -200,6 +297,36 @@ public class TrustedClient implements TrustedClientRef {
   @Delegate
   @Builder.Default
   private GrantTypesJsonVO grantTypesJsonValue = GrantTypesJsonVO.nullValue();
+
+  /**
+   * El id token encrypted response alg de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private IdTokenEncryptedResponseAlgVO idTokenEncryptedResponseAlgValue =
+      IdTokenEncryptedResponseAlgVO.nullValue();
+
+  /**
+   * El id token encrypted response enc de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private IdTokenEncryptedResponseEncVO idTokenEncryptedResponseEncValue =
+      IdTokenEncryptedResponseEncVO.nullValue();
+
+  /**
+   * El id token signed response alg de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private IdTokenSignedResponseAlgVO idTokenSignedResponseAlgValue =
+      IdTokenSignedResponseAlgVO.nullValue();
 
   /**
    * If true, this client is allowed to call the token introspection endpoint (POST /introspect) to
@@ -314,6 +441,15 @@ public class TrustedClient implements TrustedClientRef {
   private RequirePkceVO requirePkceValue;
 
   /**
+   * El require pushed authorization requests de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private RequirePushedAuthorizationRequestsVO requirePushedAuthorizationRequestsValue;
+
+  /**
    * El response types json de trusted client
    *
    * @autogenerated EntityGenerator
@@ -323,13 +459,59 @@ public class TrustedClient implements TrustedClientRef {
   private ResponseTypesJsonVO responseTypesJsonValue = ResponseTypesJsonVO.nullValue();
 
   /**
-   * If the user is not delegated, the phrase to identify
+   * El secret oauth de trusted client
    *
    * @autogenerated EntityGenerator
    */
   @Delegate
   @Builder.Default
   private SecretOauthVO secretOauthValue = SecretOauthVO.nullValue();
+
+  /**
+   * El sector identifier uri de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private SectorIdentifierUriVO sectorIdentifierUriValue = SectorIdentifierUriVO.nullValue();
+
+  /**
+   * El subject type de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private SubjectTypeVO subjectTypeValue;
+
+  /**
+   * Owner tenant. Null means a global client, manageable only by root.
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private TenantVO tenantValue = TenantVO.nullValue();
+
+  /**
+   * El tls client auth subject dn de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private TlsClientAuthSubjectDnVO tlsClientAuthSubjectDnValue =
+      TlsClientAuthSubjectDnVO.nullValue();
+
+  /**
+   * El tls client certificate bound access tokens de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private TlsClientCertificateBoundAccessTokensVO tlsClientCertificateBoundAccessTokensValue;
 
   /**
    * El token endpoint auth method de trusted client
@@ -339,6 +521,16 @@ public class TrustedClient implements TrustedClientRef {
   @Delegate
   @NonNull
   private TokenEndpointAuthMethodVO tokenEndpointAuthMethodValue;
+
+  /**
+   * El token endpoint auth signing alg de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private TokenEndpointAuthSigningAlgVO tokenEndpointAuthSigningAlgValue =
+      TokenEndpointAuthSigningAlgVO.nullValue();
 
   /**
    * El tos uri de trusted client
@@ -360,6 +552,36 @@ public class TrustedClient implements TrustedClientRef {
   private UidVO uidValue;
 
   /**
+   * El userinfo encrypted response alg de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private UserinfoEncryptedResponseAlgVO userinfoEncryptedResponseAlgValue =
+      UserinfoEncryptedResponseAlgVO.nullValue();
+
+  /**
+   * El userinfo encrypted response enc de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private UserinfoEncryptedResponseEncVO userinfoEncryptedResponseEncValue =
+      UserinfoEncryptedResponseEncVO.nullValue();
+
+  /**
+   * El userinfo signed response alg de trusted client
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private UserinfoSignedResponseAlgVO userinfoSignedResponseAlgValue =
+      UserinfoSignedResponseAlgVO.nullValue();
+
+  /**
    * Campo con el número de version de trusted client para controlar bloqueos optimistas
    *
    * @autogenerated EntityGenerator
@@ -378,11 +600,45 @@ public class TrustedClient implements TrustedClientRef {
     ConstraintFailList list = new ConstraintFailList();
     this.uidValue = attribute.readUid(previous, list);
     this.codeValue = attribute.readCode(previous, list);
+    this.tenantValue = attribute.readTenant(previous, list);
     this.allowAllScopesValue = attribute.readAllowAllScopes(previous, list);
     this.publicAllowValue = attribute.readPublicAllow(previous, list);
-    this.allowedRedirectsValue = attribute.readAllowedRedirects(previous, list);
+    this.tokenEndpointAuthMethodValue = attribute.readTokenEndpointAuthMethod(previous, list);
+    this.tokenEndpointAuthSigningAlgValue =
+        attribute.readTokenEndpointAuthSigningAlg(previous, list);
+    this.dpopBoundAccessTokensValue = attribute.readDpopBoundAccessTokens(previous, list);
+    this.idTokenSignedResponseAlgValue = attribute.readIdTokenSignedResponseAlg(previous, list);
+    this.tlsClientAuthSubjectDnValue = attribute.readTlsClientAuthSubjectDn(previous, list);
+    this.tlsClientCertificateBoundAccessTokensValue =
+        attribute.readTlsClientCertificateBoundAccessTokens(previous, list);
+    this.authorizationSignedResponseAlgValue =
+        attribute.readAuthorizationSignedResponseAlg(previous, list);
+    this.backchannelTokenDeliveryModeValue =
+        attribute.readBackchannelTokenDeliveryMode(previous, list);
+    this.backchannelClientNotificationEndpointValue =
+        attribute.readBackchannelClientNotificationEndpoint(previous, list);
+    this.subjectTypeValue = attribute.readSubjectType(previous, list);
+    this.idTokenEncryptedResponseAlgValue =
+        attribute.readIdTokenEncryptedResponseAlg(previous, list);
+    this.idTokenEncryptedResponseEncValue =
+        attribute.readIdTokenEncryptedResponseEnc(previous, list);
+    this.userinfoEncryptedResponseAlgValue =
+        attribute.readUserinfoEncryptedResponseAlg(previous, list);
+    this.userinfoEncryptedResponseEncValue =
+        attribute.readUserinfoEncryptedResponseEnc(previous, list);
+    this.authorizationDetailsTypesValue = attribute.readAuthorizationDetailsTypes(previous, list);
+    this.userinfoSignedResponseAlgValue = attribute.readUserinfoSignedResponseAlg(previous, list);
     this.secretOauthValue = attribute.readSecretOauth(previous, list);
+    this.registrationAccessValue = attribute.readRegistrationAccess(previous, list);
+    this.defaultAcrValuesValue = attribute.readDefaultAcrValues(previous, list);
+    this.defaultMaxAgeValue = attribute.readDefaultMaxAge(previous, list);
+    this.sectorIdentifierUriValue = attribute.readSectorIdentifierUri(previous, list);
+    this.allowedRedirectsValue = attribute.readAllowedRedirects(previous, list);
+    this.allowedAudiencesValue = attribute.readAllowedAudiences(previous, list);
+    this.grantTypesJsonValue = attribute.readGrantTypesJson(previous, list);
     this.isResourceServerValue = attribute.readIsResourceServer(previous, list);
+    this.requirePushedAuthorizationRequestsValue =
+        attribute.readRequirePushedAuthorizationRequests(previous, list);
     this.requirePkceValue = attribute.readRequirePkce(previous, list);
     this.backChannelLogoutUriValue = attribute.readBackChannelLogoutUri(previous, list);
     this.backChannelLogoutSessionRequiredValue =
@@ -391,14 +647,11 @@ public class TrustedClient implements TrustedClientRef {
     this.frontChannelLogoutSessionRequiredValue =
         attribute.readFrontChannelLogoutSessionRequired(previous, list);
     this.enabledValue = attribute.readEnabled(previous, list);
-    this.registrationAccessValue = attribute.readRegistrationAccess(previous, list);
     this.clientNameValue = attribute.readClientName(previous, list);
     this.logoUriValue = attribute.readLogoUri(previous, list);
     this.clientUriValue = attribute.readClientUri(previous, list);
     this.policyUriValue = attribute.readPolicyUri(previous, list);
     this.tosUriValue = attribute.readTosUri(previous, list);
-    this.tokenEndpointAuthMethodValue = attribute.readTokenEndpointAuthMethod(previous, list);
-    this.grantTypesJsonValue = attribute.readGrantTypesJson(previous, list);
     this.responseTypesJsonValue = attribute.readResponseTypesJson(previous, list);
     this.dynamicallyRegisteredValue = attribute.readDynamicallyRegistered(previous, list);
     this.registeredAtValue = attribute.readRegisteredAt(previous, list);
@@ -459,28 +712,49 @@ public class TrustedClient implements TrustedClientRef {
    * @return
    */
   public Map<String, String> toMap() {
-    Map<String, String> map = new HashMap<>(30);
+    Map<String, String> map = new HashMap<>(51);
     uidToMap(map);
     codeToMap(map);
+    tenantToMap(map);
     allowAllScopesToMap(map);
     publicAllowToMap(map);
-    allowedRedirectsToMap(map);
+    tokenEndpointAuthMethodToMap(map);
+    tokenEndpointAuthSigningAlgToMap(map);
+    dpopBoundAccessTokensToMap(map);
+    idTokenSignedResponseAlgToMap(map);
+    tlsClientAuthSubjectDnToMap(map);
+    tlsClientCertificateBoundAccessTokensToMap(map);
+    authorizationSignedResponseAlgToMap(map);
+    backchannelTokenDeliveryModeToMap(map);
+    backchannelClientNotificationEndpointToMap(map);
+    subjectTypeToMap(map);
+    idTokenEncryptedResponseAlgToMap(map);
+    idTokenEncryptedResponseEncToMap(map);
+    userinfoEncryptedResponseAlgToMap(map);
+    userinfoEncryptedResponseEncToMap(map);
+    authorizationDetailsTypesToMap(map);
+    userinfoSignedResponseAlgToMap(map);
     secretOauthToMap(map);
+    registrationAccessToMap(map);
+    defaultAcrValuesToMap(map);
+    defaultMaxAgeToMap(map);
+    sectorIdentifierUriToMap(map);
+    allowedRedirectsToMap(map);
+    allowedAudiencesToMap(map);
+    grantTypesJsonToMap(map);
     isResourceServerToMap(map);
+    requirePushedAuthorizationRequestsToMap(map);
     requirePkceToMap(map);
     backChannelLogoutUriToMap(map);
     backChannelLogoutSessionRequiredToMap(map);
     frontChannelLogoutUriToMap(map);
     frontChannelLogoutSessionRequiredToMap(map);
     enabledToMap(map);
-    registrationAccessToMap(map);
     clientNameToMap(map);
     logoUriToMap(map);
     clientUriToMap(map);
     policyUriToMap(map);
     tosUriToMap(map);
-    tokenEndpointAuthMethodToMap(map);
-    grantTypesJsonToMap(map);
     responseTypesJsonToMap(map);
     dynamicallyRegisteredToMap(map);
     registeredAtToMap(map);

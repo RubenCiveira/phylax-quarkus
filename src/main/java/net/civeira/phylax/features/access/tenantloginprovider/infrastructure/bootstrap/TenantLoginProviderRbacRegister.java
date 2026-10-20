@@ -101,6 +101,12 @@ public class TenantLoginProviderRbacRegister {
         FieldDescription.builder().name("metadata").description(
             "A metadata file required by some providers for configuration (e.g., SAML descriptor).")
             .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("oidcScopes")
+        .description("El oidc scopes de tenant login provider").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("oidcClaimMapping")
+        .description("El oidc claim mapping de tenant login provider").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("accountLinkPolicy")
+        .description("El account link policy de tenant login provider").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("oidcDiscoveryUrl").description(
             "For source=OIDC the /.well-known/openid-configuration URL of the external OIDC identity provider. The system will fetch authorization_endpoint, token_endpoint, and jwks_uri from this document at startup. public-key holds the OIDC client_id; private-key holds the OIDC client_secret.")

@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Named;
 import net.civeira.phylax.common.algorithms.Slider;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCode;
@@ -49,15 +50,17 @@ public class UserMfaRecoveryCodeQueryRepositoryAdapter
    * @param replicaDatasource
    * @param tracer
    * @param pendingWrites
+   * @param passwordHasher
    */
   public UserMfaRecoveryCodeQueryRepositoryAdapter(final DataSource datasource,
       @Named("replica") final Instance<DataSource> replicaDatasource, final Tracer tracer,
-      final PendingWritesRegistry pendingWrites) {
+      final PendingWritesRegistry pendingWrites, PasswordHasher passwordHasher) {
     if (replicaDatasource.isResolvable()) {
-      this.repository = new UserMfaRecoveryCodeJdbcDao(replicaDatasource.get(), tracer, true);
-      this.primary = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, true);
+      this.repository =
+          new UserMfaRecoveryCodeJdbcDao(replicaDatasource.get(), tracer, true, passwordHasher);
+      this.primary = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, true, passwordHasher);
     } else {
-      this.repository = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, true);
+      this.repository = new UserMfaRecoveryCodeJdbcDao(datasource, tracer, true, passwordHasher);
       this.primary = this.repository;
     }
     this.pendingWrites = pendingWrites;

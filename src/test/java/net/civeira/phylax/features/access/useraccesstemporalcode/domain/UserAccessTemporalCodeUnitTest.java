@@ -30,15 +30,15 @@ class UserAccessTemporalCodeUnitTest {
   void test_user_access_temporal_code_builder() {
     UserAccessTemporalCode one = UserAccessTemporalCode.builder().uidValue(UidVO.from("one"))
         .userValue(UserVO.from(UserReference.of("one")))
-        .tempSecondFactorSeedValue(TempSecondFactorSeedVO.fromCyphered("one"))
+        .tempSecondFactorSeedValue(TempSecondFactorSeedVO.fromPlain("one"))
         .tempSecondFactorSeedExpirationValue(TempSecondFactorSeedExpirationVO.from(LocalDateTime
             .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .failedLoginAttemptsValue(FailedLoginAttemptsVO.from(1))
-        .registerCodeValue(RegisterCodeVO.from("one"))
+        .registerCodeValue(RegisterCodeVO.fromPlain("one"))
         .registerCodeUrlValue(RegisterCodeUrlVO.from("one"))
         .registerCodeExpirationValue(RegisterCodeExpirationVO.from(LocalDateTime
             .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
-        .recoveryCodeValue(RecoveryCodeVO.from("one"))
+        .recoveryCodeValue(RecoveryCodeVO.fromPlain("one"))
         .recoveryCodeExpirationValue(RecoveryCodeExpirationVO.from(LocalDateTime
             .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .versionValue(VersionVO.from(1)).build();

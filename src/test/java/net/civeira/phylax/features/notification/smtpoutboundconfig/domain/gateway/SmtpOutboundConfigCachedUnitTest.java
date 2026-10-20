@@ -35,7 +35,7 @@ class SmtpOutboundConfigCachedUnitTest {
     SmtpOutboundConfig one = SmtpOutboundConfig.builder().uidValue(UidVO.from("one"))
         .tenantValue(TenantVO.from(TenantReference.of("one"))).hostValue(HostVO.from("one"))
         .portValue(PortVO.from(1)).loginValue(LoginVO.from("one"))
-        .passwordValue(PasswordVO.fromCyphered("one")).senderNameValue(SenderNameVO.from("one"))
+        .passwordValue(PasswordVO.fromPlain("one")).senderNameValue(SenderNameVO.from("one"))
         .senderEmailValue(SenderEmailVO.from("one")).timeoutValue(TimeoutVO.from(1))
         .useTlsValue(UseTlsVO.from(true)).maxRetriesValue(MaxRetriesVO.from(1))
         .retryDelayValue(RetryDelayVO.from(1)).rateLimitValue(RateLimitVO.from(1))

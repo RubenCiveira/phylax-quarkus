@@ -162,7 +162,7 @@ public class UserPersonalApiKeyImportationService {
       final UserPersonalApiKeyImportationRelatedResolver resolver) {
     String keyHash = row.get("keyHash");
     if (keyHash != null) {
-      return change.keyHash(keyHash);
+      return change.keyHashPlain(keyHash);
     } else {
       return change.unsetKeyHash();
     }

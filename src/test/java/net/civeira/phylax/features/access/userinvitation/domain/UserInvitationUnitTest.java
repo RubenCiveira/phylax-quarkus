@@ -34,7 +34,7 @@ class UserInvitationUnitTest {
     UserInvitation one = UserInvitation.builder().uidValue(UidVO.from("one"))
         .tenantValue(TenantVO.from(TenantReference.of("one"))).emailValue(EmailVO.from("one"))
         .rolesValue(RolesVO.from("one")).invitedByValue(InvitedByVO.from(UserReference.of("one")))
-        .tokenHashValue(TokenHashVO.from("one")).metadataJsonValue(MetadataJsonVO.from("one"))
+        .tokenHashValue(TokenHashVO.fromPlain("one")).metadataJsonValue(MetadataJsonVO.from("one"))
         .statusValue(StatusVO.from(UserInvitationStatusOptions.PENDING))
         .createdAtValue(CreatedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))

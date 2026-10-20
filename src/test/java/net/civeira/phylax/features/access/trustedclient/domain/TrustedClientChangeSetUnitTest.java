@@ -7,9 +7,8 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 class TrustedClientChangeSetUnitTest {
 
@@ -19,21 +18,33 @@ class TrustedClientChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_trusted_client_change_set_builder() {
-    AesCipherService cypher = Mockito.mock(AesCipherService.class);
-    TrustedClientChangeSet one =
-        new TrustedClientChangeSet().uid("one").code("one").allowAllScopes(true).publicAllow(true)
-            .allowedRedirects(
-                List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()))
-            .secretOauthPlain("one").isResourceServer(true).requirePkce(true)
-            .backChannelLogoutUri("one").backChannelLogoutSessionRequired(true)
-            .frontChannelLogoutUri("one").frontChannelLogoutSessionRequired(true).enabled(true)
-            .registrationAccess("one").clientName("one").logoUri("one").clientUri("one")
-            .policyUri("one").tosUri("one").tokenEndpointAuthMethod("one").grantTypesJson("one")
-            .responseTypesJson("one").dynamicallyRegistered(true)
-            .registeredAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
-                .toOffsetDateTime())
-            .allowedScopesM2m("one").m2mTokenTtlSeconds(1).requestObjectSigningAlg("one")
-            .jwksUri("one").jwksJson("one").version(1).newUid();
+    TrustedClientChangeSet one = new TrustedClientChangeSet().uid("one").code("one")
+        .tenant(TenantReference.of("one")).allowAllScopes(true).publicAllow(true)
+        .tokenEndpointAuthMethod(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_BASIC)
+        .tokenEndpointAuthSigningAlg("one").dpopBoundAccessTokens(true)
+        .idTokenSignedResponseAlg(TrustedClientIdTokenSignedResponseAlgOptions.RS256)
+        .tlsClientAuthSubjectDn("one").tlsClientCertificateBoundAccessTokens(true)
+        .authorizationSignedResponseAlg("one")
+        .backchannelTokenDeliveryMode(TrustedClientBackchannelTokenDeliveryModeOptions.POLL)
+        .backchannelClientNotificationEndpoint("one")
+        .subjectType(TrustedClientSubjectTypeOptions.PUBLIC).idTokenEncryptedResponseAlg("one")
+        .idTokenEncryptedResponseEnc("one").userinfoEncryptedResponseAlg("one")
+        .userinfoEncryptedResponseEnc("one").authorizationDetailsTypes("one")
+        .userinfoSignedResponseAlg("one").secretOauthPlain("one").registrationAccessPlain("one")
+        .defaultAcrValues("one").defaultMaxAge(1).sectorIdentifierUri("one")
+        .allowedRedirects(
+            List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()))
+        .allowedAudiences(
+            List.of(AllowedAudiences.builder().uid("one").audience("one").version(1).build()))
+        .grantTypesJson("one").isResourceServer(true).requirePushedAuthorizationRequests(true)
+        .requirePkce(true).backChannelLogoutUri("one").backChannelLogoutSessionRequired(true)
+        .frontChannelLogoutUri("one").frontChannelLogoutSessionRequired(true).enabled(true)
+        .clientName("one").logoUri("one").clientUri("one").policyUri("one").tosUri("one")
+        .responseTypesJson("one").dynamicallyRegistered(true)
+        .registeredAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+            .toOffsetDateTime())
+        .allowedScopesM2m("one").m2mTokenTtlSeconds(1).requestObjectSigningAlg("one").jwksUri("one")
+        .jwksJson("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -43,6 +54,14 @@ class TrustedClientChangeSetUnitTest {
     Assertions.assertEquals("two", one.getCode().get(), "Value must equals to the assigned value");
     one.unset("code");
     Assertions.assertFalse(one.getCode().isPresent(), "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(TenantReference.of("one"), one.getTenant().get(),
+        "Value must equals to the intial value");
+    one.tenant(TenantReference.of("two"));
+    Assertions.assertEquals(TenantReference.of("two"), one.getTenant().get(),
+        "Value must equals to the assigned value");
+    one.unset("tenant");
+    Assertions.assertFalse(one.getTenant().isPresent(),
+        "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getAllowAllScopes().get(),
         "Value must equals to the intial value");
     one.allowAllScopes(false);
@@ -59,6 +78,158 @@ class TrustedClientChangeSetUnitTest {
     one.unset("publicAllow");
     Assertions.assertFalse(one.getPublicAllow().isPresent(),
         "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_BASIC,
+        one.getTokenEndpointAuthMethod().get(), "Value must equals to the intial value");
+    one.tokenEndpointAuthMethod(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_POST);
+    Assertions.assertEquals(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_POST,
+        one.getTokenEndpointAuthMethod().get(), "Value must equals to the assigned value");
+    one.unset("tokenEndpointAuthMethod");
+    Assertions.assertFalse(one.getTokenEndpointAuthMethod().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getTokenEndpointAuthSigningAlg().get(),
+        "Value must equals to the intial value");
+    one.tokenEndpointAuthSigningAlg("two");
+    Assertions.assertEquals("two", one.getTokenEndpointAuthSigningAlg().get(),
+        "Value must equals to the assigned value");
+    one.unset("tokenEndpointAuthSigningAlg");
+    Assertions.assertFalse(one.getTokenEndpointAuthSigningAlg().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getDpopBoundAccessTokens().get(),
+        "Value must equals to the intial value");
+    one.dpopBoundAccessTokens(false);
+    Assertions.assertEquals(false, one.getDpopBoundAccessTokens().get(),
+        "Value must equals to the assigned value");
+    one.unset("dpopBoundAccessTokens");
+    Assertions.assertFalse(one.getDpopBoundAccessTokens().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(TrustedClientIdTokenSignedResponseAlgOptions.RS256,
+        one.getIdTokenSignedResponseAlg().get(), "Value must equals to the intial value");
+    one.idTokenSignedResponseAlg(TrustedClientIdTokenSignedResponseAlgOptions.ES256);
+    Assertions.assertEquals(TrustedClientIdTokenSignedResponseAlgOptions.ES256,
+        one.getIdTokenSignedResponseAlg().get(), "Value must equals to the assigned value");
+    one.unset("idTokenSignedResponseAlg");
+    Assertions.assertFalse(one.getIdTokenSignedResponseAlg().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getTlsClientAuthSubjectDn().get(),
+        "Value must equals to the intial value");
+    one.tlsClientAuthSubjectDn("two");
+    Assertions.assertEquals("two", one.getTlsClientAuthSubjectDn().get(),
+        "Value must equals to the assigned value");
+    one.unset("tlsClientAuthSubjectDn");
+    Assertions.assertFalse(one.getTlsClientAuthSubjectDn().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getTlsClientCertificateBoundAccessTokens().get(),
+        "Value must equals to the intial value");
+    one.tlsClientCertificateBoundAccessTokens(false);
+    Assertions.assertEquals(false, one.getTlsClientCertificateBoundAccessTokens().get(),
+        "Value must equals to the assigned value");
+    one.unset("tlsClientCertificateBoundAccessTokens");
+    Assertions.assertFalse(one.getTlsClientCertificateBoundAccessTokens().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getAuthorizationSignedResponseAlg().get(),
+        "Value must equals to the intial value");
+    one.authorizationSignedResponseAlg("two");
+    Assertions.assertEquals("two", one.getAuthorizationSignedResponseAlg().get(),
+        "Value must equals to the assigned value");
+    one.unset("authorizationSignedResponseAlg");
+    Assertions.assertFalse(one.getAuthorizationSignedResponseAlg().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(TrustedClientBackchannelTokenDeliveryModeOptions.POLL,
+        one.getBackchannelTokenDeliveryMode().get(), "Value must equals to the intial value");
+    one.backchannelTokenDeliveryMode(TrustedClientBackchannelTokenDeliveryModeOptions.PING);
+    Assertions.assertEquals(TrustedClientBackchannelTokenDeliveryModeOptions.PING,
+        one.getBackchannelTokenDeliveryMode().get(), "Value must equals to the assigned value");
+    one.unset("backchannelTokenDeliveryMode");
+    Assertions.assertFalse(one.getBackchannelTokenDeliveryMode().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getBackchannelClientNotificationEndpoint().get(),
+        "Value must equals to the intial value");
+    one.backchannelClientNotificationEndpoint("two");
+    Assertions.assertEquals("two", one.getBackchannelClientNotificationEndpoint().get(),
+        "Value must equals to the assigned value");
+    one.unset("backchannelClientNotificationEndpoint");
+    Assertions.assertFalse(one.getBackchannelClientNotificationEndpoint().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(TrustedClientSubjectTypeOptions.PUBLIC, one.getSubjectType().get(),
+        "Value must equals to the intial value");
+    one.subjectType(TrustedClientSubjectTypeOptions.PAIRWISE);
+    Assertions.assertEquals(TrustedClientSubjectTypeOptions.PAIRWISE, one.getSubjectType().get(),
+        "Value must equals to the assigned value");
+    one.unset("subjectType");
+    Assertions.assertFalse(one.getSubjectType().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getIdTokenEncryptedResponseAlg().get(),
+        "Value must equals to the intial value");
+    one.idTokenEncryptedResponseAlg("two");
+    Assertions.assertEquals("two", one.getIdTokenEncryptedResponseAlg().get(),
+        "Value must equals to the assigned value");
+    one.unset("idTokenEncryptedResponseAlg");
+    Assertions.assertFalse(one.getIdTokenEncryptedResponseAlg().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getIdTokenEncryptedResponseEnc().get(),
+        "Value must equals to the intial value");
+    one.idTokenEncryptedResponseEnc("two");
+    Assertions.assertEquals("two", one.getIdTokenEncryptedResponseEnc().get(),
+        "Value must equals to the assigned value");
+    one.unset("idTokenEncryptedResponseEnc");
+    Assertions.assertFalse(one.getIdTokenEncryptedResponseEnc().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getUserinfoEncryptedResponseAlg().get(),
+        "Value must equals to the intial value");
+    one.userinfoEncryptedResponseAlg("two");
+    Assertions.assertEquals("two", one.getUserinfoEncryptedResponseAlg().get(),
+        "Value must equals to the assigned value");
+    one.unset("userinfoEncryptedResponseAlg");
+    Assertions.assertFalse(one.getUserinfoEncryptedResponseAlg().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getUserinfoEncryptedResponseEnc().get(),
+        "Value must equals to the intial value");
+    one.userinfoEncryptedResponseEnc("two");
+    Assertions.assertEquals("two", one.getUserinfoEncryptedResponseEnc().get(),
+        "Value must equals to the assigned value");
+    one.unset("userinfoEncryptedResponseEnc");
+    Assertions.assertFalse(one.getUserinfoEncryptedResponseEnc().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getAuthorizationDetailsTypes().get(),
+        "Value must equals to the intial value");
+    one.authorizationDetailsTypes("two");
+    Assertions.assertEquals("two", one.getAuthorizationDetailsTypes().get(),
+        "Value must equals to the assigned value");
+    one.unset("authorizationDetailsTypes");
+    Assertions.assertFalse(one.getAuthorizationDetailsTypes().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getUserinfoSignedResponseAlg().get(),
+        "Value must equals to the intial value");
+    one.userinfoSignedResponseAlg("two");
+    Assertions.assertEquals("two", one.getUserinfoSignedResponseAlg().get(),
+        "Value must equals to the assigned value");
+    one.unset("userinfoSignedResponseAlg");
+    Assertions.assertFalse(one.getUserinfoSignedResponseAlg().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getDefaultAcrValues().get(),
+        "Value must equals to the intial value");
+    one.defaultAcrValues("two");
+    Assertions.assertEquals("two", one.getDefaultAcrValues().get(),
+        "Value must equals to the assigned value");
+    one.unset("defaultAcrValues");
+    Assertions.assertFalse(one.getDefaultAcrValues().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getDefaultMaxAge().get(),
+        "Value must equals to the intial value");
+    one.defaultMaxAge(2);
+    Assertions.assertEquals(2, one.getDefaultMaxAge().get(),
+        "Value must equals to the assigned value");
+    one.unset("defaultMaxAge");
+    Assertions.assertFalse(one.getDefaultMaxAge().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getSectorIdentifierUri().get(),
+        "Value must equals to the intial value");
+    one.sectorIdentifierUri("two");
+    Assertions.assertEquals("two", one.getSectorIdentifierUri().get(),
+        "Value must equals to the assigned value");
+    one.unset("sectorIdentifierUri");
+    Assertions.assertFalse(one.getSectorIdentifierUri().isPresent(),
+        "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()),
         one.getAllowedRedirects().get(), "Value must equals to the intial value");
@@ -70,13 +241,24 @@ class TrustedClientChangeSetUnitTest {
     one.unset("allowedRedirects");
     Assertions.assertFalse(one.getAllowedRedirects().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getSecretOauthPlain(cypher).get(),
+    Assertions.assertEquals(
+        List.of(AllowedAudiences.builder().uid("one").audience("one").version(1).build()),
+        one.getAllowedAudiences().get(), "Value must equals to the intial value");
+    one.allowedAudiences(
+        List.of(AllowedAudiences.builder().uid("two").audience("two").version(2).build()));
+    Assertions.assertEquals(
+        List.of(AllowedAudiences.builder().uid("two").audience("two").version(2).build()),
+        one.getAllowedAudiences().get(), "Value must equals to the assigned value");
+    one.unset("allowedAudiences");
+    Assertions.assertFalse(one.getAllowedAudiences().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getGrantTypesJson().get(),
         "Value must equals to the intial value");
-    one.secretOauthPlain("two");
-    Assertions.assertEquals("two", one.getSecretOauthPlain(cypher).get(),
+    one.grantTypesJson("two");
+    Assertions.assertEquals("two", one.getGrantTypesJson().get(),
         "Value must equals to the assigned value");
-    one.unset("secretOauth");
-    Assertions.assertFalse(one.getSecretOauthPlain(cypher).isPresent(),
+    one.unset("grantTypesJson");
+    Assertions.assertFalse(one.getGrantTypesJson().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getIsResourceServer().get(),
         "Value must equals to the intial value");
@@ -85,6 +267,14 @@ class TrustedClientChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("isResourceServer");
     Assertions.assertFalse(one.getIsResourceServer().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getRequirePushedAuthorizationRequests().get(),
+        "Value must equals to the intial value");
+    one.requirePushedAuthorizationRequests(false);
+    Assertions.assertEquals(false, one.getRequirePushedAuthorizationRequests().get(),
+        "Value must equals to the assigned value");
+    one.unset("requirePushedAuthorizationRequests");
+    Assertions.assertFalse(one.getRequirePushedAuthorizationRequests().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getRequirePkce().get(),
         "Value must equals to the intial value");
@@ -133,14 +323,6 @@ class TrustedClientChangeSetUnitTest {
     one.unset("enabled");
     Assertions.assertFalse(one.getEnabled().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getRegistrationAccess().get(),
-        "Value must equals to the intial value");
-    one.registrationAccess("two");
-    Assertions.assertEquals("two", one.getRegistrationAccess().get(),
-        "Value must equals to the assigned value");
-    one.unset("registrationAccess");
-    Assertions.assertFalse(one.getRegistrationAccess().isPresent(),
-        "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getClientName().get(),
         "Value must equals to the intial value");
     one.clientName("two");
@@ -178,22 +360,6 @@ class TrustedClientChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("tosUri");
     Assertions.assertFalse(one.getTosUri().isPresent(),
-        "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getTokenEndpointAuthMethod().get(),
-        "Value must equals to the intial value");
-    one.tokenEndpointAuthMethod("two");
-    Assertions.assertEquals("two", one.getTokenEndpointAuthMethod().get(),
-        "Value must equals to the assigned value");
-    one.unset("tokenEndpointAuthMethod");
-    Assertions.assertFalse(one.getTokenEndpointAuthMethod().isPresent(),
-        "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getGrantTypesJson().get(),
-        "Value must equals to the intial value");
-    one.grantTypesJson("two");
-    Assertions.assertEquals("two", one.getGrantTypesJson().get(),
-        "Value must equals to the assigned value");
-    one.unset("grantTypesJson");
-    Assertions.assertFalse(one.getGrantTypesJson().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getResponseTypesJson().get(),
         "Value must equals to the intial value");

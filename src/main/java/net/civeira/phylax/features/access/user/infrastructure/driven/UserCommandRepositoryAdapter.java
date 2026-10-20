@@ -9,7 +9,8 @@ import javax.sql.DataSource;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.user.domain.User;
@@ -49,12 +50,13 @@ public class UserCommandRepositoryAdapter implements UserCommandRepositoryGatewa
    * @param tracer
    * @param eventDispatcher
    * @param pendingWrites
-   * @param cypher
+   * @param secretStorage
+   * @param passwordHasher
    */
   public UserCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final UserEventDispatcher eventDispatcher, final PendingWritesRegistry pendingWrites,
-      AesCipherService cypher) {
-    this.repository = new UserJdbcDao(datasource, tracer, false, cypher);
+      KeyRingSecretStorage secretStorage, PasswordHasher passwordHasher) {
+    this.repository = new UserJdbcDao(datasource, tracer, false, secretStorage, passwordHasher);
     this.eventDispatcher = eventDispatcher;
     this.pendingWrites = pendingWrites;
   }

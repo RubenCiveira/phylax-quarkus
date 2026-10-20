@@ -19,9 +19,12 @@ class TenantConfigChangeSetUnitTest {
         .dynamicRegistrationPolicy(TenantConfigDynamicRegistrationPolicyOptions.OPEN)
         .allowRegister(true).enableRegisterUsers(true).magicLinkEnabled(true)
         .requireEmailVerification(true).invitationExpiryDays(1).magicLinkExpiryMinutes(1)
-        .sessionSsoTtlSeconds(1).refreshTokenTtlSeconds(1).webauthnEnabled(true).webauthnRpId("one")
-        .webauthnRpName("one").welcomeEmail("one").registeredEmail("one").disabledUserEmail("one")
-        .enabledUserEmail("one").allowRecoverPass(true).recoverPassEmail("one").version(1).newUid();
+        .sessionSsoTtlSeconds(1).refreshTokenTtlSeconds(1).refreshTokenMaxLifetimeSeconds(1)
+        .dcrAllowedGrantTypes("one").dcrAllowedAuthMethods("one").allowPasswordGrant(true)
+        .requirePushedAuthorizationRequests(true).acrValuesSupported("one").webauthnEnabled(true)
+        .webauthnRpId("one").webauthnRpName("one").welcomeEmail("one").registeredEmail("one")
+        .disabledUserEmail("one").enabledUserEmail("one").allowRecoverPass(true)
+        .recoverPassEmail("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -120,6 +123,54 @@ class TenantConfigChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("refreshTokenTtlSeconds");
     Assertions.assertFalse(one.getRefreshTokenTtlSeconds().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getRefreshTokenMaxLifetimeSeconds().get(),
+        "Value must equals to the intial value");
+    one.refreshTokenMaxLifetimeSeconds(2);
+    Assertions.assertEquals(2, one.getRefreshTokenMaxLifetimeSeconds().get(),
+        "Value must equals to the assigned value");
+    one.unset("refreshTokenMaxLifetimeSeconds");
+    Assertions.assertFalse(one.getRefreshTokenMaxLifetimeSeconds().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getDcrAllowedGrantTypes().get(),
+        "Value must equals to the intial value");
+    one.dcrAllowedGrantTypes("two");
+    Assertions.assertEquals("two", one.getDcrAllowedGrantTypes().get(),
+        "Value must equals to the assigned value");
+    one.unset("dcrAllowedGrantTypes");
+    Assertions.assertFalse(one.getDcrAllowedGrantTypes().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getDcrAllowedAuthMethods().get(),
+        "Value must equals to the intial value");
+    one.dcrAllowedAuthMethods("two");
+    Assertions.assertEquals("two", one.getDcrAllowedAuthMethods().get(),
+        "Value must equals to the assigned value");
+    one.unset("dcrAllowedAuthMethods");
+    Assertions.assertFalse(one.getDcrAllowedAuthMethods().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getAllowPasswordGrant().get(),
+        "Value must equals to the intial value");
+    one.allowPasswordGrant(false);
+    Assertions.assertEquals(false, one.getAllowPasswordGrant().get(),
+        "Value must equals to the assigned value");
+    one.unset("allowPasswordGrant");
+    Assertions.assertFalse(one.getAllowPasswordGrant().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(true, one.getRequirePushedAuthorizationRequests().get(),
+        "Value must equals to the intial value");
+    one.requirePushedAuthorizationRequests(false);
+    Assertions.assertEquals(false, one.getRequirePushedAuthorizationRequests().get(),
+        "Value must equals to the assigned value");
+    one.unset("requirePushedAuthorizationRequests");
+    Assertions.assertFalse(one.getRequirePushedAuthorizationRequests().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getAcrValuesSupported().get(),
+        "Value must equals to the intial value");
+    one.acrValuesSupported("two");
+    Assertions.assertEquals("two", one.getAcrValuesSupported().get(),
+        "Value must equals to the assigned value");
+    one.unset("acrValuesSupported");
+    Assertions.assertFalse(one.getAcrValuesSupported().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getWebauthnEnabled().get(),
         "Value must equals to the intial value");

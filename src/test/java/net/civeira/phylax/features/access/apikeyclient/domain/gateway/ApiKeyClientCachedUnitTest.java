@@ -25,7 +25,7 @@ class ApiKeyClientCachedUnitTest {
   void test_api_key_client_cached_builder() {
     ApiKeyClient one =
         ApiKeyClient.builder().uidValue(UidVO.from("one")).codeValue(CodeVO.from("one"))
-            .keyValue(KeyVO.from("one")).enabledValue(EnabledVO.from(true))
+            .keyValue(KeyVO.fromPlain("one")).enabledValue(EnabledVO.from(true))
             .scopesValue(ScopesVO.from("one")).versionValue(VersionVO.from(1)).build();
     OffsetDateTime now = OffsetDateTime.now();
     List<ApiKeyClient> empty = List.of();

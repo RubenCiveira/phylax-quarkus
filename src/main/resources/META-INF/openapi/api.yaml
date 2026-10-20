@@ -104,7 +104,7 @@ tags:
   - name: api-key-client-acl
     description: Access control for api key client
   - name: user-personal-api-key
-    description: A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication uses the SHA-256 hash for constant-time comparison.
+    description: A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication searches by its digest (HMAC with pepper) and compares it in constant time.
   - name: user-personal-api-key-batch
     description: Massive operations for user personal api key
   - name: user-personal-api-key-audit
@@ -215,6 +215,14 @@ tags:
     description: Audit operations for changes on tenant terms of use
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
+  - name: dcr-initial-access-token
+    description: dcr-initial-access-token
+  - name: dcr-initial-access-token-batch
+    description: Massive operations for dcr initial access token
+  - name: dcr-initial-access-token-audit
+    description: Audit operations for changes on dcr initial access token
+  - name: dcr-initial-access-token-acl
+    description: Access control for dcr initial access token
   - name: user
     description: user
   - name: user-batch
@@ -7412,6 +7420,22 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
         - name: limit
           in: query
           description: The maximum number of results
@@ -7501,6 +7525,22 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
       responses:
         '200':
           description: OK
@@ -7778,6 +7818,22 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
       responses:
         '200':
           description: OK
@@ -7848,6 +7904,22 @@ paths:
           required: false
           schema:
             type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
       responses:
         '200':
           description: OK
@@ -11067,6 +11139,336 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/access/dcr-initial-access-tokens:
+    get:
+      tags:
+        - dcr-initial-access-token
+      summary: List of dcr initial access token
+      operationId: dcr-initial-access-token-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: description
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-description
+          in: query
+          description: Order by description asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DcrInitialAccessTokenApiDtoList'
+    post:
+      tags:
+        - dcr-initial-access-token
+      summary: Create a new dcr initial access token
+      operationId: dcr-initial-access-token-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DcrInitialAccessTokenApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DcrInitialAccessTokenApiDto'
+    delete:
+      tags:
+        - dcr-initial-access-token-batch
+      summary: Delete a collection of dcr initial access token by filter
+      operationId: dcr-initial-access-token-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: description
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/dcr-initial-access-tokens/{uid}:
+    get:
+      tags:
+        - dcr-initial-access-token
+      summary: Retrieve on  dcr initial access token by their uid
+      operationId: dcr-initial-access-token-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DcrInitialAccessTokenApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - dcr-initial-access-token
+      summary: Update a dcr initial access token by their uid
+      operationId: dcr-initial-access-token-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DcrInitialAccessTokenApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DcrInitialAccessTokenApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - dcr-initial-access-token
+      summary: Delete a  dcr initial access token by their uid
+      operationId: dcr-initial-access-token-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/dcr-initial-access-tokens/~/delete-status/{uid}:
+    get:
+      tags:
+        - dcr-initial-access-token-batch
+      summary: Query the result of an massive delete
+      operationId: dcr-initial-access-token-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/dcr-initial-access-tokens/-/audit/entity/{uid}:
+    get:
+      tags:
+        - dcr-initial-access-token-audit
+      summary: Update a dcr initial access token by their uid
+      operationId: dcr-initial-access-token-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/dcr-initial-access-tokens/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - dcr-initial-access-token-audit
+      summary: Update a dcr initial access token by their uid
+      operationId: dcr-initial-access-token-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/dcr-initial-access-tokens:
+    get:
+      tags:
+        - dcr-initial-access-token-acl
+      summary: Check for allow permissions for the current user on dcr initial access token
+      operationId: dcr-initial-access-token-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DcrInitialAccessTokenGenericAcl'
+  /api/me/acl/access/dcr-initial-access-tokens/{uid}:
+    get:
+      tags:
+        - dcr-initial-access-token-acl
+      summary: Check for allow permissions for the current user on dcr initial access token by their uid
+      operationId: dcr-initial-access-token-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DcrInitialAccessTokenSpecificAcl'
+        '404':
+          description: The item dont exists
   /api/access/users:
     get:
       tags:
@@ -13067,7 +13469,7 @@ components:
           description: El código identificativo de la aplicación
           type: string
         key:
-          description: The key for the api
+          description: The key for the api (only its digest is stored)
           type: string
         enabled:
           description: The indicator to allow the account be used without deleting it
@@ -13166,7 +13568,7 @@ components:
             type: string
     UserPersonalApiKeyApiDto:
       type: object
-      description: A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication uses the SHA-256 hash for constant-time comparison.
+      description: A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication searches by its digest (HMAC with pepper) and compares it in constant time.
       properties:
         uid:
           description: El uid de user personal api key
@@ -13177,7 +13579,7 @@ components:
           description: A label to identify the key (e.g. 'CI pipeline', 'local dev').
           type: string
         keyHash:
-          description: SHA-256 hex digest of the raw key. Never stored in plain text.
+          description: Digest (HMAC with pepper) of the raw key. Never stored in plain text.
           type: string
         scopes:
           description: Space-separated OAuth scopes granted to this key.
@@ -13852,6 +14254,20 @@ components:
           description: Campo con el número de version de trusted client allowed redirect para controlar bloqueos optimistas
           type: integer
           format: int32
+    AllowedAudiencesApiDto:
+      type: object
+      description: trusted-client-allowed-audience
+      properties:
+        uid:
+          description: El uid de trusted client allowed audience
+          type: string
+        audience:
+          description: Code of a trusted-client resource server or relying-party, or an absolute resource URI (RFC 8707).
+          type: string
+        version:
+          description: Campo con el número de version de trusted client allowed audience para controlar bloqueos optimistas
+          type: integer
+          format: int32
     TrustedClientApiDto:
       type: object
       description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
@@ -13862,22 +14278,100 @@ components:
         code:
           description: El código identificativo de la aplicación
           type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
         allowAllScopes:
           description: El allow all scopes de trusted client
           type: boolean
         publicAllow:
           description: If true, users can use these client to access with public code flow
           type: boolean
+        tokenEndpointAuthMethod:
+          description: El token endpoint auth method de trusted client
+          type: string
+          enum: [client-secret-basic,client-secret-post,private-key-jwt,none]
+        tokenEndpointAuthSigningAlg:
+          description: El token endpoint auth signing alg de trusted client
+          type: string
+        dpopBoundAccessTokens:
+          description: El dpop bound access tokens de trusted client
+          type: boolean
+        idTokenSignedResponseAlg:
+          description: El id token signed response alg de trusted client
+          type: string
+          enum: [rs256,es256,eddsa]
+        tlsClientAuthSubjectDn:
+          description: El tls client auth subject dn de trusted client
+          type: string
+        tlsClientCertificateBoundAccessTokens:
+          description: El tls client certificate bound access tokens de trusted client
+          type: boolean
+        authorizationSignedResponseAlg:
+          description: El authorization signed response alg de trusted client
+          type: string
+        backchannelTokenDeliveryMode:
+          description: El backchannel token delivery mode de trusted client
+          type: string
+          enum: [poll,ping]
+        backchannelClientNotificationEndpoint:
+          description: El backchannel client notification endpoint de trusted client
+          type: string
+        subjectType:
+          description: El subject type de trusted client
+          type: string
+          enum: [public,pairwise]
+        idTokenEncryptedResponseAlg:
+          description: El id token encrypted response alg de trusted client
+          type: string
+        idTokenEncryptedResponseEnc:
+          description: El id token encrypted response enc de trusted client
+          type: string
+        userinfoEncryptedResponseAlg:
+          description: El userinfo encrypted response alg de trusted client
+          type: string
+        userinfoEncryptedResponseEnc:
+          description: El userinfo encrypted response enc de trusted client
+          type: string
+        authorizationDetailsTypes:
+          description: El authorization details types de trusted client
+          type: string
+        userinfoSignedResponseAlg:
+          description: El userinfo signed response alg de trusted client
+          type: string
+        secretOauth:
+          description: El secret oauth de trusted client
+          type: string
+        registrationAccess:
+          description: El registration access de trusted client
+          type: string
+        defaultAcrValues:
+          description: El default acr values de trusted client
+          type: string
+        defaultMaxAge:
+          description: El default max age de trusted client
+          type: integer
+          format: int32
+        sectorIdentifierUri:
+          description: El sector identifier uri de trusted client
+          type: string
         allowedRedirects:
           description: El allowed redirects de trusted client
           type: array
           items:
             $ref: '#/components/schemas/AllowedRedirectsApiDto'
-        secretOauth:
-          description: If the user is not delegated, the phrase to identify
+        allowedAudiences:
+          description: El allowed audiences de trusted client
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedAudiencesApiDto'
+        grantTypesJson:
+          description: El grant types json de trusted client
           type: string
         isResourceServer:
           description: If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.
+          type: boolean
+        requirePushedAuthorizationRequests:
+          description: El require pushed authorization requests de trusted client
           type: boolean
         requirePkce:
           description: If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.
@@ -13897,9 +14391,6 @@ components:
         enabled:
           description: The indicator to allow the account be used without deleting it
           type: boolean
-        registrationAccess:
-          description: El registration access de trusted client
-          type: string
         clientName:
           description: El client name de trusted client
           type: string
@@ -13914,12 +14405,6 @@ components:
           type: string
         tosUri:
           description: El tos uri de trusted client
-          type: string
-        tokenEndpointAuthMethod:
-          description: El token endpoint auth method de trusted client
-          type: string
-        grantTypesJson:
-          description: El grant types json de trusted client
           type: string
         responseTypesJson:
           description: El response types json de trusted client
@@ -14196,6 +14681,25 @@ components:
           description: Lifetime in seconds of issued refresh tokens. Defaults to 30 days (2 592 000 s). Applies to all grant types that issue refresh tokens for this tenant.
           type: integer
           format: int32
+        refreshTokenMaxLifetimeSeconds:
+          description: Absolute lifetime of a refresh token family; rotation never extends it.
+          type: integer
+          format: int32
+        dcrAllowedGrantTypes:
+          description: El dcr allowed grant types de tenant config
+          type: string
+        dcrAllowedAuthMethods:
+          description: El dcr allowed auth methods de tenant config
+          type: string
+        allowPasswordGrant:
+          description: El allow password grant de tenant config
+          type: boolean
+        requirePushedAuthorizationRequests:
+          description: El require pushed authorization requests de tenant config
+          type: boolean
+        acrValuesSupported:
+          description: JSON map of published ACR values to session level, e.g. {"urn:lugh:acr:pwd":1,"urn:lugh:acr:mfa":2}
+          type: string
         webauthnEnabled:
           description: El webauthn enabled de tenant config
           type: boolean
@@ -14682,6 +15186,16 @@ components:
         metadata:
           description: A metadata file required by some providers for configuration (e.g., SAML descriptor).
           type: string
+        oidcScopes:
+          description: El oidc scopes de tenant login provider
+          type: string
+        oidcClaimMapping:
+          description: El oidc claim mapping de tenant login provider
+          type: string
+        accountLinkPolicy:
+          description: El account link policy de tenant login provider
+          type: string
+          enum: [none,verified-email,manual]
         oidcDiscoveryUrl:
           description: For source=OIDC the /.well-known/openid-configuration URL of the external OIDC identity provider. The system will fetch authorization_endpoint, token_endpoint, and jwks_uri from this document at startup. public-key holds the OIDC client_id; private-key holds the OIDC client_secret.
           type: string
@@ -14901,6 +15415,117 @@ components:
         - enable
         - disable
     TenantTermsOfUseAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    DcrInitialAccessTokenApiDto:
+      type: object
+      description: dcr-initial-access-token
+      properties:
+        uid:
+          description: El uid de dcr initial access token
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        description:
+          description: El description de dcr initial access token
+          type: string
+        tokenHash:
+          description: El token hash de dcr initial access token
+          type: string
+        expiresAt:
+          description: El expires at de dcr initial access token
+          type: string
+          format: date-time
+        maxUses:
+          description: El max uses de dcr initial access token
+          type: integer
+          format: int32
+        uses:
+          description: El uses de dcr initial access token
+          type: integer
+          format: int32
+        allowedGrantTypes:
+          description: Overrides tenant-config.dcr-allowed-grant-types when set
+          type: string
+        revokedAt:
+          description: El revoked at de dcr initial access token
+          type: string
+          format: date-time
+        version:
+          description: Campo con el número de version de dcr initial access token para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    DcrInitialAccessTokenApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DcrInitialAccessTokenApiDto'
+    DcrInitialAccessTokenGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/DcrInitialAccessTokenAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/DcrInitialAccessTokenAclFields'
+    DcrInitialAccessTokenSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/DcrInitialAccessTokenAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/DcrInitialAccessTokenAclFields'
+    DcrInitialAccessTokenAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    DcrInitialAccessTokenAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    DcrInitialAccessTokenAclFields:
       type: object
       properties:
         noEditables:

@@ -3,8 +3,9 @@ package net.civeira.phylax.features.access.useraccesstemporalcode.domain.valueob
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.common.crypto.SecretDigester;
 
 class RecoveryCodeVOUnitTest {
 
@@ -14,14 +15,10 @@ class RecoveryCodeVOUnitTest {
   @Test
   @DisplayName("Test value object contruction for property recovery code of user access temporal code ")
   void test_recovery_code_v_o_builder() {
-    Assertions.assertFalse(RecoveryCodeVO.nullValue().getRecoveryCode().isPresent(),
-        "A empty vo should have a null value");
-    Assertions.assertFalse(RecoveryCodeVO.tryFrom(null).getRecoveryCode().isPresent(),
-        "With a null value, no present result");
-    Assertions.assertEquals("one", RecoveryCodeVO.from("one").getRecoveryCode().orElse(null));
-    Object falingInstance = new Object() {};
-    Assertions.assertThrows(ConstraintException.class,
-        () -> RecoveryCodeVO.tryFrom(falingInstance));
-    Assertions.assertEquals("[" + "one" + "]", RecoveryCodeVO.from("one").toString());
+    SecretDigester service = Mockito.mock(SecretDigester.class);
+    Mockito.when(service.digest("small")).thenReturn("hmac-sha256:p0:example");
+    Assertions.assertEquals("hmac-sha256:p0:example",
+        RecoveryCodeVO.fromPlain("small").getRecoveryCodeStored(service).orElse(null));
+    Assertions.assertEquals("****", RecoveryCodeVO.fromPlain("small").toString());
   }
 }

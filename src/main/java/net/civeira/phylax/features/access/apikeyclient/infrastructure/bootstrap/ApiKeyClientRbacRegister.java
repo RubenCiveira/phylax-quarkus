@@ -53,8 +53,8 @@ public class ApiKeyClientRbacRegister {
         .description("El identificador de la aplicacion").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
         .description("El código identificativo de la aplicación").build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("key").description("The key for the api").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("key")
+        .description("The key for the api (only its digest is stored)").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
         .description("The indicator to allow the account be used without deleting it").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("scopes")

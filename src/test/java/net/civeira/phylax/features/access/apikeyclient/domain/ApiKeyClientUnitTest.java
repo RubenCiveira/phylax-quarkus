@@ -21,7 +21,7 @@ class ApiKeyClientUnitTest {
   void test_api_key_client_builder() {
     ApiKeyClient one =
         ApiKeyClient.builder().uidValue(UidVO.from("one")).codeValue(CodeVO.from("one"))
-            .keyValue(KeyVO.from("one")).enabledValue(EnabledVO.from(true))
+            .keyValue(KeyVO.fromPlain("one")).enabledValue(EnabledVO.from(true))
             .scopesValue(ScopesVO.from("one")).versionValue(VersionVO.from(1)).build();
     ApiKeyClient withOne = one.withVersionValue(VersionVO.from(1));
     Assertions.assertEquals(2, withOne.withNextVersion().getVersion().get());

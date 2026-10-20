@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 import io.opentelemetry.api.trace.Tracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
@@ -50,12 +50,12 @@ public class TrustedClientCommandRepositoryAdapter
    * @param tracer
    * @param eventDispatcher
    * @param pendingWrites
-   * @param cypher
+   * @param secretDigester
    */
   public TrustedClientCommandRepositoryAdapter(final DataSource datasource, final Tracer tracer,
       final TrustedClientEventDispatcher eventDispatcher, final PendingWritesRegistry pendingWrites,
-      AesCipherService cypher) {
-    this.repository = new TrustedClientJdbcDao(datasource, tracer, false, cypher);
+      SecretDigester secretDigester) {
+    this.repository = new TrustedClientJdbcDao(datasource, tracer, false, secretDigester);
     this.eventDispatcher = eventDispatcher;
     this.pendingWrites = pendingWrites;
   }

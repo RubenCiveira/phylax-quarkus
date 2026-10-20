@@ -108,6 +108,8 @@ public class TrustedClientController implements TrustedClientApi {
    * @param withBackChannelUrl
    * @param withFrontChannelUrl
    * @param code
+   * @param tenant
+   * @param tenants
    * @param limit
    * @param sinceUid
    * @param sinceCode
@@ -117,9 +119,10 @@ public class TrustedClientController implements TrustedClientApi {
   @Override
   public Response trustedClientApiList(final List<String> uids, final String search,
       final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code,
-      final Integer limit, final String sinceUid, final String sinceCode, final String order) {
+      final String tenant, final List<String> tenants, final Integer limit, final String sinceUid,
+      final String sinceCode, final String order) {
     return listController.trustedClientApiList(uids, search, withBackChannelUrl,
-        withFrontChannelUrl, code, limit, sinceUid, sinceCode, order);
+        withFrontChannelUrl, code, tenant, tenants, limit, sinceUid, sinceCode, order);
   }
 
   /**

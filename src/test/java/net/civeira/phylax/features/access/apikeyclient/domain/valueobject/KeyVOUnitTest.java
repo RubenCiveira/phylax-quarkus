@@ -3,8 +3,9 @@ package net.civeira.phylax.features.access.apikeyclient.domain.valueobject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.common.crypto.SecretDigester;
 
 class KeyVOUnitTest {
 
@@ -14,13 +15,10 @@ class KeyVOUnitTest {
   @Test
   @DisplayName("Test value object contruction for property key of api key client ")
   void test_key_v_o_builder() {
-    Assertions.assertFalse(KeyVO.nullValue().getKey().isPresent(),
-        "A empty vo should have a null value");
-    Assertions.assertFalse(KeyVO.tryFrom(null).getKey().isPresent(),
-        "With a null value, no present result");
-    Assertions.assertEquals("one", KeyVO.from("one").getKey().orElse(null));
-    Object falingInstance = new Object() {};
-    Assertions.assertThrows(ConstraintException.class, () -> KeyVO.tryFrom(falingInstance));
-    Assertions.assertEquals("[" + "one" + "]", KeyVO.from("one").toString());
+    SecretDigester service = Mockito.mock(SecretDigester.class);
+    Mockito.when(service.digest("small")).thenReturn("hmac-sha256:p0:example");
+    Assertions.assertEquals("hmac-sha256:p0:example",
+        KeyVO.fromPlain("small").getKeyStored(service).orElse(null));
+    Assertions.assertEquals("****", KeyVO.fromPlain("small").toString());
   }
 }

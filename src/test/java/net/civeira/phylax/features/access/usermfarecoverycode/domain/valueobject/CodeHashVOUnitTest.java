@@ -3,8 +3,9 @@ package net.civeira.phylax.features.access.usermfarecoverycode.domain.valueobjec
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 
 class CodeHashVOUnitTest {
 
@@ -14,10 +15,10 @@ class CodeHashVOUnitTest {
   @Test
   @DisplayName("Test value object contruction for property code hash of user mfa recovery code ")
   void test_code_hash_v_o_builder() {
-    Assertions.assertThrows(ConstraintException.class, () -> CodeHashVO.tryFrom(null));
-    Assertions.assertEquals("one", CodeHashVO.from("one").getCodeHash());
-    Object falingInstance = new Object() {};
-    Assertions.assertThrows(ConstraintException.class, () -> CodeHashVO.tryFrom(falingInstance));
-    Assertions.assertEquals("[" + "one" + "]", CodeHashVO.from("one").toString());
+    PasswordHasher service = Mockito.mock(PasswordHasher.class);
+    Mockito.when(service.hash("small")).thenReturn("$argon2id$example");
+    Assertions.assertEquals("$argon2id$example",
+        CodeHashVO.fromPlain("small").getCodeHashStored(service));
+    Assertions.assertEquals("****", CodeHashVO.fromPlain("small").toString());
   }
 }

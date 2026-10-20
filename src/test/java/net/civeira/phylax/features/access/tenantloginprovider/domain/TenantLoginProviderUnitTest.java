@@ -5,12 +5,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.AccountLinkPolicyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.CertificateVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.DirectAccessVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.DisabledVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.MetadataVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.NameVO;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcClaimMappingVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcDiscoveryUrlVO;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcScopesVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PrivateKeyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PublicKeyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpCertVO;
@@ -37,6 +40,10 @@ class TenantLoginProviderUnitTest {
         .disabledValue(DisabledVO.from(true)).directAccessValue(DirectAccessVO.from(true))
         .publicKeyValue(PublicKeyVO.from("one")).privateKeyValue(PrivateKeyVO.from("one"))
         .certificateValue(CertificateVO.from("one")).metadataValue(MetadataVO.from("file_1"))
+        .oidcScopesValue(OidcScopesVO.from("one"))
+        .oidcClaimMappingValue(OidcClaimMappingVO.from("one"))
+        .accountLinkPolicyValue(
+            AccountLinkPolicyVO.from(TenantLoginProviderAccountLinkPolicyOptions.NONE))
         .oidcDiscoveryUrlValue(OidcDiscoveryUrlVO.from("one"))
         .samlIdpMetadataUrlValue(SamlIdpMetadataUrlVO.from("one"))
         .samlIdpEntityIdValue(SamlIdpEntityIdVO.from("one"))

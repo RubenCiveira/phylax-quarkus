@@ -5,8 +5,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AcrValuesSupportedVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowPasswordGrantVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRecoverPassVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRegisterVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DcrAllowedAuthMethodsVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DcrAllowedGrantTypesVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DisabledUserEmailVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DynamicRegistrationPolicyVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnableRegisterUsersVO;
@@ -17,9 +21,11 @@ import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.Invita
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkExpiryMinutesVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RecoverPassEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenMaxLifetimeSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisteredEmailVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequireEmailVerificationVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequirePushedAuthorizationRequestsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SessionSsoTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.UidVO;
@@ -50,6 +56,12 @@ class TenantConfigUnitTest {
         .magicLinkExpiryMinutesValue(MagicLinkExpiryMinutesVO.from(1))
         .sessionSsoTtlSecondsValue(SessionSsoTtlSecondsVO.from(1))
         .refreshTokenTtlSecondsValue(RefreshTokenTtlSecondsVO.from(1))
+        .refreshTokenMaxLifetimeSecondsValue(RefreshTokenMaxLifetimeSecondsVO.from(1))
+        .dcrAllowedGrantTypesValue(DcrAllowedGrantTypesVO.from("one"))
+        .dcrAllowedAuthMethodsValue(DcrAllowedAuthMethodsVO.from("one"))
+        .allowPasswordGrantValue(AllowPasswordGrantVO.from(true))
+        .requirePushedAuthorizationRequestsValue(RequirePushedAuthorizationRequestsVO.from(true))
+        .acrValuesSupportedValue(AcrValuesSupportedVO.from("one"))
         .webauthnEnabledValue(WebauthnEnabledVO.from(true))
         .webauthnRpIdValue(WebauthnRpIdVO.from("one"))
         .webauthnRpNameValue(WebauthnRpNameVO.from("one"))

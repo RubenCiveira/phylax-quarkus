@@ -28,3 +28,8 @@ include::properties-trusted-client.asciidoc[]
 include::../../../diagrams/model/access/trusted-client//usecase-diagram-trusted-client.puml[]
 ....
 
+.Eventos
+include::trigger-inherit-tenant-excluding-root.asciidoc[]
+
+
+

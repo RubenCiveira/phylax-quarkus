@@ -12,7 +12,7 @@ class ApiKeyClientChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_api_key_client_change_set_builder() {
-    ApiKeyClientChangeSet one = new ApiKeyClientChangeSet().uid("one").code("one").key("one")
+    ApiKeyClientChangeSet one = new ApiKeyClientChangeSet().uid("one").code("one").keyPlain("one")
         .enabled(true).scopes("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
@@ -23,11 +23,6 @@ class ApiKeyClientChangeSetUnitTest {
     Assertions.assertEquals("two", one.getCode().get(), "Value must equals to the assigned value");
     one.unset("code");
     Assertions.assertFalse(one.getCode().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getKey().get(), "Value must equals to the intial value");
-    one.key("two");
-    Assertions.assertEquals("two", one.getKey().get(), "Value must equals to the assigned value");
-    one.unset("key");
-    Assertions.assertFalse(one.getKey().isPresent(), "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getEnabled().get(), "Value must equals to the intial value");
     one.enabled(false);
     Assertions.assertEquals(false, one.getEnabled().get(),

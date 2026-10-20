@@ -3,9 +3,7 @@ package net.civeira.phylax.features.notification.smtpoutboundconfig.domain;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 class SmtpOutboundConfigChangeSetUnitTest {
@@ -16,7 +14,6 @@ class SmtpOutboundConfigChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_smtp_outbound_config_change_set_builder() {
-    AesCipherService cypher = Mockito.mock(AesCipherService.class);
     SmtpOutboundConfigChangeSet one =
         new SmtpOutboundConfigChangeSet().uid("one").tenant(TenantReference.of("one")).host("one")
             .port(1).login("one").passwordPlain("one").senderName("one").senderEmail("one")
@@ -48,14 +45,6 @@ class SmtpOutboundConfigChangeSetUnitTest {
     Assertions.assertEquals("two", one.getLogin().get(), "Value must equals to the assigned value");
     one.unset("login");
     Assertions.assertFalse(one.getLogin().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getPasswordPlain(cypher).get(),
-        "Value must equals to the intial value");
-    one.passwordPlain("two");
-    Assertions.assertEquals("two", one.getPasswordPlain(cypher).get(),
-        "Value must equals to the assigned value");
-    one.unset("password");
-    Assertions.assertFalse(one.getPasswordPlain(cypher).isPresent(),
-        "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getSenderName().get(),
         "Value must equals to the intial value");
     one.senderName("two");

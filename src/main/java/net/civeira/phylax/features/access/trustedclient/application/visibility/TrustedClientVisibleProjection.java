@@ -8,22 +8,39 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import net.civeira.phylax.features.access.tenant.domain.TenantRef;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientBackchannelTokenDeliveryModeOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientIdTokenSignedResponseAlgOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedAudiencesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedScopesM2mVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationDetailsTypesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackChannelLogoutUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelClientNotificationEndpointVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.BackchannelTokenDeliveryModeVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientNameVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ClientUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultAcrValuesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DefaultMaxAgeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DpopBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.DynamicallyRegisteredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutSessionRequiredVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.FrontChannelLogoutUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.GrantTypesJsonVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IdTokenSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.IsResourceServerVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.JwksUriVO;
@@ -35,11 +52,21 @@ import net.civeira.phylax.features.access.trustedclient.domain.valueobject.Regis
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RegistrationAccessVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequestObjectSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePkceVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.RequirePushedAuthorizationRequestsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.ResponseTypesJsonVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SectorIdentifierUriVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SubjectTypeVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TenantVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientAuthSubjectDnVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TlsClientCertificateBoundAccessTokensVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthMethodVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TokenEndpointAuthSigningAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.TosUriVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UidVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseAlgVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoEncryptedResponseEncVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.UserinfoSignedResponseAlgVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.VersionVO;
 
 /**
@@ -61,6 +88,14 @@ public class TrustedClientVisibleProjection {
   private Optional<AllowAllScopesVO> allowAllScopes = Optional.empty();
 
   /**
+   * El allowed audiences de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<AllowedAudiencesVO> allowedAudiences = Optional.empty();
+
+  /**
    * El allowed redirects de trusted client
    *
    * @autogenerated VisibleProjectionGenerator
@@ -75,6 +110,23 @@ public class TrustedClientVisibleProjection {
    */
   @Builder.Default
   private Optional<AllowedScopesM2mVO> allowedScopesM2m = Optional.empty();
+
+  /**
+   * El authorization details types de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<AuthorizationDetailsTypesVO> authorizationDetailsTypes = Optional.empty();
+
+  /**
+   * El authorization signed response alg de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<AuthorizationSignedResponseAlgVO> authorizationSignedResponseAlg =
+      Optional.empty();
 
   /**
    * El back channel logout session required de trusted client
@@ -92,6 +144,23 @@ public class TrustedClientVisibleProjection {
    */
   @Builder.Default
   private Optional<BackChannelLogoutUriVO> backChannelLogoutUri = Optional.empty();
+
+  /**
+   * El backchannel client notification endpoint de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<BackchannelClientNotificationEndpointVO> backchannelClientNotificationEndpoint =
+      Optional.empty();
+
+  /**
+   * El backchannel token delivery mode de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<BackchannelTokenDeliveryModeVO> backchannelTokenDeliveryMode = Optional.empty();
 
   /**
    * El client name de trusted client
@@ -116,6 +185,30 @@ public class TrustedClientVisibleProjection {
    */
   @Builder.Default
   private Optional<CodeVO> code = Optional.empty();
+
+  /**
+   * El default acr values de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<DefaultAcrValuesVO> defaultAcrValues = Optional.empty();
+
+  /**
+   * El default max age de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<DefaultMaxAgeVO> defaultMaxAge = Optional.empty();
+
+  /**
+   * El dpop bound access tokens de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<DpopBoundAccessTokensVO> dpopBoundAccessTokens = Optional.empty();
 
   /**
    * El dynamically registered de trusted client
@@ -157,6 +250,30 @@ public class TrustedClientVisibleProjection {
    */
   @Builder.Default
   private Optional<GrantTypesJsonVO> grantTypesJson = Optional.empty();
+
+  /**
+   * El id token encrypted response alg de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<IdTokenEncryptedResponseAlgVO> idTokenEncryptedResponseAlg = Optional.empty();
+
+  /**
+   * El id token encrypted response enc de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<IdTokenEncryptedResponseEncVO> idTokenEncryptedResponseEnc = Optional.empty();
+
+  /**
+   * El id token signed response alg de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<IdTokenSignedResponseAlgVO> idTokenSignedResponseAlg = Optional.empty();
 
   /**
    * If true, this client is allowed to call the token introspection endpoint (POST /introspect) to
@@ -251,6 +368,15 @@ public class TrustedClientVisibleProjection {
   private Optional<RequirePkceVO> requirePkce = Optional.empty();
 
   /**
+   * El require pushed authorization requests de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<RequirePushedAuthorizationRequestsVO> requirePushedAuthorizationRequests =
+      Optional.empty();
+
+  /**
    * El response types json de trusted client
    *
    * @autogenerated VisibleProjectionGenerator
@@ -259,12 +385,53 @@ public class TrustedClientVisibleProjection {
   private Optional<ResponseTypesJsonVO> responseTypesJson = Optional.empty();
 
   /**
-   * If the user is not delegated, the phrase to identify
+   * El secret oauth de trusted client
    *
    * @autogenerated VisibleProjectionGenerator
    */
   @Builder.Default
   private Optional<SecretOauthVO> secretOauth = Optional.empty();
+
+  /**
+   * El sector identifier uri de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<SectorIdentifierUriVO> sectorIdentifierUri = Optional.empty();
+
+  /**
+   * El subject type de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<SubjectTypeVO> subjectType = Optional.empty();
+
+  /**
+   * Owner tenant. Null means a global client, manageable only by root.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<TenantVO> tenant = Optional.empty();
+
+  /**
+   * El tls client auth subject dn de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<TlsClientAuthSubjectDnVO> tlsClientAuthSubjectDn = Optional.empty();
+
+  /**
+   * El tls client certificate bound access tokens de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<TlsClientCertificateBoundAccessTokensVO> tlsClientCertificateBoundAccessTokens =
+      Optional.empty();
 
   /**
    * El token endpoint auth method de trusted client
@@ -273,6 +440,14 @@ public class TrustedClientVisibleProjection {
    */
   @Builder.Default
   private Optional<TokenEndpointAuthMethodVO> tokenEndpointAuthMethod = Optional.empty();
+
+  /**
+   * El token endpoint auth signing alg de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<TokenEndpointAuthSigningAlgVO> tokenEndpointAuthSigningAlg = Optional.empty();
 
   /**
    * El tos uri de trusted client
@@ -291,6 +466,30 @@ public class TrustedClientVisibleProjection {
   private Optional<UidVO> uid = Optional.empty();
 
   /**
+   * El userinfo encrypted response alg de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<UserinfoEncryptedResponseAlgVO> userinfoEncryptedResponseAlg = Optional.empty();
+
+  /**
+   * El userinfo encrypted response enc de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<UserinfoEncryptedResponseEncVO> userinfoEncryptedResponseEnc = Optional.empty();
+
+  /**
+   * El userinfo signed response alg de trusted client
+   *
+   * @autogenerated VisibleProjectionGenerator
+   */
+  @Builder.Default
+  private Optional<UserinfoSignedResponseAlgVO> userinfoSignedResponseAlg = Optional.empty();
+
+  /**
    * Campo con el número de version de trusted client para controlar bloqueos optimistas
    *
    * @autogenerated VisibleProjectionGenerator
@@ -307,11 +506,38 @@ public class TrustedClientVisibleProjection {
   public TrustedClientVisibleProjection(final TrustedClient entity) {
     uid = Optional.of(entity.getUidValue());
     code = Optional.of(entity.getCodeValue());
+    tenant = Optional.of(entity.getTenantValue());
     allowAllScopes = Optional.of(entity.getAllowAllScopesValue());
     publicAllow = Optional.of(entity.getPublicAllowValue());
-    allowedRedirects = Optional.of(entity.getAllowedRedirectsValue());
+    tokenEndpointAuthMethod = Optional.of(entity.getTokenEndpointAuthMethodValue());
+    tokenEndpointAuthSigningAlg = Optional.of(entity.getTokenEndpointAuthSigningAlgValue());
+    dpopBoundAccessTokens = Optional.of(entity.getDpopBoundAccessTokensValue());
+    idTokenSignedResponseAlg = Optional.of(entity.getIdTokenSignedResponseAlgValue());
+    tlsClientAuthSubjectDn = Optional.of(entity.getTlsClientAuthSubjectDnValue());
+    tlsClientCertificateBoundAccessTokens =
+        Optional.of(entity.getTlsClientCertificateBoundAccessTokensValue());
+    authorizationSignedResponseAlg = Optional.of(entity.getAuthorizationSignedResponseAlgValue());
+    backchannelTokenDeliveryMode = Optional.of(entity.getBackchannelTokenDeliveryModeValue());
+    backchannelClientNotificationEndpoint =
+        Optional.of(entity.getBackchannelClientNotificationEndpointValue());
+    subjectType = Optional.of(entity.getSubjectTypeValue());
+    idTokenEncryptedResponseAlg = Optional.of(entity.getIdTokenEncryptedResponseAlgValue());
+    idTokenEncryptedResponseEnc = Optional.of(entity.getIdTokenEncryptedResponseEncValue());
+    userinfoEncryptedResponseAlg = Optional.of(entity.getUserinfoEncryptedResponseAlgValue());
+    userinfoEncryptedResponseEnc = Optional.of(entity.getUserinfoEncryptedResponseEncValue());
+    authorizationDetailsTypes = Optional.of(entity.getAuthorizationDetailsTypesValue());
+    userinfoSignedResponseAlg = Optional.of(entity.getUserinfoSignedResponseAlgValue());
     secretOauth = Optional.of(entity.getSecretOauthValue());
+    registrationAccess = Optional.of(entity.getRegistrationAccessValue());
+    defaultAcrValues = Optional.of(entity.getDefaultAcrValuesValue());
+    defaultMaxAge = Optional.of(entity.getDefaultMaxAgeValue());
+    sectorIdentifierUri = Optional.of(entity.getSectorIdentifierUriValue());
+    allowedRedirects = Optional.of(entity.getAllowedRedirectsValue());
+    allowedAudiences = Optional.of(entity.getAllowedAudiencesValue());
+    grantTypesJson = Optional.of(entity.getGrantTypesJsonValue());
     isResourceServer = Optional.of(entity.getIsResourceServerValue());
+    requirePushedAuthorizationRequests =
+        Optional.of(entity.getRequirePushedAuthorizationRequestsValue());
     requirePkce = Optional.of(entity.getRequirePkceValue());
     backChannelLogoutUri = Optional.of(entity.getBackChannelLogoutUriValue());
     backChannelLogoutSessionRequired =
@@ -320,14 +546,11 @@ public class TrustedClientVisibleProjection {
     frontChannelLogoutSessionRequired =
         Optional.of(entity.getFrontChannelLogoutSessionRequiredValue());
     enabled = Optional.of(entity.getEnabledValue());
-    registrationAccess = Optional.of(entity.getRegistrationAccessValue());
     clientName = Optional.of(entity.getClientNameValue());
     logoUri = Optional.of(entity.getLogoUriValue());
     clientUri = Optional.of(entity.getClientUriValue());
     policyUri = Optional.of(entity.getPolicyUriValue());
     tosUri = Optional.of(entity.getTosUriValue());
-    tokenEndpointAuthMethod = Optional.of(entity.getTokenEndpointAuthMethodValue());
-    grantTypesJson = Optional.of(entity.getGrantTypesJsonValue());
     responseTypesJson = Optional.of(entity.getResponseTypesJsonValue());
     dynamicallyRegistered = Optional.of(entity.getDynamicallyRegisteredValue());
     registeredAt = Optional.of(entity.getRegisteredAtValue());
@@ -363,6 +586,17 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in AllowedAudiences
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for AllowedAudiences, otherwise the value for
+   *         AllowedAudiences
+   */
+  public Optional<AllowedAudiencesVO> getAllowedAudiences() {
+    return allowedAudiences;
+  }
+
+  /**
    * Inform for a possible change propolsal in AllowedRedirects
    *
    * @autogenerated VisibleProjectionGenerator
@@ -385,6 +619,28 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in AuthorizationDetailsTypes
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for AuthorizationDetailsTypes, otherwise the value
+   *         for AuthorizationDetailsTypes
+   */
+  public Optional<AuthorizationDetailsTypesVO> getAuthorizationDetailsTypes() {
+    return authorizationDetailsTypes;
+  }
+
+  /**
+   * Inform for a possible change propolsal in AuthorizationSignedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for AuthorizationSignedResponseAlg, otherwise the
+   *         value for AuthorizationSignedResponseAlg
+   */
+  public Optional<AuthorizationSignedResponseAlgVO> getAuthorizationSignedResponseAlg() {
+    return authorizationSignedResponseAlg;
+  }
+
+  /**
    * Inform for a possible change propolsal in BackChannelLogoutSessionRequired
    *
    * @autogenerated VisibleProjectionGenerator
@@ -404,6 +660,28 @@ public class TrustedClientVisibleProjection {
    */
   public Optional<BackChannelLogoutUriVO> getBackChannelLogoutUri() {
     return backChannelLogoutUri;
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelClientNotificationEndpoint
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for BackchannelClientNotificationEndpoint,
+   *         otherwise the value for BackchannelClientNotificationEndpoint
+   */
+  public Optional<BackchannelClientNotificationEndpointVO> getBackchannelClientNotificationEndpoint() {
+    return backchannelClientNotificationEndpoint;
+  }
+
+  /**
+   * Inform for a possible change propolsal in BackchannelTokenDeliveryMode
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for BackchannelTokenDeliveryMode, otherwise the
+   *         value for BackchannelTokenDeliveryMode
+   */
+  public Optional<BackchannelTokenDeliveryModeVO> getBackchannelTokenDeliveryMode() {
+    return backchannelTokenDeliveryMode;
   }
 
   /**
@@ -434,6 +712,39 @@ public class TrustedClientVisibleProjection {
    */
   public Optional<CodeVO> getCode() {
     return code;
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultAcrValues
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for DefaultAcrValues, otherwise the value for
+   *         DefaultAcrValues
+   */
+  public Optional<DefaultAcrValuesVO> getDefaultAcrValues() {
+    return defaultAcrValues;
+  }
+
+  /**
+   * Inform for a possible change propolsal in DefaultMaxAge
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for DefaultMaxAge, otherwise the value for
+   *         DefaultMaxAge
+   */
+  public Optional<DefaultMaxAgeVO> getDefaultMaxAge() {
+    return defaultMaxAge;
+  }
+
+  /**
+   * Inform for a possible change propolsal in DpopBoundAccessTokens
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for DpopBoundAccessTokens, otherwise the value for
+   *         DpopBoundAccessTokens
+   */
+  public Optional<DpopBoundAccessTokensVO> getDpopBoundAccessTokens() {
+    return dpopBoundAccessTokens;
   }
 
   /**
@@ -488,6 +799,39 @@ public class TrustedClientVisibleProjection {
    */
   public Optional<GrantTypesJsonVO> getGrantTypesJson() {
     return grantTypesJson;
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseAlg, otherwise the
+   *         value for IdTokenEncryptedResponseAlg
+   */
+  public Optional<IdTokenEncryptedResponseAlgVO> getIdTokenEncryptedResponseAlg() {
+    return idTokenEncryptedResponseAlg;
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenEncryptedResponseEnc
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for IdTokenEncryptedResponseEnc, otherwise the
+   *         value for IdTokenEncryptedResponseEnc
+   */
+  public Optional<IdTokenEncryptedResponseEncVO> getIdTokenEncryptedResponseEnc() {
+    return idTokenEncryptedResponseEnc;
+  }
+
+  /**
+   * Inform for a possible change propolsal in IdTokenSignedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for IdTokenSignedResponseAlg, otherwise the value
+   *         for IdTokenSignedResponseAlg
+   */
+  public Optional<IdTokenSignedResponseAlgVO> getIdTokenSignedResponseAlg() {
+    return idTokenSignedResponseAlg;
   }
 
   /**
@@ -608,6 +952,17 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in RequirePushedAuthorizationRequests
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for RequirePushedAuthorizationRequests, otherwise
+   *         the value for RequirePushedAuthorizationRequests
+   */
+  public Optional<RequirePushedAuthorizationRequestsVO> getRequirePushedAuthorizationRequests() {
+    return requirePushedAuthorizationRequests;
+  }
+
+  /**
    * Inform for a possible change propolsal in ResponseTypesJson
    *
    * @autogenerated VisibleProjectionGenerator
@@ -630,6 +985,60 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in SectorIdentifierUri
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for SectorIdentifierUri, otherwise the value for
+   *         SectorIdentifierUri
+   */
+  public Optional<SectorIdentifierUriVO> getSectorIdentifierUri() {
+    return sectorIdentifierUri;
+  }
+
+  /**
+   * Inform for a possible change propolsal in SubjectType
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for SubjectType, otherwise the value for
+   *         SubjectType
+   */
+  public Optional<SubjectTypeVO> getSubjectType() {
+    return subjectType;
+  }
+
+  /**
+   * Inform for a possible change propolsal in Tenant
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for Tenant, otherwise the value for Tenant
+   */
+  public Optional<TenantVO> getTenant() {
+    return tenant;
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientAuthSubjectDn
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for TlsClientAuthSubjectDn, otherwise the value
+   *         for TlsClientAuthSubjectDn
+   */
+  public Optional<TlsClientAuthSubjectDnVO> getTlsClientAuthSubjectDn() {
+    return tlsClientAuthSubjectDn;
+  }
+
+  /**
+   * Inform for a possible change propolsal in TlsClientCertificateBoundAccessTokens
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for TlsClientCertificateBoundAccessTokens,
+   *         otherwise the value for TlsClientCertificateBoundAccessTokens
+   */
+  public Optional<TlsClientCertificateBoundAccessTokensVO> getTlsClientCertificateBoundAccessTokens() {
+    return tlsClientCertificateBoundAccessTokens;
+  }
+
+  /**
    * Inform for a possible change propolsal in TokenEndpointAuthMethod
    *
    * @autogenerated VisibleProjectionGenerator
@@ -638,6 +1047,17 @@ public class TrustedClientVisibleProjection {
    */
   public Optional<TokenEndpointAuthMethodVO> getTokenEndpointAuthMethod() {
     return tokenEndpointAuthMethod;
+  }
+
+  /**
+   * Inform for a possible change propolsal in TokenEndpointAuthSigningAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for TokenEndpointAuthSigningAlg, otherwise the
+   *         value for TokenEndpointAuthSigningAlg
+   */
+  public Optional<TokenEndpointAuthSigningAlgVO> getTokenEndpointAuthSigningAlg() {
+    return tokenEndpointAuthSigningAlg;
   }
 
   /**
@@ -661,6 +1081,39 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseAlg, otherwise the
+   *         value for UserinfoEncryptedResponseAlg
+   */
+  public Optional<UserinfoEncryptedResponseAlgVO> getUserinfoEncryptedResponseAlg() {
+    return userinfoEncryptedResponseAlg;
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoEncryptedResponseEnc
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for UserinfoEncryptedResponseEnc, otherwise the
+   *         value for UserinfoEncryptedResponseEnc
+   */
+  public Optional<UserinfoEncryptedResponseEncVO> getUserinfoEncryptedResponseEnc() {
+    return userinfoEncryptedResponseEnc;
+  }
+
+  /**
+   * Inform for a possible change propolsal in UserinfoSignedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return empty if there is no change proposal for UserinfoSignedResponseAlg, otherwise the value
+   *         for UserinfoSignedResponseAlg
+   */
+  public Optional<UserinfoSignedResponseAlgVO> getUserinfoSignedResponseAlg() {
+    return userinfoSignedResponseAlg;
+  }
+
+  /**
    * Inform for a possible change propolsal in Version
    *
    * @autogenerated VisibleProjectionGenerator
@@ -679,6 +1132,18 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection setAllowAllScopes(final Boolean value) {
     this.allowAllScopes = Optional.of(AllowAllScopesVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for AllowedAudiences to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setAllowedAudiences(final List<AllowedAudiences> value) {
+    this.allowedAudiences = Optional.of(AllowedAudiencesVO.from(null == value ? List.of() : value));
     return this;
   }
 
@@ -707,6 +1172,30 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Assigna change proposal for AuthorizationDetailsTypes to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setAuthorizationDetailsTypes(final String value) {
+    this.authorizationDetailsTypes = Optional.of(AuthorizationDetailsTypesVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for AuthorizationSignedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setAuthorizationSignedResponseAlg(final String value) {
+    this.authorizationSignedResponseAlg = Optional.of(AuthorizationSignedResponseAlgVO.from(value));
+    return this;
+  }
+
+  /**
    * Assigna change proposal for BackChannelLogoutSessionRequired to be apply for the aggregate.
    *
    * @autogenerated VisibleProjectionGenerator
@@ -728,6 +1217,34 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection setBackChannelLogoutUri(final String value) {
     this.backChannelLogoutUri = Optional.of(BackChannelLogoutUriVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for BackchannelClientNotificationEndpoint to be apply for the
+   * aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setBackchannelClientNotificationEndpoint(
+      final String value) {
+    this.backchannelClientNotificationEndpoint =
+        Optional.of(BackchannelClientNotificationEndpointVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for BackchannelTokenDeliveryMode to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setBackchannelTokenDeliveryMode(
+      final TrustedClientBackchannelTokenDeliveryModeOptions value) {
+    this.backchannelTokenDeliveryMode = Optional.of(BackchannelTokenDeliveryModeVO.from(value));
     return this;
   }
 
@@ -764,6 +1281,42 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection setCode(final String value) {
     this.code = Optional.of(CodeVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for DefaultAcrValues to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setDefaultAcrValues(final String value) {
+    this.defaultAcrValues = Optional.of(DefaultAcrValuesVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for DefaultMaxAge to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setDefaultMaxAge(final Integer value) {
+    this.defaultMaxAge = Optional.of(DefaultMaxAgeVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for DpopBoundAccessTokens to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setDpopBoundAccessTokens(final Boolean value) {
+    this.dpopBoundAccessTokens = Optional.of(DpopBoundAccessTokensVO.from(value));
     return this;
   }
 
@@ -825,6 +1378,43 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection setGrantTypesJson(final String value) {
     this.grantTypesJson = Optional.of(GrantTypesJsonVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for IdTokenEncryptedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setIdTokenEncryptedResponseAlg(final String value) {
+    this.idTokenEncryptedResponseAlg = Optional.of(IdTokenEncryptedResponseAlgVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for IdTokenEncryptedResponseEnc to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setIdTokenEncryptedResponseEnc(final String value) {
+    this.idTokenEncryptedResponseEnc = Optional.of(IdTokenEncryptedResponseEncVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for IdTokenSignedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setIdTokenSignedResponseAlg(
+      final TrustedClientIdTokenSignedResponseAlgOptions value) {
+    this.idTokenSignedResponseAlg = Optional.of(IdTokenSignedResponseAlgVO.from(value));
     return this;
   }
 
@@ -932,7 +1522,7 @@ public class TrustedClientVisibleProjection {
    * @return self instance to enable a flow code
    */
   public TrustedClientVisibleProjection setRegistrationAccess(final String value) {
-    this.registrationAccess = Optional.of(RegistrationAccessVO.from(value));
+    this.registrationAccess = Optional.of(RegistrationAccessVO.fromPlain(value));
     return this;
   }
 
@@ -961,6 +1551,19 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Assigna change proposal for RequirePushedAuthorizationRequests to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setRequirePushedAuthorizationRequests(final Boolean value) {
+    this.requirePushedAuthorizationRequests =
+        Optional.of(RequirePushedAuthorizationRequestsVO.from(value));
+    return this;
+  }
+
+  /**
    * Assigna change proposal for ResponseTypesJson to be apply for the aggregate.
    *
    * @autogenerated VisibleProjectionGenerator
@@ -985,14 +1588,91 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Assigna change proposal for SectorIdentifierUri to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setSectorIdentifierUri(final String value) {
+    this.sectorIdentifierUri = Optional.of(SectorIdentifierUriVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for SubjectType to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setSubjectType(
+      final TrustedClientSubjectTypeOptions value) {
+    this.subjectType = Optional.of(SubjectTypeVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for Tenant to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setTenant(final TenantRef value) {
+    this.tenant = Optional.of(TenantVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for TlsClientAuthSubjectDn to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setTlsClientAuthSubjectDn(final String value) {
+    this.tlsClientAuthSubjectDn = Optional.of(TlsClientAuthSubjectDnVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for TlsClientCertificateBoundAccessTokens to be apply for the
+   * aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setTlsClientCertificateBoundAccessTokens(
+      final Boolean value) {
+    this.tlsClientCertificateBoundAccessTokens =
+        Optional.of(TlsClientCertificateBoundAccessTokensVO.from(value));
+    return this;
+  }
+
+  /**
    * Assigna change proposal for TokenEndpointAuthMethod to be apply for the aggregate.
    *
    * @autogenerated VisibleProjectionGenerator
    * @param value The proposal value for TrustedClientVisibleProjection
    * @return self instance to enable a flow code
    */
-  public TrustedClientVisibleProjection setTokenEndpointAuthMethod(final String value) {
+  public TrustedClientVisibleProjection setTokenEndpointAuthMethod(
+      final TrustedClientTokenEndpointAuthMethodOptions value) {
     this.tokenEndpointAuthMethod = Optional.of(TokenEndpointAuthMethodVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for TokenEndpointAuthSigningAlg to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setTokenEndpointAuthSigningAlg(final String value) {
+    this.tokenEndpointAuthSigningAlg = Optional.of(TokenEndpointAuthSigningAlgVO.from(value));
     return this;
   }
 
@@ -1017,6 +1697,42 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection setUid(final String value) {
     this.uid = Optional.of(UidVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for UserinfoEncryptedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setUserinfoEncryptedResponseAlg(final String value) {
+    this.userinfoEncryptedResponseAlg = Optional.of(UserinfoEncryptedResponseAlgVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for UserinfoEncryptedResponseEnc to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setUserinfoEncryptedResponseEnc(final String value) {
+    this.userinfoEncryptedResponseEnc = Optional.of(UserinfoEncryptedResponseEncVO.from(value));
+    return this;
+  }
+
+  /**
+   * Assigna change proposal for UserinfoSignedResponseAlg to be apply for the aggregate.
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @param value The proposal value for TrustedClientVisibleProjection
+   * @return self instance to enable a flow code
+   */
+  public TrustedClientVisibleProjection setUserinfoSignedResponseAlg(final String value) {
+    this.userinfoSignedResponseAlg = Optional.of(UserinfoSignedResponseAlgVO.from(value));
     return this;
   }
 
@@ -1046,20 +1762,92 @@ public class TrustedClientVisibleProjection {
     if ("code".equals(field)) {
       this.unsetCode();
     }
+    if ("tenant".equals(field)) {
+      this.unsetTenant();
+    }
     if ("allowAllScopes".equals(field)) {
       this.unsetAllowAllScopes();
     }
     if ("publicAllow".equals(field)) {
       this.unsetPublicAllow();
     }
-    if ("allowedRedirects".equals(field)) {
-      this.unsetAllowedRedirects();
+    if ("tokenEndpointAuthMethod".equals(field)) {
+      this.unsetTokenEndpointAuthMethod();
+    }
+    if ("tokenEndpointAuthSigningAlg".equals(field)) {
+      this.unsetTokenEndpointAuthSigningAlg();
+    }
+    if ("dpopBoundAccessTokens".equals(field)) {
+      this.unsetDpopBoundAccessTokens();
+    }
+    if ("idTokenSignedResponseAlg".equals(field)) {
+      this.unsetIdTokenSignedResponseAlg();
+    }
+    if ("tlsClientAuthSubjectDn".equals(field)) {
+      this.unsetTlsClientAuthSubjectDn();
+    }
+    if ("tlsClientCertificateBoundAccessTokens".equals(field)) {
+      this.unsetTlsClientCertificateBoundAccessTokens();
+    }
+    if ("authorizationSignedResponseAlg".equals(field)) {
+      this.unsetAuthorizationSignedResponseAlg();
+    }
+    if ("backchannelTokenDeliveryMode".equals(field)) {
+      this.unsetBackchannelTokenDeliveryMode();
+    }
+    if ("backchannelClientNotificationEndpoint".equals(field)) {
+      this.unsetBackchannelClientNotificationEndpoint();
+    }
+    if ("subjectType".equals(field)) {
+      this.unsetSubjectType();
+    }
+    if ("idTokenEncryptedResponseAlg".equals(field)) {
+      this.unsetIdTokenEncryptedResponseAlg();
+    }
+    if ("idTokenEncryptedResponseEnc".equals(field)) {
+      this.unsetIdTokenEncryptedResponseEnc();
+    }
+    if ("userinfoEncryptedResponseAlg".equals(field)) {
+      this.unsetUserinfoEncryptedResponseAlg();
+    }
+    if ("userinfoEncryptedResponseEnc".equals(field)) {
+      this.unsetUserinfoEncryptedResponseEnc();
+    }
+    if ("authorizationDetailsTypes".equals(field)) {
+      this.unsetAuthorizationDetailsTypes();
+    }
+    if ("userinfoSignedResponseAlg".equals(field)) {
+      this.unsetUserinfoSignedResponseAlg();
     }
     if ("secretOauth".equals(field)) {
       this.unsetSecretOauth();
     }
+    if ("registrationAccess".equals(field)) {
+      this.unsetRegistrationAccess();
+    }
+    if ("defaultAcrValues".equals(field)) {
+      this.unsetDefaultAcrValues();
+    }
+    if ("defaultMaxAge".equals(field)) {
+      this.unsetDefaultMaxAge();
+    }
+    if ("sectorIdentifierUri".equals(field)) {
+      this.unsetSectorIdentifierUri();
+    }
+    if ("allowedRedirects".equals(field)) {
+      this.unsetAllowedRedirects();
+    }
+    if ("allowedAudiences".equals(field)) {
+      this.unsetAllowedAudiences();
+    }
+    if ("grantTypesJson".equals(field)) {
+      this.unsetGrantTypesJson();
+    }
     if ("isResourceServer".equals(field)) {
       this.unsetIsResourceServer();
+    }
+    if ("requirePushedAuthorizationRequests".equals(field)) {
+      this.unsetRequirePushedAuthorizationRequests();
     }
     if ("requirePkce".equals(field)) {
       this.unsetRequirePkce();
@@ -1079,9 +1867,6 @@ public class TrustedClientVisibleProjection {
     if ("enabled".equals(field)) {
       this.unsetEnabled();
     }
-    if ("registrationAccess".equals(field)) {
-      this.unsetRegistrationAccess();
-    }
     if ("clientName".equals(field)) {
       this.unsetClientName();
     }
@@ -1096,12 +1881,6 @@ public class TrustedClientVisibleProjection {
     }
     if ("tosUri".equals(field)) {
       this.unsetTosUri();
-    }
-    if ("tokenEndpointAuthMethod".equals(field)) {
-      this.unsetTokenEndpointAuthMethod();
-    }
-    if ("grantTypesJson".equals(field)) {
-      this.unsetGrantTypesJson();
     }
     if ("responseTypesJson".equals(field)) {
       this.unsetResponseTypesJson();
@@ -1144,6 +1923,17 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Remove the change propolsal for AllowedAudiences
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetAllowedAudiences() {
+    this.allowedAudiences = Optional.empty();
+    return this;
+  }
+
+  /**
    * Remove the change propolsal for AllowedRedirects
    *
    * @autogenerated VisibleProjectionGenerator
@@ -1166,6 +1956,28 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Remove the change propolsal for AuthorizationDetailsTypes
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetAuthorizationDetailsTypes() {
+    this.authorizationDetailsTypes = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for AuthorizationSignedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetAuthorizationSignedResponseAlg() {
+    this.authorizationSignedResponseAlg = Optional.empty();
+    return this;
+  }
+
+  /**
    * Remove the change propolsal for BackChannelLogoutSessionRequired
    *
    * @autogenerated VisibleProjectionGenerator
@@ -1184,6 +1996,28 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection unsetBackChannelLogoutUri() {
     this.backChannelLogoutUri = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for BackchannelClientNotificationEndpoint
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetBackchannelClientNotificationEndpoint() {
+    this.backchannelClientNotificationEndpoint = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for BackchannelTokenDeliveryMode
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetBackchannelTokenDeliveryMode() {
+    this.backchannelTokenDeliveryMode = Optional.empty();
     return this;
   }
 
@@ -1217,6 +2051,39 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection unsetCode() {
     this.code = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for DefaultAcrValues
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetDefaultAcrValues() {
+    this.defaultAcrValues = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for DefaultMaxAge
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetDefaultMaxAge() {
+    this.defaultMaxAge = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for DpopBoundAccessTokens
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetDpopBoundAccessTokens() {
+    this.dpopBoundAccessTokens = Optional.empty();
     return this;
   }
 
@@ -1272,6 +2139,39 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection unsetGrantTypesJson() {
     this.grantTypesJson = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for IdTokenEncryptedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetIdTokenEncryptedResponseAlg() {
+    this.idTokenEncryptedResponseAlg = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for IdTokenEncryptedResponseEnc
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetIdTokenEncryptedResponseEnc() {
+    this.idTokenEncryptedResponseEnc = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for IdTokenSignedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetIdTokenSignedResponseAlg() {
+    this.idTokenSignedResponseAlg = Optional.empty();
     return this;
   }
 
@@ -1397,6 +2297,17 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Remove the change propolsal for RequirePushedAuthorizationRequests
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetRequirePushedAuthorizationRequests() {
+    this.requirePushedAuthorizationRequests = Optional.empty();
+    return this;
+  }
+
+  /**
    * Remove the change propolsal for ResponseTypesJson
    *
    * @autogenerated VisibleProjectionGenerator
@@ -1419,6 +2330,61 @@ public class TrustedClientVisibleProjection {
   }
 
   /**
+   * Remove the change propolsal for SectorIdentifierUri
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetSectorIdentifierUri() {
+    this.sectorIdentifierUri = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for SubjectType
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetSubjectType() {
+    this.subjectType = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for Tenant
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetTenant() {
+    this.tenant = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for TlsClientAuthSubjectDn
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetTlsClientAuthSubjectDn() {
+    this.tlsClientAuthSubjectDn = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for TlsClientCertificateBoundAccessTokens
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetTlsClientCertificateBoundAccessTokens() {
+    this.tlsClientCertificateBoundAccessTokens = Optional.empty();
+    return this;
+  }
+
+  /**
    * Remove the change propolsal for TokenEndpointAuthMethod
    *
    * @autogenerated VisibleProjectionGenerator
@@ -1426,6 +2392,17 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection unsetTokenEndpointAuthMethod() {
     this.tokenEndpointAuthMethod = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for TokenEndpointAuthSigningAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetTokenEndpointAuthSigningAlg() {
+    this.tokenEndpointAuthSigningAlg = Optional.empty();
     return this;
   }
 
@@ -1448,6 +2425,39 @@ public class TrustedClientVisibleProjection {
    */
   public TrustedClientVisibleProjection unsetUid() {
     this.uid = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for UserinfoEncryptedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetUserinfoEncryptedResponseAlg() {
+    this.userinfoEncryptedResponseAlg = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for UserinfoEncryptedResponseEnc
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetUserinfoEncryptedResponseEnc() {
+    this.userinfoEncryptedResponseEnc = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Remove the change propolsal for UserinfoSignedResponseAlg
+   *
+   * @autogenerated VisibleProjectionGenerator
+   * @return self instance to enable a flow code.
+   */
+  public TrustedClientVisibleProjection unsetUserinfoSignedResponseAlg() {
+    this.userinfoSignedResponseAlg = Optional.empty();
     return this;
   }
 

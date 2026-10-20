@@ -1,14 +1,11 @@
 package net.civeira.phylax.features.notification.smtpoutboundconfig.domain.valueobject;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import net.civeira.phylax.common.crypto.AesCipherService;
-import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
 
 class PasswordVOUnitTest {
 
@@ -18,21 +15,11 @@ class PasswordVOUnitTest {
   @Test
   @DisplayName("Test value object contruction for property password of smtp outbound config ")
   void test_password_v_o_builder() {
-    Assertions.assertThrows(ConstraintException.class, () -> PasswordVO.tryFrom(null));
-    AesCipherService cypher = Mockito.mock(AesCipherService.class);
-    Mockito.when(cypher.encryptForAll("one")).thenReturn("cyphered");
-    Mockito.when(cypher.decryptForAll("one")).thenReturn(Optional.of("plain"));
-    Mockito.when(cypher.decryptForAll("two")).thenReturn(Optional.empty());
-    Assertions.assertEquals("one", PasswordVO.fromCyphered("one").getPasswordCyphered(null));
-    Assertions.assertEquals("one", PasswordVO.fromPlain("one").getPasswordPlain(null));
-    Assertions.assertEquals("plain", PasswordVO.fromCyphered("one").getPasswordPlain(cypher));
-    Assertions.assertEquals("cyphered", PasswordVO.fromPlain("one").getPasswordCyphered(cypher));
-    Assertions.assertThrows(IllegalStateException.class,
-        () -> PasswordVO.fromCyphered("two").getPasswordPlain(cypher));
-    Assertions.assertThrows(ConstraintException.class, () -> PasswordVO.tryFrom(new Object() {}));
-    Assertions.assertEquals("[plain:*****]", PasswordVO.fromPlain("small").toString());
-    Assertions.assertEquals("[plain:longt*****]",
-        PasswordVO.fromPlain("longtextlongtext").toString());
-    Assertions.assertEquals("[cyphered:" + "one" + "]", PasswordVO.fromCyphered("one").toString());
+    KeyRingSecretStorage service = Mockito.mock(KeyRingSecretStorage.class);
+    Mockito.when(service.seal("small", "notification.smtp_outbound_config.password#owner"))
+        .thenReturn("sealed:k0:example");
+    Assertions.assertEquals("sealed:k0:example",
+        PasswordVO.fromPlain("small").getPasswordStored(service, "owner"));
+    Assertions.assertEquals("****", PasswordVO.fromPlain("small").toString());
   }
 }

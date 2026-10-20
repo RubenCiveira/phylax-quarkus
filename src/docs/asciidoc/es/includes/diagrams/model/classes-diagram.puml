@@ -350,22 +350,41 @@ uid:string
 code:string
 allowAllScopes:boolean
 publicAllow:boolean
+tokenEndpointAuthMethod:TrustedClientTokenEndpointAuthMethodOptions
+tokenEndpointAuthSigningAlg:string
+dpopBoundAccessTokens:boolean
+idTokenSignedResponseAlg:TrustedClientIdTokenSignedResponseAlgOptions
+tlsClientAuthSubjectDn:string
+tlsClientCertificateBoundAccessTokens:boolean
+authorizationSignedResponseAlg:string
+backchannelTokenDeliveryMode:TrustedClientBackchannelTokenDeliveryModeOptions
+backchannelClientNotificationEndpoint:string
+subjectType:TrustedClientSubjectTypeOptions
+idTokenEncryptedResponseAlg:string
+idTokenEncryptedResponseEnc:string
+userinfoEncryptedResponseAlg:string
+userinfoEncryptedResponseEnc:string
+authorizationDetailsTypes:blob
+userinfoSignedResponseAlg:string
 secretOauth:string
+registrationAccess:string
+defaultAcrValues:string
+defaultMaxAge:integer
+sectorIdentifierUri:string
+grantTypesJson:blob
 isResourceServer:boolean
+requirePushedAuthorizationRequests:boolean
 requirePkce:boolean
 backChannelLogoutUri:string
 backChannelLogoutSessionRequired:boolean
 frontChannelLogoutUri:string
 frontChannelLogoutSessionRequired:boolean
 enabled:boolean
-registrationAccess:string
 clientName:string
 logoUri:string
 clientUri:string
 policyUri:string
 tosUri:string
-tokenEndpointAuthMethod:string
-grantTypesJson:blob
 responseTypesJson:blob
 dynamicallyRegistered:boolean
 registeredAt:datetime
@@ -383,6 +402,7 @@ delete()
 enable()
 disable()
 }
+access.Tenant "1"  o--  "N*" access.TrustedClient: tenant 
 
 class document.ThemeAsset{
 uid:string
@@ -414,6 +434,12 @@ invitationExpiryDays:integer
 magicLinkExpiryMinutes:integer
 sessionSsoTtlSeconds:integer
 refreshTokenTtlSeconds:integer
+refreshTokenMaxLifetimeSeconds:integer
+dcrAllowedGrantTypes:blob
+dcrAllowedAuthMethods:blob
+allowPasswordGrant:boolean
+requirePushedAuthorizationRequests:boolean
+acrValuesSupported:blob
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
@@ -514,6 +540,9 @@ publicKey:string
 privateKey:string
 certificate:blob
 metadata:binary
+oidcScopes:string
+oidcClaimMapping:blob
+accountLinkPolicy:TenantLoginProviderAccountLinkPolicyOptions
 oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
@@ -548,6 +577,24 @@ disable()
 }
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
+
+class access.DcrInitialAccessToken{
+uid:string
+description:string
+tokenHash:string
+expiresAt:datetime
+maxUses:integer
+uses:integer
+allowedGrantTypes:blob
+revokedAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.Tenant "1"  o--  "N*" access.DcrInitialAccessToken: tenant 
 
 class access.UserMfaRecoveryCode{
 uid:string
@@ -986,22 +1033,41 @@ uid:string
 code:string
 allowAllScopes:boolean
 publicAllow:boolean
+tokenEndpointAuthMethod:TrustedClientTokenEndpointAuthMethodOptions
+tokenEndpointAuthSigningAlg:string
+dpopBoundAccessTokens:boolean
+idTokenSignedResponseAlg:TrustedClientIdTokenSignedResponseAlgOptions
+tlsClientAuthSubjectDn:string
+tlsClientCertificateBoundAccessTokens:boolean
+authorizationSignedResponseAlg:string
+backchannelTokenDeliveryMode:TrustedClientBackchannelTokenDeliveryModeOptions
+backchannelClientNotificationEndpoint:string
+subjectType:TrustedClientSubjectTypeOptions
+idTokenEncryptedResponseAlg:string
+idTokenEncryptedResponseEnc:string
+userinfoEncryptedResponseAlg:string
+userinfoEncryptedResponseEnc:string
+authorizationDetailsTypes:blob
+userinfoSignedResponseAlg:string
 secretOauth:string
+registrationAccess:string
+defaultAcrValues:string
+defaultMaxAge:integer
+sectorIdentifierUri:string
+grantTypesJson:blob
 isResourceServer:boolean
+requirePushedAuthorizationRequests:boolean
 requirePkce:boolean
 backChannelLogoutUri:string
 backChannelLogoutSessionRequired:boolean
 frontChannelLogoutUri:string
 frontChannelLogoutSessionRequired:boolean
 enabled:boolean
-registrationAccess:string
 clientName:string
 logoUri:string
 clientUri:string
 policyUri:string
 tosUri:string
-tokenEndpointAuthMethod:string
-grantTypesJson:blob
 responseTypesJson:blob
 dynamicallyRegistered:boolean
 registeredAt:datetime
@@ -1019,6 +1085,7 @@ delete()
 enable()
 disable()
 }
+access.Tenant "1"  o--  "N*" access.TrustedClient: tenant 
 
 class document.ThemeAsset{
 uid:string
@@ -1050,6 +1117,12 @@ invitationExpiryDays:integer
 magicLinkExpiryMinutes:integer
 sessionSsoTtlSeconds:integer
 refreshTokenTtlSeconds:integer
+refreshTokenMaxLifetimeSeconds:integer
+dcrAllowedGrantTypes:blob
+dcrAllowedAuthMethods:blob
+allowPasswordGrant:boolean
+requirePushedAuthorizationRequests:boolean
+acrValuesSupported:blob
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
@@ -1150,6 +1223,9 @@ publicKey:string
 privateKey:string
 certificate:blob
 metadata:binary
+oidcScopes:string
+oidcClaimMapping:blob
+accountLinkPolicy:TenantLoginProviderAccountLinkPolicyOptions
 oidcDiscoveryUrl:string
 samlIdpMetadataUrl:string
 samlIdpEntityId:string
@@ -1184,6 +1260,24 @@ disable()
 }
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant 
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty 
+
+class access.DcrInitialAccessToken{
+uid:string
+description:string
+tokenHash:string
+expiresAt:datetime
+maxUses:integer
+uses:integer
+allowedGrantTypes:blob
+revokedAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.Tenant "1"  o--  "N*" access.DcrInitialAccessToken: tenant 
 
 class access.UserMfaRecoveryCode{
 uid:string
@@ -1296,7 +1390,9 @@ document.Template "1"  o--  "N*" document.TemplateAsset: template
 access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant  
 access.User "1"  o--  "N*" access.UserProfile: user  
 access.Tenant "1"  o--  "N*" notification.Message: tenant  
+access.Tenant "1"  o--  "N*" access.TrustedClient: tenant  
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
+access.TrustedClientAllowedAudience "N*"  o--  "N*" access.TrustedClient: allowedAudiences  
 document.Theme "1"  o--  "N*" document.ThemeAsset: theme  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
 access.User "1"  o--  "N*" access.UserRoleAssignment: user  
@@ -1311,6 +1407,7 @@ access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
+access.Tenant "1"  o--  "N*" access.DcrInitialAccessToken: tenant  
 access.User "1"  o--  "N*" access.UserMfaRecoveryCode: user  
 access.User "1"  o--  "N*" access.UserConsentedScopes: user  
 access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient  
@@ -1338,7 +1435,9 @@ document.Template "1"  o--  "N*" document.TemplateAsset: template
 access.Tenant "1"  o--  "N*" document.TemplateAsset: tenant  
 access.User "1"  o--  "N*" access.UserProfile: user  
 access.Tenant "1"  o--  "N*" notification.Message: tenant  
+access.Tenant "1"  o--  "N*" access.TrustedClient: tenant  
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
+access.TrustedClientAllowedAudience "N*"  o--  "N*" access.TrustedClient: allowedAudiences  
 document.Theme "1"  o--  "N*" document.ThemeAsset: theme  
 access.Tenant "1"  o--  "N*" access.TenantConfig: tenant  
 access.User "1"  o--  "N*" access.UserRoleAssignment: user  
@@ -1353,6 +1452,7 @@ access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant
 access.Tenant "1"  o--  "N*" access.TenantLoginProvider: tenant  
 access.Tenant "1"  o--  "N*" access.TenantTermsOfUse: tenant  
 access.RelyingParty "1"  o--  "N*" access.TenantTermsOfUse: relyingParty  
+access.Tenant "1"  o--  "N*" access.DcrInitialAccessToken: tenant  
 access.User "1"  o--  "N*" access.UserMfaRecoveryCode: user  
 access.User "1"  o--  "N*" access.UserConsentedScopes: user  
 access.TrustedClient "1"  o--  "N*" access.UserConsentedScopes: trustedClient  

@@ -54,20 +54,81 @@ public class TrustedClientRbacRegister {
         .description("El identificador de la aplicacion").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
         .description("El código identificativo de la aplicación").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
+        .description("Owner tenant. Null means a global client, manageable only by root.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowAllScopes")
         .description("El allow all scopes de trusted client").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("publicAllow")
             .description("If true, users can use these client to access with public code flow")
             .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tokenEndpointAuthMethod")
+        .description("El token endpoint auth method de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("tokenEndpointAuthSigningAlg")
+            .description("El token endpoint auth signing alg de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("dpopBoundAccessTokens")
+        .description("El dpop bound access tokens de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("idTokenSignedResponseAlg")
+        .description("El id token signed response alg de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tlsClientAuthSubjectDn")
+        .description("El tls client auth subject dn de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("tlsClientCertificateBoundAccessTokens")
+            .description("El tls client certificate bound access tokens de trusted client")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("authorizationSignedResponseAlg")
+            .description("El authorization signed response alg de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("backchannelTokenDeliveryMode")
+            .description("El backchannel token delivery mode de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("backchannelClientNotificationEndpoint")
+            .description("El backchannel client notification endpoint de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("subjectType")
+        .description("El subject type de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("idTokenEncryptedResponseAlg")
+            .description("El id token encrypted response alg de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("idTokenEncryptedResponseEnc")
+            .description("El id token encrypted response enc de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("userinfoEncryptedResponseAlg")
+            .description("El userinfo encrypted response alg de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("userinfoEncryptedResponseEnc")
+            .description("El userinfo encrypted response enc de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("authorizationDetailsTypes")
+            .description("El authorization details types de trusted client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("userinfoSignedResponseAlg")
+            .description("El userinfo signed response alg de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
+        .description("El secret oauth de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registrationAccess")
+        .description("El registration access de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("defaultAcrValues")
+        .description("El default acr values de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("defaultMaxAge")
+        .description("El default max age de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("sectorIdentifierUri")
+        .description("El sector identifier uri de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedRedirects")
         .description("El allowed redirects de trusted client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
-        .description("If the user is not delegated, the phrase to identify").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedAudiences")
+        .description("El allowed audiences de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("grantTypesJson")
+        .description("El grant types json de trusted client").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("isResourceServer").description(
             "If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.")
             .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("requirePushedAuthorizationRequests")
+            .description("El require pushed authorization requests de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("requirePkce").description(
         "If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.")
         .build());
@@ -83,8 +144,6 @@ public class TrustedClientRbacRegister {
             .description("El front channel logout session required de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
         .description("The indicator to allow the account be used without deleting it").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registrationAccess")
-        .description("El registration access de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("clientName")
         .description("El client name de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("logoUri")
@@ -95,10 +154,6 @@ public class TrustedClientRbacRegister {
         .description("El policy uri de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tosUri")
         .description("El tos uri de trusted client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tokenEndpointAuthMethod")
-        .description("El token endpoint auth method de trusted client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("grantTypesJson")
-        .description("El grant types json de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("responseTypesJson")
         .description("El response types json de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("dynamicallyRegistered")

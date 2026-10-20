@@ -3,8 +3,9 @@ package net.civeira.phylax.features.access.trustedclient.domain.valueobject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import net.civeira.phylax.common.exception.ConstraintException;
+import net.civeira.phylax.common.crypto.SecretDigester;
 
 class RegistrationAccessVOUnitTest {
 
@@ -14,15 +15,10 @@ class RegistrationAccessVOUnitTest {
   @Test
   @DisplayName("Test value object contruction for property registration access of trusted client ")
   void test_registration_access_v_o_builder() {
-    Assertions.assertFalse(RegistrationAccessVO.nullValue().getRegistrationAccess().isPresent(),
-        "A empty vo should have a null value");
-    Assertions.assertFalse(RegistrationAccessVO.tryFrom(null).getRegistrationAccess().isPresent(),
-        "With a null value, no present result");
-    Assertions.assertEquals("one",
-        RegistrationAccessVO.from("one").getRegistrationAccess().orElse(null));
-    Object falingInstance = new Object() {};
-    Assertions.assertThrows(ConstraintException.class,
-        () -> RegistrationAccessVO.tryFrom(falingInstance));
-    Assertions.assertEquals("[" + "one" + "]", RegistrationAccessVO.from("one").toString());
+    SecretDigester service = Mockito.mock(SecretDigester.class);
+    Mockito.when(service.digest("small")).thenReturn("hmac-sha256:p0:example");
+    Assertions.assertEquals("hmac-sha256:p0:example",
+        RegistrationAccessVO.fromPlain("small").getRegistrationAccessStored(service).orElse(null));
+    Assertions.assertEquals("****", RegistrationAccessVO.fromPlain("small").toString());
   }
 }

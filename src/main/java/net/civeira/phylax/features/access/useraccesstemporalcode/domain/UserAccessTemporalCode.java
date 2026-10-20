@@ -252,7 +252,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
   public UserAccessTemporalCode generatePasswordRecover(final String recoveryLink,
       final String recoveryCode, final OffsetDateTime recoveryCodeExpiration) {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.recoveryCode(recoveryCode);
+    attr.recoveryCodePlain(recoveryCode);
     attr.recoveryCodeExpiration(recoveryCodeExpiration);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));
     instance.addEvent(UserAccessTemporalCodeGeneratePasswordRecoverEvent.builder().payload(instance)
@@ -272,7 +272,7 @@ public class UserAccessTemporalCode implements UserAccessTemporalCodeRef {
   public UserAccessTemporalCode generatedRegisterVerification(final String registerCode,
       final String registerCodeUrl, final OffsetDateTime registerCodeExpiration) {
     UserAccessTemporalCodeChangeSet attr = new UserAccessTemporalCodeChangeSet();
-    attr.registerCode(registerCode);
+    attr.registerCodePlain(registerCode);
     attr.registerCodeUrl(registerCodeUrl);
     attr.registerCodeExpiration(registerCodeExpiration);
     UserAccessTemporalCode instance = new UserAccessTemporalCode(attr, Optional.of(this));

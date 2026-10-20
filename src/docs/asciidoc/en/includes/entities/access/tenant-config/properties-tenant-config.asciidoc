@@ -29,6 +29,18 @@ Session sso ttl seconds* (integer)::
 Lifetime in seconds of the cross-client SSO session cookie.       After this duration the user must re-authenticate even if a per-flow session is still valid.       Corresponds to the max_age upper bound for prompt=none requests.
 Refresh token ttl seconds* (integer)::
 Lifetime in seconds of issued refresh tokens. Defaults to 30 days (2 592 000 s).       Applies to all grant types that issue refresh tokens for this tenant.
+Refresh token max lifetime seconds* (integer)::
+Absolute lifetime of a refresh token family; rotation never extends it.
+Dcr allowed grant types (blob)::
+El dcr allowed grant types de tenant config
+Dcr allowed auth methods (blob)::
+El dcr allowed auth methods de tenant config
+Allow password grant* (boolean)::
+El allow password grant de tenant config
+Require pushed authorization requests* (boolean)::
+El require pushed authorization requests de tenant config
+Acr values supported (blob)::
+JSON map of published ACR values to session level, e.g. {"urn:lugh:acr:pwd":1,"urn:lugh:acr:mfa":2}
 Webauthn enabled (boolean)::
 El webauthn enabled de tenant config
 Webauthn rp id (string)::

@@ -10,7 +10,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Named;
 import net.civeira.phylax.common.algorithms.Slider;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.consistency.PendingWritesRegistry;
 import net.civeira.phylax.common.telemetry.Observed;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
@@ -50,17 +51,21 @@ public class UserAccessTemporalCodeQueryRepositoryAdapter
    * @param replicaDatasource
    * @param tracer
    * @param pendingWrites
-   * @param cypher
+   * @param secretStorage
+   * @param secretDigester
    */
   public UserAccessTemporalCodeQueryRepositoryAdapter(final DataSource datasource,
       @Named("replica") final Instance<DataSource> replicaDatasource, final Tracer tracer,
-      final PendingWritesRegistry pendingWrites, AesCipherService cypher) {
+      final PendingWritesRegistry pendingWrites, KeyRingSecretStorage secretStorage,
+      SecretDigester secretDigester) {
     if (replicaDatasource.isResolvable()) {
-      this.repository =
-          new UserAccessTemporalCodeJdbcDao(replicaDatasource.get(), tracer, true, cypher);
-      this.primary = new UserAccessTemporalCodeJdbcDao(datasource, tracer, true, cypher);
+      this.repository = new UserAccessTemporalCodeJdbcDao(replicaDatasource.get(), tracer, true,
+          secretStorage, secretDigester);
+      this.primary = new UserAccessTemporalCodeJdbcDao(datasource, tracer, true, secretStorage,
+          secretDigester);
     } else {
-      this.repository = new UserAccessTemporalCodeJdbcDao(datasource, tracer, true, cypher);
+      this.repository = new UserAccessTemporalCodeJdbcDao(datasource, tracer, true, secretStorage,
+          secretDigester);
       this.primary = this.repository;
     }
     this.pendingWrites = pendingWrites;

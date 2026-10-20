@@ -20,6 +20,7 @@ import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.delete.TrustedClientCheckBatchDeleteStatus;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.delete.TrustedClientDeleteFilter;
 import net.civeira.phylax.features.access.trustedclient.application.usecase.delete.TrustedClientDeleteUsecase;
@@ -54,11 +55,14 @@ public class TrustedClientDeleteController {
    * @param withBackChannelUrl
    * @param withFrontChannelUrl
    * @param code
+   * @param tenant
+   * @param tenants
    * @return
    */
   @ApiObserved("Api to delete on massive entity of trusted client")
   public Response trustedClientApiBatchDelete(final List<String> uids, final String search,
-      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code) {
+      final Boolean withBackChannelUrl, final Boolean withFrontChannelUrl, final String code,
+      final String tenant, final List<String> tenants) {
     TrustedClientDeleteFilter.TrustedClientDeleteFilterBuilder filterBuilder =
         TrustedClientDeleteFilter.builder();
     filterBuilder =
@@ -70,6 +74,11 @@ public class TrustedClientDeleteController {
     filterBuilder = filterBuilder.withBackChannelUrl(withBackChannelUrl);
     filterBuilder = filterBuilder.withFrontChannelUrl(withFrontChannelUrl);
     filterBuilder = filterBuilder.code(code);
+    if (null != tenant) {
+      filterBuilder = filterBuilder.tenant(TenantReference.of(tenant));
+    }
+    filterBuilder = filterBuilder.tenants(null == tenants ? null
+        : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TrustedClientDeleteFilter filter = filterBuilder.build();
     BatchIdentifier task = delete.batchDelete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */

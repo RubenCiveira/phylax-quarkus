@@ -34,14 +34,14 @@ class UserUnitTest {
   void test_user_builder() {
     User one = User.builder().uidValue(UidVO.from("one"))
         .tenantValue(TenantVO.from(TenantReference.of("one"))).nameValue(NameVO.from("one"))
-        .passwordValue(PasswordVO.fromCyphered("one")).emailValue(EmailVO.from("one"))
+        .passwordValue(PasswordVO.fromPlain("one")).emailValue(EmailVO.from("one"))
         .welcomeAtValue(WelcomeAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .emailVerifiedValue(EmailVerifiedVO.from(true)).enabledValue(EnabledVO.from(true))
         .approveValue(ApproveVO.from(UserApproveOptions.UNVERIFIED))
         .temporalPasswordValue(TemporalPasswordVO.from(true))
         .useSecondFactorsValue(UseSecondFactorsVO.from(true))
-        .secondFactorSeedValue(SecondFactorSeedVO.fromCyphered("one"))
+        .secondFactorSeedValue(SecondFactorSeedVO.fromPlain("one"))
         .blockedUntilValue(BlockedUntilVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .providerValue(ProviderVO.from("one")).versionValue(VersionVO.from(1)).build();

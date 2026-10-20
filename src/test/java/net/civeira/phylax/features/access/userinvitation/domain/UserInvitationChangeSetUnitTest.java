@@ -20,8 +20,8 @@ class UserInvitationChangeSetUnitTest {
   void test_user_invitation_change_set_builder() {
     UserInvitationChangeSet one =
         new UserInvitationChangeSet().uid("one").tenant(TenantReference.of("one")).email("one")
-            .roles("one").invitedBy(UserReference.of("one")).tokenHash("one").metadataJson("one")
-            .status(UserInvitationStatusOptions.PENDING)
+            .roles("one").invitedBy(UserReference.of("one")).tokenHashPlain("one")
+            .metadataJson("one").status(UserInvitationStatusOptions.PENDING)
             .createdAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
             .expiredAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
@@ -58,14 +58,6 @@ class UserInvitationChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("invitedBy");
     Assertions.assertFalse(one.getInvitedBy().isPresent(),
-        "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getTokenHash().get(),
-        "Value must equals to the intial value");
-    one.tokenHash("two");
-    Assertions.assertEquals("two", one.getTokenHash().get(),
-        "Value must equals to the assigned value");
-    one.unset("tokenHash");
-    Assertions.assertFalse(one.getTokenHash().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getMetadataJson().get(),
         "Value must equals to the intial value");

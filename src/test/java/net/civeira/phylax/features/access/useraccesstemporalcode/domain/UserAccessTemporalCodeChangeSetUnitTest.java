@@ -6,9 +6,7 @@ import java.time.ZoneId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import net.civeira.phylax.common.crypto.AesCipherService;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 
 class UserAccessTemporalCodeChangeSetUnitTest {
@@ -19,15 +17,14 @@ class UserAccessTemporalCodeChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_user_access_temporal_code_change_set_builder() {
-    AesCipherService cypher = Mockito.mock(AesCipherService.class);
     UserAccessTemporalCodeChangeSet one = new UserAccessTemporalCodeChangeSet().uid("one")
         .user(UserReference.of("one")).tempSecondFactorSeedPlain("one")
         .tempSecondFactorSeedExpiration(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-        .failedLoginAttempts(1).registerCode("one").registerCodeUrl("one")
+        .failedLoginAttempts(1).registerCodePlain("one").registerCodeUrl("one")
         .registerCodeExpiration(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-        .recoveryCode("one").recoveryCodeExpiration(LocalDateTime.of(1980, 8, 20, 0, 0)
+        .recoveryCodePlain("one").recoveryCodeExpiration(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
         .version(1).newUid();
     one.uid("two");
@@ -41,14 +38,6 @@ class UserAccessTemporalCodeChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("user");
     Assertions.assertFalse(one.getUser().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getTempSecondFactorSeedPlain(cypher).get(),
-        "Value must equals to the intial value");
-    one.tempSecondFactorSeedPlain("two");
-    Assertions.assertEquals("two", one.getTempSecondFactorSeedPlain(cypher).get(),
-        "Value must equals to the assigned value");
-    one.unset("tempSecondFactorSeed");
-    Assertions.assertFalse(one.getTempSecondFactorSeedPlain(cypher).isPresent(),
-        "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
         one.getTempSecondFactorSeedExpiration().get(), "Value must equals to the intial value");
@@ -68,14 +57,6 @@ class UserAccessTemporalCodeChangeSetUnitTest {
     one.unset("failedLoginAttempts");
     Assertions.assertFalse(one.getFailedLoginAttempts().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getRegisterCode().get(),
-        "Value must equals to the intial value");
-    one.registerCode("two");
-    Assertions.assertEquals("two", one.getRegisterCode().get(),
-        "Value must equals to the assigned value");
-    one.unset("registerCode");
-    Assertions.assertFalse(one.getRegisterCode().isPresent(),
-        "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getRegisterCodeUrl().get(),
         "Value must equals to the intial value");
     one.registerCodeUrl("two");
@@ -94,14 +75,6 @@ class UserAccessTemporalCodeChangeSetUnitTest {
         one.getRegisterCodeExpiration().get(), "Value must equals to the assigned value");
     one.unset("registerCodeExpiration");
     Assertions.assertFalse(one.getRegisterCodeExpiration().isPresent(),
-        "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getRecoveryCode().get(),
-        "Value must equals to the intial value");
-    one.recoveryCode("two");
-    Assertions.assertEquals("two", one.getRecoveryCode().get(),
-        "Value must equals to the assigned value");
-    one.unset("recoveryCode");
-    Assertions.assertFalse(one.getRecoveryCode().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),

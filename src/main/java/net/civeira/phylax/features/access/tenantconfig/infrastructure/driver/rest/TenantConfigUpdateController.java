@@ -109,6 +109,13 @@ public class TenantConfigUpdateController {
     tenantConfigApiDto.setMagicLinkExpiryMinutes(dto.getMagicLinkExpiryMinutes());
     tenantConfigApiDto.setSessionSsoTtlSeconds(dto.getSessionSsoTtlSeconds());
     tenantConfigApiDto.setRefreshTokenTtlSeconds(dto.getRefreshTokenTtlSeconds());
+    tenantConfigApiDto.setRefreshTokenMaxLifetimeSeconds(dto.getRefreshTokenMaxLifetimeSeconds());
+    tenantConfigApiDto.setDcrAllowedGrantTypes(dto.getDcrAllowedGrantTypes());
+    tenantConfigApiDto.setDcrAllowedAuthMethods(dto.getDcrAllowedAuthMethods());
+    tenantConfigApiDto.setAllowPasswordGrant(dto.getAllowPasswordGrant());
+    tenantConfigApiDto
+        .setRequirePushedAuthorizationRequests(dto.getRequirePushedAuthorizationRequests());
+    tenantConfigApiDto.setAcrValuesSupported(dto.getAcrValuesSupported());
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());
@@ -168,6 +175,25 @@ public class TenantConfigUpdateController {
     }
     if (null != tenantConfigApiDto.getRefreshTokenTtlSeconds()) {
       dto.setRefreshTokenTtlSeconds(tenantConfigApiDto.getRefreshTokenTtlSeconds());
+    }
+    if (null != tenantConfigApiDto.getRefreshTokenMaxLifetimeSeconds()) {
+      dto.setRefreshTokenMaxLifetimeSeconds(tenantConfigApiDto.getRefreshTokenMaxLifetimeSeconds());
+    }
+    if (null != tenantConfigApiDto.getDcrAllowedGrantTypes()) {
+      dto.setDcrAllowedGrantTypes(tenantConfigApiDto.getDcrAllowedGrantTypes());
+    }
+    if (null != tenantConfigApiDto.getDcrAllowedAuthMethods()) {
+      dto.setDcrAllowedAuthMethods(tenantConfigApiDto.getDcrAllowedAuthMethods());
+    }
+    if (null != tenantConfigApiDto.getAllowPasswordGrant()) {
+      dto.setAllowPasswordGrant(tenantConfigApiDto.getAllowPasswordGrant());
+    }
+    if (null != tenantConfigApiDto.getRequirePushedAuthorizationRequests()) {
+      dto.setRequirePushedAuthorizationRequests(
+          tenantConfigApiDto.getRequirePushedAuthorizationRequests());
+    }
+    if (null != tenantConfigApiDto.getAcrValuesSupported()) {
+      dto.setAcrValuesSupported(tenantConfigApiDto.getAcrValuesSupported());
     }
     if (null != tenantConfigApiDto.getWebauthnEnabled()) {
       dto.setWebauthnEnabled(tenantConfigApiDto.getWebauthnEnabled());

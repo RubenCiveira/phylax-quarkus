@@ -179,7 +179,7 @@ public class ApiKeyClientEnableController {
     ApiKeyClientApiDto apiKeyClientApiDto = new ApiKeyClientApiDto();
     apiKeyClientApiDto.setUid(dto.getUid());
     apiKeyClientApiDto.setCode(dto.getCode());
-    apiKeyClientApiDto.setKey(dto.getKey());
+    apiKeyClientApiDto.setKey("*****");
     apiKeyClientApiDto.setEnabled(dto.getEnabled());
     apiKeyClientApiDto.setScopes(dto.getScopes());
     apiKeyClientApiDto.setVersion(dto.getVersion());

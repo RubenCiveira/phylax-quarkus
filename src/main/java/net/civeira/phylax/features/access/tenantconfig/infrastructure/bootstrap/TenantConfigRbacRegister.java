@@ -82,6 +82,23 @@ public class TenantConfigRbacRegister {
         FieldDescription.builder().name("refreshTokenTtlSeconds").description(
             "Lifetime in seconds of issued refresh tokens. Defaults to 30 days (2 592 000 s). Applies to all grant types that issue refresh tokens for this tenant.")
             .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("refreshTokenMaxLifetimeSeconds")
+            .description("Absolute lifetime of a refresh token family; rotation never extends it.")
+            .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("dcrAllowedGrantTypes")
+        .description("El dcr allowed grant types de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("dcrAllowedAuthMethods")
+        .description("El dcr allowed auth methods de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowPasswordGrant")
+        .description("El allow password grant de tenant config").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("requirePushedAuthorizationRequests")
+            .description("El require pushed authorization requests de tenant config").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("acrValuesSupported").description(
+            "JSON map of published ACR values to session level, e.g. {\"urn:lugh:acr:pwd\":1,\"urn:lugh:acr:mfa\":2}")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnEnabled")
         .description("El webauthn enabled de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnRpId")

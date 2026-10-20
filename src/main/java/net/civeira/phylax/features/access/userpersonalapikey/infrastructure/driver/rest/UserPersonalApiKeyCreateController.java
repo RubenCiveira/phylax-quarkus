@@ -50,7 +50,7 @@ public class UserPersonalApiKeyCreateController {
     userPersonalApiKeyApiDto.setUid(dto.getUid());
     userPersonalApiKeyApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
     userPersonalApiKeyApiDto.setName(dto.getName());
-    userPersonalApiKeyApiDto.setKeyHash(dto.getKeyHash());
+    userPersonalApiKeyApiDto.setKeyHash("*****");
     userPersonalApiKeyApiDto.setScopes(dto.getScopes());
     userPersonalApiKeyApiDto.setLastUsedAt(dto.getLastUsedAt());
     userPersonalApiKeyApiDto.setExpiresAt(dto.getExpiresAt());
@@ -77,7 +77,8 @@ public class UserPersonalApiKeyCreateController {
     if (null != userPersonalApiKeyApiDto.getName()) {
       dto.setName(userPersonalApiKeyApiDto.getName());
     }
-    if (null != userPersonalApiKeyApiDto.getKeyHash()) {
+    if (null != userPersonalApiKeyApiDto.getKeyHash()
+        && !"*****".equals(userPersonalApiKeyApiDto.getKeyHash())) {
       dto.setKeyHash(userPersonalApiKeyApiDto.getKeyHash());
     }
     if (null != userPersonalApiKeyApiDto.getScopes()) {

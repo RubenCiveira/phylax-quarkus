@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+
 class TrustedClientFilterUnitTest {
 
   /**
@@ -43,5 +45,20 @@ class TrustedClientFilterUnitTest {
         "Code must be empty if filter is build without it");
     filter.setCode("one");
     Assertions.assertEquals("one", filter.getCode().get(), "Code must be the same as the assigned");
+    Assertions.assertFalse(filter.getTenant().isPresent(),
+        "Tenant must be empty if filter is build without it");
+    filter.setTenant(TenantReference.of("$ref"));
+    Assertions.assertEquals(TenantReference.of("$ref"), filter.getTenant().get(),
+        "Tenant must be the same as the assigned");
+    Assertions.assertTrue(filter.getTenants().isEmpty(),
+        "Tenants must be empty if filter is build without it");
+    filter.setTenants(List.of("one"));
+    Assertions.assertEquals(List.of("one"), filter.getTenants(),
+        "Tenants must be the same as the assigned");
+    Assertions.assertFalse(filter.getTenantAccessible().isPresent(),
+        "TenantAccessible must be empty if filter is build without it");
+    filter.setTenantAccessible("one");
+    Assertions.assertEquals("one", filter.getTenantAccessible().get(),
+        "TenantAccessible must be the same as the assigned");
   }
 }

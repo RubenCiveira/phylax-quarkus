@@ -113,7 +113,9 @@ public class TrustedClientDisableUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .withBackChannelUrl(filter.getWithBackChannelUrl().orElse(null))
             .withFrontChannelUrl(filter.getWithFrontChannelUrl().orElse(null))
-            .code(filter.getCode().orElse(null)).build();
+            .code(filter.getCode().orElse(null)).tenant(filter.getTenant().orElse(null))
+            .tenants(filter.getTenants())
+            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TrustedClientDisableAllInBatchCommand command =
         new TrustedClientDisableAllInBatchCommand(context, filterWithVisibility);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

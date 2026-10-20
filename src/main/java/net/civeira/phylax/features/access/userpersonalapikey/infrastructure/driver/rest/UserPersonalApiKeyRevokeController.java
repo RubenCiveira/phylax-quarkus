@@ -188,7 +188,7 @@ public class UserPersonalApiKeyRevokeController {
     userPersonalApiKeyApiDto.setUid(dto.getUid());
     userPersonalApiKeyApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
     userPersonalApiKeyApiDto.setName(dto.getName());
-    userPersonalApiKeyApiDto.setKeyHash(dto.getKeyHash());
+    userPersonalApiKeyApiDto.setKeyHash("*****");
     userPersonalApiKeyApiDto.setScopes(dto.getScopes());
     userPersonalApiKeyApiDto.setLastUsedAt(dto.getLastUsedAt());
     userPersonalApiKeyApiDto.setExpiresAt(dto.getExpiresAt());
