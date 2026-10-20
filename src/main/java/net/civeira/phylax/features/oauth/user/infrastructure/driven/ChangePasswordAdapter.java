@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
@@ -37,6 +38,7 @@ public class ChangePasswordAdapter implements ChangePasswordGateway {
   private final UserCommandRepositoryGateway users;
   private final UserAccessTemporalCodeCommandRepositoryGateway codes;
   private final UserLoginService loginUsecase;
+  private final SecretDigester secretDigester;
 
   @Override
   public boolean allowRecover(String tenant) {
@@ -80,7 +82,7 @@ public class ChangePasswordAdapter implements ChangePasswordGateway {
             return Optional.empty();
           }
           UserAccessTemporalCode tempCode = find.get();
-          if (!"".equals(code) && code.equals(tempCode.getRecoveryCode().orElse(""))) {
+          if (!"".equals(code) && tempCode.getRecoveryCodeValue().verify(secretDigester, code)) {
             codes.update(tempCode, tempCode.resetPasswordRecover());
             // codes.update(tempCode, tempCode.withNullRecoveryCode());
             users.update(user, user.changePassword(newPassoword));

@@ -14,7 +14,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
 import net.civeira.phylax.common.infrastructure.mail.MailConfiguration;
 import net.civeira.phylax.features.notification.message.domain.Message;
 import net.civeira.phylax.features.notification.message.domain.MessageChangeSet;
@@ -74,7 +74,7 @@ public class NotificationDispatchService {
   private final SmtpMailSenderGateway mailSender;
   private final MessageEventDispatcher eventDispatcher;
   private final ObjectMapper objectMapper;
-  private final AesCipherService cipher;
+  private final KeyRingSecretStorage secretStorage;
 
   /**
    * Processes pending outbox messages in a single transaction, up to {@link #dispatchRate} messages
@@ -247,8 +247,9 @@ public class NotificationDispatchService {
   private MailConfiguration toMailConfiguration(SmtpOutboundConfig smtp) {
     int smtpPort = smtp.isUseTls() ? 465 : 587;
     return MailConfiguration.builder().smtpHost(smtp.getHost()).smtpPort(smtpPort)
-        .smtpLogin(smtp.getLogin()).smtpPass(smtp.getPasswordPlain(cipher)).useTtls(smtp.isUseTls())
-        .timeout(smtp.getTimeout()).fromEmail(smtp.getSenderEmail())
+        .smtpLogin(smtp.getLogin())
+        .smtpPass(smtp.getPasswordValue().plainValueWith(secretStorage, smtp.getUid()))
+        .useTtls(smtp.isUseTls()).timeout(smtp.getTimeout()).fromEmail(smtp.getSenderEmail())
         .fromName(smtp.getSenderName().orElse(null)).build();
   }
 

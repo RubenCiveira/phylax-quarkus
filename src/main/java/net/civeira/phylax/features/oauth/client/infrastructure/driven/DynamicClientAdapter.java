@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
 import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGateway;
@@ -33,7 +33,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
 
   private final DataSource source;
   private final ObjectMapper mapper;
-  private final AesCipherService cypher;
+  private final SecretDigester secretDigester;
 
   @Override
   public DynamicClientData create(String clientId, String clientSecret,
@@ -64,10 +64,10 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       stat.setString(19, request.getPolicyUri());
       stat.setBoolean(20, true);
       stat.setTimestamp(21, Timestamp.from(now));
-      stat.setString(22, sha256(registrationAccessToken));
+      stat.setString(22, secretDigester.digest(registrationAccessToken));
       stat.setString(23, null);
       stat.setString(24, mapper.writeValueAsString(request.getResponseTypes()));
-      stat.setString(25, cypher.encryptForAll(clientSecret));
+      stat.setString(25, secretDigester.digest(clientSecret));
       stat.setString(26, request.getTokenEndpointAuthMethod());
       stat.setString(27, request.getTosUri());
       stat.execute();
@@ -96,7 +96,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientId);
       stat.setBoolean(2, true);
-      stat.setString(3, sha256(registrationAccessToken));
+      stat.setString(3, secretDigester.digest(registrationAccessToken));
       try (ResultSet rs = stat.executeQuery()) {
         if (!rs.next()) {
           return Optional.empty();
@@ -127,7 +127,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       stat.setString(10, request.getFrontchannelLogoutUri());
       stat.setString(11, clientId);
       stat.setBoolean(12, true);
-      stat.setString(13, sha256(registrationAccessToken));
+      stat.setString(13, secretDigester.digest(registrationAccessToken));
       if (stat.executeUpdate() == 0) {
         return Optional.empty();
       }
@@ -146,7 +146,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientId);
       stat.setBoolean(2, true);
-      stat.setString(3, sha256(registrationAccessToken));
+      stat.setString(3, secretDigester.digest(registrationAccessToken));
       boolean deleted = stat.executeUpdate() > 0;
       if (deleted) {
         deleteRedirects(conn, clientId);
@@ -248,16 +248,6 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       return list == null || list.isEmpty() ? defaultValue : list;
     } catch (JsonProcessingException ex) {
       return defaultValue;
-    }
-  }
-
-  private String sha256(String value) {
-    try {
-      java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-      byte[] hash = digest.digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(hash);
-    } catch (java.security.NoSuchAlgorithmException ex) {
-      throw new IllegalStateException(ex);
     }
   }
 }

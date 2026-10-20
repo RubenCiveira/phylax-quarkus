@@ -15,7 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
 import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
@@ -39,7 +39,7 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
   private final ActiveUserFindService finder;
   private final UserCommandRepositoryGateway users;
   private final UserAccessTemporalCodeCommandRepositoryGateway codes;
-  private final AesCipherService cypher;
+  private final KeyRingSecretStorage secretStorage;
 
   @Override
   public PublicLoginMfaBuildResponse configurationForNewMfa(String tenant, String username,
@@ -77,7 +77,8 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
       Optional<String> prev = find
           .filter(code -> code.getTempSecondFactorSeedExpiration()
               .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(code -> code.getTempSecondFactorSeedCyphered(cypher));
+          .flatMap(code -> code.getTempSecondFactorSeedValue().plainValueWith(secretStorage,
+              code.getUid()));
       if (prev.isPresent()) {
         return otp.getQr(
             ApplicationInfo.builder().label(user.getName() + " at ").issuer("no").build(),
@@ -108,7 +109,8 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
       Optional<String> prev = find
           .filter(temps -> temps.getTempSecondFactorSeedExpiration()
               .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(second -> second.getTempSecondFactorSeedCyphered(cypher));
+          .flatMap(second -> second.getTempSecondFactorSeedValue().plainValueWith(secretStorage,
+              second.getUid()));
       if (prev.isPresent()) {
         String seed = prev.get();
         boolean valid = otp.validateOtp(code, seed);
@@ -116,8 +118,7 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
           if (find.isPresent()) {
             UserAccessTemporalCode temps = find.get();
             codes.update(temps, temps.resetMfaTemporalCode());
-            users.update(user,
-                user.setMfaSeed(temps.getTempSecondFactorSeedPlain(cypher).orElseThrow()));
+            users.update(user, user.setMfaSeed(seed));
           } else {
             log.error("We have a part but not the hole item");
             throw new IllegalStateException("");

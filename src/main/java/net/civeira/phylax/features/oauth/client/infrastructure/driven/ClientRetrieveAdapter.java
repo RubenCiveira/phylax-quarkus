@@ -8,7 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
@@ -29,7 +29,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   private static final List<String> DEFAULT_GRANTERS = List.of("password", "refresh", "mfa",
       "urn:ietf:params:oauth:grant-type:device_code", "client_credentials");
 
-  private final AesCipherService cypher;
+  private final SecretDigester secretDigester;
   private final TenantQueryRepositoryGateway tenants;
   private final TrustedClientQueryRepositoryGateway clients;
 
@@ -123,8 +123,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
 
   private Optional<ClientDetails> privateClient(TrustedClient app, String clientId, String secret) {
     SecretOauthVO secretOauth = app.getSecretOauthValue();
-    Optional<String> pass = secretOauth.getSecretOauthPlain(cypher);
-    if (pass.isPresent() && secret.equals(pass.get())) {
+    if (secret != null && secretOauth.verify(secretDigester, secret)) {
       Integer m2mTtl = app.getM2mTokenTtlSecondsValue() != null
           ? app.getM2mTokenTtlSecondsValue().getM2mTokenTtlSeconds()
           : null;

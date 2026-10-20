@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
@@ -28,7 +28,7 @@ public class PasswordAdapter implements PasswordGateway {
 
   private final UserCommandRepositoryGateway users;
   private final TenantQueryRepositoryGateway tenants;
-  private final AesCipherService cypher;
+  private final PasswordHasher passwordHasher;
 
   @Override
   public boolean changePassword(String userUid, String tenant, String oldPass, String newPass) {
@@ -41,7 +41,7 @@ public class PasswordAdapter implements PasswordGateway {
     if (tenantObj.isEmpty() || !tenantObj.get().getUid().equals(user.getTenantUid())) {
       return false;
     }
-    if (!oldPass.equals(user.getPasswordPlain(cypher))) {
+    if (!user.verify(passwordHasher, oldPass)) {
       return false;
     }
     users.update(user, user.changePassword(newPass));

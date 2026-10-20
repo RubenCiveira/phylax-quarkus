@@ -24,6 +24,37 @@ app:
     encryption:
       key: ${security.encriptation.key:eventual}
 
+# Anillos de claves para secretos protegidos, con formato "id:secreto,id2:secreto2".
+# - digest: pepper HMAC-SHA256 de API keys, secretos de cliente, tokens y códigos (SecretDigester).
+# - secrets: claves AES-GCM de los secretos reversibles: semillas TOTP, SMTP (KeyRingSecretStorage).
+# "current" es el id con el que se protege lo nuevo; los demás ids solo sirven para leer y rotar.
+# Sin valor por defecto: fuera de dev/test el arranque falla si no se configuran.
+security:
+  digest:
+    peppers: ${SECURITY_DIGEST_PEPPERS}
+    current: ${SECURITY_DIGEST_CURRENT}
+  secrets:
+    keys: ${SECURITY_SECRETS_KEYS}
+    current: ${SECURITY_SECRETS_CURRENT}
+
+"%dev":
+  security:
+    digest:
+      peppers: d0:dev-digest-pepper-not-for-production
+      current: d0
+    secrets:
+      keys: k0:dev-secret-key-not-for-production
+      current: k0
+
+"%test":
+  security:
+    digest:
+      peppers: t0:test-digest-pepper
+      current: t0
+    secrets:
+      keys: t0:test-secret-key
+      current: t0
+
 quarkus:
   http:
     cors:

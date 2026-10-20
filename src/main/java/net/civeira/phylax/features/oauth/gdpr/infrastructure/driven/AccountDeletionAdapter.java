@@ -16,6 +16,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.mail.EmailMessage;
 import net.civeira.phylax.common.infrastructure.mail.EmailService;
 import net.civeira.phylax.features.access.user.domain.User;
@@ -44,6 +45,7 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
   private final UserConsentedScopesCommandRepositoryGateway consentWrite;
   private final DataSource dataSource;
   private final EmailService emailService;
+  private final SecretDigester secretDigester;
 
   @Override
   @Transactional
@@ -70,11 +72,11 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
     }
     UserAccessTemporalCode temporal = temporalOpt.get();
 
-    String storedCode = temporal.getRecoveryCode().orElse("");
     OffsetDateTime storedExpiration =
         temporal.getRecoveryCodeExpiration().orElse(OffsetDateTime.MIN);
 
-    if (!storedCode.equals(code) || storedCode.isBlank()) {
+    if (code == null || code.isBlank()
+        || !temporal.getRecoveryCodeValue().verify(secretDigester, code)) {
       log.warn("Deletion confirmation code mismatch for user {}", userUid);
       return false;
     }

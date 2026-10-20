@@ -40,7 +40,6 @@ public class InvitationCreateUsecase {
     });
 
     String rawToken = secureTokenService.generate();
-    String tokenHash = secureTokenService.hash(rawToken);
     int expiryDays = tenantConfigs
         .find(TenantConfigFilter.builder().tenant(TenantReference.of(params.getTenantId())).build())
         .map(c -> c.getInvitationExpiryDays()).orElse(DEFAULT_EXPIRES_DAYS);
@@ -51,7 +50,7 @@ public class InvitationCreateUsecase {
     change.tenant(TenantReference.of(params.getTenantId()));
     change.email(params.getEmail());
     change.invitedBy(UserReference.of(params.getInvitedByUserUid()));
-    change.tokenHash(tokenHash);
+    change.tokenHashPlain(rawToken);
     change.status(UserInvitationStatusOptions.PENDING);
     change.createdAt(OffsetDateTime.now(ZoneOffset.UTC));
     change.expiredAt(expiresAt);

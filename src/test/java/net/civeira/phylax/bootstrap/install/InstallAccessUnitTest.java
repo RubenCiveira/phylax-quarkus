@@ -2,6 +2,7 @@
 package net.civeira.phylax.bootstrap.install;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 
+import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.config.IsolatedConfigLoaderTestSupport;
 import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
@@ -38,6 +40,10 @@ import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssi
 import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentCommandRepositoryGateway;
 
 class InstallAccessUnitTest {
+  private static final String DEV_COLLECTOR_KEY =
+      "hcaik_01jtteh99vbsv4qrj22trvh3wg35g1n4tgkcxzgqv0034y2cby7dceaf43";
+
+  private final SecretDigester digester = new SecretDigester("t0:test-pepper", "t0");
   private UserCommandRepositoryGateway users;
   private RelyingPartyCommandRepositoryGateway parties;
   private TrustedClientCommandRepositoryGateway clients;
@@ -65,11 +71,10 @@ class InstallAccessUnitTest {
     assertEquals("ROOT", root.getName());
     assertTrue(root.isTemporalPassword());
     List<ApiKeyClient> keys = createdKeys();
-    assertTrue(keys.get(0).getKey().orElseThrow().startsWith("hcaik_"),
-        keys.get(0).getKey().orElseThrow());
-    assertTrue(keys.get(1).getKey().orElseThrow().startsWith("sck_"),
-        keys.get(1).getKey().orElseThrow());
-    assertTrue(keys.get(0).getKey().orElseThrow().length() > "hcaik_".length() + 30);
+    String collector = storedKey(keys.get(0));
+    String sync = storedKey(keys.get(1));
+    assertTrue(collector.startsWith(SecretDigester.PREFIX), collector);
+    assertNotEquals(collector, sync);
   }
 
   @Test
@@ -80,14 +85,14 @@ class InstallAccessUnitTest {
     assertEquals(Boolean.FALSE, root.isTemporalPassword());
     assertEquals("civi-acme-api", created(parties, RelyingParty.class).getCode());
     assertEquals("civi-acme-ui", created(clients, TrustedClient.class).getCode());
-    assertTrue(createdKeys().get(0).getKey().orElseThrow().startsWith("hcaik_01jtteh"));
+    assertEquals(digester.digest(DEV_COLLECTOR_KEY), storedKey(createdKeys().get(0)));
   }
 
   @Test
   void testUseTheSecretsFromTheEnvironment() {
     seed(List.of("prod"), Map.of("OIDC_API_KEYS_COLLECTOR", "hcaik_from_env")).run();
 
-    assertEquals("hcaik_from_env", createdKeys().get(0).getKey().orElseThrow());
+    assertEquals(digester.digest("hcaik_from_env"), storedKey(createdKeys().get(0)));
   }
 
   @Test
@@ -114,6 +119,10 @@ class InstallAccessUnitTest {
     return new InstallAccess(users, roles, tenants, clients, parties, assignments, memberships,
         apiKeys, IsolatedConfigLoaderTestSupport.loader(external, profiles, environment),
         new SecureTokenService());
+  }
+
+  private String storedKey(ApiKeyClient key) {
+    return key.getKeyStored(digester).orElseThrow();
   }
 
   private List<ApiKeyClient> createdKeys() {

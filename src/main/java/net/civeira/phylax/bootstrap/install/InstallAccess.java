@@ -25,9 +25,12 @@ import net.civeira.phylax.features.access.role.domain.gateway.RoleCommandReposit
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantCommandRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
@@ -90,13 +93,19 @@ public class InstallAccess implements MigrationSeed {
 
     AllowedRedirects localhost = AllowedRedirects.builder().newUid()
         .url(config.getRequiredConfig("oidc.trusted-client.redirect")).build();
+    AllowedAudiences partyAudience = AllowedAudiences.builder().newUid()
+        .audience(config.getRequiredConfig("oidc.relying-party.code")).build();
 
     TrustedClientChangeSet client = new TrustedClientChangeSet().newUid()
         .code(config.getRequiredConfig("oidc.trusted-client.code")).allowAllScopes(Boolean.TRUE)
         .secretOauthPlain(secret(config, "oidc.trusted-client.secret", "", generated))
         .publicAllow(Boolean.TRUE).isResourceServer(Boolean.FALSE).requirePkce(Boolean.TRUE)
-        .tokenEndpointAuthMethod("client_secret_post").m2mTokenTtlSeconds(3600)
-        .allowedRedirects(List.of(localhost)).enabled(Boolean.TRUE);
+        .tokenEndpointAuthMethod(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_POST)
+        .m2mTokenTtlSeconds(3600).allowedRedirects(List.of(localhost))
+        .allowedAudiences(List.of(partyAudience))
+        .subjectType(TrustedClientSubjectTypeOptions.PUBLIC)
+        .requirePushedAuthorizationRequests(Boolean.FALSE).dpopBoundAccessTokens(Boolean.FALSE)
+        .tlsClientCertificateBoundAccessTokens(Boolean.FALSE).enabled(Boolean.TRUE);
 
     RoleChangeSet adminRole = new RoleChangeSet().newUid().name("ADMIN");
     RoleChangeSet rootRole = new RoleChangeSet().newUid().name("ROOT");
@@ -145,13 +154,14 @@ public class InstallAccess implements MigrationSeed {
 
     ApiKeyClientChangeSet collectorApiKey =
         new ApiKeyClientChangeSet().newUid().code("Initial collector")
-            .key(secret(config, "oidc.api-keys.collector", "hcaik_", generated)).scopes("collect")
-            .enabled(true);
+            .keyPlain(secret(config, "oidc.api-keys.collector", "hcaik_", generated))
+            .scopes("collect").enabled(true);
     apiKeys.create(ApiKeyClient.create(collectorApiKey).enable());
 
-    ApiKeyClientChangeSet syncApiKey = new ApiKeyClientChangeSet().newUid()
-        .code("Initial syn client").key(secret(config, "oidc.api-keys.sync", "sck_", generated))
-        .scopes("sync").enabled(true);
+    ApiKeyClientChangeSet syncApiKey =
+        new ApiKeyClientChangeSet().newUid().code("Initial syn client")
+            .keyPlain(secret(config, "oidc.api-keys.sync", "sck_", generated)).scopes("sync")
+            .enabled(true);
     apiKeys.create(ApiKeyClient.create(syncApiKey).enable());
 
     if (!generated.isEmpty()) {

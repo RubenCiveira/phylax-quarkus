@@ -8,7 +8,7 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.security.SecureTokenService;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCode;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaRecoveryCodeChangeSet;
@@ -25,7 +25,7 @@ public class MfaRecoveryService {
 
   private final UserMfaRecoveryCodeQueryRepositoryGateway readGateway;
   private final UserMfaRecoveryCodeCommandRepositoryGateway writeGateway;
-  private final SecureTokenService secureTokenService;
+  private final PasswordHasher passwordHasher;
 
   /** Generates {@code count} single-use codes, replacing any existing ones for the user. */
   public List<String> generateCodes(String userUid, int count) {
@@ -37,7 +37,7 @@ public class MfaRecoveryService {
     for (int i = 0; i < count; i++) {
       String raw = generateRawCode();
       UserMfaRecoveryCode entity = UserMfaRecoveryCode.create(new UserMfaRecoveryCodeChangeSet()
-          .newUid().user(UserReference.of(userUid)).codeHash(secureTokenService.hash(raw)));
+          .newUid().user(UserReference.of(userUid)).codeHashPlain(raw));
       writeGateway.create(entity);
       rawCodes.add(raw);
     }
@@ -46,10 +46,11 @@ public class MfaRecoveryService {
 
   /** Returns true and marks the code used if it matches an unused code; false otherwise. */
   public boolean consumeCode(String userUid, String rawCode) {
-    String hash = secureTokenService.hash(rawCode.trim());
+    String candidate = rawCode.trim();
     return readGateway
         .list(UserMfaRecoveryCodeFilter.builder().userUnused(UserReference.of(userUid)).build())
-        .stream().filter(c -> c.getCodeHash().equals(hash)).findFirst().map(code -> {
+        .stream().filter(c -> c.getCodeHashValue().verify(passwordHasher, candidate)).findFirst()
+        .map(code -> {
           writeGateway.update(code, code.consume(OffsetDateTime.now()));
           return true;
         }).orElse(false);

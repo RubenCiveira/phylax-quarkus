@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
+import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
 import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyQueryRepositoryGateway;
@@ -70,7 +71,9 @@ public class UserLoginService {
 
   private final RelyingPartyQueryRepositoryGateway parties;
 
-  private final AesCipherService cypher;
+  private final PasswordHasher passwordHasher;
+
+  private final KeyRingSecretStorage secretStorage;
 
   // private final MfaConfigUsecase otp;
 
@@ -107,7 +110,7 @@ public class UserLoginService {
       String newPassword) {
     return activeUser.findEnabledUser(request.getTenant(), username, request.getAudiences())
         .map(user -> {
-          if (oldPassword.equals(user.getPasswordPlain(cypher))) {
+          if (user.verify(passwordHasher, oldPassword)) {
             users.update(user, user.changePassword(newPassword));
             return true;
           } else {
@@ -207,7 +210,7 @@ public class UserLoginService {
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,
       AuthenticationMode mode) {
     if (AuthenticationMode.PASSWORD == mode && user.isUseSecondFactors()) {
-      if (!user.getSecondFactorSeedCyphered(cypher).isPresent()) {
+      if (!user.getSecondFactorSeedStored(secretStorage, user.getUid()).isPresent()) {
         return Optional
             .of(AuthenticationResult.newMfaRequired(request.getTenant(), user.getName()));
       } else {
@@ -247,7 +250,7 @@ public class UserLoginService {
 
   private Optional<AuthenticationResult> checkPassword(AuthRequest request, User user,
       String password) {
-    if (null != password && !password.equals(user.getPasswordPlain(cypher))) {
+    if (null != password && !user.verify(passwordHasher, password)) {
       log.error("The provided password for {} is invalid", user.getName());
       markLoginFails(user, true);
       return Optional.of(AuthenticationResult.wrongCredential(request.getTenant(), user.getName()));

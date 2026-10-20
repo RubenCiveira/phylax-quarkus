@@ -21,9 +21,9 @@ class SyncTemplateTest(unittest.TestCase):
         root = Path(self.temporary.name)
         self.repo = root / 'repo'
         self.template = root / 'template'
-        self.repo.mkdir()
-        for target, package in SYNC.MAPPINGS.values():
-            (self.template / target / 'src/main/java' / package).mkdir(parents=True)
+        (self.repo / 'src/main/java/net/civeira/phylax/common').mkdir(parents=True)
+        for layer in SYNC.LAYERS:
+            (self.template / layer / 'src/main/java').mkdir(parents=True)
 
     def source(self, path, content):
         file = self.repo / 'src/main/java/net/civeira/phylax' / path
@@ -40,11 +40,11 @@ class SyncTemplateTest(unittest.TestCase):
         test.parent.mkdir(parents=True)
         test.write_text('package net.civeira.phylax.features.oauth;\n', encoding='utf-8')
 
-        self.assertEqual((4, 0, 4), SYNC.sync(self.repo, self.template, from_index=False, apply=False))
+        self.assertEqual((4, 0, 4, 0), SYNC.sync(self.repo, self.template, from_index=False, apply=False))
         self.assertEqual([], list(self.template.rglob('Helper')))
-        self.assertEqual((4, 4, 0), SYNC.sync(self.repo, self.template, from_index=False,
+        self.assertEqual((4, 4, 0, 0), SYNC.sync(self.repo, self.template, from_index=False,
                                                apply=True, include_new=True))
-        self.assertEqual((4, 0, 0), SYNC.sync(self.repo, self.template, from_index=False, apply=True))
+        self.assertEqual((4, 0, 0, 0), SYNC.sync(self.repo, self.template, from_index=False, apply=True))
         target = self.template / 'container/src/main/java/common/Helper'
         self.assertEqual('package {{base}}.common;\n', target.read_text(encoding='utf-8'))
         self.assertTrue((self.template / 'container/src/main/java/bootstrap/Boot').exists())
@@ -58,14 +58,58 @@ class SyncTemplateTest(unittest.TestCase):
         subprocess.run(['git', '-C', str(self.repo), 'add', 'src/main/java'], check=True)
         self.source('common/Helper.java', 'package net.civeira.phylax.common; // worktree\n')
         extra = self.template / 'container/src/main/java/common/TemplateOnly'
+        extra.parent.mkdir(parents=True)
         extra.write_text('keep', encoding='utf-8')
 
-        self.assertEqual((1, 1, 0), SYNC.sync(self.repo, self.template, from_index=True, apply=True,
+        self.assertEqual((1, 1, 0, 0), SYNC.sync(self.repo, self.template, from_index=True, apply=True,
                                                include_new=True))
         self.assertIn('staged', (extra.parent / 'Helper').read_text(encoding='utf-8'))
-        self.assertEqual((1, 1, 0), SYNC.sync(self.repo, self.template, from_index=False, apply=True))
+        self.assertEqual((1, 1, 0, 0), SYNC.sync(self.repo, self.template, from_index=False, apply=True))
         self.assertIn('worktree', (extra.parent / 'Helper').read_text(encoding='utf-8'))
         self.assertEqual('keep', extra.read_text(encoding='utf-8'))
+
+    def test_layer_rule(self):
+        cases = {
+            'common/Helper': 'container',
+            'bootstrap/install/Seed': 'container',
+            'features/oauth/user/application/Login': 'traits/oidc',
+            'features/oauth/user/infrastructure/UserLoginService': 'traits/oidc',
+            'features/oauth/client/infrastructure/driven/ClientAdapter': 'traits/multitenant-oidc',
+            'features/notification/outbox/application/Dispatch': 'traits/multitenant-notification',
+            'features/notification/outbox/infrastructure/driven/Store': 'traits/multitenant-notification',
+            'features/document/theme/domain/Theme': 'traits/multitenant-documents',
+        }
+        for relative, layer in cases.items():
+            with self.subTest(relative=relative):
+                self.assertEqual(layer, SYNC.layer_for(Path(relative)))
+        with self.assertRaises(ValueError):
+            SYNC.layer_for(Path('features/access/user/User'))
+
+    def test_misplaced_template_is_reported_and_not_duplicated(self):
+        self.source('features/oauth/client/infrastructure/driven/Adapter.java',
+                    'package net.civeira.phylax.features.oauth; // new\n')
+        legacy = self.template / 'traits/oidc/src/main/java/features/oauth/client/infrastructure/driven/Adapter'
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text('old', encoding='utf-8')
+
+        self.assertEqual((1, 0, 0, 1), SYNC.sync(self.repo, self.template, from_index=False,
+                                                  apply=True, include_new=True, quiet=True))
+        self.assertEqual('old', legacy.read_text(encoding='utf-8'))
+        self.assertEqual([], list((self.template / 'traits/multitenant-oidc').rglob('Adapter')))
+
+    def test_copy_in_other_layer_does_not_block_the_rule_destination(self):
+        self.source('features/notification/outbox/Dispatch.java',
+                    'package net.civeira.phylax.features.notification; // new\n')
+        rule = self.template / 'traits/multitenant-notification/src/main/java/features/notification/outbox/Dispatch'
+        extra = self.template / 'traits/multitenant-oidc/src/main/java/features/notification/outbox/Dispatch'
+        for path in (rule, extra):
+            path.parent.mkdir(parents=True)
+            path.write_text('old', encoding='utf-8')
+
+        self.assertEqual((1, 1, 0, 0), SYNC.sync(self.repo, self.template, from_index=False,
+                                                  apply=True, quiet=True))
+        self.assertIn('// new', rule.read_text(encoding='utf-8'))
+        self.assertEqual('old', extra.read_text(encoding='utf-8'))
 
 
 if __name__ == '__main__':
