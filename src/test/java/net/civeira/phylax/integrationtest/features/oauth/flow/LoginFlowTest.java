@@ -67,7 +67,8 @@ class LoginFlowTest extends OidcIntegrationTestBase {
 
     Response retry = client.exchangeCode(OidcTestFixtures.TENANT, code,
         OidcTestFixtures.REDIRECT_URI, OidcTestFixtures.CLIENT_ID);
-    Assertions.assertEquals(401, retry.statusCode());
+    Assertions.assertEquals(400, retry.statusCode());
+    Assertions.assertEquals("invalid_grant", retry.jsonPath().getString("error"));
   }
 
   @Test

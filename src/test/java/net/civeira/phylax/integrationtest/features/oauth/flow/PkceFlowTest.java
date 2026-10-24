@@ -61,10 +61,10 @@ class PkceFlowTest extends OidcIntegrationTestBase {
 
   /**
    * Verifier incorrecto con método S256: el challenge fue calculado para un verifier diferente. El
-   * token endpoint debe rechazar con 401.
+   * token endpoint debe rechazar con 400 invalid_grant.
    */
   @Test
-  void pkce_s256_wrongVerifier_returns401() {
+  void pkce_s256_wrongVerifier_returnsInvalidGrant() {
     String verifier = randomVerifier();
     String challenge = s256Challenge(verifier);
 
@@ -76,7 +76,7 @@ class PkceFlowTest extends OidcIntegrationTestBase {
     Response exchange = client.exchangeCodeWithVerifier(OidcTestFixtures.TENANT, code,
         OidcTestFixtures.REDIRECT_URI, OidcTestFixtures.CLIENT_ID, "wrong-verifier-xyz");
 
-    Assertions.assertEquals(401, exchange.statusCode());
+    Assertions.assertEquals(400, exchange.statusCode());
   }
 
   /**
@@ -99,10 +99,10 @@ class PkceFlowTest extends OidcIntegrationTestBase {
 
   /**
    * Challenge S256 presentado como plain: enviar el verifier sin aplicar SHA-256 cuando el método
-   * almacenado es S256. El hash calculado no coincide con el challenge → 401.
+   * almacenado es S256. El hash calculado no coincide con el challenge → 400 invalid_grant.
    */
   @Test
-  void pkce_s256_verifierSentAsPlain_returns401() {
+  void pkce_s256_verifierSentAsPlain_returnsInvalidGrant() {
     String verifier = randomVerifier();
     String challenge = s256Challenge(verifier);
 
@@ -115,6 +115,6 @@ class PkceFlowTest extends OidcIntegrationTestBase {
     Response exchange = client.exchangeCodeWithVerifier(OidcTestFixtures.TENANT, code,
         OidcTestFixtures.REDIRECT_URI, OidcTestFixtures.CLIENT_ID, challenge);
 
-    Assertions.assertEquals(401, exchange.statusCode());
+    Assertions.assertEquals(400, exchange.statusCode());
   }
 }

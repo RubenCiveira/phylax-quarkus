@@ -38,7 +38,7 @@ class AuthCodeExchangeTest extends OidcIntegrationTestBase {
   }
 
   @Test
-  void pkce_wrongVerifier_returns401() {
+  void pkce_wrongVerifier_returnsInvalidGrant() {
     Response login = client.submitLoginWithPkce(OidcTestFixtures.TENANT, OidcTestFixtures.USERNAME,
         OidcTestFixtures.PASSWORD, null, OidcTestFixtures.CODE_CHALLENGE, "S256");
     String code = client.extractAuthCode(login);
@@ -47,7 +47,7 @@ class AuthCodeExchangeTest extends OidcIntegrationTestBase {
     Response exchange = client.exchangeCodeWithBadVerifier(OidcTestFixtures.TENANT, code,
         OidcTestFixtures.REDIRECT_URI, OidcTestFixtures.CLIENT_ID);
 
-    Assertions.assertEquals(401, exchange.statusCode());
+    Assertions.assertEquals(400, exchange.statusCode());
   }
 
   @Test

@@ -2,13 +2,13 @@
 package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.step;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,35 +16,58 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.AuthorizeHtml;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.DelegatedHtml;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcCookieManager;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.OidcStep;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.SecureHtmlBuilder;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepInput;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
 import net.civeira.phylax.features.oauth.delegatelogin.application.DelegateLogin;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.application.DelegateLogin.Started;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.RequestInfo;
 
 /**
- * OIDC step for delegated login callbacks.
+ * OIDC step for delegated (federated) login.
  *
- * Handles the {@code step=query-delegated} form submission to resolve delegated user codes. Not
- * triggered by an authentication exception — delegated flows are initiated via explicit controller
- * endpoints.
+ * {@code step=delegated-login} starts the login: it stores a pending login bound to this browser,
+ * sets the binding cookie and sends the browser to the provider. {@code step=query-delegated}
+ * completes it with the provider response forwarded by the callback page.
  *
- * Also exposes {@link #doBackLoginForm}, {@link #doPaintLoginForm}, and {@link #readToken} for
- * direct use by the controller's delegated-auth endpoints.
+ * Design notes: - The provider response is only trusted after the pending login is consumed and
+ * matches this browser, tenant, client and provider. - The return URL is built on the server; the
+ * browser cannot choose where the result goes.
  */
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class DelegatedStep implements OidcStep {
+  /**
+   * Path of the provider callback, shared by every tenant.
+   */
+  public static final String CALLBACK_PATH = "/oauth/openid/-/delegated/authorization/";
+  /**
+   * Form field with the forwarded provider parameters (JSON).
+   */
+  public static final String PROVIDER_DATA = "provider-data";
+  /**
+   * Form field with the login state.
+   */
+  public static final String DELEGATED_STATE = "delegated-state";
+  /**
+   * Form field with the provider identifier.
+   */
+  public static final String APP_PROVIDER = "app-provider";
 
   private final ObjectMapper mapper;
   private final SecureHtmlBuilder securer;
   private final DelegateLogin delegateLogin;
+  private final OidcCookieManager cookieManager;
+  private final CurrentRequest current;
 
   @Override
   public AuthenticationChallenge challenge() {
@@ -69,7 +92,16 @@ public class DelegatedStep implements OidcStep {
   @Override
   public Optional<Response> paintInitial(StepInput input, String error) {
     String provider = AuthorizeHtml.first(input.getFormParams(), "delegated-provider");
-    return Optional.of(doPaintLoginForm(input.tenant(), provider, input.locale(), null));
+    if (provider == null || provider.isBlank()) {
+      return Optional.empty();
+    }
+    String clientId = input.getClientDetails().getClientId();
+    String callbackUrl = current.getPublicHost() + CALLBACK_PATH + DelegatedHtml.encode(provider);
+    String returnPath =
+        "/oauth/openid/" + DelegatedHtml.encode(input.tenant()) + "/authorize?client_id="
+            + DelegatedHtml.encode(clientId) + input.getRequest().encodeInUrl();
+    return delegateLogin.start(input.getRequest(), provider, clientId, callbackUrl, returnPath)
+        .map(started -> redirect(started, input.tenant()));
   }
 
   @Override
@@ -79,81 +111,61 @@ public class DelegatedStep implements OidcStep {
 
   @Override
   public Optional<StepOutcome> process(StepInput input) {
-    String usercode = input.getFormParams().getFirst("user-code");
-    String appprovider = input.getFormParams().getFirst("app-provider");
-    if (!"query-delegated".equals(input.step()) || usercode == null || appprovider == null) {
+    String state = input.getFormParams().getFirst(DELEGATED_STATE);
+    String provider = input.getFormParams().getFirst(APP_PROVIDER);
+    if (!"query-delegated".equals(input.step()) || state == null || provider == null) {
       return Optional.empty();
     }
-    return delegateLogin.resolveUsername(input.getRequest(), usercode, appprovider)
-        .map(username -> {
-          ChallengesState state =
-              input.getChallenges().orElseGet(() -> ChallengesState.empty(username));
+    Map<String, String[]> params = providerData(input.getFormParams().getFirst(PROVIDER_DATA));
+    return delegateLogin.complete(input.getRequest(), input.getClientDetails().getClientId(),
+        provider, state, input.getDelegatedBinding().orElse(null), params).map(username -> {
+          ChallengesState challenges =
+              input.getChallenges().filter(c -> username.equals(c.getUsername()))
+                  .orElseGet(() -> ChallengesState.empty(username));
           return (StepOutcome) new StepOutcome.Proceed(username, input.getClientDetails(),
-              input.getRequest(), state);
+              input.getRequest(), challenges);
         });
   }
 
   /**
-   * Builds a back-login form to continue delegated flow.
-   *
-   * Creates a signed form that posts to the stored {@code post-auth-target} cookie. Used after a
-   * delegated provider redirects back.
+   * Sends the browser to the provider with the binding cookie set.
    */
-  public Response doBackLoginForm(String tenant, String provider, String code, Locale locale,
-      String msg) {
-    String js = securer.configureScripts(securer.addSignAndSend("sign", "form"));
-    return securer.secureHtmlResponse(Response
-        .ok(js + "<form id=\"form\" method=\"POST\">"
-            + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />"
-            + "<input type=\"hidden\" name=\"user-code\" value=\"" + code + "\" />"
-            + "<input type=\"hidden\" name=\"app-provider\" value=\"" + provider + "\" />"
-            + "<input type=\"hidden\" name=\"step\" value=\"query-delegated\" />" + "</form>"
-            + "<script>" + "function getCookie(cname) {" + "let name = cname + \"=\";"
-            + "let decodedCookie = decodeURIComponent(document.cookie);"
-            + "let ca = decodedCookie.split(';');" + "for(let i = 0; i <ca.length; i++) {"
-            + "let c = ca[i];" + "while (c.charAt(0) == ' ') {"
-            + "c = c.substring(1); } if (c.indexOf(name) == 0) {"
-            + "return c.substring(name.length, c.length);}}return \"\";" + "}"
-            + "var target = getCookie(\"post-auth-target\");"
-            + "document.getElementById(\"form\").action = target;" + "</script>")
-        .type(AuthorizeHtml.TEXT_HTML));
-  }
-
-  /**
-   * Starts a delegated login flow by redirecting to the provider.
-   *
-   * Sets a {@code post-auth-target} cookie with the current page and triggers redirect.
-   */
-  public Response doPaintLoginForm(String tenant, String provider, Locale locale, String msg) {
-    String back = "/oauth/openid/" + tenant + "/delegated-auth?provider=" + provider + "&code=";
-    return securer
-        .secureHtmlResponse(Response
-            .ok("" + "<script>" + "function setCookie(cname, cvalue, exhours) {"
-                + "const d = new Date();" + "d.setTime(d.getTime() + (exhours*60*60*1000));"
-                + "let expires = \"expires=\"+ d.toUTCString();"
-                + "document.cookie = cname + \"=\" + cvalue + \";\" + expires + \";path=/\";" + "}"
-                + "setCookie(\"post-auth-target\", document.location, 1);"
-                + "document.location = \"/oauth/openid/" + tenant + "/delegated/redirect/"
-                + provider + "?back=" + encode(back) + "\";" + "</script>")
-            .type(AuthorizeHtml.TEXT_HTML));
-  }
-
-  /**
-   * Parses a delegated token from a Base64 JSON payload.
-   *
-   * Returns an empty optional when parsing fails.
-   */
-  public Optional<TokenInfo> readToken(String str) {
-    String res = new String(Base64.getDecoder().decode(str), StandardCharsets.UTF_8);
-    try {
-      return Optional.of(mapper.readValue(res, TokenInfo.class));
-    } catch (IOException ex) {
-      log.warn("Se intenta login con un token sso invalido", ex);
-      return Optional.empty();
+  private Response redirect(Started started, String tenant) {
+    RequestInfo info = started.getRequest();
+    NewCookie binding = cookieManager.writeDelegatedBinding(started.getBinding(), tenant);
+    if (!info.isWithPost()) {
+      return securer
+          .secureRedirectResponse(DelegatedHtml
+              .pageHeaders(Response.status(302)
+                  .location(java.net.URI
+                      .create(DelegatedHtml.withQuery(info.getTargetUrl(), info.getParams()))))
+              .cookie(binding));
     }
+    String html = "<!doctype html><html><head><meta charset=\"utf-8\"></head><body>"
+        + "<form id=\"form\" method=\"POST\" action=\"" + DelegatedHtml.esc(info.getTargetUrl())
+        + "\">" + DelegatedHtml.hiddens(info.getParams())
+        + "<noscript><button type=\"submit\">Continue</button></noscript></form>"
+        + "<script>document.getElementById('form').submit();</script></body></html>";
+    return securer.secureHtmlResponse(
+        DelegatedHtml.pageHeaders(Response.ok(html).type(AuthorizeHtml.TEXT_HTML)).cookie(binding));
   }
 
-  private String encode(String param) {
-    return URLEncoder.encode(param, StandardCharsets.UTF_8);
+  /**
+   * Reads the provider parameters forwarded by the callback page.
+   */
+  private Map<String, String[]> providerData(String json) {
+    if (json == null || json.isBlank()) {
+      return Map.of();
+    }
+    try {
+      Map<String, List<String>> raw =
+          mapper.readValue(json, new TypeReference<Map<String, List<String>>>() {});
+      Map<String, String[]> params = new HashMap<>();
+      raw.forEach((key, values) -> params.put(key, values.toArray(new String[0])));
+      return params;
+    } catch (IOException ex) {
+      log.warn("Unreadable delegated provider data");
+      return Map.of();
+    }
   }
 }

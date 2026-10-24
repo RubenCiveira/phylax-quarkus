@@ -143,6 +143,14 @@ tags:
     description: Audit operations for changes on tenant
   - name: tenant-acl
     description: Access control for tenant
+  - name: user-federated-identity
+    description: user-federated-identity
+  - name: user-federated-identity-batch
+    description: Massive operations for user federated identity
+  - name: user-federated-identity-audit
+    description: Audit operations for changes on user federated identity
+  - name: user-federated-identity-acl
+    description: Access control for user federated identity
   - name: message
     description: message
   - name: message-batch
@@ -7071,6 +7079,368 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/user-federated-identities:
+    get:
+      tags:
+        - user-federated-identity
+      summary: List of user federated identity
+      operationId: user-federated-identity-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: subject
+          in: query
+          description: subject
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: login-provider
+          in: query
+          description: login provider
+          required: false
+          schema:
+            type: string
+        - name: login-providers
+          in: query
+          description: login providers
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-subject
+          in: query
+          description: Order by subject asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFederatedIdentityApiDtoList'
+    post:
+      tags:
+        - user-federated-identity
+      summary: Create a new user federated identity
+      operationId: user-federated-identity-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserFederatedIdentityApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFederatedIdentityApiDto'
+    delete:
+      tags:
+        - user-federated-identity-batch
+      summary: Delete a collection of user federated identity by filter
+      operationId: user-federated-identity-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: subject
+          in: query
+          description: subject
+          required: false
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: user
+          required: false
+          schema:
+            type: string
+        - name: users
+          in: query
+          description: users
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: login-provider
+          in: query
+          description: login provider
+          required: false
+          schema:
+            type: string
+        - name: login-providers
+          in: query
+          description: login providers
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/user-federated-identities/{uid}:
+    get:
+      tags:
+        - user-federated-identity
+      summary: Retrieve on  user federated identity by their uid
+      operationId: user-federated-identity-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFederatedIdentityApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - user-federated-identity
+      summary: Update a user federated identity by their uid
+      operationId: user-federated-identity-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserFederatedIdentityApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFederatedIdentityApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - user-federated-identity
+      summary: Delete a  user federated identity by their uid
+      operationId: user-federated-identity-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/user-federated-identities/~/delete-status/{uid}:
+    get:
+      tags:
+        - user-federated-identity-batch
+      summary: Query the result of an massive delete
+      operationId: user-federated-identity-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/user-federated-identities/-/audit/entity/{uid}:
+    get:
+      tags:
+        - user-federated-identity-audit
+      summary: Update a user federated identity by their uid
+      operationId: user-federated-identity-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/user-federated-identities/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - user-federated-identity-audit
+      summary: Update a user federated identity by their uid
+      operationId: user-federated-identity-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/user-federated-identities:
+    get:
+      tags:
+        - user-federated-identity-acl
+      summary: Check for allow permissions for the current user on user federated identity
+      operationId: user-federated-identity-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFederatedIdentityGenericAcl'
+  /api/me/acl/access/user-federated-identities/{uid}:
+    get:
+      tags:
+        - user-federated-identity-acl
+      summary: Check for allow permissions for the current user on user federated identity by their uid
+      operationId: user-federated-identity-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFederatedIdentitySpecificAcl'
         '404':
           description: The item dont exists
   /api/template/template:
@@ -14119,6 +14489,115 @@ components:
         - enable
         - disable
     TenantAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    TenantLoginProviderApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/access/login-providers"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - user
+        - loginProvider
+    UserFederatedIdentityApiDto:
+      type: object
+      description: user-federated-identity
+      properties:
+        uid:
+          description: El uid de user federated identity
+          type: string
+        user:
+          $ref: '#/components/schemas/UserApiRef'
+        loginProvider:
+          $ref: '#/components/schemas/TenantLoginProviderApiRef'
+        subject:
+          description: El subject de user federated identity
+          type: string
+        createdAt:
+          description: El created at de user federated identity
+          type: string
+          format: date-time
+        version:
+          description: Campo con el número de version de user federated identity para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    UserFederatedIdentityApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserFederatedIdentityApiDto'
+    UserFederatedIdentityGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserFederatedIdentityAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/UserFederatedIdentityAclFields'
+    UserFederatedIdentitySpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/UserFederatedIdentityAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/UserFederatedIdentityAclFields'
+    UserFederatedIdentityAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    UserFederatedIdentityAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    UserFederatedIdentityAclFields:
       type: object
       properties:
         noEditables:

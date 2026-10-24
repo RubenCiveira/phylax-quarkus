@@ -6,42 +6,47 @@ import java.util.Optional;
 
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.UserData;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.FederatedUser;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.PendingDelegation;
 
 /**
  * Unified port for delegated (SSO) login.
  *
- * Responsibilities: - Provide provider registry access and token storage. - Resolve delegated user
- * data into local usernames.
+ * Responsibilities: - Provide provider registry access and pending login storage. - Resolve a
+ * validated external identity into a local account.
  *
  * Design notes: - Supersedes DelegatedStoreGateway and DelegatedAccessProviderGateway. -
  * Implemented by infrastructure adapters.
  */
 public interface DelegateLoginGateway {
+  /**
+   * Stores a pending login under the hash of its state.
+   *
+   * @param stateHash hash of the state sent to the provider
+   * @param pending pending login
+   */
+  void savePending(String stateHash, PendingDelegation pending);
 
   /**
-   * Loads a stored delegated token by code.
+   * Reads a pending login without consuming it.
    *
-   * Used to resume delegated flows after redirects. Returns empty when the code is unknown or
-   * expired.
+   * Used by the provider callback, which only needs to know where to resume.
    *
-   * @param request auth request context
-   * @param code temporary code
-   * @return optional token info
+   * @param stateHash hash of the state
+   * @return pending login, if not expired
    */
-  Optional<TokenInfo> loadToken(AuthRequest request, String code);
+  Optional<PendingDelegation> findPending(String stateHash);
 
   /**
-   * Stores a delegated token under a temporary code.
+   * Consumes a pending login of a tenant.
    *
-   * Used to bridge browser callbacks to token granters. Implementations should enforce expiration.
+   * Only one caller obtains it: concurrent or repeated completions get empty.
    *
-   * @param request auth request context
-   * @param code temporary code
-   * @param token delegated token info
+   * @param tenant tenant name
+   * @param stateHash hash of the state
+   * @return pending login, if it existed, was not expired and was not consumed before
    */
-  void saveToken(AuthRequest request, String code, TokenInfo token);
+  Optional<PendingDelegation> consumePending(String tenant, String stateHash);
 
   /**
    * Returns the delegated providers available for the request.
@@ -54,15 +59,15 @@ public interface DelegateLoginGateway {
   List<DelegatedAccessExternalProvider> providers(AuthRequest request);
 
   /**
-   * Resolves a local username from provider user data.
+   * Resolves the local account of a validated external identity.
    *
-   * Used to map external identity to local user accounts. Returns empty when no user mapping
-   * exists.
+   * Uses the identities linked to the provider; never selects an account by display name. Returns
+   * empty when the link policy does not allow the access.
    *
    * @param request auth request context
    * @param provider provider identifier
-   * @param userInfo user data from provider
-   * @return optional username
+   * @param user identity asserted by the provider
+   * @return username of the local account
    */
-  Optional<String> retrieveUsername(AuthRequest request, String provider, UserData userInfo);
+  Optional<String> resolveAccount(AuthRequest request, String provider, FederatedUser user);
 }

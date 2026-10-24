@@ -2,24 +2,25 @@
 package net.civeira.phylax.features.oauth.delegatelogin.domain.provider;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.time.Instant;
+import java.time.Clock;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 
 import javax.xml.XMLConstants;
-import javax.xml.crypto.MarshalException;
-import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureException;
-import javax.xml.crypto.dsig.XMLSignatureFactory;
-import javax.xml.crypto.dsig.dom.DOMValidateContext;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -30,82 +31,80 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.FederatedUser;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.provider.SamlResponseValidator.Expectations;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.provider.SamlResponseValidator.SamlValidationException;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.provider.SamlResponseValidator.ValidAssertion;
 
 /**
- * Delegated access provider implementation for SAML.
+ * Delegated access provider implementation for SAML 2.0.
  *
- * Responsibilities: - Build SAML authentication requests. - Validate SAML responses and extract
- * user data.
+ * Responsibilities: - Send an AuthnRequest with the HTTP-Redirect binding. - Validate the HTTP-POST
+ * response strictly and map NameID and attributes to the asserted identity.
  *
- * Design notes: - Uses XML signature validation for security. - Returns minimal user data for
- * mapping.
+ * Design notes: - The AuthnRequest ID comes from the login state, so a response is only valid for
+ * the request sent with that state; unsolicited responses are rejected. - The email is trusted as
+ * verified because the assertion is signed by the IdP the tenant administrator configured.
  */
 @Slf4j
 @RequiredArgsConstructor
 public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvider {
-
-  @Data
-  @RegisterForReflection
   /**
-   * Parsed SAML response data for user mapping.
-   *
-   * Contains name, code, and email extracted from assertions. Used to build
-   * DelegatedAccessExternalProvider.UserData.
+   * Attributes that may carry the email.
    */
-  public static class SamlData {
-    /**
-     * Display name extracted from SAML.
-     */
-    private String name;
-    /**
-     * Identifier extracted from SAML (NameID).
-     */
-    private String code;
-    /**
-     * Email extracted from SAML.
-     */
-    private String email;
-  }
+  private static final List<String> EMAIL_ATTRIBUTES = List.of("email", "mail",
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
+  /**
+   * Attributes that may carry the display name.
+   */
+  private static final List<String> NAME_ATTRIBUTES =
+      List.of("name", "displayName", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+  /**
+   * Loose email shape, used only to decide whether the NameID can stand for the email.
+   */
+  private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
   /**
    * Provider identifier for this instance.
    */
   private final String id;
   /**
-   * Identity provider SSO target URL.
+   * IdP single sign-on URL (HTTP-Redirect binding).
    */
-  private final String idpSsoTargetUrl;
+  private final String idpSsoUrl;
   /**
-   * Issuer value used in SAML requests.
+   * Entity ID of this service provider, sent as issuer and expected as audience.
    */
-  private final String issuer;
+  private final String spEntityId;
   /**
-   * PEM-encoded certificate used to validate responses.
+   * Entity ID of the IdP, expected as issuer of the response.
+   */
+  private final String idpEntityId;
+  /**
+   * PEM-encoded IdP certificate used to validate responses.
    */
   private final String certificate;
   /**
    * Whether the provider should auto-submit in the UI.
    */
   private final boolean automatic;
+  /**
+   * Clock for validity windows.
+   */
+  private final Clock clock;
 
   /**
    * Builds the SAML authentication request info.
    *
-   * Generates a SAML request and constructs redirect URL. Returns request info for a GET redirect
-   * to the IdP.
+   * The AuthnRequest is deflated and base64 encoded (HTTP-Redirect binding) and sent with the login
+   * state as RelayState.
    *
    * @param request auth request context
    * @param detail delegated request details
@@ -114,75 +113,52 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
   @Override
   public RequestInfo request(AuthRequest request, DelegatedRequestDetails detail) {
     try {
-      String samlRequest = generateAuthRequest(detail.getExternalUrl());
-      String encodedSamlRequest = URLEncoder.encode(samlRequest, StandardCharsets.UTF_8.toString());
-
+      Map<String, String> params = new LinkedHashMap<>();
+      params.put("SAMLRequest", deflate(authnRequest(detail)));
+      params.put("RelayState", detail.getState());
       RequestInfo info = new RequestInfo();
       info.setTitle("Redirigiendo por saml");
       info.setMessage("Vamos a ir a su login de saml");
-      info.setTargetUrl(idpSsoTargetUrl + "?SAMLRequest=" + encodedSamlRequest);
+      info.setTargetUrl(idpSsoUrl);
       info.setWithPost(false);
-      info.setParams(new HashMap<>());
+      info.setParams(params);
       return info;
-    } catch (Exception ex) {
-      log.error("Unable to prepare saml request");
+    } catch (ParserConfigurationException | TransformerException | IOException ex) {
+      log.error("Unable to prepare saml request for provider {}", id);
       throw new IllegalStateException("Wrong saml config", ex);
     }
   }
 
   /**
-   * Processes the SAML response parameters.
-   *
-   * Validates the SAML response and builds response info. Returns null when response parsing fails.
+   * Validates the SAMLResponse and returns the asserted identity.
    *
    * @param request auth request context
-   * @param detail delegated request details
+   * @param detail delegated request details of the pending login
    * @param params response parameters
-   * @return response information
+   * @return asserted identity, or empty when the response is rejected
    */
   @Override
-  public ResponseInfo response(AuthRequest request, DelegatedRequestDetails detail,
+  public Optional<FederatedUser> authenticate(AuthRequest request, DelegatedRequestDetails detail,
       Map<String, String[]> params) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      SamlData processResponse =
-          processResponse(params.get("SAMLResponse")[0], loadCertificate(certificate), id);
-      ResponseInfo info = new ResponseInfo();
-      info.setInnerToken(mapper.writeValueAsString(processResponse));
-      return info;
-    } catch (Exception ex) {
-      log.error("Unable to acept response", ex);
-      return null;
+    String[] response = params.get("SAMLResponse");
+    if (response == null || response.length != 1) {
+      log.warn("SAML response rejected for provider {}: missing SAMLResponse", id);
+      return Optional.empty();
     }
-  }
-
-  /**
-   * Retrieves user data from a SAML response payload.
-   *
-   * Parses the inner token as JSON and maps to user data. Returns null when parsing fails.
-   *
-   * @param request auth request context
-   * @param detail delegated request details
-   * @param innerToken SAML response payload
-   * @return user data or null
-   */
-  @Override
-  public UserData userInfo(AuthRequest request, DelegatedRequestDetails detail, String innerToken) {
-    ObjectMapper mapper = new ObjectMapper();
     try {
-      SamlData data = mapper.readValue(innerToken, SamlData.class);
-      return UserData.builder().code(data.getCode()).name(data.getName()).email(data.getEmail())
-          .build();
-    } catch (JsonProcessingException e) {
-      log.error("Unable to read saml response", e);
-      return null;
+      Expectations expected =
+          Expectations.builder().idpKey(loadCertificate(certificate).getPublicKey())
+              .idpEntityId(idpEntityId).spEntityId(spEntityId).acsUrl(detail.getExternalUrl())
+              .requestId(detail.getRequestId()).now(clock.instant()).build();
+      return toUser(SamlResponseValidator.validate(response[0], expected));
+    } catch (SamlValidationException | CertificateException ex) {
+      log.warn("SAML response rejected for provider {}: {}", id, ex.getMessage());
+      return Optional.empty();
     }
   }
 
   /**
    * Returns the provider identifier.
-   *
-   * Used to select the SAML provider by id. The id is configured per instance.
    *
    * @param request auth request context
    * @return provider identifier
@@ -194,8 +170,6 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
 
   /**
    * Returns the provider description for UI rendering.
-   *
-   * Includes name, logo, and automation flag. Used to render provider buttons in the login UI.
    *
    * @param request auth request context
    * @return provider description
@@ -211,254 +185,82 @@ public class SamlDelegatedAccessProvider implements DelegatedAccessExternalProvi
   }
 
   /**
-   * Generates a SAML AuthnRequest XML and returns it as base64.
+   * Maps a validated assertion to the asserted identity.
    *
-   * Builds a minimal AuthnRequest document with issuer and destination. Uses secure XML transformer
-   * settings.
-   *
-   * @param assertionConsumerServiceUrl callback URL
-   * @return base64-encoded SAML request XML
-   * @throws ParserConfigurationException when XML builder fails
-   * @throws TransformerException when XML serialization fails
+   * The email comes from the email attributes or from a NameID with an email shape; without email
+   * there is no identity.
    */
-  private String generateAuthRequest(String assertionConsumerServiceUrl)
+  static Optional<FederatedUser> toUser(ValidAssertion assertion) {
+    String nameId = assertion.getNameId();
+    Optional<String> email = assertion.firstAttribute(EMAIL_ATTRIBUTES)
+        .or(() -> EMAIL.matcher(nameId).matches() ? Optional.of(nameId) : Optional.empty());
+    return email.map(mail -> FederatedUser.builder().subject(nameId).email(mail).emailVerified(true)
+        .name(assertion.firstAttribute(NAME_ATTRIBUTES).orElse(null)).build());
+  }
+
+  /**
+   * Builds the AuthnRequest XML.
+   */
+  String authnRequest(DelegatedRequestDetails detail)
       throws ParserConfigurationException, TransformerException {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-    Document document = documentBuilder.newDocument();
+    documentBuilderFactory.setNamespaceAware(true);
+    Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
 
-    Element root =
-        document.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:AuthnRequest");
-    root.setAttribute("ID", "_" + UUID.randomUUID().toString());
+    Element root = document.createElementNS(SamlResponseValidator.PROTOCOL, "samlp:AuthnRequest");
+    root.setAttribute("ID", detail.getRequestId());
     root.setAttribute("Version", "2.0");
-    root.setAttribute("IssueInstant", Instant.now().toString());
+    root.setAttribute("IssueInstant", clock.instant().truncatedTo(ChronoUnit.SECONDS).toString());
     root.setAttribute("ProtocolBinding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
-    root.setAttribute("AssertionConsumerServiceURL", assertionConsumerServiceUrl);
-    root.setAttribute("Destination", idpSsoTargetUrl);
+    root.setAttribute("AssertionConsumerServiceURL", detail.getExternalUrl());
+    root.setAttribute("Destination", idpSsoUrl);
     document.appendChild(root);
 
     Element issuerElement =
-        document.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "saml:Issuer");
-    issuerElement.setTextContent(issuer);
+        document.createElementNS(SamlResponseValidator.ASSERTION, "saml:Issuer");
+    issuerElement.setTextContent(spEntityId);
     root.appendChild(issuerElement);
 
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
     transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-
-    // Si se usa Xalan como implementación, es necesario establecer también:
     transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
     Transformer transformer = transformerFactory.newTransformer();
+    transformer.setOutputProperty("omit-xml-declaration", "yes");
     StringWriter writer = new StringWriter();
     transformer.transform(new DOMSource(document), new StreamResult(writer));
-
-    String authRequestXml = writer.toString();
-    return Base64.getEncoder().encodeToString(authRequestXml.getBytes());
+    return writer.toString();
   }
 
   /**
-   * Loads an X509 certificate from a PEM string.
-   *
-   * Removes PEM headers and decodes base64 content. Returns the certificate for signature
-   * validation.
-   *
-   * @param pemCertificate PEM-encoded certificate
-   * @return X509 certificate
-   * @throws Exception when decoding or parsing fails
+   * Encodes a message for the HTTP-Redirect binding: raw DEFLATE and base64.
    */
-  private static X509Certificate loadCertificate(String pemCertificate) throws Exception {
+  static String deflate(String xml) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    Deflater deflater = new Deflater(Deflater.DEFLATED, true);
+    try (DeflaterOutputStream stream = new DeflaterOutputStream(out, deflater)) {
+      stream.write(xml.getBytes(StandardCharsets.UTF_8));
+    } finally {
+      deflater.end();
+    }
+    return Base64.getEncoder().encodeToString(out.toByteArray());
+  }
+
+  /**
+   * Loads an X509 certificate from a PEM string (headers optional).
+   */
+  static X509Certificate loadCertificate(String pemCertificate) throws CertificateException {
     String pemContent = pemCertificate.replace("-----BEGIN CERTIFICATE-----", "")
         .replace("-----END CERTIFICATE-----", "").replaceAll("\\s+", "");
-    byte[] decoded = java.util.Base64.getDecoder().decode(pemContent);
+    byte[] decoded;
+    try {
+      decoded = Base64.getDecoder().decode(pemContent);
+    } catch (IllegalArgumentException ex) {
+      throw new CertificateException("Invalid certificate encoding", ex);
+    }
     CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
     return (X509Certificate) certificateFactory
         .generateCertificate(new ByteArrayInputStream(decoded));
-  }
-
-  /**
-   * Processes a SAML response and extracts user data.
-   *
-   * Validates signature, time conditions, and audience. Extracts attributes and NameID to populate
-   * user data.
-   *
-   * @param samlResponse base64 SAML response
-   * @param certificate certificate for signature validation
-   * @param expectedAudience expected audience value
-   * @return parsed SAML data
-   * @throws Exception when validation fails
-   */
-  private SamlData processResponse(String samlResponse, X509Certificate certificate,
-      String expectedAudience) throws Exception {
-    SamlData result = new SamlData();
-    // Decodificar la respuesta SAML desde Base64
-    byte[] decodedBytes = Base64.getDecoder().decode(samlResponse);
-    DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-    documentBuilderFactory.setNamespaceAware(true);
-    DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-    Document document = documentBuilder.parse(new ByteArrayInputStream(decodedBytes));
-
-    // Verificar la firma del XML
-    if (!verifySignature(document, certificate)) {
-      throw new SecurityException("Invalid SAML Response signature");
-    }
-
-    // Obtener el elemento raíz y las afirmaciones (Assertions)
-    Element root = document.getDocumentElement();
-    NodeList assertionList =
-        root.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "Assertion");
-
-    if (assertionList.getLength() > 0) {
-      Element assertion = (Element) assertionList.item(0);
-
-      // Validar NotBefore y NotOnOrAfter
-      validateTimeConditions(assertion);
-
-      // Validar Audience
-      validateAudience(assertion, expectedAudience);
-
-      // Extraer el Subject y el NameID
-      NodeList subjectList =
-          assertion.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "Subject");
-      if (subjectList.getLength() > 0) {
-        Element subject = (Element) subjectList.item(0);
-        NodeList nameIdList =
-            subject.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "NameID");
-
-        if (nameIdList.getLength() > 0) {
-          String userId = nameIdList.item(0).getTextContent();
-          result.setCode(userId);
-          result.setName(userId);
-          result.setEmail(userId);
-        }
-      }
-
-      // Extraer los atributos del AttributeStatement
-      NodeList attributeStatementList = assertion
-          .getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "AttributeStatement");
-      if (attributeStatementList.getLength() > 0) {
-        Element attributeStatement = (Element) attributeStatementList.item(0);
-        NodeList attributeList = attributeStatement
-            .getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "Attribute");
-
-        for (int i = 0; i < attributeList.getLength(); i++) {
-          Element attribute = (Element) attributeList.item(i);
-          String attributeName = attribute.getAttribute("Name");
-
-          // Dependiendo de tu configuración en Okta, estos nombres pueden variar
-          if ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-              .equals(attributeName)) { // Email
-            NodeList attributeValueList = attribute
-                .getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "AttributeValue");
-            if (attributeValueList.getLength() > 0) {
-              result.setEmail(attributeValueList.item(0).getTextContent());
-            }
-          } else if ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-              .equals(attributeName)) { // Full Name
-            NodeList attributeValueList = attribute
-                .getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "AttributeValue");
-            if (attributeValueList.getLength() > 0) {
-              result.setName(attributeValueList.item(0).getTextContent());
-            }
-          }
-        }
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Verifies the XML digital signature of a SAML response.
-   *
-   * Locates the Signature element and validates it using the certificate. Enables secure validation
-   * to prevent known attacks.
-   *
-   * @param document parsed SAML XML document
-   * @param certificate certificate for signature validation
-   * @return true when the signature is valid
-   * @throws XMLSignatureException when signature is invalid
-   * @throws MarshalException when signature cannot be parsed
-   */
-  private boolean verifySignature(Document document, X509Certificate certificate)
-      throws XMLSignatureException, MarshalException {
-    NodeList signatureNodeList = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
-    if (signatureNodeList.getLength() == 0) {
-      throw new XMLSignatureException("No XML Digital Signature found, document is discarded");
-    }
-
-    // Agregar la ID del documento al contexto de validación
-    Element documentElement = document.getDocumentElement();
-    documentElement.setIdAttribute("ID", true);
-
-    DOMValidateContext valContext =
-        new DOMValidateContext(certificate.getPublicKey(), signatureNodeList.item(0));
-    valContext.setProperty("org.jcp.xml.dsig.secureValidation", Boolean.TRUE);
-
-    XMLSignatureFactory signatureFactory = XMLSignatureFactory.getInstance("DOM");
-    XMLSignature signature = signatureFactory.unmarshalXMLSignature(valContext);
-
-    return signature.validate(valContext);
-  }
-
-  /**
-   * Validates time conditions on a SAML assertion.
-   *
-   * Ensures the assertion is not used before NotBefore or after NotOnOrAfter. Throws when the time
-   * window is invalid.
-   *
-   * @param assertion assertion element
-   * @throws XMLSignatureException when conditions are missing
-   */
-  private void validateTimeConditions(Element assertion) throws XMLSignatureException {
-    NodeList conditionsList =
-        assertion.getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "Conditions");
-    if (conditionsList.getLength() == 0) {
-      throw new XMLSignatureException("No Conditions element found in SAML assertion");
-    }
-
-    Element conditions = (Element) conditionsList.item(0);
-    String notBeforeStr = conditions.getAttribute("NotBefore");
-    String notOnOrAfterStr = conditions.getAttribute("NotOnOrAfter");
-
-    Instant notBefore = Instant.parse(notBeforeStr);
-    Instant notOnOrAfter = Instant.parse(notOnOrAfterStr);
-    Instant now = Instant.now();
-    if (now.isBefore(notBefore)) {
-      throw new SecurityException("SAML assertion is not yet valid");
-    }
-    if (now.isAfter(notOnOrAfter)) {
-      throw new SecurityException("SAML assertion is no longer valid");
-    }
-  }
-
-  /**
-   * Validates audience restrictions on a SAML assertion.
-   *
-   * Ensures that the expected audience is present. Throws when no matching audience is found.
-   *
-   * @param assertion assertion element
-   * @param expectedAudience expected audience value
-   * @throws XMLSignatureException when restrictions are missing
-   */
-  private void validateAudience(Element assertion, String expectedAudience)
-      throws XMLSignatureException {
-    NodeList audienceRestrictionList = assertion
-        .getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "AudienceRestriction");
-    if (audienceRestrictionList.getLength() == 0) {
-      throw new XMLSignatureException("No AudienceRestriction element found in SAML assertion");
-    }
-    for (int i = 0; i < audienceRestrictionList.getLength(); i++) {
-      Element audienceRestriction = (Element) audienceRestrictionList.item(i);
-      NodeList audienceList = audienceRestriction
-          .getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "Audience");
-      for (int j = 0; j < audienceList.getLength(); j++) {
-        Element audience = (Element) audienceList.item(j);
-        if (expectedAudience.equals(audience.getTextContent())) {
-          return; // Audience is valid
-        }
-      }
-    }
-    throw new SecurityException("SAML assertion audience is invalid");
   }
 }

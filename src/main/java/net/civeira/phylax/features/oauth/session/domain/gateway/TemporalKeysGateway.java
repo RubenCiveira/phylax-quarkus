@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.session.domain.gateway;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 
@@ -66,13 +67,15 @@ public interface TemporalKeysGateway {
   String registerTemporalAuthCode(TemporalAuthCode code);
 
   /**
-   * Retrieves and removes a temporary authorization code.
+   * Consumes a temporary authorization code once, if the validator accepts it.
    *
-   * Returns empty when the code is missing or expired. Implementations should remove the code after
-   * retrieval.
+   * A code the validator rejects is kept, so the legitimate client can still redeem it. Of two
+   * concurrent consumptions only one gets the code.
    *
    * @param code code identifier
-   * @return optional temporal auth code
+   * @param validator checks of the redeeming request (client, tenant, redirect, PKCE)
+   * @return the code, only for the caller that consumed it
    */
-  Optional<TemporalAuthCode> retrieveTemporalAuthCode(String code);
+  Optional<TemporalAuthCode> consumeTemporalAuthCode(String code,
+      Predicate<TemporalAuthCode> validator);
 }

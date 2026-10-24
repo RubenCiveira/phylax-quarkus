@@ -182,6 +182,20 @@ delete()
 }
 access.User "1"  o--  "N*" access.UserProfile: user 
 
+class access.UserFederatedIdentity{
+uid:string
+subject:string
+createdAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+access.User "1"  o--  "N*" access.UserFederatedIdentity: user 
+access.TenantLoginProvider "1"  o--  "N*" access.UserFederatedIdentity: loginProvider 
+
 class access.TrustedClient{
 uid:string
 code:string
@@ -494,6 +508,8 @@ access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user
 access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions  
 access.User "1"  o--  "N*" access.UserPersonalApiKey: user  
 access.User "1"  o--  "N*" access.UserProfile: user  
+access.User "1"  o--  "N*" access.UserFederatedIdentity: user  
+access.TenantLoginProvider "1"  o--  "N*" access.UserFederatedIdentity: loginProvider  
 access.Tenant "1"  o--  "N*" access.TrustedClient: tenant  
 access.TrustedClientAllowedRedirect "N*"  o--  "N*" access.TrustedClient: allowedRedirects  
 access.TrustedClientAllowedAudience "N*"  o--  "N*" access.TrustedClient: allowedAudiences  

@@ -49,6 +49,11 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   }
 
   @Override
+  public Optional<ClientDetails> loadPublicById(String tenant, String clientId) {
+    return matches(tenant, clientId) ? Optional.of(buildClient(false)) : Optional.empty();
+  }
+
+  @Override
   public Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret) {
     boolean secretMatches = OidcTestFixtures.CLIENT_SECRET.equals(clientSecret);
     return matches(tenant, clientId) && secretMatches ? Optional.of(buildClient())
@@ -60,9 +65,13 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   }
 
   private ClientDetails buildClient() {
+    return buildClient(true);
+  }
+
+  private ClientDetails buildClient(boolean confidential) {
     return ClientDetails.builder().clientId(OidcTestFixtures.CLIENT_ID)
-        .allowedScopes(allowedScopes.get()).allowedGrants(allowedGrants).protectedWithSecret(true)
-        .isResourceServer(true).postLogoutRedirectUris(
+        .allowedScopes(allowedScopes.get()).allowedGrants(allowedGrants)
+        .protectedWithSecret(confidential).isResourceServer(true).postLogoutRedirectUris(
             List.of("http://localhost/after-logout", "http://localhost/callback"))
         .build();
   }

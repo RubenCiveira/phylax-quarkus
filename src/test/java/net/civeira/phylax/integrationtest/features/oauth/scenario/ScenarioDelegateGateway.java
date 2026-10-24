@@ -13,30 +13,26 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.UserData;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.FederatedUser;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.PendingDelegation;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.gateway.DelegateLoginGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
-/**
- * Configurable test double for DelegateLoginGateway.
- *
- * Defaults to returning no providers (same behaviour as the previous FixedDelegateGateway). Tests
- * that exercise delegated login enable a "google" provider and configure the username resolution
- * via {@link #whenResolveUsername(Supplier)}.
- */
 @IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped
 public class ScenarioDelegateGateway implements DelegateLoginGateway {
 
-  /** Provider id used by the built-in scenario provider. */
   public static final String PROVIDER_ID = "google";
+  /**
+   * The only provider code the scenario provider accepts.
+   */
+  public static final String GOOD_CODE = "good-code";
 
-  private final ConcurrentHashMap<String, TokenInfo> tokens = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, PendingDelegation> pending = new ConcurrentHashMap<>();
   private boolean providerEnabled = false;
   private Supplier<Optional<String>> usernameSupplier = () -> Optional.empty();
 
@@ -51,7 +47,7 @@ public class ScenarioDelegateGateway implements DelegateLoginGateway {
   }
 
   public void reset() {
-    tokens.clear();
+    pending.clear();
     providerEnabled = false;
     usernameSupplier = () -> Optional.empty();
   }
@@ -59,36 +55,32 @@ public class ScenarioDelegateGateway implements DelegateLoginGateway {
   // ── DelegateLoginGateway ───────────────────────────────────────────────────
 
   @Override
+  public void savePending(String stateHash, PendingDelegation value) {
+    pending.put(stateHash, value);
+  }
+
+  @Override
+  public Optional<PendingDelegation> findPending(String stateHash) {
+    return Optional.ofNullable(pending.get(stateHash));
+  }
+
+  @Override
+  public Optional<PendingDelegation> consumePending(String tenant, String stateHash) {
+    PendingDelegation found = pending.get(stateHash);
+    if (found == null || !tenant.equals(found.getTenant())) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(pending.remove(stateHash));
+  }
+
+  @Override
   public List<DelegatedAccessExternalProvider> providers(AuthRequest request) {
     return providerEnabled ? List.of(new ScenarioProvider()) : List.of();
   }
 
   @Override
-  public void saveToken(AuthRequest request, String code, TokenInfo token) {
-    tokens.put(code, token);
-  }
-
-  @Override
-  public Optional<TokenInfo> loadToken(AuthRequest request, String code) {
-    if (code == null)
-      return Optional.empty();
-    return Optional.ofNullable(tokens.get(code));
-  }
-
-  @Override
-  public Optional<String> retrieveUsername(AuthRequest request, String provider,
-      UserData userInfo) {
+  public Optional<String> resolveAccount(AuthRequest request, String provider, FederatedUser user) {
     return usernameSupplier.get();
-  }
-
-  // ── helper: build a ready-to-use TokenInfo ─────────────────────────────────
-
-  public static TokenInfo buildTokenInfo() {
-    TokenInfo info = new TokenInfo();
-    info.setProvider(PROVIDER_ID);
-    info.setExternUrl("https://accounts.google.com");
-    info.setInnerToken("fake-inner-token");
-    return info;
   }
 
   // ── inner scenario provider ────────────────────────────────────────────────
@@ -115,23 +107,20 @@ public class ScenarioDelegateGateway implements DelegateLoginGateway {
       info.setTitle("Sign in with Google");
       info.setMessage("Redirecting to Google...");
       info.setTargetUrl("https://accounts.google.com/o/oauth2/auth");
-      info.setParams(Map.of("response_type", "code", "client_id", "test-client-id"));
+      info.setParams(Map.of("response_type", "code", "state", details.getState()));
       info.setWithPost(false);
       return info;
     }
 
     @Override
-    public ResponseInfo response(AuthRequest request, DelegatedRequestDetails details,
-        Map<String, String[]> params) {
-      String[] codes = params.getOrDefault("code", new String[] {"fake-code"});
-      return ResponseInfo.from(request, this, codes);
-    }
-
-    @Override
-    public UserData userInfo(AuthRequest request, DelegatedRequestDetails details,
-        String innerToken) {
-      return UserData.builder().code(OidcTestFixtures.USERNAME).name("Alice Example")
-          .email(OidcTestFixtures.USERNAME).build();
+    public Optional<FederatedUser> authenticate(AuthRequest request,
+        DelegatedRequestDetails details, Map<String, String[]> params) {
+      String[] codes = params.get("code");
+      if (codes == null || codes.length != 1 || !GOOD_CODE.equals(codes[0])) {
+        return Optional.empty();
+      }
+      return Optional.of(FederatedUser.builder().subject("google-sub-1")
+          .email(OidcTestFixtures.USERNAME).emailVerified(true).name("Alice Example").build());
     }
   }
 }

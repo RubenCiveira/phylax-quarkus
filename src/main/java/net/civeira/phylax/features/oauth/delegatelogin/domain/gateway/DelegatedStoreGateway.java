@@ -3,39 +3,39 @@ package net.civeira.phylax.features.oauth.delegatelogin.domain.gateway;
 
 import java.util.Optional;
 
-import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.PendingDelegation;
 
 /**
- * Legacy gateway for delegated token storage.
+ * Legacy gateway for pending delegated login storage.
  *
- * Responsibilities: - Store delegated tokens under temporary codes. - Load tokens to resume
- * delegated flows.
+ * Responsibilities: - Store pending logins under the hash of their state. - Load or consume them to
+ * resume delegated flows.
  *
  * Design notes: - Superseded by DelegateLoginGateway. - Retained for adapter compatibility.
  */
 public interface DelegatedStoreGateway {
+  /**
+   * Stores a pending login.
+   *
+   * @param stateHash hash of the state
+   * @param pending pending login
+   */
+  void save(String stateHash, PendingDelegation pending);
 
   /**
-   * Loads a stored token for the given code.
+   * Loads a pending login without consuming it.
    *
-   * Used to resume delegated flows after redirects. Returns empty when the code is unknown or
-   * expired.
-   *
-   * @param request auth request context
-   * @param code temporary code
-   * @return optional token info
+   * @param stateHash hash of the state
+   * @return pending login, if not expired
    */
-  Optional<TokenInfo> load(AuthRequest request, String code);
+  Optional<PendingDelegation> find(String stateHash);
 
   /**
-   * Stores a delegated token under a temporary code.
+   * Consumes a pending login of a tenant atomically.
    *
-   * Used to bridge browser callbacks to token granters. Implementations should enforce expiration.
-   *
-   * @param request auth request context
-   * @param code temporary code
-   * @param token delegated token info
+   * @param tenant tenant name
+   * @param stateHash hash of the state
+   * @return pending login, only for the first caller
    */
-  void save(AuthRequest request, String code, TokenInfo token);
+  Optional<PendingDelegation> consume(String tenant, String stateHash);
 }

@@ -77,6 +77,14 @@ public interface SessionStoreGateway {
       String refreshJti);
 
   /**
+   * Checks that the session a refresh token belongs to is still alive.
+   *
+   * @param refreshJti jti of the refresh token
+   * @return true when the token is linked to a session that is not expired nor revoked
+   */
+  boolean isRefreshSessionActive(String refreshJti);
+
+  /**
    * Deletes a session by its identifier.
    *
    * Used for logout and session revocation. Implementations should ignore missing sessions.

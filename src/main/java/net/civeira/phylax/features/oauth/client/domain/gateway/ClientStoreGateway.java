@@ -52,4 +52,15 @@ public interface ClientStoreGateway {
    * @return optional client details
    */
   Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret);
+
+  /**
+   * Loads a client allowed to act as public (no secret) by its identifier.
+   *
+   * Used by the token endpoint when the request carries no client secret.
+   *
+   * @param tenant tenant identifier
+   * @param clientId client identifier
+   * @return client details, only for clients that allow public access
+   */
+  Optional<ClientDetails> loadPublicById(String tenant, String clientId);
 }

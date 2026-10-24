@@ -10,4 +10,4 @@
 
 **Aceptación:** cliente de A no se usa en B; grant/scope/audience/redirect ajenos rechazados; secreto no recuperable en almacenamiento ni lectura DCR; credencial caducada/agotada no registra clientes.
 
-**Referencia PHP:** [EP-02 secretos](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/TODD/epicas/EP-02-secretos-y-cifrado.md) pendiente y `done/EP-03-clientes-tenant-dcr.md` ya ejecutada en PHP. En Java `ClientRetrieveAdapter` aún carga defaults globales y DCR es 403.
+**Referencia PHP:** [EP-02 secretos](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/TODD/done/EP-02-secretos-y-cifrado.md) pendiente y `done/EP-03-clientes-tenant-dcr.md` ya ejecutada en PHP. En Java `ClientRetrieveAdapter` aún carga defaults globales y DCR es 403.

@@ -3,15 +3,16 @@ package net.civeira.phylax.features.oauth.tokensecurity.application;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.Builder;
 import lombok.Data;
 
 /**
- * Information extracted from a verified refresh token.
+ * Information extracted from a refresh token whose signature is valid.
  *
- * Carries username, audiences, client id, JTI, and expiry. Used to rehydrate authentication state
- * on token refresh.
+ * Carries username, audiences, client id, JTI, expiry, the granted scopes and the family. The token
+ * may already be consumed or revoked: the caller decides, so that a reuse can be detected.
  */
 @Data
 @Builder
@@ -21,4 +22,14 @@ public class RefreshTokenInfo {
   private final String client;
   private final String jti;
   private final Instant expiresAt;
+  /**
+   * Scopes granted to the original grant; a refresh can only narrow them.
+   */
+  @Builder.Default
+  private final List<String> grantedScopes = List.of();
+  /**
+   * Family of the token; empty for tokens issued before families existed.
+   */
+  @Builder.Default
+  private final Optional<RefreshFamily> family = Optional.empty();
 }

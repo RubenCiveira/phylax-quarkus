@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import io.restassured.RestAssured;
@@ -211,19 +212,48 @@ public class OidcFlowClient {
         .formParam("client_id", clientId).post("/oauth/openid/" + tenant + "/token");
   }
 
+  /**
+   * Redeems a code without PKCE as a confidential client (HTTP Basic with the fixture secret).
+   */
   public Response exchangeCodeWithoutVerifier(String tenant, String code, String redirectUri,
       String clientId) {
+    return exchangeCodeAsConfidential(tenant, code, redirectUri, clientId,
+        OidcTestFixtures.CLIENT_SECRET);
+  }
+
+  /**
+   * Redeems a code obtained without PKCE, authenticating the confidential client.
+   */
+  public Response exchangeCode(String tenant, String code, String redirectUri, String clientId) {
+    return exchangeCodeAsConfidential(tenant, code, redirectUri, clientId,
+        OidcTestFixtures.CLIENT_SECRET);
+  }
+
+  public Response exchangeCodeAsConfidential(String tenant, String code, String redirectUri,
+      String clientId, String secret) {
+    String basic = Base64.getEncoder()
+        .encodeToString((clientId + ":" + secret).getBytes(StandardCharsets.UTF_8));
     return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
-        .formParam("grant_type", "authorization_code").formParam("code", code)
-        .formParam("redirect_uri", redirectUri).formParam("client_id", clientId)
+        .header("Authorization", "Basic " + basic).formParam("grant_type", "authorization_code")
+        .formParam("code", code).formParam("redirect_uri", redirectUri)
         .post("/oauth/openid/" + tenant + "/token");
   }
 
-  public Response exchangeCode(String tenant, String code, String redirectUri, String clientId) {
+  /**
+   * Refreshes as a public client (client_id only, no secret).
+   */
+  public Response refreshTokenAsPublic(String tenant, String refreshToken, String clientId) {
     return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
-        .formParam("grant_type", "authorization_code").formParam("code", code)
-        .formParam("code_verifier", OidcTestFixtures.CODE_CHALLENGE)
-        .formParam("redirect_uri", redirectUri).formParam("client_id", clientId)
+        .formParam("grant_type", "refresh_token").formParam("client_id", clientId)
+        .formParam("refresh_token", refreshToken).post("/oauth/openid/" + tenant + "/token");
+  }
+
+  /**
+   * Refreshes without any client identification.
+   */
+  public Response refreshTokenWithoutClient(String tenant, String refreshToken) {
+    return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .formParam("grant_type", "refresh_token").formParam("refresh_token", refreshToken)
         .post("/oauth/openid/" + tenant + "/token");
   }
 
@@ -321,15 +351,36 @@ public class OidcFlowClient {
   }
 
   /**
-   * Simulates the final step of a delegated login callback.
-   *
-   * Bypasses browser-driven JavaScript redirects and posts directly to /auth with the stored
-   * delegated code and provider, mirroring what {@code doBackLoginForm} auto-submits.
+   * Starts a delegated login from the login form ({@code step=delegated-login}).
    */
-  public Response submitQueryDelegated(String tenant, String userCode, String appProvider) {
-    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "query-delegated")
-        .formParam("user-code", userCode).formParam("app-provider", appProvider)
-        .formParam("csid", OidcTestFixtures.CSID).post("/oauth/openid/" + tenant + "/auth");
+  public Response startDelegated(String tenant, String provider) {
+    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "delegated-login")
+        .formParam("delegated-provider", provider).post("/oauth/openid/" + tenant + "/auth");
+  }
+
+  /**
+   * Calls the provider callback as the provider would redirect the browser.
+   */
+  public Response delegatedCallback(String provider, Map<String, String> params) {
+    return RestAssured.given().redirects().follow(false).queryParams(params)
+        .get("/oauth/openid/-/delegated/authorization/" + provider);
+  }
+
+  /**
+   * Simulates the form the callback page auto-submits to the authorize step.
+   *
+   * @param binding value of the DELEGATED_BINDING cookie, or null for another browser
+   */
+  public Response submitQueryDelegated(String tenant, String appProvider, String state,
+      String providerData, String binding) {
+    io.restassured.specification.RequestSpecification spec =
+        baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "query-delegated")
+            .formParam("app-provider", appProvider).formParam("delegated-state", state)
+            .formParam("provider-data", providerData).formParam("csid", OidcTestFixtures.CSID);
+    if (binding != null) {
+      spec = spec.cookie("DELEGATED_BINDING", binding);
+    }
+    return spec.post("/oauth/openid/" + tenant + "/auth");
   }
 
   private io.restassured.specification.RequestSpecification baseAuthPost(String tenant) {

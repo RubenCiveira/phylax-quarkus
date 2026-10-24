@@ -38,6 +38,10 @@ public class StepInput {
   /** Form parameters submitted with the POST request. */
   MultivaluedMap<String, String> formParams;
 
+  /** Value of the {@code DELEGATED_BINDING} cookie, when the browser started a delegated login. */
+  @Builder.Default
+  Optional<String> delegatedBinding = Optional.empty();
+
   // -------------------------------------------------------------------------
   // Convenience helpers
   // -------------------------------------------------------------------------

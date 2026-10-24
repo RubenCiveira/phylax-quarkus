@@ -53,6 +53,20 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   }
 
   @Override
+  public Optional<ClientDetails> loadPublicById(String tenant, String clientId) {
+    return tenant(tenant)
+        .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
+        .filter(this::clientEnabled).filter(app -> Boolean.TRUE.equals(app.isPublicAllow()))
+        .map(app -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
+            .requirePkce(true).allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES)
+            .postLogoutRedirectUris(postLogoutUris(app))
+            .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
+            .backchannelLogoutSessionRequired(
+                Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
+            .build());
+  }
+
+  @Override
   public Optional<ClientDetails> loadPublic(String tenant, String clientId, String redirect) {
     return verify(tenant, clientId, Optional.empty(), Optional.of(redirect));
   }

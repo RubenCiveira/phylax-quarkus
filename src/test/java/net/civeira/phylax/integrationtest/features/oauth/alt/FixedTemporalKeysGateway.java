@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.annotation.Priority;
@@ -49,7 +50,12 @@ public class FixedTemporalKeysGateway implements TemporalKeysGateway {
   }
 
   @Override
-  public Optional<TemporalAuthCode> retrieveTemporalAuthCode(String code) {
+  public Optional<TemporalAuthCode> consumeTemporalAuthCode(String code,
+      Predicate<TemporalAuthCode> validator) {
+    TemporalAuthCode found = code == null ? null : codes.get(code);
+    if (found == null || !validator.test(found)) {
+      return Optional.empty();
+    }
     return Optional.ofNullable(codes.remove(code));
   }
 

@@ -36,6 +36,7 @@ include::access/user-accepted-terms-of-use/entity-user-accepted-terms-of-use.asc
 include::access/user-access-temporal-code/entity-user-access-temporal-code.asciidoc[]
 include::access/user-consent-purposes/entity-user-consent-purposes.asciidoc[]
 include::access/user-consented-scopes/entity-user-consented-scopes.asciidoc[]
+include::access/user-federated-identity/entity-user-federated-identity.asciidoc[]
 include::access/user-group-membership/entity-user-group-membership.asciidoc[]
 include::access/user-invitation/entity-user-invitation.asciidoc[]
 include::access/user-mfa-recovery-code/entity-user-mfa-recovery-code.asciidoc[]

@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.rest;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -16,11 +17,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.authentication.application.granter.TokenGranter;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
@@ -33,6 +36,7 @@ import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.application.RefreshFamily;
 import net.civeira.phylax.features.oauth.tokensecurity.application.RefreshTokenInfo;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
@@ -47,6 +51,7 @@ import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
  * Design notes: - Delegates grant handling to TokenGranter implementations. - Uses JwtTokenBuilder
  * for token creation and validation.
  */
+@Slf4j
 @Path("")
 @RequestScoped
 @RequiredArgsConstructor
@@ -150,64 +155,11 @@ public class TokenController {
     String autho = headers.getHeaderString("Authorization");
     String clientId = null;
     String clientSecret = null;
-    // refresh token.
-    if ("authorization_code".equals(paramMap.getFirst("grant_type"))) {
-      Optional<TemporalAuthCode> retrieve =
-          temporalStore.retrieveTemporalAuthCode(paramMap.getFirst("code"));
-      return retrieve.map(code -> {
-        String storedChallenge = code.request.getCodeChallenge().orElse(null);
-        if (storedChallenge != null) {
-          String codeVerifier = paramMap.getFirst("code_verifier");
-          if (codeVerifier == null || codeVerifier.isBlank()) {
-            return Response.status(401).build();
-          }
-          if (!"S256".equals(code.request.getCodeChallengeMethod().orElse(""))) {
-            return Response.status(401).build();
-          }
-          if (!PkceChallenge.fromRequest(storedChallenge, "S256").verify(codeVerifier)) {
-            return Response.status(401).build();
-          }
-        }
-        AuthRequest request = code.request;
-        AuthenticationResult auth =
-            loginUsecase.fillPreAuthenticated(request, code.data.getUsername(), code.client,
-                Arrays.asList(), AuthenticationMode.CODE_EXCHANGE);
-        return auth.isRight()
-            ? Response.status(200)
-                .entity(emitAndBindToken(tenant, code.client, paramMap.getFirst("grant_type"),
-                    auth.getData(), request, Optional.ofNullable(code.sessionId), Optional.empty()))
-                .build()
-            : Response.status(401).build();
-      }).orElseGet(() -> Response.status(401).build());
-    } else if ("refresh_token".equals(paramMap.getFirst("grant_type"))) {
-      String refreshToken = paramMap.getFirst("refresh_token");
-      Optional<RefreshTokenInfo> maybeInfo = tokenBuilder.verifyRefreshInfo(refreshToken, tenant);
-      if (maybeInfo.isEmpty()) {
-        return Response.status(401).build();
-      }
-      RefreshTokenInfo info = maybeInfo.get();
-      if (info.getJti() != null && revocationGateway.isRevoked(info.getJti(), tenant)) {
-        // Replay detected — revoke all active refresh tokens for this user/client pair
-        revocationGateway.revokeAllForUser(info.getUsername(), info.getClient(), tenant);
-        return Response.status(401).build();
-      }
-      return loadPreautorizedClient(tenant, info.getClient()).map(client -> {
-        List<String> audiences = info.getAudiences();
-        AuthRequest request = AuthRequest.builder().audiences(audiences).tenant(tenant)
-            .clientId(Optional.of(client.getClientId()))
-            .scope(Optional.ofNullable(paramMap.getFirst("scope"))).build();
-        AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request, info.getUsername(),
-            client, Arrays.asList(), AuthenticationMode.REFRESH);
-        if (!auth.isRight()) {
-          return Response.status(401).build();
-        }
-        AutorizationToken token = emitAndBindToken(tenant, client, paramMap.getFirst("grant_type"),
-            auth.getData(), request, Optional.empty(), Optional.of(refreshToken));
-        if (info.getJti() != null) {
-          revocationGateway.revokeJti(info.getJti(), tenant, "refresh", info.getExpiresAt());
-        }
-        return Response.status(200).entity(token).build();
-      }).orElseGet(() -> Response.status(401).build());
+    String grantType = paramMap.getFirst("grant_type");
+    if ("authorization_code".equals(grantType)) {
+      return exchangeCode(tenant, autho, paramMap);
+    } else if ("refresh_token".equals(grantType)) {
+      return refresh(tenant, autho, paramMap);
     }
     if (null != autho && autho.startsWith("Basic ")) {
       String encodeToString = new String(Base64.getDecoder().decode(autho.substring(6).getBytes()),
@@ -288,15 +240,203 @@ public class TokenController {
     }
     return Response.status(200)
         .entity(emitAndBindToken(tenant, clientDetails, paramMap.getFirst("grant_type"),
-            authenticate.getData(), request, Optional.empty(), Optional.empty()))
+            authenticate.getData(), request, Optional.empty(), Optional.empty(),
+            tokenBuilder.newRefreshFamily(tenant, false)))
         .build();
+  }
+
+  /**
+   * Redeems an authorization code.
+   *
+   * The client must authenticate (secret, or as a public client) and be the one the code was issued
+   * to, for the same tenant and redirect URI, with a valid PKCE verifier. A request that fails
+   * these checks does not spend the code; of two valid concurrent requests only one gets tokens.
+   */
+  private Response exchangeCode(String tenant, String autho,
+      MultivaluedMap<String, String> params) {
+    Optional<ClientDetails> client = authenticateClient(tenant, autho, params);
+    if (client.isEmpty()) {
+      return oauthError(401, "invalid_client", "Client authentication failed");
+    }
+    ClientDetails authenticated = client.get();
+    String redirect = params.getFirst("redirect_uri");
+    String verifier = params.getFirst("code_verifier");
+    Optional<TemporalAuthCode> redeemed =
+        temporalStore.consumeTemporalAuthCode(params.getFirst("code"),
+            code -> codeMatches(code, tenant, authenticated, redirect, verifier));
+    if (redeemed.isEmpty()) {
+      return oauthError(400, "invalid_grant", "Invalid authorization code");
+    }
+    TemporalAuthCode code = redeemed.get();
+    AuthRequest request = code.request;
+    AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request, code.data.getUsername(),
+        code.client, Arrays.asList(), AuthenticationMode.CODE_EXCHANGE);
+    if (!auth.isRight()) {
+      return oauthError(400, "invalid_grant", "The user can not be authenticated");
+    }
+    boolean withSession = code.sessionId != null && !code.sessionId.isBlank();
+    return tokenResponse(emitAndBindToken(tenant, code.client, "authorization_code", auth.getData(),
+        request, Optional.ofNullable(code.sessionId), Optional.empty(),
+        tokenBuilder.newRefreshFamily(tenant, withSession)));
+  }
+
+  /**
+   * Checks that a stored code belongs to the redeeming request.
+   */
+  static boolean codeMatches(TemporalAuthCode code, String tenant, ClientDetails client,
+      String redirect, String verifier) {
+    if (code.client == null || !client.getClientId().equals(code.client.getClientId())) {
+      return false;
+    }
+    if (code.request == null || !tenant.equals(code.request.getTenant())) {
+      return false;
+    }
+    if (code.request.getRedirect().isPresent()
+        && !code.request.getRedirect().get().equals(redirect)) {
+      return false;
+    }
+    String challenge = code.request.getCodeChallenge().orElse(null);
+    if (challenge == null) {
+      // Without PKCE only an authenticated confidential client may redeem, and a verifier for a
+      // code without challenge is a downgrade attempt (RFC 9700 §2.1.1).
+      return client.isProtectedWithSecret() && (verifier == null || verifier.isBlank());
+    }
+    return verifier != null && !verifier.isBlank()
+        && "S256".equals(code.request.getCodeChallengeMethod().orElse(""))
+        && PkceChallenge.fromRequest(challenge, "S256").verify(verifier);
+  }
+
+  /**
+   * Rotates a refresh token.
+   *
+   * The client must authenticate and own the token; the family must be alive and, for interactive
+   * grants, its session too. Scopes can only be narrowed. The token is consumed atomically just
+   * before issuing; a token used twice revokes its family.
+   */
+  private Response refresh(String tenant, String autho, MultivaluedMap<String, String> params) {
+    String refreshToken = params.getFirst("refresh_token");
+    Optional<RefreshTokenInfo> maybeInfo = null == refreshToken ? Optional.empty()
+        : tokenBuilder.verifyRefreshInfo(refreshToken, tenant);
+    if (maybeInfo.isEmpty()) {
+      return oauthError(400, "invalid_grant", "Invalid refresh token");
+    }
+    RefreshTokenInfo info = maybeInfo.get();
+    Optional<ClientDetails> client = authenticateClient(tenant, autho, params);
+    if (client.isEmpty()) {
+      return oauthError(401, "invalid_client", "Client authentication failed");
+    }
+    if (!client.get().getClientId().equals(info.getClient()) || info.getJti() == null
+        || info.getFamily().isEmpty()) {
+      return oauthError(400, "invalid_grant", "Invalid refresh token");
+    }
+    RefreshFamily family = info.getFamily().get();
+    if (revocationGateway.isRevoked(info.getJti(), tenant)) {
+      return replay(tenant, info, family);
+    }
+    if (revocationGateway.isRevoked(family.getFid(), tenant)
+        || !family.getFexp().isAfter(Instant.now())) {
+      return oauthError(400, "invalid_grant", "Refresh token family expired or revoked");
+    }
+    if (family.isSessionBound() && !sessionStore.isRefreshSessionActive(info.getJti())) {
+      return oauthError(400, "invalid_grant", "The session of the refresh token has ended");
+    }
+    List<String> requested = Optional.ofNullable(params.getFirst("scope")).map(
+        scope -> Arrays.stream(scope.split("\\s+")).filter(s -> !s.isBlank()).distinct().toList())
+        .orElse(List.of());
+    if (!info.getGrantedScopes().containsAll(requested)) {
+      return oauthError(400, "invalid_scope", "The scope exceeds the original grant");
+    }
+    List<String> scopes = requested.isEmpty() ? info.getGrantedScopes() : requested;
+    ClientDetails details = client.get();
+    AuthRequest request = AuthRequest.builder().audiences(info.getAudiences()).tenant(tenant)
+        .clientId(Optional.of(details.getClientId())).scope(Optional.of(String.join(" ", scopes)))
+        .build();
+    AuthenticationResult auth = loginUsecase.fillPreAuthenticated(request, info.getUsername(),
+        details, Arrays.asList(), AuthenticationMode.REFRESH);
+    if (!auth.isRight()) {
+      return oauthError(400, "invalid_grant", "The user can not be authenticated");
+    }
+    auth.getData().setScopes(scopes);
+    if (!revocationGateway.consumeJti(info.getJti(), tenant, "refresh", info.getExpiresAt())) {
+      return replay(tenant, info, family);
+    }
+    return tokenResponse(emitAndBindToken(tenant, details, "refresh_token", auth.getData(), request,
+        Optional.empty(), Optional.of(refreshToken), family));
+  }
+
+  /**
+   * A refresh token was used twice: revoke its family and the user's tokens for the client.
+   */
+  private Response replay(String tenant, RefreshTokenInfo info, RefreshFamily family) {
+    log.warn("Refresh token reuse for client {} in tenant {}: family revoked", info.getClient(),
+        tenant);
+    revocationGateway.revokeJti(family.getFid(), tenant, "refresh", family.getFexp());
+    revocationGateway.revokeAllForUser(info.getUsername(), info.getClient(), tenant);
+    return oauthError(400, "invalid_grant", "Refresh token already used");
+  }
+
+  /**
+   * Authenticates the client of a token request.
+   *
+   * With a secret (HTTP Basic or {@code client_secret}) the client must be confidential and the
+   * secret valid; without it, the client must allow public access. Basic and body credentials
+   * cannot disagree.
+   */
+  private Optional<ClientDetails> authenticateClient(String tenant, String autho,
+      MultivaluedMap<String, String> params) {
+    String bodyId = params.getFirst("client_id");
+    String bodySecret = params.getFirst("client_secret");
+    String id = bodyId;
+    String secret = bodySecret;
+    if (autho != null && autho.regionMatches(true, 0, "Basic ", 0, 6)) {
+      String decoded;
+      try {
+        decoded = new String(Base64.getDecoder().decode(autho.substring(6).trim()),
+            StandardCharsets.UTF_8);
+      } catch (IllegalArgumentException ex) {
+        return Optional.empty();
+      }
+      int colon = decoded.indexOf(':');
+      if (colon < 0 || bodySecret != null) {
+        return Optional.empty();
+      }
+      id = decoded.substring(0, colon);
+      secret = decoded.substring(colon + 1);
+      if (bodyId != null && !bodyId.equals(id)) {
+        return Optional.empty();
+      }
+    }
+    if (id == null || id.isBlank()) {
+      return Optional.empty();
+    }
+    return secret == null || secret.isEmpty() ? clientRetriever.loadPublicById(tenant, id)
+        : loadClient(tenant, id, secret);
+  }
+
+  private static Response tokenResponse(AutorizationToken token) {
+    return Response.status(200).entity(token).header("Cache-Control", "no-store")
+        .header("Pragma", "no-cache").build();
+  }
+
+  /**
+   * OAuth error response (RFC 6749 §5.2), never cached.
+   */
+  private static Response oauthError(int status, String error, String description) {
+    Response.ResponseBuilder builder =
+        Response.status(status).entity(Map.of("error", error, "error_description", description))
+            .type(MediaType.APPLICATION_JSON).header("Cache-Control", "no-store")
+            .header("Pragma", "no-cache");
+    if (status == 401) {
+      builder.header("WWW-Authenticate", "Basic realm=\"oauth\"");
+    }
+    return builder.build();
   }
 
   private AutorizationToken emitAndBindToken(String tenant, ClientDetails clientDetails,
       String grantType, AuthenticationData auth, AuthRequest request, Optional<String> sessionId,
-      Optional<String> previousRefreshToken) {
+      Optional<String> previousRefreshToken, RefreshFamily family) {
     AutorizationToken token =
-        tokenBuilder.buildToken(tenant, clientDetails, grantType, auth, request);
+        tokenBuilder.buildToken(tenant, clientDetails, grantType, auth, request, family);
     Optional<String> accessJti = tokenBuilder.tokenJti(token.getAccessToken(), tenant);
     Optional<String> refreshJti = tokenBuilder.tokenJti(token.getRefreshToken(), tenant);
     if (accessJti.isPresent() && refreshJti.isPresent()) {
@@ -324,20 +464,6 @@ public class TokenController {
   private Optional<ClientDetails> loadClient(final String tenant, final String clientId,
       final String secretId) {
     return clientRetriever.loadPrivate(tenant, clientId, secretId);
-  }
-
-  /**
-   * Loads a pre-authorized client using only the client id.
-   *
-   * Used when client authentication is not required. Delegates lookup to the client gateway.
-   *
-   * @param tenant tenant identifier
-   * @param clientId client identifier
-   * @return optional client details
-   */
-  private Optional<ClientDetails> loadPreautorizedClient(final String tenant,
-      final String clientId) {
-    return clientRetriever.loadPreautorized(tenant, clientId);
   }
 
 }

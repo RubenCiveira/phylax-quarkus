@@ -2,20 +2,20 @@
 package net.civeira.phylax.features.oauth.delegatelogin.domain;
 
 import java.util.Map;
+import java.util.Optional;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.Builder;
 import lombok.Data;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 
 /**
  * Contract for external delegated access providers.
  *
- * Responsibilities: - Build request information for external auth. - Process provider responses and
- * extract user data.
+ * Responsibilities: - Build request information for external auth. - Validate provider responses
+ * and extract the asserted identity.
  *
- * Design notes: - Implementations encapsulate provider-specific logic. - Used by delegated login
- * flows and UI rendering.
+ * Design notes: - Implementations encapsulate provider-specific logic. - A response yields an
+ * identity only after the provider checks it (code exchange, signature); otherwise it is empty.
  */
 public interface DelegatedAccessExternalProvider {
   @Data
@@ -53,106 +53,11 @@ public interface DelegatedAccessExternalProvider {
     private boolean automatic = false;
   }
 
-  @Data
-  @RegisterForReflection
-  /**
-   * Response information returned by an external provider.
-   *
-   * Holds an inner token and optional UI messages. Used to continue the delegated login flow.
-   */
-  public static class ResponseInfo {
-    /**
-     * Provider-issued token or code.
-     */
-    private String innerToken;
-    /**
-     * Title for UI display.
-     */
-    private String title;
-    /**
-     * Message for UI display.
-     */
-    private String message;
-
-    /**
-     * Builds a default response from provider metadata and code.
-     *
-     * Uses provider description to build localized messages. Stores the first code value as inner
-     * token.
-     *
-     * @param request auth request context
-     * @param provider delegated provider implementation
-     * @param code provider code array
-     * @return response info instance
-     */
-    public static ResponseInfo from(final AuthRequest request,
-        DelegatedAccessExternalProvider provider, String[] code) {
-      DelegatedProviderDescription info = provider.info(request);
-      ResponseInfo response = new ResponseInfo();
-      response.setTitle(info.getName() + " correcto");
-      response.setMessage(
-          "Autenticacion correcta con " + info.getName() + ", redirigimos para autenticar");
-      response.setInnerToken(code[0]);
-      return response;
-    }
-  }
-
-  @Data
-  @RegisterForReflection
-  /**
-   * Token information stored during delegated login flows.
-   *
-   * Captures request context and provider identifiers. Used when exchanging codes for local
-   * sessions.
-   */
-  public static class TokenInfo {
-    /**
-     * Auth request context.
-     */
-    private AuthRequest request;
-    /**
-     * Provider identifier.
-     */
-    private String provider;
-    /**
-     * External URL used by the provider.
-     */
-    private String externUrl;
-    /**
-     * Provider-issued token or code.
-     */
-    private String innerToken;
-  }
-
-
-  @Data
-  @Builder
-  /**
-   * User data extracted from an external provider.
-   *
-   * Contains code, name, and email fields used for mapping. Used to resolve local usernames or
-   * accounts.
-   */
-  public static class UserData {
-    /**
-     * Provider-specific user code or identifier.
-     */
-    private final String code;
-    /**
-     * Display name for the user.
-     */
-    private final String name;
-    /**
-     * Email address for the user.
-     */
-    private final String email;
-  }
-
   /**
    * Builds request information for the external provider.
    *
-   * Implementations should include target URL and parameters. Used to initiate delegated login
-   * redirections.
+   * Implementations must send the {@code state} of the details and, when the protocol allows it,
+   * bind the request to it (PKCE, SAML request ID).
    *
    * @param request auth request context
    * @param details delegated request details
@@ -161,31 +66,18 @@ public interface DelegatedAccessExternalProvider {
   RequestInfo request(AuthRequest request, DelegatedRequestDetails details);
 
   /**
-   * Processes a provider response and extracts token info.
+   * Validates the provider response and returns the identity it asserts.
    *
-   * Implementations should parse the provider parameters. The returned response info continues the
-   * flow.
+   * Implementations must reject responses that do not answer the request described by the details.
+   * Returns empty for any invalid, foreign or unverifiable response.
    *
    * @param request auth request context
-   * @param details delegated request details
+   * @param details delegated request details of the pending login
    * @param params provider response parameters
-   * @return response information
+   * @return asserted identity
    */
-  ResponseInfo response(AuthRequest request, DelegatedRequestDetails details,
+  Optional<FederatedUser> authenticate(AuthRequest request, DelegatedRequestDetails details,
       Map<String, String[]> params);
-
-  /**
-   * Retrieves user data from the provider using the inner token.
-   *
-   * Implementations should call provider APIs to fetch user info. The returned data is used to map
-   * to local identities.
-   *
-   * @param request auth request context
-   * @param details delegated request details
-   * @param innerToken provider token or code
-   * @return user data
-   */
-  UserData userInfo(AuthRequest request, DelegatedRequestDetails details, String innerToken);
 
   /**
    * Returns the provider identifier for this implementation.

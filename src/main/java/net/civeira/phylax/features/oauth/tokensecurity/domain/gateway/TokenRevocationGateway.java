@@ -33,6 +33,19 @@ public interface TokenRevocationGateway {
   boolean isRevoked(String jti, String tenantId);
 
   /**
+   * Consumes a JWT ID once: only the first caller gets {@code true}.
+   *
+   * Used to rotate refresh tokens; a second consumption of the same JTI is a reuse.
+   *
+   * @param jti JWT ID claim
+   * @param tenantId tenant identifier
+   * @param tokenType token type
+   * @param expiresAt token expiry — used to schedule cleanup
+   * @return true only when this call consumed the JTI
+   */
+  boolean consumeJti(String jti, String tenantId, String tokenType, Instant expiresAt);
+
+  /**
    * Removes expired revocation entries.
    *
    * <p>

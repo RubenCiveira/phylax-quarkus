@@ -6,40 +6,54 @@ import java.util.Map;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.RequestInfo;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.ResponseInfo;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.UserData;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedLoginEndpoint;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.PendingDelegation;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.gateway.DelegateLoginGateway;
 
 /**
  * Application service for delegated login flows.
  *
- * Responsibilities: - Orchestrate delegated provider requests and responses. - Resolve usernames
- * from stored delegated tokens.
+ * Responsibilities: - Start a delegated login bound to the browser, the client and the provider. -
+ * Complete it once: check the binding, validate the provider response and resolve the account.
  *
- * Design notes: - Delegates provider access to DelegateLoginGateway. - Keeps provider selection
- * logic centralized.
+ * Design notes: - The state travels through the provider; the binding secret only lives in an
+ * HttpOnly cookie of the browser that started the login. - Every check happens before the provider
+ * response is trusted, and the pending login is consumed before calling the provider.
  */
+@Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class DelegateLogin {
 
   /**
-   * Gateway that provides delegated providers and token storage.
+   * A started delegated login.
+   */
+  @Getter
+  @RequiredArgsConstructor
+  public static class Started {
+    /**
+     * Where to send the browser.
+     */
+    private final RequestInfo request;
+    /**
+     * Binding secret to store in the browser cookie.
+     */
+    private final String binding;
+  }
+
+  /**
+   * Gateway that provides delegated providers and pending login storage.
    */
   private final DelegateLoginGateway gateway;
 
   /**
    * Returns the configured delegated providers for a request.
-   *
-   * Providers are resolved by the gateway based on tenant context. Used to render delegated login
-   * options.
    *
    * @param request auth request context
    * @return list of delegated providers
@@ -49,118 +63,90 @@ public class DelegateLogin {
   }
 
   /**
-   * Builds request information for a specific delegated provider.
-   *
-   * Selects the provider based on endpoint configuration. Returns empty when no matching provider
-   * is found.
+   * Starts a delegated login with a provider of the tenant.
    *
    * @param request auth request context
-   * @param endpoint delegated login endpoint
-   * @return optional request info
+   * @param provider provider identifier
+   * @param clientId client of the authorization request
+   * @param callbackUrl callback URL registered at the provider
+   * @param returnPath relative authorize URL to resume after the provider
+   * @return the request to send and the binding secret, or empty when there is no such provider
    */
-  public Optional<RequestInfo> getRequestInfo(AuthRequest request,
-      DelegatedLoginEndpoint endpoint) {
-    DelegatedRequestDetails details = toDetails(endpoint);
-    return gateway.providers(request).stream()
-        .filter(p -> p.getId(request).equals(endpoint.getProvider()))
-        .map(p -> p.request(request, details)).findFirst();
+  public Optional<Started> start(AuthRequest request, String provider, String clientId,
+      String callbackUrl, String returnPath) {
+    return find(request, provider).map(external -> {
+      String state = PendingDelegation.newSecret();
+      String binding = PendingDelegation.newSecret();
+      PendingDelegation pending = PendingDelegation.builder().tenant(request.getTenant())
+          .provider(provider).clientId(clientId).returnPath(returnPath).callbackUrl(callbackUrl)
+          .bindingHash(PendingDelegation.hash(binding)).codeVerifier(PendingDelegation.newSecret())
+          .requestId(PendingDelegation.requestIdFor(state)).createdAt(System.currentTimeMillis())
+          .build();
+      gateway.savePending(PendingDelegation.hash(state), pending);
+      return new Started(external.request(request, DelegatedRequestDetails.of(pending, state)),
+          binding);
+    });
   }
 
   /**
-   * Processes a delegated provider response.
+   * Reads a pending login by its state without consuming it.
    *
-   * Selects the provider based on endpoint configuration. Returns empty when no matching provider
-   * is found.
+   * @param state state returned by the provider
+   * @return pending login
+   */
+  public Optional<PendingDelegation> pending(String state) {
+    if (state == null || state.isBlank()) {
+      return Optional.empty();
+    }
+    return gateway.findPending(PendingDelegation.hash(state));
+  }
+
+  /**
+   * Completes a delegated login and returns the username of the local account.
    *
-   * @param request auth request context
-   * @param endpoint delegated login endpoint
+   * The pending login is consumed first, so a response can only be used once. Then the browser
+   * binding, tenant, provider and client must match the ones that started it, and the provider must
+   * accept its own response.
+   *
+   * @param request auth request context of the authorize step
+   * @param clientId client of the authorize step
+   * @param provider provider sent with the response
+   * @param state state returned by the provider
+   * @param binding binding cookie of the browser
    * @param params provider response parameters
-   * @return optional response info
+   * @return username, or empty when any check fails
    */
-  public Optional<ResponseInfo> processResponse(AuthRequest request,
-      DelegatedLoginEndpoint endpoint, Map<String, String[]> params) {
-    DelegatedRequestDetails details = toDetails(endpoint);
-    return gateway.providers(request).stream()
-        .filter(p -> p.getId(request).equals(endpoint.getProvider()))
-        .map(p -> p.response(request, details, params)).findFirst();
+  public Optional<String> complete(AuthRequest request, String clientId, String provider,
+      String state, String binding, Map<String, String[]> params) {
+    if (state == null || state.isBlank()) {
+      return Optional.empty();
+    }
+    Optional<PendingDelegation> consumed =
+        gateway.consumePending(request.getTenant(), PendingDelegation.hash(state));
+    if (consumed.isEmpty()) {
+      log.warn("Delegated login refused for tenant {}: unknown, expired or used state",
+          request.getTenant());
+      return Optional.empty();
+    }
+    PendingDelegation pending = consumed.get();
+    if (!pending.boundTo(binding)) {
+      log.warn("Delegated login refused for tenant {}: started by another browser",
+          request.getTenant());
+      return Optional.empty();
+    }
+    if (!pending.sameFlow(request.getTenant(), provider, clientId)) {
+      log.warn("Delegated login refused for tenant {}: provider or client mismatch",
+          request.getTenant());
+      return Optional.empty();
+    }
+    return find(request, provider)
+        .flatMap(external -> external.authenticate(request,
+            DelegatedRequestDetails.of(pending, state), params))
+        .flatMap(user -> gateway.resolveAccount(request, provider, user));
   }
 
-  /**
-   * Stores a delegated token using the gateway.
-   *
-   * The token is stored under a short-lived code. Used to resume the flow after external login.
-   *
-   * @param request auth request context
-   * @param code temporary code
-   * @param token delegated token info
-   */
-  public void saveToken(AuthRequest request, String code, TokenInfo token) {
-    gateway.saveToken(request, code, token);
-  }
-
-  /**
-   * Resolves the username from a stored delegated token, validating provider.
-   *
-   * Ensures the stored token belongs to the expected provider. Used for browser callback flows for
-   * security.
-   *
-   * @param request auth request context
-   * @param code temporary code
-   * @param expectedProvider expected provider identifier
-   * @return optional username
-   */
-  public Optional<String> resolveUsername(AuthRequest request, String code,
-      String expectedProvider) {
-    return gateway.loadToken(request, code).filter(t -> t.getProvider().equals(expectedProvider))
-        .flatMap(info -> resolveFromInfo(request, info));
-  }
-
-  /**
-   * Resolves the username from a stored delegated token.
-   *
-   * Does not constrain provider, used by token granters. Provider verification occurs within stored
-   * token data.
-   *
-   * @param request auth request context
-   * @param code temporary code
-   * @return optional username
-   */
-  public Optional<String> resolveUsername(AuthRequest request, String code) {
-    return gateway.loadToken(request, code).flatMap(info -> resolveFromInfo(request, info));
-  }
-
-  /**
-   * Resolves a username from stored token info.
-   *
-   * Loads provider and queries user info to map to local user. Uses gateway to resolve the final
-   * username.
-   *
-   * @param request auth request context
-   * @param info delegated token info
-   * @return optional username
-   */
-  private Optional<String> resolveFromInfo(AuthRequest request, TokenInfo info) {
-    DelegatedRequestDetails details = DelegatedRequestDetails.builder().provider(info.getProvider())
-        .externalUrl(info.getExternUrl()).build();
-    return gateway.providers(request).stream()
-        .filter(p -> p.getId(request).equals(info.getProvider())).findFirst()
-        .flatMap(ssoProvider -> {
-          UserData userInfo = ssoProvider.userInfo(request, details, info.getInnerToken());
-          return gateway.retrieveUsername(request, ssoProvider.getId(request), userInfo);
-        });
-  }
-
-  /**
-   * Converts a login endpoint to delegated request details.
-   *
-   * Extracts provider id and external URL for provider calls. Keeps detail creation consistent
-   * across methods.
-   *
-   * @param endpoint delegated login endpoint
-   * @return request details
-   */
-  private DelegatedRequestDetails toDetails(DelegatedLoginEndpoint endpoint) {
-    return DelegatedRequestDetails.builder().provider(endpoint.getProvider())
-        .externalUrl(endpoint.getExternalUrl()).build();
+  private Optional<DelegatedAccessExternalProvider> find(AuthRequest request, String provider) {
+    return gateway.providers(request).stream().filter(p -> p.getId(request).equals(provider))
+        .findFirst();
   }
 }

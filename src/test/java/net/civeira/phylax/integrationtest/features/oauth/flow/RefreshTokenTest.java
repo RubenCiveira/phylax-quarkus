@@ -30,10 +30,11 @@ class RefreshTokenTest extends OidcIntegrationTestBase {
   }
 
   @Test
-  void refreshToken_invalid_returns401() {
+  void refreshToken_invalid_returnsInvalidGrant() {
     Response response = client.refreshToken(OidcTestFixtures.TENANT, "not-a-valid-token",
         OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET);
 
-    Assertions.assertEquals(401, response.statusCode());
+    Assertions.assertEquals(400, response.statusCode());
+    Assertions.assertEquals("invalid_grant", response.jsonPath().getString("error"));
   }
 }

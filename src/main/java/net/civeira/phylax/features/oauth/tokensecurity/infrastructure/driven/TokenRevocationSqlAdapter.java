@@ -27,6 +27,23 @@ public class TokenRevocationSqlAdapter implements TokenRevocationGateway {
   private final DataSource datasource;
 
   @Override
+  public boolean consumeJti(String jti, String tenantId, String tokenType, Instant expiresAt) {
+    // The primary key on jti makes the insert the single winner of concurrent consumptions.
+    try (Connection conn = datasource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(
+            "INSERT IGNORE INTO _oauth_revoked_jti (jti, tenant_id, token_type, expires_at)"
+                + " VALUES (?, ?, ?, ?)")) {
+      ps.setString(1, jti);
+      ps.setString(2, tenantId);
+      ps.setString(3, tokenType);
+      ps.setTimestamp(4, new Timestamp(expiresAt.toEpochMilli()));
+      return ps.executeUpdate() == 1;
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
   public void revokeJti(String jti, String tenantId, String tokenType, Instant expiresAt) {
     try (Connection conn = datasource.getConnection();
         PreparedStatement ps = conn.prepareStatement(

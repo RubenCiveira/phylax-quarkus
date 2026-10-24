@@ -35,6 +35,10 @@ public class TokenVerifier {
   private static final String CHALLENGE = "challenge";
   private static final String REFRESH_SCOPE = "refresh";
   private static final String MFA_SCOPE = "mfa";
+  static final String CLAIM_FAMILY_ID = "fid";
+  static final String CLAIM_FAMILY_EXPIRATION = "fexp";
+  static final String CLAIM_SESSION_BOUND = "ses";
+  static final String CLAIM_GRANTED_SCOPE = "granted_scope";
 
   private final TokenSigner tokenSigner;
   private final TokenRevocationGateway revocationGateway;
@@ -64,14 +68,16 @@ public class TokenVerifier {
       }
       String jti = claimAsString(payload.get("jti"));
       Instant expiresAt = resolveExpiry(payload);
-      if (jti != null && !jti.isBlank() && revocationGateway.isRevoked(jti, tenant)) {
-        return Optional.empty();
-      }
+      // Revocation is not checked here: the token endpoint must tell a reuse from a forgery.
       List<String> aud = claimAsList(payload.get(CLAIM_AUDIENCE_ID));
+      String granted = claimAsString(payload.get(CLAIM_GRANTED_SCOPE));
       return Optional
           .of(RefreshTokenInfo.builder().username(claimAsString(payload.get(CLAIM_USER_NAME)))
               .client(claimAsString(payload.get(CLAIM_CLIENT_ID)))
-              .audiences(null == aud ? List.of() : aud).jti(jti).expiresAt(expiresAt).build());
+              .audiences(null == aud ? List.of() : aud).jti(jti).expiresAt(expiresAt)
+              .grantedScopes(null == granted ? List.of()
+                  : Arrays.stream(granted.split(" ")).filter(s -> !s.isBlank()).toList())
+              .family(family(payload)).build());
     } catch (NotAllowedException nae) {
       return Optional.empty();
     }
@@ -128,6 +134,16 @@ public class TokenVerifier {
       log.warn("Wrong {} token", scope);
       return Optional.empty();
     }
+  }
+
+  private Optional<RefreshFamily> family(Map<String, Object> payload) {
+    String fid = claimAsString(payload.get(CLAIM_FAMILY_ID));
+    Object fexp = payload.get(CLAIM_FAMILY_EXPIRATION);
+    if (fid == null || fid.isBlank() || !(fexp instanceof Number n)) {
+      return Optional.empty();
+    }
+    return Optional.of(RefreshFamily.builder().fid(fid).fexp(Instant.ofEpochSecond(n.longValue()))
+        .sessionBound(Boolean.TRUE.equals(payload.get(CLAIM_SESSION_BOUND))).build());
   }
 
   private Instant resolveExpiry(Map<String, Object> payload) {

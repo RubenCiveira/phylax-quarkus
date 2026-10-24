@@ -238,6 +238,22 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
   }
 
   @Override
+  public boolean isRefreshSessionActive(String refreshJti) {
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement("SELECT 1 FROM _oauth_session_token st"
+            + " JOIN _oauth_session s ON s.session = st.session WHERE st.refresh_jti = ?"
+            + " AND st.revoked_at IS NULL AND s.revoked_at IS NULL AND s.expiration > ?")) {
+      stat.setString(1, refreshJti);
+      stat.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+      try (ResultSet rs = stat.executeQuery()) {
+        return rs.next();
+      }
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
   public boolean updateTokenJtisByRefreshJti(String currentRefreshJti, String accessJti,
       String refreshJti) {
     long now = System.currentTimeMillis();

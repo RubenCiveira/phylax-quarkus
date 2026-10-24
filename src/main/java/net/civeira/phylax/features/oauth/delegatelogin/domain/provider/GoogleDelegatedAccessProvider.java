@@ -3,157 +3,78 @@ package net.civeira.phylax.features.oauth.delegatelogin.domain.provider;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedRequestDetails;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.FederatedUser;
 
 /**
- * Delegated access provider implementation for Google OAuth.
+ * Delegated access provider implementation for Google (OpenID Connect).
  *
- * Responsibilities: - Build Google authorization requests. - Exchange authorization codes for user
- * information.
+ * Responsibilities: - Build Google authorization requests with state and PKCE. - Exchange the code
+ * and read the identity from the OIDC UserInfo endpoint.
  *
- * Design notes: - Uses Google OAuth endpoints and userinfo API. - Returns minimal user data for
- * mapping.
+ * Design notes: - The identity is the Google {@code sub}; the email counts as verified only when
+ * {@code email_verified} is true. - The code is exchanged server to server over TLS, so the
+ * UserInfo response is trusted (OIDC Core 3.1.3.7).
  */
+@Slf4j
 @RequiredArgsConstructor
 public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalProvider {
-  @Data
   /**
-   * Google userinfo response payload.
-   *
-   * Contains name, email, and profile metadata. Used to derive local user data.
+   * Google authorization endpoint.
    */
-  public static class GoogleUserData {
-    /**
-     * Given name from Google profile.
-     */
-    @JsonProperty("given_name")
-    private String name;
-    /**
-     * Family name from Google profile.
-     */
-    @JsonProperty("family_name")
-    private String surname;
-    /**
-     * Email address from Google profile.
-     */
-    @JsonProperty("email")
-    private String email;
-    /**
-     * Whether the email has been verified.
-     */
-    @JsonProperty("verified_email")
-    private boolean verified;
-    /**
-     * URL for the user's profile picture.
-     */
-    @JsonProperty("picture")
-    private String userPictureUrl;
-  }
+  private static final String AUTHORIZE = "https://accounts.google.com/o/oauth2/v2/auth";
+  /**
+   * Google token endpoint.
+   */
+  private static final String TOKEN = "https://oauth2.googleapis.com/token";
+  /**
+   * Google OIDC UserInfo endpoint.
+   */
+  private static final String USERINFO = "https://openidconnect.googleapis.com/v1/userinfo";
+  /**
+   * Shared HTTP client.
+   */
+  private static final HttpClient CLIENT =
+      HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+  /**
+   * JSON reader.
+   */
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  @Data
-  /**
-   * Google token response payload.
-   *
-   * Contains the access token used to fetch user info. Used after exchanging the authorization
-   * code.
-   */
-  public static class GoogleAuth {
-    /**
-     * Access token returned by Google.
-     */
-    @JsonProperty("access_token")
-    private String accessToken;
-  }
-
-  @Data
-  /**
-   * Google token exchange request payload.
-   *
-   * Contains client credentials and authorization code. Serialized to JSON for token exchange.
-   */
-  public static class GoogleCheck {
-    /**
-     * Google client id.
-     */
-    @JsonProperty("client_id")
-    private String clientId;
-    /**
-     * Google client secret.
-     */
-    @JsonProperty("client_secret")
-    private String clientSecret;
-    /**
-     * Authorization code returned by Google.
-     */
-    @JsonProperty("code")
-    private String code;
-    /**
-     * Grant type used for exchange.
-     */
-    @JsonProperty("grant_type")
-    private String grantType;
-    /**
-     * Redirect URI used in the authorization request.
-     */
-    @JsonProperty("redirect_uri")
-    private String redirect;
-  }
-
-  /**
-   * Provider identifier for this instance.
-   */
   private final String id;
-  /**
-   * Google OAuth client id.
-   */
   private final String googleClientId;
-  /**
-   * Google OAuth client secret.
-   */
   private final String googleSecretId;
-  /**
-   * Whether the provider should auto-submit in the UI.
-   */
   private final boolean automatic;
 
-  /**
-   * Returns the provider identifier.
-   *
-   * Used to select the Google provider by id. The id is configured per instance.
-   *
-   * @param request auth request context
-   * @return provider identifier
-   */
   @Override
   public String getId(AuthRequest request) {
     return id;
   }
 
-  /**
-   * Returns the provider description for UI rendering.
-   *
-   * Includes name, logo, and automation flag. Used to render provider buttons in the login UI.
-   *
-   * @param request auth request context
-   * @return provider description
-   */
   @Override
   public DelegatedProviderDescription info(AuthRequest request) {
     DelegatedProviderDescription pd = new DelegatedProviderDescription();
@@ -164,115 +85,109 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
     return pd;
   }
 
-  /**
-   * Builds the Google authorization request info.
-   *
-   * Provides target URL and required parameters for OAuth. Uses GET redirect with configured
-   * scopes.
-   *
-   * @param request auth request context
-   * @param detail delegated request details
-   * @return request information
-   */
   @Override
   public RequestInfo request(AuthRequest request, DelegatedRequestDetails detail) {
     RequestInfo info = new RequestInfo();
     info.setTitle("Redirigiendo a google");
     info.setMessage("Vamos a ir a su login de google para autenticarlo");
-    info.setTargetUrl("https://accounts.google.com/o/oauth2/v2/auth");
+    info.setTargetUrl(AUTHORIZE);
     info.setWithPost(false);
-    info.setParams(new HashMap<>());
-    // Cada proyecto podrá tener el suyo propio en alguna configuración específica.
-    // En su defecto, uno por defecto de birdgit.
-    info.getParams().put("response_type", "code");
-    info.getParams().put("client_id", googleClientId);
-    info.getParams().put("redirect_uri", detail.getExternalUrl());
-    info.getParams().put("scope",
-        "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email");
+    Map<String, String> params = new LinkedHashMap<>();
+    params.put("response_type", "code");
+    params.put("client_id", googleClientId);
+    params.put("redirect_uri", detail.getExternalUrl());
+    params.put("scope", "openid email profile");
+    params.put("state", detail.getState());
+    params.put("code_challenge", challenge(detail.getCodeVerifier()));
+    params.put("code_challenge_method", "S256");
+    info.setParams(params);
     return info;
   }
 
-  /**
-   * Processes Google redirect response parameters.
-   *
-   * Extracts the authorization code and returns response info. The inner token holds the
-   * authorization code.
-   *
-   * @param request auth request context
-   * @param detail delegated request details
-   * @param params response parameters
-   * @return response information
-   */
   @Override
-  public ResponseInfo response(AuthRequest request, DelegatedRequestDetails detail,
+  public Optional<FederatedUser> authenticate(AuthRequest request, DelegatedRequestDetails detail,
       Map<String, String[]> params) {
-    ResponseInfo response = new ResponseInfo();
-    String code = params.get("code")[0];
-    response.setTitle("Aceptado el token");
-    response.setMessage("Su autenticación ha sido correcta, vamos a acceder");
-    response.setInnerToken(code);
-    return response;
+    String[] code = params.get("code");
+    if (params.containsKey("error") || code == null || code.length != 1 || code[0].isBlank()) {
+      log.warn("Google response rejected for provider {}: no code", id);
+      return Optional.empty();
+    }
+    try {
+      Map<String, String> form = new LinkedHashMap<>();
+      form.put("grant_type", "authorization_code");
+      form.put("code", code[0]);
+      form.put("redirect_uri", detail.getExternalUrl());
+      form.put("client_id", googleClientId);
+      form.put("client_secret", googleSecretId);
+      form.put("code_verifier", detail.getCodeVerifier());
+      HttpResponse<String> tokenResponse =
+          CLIENT.send(HttpRequest.newBuilder(URI.create(TOKEN)).timeout(Duration.ofSeconds(10))
+              .header("Content-Type", "application/x-www-form-urlencoded")
+              .POST(BodyPublishers.ofString(encode(form))).build(), BodyHandlers.ofString());
+      if (tokenResponse.statusCode() != 200) {
+        log.warn("Google code exchange rejected for provider {}: {}", id,
+            tokenResponse.statusCode());
+        return Optional.empty();
+      }
+      String accessToken = MAPPER.readTree(tokenResponse.body()).path("access_token").asText("");
+      if (accessToken.isEmpty()) {
+        return Optional.empty();
+      }
+      HttpResponse<String> userInfo = CLIENT.send(
+          HttpRequest.newBuilder(URI.create(USERINFO)).timeout(Duration.ofSeconds(10))
+              .header("Authorization", "Bearer " + accessToken).GET().build(),
+          BodyHandlers.ofString());
+      if (userInfo.statusCode() != 200) {
+        log.warn("Google userinfo rejected for provider {}: {}", id, userInfo.statusCode());
+        return Optional.empty();
+      }
+      return toUser(userInfo.body());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return Optional.empty();
+    } catch (IOException e) {
+      log.warn("Google invocation failed for provider {}", id, e);
+      return Optional.empty();
+    }
   }
 
   /**
-   * Retrieves user information from Google using the authorization code.
+   * Maps the OIDC UserInfo response to the asserted identity.
    *
-   * Exchanges the code for an access token and queries userinfo. Returns delegated user data
-   * derived from the profile.
-   *
-   * @param request auth request context
-   * @param detail delegated request details
-   * @param innerToken authorization code
-   * @return user data
+   * {@code email_verified} counts only as the boolean {@code true} or the string {@code "true"}.
    */
-  @Override
-  public UserData userInfo(AuthRequest request, DelegatedRequestDetails detail, String innerToken) {
-    HttpClient client = HttpClient.newHttpClient();
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    GoogleCheck check = new GoogleCheck();
-    check.setClientId(googleClientId);
-    check.setClientSecret(googleSecretId);
-    check.setCode(innerToken);
-    check.setGrantType("authorization_code");
-    check.setRedirect(detail.getExternalUrl());
-    try {
-      String requestBody = objectMapper.writeValueAsString(check);
-
-      // Create HTTP request for token exchange
-      HttpRequest tokenRequest =
-          HttpRequest.newBuilder().uri(URI.create("https://oauth2.googleapis.com/token"))
-              .header("Content-Type", "application/json").POST(BodyPublishers.ofString(requestBody))
-              .build();
-
-      // Send request and get response
-      HttpResponse<String> tokenResponse = client.send(tokenRequest, BodyHandlers.ofString());
-
-      // Deserialize response to GoogleAuth
-      GoogleAuth auth = objectMapper.readValue(tokenResponse.body(), GoogleAuth.class);
-      if (auth != null && auth.getAccessToken() != null) {
-        // Create HTTP request for user info
-        HttpRequest userInfoRequest = HttpRequest.newBuilder()
-            .uri(URI.create("https://www.googleapis.com/oauth2/v1/userinfo?alt=json"))
-            .header("Authorization", "Bearer " + auth.getAccessToken()).GET().build();
-
-        // Send request and get response
-        HttpResponse<String> userInfoResponse =
-            client.send(userInfoRequest, BodyHandlers.ofString());
-
-        // Deserialize response to GoogleUserData
-        GoogleUserData gd = objectMapper.readValue(userInfoResponse.body(), GoogleUserData.class);
-        String name = (gd.getName() + gd.getSurname()).replaceAll(" ", "");
-        return UserData.builder().code(name).name(name).email(name + "@gmail.com").build();
-      } else {
-        throw new IllegalArgumentException("No google code");
-      }
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new IllegalArgumentException("Interrumption with google invocation", e);
-    } catch (IOException e) {
-      throw new IllegalArgumentException("Fail with google invocation", e);
+  static Optional<FederatedUser> toUser(String userInfoJson) throws IOException {
+    JsonNode node = MAPPER.readTree(userInfoJson);
+    String subject = node.path("sub").asText("");
+    if (subject.isBlank()) {
+      return Optional.empty();
     }
+    JsonNode verified = node.path("email_verified");
+    boolean emailVerified = verified.isBoolean() ? verified.booleanValue()
+        : verified.isTextual() && "true".equalsIgnoreCase(verified.textValue());
+    return Optional.of(FederatedUser.builder().subject(subject)
+        .email(node.path("email").isTextual() ? node.path("email").textValue() : null)
+        .emailVerified(emailVerified)
+        .name(node.path("name").isTextual() ? node.path("name").textValue() : null).build());
+  }
+
+  /**
+   * PKCE S256 challenge of a verifier.
+   */
+  static String challenge(String verifier) {
+    try {
+      byte[] digest =
+          MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII));
+      return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+    } catch (NoSuchAlgorithmException ex) {
+      throw new IllegalStateException("SHA-256 not available", ex);
+    }
+  }
+
+  private static String encode(Map<String, String> form) {
+    return form.entrySet().stream()
+        .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "="
+            + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
+        .collect(Collectors.joining("&"));
   }
 }

@@ -111,6 +111,22 @@ class SyncTemplateTest(unittest.TestCase):
         self.assertIn('// new', rule.read_text(encoding='utf-8'))
         self.assertEqual('old', extra.read_text(encoding='utf-8'))
 
+    def test_install_seeds_are_updated_in_place_and_never_created(self):
+        self.source('bootstrap/install/Seed.java', 'package net.civeira.phylax.bootstrap; // new\n')
+        self.source('bootstrap/install/Unknown.java', 'package net.civeira.phylax.bootstrap;\n')
+        copies = [self.template / layer / 'src/main/java/bootstrap/install/Seed'
+                  for layer in ('traits/oidc', 'traits/multitenant-oidc')]
+        for path in copies:
+            path.parent.mkdir(parents=True)
+            path.write_text('old', encoding='utf-8')
+
+        self.assertEqual((2, 2, 1, 0), SYNC.sync(self.repo, self.template, from_index=False,
+                                                  apply=True, include_new=True, quiet=True))
+        for path in copies:
+            self.assertIn('// new', path.read_text(encoding='utf-8'))
+        self.assertEqual([], list((self.template / 'container').rglob('Seed')))
+        self.assertEqual([], list(self.template.rglob('Unknown')))
+
 
 if __name__ == '__main__':
     unittest.main()

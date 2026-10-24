@@ -78,13 +78,17 @@ public class ClaimsMapper {
   }
 
   public Builder refreshToken(String tenant, ClientDetails client,
-      AuthenticationData validationData) {
+      AuthenticationData validationData, RefreshFamily family) {
     String jti = UUID.randomUUID().toString();
     return JWT.create().withIssuer(issuer(tenant)).withJWTId(jti).withIssuedAt(new Date())
         .withClaim("aud", validationData.getAudiences())
         .withClaim(CLAIM_USER_NAME, validationData.getUsername())
         .withClaim(CLAIM_CLIENT_ID, client.getClientId())
-        .withArrayClaim(CLAIM_SCOPE, new String[] {REFRESH_SCOPE});
+        .withArrayClaim(CLAIM_SCOPE, new String[] {REFRESH_SCOPE})
+        .withClaim(TokenVerifier.CLAIM_GRANTED_SCOPE, String.join(" ", validationData.getScopes()))
+        .withClaim(TokenVerifier.CLAIM_FAMILY_ID, family.getFid())
+        .withClaim(TokenVerifier.CLAIM_FAMILY_EXPIRATION, family.getFexp().getEpochSecond())
+        .withClaim(TokenVerifier.CLAIM_SESSION_BOUND, family.isSessionBound());
   }
 
   public Builder identityToken(String tenant, String accessToken, ClientDetails client,
@@ -145,6 +149,17 @@ public class ClaimsMapper {
         .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
         .map(cfg -> Duration.ofSeconds(cfg.getRefreshTokenTtlSeconds()))
         .orElseGet(() -> propiedadEntera(EXPIRATION_CONF));
+  }
+
+  /**
+   * Absolute lifetime of a refresh family: {@code refresh-token-max-lifetime-seconds} of the tenant
+   * configuration, 30 days when missing or not positive.
+   */
+  public Duration refreshFamilyTtl(String tenantName) {
+    return tenantRepo.find(TenantFilter.builder().name(tenantName).build())
+        .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
+        .map(cfg -> cfg.getRefreshTokenMaxLifetimeSeconds()).filter(v -> v != null && v > 0)
+        .map(Duration::ofSeconds).orElse(Duration.ofDays(30));
   }
 
   static String generateHash(String value) {

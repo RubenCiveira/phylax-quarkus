@@ -6,18 +6,17 @@ import java.util.Optional;
 
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.UserData;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.FederatedUser;
 
 /**
  * Legacy gateway for delegated provider access.
  *
- * Responsibilities: - Provide access to configured delegated providers. - Resolve local usernames
- * from provider user data.
+ * Responsibilities: - Provide access to configured delegated providers. - Resolve local accounts
+ * from validated external identities.
  *
  * Design notes: - Superseded by DelegateLoginGateway. - Retained for adapter compatibility.
  */
 public interface DelegatedAccessProviderGateway {
-
   /**
    * Returns the delegated providers available for the request.
    *
@@ -29,15 +28,12 @@ public interface DelegatedAccessProviderGateway {
   List<DelegatedAccessExternalProvider> providers(AuthRequest request);
 
   /**
-   * Resolves a local username from provider user data.
-   *
-   * Used to map external identity to local user accounts. Returns empty when no user mapping
-   * exists.
+   * Resolves the local account of a validated external identity.
    *
    * @param request auth request context
    * @param provider provider identifier
-   * @param userInfo user data from provider
-   * @return optional username
+   * @param user identity asserted by the provider
+   * @return username of the local account
    */
-  Optional<String> retrieveUsername(AuthRequest request, String provider, UserData userInfo);
+  Optional<String> resolveAccount(AuthRequest request, String provider, FederatedUser user);
 }

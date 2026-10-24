@@ -36,6 +36,11 @@ public class FixedTokenRevocationGateway implements TokenRevocationGateway {
   }
 
   @Override
+  public boolean consumeJti(String jti, String tenantId, String tokenType, Instant expiresAt) {
+    return revoked.add(jti);
+  }
+
+  @Override
   public boolean isRevoked(String jti, String tenantId) {
     return revoked.contains(jti);
   }

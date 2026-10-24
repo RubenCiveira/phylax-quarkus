@@ -79,6 +79,7 @@ public class AuthorizeHtml {
   private static final String USERNAME = "username";
   private static final String AUTH_SESSION_ID = OidcCookieManager.AUTH_SESSION_ID;
   private static final String PRE_SESSION_ID = OidcCookieManager.PRE_SESSION_ID;
+  private static final String DELEGATED_BINDING = OidcCookieManager.DELEGATED_BINDING;
   /**
    * Cached translations indexed by locale.
    */
@@ -242,7 +243,8 @@ public class AuthorizeHtml {
    */
   public Response processForm(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap,
-      @CookieParam(AUTH_SESSION_ID) String session, @CookieParam(PRE_SESSION_ID) String cookie) {
+      @CookieParam(AUTH_SESSION_ID) String session, @CookieParam(PRE_SESSION_ID) String cookie,
+      @CookieParam(DELEGATED_BINDING) String delegatedBinding) {
     AuthRequest request;
     try {
       request = resolveAuthRequest(tenant, req, headers);
@@ -274,7 +276,7 @@ public class AuthorizeHtml {
       }
 
       return sessionInfo.map(si -> doCheckSession(si, loadClient, request, paramMap, session))
-          .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie));
+          .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie, delegatedBinding));
     }).orElseGet(() -> clientNotAllowedResponse(tenant, headers));
   }
 
@@ -283,8 +285,9 @@ public class AuthorizeHtml {
   public Response processAuthorizeForm(final @PathParam(TENANT) String tenant,
       final @Context UriInfo req, @Context HttpHeaders headers,
       final MultivaluedMap<String, String> paramMap, @CookieParam(AUTH_SESSION_ID) String session,
-      @CookieParam(PRE_SESSION_ID) String cookie) {
-    return processForm(tenant, req, headers, paramMap, session, cookie);
+      @CookieParam(PRE_SESSION_ID) String cookie,
+      @CookieParam(DELEGATED_BINDING) String delegatedBinding) {
+    return processForm(tenant, req, headers, paramMap, session, cookie, delegatedBinding);
   }
 
   @POST
@@ -540,13 +543,14 @@ public class AuthorizeHtml {
    * Executes the next step in the form-based flow via the OidcStepRouter.
    */
   private Response doExecStep(ClientDetails clientDetails, AuthRequest request,
-      MultivaluedMap<String, String> paramMap, String cookie) {
+      MultivaluedMap<String, String> paramMap, String cookie, String delegatedBinding) {
     String step = first(paramMap, "step");
     Optional<ChallengesState> challengeState =
         cookieManager.readPreSession(cookie, request.getTenant());
 
-    StepInput input = StepInput.builder().request(request).clientDetails(clientDetails)
-        .challenges(challengeState).formParams(paramMap).build();
+    StepInput input =
+        StepInput.builder().request(request).clientDetails(clientDetails).challenges(challengeState)
+            .formParams(paramMap).delegatedBinding(Optional.ofNullable(delegatedBinding)).build();
 
     // Initial-render requests (show-recover, show-register, delegated-login, start)
     if (step != null && !step.isEmpty()) {

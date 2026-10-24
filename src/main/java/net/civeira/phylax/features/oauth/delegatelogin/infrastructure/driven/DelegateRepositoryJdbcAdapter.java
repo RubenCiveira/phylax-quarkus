@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,37 +19,38 @@ import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
-import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExternalProvider.TokenInfo;
+import net.civeira.phylax.features.oauth.delegatelogin.domain.PendingDelegation;
 import net.civeira.phylax.features.oauth.delegatelogin.domain.gateway.DelegatedStoreGateway;
 
 /**
- * JDBC adapter for storing delegated login tokens.
+ * JDBC adapter for pending delegated logins.
  *
- * Responsibilities: - Persist delegated tokens and temporary codes. - Clean up expired delegated
- * tokens on a schedule.
+ * Responsibilities: - Persist pending logins under the hash of their state. - Consume them once and
+ * clean up expired ones on a schedule.
  *
- * Design notes: - Uses a dedicated database table for storage. - Encodes token info as base64 JSON
- * strings.
+ * Design notes: - Uses the {@code _oauth_delegated_state} table; {@code state_token} holds the
+ * SHA-256 of the state, never the state itself. - Consumption deletes the row and only the caller
+ * whose delete affected it obtains the pending login.
  */
 @Slf4j
 @RequestScoped
 @RequiredArgsConstructor
 public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
   /**
+   * How long a delegated login may stay pending.
+   */
+  static final Duration TTL = Duration.ofMinutes(10);
+  /**
    * Data source used for JDBC operations.
    */
   private final DataSource source;
   /**
-   * JSON mapper used to serialize token info.
+   * JSON mapper used to serialize pending logins.
    */
   private final ObjectMapper mapper;
 
   /**
-   * Scheduled cleanup of expired delegated tokens.
-   *
-   * Deletes rows older than the configured expiration window. Runs periodically to prevent table
-   * growth.
+   * Scheduled cleanup of expired pending logins.
    *
    * @throws SQLException when cleanup fails
    */
@@ -73,103 +75,75 @@ public class DelegateRepositoryJdbcAdapter implements DelegatedStoreGateway {
     return "42S02".equals(ex.getSQLState()) || ex.getErrorCode() == 1146;
   }
 
-  /**
-   * Stores a delegated token under the given code.
-   *
-   * Serializes the token to JSON and base64 encodes it. Writes the token with a short expiration
-   * time.
-   *
-   * @param request auth request context
-   * @param code temporary code
-   * @param token delegated token info
-   */
   @Override
-  public void save(AuthRequest request, String code, TokenInfo token) {
-    String json = format(token);
+  public void save(String stateHash, PendingDelegation pending) {
+    long now = System.currentTimeMillis();
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(
             "INSERT INTO _oauth_delegated_state (uid, tenant_id, state_token, provider_id, session_context_json, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
       stat.setString(1, UUID.randomUUID().toString());
-      stat.setString(2, token.getRequest().getTenant());
-      stat.setString(3, code);
-      stat.setString(4, token.getProvider());
-      stat.setString(5, json);
-      stat.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-      stat.setTimestamp(7, new Timestamp(System.currentTimeMillis() + 60000));
+      stat.setString(2, pending.getTenant());
+      stat.setString(3, stateHash);
+      stat.setString(4, pending.getProvider());
+      stat.setString(5, mapper.writeValueAsString(pending));
+      stat.setTimestamp(6, new Timestamp(now));
+      stat.setTimestamp(7, new Timestamp(now + TTL.toMillis()));
       stat.execute();
-    } catch (SQLException ex) {
+    } catch (SQLException | IOException ex) {
       throw new IllegalStateException(ex);
     }
   }
 
-  /**
-   * Formats token info as a JSON string.
-   *
-   * Uses ObjectMapper for serialization with fallback text. Returns a minimal JSON-like string on
-   * failure.
-   *
-   * @param json token info
-   * @return JSON string
-   */
-  private String format(TokenInfo json) {
-    try {
-      return mapper.writeValueAsString(json);
-    } catch (IOException ex) {
-      log.warn("Unable to build sso token", ex);
-      return "{ tenant: \"" + json.getRequest().getTenant() + "\", provider: \""
-          + json.getProvider() + "\", externUrl: \"" + json.getExternUrl() + "\", innerToken: \""
-          + json.getInnerToken() + "\"}";
-    }
-  }
-
-  /**
-   * Loads a delegated token by code.
-   *
-   * Reads and decodes the token payload if not expired. Filters out tokens from other tenants.
-   *
-   * @param request auth request context
-   * @param code temporary code
-   * @return optional token info
-   */
   @Override
-  public Optional<TokenInfo> load(AuthRequest request, String code) {
-    Optional<String> response = Optional.empty();
-    try (Connection connection = source.getConnection();
-        PreparedStatement stat = connection.prepareStatement(
-            "SELECT session_context_json FROM _oauth_delegated_state WHERE state_token=? AND expires_at > ?")) {
-      stat.setString(1, code);
-      stat.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-      try (ResultSet res = stat.executeQuery()) {
-        if (res.next()) {
-          response = Optional.of(res.getString(1));
-        }
+  public Optional<PendingDelegation> find(String stateHash) {
+    try (Connection connection = source.getConnection()) {
+      return read(connection, stateHash, null);
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  @Override
+  public Optional<PendingDelegation> consume(String tenant, String stateHash) {
+    try (Connection connection = source.getConnection()) {
+      Optional<PendingDelegation> pending = read(connection, stateHash, tenant);
+      if (pending.isEmpty()) {
+        return Optional.empty();
+      }
+      try (PreparedStatement stat = connection.prepareStatement(
+          "DELETE FROM _oauth_delegated_state WHERE state_token=? AND tenant_id=? AND expires_at > ?")) {
+        stat.setString(1, stateHash);
+        stat.setString(2, tenant);
+        stat.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+        // Only the caller whose delete removed the row wins a concurrent completion.
+        return stat.executeUpdate() == 1 ? pending : Optional.empty();
       }
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }
-    return response.flatMap(this::readToken).filter(token -> {
-      boolean acepted = request.getTenant().equals(token.getRequest().getTenant());
-      if (!acepted) {
-        log.error("El token que se intenta cargar es de " + token.getRequest().getTenant()
-            + " y no de " + request.getTenant());
-      }
-      return acepted;
-    });
   }
 
-  /**
-   * Parses a token from a base64 JSON string.
-   *
-   * Returns empty when decoding or parsing fails. Logs warnings for invalid token payloads.
-   *
-   * @param str base64 JSON string
-   * @return optional token info
-   */
-  public Optional<TokenInfo> readToken(String str) {
+  private Optional<PendingDelegation> read(Connection connection, String stateHash, String tenant)
+      throws SQLException {
+    String sql = "SELECT session_context_json FROM _oauth_delegated_state WHERE state_token=?"
+        + " AND expires_at > ?" + (tenant == null ? "" : " AND tenant_id=?");
+    try (PreparedStatement stat = connection.prepareStatement(sql)) {
+      stat.setString(1, stateHash);
+      stat.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+      if (tenant != null) {
+        stat.setString(3, tenant);
+      }
+      try (ResultSet res = stat.executeQuery()) {
+        return res.next() ? parse(res.getString(1)) : Optional.empty();
+      }
+    }
+  }
+
+  private Optional<PendingDelegation> parse(String json) {
     try {
-      return Optional.of(mapper.readValue(str, TokenInfo.class));
+      return Optional.of(mapper.readValue(json, PendingDelegation.class));
     } catch (IOException ex) {
-      log.warn("Se intenta login con un token sso invalido", ex);
+      log.warn("Unreadable pending delegated login", ex);
       return Optional.empty();
     }
   }

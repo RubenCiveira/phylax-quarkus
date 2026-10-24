@@ -53,7 +53,7 @@
  * logout notifications to registered relying-party logout endpoints.</li>
  * <li>{@code TokenGranter} (interface) / granter implementations — Strategy pattern for the token
  * endpoint: {@code PasswordGranter} (ROPC), {@code RefreshGranter} (refresh rotation),
- * {@code MfaGranter} (MFA token exchange), {@code DelegatedAccessGranter} (federation).</li>
+ * {@code MfaGranter} (MFA token exchange).</li>
  * </ul>
  *
  * <p>
@@ -84,7 +84,7 @@
  * │   └── exception/      — LoginException hierarchy (WrongCredentials, MfaRequired, etc.)
  * ├── application/
  * │   ├── AuthenticateUser.java / SessionManager.java / BackChannelLogoutDispatcher.java
- * │   └── granter/        — TokenGranter interface + Password/Refresh/Mfa/DelegatedAccess granters
+ * │   └── granter/        — TokenGranter interface + Password/Refresh/Mfa granters
  * └── infrastructure/
  *     ├── driver/
  *     │   ├── html/       — AuthorizeHtml, OidcStepRouter, step handlers, OidcCookieManager

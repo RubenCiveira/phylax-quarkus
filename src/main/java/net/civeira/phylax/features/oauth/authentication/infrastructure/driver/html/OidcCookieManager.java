@@ -32,8 +32,12 @@ public class OidcCookieManager {
   /** Cookie name for the pre-authenticated challenges state. */
   public static final String PRE_SESSION_ID = "PRE_SESSION_ID";
 
+  /** Cookie name for the secret that binds a delegated login to this browser. */
+  public static final String DELEGATED_BINDING = "DELEGATED_BINDING";
+
   private static final String OAUTH_OPENID = "/oauth/openid/";
   private static final Duration PRE_SESSION_TTL = Duration.ofHours(1);
+  private static final Duration DELEGATED_BINDING_TTL = Duration.ofMinutes(10);
 
   private final JwtTokenBuilder tokenBuilder;
 
@@ -108,5 +112,17 @@ public class OidcCookieManager {
    */
   public NewCookie clearAuthSession(String tenant) {
     return new NewCookie.Builder(AUTH_SESSION_ID).value("").build();
+  }
+
+  /**
+   * Writes the binding secret of a delegated login.
+   *
+   * {@code SameSite=Lax}: the provider callback page posts to the tenant authorize URL from this
+   * same site, so the cookie is sent there, but never on cross-site subrequests.
+   */
+  public NewCookie writeDelegatedBinding(String binding, String tenant) {
+    return new NewCookie.Builder(DELEGATED_BINDING).value(binding).sameSite(SameSite.LAX)
+        .path(OAUTH_OPENID + tenant).secure(true).httpOnly(true)
+        .maxAge((int) DELEGATED_BINDING_TTL.toSeconds()).build();
   }
 }

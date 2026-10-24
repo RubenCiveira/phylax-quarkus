@@ -20,6 +20,7 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGate
 @ApplicationScoped
 public class FixedSessionStore implements SessionStoreGateway {
   private final ConcurrentMap<String, SessionInfo> sessions = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, String> refreshSessions = new ConcurrentHashMap<>();
 
   @Override
   public Optional<SessionInfo> loadSession(String state) {
@@ -48,13 +49,24 @@ public class FixedSessionStore implements SessionStoreGateway {
 
   @Override
   public void updateTokenJtis(String sessionId, String accessJti, String refreshJti) {
-    // no-op for tests using in-memory session state only
+    refreshSessions.put(refreshJti, sessionId);
   }
 
   @Override
   public boolean updateTokenJtisByRefreshJti(String currentRefreshJti, String accessJti,
       String refreshJti) {
-    return false;
+    String session = refreshSessions.remove(currentRefreshJti);
+    if (session == null) {
+      return false;
+    }
+    refreshSessions.put(refreshJti, session);
+    return true;
+  }
+
+  @Override
+  public boolean isRefreshSessionActive(String refreshJti) {
+    String session = refreshSessions.get(refreshJti);
+    return session != null && sessions.containsKey(session);
   }
 
   @Override
@@ -64,5 +76,6 @@ public class FixedSessionStore implements SessionStoreGateway {
 
   public void clear() {
     sessions.clear();
+    refreshSessions.clear();
   }
 }

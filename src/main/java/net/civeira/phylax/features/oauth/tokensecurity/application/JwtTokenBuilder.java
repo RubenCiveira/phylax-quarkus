@@ -107,14 +107,19 @@ public class JwtTokenBuilder {
     return authorization;
   }
 
-  @Deprecated
-  public AutorizationToken buildToken(String tenant, ClientDetails details, String grantType,
-      AuthenticationData validationData) {
-    return buildToken(tenant, details, grantType, validationData, null);
+  /**
+   * Starts a new refresh family for a grant.
+   *
+   * @param tenant tenant name
+   * @param sessionBound whether the grant comes from an interactive session
+   * @return new family
+   */
+  public RefreshFamily newRefreshFamily(String tenant, boolean sessionBound) {
+    return RefreshFamily.start(claimsMapper.refreshFamilyTtl(tenant), sessionBound);
   }
 
   public AutorizationToken buildToken(String tenant, ClientDetails details, String grantType,
-      AuthenticationData validationData, AuthRequest request) {
+      AuthenticationData validationData, AuthRequest request, RefreshFamily family) {
     if (request != null && validationData.getScopes().isEmpty()) {
       List<String> requested = request.getScope().map(s -> Arrays.stream(s.split("\\s+"))
           .filter(sc -> !sc.isBlank()).collect(Collectors.toList())).orElse(List.of());
@@ -127,7 +132,7 @@ public class JwtTokenBuilder {
 
     Duration expiration = claimsMapper.accessTokenTtl();
     Instant authExpires = Instant.now().plus(expiration);
-    Instant refreshExpires = Instant.now().plus(claimsMapper.refreshTtl(tenant));
+    Instant refreshExpires = family.expiration(claimsMapper.refreshTtl(tenant));
 
     AutorizationToken authorization = new AutorizationToken();
     authorization.setGrantType(grantType);
@@ -137,7 +142,7 @@ public class JwtTokenBuilder {
     authorization.setAccessToken(tokenSigner.sign(tenant,
         claimsMapper.accessToken(tenant, details, grantType, validationData), authExpires));
     authorization.setRefreshToken(tokenSigner.sign(tenant,
-        claimsMapper.refreshToken(tenant, details, validationData), refreshExpires));
+        claimsMapper.refreshToken(tenant, details, validationData, family), refreshExpires));
 
     if (null != request) {
       String sessionState = UUID.randomUUID().toString();

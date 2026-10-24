@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.sql.DataSource;
 
@@ -164,7 +165,11 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
    * @return optional temporal auth code
    */
   @Override
-  public Optional<TemporalAuthCode> retrieveTemporalAuthCode(String code) {
+  public Optional<TemporalAuthCode> consumeTemporalAuthCode(String code,
+      Predicate<TemporalAuthCode> validator) {
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
     Optional<TemporalAuthCode> response;
     String sql = "SELECT code_data FROM _oauth_temporal_codes WHERE code = ? and expiration > ?";
     try (Connection connection = datasource.getConnection()) {
@@ -178,8 +183,12 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
               : Optional.empty();
         }
       }
-      removeCode(connection, code);
-      return response;
+      // A rejected request does not spend the code of the legitimate client.
+      if (response.isEmpty() || !validator.test(response.get())) {
+        return Optional.empty();
+      }
+      // Only the request whose delete removed the row redeems the code.
+      return removeCode(connection, code) == 1 ? response : Optional.empty();
     } catch (SQLException | JsonProcessingException error) {
       throw new IllegalStateException(error);
     }
@@ -208,11 +217,11 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
    * @param code code identifier
    * @throws SQLException when deletion fails
    */
-  private void removeCode(Connection connection, String code) throws SQLException {
+  private int removeCode(Connection connection, String code) throws SQLException {
     String sql = "DELETE FROM _oauth_temporal_codes where code = ? ";
     try (PreparedStatement prepareStatement = connection.prepareStatement(sql)) {
       prepareStatement.setString(1, code);
-      prepareStatement.executeUpdate();
+      return prepareStatement.executeUpdate();
     }
   }
 
