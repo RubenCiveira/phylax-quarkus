@@ -29,8 +29,8 @@ import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
  * expiration ({@code fexp}); a family started by an interactive login ({@code ses}) also needs its
  * session alive. Scopes can only be narrowed and the audiences are the original ones. The JTI is
  * consumed atomically just before issuing, so a rejected request does not spend the token; a token
- * presented twice (replay, or two concurrent rotations) revokes the whole family and the refresh
- * tokens of the user's interactive sessions with that client.
+ * presented twice (replay, or two concurrent rotations) revokes the whole family and the access and
+ * refresh tokens of the user's interactive sessions with that client in this tenant.
  */
 @Slf4j
 @ApplicationScoped
@@ -97,8 +97,10 @@ public class RefreshTokenGrant {
   }
 
   /**
-   * A refresh token was used twice: revoke its family and the refresh tokens of the user's
-   * interactive sessions with the client (access tokens stay valid until they expire).
+   * A refresh token was used twice: revoke its family and the access and refresh tokens of the
+   * user's interactive sessions with the client in this tenant. Access tokens of grants without
+   * session are not swept, and a revoked access JTI is only enforced where revocation is checked
+   * (introspection; API bearer verification does not check it yet, task 0.8).
    */
   private OAuthTokenException replay(String tenant, RefreshTokenInfo info, RefreshFamily family) {
     log.warn("Refresh token reuse for client {} in tenant {}: family revoked", info.getClient(),
