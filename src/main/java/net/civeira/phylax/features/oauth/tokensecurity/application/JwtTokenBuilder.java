@@ -182,10 +182,6 @@ public class JwtTokenBuilder {
     return tokenVerifier.verifyMfa(token, tenant);
   }
 
-  public Optional<String> verifyRefresh(String token, String tenant) {
-    return tokenVerifier.verifyRefresh(token, tenant);
-  }
-
   public Optional<RefreshTokenInfo> verifyRefreshInfo(String token, String tenant) {
     return tokenVerifier.verifyRefreshInfo(token, tenant);
   }

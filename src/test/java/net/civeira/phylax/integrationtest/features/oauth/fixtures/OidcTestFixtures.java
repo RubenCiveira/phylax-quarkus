@@ -5,6 +5,12 @@ public final class OidcTestFixtures {
   public static final String TENANT = "test-tenant";
   public static final String CLIENT_ID = "test-client";
   public static final String CLIENT_SECRET = "test-secret";
+  /** Second tenant where {@link #CLIENT_ID} is also registered. */
+  public static final String OTHER_TENANT = "other-tenant";
+  /** Confidential web app registered for client_secret_basic, without public access. */
+  public static final String WEB_CLIENT_ID = "web-client";
+  /** Public client registered for none. */
+  public static final String SPA_CLIENT_ID = "spa-client";
   public static final String REDIRECT_URI = "http://localhost/callback";
   public static final String USERNAME = "alice@example.com";
   public static final String PASSWORD = "correct-password";

@@ -72,7 +72,7 @@ public class RequestMagicLinkUsecase {
       return;
     }
 
-    if (clients.loadPublic(tenantName, clientId, redirectUri).isEmpty()) {
+    if (clients.loadForAuthorization(tenantName, clientId, redirectUri).isEmpty()) {
       return;
     }
 

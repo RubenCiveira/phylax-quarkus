@@ -10,68 +10,105 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
+/**
+ * Clients of the OAuth flow tests, all with {@link OidcTestFixtures#CLIENT_SECRET}:
+ * <ul>
+ * <li>{@link OidcTestFixtures#CLIENT_ID} in {@link OidcTestFixtures#TENANT} and
+ * {@link OidcTestFixtures#OTHER_TENANT}: confidential and public at once, without a registered auth
+ * method (any secret method is accepted);</li>
+ * <li>{@link OidcTestFixtures#WEB_CLIENT_ID}: confidential web app registered for
+ * client_secret_basic, without public access;</li>
+ * <li>{@link OidcTestFixtures#SPA_CLIENT_ID}: public client registered for none.</li>
+ * </ul>
+ */
 @IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped
 public class FixedClientStoreGateway implements ClientStoreGateway {
   private final AtomicReference<List<String>> allowedScopes = new AtomicReference<>();
-  private List<String> allowedGrants;
+  private final AtomicReference<List<String>> allowedGrants = new AtomicReference<>();
 
   @PostConstruct
   void init() {
     reset();
-    allowedGrants = List.of("authorization_code", "password", "refresh_token", "form");
   }
 
   public void setAllowedScopes(List<String> scopes) {
     allowedScopes.set(List.copyOf(scopes));
   }
 
+  public void setAllowedGrants(List<String> grants) {
+    allowedGrants.set(List.copyOf(grants));
+  }
+
   public void reset() {
     allowedScopes.set(List.of("*"));
+    allowedGrants.set(List.of("authorization_code", "password", "refresh_token", "form",
+        "client_credentials", "mfa", "urn:ietf:params:oauth:grant-type:device_code"));
   }
 
   @Override
   public Optional<ClientDetails> loadPreautorized(String tenant, String clientId) {
-    return matches(tenant, clientId) ? Optional.of(buildClient()) : Optional.empty();
+    return method(tenant, clientId).map(_ -> buildClient(clientId, true));
   }
 
   @Override
-  public Optional<ClientDetails> loadPublic(String tenant, String clientId, String redirect) {
+  public Optional<ClientDetails> loadForAuthorization(String tenant, String clientId,
+      String redirect) {
     boolean redirectAllowed = redirect != null && redirect.contains("localhost/callback");
-    return matches(tenant, clientId) && redirectAllowed ? Optional.of(buildClient())
+    return redirectAllowed
+        ? method(tenant, clientId).map(_ -> buildClient(clientId, !isSpa(clientId)))
         : Optional.empty();
   }
 
   @Override
   public Optional<ClientDetails> loadPublicById(String tenant, String clientId) {
-    return matches(tenant, clientId) ? Optional.of(buildClient(false)) : Optional.empty();
+    return method(tenant, clientId).filter(_ -> !isWeb(clientId))
+        .map(_ -> buildClient(clientId, false));
   }
 
   @Override
   public Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret) {
     boolean secretMatches = OidcTestFixtures.CLIENT_SECRET.equals(clientSecret);
-    return matches(tenant, clientId) && secretMatches ? Optional.of(buildClient())
+    return secretMatches ? method(tenant, clientId).map(_ -> buildClient(clientId, true))
         : Optional.empty();
   }
 
-  private boolean matches(String tenant, String clientId) {
-    return OidcTestFixtures.TENANT.equals(tenant) && OidcTestFixtures.CLIENT_ID.equals(clientId);
+  /**
+   * The client registered in the tenant; the value is unused, only its presence matters.
+   */
+  private Optional<String> method(String tenant, String clientId) {
+    if (OidcTestFixtures.CLIENT_ID.equals(clientId)) {
+      return OidcTestFixtures.TENANT.equals(tenant) || OidcTestFixtures.OTHER_TENANT.equals(tenant)
+          ? Optional.of(clientId)
+          : Optional.empty();
+    }
+    return OidcTestFixtures.TENANT.equals(tenant) && (isWeb(clientId) || isSpa(clientId))
+        ? Optional.of(clientId)
+        : Optional.empty();
   }
 
-  private ClientDetails buildClient() {
-    return buildClient(true);
+  private static boolean isWeb(String clientId) {
+    return OidcTestFixtures.WEB_CLIENT_ID.equals(clientId);
   }
 
-  private ClientDetails buildClient(boolean confidential) {
-    return ClientDetails.builder().clientId(OidcTestFixtures.CLIENT_ID)
-        .allowedScopes(allowedScopes.get()).allowedGrants(allowedGrants)
-        .protectedWithSecret(confidential).isResourceServer(true).postLogoutRedirectUris(
+  private static boolean isSpa(String clientId) {
+    return OidcTestFixtures.SPA_CLIENT_ID.equals(clientId);
+  }
+
+  private ClientDetails buildClient(String clientId, boolean confidential) {
+    ClientAuthMethod registered = isWeb(clientId) ? ClientAuthMethod.CLIENT_SECRET_BASIC
+        : isSpa(clientId) ? ClientAuthMethod.NONE : null;
+    return ClientDetails.builder().clientId(clientId).allowedScopes(allowedScopes.get())
+        .allowedGrants(allowedGrants.get()).protectedWithSecret(confidential)
+        .tokenEndpointAuthMethod(registered).requirePkce(isSpa(clientId))
+        .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId)).postLogoutRedirectUris(
             List.of("http://localhost/after-logout", "http://localhost/callback"))
         .build();
   }

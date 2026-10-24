@@ -15,7 +15,7 @@
  * the authorization server. Encodes standard OIDC claims (sub, iss, aud, iat, exp, nonce, acr,
  * amr), custom claims (roles, groups, tenant), and token-specific claims. Also provides PKCE helper
  * methods (S256 hash generation), JTI extraction from refresh tokens, and opaque/JWT token
- * verification used by {@code RefreshGranter}.</li>
+ * verification used by {@code RefreshTokenGrant}.</li>
  * <li>{@code AutorizationToken} — value object representing the complete token-endpoint response:
  * access_token, token_type, expires_in, refresh_token (if issued), and optionally an id_token for
  * OIDC authorization-code flows.</li>

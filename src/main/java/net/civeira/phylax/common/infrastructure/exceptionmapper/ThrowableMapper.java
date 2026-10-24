@@ -4,6 +4,7 @@ package net.civeira.phylax.common.infrastructure.exceptionmapper;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -33,6 +34,11 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
    */
   @Override
   public Response toResponse(Throwable exception) {
+    if (exception instanceof WebApplicationException web && web.getResponse() != null
+        && web.getResponse().getStatus() < 500) {
+      // Protocol errors raised by JAX-RS itself (404, 405, 415...) keep their status.
+      return web.getResponse();
+    }
     log.warn("unhandled exception " + exception.getClass() + ": " + exception.getMessage(),
         exception);
     Map<String, String> error = new HashMap<>();

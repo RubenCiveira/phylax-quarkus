@@ -127,7 +127,7 @@ class RequestMagicLinkUsecaseUnitTest {
     Mockito.when(enabled.isEnabled("tenant")).thenReturn(true);
     Mockito.when(tenants.find(Mockito.any())).thenReturn(Optional.of(tenant));
     Mockito.when(users.find(Mockito.any())).thenReturn(Optional.of(user));
-    Mockito.when(clients.loadPublic(Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito.when(clients.loadForAuthorization(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
     usecase.request("user@example.com", "client-1", "https://app.example.com", "tenant", "openid",
         null, null);
@@ -149,7 +149,7 @@ class RequestMagicLinkUsecaseUnitTest {
     Mockito.when(enabled.isEnabled("tenant")).thenReturn(true);
     Mockito.when(tenants.find(Mockito.any())).thenReturn(Optional.of(tenant));
     Mockito.when(users.find(Mockito.any())).thenReturn(Optional.of(user));
-    Mockito.when(clients.loadPublic(Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito.when(clients.loadForAuthorization(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(clientDetails));
     Mockito.when(tenantConfigs.find(Mockito.any())).thenReturn(Optional.empty());
     Mockito.when(secureTokenService.generate()).thenReturn("raw-token");

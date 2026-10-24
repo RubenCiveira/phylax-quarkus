@@ -1,7 +1,7 @@
 # 0.16 — Seguridad del login federado (SAML, Google y `state`)
 
-- **Fase:** 0 · **Esfuerzo:** M–L · **Estado:** implementada (23-10-2026), pendiente de verificación manual con un IdP SAML y Google reales. **Prioridad:** crítica (adelantar a la ola 1).
-- **Origen:** equivalente Java de la ficha PHP [072](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/TODD/done/072-seguridad-login-federado.md), que apareció al descartar la federación OIDC genérica ([3.4](../issue-3.4-federacion-oidc-generica.md)). Revisado sobre el código Java el 23-10-2026.
+- **Fase:** 0 · **Esfuerzo:** M–L · **Estado:** hecha (23-10-2026); queda la verificación manual con un IdP SAML y Google reales. **Prioridad:** crítica (adelantar a la ola 1).
+- **Origen:** equivalente Java de la ficha PHP [072](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/TODD/done/072-seguridad-login-federado.md), que apareció al descartar la federación OIDC genérica ([3.4](../pospuestos/issue-3.4-federacion-oidc-generica.md)). Revisado sobre el código Java el 23-10-2026.
 
 ## Evidencia en Java
 

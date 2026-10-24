@@ -36,7 +36,7 @@ class PasswordGrantTest extends OidcIntegrationTestBase {
   }
 
   @Test
-  void passwordGrant_wrongCredentials_returns401() {
+  void passwordGrant_wrongCredentials_isInvalidGrant() {
     loginGateway.whenValidate(() -> AuthenticationResult.wrongCredential(OidcTestFixtures.TENANT,
         OidcTestFixtures.USERNAME));
 
@@ -44,7 +44,8 @@ class PasswordGrantTest extends OidcIntegrationTestBase {
         OidcTestFixtures.CLIENT_SECRET, OidcTestFixtures.USERNAME, OidcTestFixtures.WRONG_PASSWORD,
         "openid profile");
 
-    Assertions.assertEquals(401, response.statusCode());
+    Assertions.assertEquals(400, response.statusCode());
+    Assertions.assertEquals("invalid_grant", response.jsonPath().getString("error"));
   }
 
   @Test

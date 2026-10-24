@@ -204,6 +204,41 @@ public class OidcFlowClient {
         .post("/oauth/openid/" + tenant + "/auth");
   }
 
+  /**
+   * Logs in through the authorization endpoint as the given client, without PKCE.
+   */
+  public Response submitLoginAs(String tenant, String clientId, String username, String password) {
+    return RestAssured.given().redirects().follow(false).header("Accept-Language", "es-ES")
+        .queryParam("client_id", clientId).queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("response_type", "code").queryParam("scope", OidcTestFixtures.SCOPE)
+        .queryParam("state", OidcTestFixtures.STATE).contentType(ContentType.URLENC)
+        .formParam("username", username).formParam("password", password)
+        .formParam("csid", OidcTestFixtures.CSID).post("/oauth/openid/" + tenant + "/auth");
+  }
+
+  /**
+   * HTTP Basic header value for a client.
+   */
+  public static String basic(String clientId, String secret) {
+    return "Basic " + Base64.getEncoder()
+        .encodeToString((clientId + ":" + secret).getBytes(StandardCharsets.UTF_8));
+  }
+
+  /**
+   * Raw token endpoint request.
+   *
+   * @param authorization Authorization header, null for none
+   * @param form form parameters
+   */
+  public Response token(String tenant, String authorization, Map<String, String> form) {
+    io.restassured.specification.RequestSpecification spec =
+        RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC);
+    if (authorization != null) {
+      spec = spec.header("Authorization", authorization);
+    }
+    return spec.formParams(form).post("/oauth/openid/" + tenant + "/token");
+  }
+
   public Response exchangeCodeWithVerifier(String tenant, String code, String redirectUri,
       String clientId, String codeVerifier) {
     return RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)

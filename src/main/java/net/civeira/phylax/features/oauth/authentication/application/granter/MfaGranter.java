@@ -94,7 +94,7 @@ public class MfaGranter implements TokenGranter {
    * @return the first value or null
    */
   private String first(Map<String, List<String>> paramMap, String key) {
-    return paramMap.containsKey(key) || paramMap.get(key).size() > 0 ? paramMap.get(key).get(0)
-        : null;
+    List<String> values = paramMap.get(key);
+    return values != null && !values.isEmpty() ? values.get(0) : null;
   }
 }

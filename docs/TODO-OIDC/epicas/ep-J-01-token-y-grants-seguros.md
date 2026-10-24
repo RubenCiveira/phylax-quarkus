@@ -1,6 +1,8 @@
 # J-01 — Token y grants seguros
 
-**Prioridad:** bloqueante · **Tareas:** [0.1](../done/issue-0.1-canje-seguro-de-authorization-code.md), [0.2](../done/issue-0.2-refresh-cliente-sesion.md), [0.9](../issue-0.9-autenticacion-cliente-unificada.md), [0.13](../issue-0.13-ruta-revocacion-no-duplicada.md), [1.4](../issue-1.4-errores-cache-token.md), [1.8](../issue-1.8-code-clientes-confidenciales.md), [1.10](../issue-1.10-tests-negativos-seguridad.md), [1.16](../issue-1.16-emision-canje-fuera-tokencontroller.md). **Depende de:** política de [J-02](ep-J-02-clientes-tenant-secretos.md) para cliente/grant/tenant; la seguridad del code y refresh empieza antes de terminar toda la épica.
+**Prioridad:** bloqueante · **Tareas:** [0.1](../done/issue-0.1-canje-seguro-de-authorization-code.md), [0.2](../done/issue-0.2-refresh-cliente-sesion.md), [0.9](../done/issue-0.9-autenticacion-cliente-unificada.md), [0.13](../done/issue-0.13-ruta-revocacion-no-duplicada.md), [1.4](../done/issue-1.4-errores-cache-token.md), [1.8](../done/issue-1.8-code-clientes-confidenciales.md), [1.10](../issue-1.10-tests-negativos-seguridad.md), [1.16](../done/issue-1.16-emision-canje-fuera-tokencontroller.md). **Depende de:** política de [J-02](ep-J-02-clientes-tenant-secretos.md) para cliente/grant/tenant; la seguridad del code y refresh empieza antes de terminar toda la épica.
+
+**Estado (24-10-2026):** implementada salvo [1.10](../issue-1.10-tests-negativos-seguridad.md), parcial (audiencia ajena tras 0.3, redirect estricto tras 0.10). Queda la verificación concurrente contra MariaDB de 0.1, 0.2 y 1.10 en el arnés [V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md).
 
 ## Implementación
 
@@ -10,4 +12,74 @@
 
 **Aceptación:** dos canjes concurrentes de code o refresh producen un vencedor; code/refresh de otro cliente/tenant o sesión terminada no emiten tokens; errors y headers verificables por HTTP+BD. [V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md) conserva el arnés.
 
-**Referencia PHP:** `done/017-canje-code-atomico.md`, `done/019-refresh-cliente-y-sesion.md`, `done/020-rotar-refresh-y-detectar-replay.md`, EP-05 (038, 064). Java difiere: `TokenController` resuelve code/refresh en línea y hay `RefreshGranter` inalcanzable.
+**Referencia PHP:** `done/017-canje-code-atomico.md`, `done/019-refresh-cliente-y-sesion.md`, `done/020-rotar-refresh-y-detectar-replay.md`, EP-05 (038, 064). Java difería: `TokenController` resolvía code/refresh en línea y había un `RefreshGranter` inalcanzable; ambos están resueltos.
+
+## Lo construido (documentación funcional)
+
+### El endpoint de token, de principio a fin
+
+`POST /oauth/openid/{tenant}/token` sigue siempre el mismo orden. Cada paso que falla corta la petición con su error OAuth y **no consume** nada:
+
+1. **Grant reconocido.** Sin `grant_type`: `invalid_request`. Desconocido: `unsupported_grant_type`.
+2. **Cliente autenticado** con un único método y según la política del grant ([0.9](../done/issue-0.9-autenticacion-cliente-unificada.md)). Si no: `invalid_client` (401).
+3. **Grant resuelto:**
+   - `authorization_code` ([0.1](../done/issue-0.1-canje-seguro-de-authorization-code.md), [1.8](../done/issue-1.8-code-clientes-confidenciales.md)): el code debe ser de ese cliente, tenant y `redirect_uri`, con PKCE válido (o cliente confidencial sin PKCE). Se consume atómicamente.
+   - `refresh_token` ([0.2](../done/issue-0.2-refresh-cliente-sesion.md)): token del tenant y del cliente, familia viva y no vencida, sesión viva si nació de un login, scope igual o menor. El JTI se consume atómicamente; un JTI reutilizado revoca la familia.
+   - `password`, `mfa`, `client_credentials`, `device_code`: el grant debe estar permitido al cliente (`unauthorized_client`) y lo resuelve su granter; credenciales de usuario erróneas son `invalid_grant`.
+4. **Emisión** única por `JwtTokenBuilder`/`ClaimsMapper`, ligando los JTI a la sesión ([1.16](../done/issue-1.16-emision-canje-fuera-tokencontroller.md)).
+
+Toda respuesta lleva `Cache-Control: no-store` y `Pragma: no-cache` ([1.4](../done/issue-1.4-errores-cache-token.md)).
+
+### Qué cliente puede qué
+
+| Tipo de cliente | Cómo se autentica | Grants que puede usar |
+|---|---|---|
+| Web app confidencial | Su método registrado (`client_secret_basic` o `client_secret_post`) | code (con o sin PKCE), refresh, password, client_credentials, device |
+| SPA / móvil (público) | Solo `client_id` (`none`) | code **con PKCE**, refresh, device |
+| Mixto (secreto + `publicAllow`, como el cliente de la consola) | Su método secreto o como público | Lo de cada tipo según cómo se autentique en cada petición |
+| Registrado como `private_key_jwt` | — | Ninguno hasta [3.2](../issue-3.2-autenticacion-jwt-cliente.md) |
+
+Introspección, revocación y PAR exigen secreto; `/device` admite públicos.
+
+### Garantías frente a ataques
+
+| Ataque | Defensa |
+|---|---|
+| Robo de un code | Ligado a cliente, tenant, redirect y PKCE; quien no es el dueño recibe `invalid_grant` y el code no se gasta |
+| Doble canje o canjes simultáneos | Consumo atómico: un único vencedor |
+| Robo de un refresh | Ligado al cliente (`azp`) y al tenant (`iss`) |
+| Replay de un refresh rotado o rotaciones simultáneas | Un único vencedor; el reuso revoca la familia y los tokens del usuario para ese cliente |
+| Refresh tras cerrar sesión | Rechazado si la familia nació de un login interactivo |
+| Prolongar un grant indefinidamente | Expiración absoluta de familia (`fexp`) |
+| Downgrade de PKCE o confidencial haciéndose pasar por público | Un público nunca canjea sin PKCE; un verifier para un code sin challenge se rechaza |
+| Revocación confundida con cierre de pre-sesión | Rutas separadas: `/revocation` (RFC 7009) y `/revoke` (pre-sesión) ([0.13](../done/issue-0.13-ruta-revocacion-no-duplicada.md)) |
+
+### Cambios de contrato para integradores
+
+- `password` con credenciales erróneas: 400 `invalid_grant` (antes 401).
+- `mfa_required`: 403 (antes 401), mismo cuerpo con `mfa_token`.
+- Grant no permitido al cliente: `unauthorized_client` (antes `unsupported_grant_type`).
+- Code y refresh exigen el método de autenticación **registrado**: un cliente `client_secret_basic` que enviaba el secreto en el cuerpo deja de funcionar.
+- `/device` sin secreto solo para clientes públicos; el `device_code` solo lo canjea el cliente que lo pidió.
+- `/revocation` solo como RFC 7009: los formularios de login deben usar `/revoke`.
+- Introspección y revocación devuelven `invalid_client` en JSON.
+
+### Dónde está el código
+
+| Pieza | Ubicación |
+|---|---|
+| Credenciales, métodos y políticas de cliente | `features/oauth/client/domain/ClientCredentials`, `ClientAuthMethod`, `ClientAuthPolicy` |
+| Autenticación de cliente | `features/oauth/client/application/ClientAuthenticator` |
+| Caso de uso del endpoint | `features/oauth/authentication/application/token/IssueTokenUsecase` |
+| Code, refresh y emisión | `…/token/AuthorizationCodeGrant`, `RefreshTokenGrant`, `TokenIssuer` |
+| Error OAuth | `features/oauth/authentication/domain/exception/OAuthTokenException` |
+| Driver HTTP | `features/oauth/authentication/infrastructure/driver/rest/TokenController` |
+| Pruebas | `TokenGrantSecurityTest`, `TokenEndpointContractTest`, `ConfidentialCodeFlowTest`, `TokenGrantNegativeSecurityTest`, `ClientCredentialsUnitTest`, `ClientAuthenticatorUnitTest` |
+
+### Pendiente y límites conocidos
+
+- MariaDB: dos canjes/rotaciones concurrentes reales y la familia revocada persistida ([V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md)).
+- Revocar los tokens del primer canje si se reintenta un code ya usado (requiere guardar los codes gastados; anotado en 0.1).
+- `allowedGrants` aún son los valores por defecto del adaptador, y code/refresh no se filtran por ellos: aplicar `grantTypesJson` es [0.4](../issue-0.4-configuracion-por-cliente.md) (J-02).
+- Audiencias autorizadas ([0.3](../issue-0.3-audiencias-autorizadas.md)) y redirect exacto ([0.10](../issue-0.10-redirect-uri-estricta.md)), ambos en J-02.
+- El canje de `device_code` no es atómico (lee y borra sin comprobar filas); queda fuera de esta épica.

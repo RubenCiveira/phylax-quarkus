@@ -1,0 +1,100 @@
+package net.civeira.phylax.features.oauth.client.domain;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class ClientCredentialsUnitTest {
+
+  private static String basic(String id, String secret) {
+    return "Basic "
+        + Base64.getEncoder().encodeToString((id + ":" + secret).getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Test
+  @DisplayName("Basic header is client_secret_basic and keeps the secret verbatim")
+  void test_basic() {
+    ClientCredentials credentials = ClientCredentials.from(basic("app", "s+e%cr:et"), Map.of());
+    Assertions.assertEquals(Optional.of(ClientAuthMethod.CLIENT_SECRET_BASIC),
+        credentials.method());
+    Assertions.assertEquals(Optional.of("app"), credentials.clientId());
+    Assertions.assertEquals("s+e%cr:et", credentials.secret());
+  }
+
+  @Test
+  @DisplayName("client_secret in the body is client_secret_post")
+  void test_post() {
+    ClientCredentials credentials = ClientCredentials.from(null,
+        Map.of("client_id", List.of("app"), "client_secret", List.of("secret")));
+    Assertions.assertEquals(Optional.of(ClientAuthMethod.CLIENT_SECRET_POST), credentials.method());
+    Assertions.assertEquals("secret", credentials.secret());
+  }
+
+  @Test
+  @DisplayName("client_id alone is none")
+  void test_none() {
+    ClientCredentials credentials =
+        ClientCredentials.from(null, Map.of("client_id", List.of("app")));
+    Assertions.assertEquals(Optional.of(ClientAuthMethod.NONE), credentials.method());
+    Assertions.assertEquals("", credentials.secret());
+  }
+
+  @Test
+  @DisplayName("Basic and body secret together are rejected (RFC 6749 §2.3)")
+  void test_mixed() {
+    Assertions.assertTrue(
+        ClientCredentials.from(basic("app", "secret"), Map.of("client_secret", List.of("secret")))
+            .method().isEmpty());
+  }
+
+  @Test
+  @DisplayName("Basic user and client_id naming different clients are rejected")
+  void test_different_clients() {
+    ClientCredentials credentials =
+        ClientCredentials.from(basic("app", "secret"), Map.of("client_id", List.of("other")));
+    Assertions.assertTrue(credentials.clientId().isEmpty());
+    Assertions.assertTrue(credentials.method().isEmpty());
+  }
+
+  @Test
+  @DisplayName("Malformed Basic header is rejected, not a 500")
+  void test_malformed() {
+    Assertions.assertTrue(ClientCredentials.from("Basic %%%", Map.of()).method().isEmpty());
+    Assertions
+        .assertTrue(
+            ClientCredentials
+                .from("Basic " + Base64.getEncoder()
+                    .encodeToString("no-colon".getBytes(StandardCharsets.UTF_8)), Map.of())
+                .method().isEmpty());
+  }
+
+  @Test
+  @DisplayName("Client assertion is private_key_jwt; other schemes are ignored")
+  void test_assertion_and_bearer() {
+    Assertions.assertEquals(Optional.of(ClientAuthMethod.PRIVATE_KEY_JWT),
+        ClientCredentials
+            .from(null, Map.of("client_id", List.of("app"), "client_assertion", List.of("eyJ...")))
+            .method());
+    Assertions.assertEquals(Optional.of(ClientAuthMethod.NONE),
+        ClientCredentials.from("Bearer abc", Map.of("client_id", List.of("app"))).method());
+  }
+
+  @Test
+  @DisplayName("Without client there is no method")
+  void test_without_client() {
+    Assertions.assertTrue(ClientCredentials.from(null, Map.of()).method().isEmpty());
+  }
+
+  @Test
+  @DisplayName("toString never shows the secret")
+  void test_to_string() {
+    Assertions.assertFalse(
+        ClientCredentials.from(basic("app", "top-secret"), Map.of()).toString().contains("top"));
+  }
+}

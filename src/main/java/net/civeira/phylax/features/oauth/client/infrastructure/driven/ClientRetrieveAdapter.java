@@ -14,9 +14,11 @@ import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 
@@ -38,13 +40,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return tenant(tenant)
         .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
         .filter(this::clientEnabled)
-        .map(app -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
-            .requirePkce(false).allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES)
-            .postLogoutRedirectUris(postLogoutUris(app))
-            .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
-            .backchannelLogoutSessionRequired(
-                Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
-            .build());
+        .map(app -> base(app, clientId).protectedWithSecret(false).requirePkce(false).build());
   }
 
   @Override
@@ -56,18 +52,13 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   public Optional<ClientDetails> loadPublicById(String tenant, String clientId) {
     return tenant(tenant)
         .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
-        .filter(this::clientEnabled).filter(app -> Boolean.TRUE.equals(app.isPublicAllow()))
-        .map(app -> ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
-            .requirePkce(true).allowedGrants(DEFAULT_GRANTERS).allowedScopes(DEFAULT_SCOPES)
-            .postLogoutRedirectUris(postLogoutUris(app))
-            .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
-            .backchannelLogoutSessionRequired(
-                Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
-            .build());
+        .filter(this::clientEnabled).filter(this::publicAllowed)
+        .map(app -> base(app, clientId).protectedWithSecret(false).requirePkce(true).build());
   }
 
   @Override
-  public Optional<ClientDetails> loadPublic(String tenant, String clientId, String redirect) {
+  public Optional<ClientDetails> loadForAuthorization(String tenant, String clientId,
+      String redirect) {
     return verify(tenant, clientId, Optional.empty(), Optional.of(redirect));
   }
 
@@ -77,7 +68,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
         .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
         .filter(this::clientEnabled)
         .flatMap(client -> clientSecret.isEmpty()
-            ? publicClient(client, clientId, withRedirect.orElseThrow())
+            ? authorizingClient(client, clientId, withRedirect.orElseThrow())
             : privateClient(client, clientId, clientSecret.get()));
   }
 
@@ -103,19 +94,27 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return enabled;
   }
 
-  private Optional<ClientDetails> publicClient(TrustedClient app, String clientId,
+  /**
+   * Public access: the client allows it or registers {@code none} as its auth method.
+   */
+  private boolean publicAllowed(TrustedClient app) {
+    return Boolean.TRUE.equals(app.isPublicAllow())
+        || app.getTokenEndpointAuthMethod() == TrustedClientTokenEndpointAuthMethodOptions.NONE;
+  }
+
+  /**
+   * Client starting an authorization request: public clients and confidential web apps alike, as
+   * long as the redirect is registered. A confidential client authenticates later, at the token
+   * endpoint; a public one must use PKCE.
+   */
+  private Optional<ClientDetails> authorizingClient(TrustedClient app, String clientId,
       String redirect) {
-    if (app.isPublicAllow() && redirectAllowed(app, redirect)) {
-      return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(false)
-          .requirePkce(app.isPublicAllow() || app.isRequirePkce()).allowedGrants(DEFAULT_GRANTERS)
-          .allowedScopes(DEFAULT_SCOPES).postLogoutRedirectUris(postLogoutUris(app))
-          .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
-          .backchannelLogoutSessionRequired(
-              Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
-          .build());
-    } else {
+    if (!redirectAllowed(app, redirect)) {
       return Optional.empty();
     }
+    boolean publicAccess = publicAllowed(app);
+    return Optional.of(base(app, clientId).protectedWithSecret(!publicAccess)
+        .requirePkce(publicAccess || app.isRequirePkce()).build());
   }
 
   private boolean redirectAllowed(TrustedClient app, String redirect) {
@@ -141,17 +140,24 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
       Integer m2mTtl = app.getM2mTokenTtlSecondsValue() != null
           ? app.getM2mTokenTtlSecondsValue().getM2mTokenTtlSeconds()
           : null;
-      return Optional.of(ClientDetails.builder().clientId(clientId).protectedWithSecret(true)
-          .requirePkce(app.isRequirePkce()).allowedGrants(DEFAULT_GRANTERS)
-          .allowedScopes(DEFAULT_SCOPES).postLogoutRedirectUris(postLogoutUris(app))
-          .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
-          .backchannelLogoutSessionRequired(
-              Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
-          .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
-          .m2mTokenTtlSeconds(m2mTtl).build());
+      return Optional
+          .of(base(app, clientId).protectedWithSecret(true).requirePkce(app.isRequirePkce())
+              .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
+              .m2mTokenTtlSeconds(m2mTtl).build());
     } else {
       return Optional.empty();
     }
+  }
+
+  private ClientDetails.ClientDetailsBuilder base(TrustedClient app, String clientId) {
+    return ClientDetails.builder().clientId(clientId).allowedGrants(DEFAULT_GRANTERS)
+        .allowedScopes(DEFAULT_SCOPES)
+        .tokenEndpointAuthMethod(
+            ClientAuthMethod.from(app.getTokenEndpointAuthMethod().name()).orElse(null))
+        .postLogoutRedirectUris(postLogoutUris(app))
+        .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
+        .backchannelLogoutSessionRequired(
+            Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()));
   }
 
   private List<String> postLogoutUris(TrustedClient app) {

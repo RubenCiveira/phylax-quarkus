@@ -69,16 +69,21 @@ public class DeviceAuthorizationService {
   /**
    * Exchanges a device_code for authentication data.
    *
+   * A device code issued to another client is unknown to this one ({@code invalid_grant}).
+   *
+   * @param deviceCode the device_code of the token request
+   * @param clientId the authenticated client of the token request
    * @throws DeviceAuthorizationException on any grant error (pending, slow-down, denied, expired)
    */
-  public AuthenticationData exchangeDeviceCode(String deviceCode) {
+  public AuthenticationData exchangeDeviceCode(String deviceCode, String clientId) {
     if (deviceCode == null || deviceCode.isBlank()) {
       throw DeviceAuthorizationException.invalidRequest("device_code is required");
     }
 
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    DeviceAuthorization record = gateway.findByDeviceCode(deviceCode)
-        .orElseThrow(DeviceAuthorizationException::invalidGrant);
+    DeviceAuthorization record =
+        gateway.findByDeviceCode(deviceCode).filter(found -> found.getClientId().equals(clientId))
+            .orElseThrow(DeviceAuthorizationException::invalidGrant);
 
     if (record.isExpired()) {
       gateway.consume(deviceCode);

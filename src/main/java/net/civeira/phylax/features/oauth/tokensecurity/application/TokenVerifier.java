@@ -48,10 +48,6 @@ public class TokenVerifier {
     return verifyScoped(token, MFA_SCOPE, tenant);
   }
 
-  public Optional<String> verifyRefresh(String token, String tenant) {
-    return verifyScoped(token, REFRESH_SCOPE, tenant);
-  }
-
   public Optional<String> verifyToken(String token, String scope, String tenant) {
     return verifyScoped(token, scope, tenant);
   }
@@ -64,6 +60,11 @@ public class TokenVerifier {
       }
       List<String> scopes = claimAsList(payload.get(CLAIM_SCOPE));
       if (scopes.size() != 1 || !scopes.contains(REFRESH_SCOPE)) {
+        return Optional.empty();
+      }
+      // Issued by this tenant, whatever keys the tenants share: the issuer ends with its path.
+      String issuer = claimAsString(payload.get("iss"));
+      if (issuer == null || !issuer.endsWith("/oauth/openid/" + tenant)) {
         return Optional.empty();
       }
       String jti = claimAsString(payload.get("jti"));

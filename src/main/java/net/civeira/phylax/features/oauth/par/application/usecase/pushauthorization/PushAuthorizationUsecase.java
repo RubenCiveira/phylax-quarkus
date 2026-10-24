@@ -3,7 +3,9 @@ package net.civeira.phylax.features.oauth.par.application.usecase.pushauthorizat
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
+import net.civeira.phylax.features.oauth.client.application.ClientAuthenticator;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthPolicy;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.par.domain.ParRequest;
 import net.civeira.phylax.features.oauth.par.domain.exception.ParException;
 import net.civeira.phylax.features.oauth.par.domain.gateway.ParRequestGateway;
@@ -15,19 +17,18 @@ import net.civeira.phylax.features.oauth.par.domain.gateway.ParRequestGateway;
 @RequiredArgsConstructor
 public class PushAuthorizationUsecase {
 
-  private final ClientStoreGateway clients;
+  private final ClientAuthenticator clientAuthenticator;
   private final ParRequestGateway gateway;
 
   public PushAuthorizationResult push(PushAuthorizationParams params) {
-    if (clients.loadPrivate(params.getTenant(), params.getClientId(), params.getClientSecret())
-        .isEmpty()) {
-      throw ParException.invalidClient();
-    }
+    ClientDetails client = clientAuthenticator
+        .authenticate(params.getTenant(), params.getCredentials(), ClientAuthPolicy.SECRET)
+        .orElseThrow(ParException::invalidClient);
 
     validateAuthParams(params);
 
     ParRequest parRequest =
-        ParRequest.create(params.getTenant(), params.getClientId(), params.getAuthParams());
+        ParRequest.create(params.getTenant(), client.getClientId(), params.getAuthParams());
     gateway.store(parRequest);
 
     return new PushAuthorizationResult(parRequest.getRequestUri(), parRequest.expiresInSeconds());

@@ -8,6 +8,7 @@ import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.OAuthTokenException;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
 
@@ -55,9 +56,13 @@ public class PasswordGranter implements TokenGranter {
   @Override
   public AuthenticationResult authenticate(final AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
+    String username = first(paramMap, "username");
+    String password = first(paramMap, "password");
+    if (username == null || password == null) {
+      throw OAuthTokenException.invalidRequest("username and password are required");
+    }
     if (client.isProtectedWithSecret()) {
-      return loginUsecase.validatedUserData(request, first(paramMap, "username"),
-          first(paramMap, "password"), client, List.of());
+      return loginUsecase.validatedUserData(request, username, password, client, List.of());
     } else {
       return AuthenticationResult.notAllowed(request.getTenant(), "",
           "Password authentication is only allowed for authenticated clients");
@@ -74,7 +79,7 @@ public class PasswordGranter implements TokenGranter {
    * @return the first value or null
    */
   private String first(Map<String, List<String>> paramMap, String key) {
-    return paramMap.containsKey(key) || paramMap.get(key).size() > 0 ? paramMap.get(key).get(0)
-        : null;
+    List<String> values = paramMap.get(key);
+    return values != null && !values.isEmpty() ? values.get(0) : null;
   }
 }

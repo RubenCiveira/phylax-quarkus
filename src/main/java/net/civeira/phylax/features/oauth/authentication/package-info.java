@@ -51,16 +51,20 @@
  * authorization request, checkpoint updates after each step, and cleanup on completion.</li>
  * <li>{@code BackChannelLogoutDispatcher} — issues async RFC 7009 / OIDC Session 1.0 back-channel
  * logout notifications to registered relying-party logout endpoints.</li>
- * <li>{@code TokenGranter} (interface) / granter implementations — Strategy pattern for the token
- * endpoint: {@code PasswordGranter} (ROPC), {@code RefreshGranter} (refresh rotation),
- * {@code MfaGranter} (MFA token exchange).</li>
+ * <li>{@code IssueTokenUsecase} — entry point of the token endpoint: authenticates the client with
+ * {@code ClientAuthenticator} and runs {@code AuthorizationCodeGrant}, {@code RefreshTokenGrant} or
+ * a {@code TokenGranter}; {@code TokenIssuer} issues and binds the tokens of user grants.</li>
+ * <li>{@code TokenGranter} (interface) / granter implementations — Strategy pattern for the other
+ * grants: {@code PasswordGranter} (ROPC), {@code MfaGranter} (MFA token exchange),
+ * {@code ClientCredentialsGranter} and {@code DeviceCodeGranter}.</li>
  * </ul>
  *
  * <p>
  * <b>Infrastructure drivers:</b>
  * <ul>
- * <li>{@code TokenController} — REST driver for POST /token. Dispatches across granters, handles
- * PKCE code exchange, validates client credentials, serializes token responses.</li>
+ * <li>{@code TokenController} — REST driver for POST /token. Parses the form and client
+ * credentials, delegates to {@code IssueTokenUsecase} and serialises tokens and OAuth errors with
+ * anti-cache headers.</li>
  * <li>{@code AuthorizeHtml} — HTML driver for GET/POST /authorize. Bootstraps the session, resolves
  * PAR request_uri references, and delegates rendering to the step-router.</li>
  * <li>{@code OidcStepRouter} — resolves the active {@code StepName} and dispatches to the matching
@@ -84,7 +88,8 @@
  * │   └── exception/      — LoginException hierarchy (WrongCredentials, MfaRequired, etc.)
  * ├── application/
  * │   ├── AuthenticateUser.java / SessionManager.java / BackChannelLogoutDispatcher.java
- * │   └── granter/        — TokenGranter interface + Password/Refresh/Mfa granters
+ * │   ├── granter/        — TokenGranter interface + Password/Mfa/ClientCredentials/Device granters
+ * │   └── token/          — IssueTokenUsecase, AuthorizationCodeGrant, RefreshTokenGrant, TokenIssuer
  * └── infrastructure/
  *     ├── driver/
  *     │   ├── html/       — AuthorizeHtml, OidcStepRouter, step handlers, OidcCookieManager

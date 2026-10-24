@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.OAuthTokenException;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.device.application.DeviceAuthorizationService;
 import net.civeira.phylax.features.oauth.device.domain.exception.DeviceAuthorizationException;
@@ -18,8 +16,8 @@ import net.civeira.phylax.features.oauth.device.domain.exception.DeviceAuthoriza
 /**
  * Token granter for the RFC 8628 Device Authorization grant.
  *
- * Responsibilities: - Exchange a device_code for authentication data. - Surface RFC 8628 polling
- * errors (pending, slow_down, denied, expired) as proper HTTP responses.
+ * Responsibilities: - Exchange a device_code, issued to the same client, for authentication data. -
+ * Surface RFC 8628 polling errors (pending, slow_down, denied, expired) as OAuth token errors.
  */
 @RequestScoped
 @RequiredArgsConstructor
@@ -36,12 +34,10 @@ public class DeviceCodeGranter implements TokenGranter {
   public AuthenticationResult authenticate(AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     try {
-      return AuthenticationResult
-          .right(deviceService.exchangeDeviceCode(first(paramMap, "device_code")));
+      return AuthenticationResult.right(
+          deviceService.exchangeDeviceCode(first(paramMap, "device_code"), client.getClientId()));
     } catch (DeviceAuthorizationException e) {
-      throw new WebApplicationException(
-          Response.status(e.getStatusCode()).type(MediaType.APPLICATION_JSON)
-              .entity(Map.of("error", e.getError(), "error_description", e.getMessage())).build());
+      throw OAuthTokenException.of(e.getError(), e.getMessage(), e.getStatusCode());
     }
   }
 

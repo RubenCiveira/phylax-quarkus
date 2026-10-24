@@ -44,6 +44,12 @@ public class ClientDetails {
   private final boolean protectedWithSecret;
 
   /**
+   * Registered token endpoint auth method. Null when the source does not declare one: then any
+   * secret method is accepted.
+   */
+  private final ClientAuthMethod tokenEndpointAuthMethod;
+
+  /**
    * Indicates whether every authorization code request must include a PKCE code_challenge (S256).
    * Always true for public clients.
    */

@@ -290,24 +290,18 @@ public class AuthorizeHtml {
     return processForm(tenant, req, headers, paramMap, session, cookie, delegatedBinding);
   }
 
-  @POST
-  @Path("oauth/openid/{tenant}/revocation")
   /**
-   * Revokes a pre-session by deleting its cookie session.
+   * Abandons a pre-session (login in progress) by deleting its cookie session.
+   *
+   * Only at {@code /revoke}: {@code /revocation} is the RFC 7009 token revocation endpoint
+   * ({@code TokenRevocationController}), whatever the Content-Type (task 0.13).
    */
-  public Response revoke(final @PathParam(TENANT) String tenant,
-      @CookieParam(PRE_SESSION_ID) String cookie, final MultivaluedMap<String, String> paramMap,
-      final @Context HttpHeaders headers) {
-    sessionManager.removeSession(cookie);
-    return Response.ok().build();
-  }
-
   @POST
   @Path("oauth/openid/{tenant}/revoke")
-  public Response revokeAlias(final @PathParam(TENANT) String tenant,
-      @CookieParam(PRE_SESSION_ID) String cookie, final MultivaluedMap<String, String> paramMap,
-      final @Context HttpHeaders headers) {
-    return revoke(tenant, cookie, paramMap, headers);
+  public Response revokePreSession(final @PathParam(TENANT) String tenant,
+      @CookieParam(PRE_SESSION_ID) String cookie) {
+    sessionManager.removeSession(cookie);
+    return Response.ok().build();
   }
 
   @GET
@@ -590,8 +584,8 @@ public class AuthorizeHtml {
    * Loads the client details for the request.
    */
   private Optional<ClientDetails> loadClient(final AuthRequest request) {
-    return clientRetrieve.loadPublic(request.getTenant(), request.getClientId().orElseThrow(),
-        request.getRedirect().orElseThrow());
+    return clientRetrieve.loadForAuthorization(request.getTenant(),
+        request.getClientId().orElseThrow(), request.getRedirect().orElseThrow());
   }
 
   private Response clientNotAllowedResponse(String tenant, HttpHeaders headers) {

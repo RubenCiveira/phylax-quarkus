@@ -29,17 +29,18 @@ public interface ClientStoreGateway {
   Optional<ClientDetails> loadPreautorized(String tenant, String clientId);
 
   /**
-   * Loads a public client validating its redirect URL.
+   * Loads a client that starts an authorization request, validating its redirect URL.
    *
-   * Used for authorization endpoint flows and public clients. Returns empty when the client or
-   * redirect is invalid.
+   * Public clients and confidential web apps alike: the confidential ones authenticate later at the
+   * token endpoint ({@code protectedWithSecret}), the public ones must use PKCE
+   * ({@code requirePkce}). Returns empty when the client or redirect is invalid.
    *
    * @param tenant tenant identifier
    * @param clientId client identifier
    * @param redirect redirect URI
    * @return optional client details
    */
-  Optional<ClientDetails> loadPublic(String tenant, String clientId, String redirect);
+  Optional<ClientDetails> loadForAuthorization(String tenant, String clientId, String redirect);
 
   /**
    * Loads a confidential client validating the client secret.

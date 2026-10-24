@@ -5,13 +5,19 @@ import java.util.Map;
 
 import lombok.Builder;
 import lombok.Getter;
+import net.civeira.phylax.features.oauth.client.domain.ClientCredentials;
 
 @Builder
 @Getter
 public class PushAuthorizationParams {
 
   private final String tenant;
-  private final String clientId;
-  private final String clientSecret;
+  /**
+   * Client credentials of the request, verified by {@code ClientAuthenticator}.
+   */
+  private final ClientCredentials credentials;
+  /**
+   * Authorization parameters to store, without client credentials.
+   */
   private final Map<String, String> authParams;
 }

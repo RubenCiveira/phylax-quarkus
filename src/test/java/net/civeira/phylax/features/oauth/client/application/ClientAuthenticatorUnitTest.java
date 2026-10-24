@@ -1,0 +1,136 @@
+package net.civeira.phylax.features.oauth.client.application;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthPolicy;
+import net.civeira.phylax.features.oauth.client.domain.ClientCredentials;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
+
+class ClientAuthenticatorUnitTest {
+
+  private static final String TENANT = "tenant";
+  private static final String ID = "app";
+  private static final String SECRET = "secret";
+
+  private final ClientStoreGateway clients = Mockito.mock(ClientStoreGateway.class);
+  private ClientAuthenticator authenticator;
+
+  @BeforeEach
+  void setUp() {
+    Mockito.reset(clients);
+    authenticator = new ClientAuthenticator(clients);
+  }
+
+  private static ClientDetails client(ClientAuthMethod registered, boolean confidential) {
+    return ClientDetails.builder().clientId(ID).allowedScopes(List.of("*")).allowedGrants(List.of())
+        .protectedWithSecret(confidential).tokenEndpointAuthMethod(registered).build();
+  }
+
+  private void registered(ClientAuthMethod method, boolean publicAccess) {
+    Mockito.when(clients.loadPrivate(TENANT, ID, SECRET))
+        .thenReturn(Optional.of(client(method, true)));
+    Mockito.when(clients.loadPublicById(TENANT, ID))
+        .thenReturn(publicAccess ? Optional.of(client(method, false)) : Optional.empty());
+  }
+
+  private static ClientCredentials basic() {
+    return ClientCredentials.from("Basic "
+        + Base64.getEncoder().encodeToString((ID + ":" + SECRET).getBytes(StandardCharsets.UTF_8)),
+        Map.of());
+  }
+
+  private static ClientCredentials post(String secret) {
+    return ClientCredentials.from(null,
+        Map.of("client_id", List.of(ID), "client_secret", List.of(secret)));
+  }
+
+  private static ClientCredentials none() {
+    return ClientCredentials.from(null, Map.of("client_id", List.of(ID)));
+  }
+
+  private boolean authenticates(ClientCredentials credentials, ClientAuthPolicy policy) {
+    return authenticator.authenticate(TENANT, credentials, policy).isPresent();
+  }
+
+  @Test
+  @DisplayName("Registered method: only that secret method authenticates")
+  void test_registered_method_is_exact() {
+    registered(ClientAuthMethod.CLIENT_SECRET_BASIC, false);
+    Assertions.assertTrue(authenticates(basic(), ClientAuthPolicy.REGISTERED_METHOD));
+    Assertions.assertFalse(authenticates(post(SECRET), ClientAuthPolicy.REGISTERED_METHOD));
+    Assertions.assertFalse(authenticates(none(), ClientAuthPolicy.REGISTERED_METHOD));
+  }
+
+  @Test
+  @DisplayName("Secret policy: any secret method of a confidential client, never none")
+  void test_secret_policy() {
+    registered(ClientAuthMethod.CLIENT_SECRET_BASIC, true);
+    Assertions.assertTrue(authenticates(basic(), ClientAuthPolicy.SECRET));
+    Assertions.assertTrue(authenticates(post(SECRET), ClientAuthPolicy.SECRET));
+    Assertions.assertFalse(authenticates(none(), ClientAuthPolicy.SECRET));
+  }
+
+  @Test
+  @DisplayName("Public access only when the client allows it, and returned as not confidential")
+  void test_public_access() {
+    registered(ClientAuthMethod.CLIENT_SECRET_POST, true);
+    Optional<ClientDetails> client =
+        authenticator.authenticate(TENANT, none(), ClientAuthPolicy.REGISTERED_METHOD);
+    Assertions.assertTrue(client.isPresent());
+    Assertions.assertFalse(client.get().isProtectedWithSecret());
+    Assertions.assertTrue(authenticates(none(), ClientAuthPolicy.SECRET_OR_PUBLIC));
+
+    registered(ClientAuthMethod.CLIENT_SECRET_POST, false);
+    Assertions.assertFalse(authenticates(none(), ClientAuthPolicy.SECRET_OR_PUBLIC));
+  }
+
+  @Test
+  @DisplayName("A client registered for none never authenticates with a secret")
+  void test_none_client_with_secret() {
+    registered(ClientAuthMethod.NONE, true);
+    Assertions.assertFalse(authenticates(post(SECRET), ClientAuthPolicy.SECRET));
+    Assertions.assertTrue(authenticates(none(), ClientAuthPolicy.REGISTERED_METHOD));
+  }
+
+  @Test
+  @DisplayName("A client registered for private_key_jwt is rejected with any other method")
+  void test_private_key_jwt_client() {
+    registered(ClientAuthMethod.PRIVATE_KEY_JWT, true);
+    Assertions.assertFalse(authenticates(basic(), ClientAuthPolicy.SECRET));
+    Assertions.assertFalse(authenticates(none(), ClientAuthPolicy.SECRET_OR_PUBLIC));
+    Assertions.assertFalse(authenticates(
+        ClientCredentials.from(null,
+            Map.of("client_id", List.of(ID), "client_assertion", List.of("jwt"))),
+        ClientAuthPolicy.SECRET));
+  }
+
+  @Test
+  @DisplayName("Without registered method any secret method is accepted")
+  void test_undeclared_method() {
+    registered(null, true);
+    Assertions.assertTrue(authenticates(basic(), ClientAuthPolicy.REGISTERED_METHOD));
+    Assertions.assertTrue(authenticates(post(SECRET), ClientAuthPolicy.REGISTERED_METHOD));
+  }
+
+  @Test
+  @DisplayName("Wrong secret and mixed credentials are rejected")
+  void test_wrong_and_mixed() {
+    registered(ClientAuthMethod.CLIENT_SECRET_POST, true);
+    Mockito.when(clients.loadPrivate(TENANT, ID, "wrong")).thenReturn(Optional.empty());
+    Assertions.assertFalse(authenticates(post("wrong"), ClientAuthPolicy.SECRET));
+    ClientCredentials mixed = new ClientCredentials(ID, ID, SECRET, SECRET, false, false);
+    Assertions.assertFalse(authenticates(mixed, ClientAuthPolicy.SECRET));
+  }
+}

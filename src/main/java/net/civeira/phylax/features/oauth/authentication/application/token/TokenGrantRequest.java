@@ -1,0 +1,30 @@
+package net.civeira.phylax.features.oauth.authentication.application.token;
+
+import java.util.List;
+import java.util.Map;
+
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.client.domain.ClientCredentials;
+
+/**
+ * Token endpoint request once the HTTP layer has parsed it.
+ *
+ * @param tenant tenant of the endpoint
+ * @param grantType the {@code grant_type} parameter, may be null
+ * @param params form parameters
+ * @param credentials client credentials presented (Basic header and body)
+ * @param request request context for the grants that need it (headers, audiences, scope)
+ */
+public record TokenGrantRequest(String tenant, String grantType, Map<String, List<String>> params,
+    ClientCredentials credentials, AuthRequest request) {
+
+  /**
+   * First value of a form parameter.
+   *
+   * @param name parameter name
+   * @return the value, null when missing or empty
+   */
+  public String param(String name) {
+    return TokenParams.first(params, name);
+  }
+}

@@ -78,8 +78,8 @@ public class RegisterController {
   }
 
   private Optional<ClientDetails> loadClient(AuthRequest request) {
-    return clientRetrieve.loadPublic(request.getTenant(), request.getClientId().orElseThrow(),
-        request.getRedirect().orElseThrow());
+    return clientRetrieve.loadForAuthorization(request.getTenant(),
+        request.getClientId().orElseThrow(), request.getRedirect().orElseThrow());
   }
 
   private Response clientNotAllowedResponse(String tenant, HttpHeaders headers) {

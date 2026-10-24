@@ -1,6 +1,6 @@
 # J-10 — Aserciones JWT de cliente y grant
 
-**Prioridad:** opcional · **Tareas:** [3.2](../issue-3.2-autenticacion-jwt-cliente.md), [3.9](../issue-3.9-grant-jwt-bearer.md) (pospuesta, como PHP 069). **Depende de:** método cliente J-02, resolver/JWKS y anti-replay J-05.
+**Prioridad:** opcional · **Tareas:** [3.2](../issue-3.2-autenticacion-jwt-cliente.md), [3.9](../pospuestos/issue-3.9-grant-jwt-bearer.md) (pospuesta, como PHP 069). **Depende de:** método cliente J-02, resolver/JWKS y anti-replay J-05.
 
 ## Implementación
 

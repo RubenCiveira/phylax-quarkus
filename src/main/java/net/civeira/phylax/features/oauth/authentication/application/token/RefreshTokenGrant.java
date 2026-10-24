@@ -1,0 +1,109 @@
+package net.civeira.phylax.features.oauth.authentication.application.token;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.OAuthTokenException;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
+import net.civeira.phylax.features.oauth.tokensecurity.application.RefreshFamily;
+import net.civeira.phylax.features.oauth.tokensecurity.application.RefreshTokenInfo;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
+import net.civeira.phylax.features.oauth.user.application.usecase.LoginUsecase;
+
+/**
+ * The refresh_token grant with rotation (task 0.2).
+ *
+ * <p>
+ * The client has already authenticated with its registered method and must be the one the token was
+ * issued to ({@code azp}). The family ({@code fid}) must be alive and not past its absolute
+ * expiration ({@code fexp}); a family started by an interactive login ({@code ses}) also needs its
+ * session alive. Scopes can only be narrowed and the audiences are the original ones. The JTI is
+ * consumed atomically just before issuing, so a rejected request does not spend the token; a token
+ * presented twice (replay, or two concurrent rotations) revokes the whole family and the user's
+ * tokens for that client.
+ */
+@Slf4j
+@ApplicationScoped
+@RequiredArgsConstructor
+public class RefreshTokenGrant {
+
+  public static final String GRANT_TYPE = "refresh_token";
+
+  private final JwtTokenBuilder tokenBuilder;
+  private final SessionStoreGateway sessionStore;
+  private final TokenRevocationGateway revocationGateway;
+  private final LoginUsecase loginUsecase;
+  private final TokenIssuer issuer;
+
+  /**
+   * Rotates the refresh token of a token request.
+   *
+   * @param request token request
+   * @param client authenticated client
+   * @return issued tokens, with a new refresh token of the same family
+   * @throws OAuthTokenException invalid_request without token, invalid_grant when it cannot be
+   *         used, invalid_scope when the scope widens the grant
+   */
+  public AutorizationToken rotate(TokenGrantRequest request, ClientDetails client) {
+    String tenant = request.tenant();
+    String refreshToken = request.param("refresh_token");
+    if (refreshToken == null) {
+      throw OAuthTokenException.invalidRequest("refresh_token is required");
+    }
+    RefreshTokenInfo info = tokenBuilder.verifyRefreshInfo(refreshToken, tenant)
+        .filter(found -> client.getClientId().equals(found.getClient()))
+        .filter(found -> found.getJti() != null && found.getFamily().isPresent())
+        .orElseThrow(() -> OAuthTokenException.invalidGrant("Invalid refresh token"));
+    RefreshFamily family = info.getFamily().get();
+    if (revocationGateway.isRevoked(info.getJti(), tenant)) {
+      throw replay(tenant, info, family);
+    }
+    if (revocationGateway.isRevoked(family.getFid(), tenant)
+        || !family.getFexp().isAfter(Instant.now())) {
+      throw OAuthTokenException.invalidGrant("Refresh token family expired or revoked");
+    }
+    if (family.isSessionBound() && !sessionStore.isRefreshSessionActive(info.getJti())) {
+      throw OAuthTokenException.invalidGrant("The session of the refresh token has ended");
+    }
+    List<String> requested = TokenParams.scopes(request.param("scope"));
+    if (!info.getGrantedScopes().containsAll(requested)) {
+      throw OAuthTokenException.invalidScope("The scope exceeds the original grant");
+    }
+    List<String> scopes = requested.isEmpty() ? info.getGrantedScopes() : requested;
+    AuthRequest authRequest = AuthRequest.builder().audiences(info.getAudiences()).tenant(tenant)
+        .clientId(Optional.of(client.getClientId())).scope(Optional.of(String.join(" ", scopes)))
+        .build();
+    AuthenticationResult auth = loginUsecase.fillPreAuthenticated(authRequest, info.getUsername(),
+        client, List.of(), AuthenticationMode.REFRESH);
+    if (!auth.isRight()) {
+      throw OAuthTokenException.invalidGrant("The user can not be authenticated");
+    }
+    auth.getData().setScopes(scopes);
+    if (!revocationGateway.consumeJti(info.getJti(), tenant, "refresh", info.getExpiresAt())) {
+      throw replay(tenant, info, family);
+    }
+    return issuer.issue(tenant, client, GRANT_TYPE, auth.getData(), authRequest, Optional.empty(),
+        Optional.of(refreshToken), family);
+  }
+
+  /**
+   * A refresh token was used twice: revoke its family and the user's tokens for the client.
+   */
+  private OAuthTokenException replay(String tenant, RefreshTokenInfo info, RefreshFamily family) {
+    log.warn("Refresh token reuse for client {} in tenant {}: family revoked", info.getClient(),
+        tenant);
+    revocationGateway.revokeJti(family.getFid(), tenant, "refresh", family.getFexp());
+    revocationGateway.revokeAllForUser(info.getUsername(), info.getClient(), tenant);
+    return OAuthTokenException.invalidGrant("Refresh token already used");
+  }
+}
