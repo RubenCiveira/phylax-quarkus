@@ -1,0 +1,145 @@
+package net.civeira.phylax.integrationtest.persistence;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.infrastructure.driven.SessionStoreSqlAdapter;
+import net.civeira.phylax.features.oauth.tokensecurity.infrastructure.driven.TokenRevocationSqlAdapter;
+
+/**
+ * Refresh consumption, family revocation and replay sweep of {@link TokenRevocationSqlAdapter}
+ * against MariaDB (V.1 for 0.2 and 1.10).
+ */
+@Tag("mariadb")
+@ExtendWith(MariaDbSchema.class)
+class TokenRevocationSqlAdapterMariaDbTest {
+
+  private static final String TENANT_A = "tenant-a";
+  private static final String TENANT_B = "tenant-b";
+  private static final String CLIENT = "web";
+  private static final Instant LATER = Instant.now().plus(1, ChronoUnit.HOURS);
+
+  private DataSource dataSource;
+  private TokenRevocationSqlAdapter revocations;
+  private SessionStoreSqlAdapter sessions;
+
+  @BeforeEach
+  void setUp(DataSource dataSource) throws SQLException {
+    this.dataSource = dataSource;
+    revocations = new TokenRevocationSqlAdapter(dataSource);
+    sessions = new SessionStoreSqlAdapter(dataSource, MariaDbSchema.mapper());
+    try (Connection c = dataSource.getConnection()) {
+      c.createStatement().execute("DELETE FROM _oauth_revoked_jti");
+      c.createStatement().execute("DELETE FROM _oauth_session");
+      c.createStatement().execute("DELETE FROM access_tenant");
+      tenant(c, "uid-a", TENANT_A);
+      tenant(c, "uid-b", TENANT_B);
+    }
+  }
+
+  private static void tenant(Connection c, String uid, String name) throws SQLException {
+    try (PreparedStatement ps = c.prepareStatement("INSERT INTO access_tenant"
+        + " (uid, version, domain, enabled, mark_for_delete, name, root)"
+        + " VALUES (?, 0, ?, 1, 0, ?, 0)")) {
+      ps.setString(1, uid);
+      ps.setString(2, name + ".example");
+      ps.setString(3, name);
+      ps.execute();
+    }
+  }
+
+  /**
+   * An interactive session of a user, with the access and refresh JTIs of its tokens.
+   */
+  private String[] session(String username, String tenantUid, String clientId) {
+    String session = UUID.randomUUID().toString();
+    AuthenticationData auth = new AuthenticationData();
+    auth.setUid(UUID.randomUUID().toString());
+    auth.setUsername(username);
+    auth.setTenant(tenantUid);
+    sessions.saveSession(session, ClientDetails.builder().clientId(clientId)
+        .allowedScopes(List.of()).allowedGrants(List.of()).build(), "form", auth, "csid");
+    String access = UUID.randomUUID().toString();
+    String refresh = UUID.randomUUID().toString();
+    sessions.updateTokenJtis(session, access, refresh);
+    return new String[] {access, refresh};
+  }
+
+  @Test
+  void consumeJti_concurrently_hasASingleWinner() throws Exception {
+    String jti = UUID.randomUUID().toString();
+
+    List<Boolean> results =
+        Concurrently.run(16, () -> revocations.consumeJti(jti, TENANT_A, "refresh", LATER));
+
+    Assertions.assertEquals(1, results.stream().filter(Boolean::booleanValue).count());
+    Assertions.assertTrue(revocations.isRevoked(jti, TENANT_A));
+  }
+
+  @Test
+  void revokedFamily_isPersisted_onlyForItsTenant() {
+    String fid = UUID.randomUUID().toString();
+
+    revocations.revokeJti(fid, TENANT_A, "refresh", LATER);
+
+    Assertions.assertTrue(revocations.isRevoked(fid, TENANT_A));
+    Assertions.assertFalse(revocations.isRevoked(fid, TENANT_B));
+  }
+
+  @Test
+  void replaySweep_revokesAccessAndRefresh_ofTheUserSessionsWithTheClient() {
+    String[] alice = session("alice", "uid-a", CLIENT);
+    String[] secondAlice = session("alice", "uid-a", CLIENT);
+
+    revocations.revokeAllForUser("alice", CLIENT, TENANT_A);
+
+    for (String[] tokens : List.of(alice, secondAlice)) {
+      Assertions.assertTrue(revocations.isRevoked(tokens[0], TENANT_A), "access token revoked");
+      Assertions.assertTrue(revocations.isRevoked(tokens[1], TENANT_A), "refresh token revoked");
+    }
+  }
+
+  @Test
+  void replaySweep_neverTouchesAnotherTenant_userOrClient() {
+    String[] otherTenant = session("alice", "uid-b", CLIENT);
+    String[] otherUser = session("bob", "uid-a", CLIENT);
+    String[] otherClient = session("alice", "uid-a", "mobile");
+
+    revocations.revokeAllForUser("alice", CLIENT, TENANT_A);
+
+    Assertions.assertFalse(revocations.isRevoked(otherUser[1], TENANT_A));
+    Assertions.assertFalse(revocations.isRevoked(otherClient[1], TENANT_A));
+    Assertions.assertTrue(revocations.consumeJti(otherTenant[1], TENANT_B, "refresh", LATER),
+        "The same user name in another tenant can still rotate its refresh token");
+    Assertions.assertTrue(revocations.consumeJti(otherUser[1], TENANT_A, "refresh", LATER));
+  }
+
+  @Test
+  void endedSession_stopsItsRefresh() {
+    String[] alice = session("alice", "uid-a", CLIENT);
+    Assertions.assertTrue(sessions.isRefreshSessionActive(alice[1]));
+
+    try (Connection c = dataSource.getConnection()) {
+      c.createStatement().execute("DELETE FROM _oauth_session");
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+
+    Assertions.assertFalse(sessions.isRefreshSessionActive(alice[1]));
+  }
+}

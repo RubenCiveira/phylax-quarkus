@@ -8,3 +8,10 @@ docker-run:
 
 docker-build-jvm:
 	docker build --no-cache --force-rm -f src/main/docker/Dockerfile.jvm.multistage -t civi/phylax-api .
+
+# V.1: SQL adapters against MariaDB, in a throwaway phylax_v1_* schema (never the .env database).
+test-mariadb:
+	@set -a && . ./.env && set +a && \
+	V1_MARIADB_URL="jdbc:mariadb://$${DATASOURCE_HOST:-localhost}:$${DATASOURCE_PORT:-3306}" \
+	V1_MARIADB_USER="$${DATASOURCE_USER}" V1_MARIADB_PASSWORD="$${DATASOURCE_PASS}" \
+	mvn test -Dtest='*MariaDbTest' -Dsurefire.failIfNoSpecifiedTests=false

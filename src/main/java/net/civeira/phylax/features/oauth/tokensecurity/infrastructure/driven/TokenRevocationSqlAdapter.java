@@ -112,19 +112,35 @@ public class TokenRevocationSqlAdapter implements TokenRevocationGateway {
     }
   }
 
+  /**
+   * Tokens of the user's interactive sessions with the client in this tenant.
+   *
+   * <p>
+   * {@code auth_data.tenant} holds the uid of the user's tenant, the one the route tenant name
+   * resolves to at login; matching it keeps another tenant's user with the same name and client
+   * untouched (inserting their JTIs here would also make their next rotation look like a replay).
+   */
+  private static final String USER_TOKENS =
+      " FROM _oauth_session_token st" + " WHERE st.client_id = ? AND st.auth_data IS NOT NULL"
+          + "   AND JSON_UNQUOTE(JSON_EXTRACT(st.auth_data, '$.username')) = ?"
+          + "   AND JSON_UNQUOTE(JSON_EXTRACT(st.auth_data, '$.tenant'))"
+          + "       = (SELECT t.uid FROM access_tenant t WHERE t.name = ?)"
+          + "   AND st.expires_at > NOW() AND st.revoked_at IS NULL";
+
   @Override
   public void revokeAllForUser(String username, String clientId, String tenantId) {
+    String sql = "INSERT IGNORE INTO _oauth_revoked_jti (jti, tenant_id, token_type, expires_at)"
+        + " SELECT st.jti, ?, 'access', st.expires_at" + USER_TOKENS + " UNION ALL"
+        + " SELECT st.refresh_jti, ?, 'refresh', st.expires_at" + USER_TOKENS;
     try (Connection conn = datasource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(
-            "INSERT IGNORE INTO _oauth_revoked_jti (jti, tenant_id, token_type, expires_at)"
-                + " SELECT st.refresh_jti, ?, 'refresh', st.expires_at"
-                + " FROM _oauth_session_token st" + " WHERE st.client_id = ?"
-                + "   AND st.auth_data IS NOT NULL"
-                + "   AND JSON_UNQUOTE(JSON_EXTRACT(st.auth_data, '$.username')) = ?"
-                + "   AND st.expires_at > NOW()" + "   AND st.revoked_at IS NULL")) {
-      ps.setString(1, tenantId);
-      ps.setString(2, clientId);
-      ps.setString(3, username);
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      int index = 1;
+      for (int part = 0; part < 2; part++) {
+        ps.setString(index++, tenantId);
+        ps.setString(index++, clientId);
+        ps.setString(index++, username);
+        ps.setString(index++, tenantId);
+      }
       ps.executeUpdate();
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);

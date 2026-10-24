@@ -1,0 +1,113 @@
+package net.civeira.phylax.integrationtest.persistence;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolver;
+import org.mariadb.jdbc.MariaDbDataSource;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import net.civeira.phylax.common.infrastructure.migration.Migrations;
+
+/**
+ * Persistence harness of V.1: a throwaway MariaDB schema per test class, built with the project
+ * migrations, so the SQL adapters run against the real engine (atomic consumption, JSON functions,
+ * constraints) instead of the in-memory doubles of the flow tests.
+ *
+ * <p>
+ * Opt-in through environment variables or system properties; without them the tests are skipped:
+ * <ul>
+ * <li>{@code V1_MARIADB_URL}: server URL without database, e.g.
+ * {@code jdbc:mariadb://localhost:3306};</li>
+ * <li>{@code V1_MARIADB_USER} and {@code V1_MARIADB_PASSWORD}: a user allowed to create and drop
+ * databases.</li>
+ * </ul>
+ * The schema ({@code phylax_v1_<random>}) is dropped after the class, so the harness never touches
+ * the development database.
+ */
+public class MariaDbSchema implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
+
+  private static final String MIGRATIONS = "migration/mysql/changelog.txt";
+
+  private String server;
+  private String user;
+  private String password;
+  private String schema;
+  private MariaDbDataSource dataSource;
+
+  private static Optional<String> setting(String name) {
+    return Optional.ofNullable(System.getProperty(name))
+        .or(() -> Optional.ofNullable(System.getenv(name))).filter(v -> !v.isBlank());
+  }
+
+  /**
+   * JSON mapper configured like the Quarkus one for the adapters that serialise domain objects.
+   */
+  public static ObjectMapper mapper() {
+    return new ObjectMapper().findAndRegisterModules()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+  }
+
+  @Override
+  public void beforeAll(ExtensionContext context) throws Exception {
+    Optional<String> url = setting("V1_MARIADB_URL");
+    Assumptions.assumeTrue(url.isPresent(), "V1_MARIADB_URL not set: MariaDB harness skipped");
+    server = url.get().replaceAll("/+$", "");
+    user = setting("V1_MARIADB_USER").orElse("root");
+    password = setting("V1_MARIADB_PASSWORD").orElse("");
+    schema = "phylax_v1_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+    try (Connection admin = DriverManager.getConnection(server + "/", user, password);
+        Statement st = admin.createStatement()) {
+      st.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    }
+    dataSource = new MariaDbDataSource(server + "/" + schema);
+    dataSource.setUser(user);
+    dataSource.setPassword(password);
+    try (Connection connection = dataSource.getConnection();
+        Migrations migrations = new Migrations(connection, MIGRATIONS, "mysql")) {
+      Map<String, Object> result = migrations.runMigrations();
+      Object errors = result.get("errors");
+      if (errors instanceof List<?> list && !list.isEmpty()) {
+        throw new IllegalStateException("Migrations failed on " + schema + ": " + list);
+      }
+    }
+  }
+
+  @Override
+  public void afterAll(ExtensionContext context) throws SQLException {
+    if (schema == null) {
+      return;
+    }
+    try (Connection admin = DriverManager.getConnection(server + "/", user, password);
+        Statement st = admin.createStatement()) {
+      st.execute("DROP DATABASE IF EXISTS " + schema);
+    }
+  }
+
+  @Override
+  public boolean supportsParameter(ParameterContext parameter, ExtensionContext context) {
+    return parameter.getParameter().getType() == DataSource.class;
+  }
+
+  @Override
+  public Object resolveParameter(ParameterContext parameter, ExtensionContext context) {
+    return dataSource;
+  }
+}

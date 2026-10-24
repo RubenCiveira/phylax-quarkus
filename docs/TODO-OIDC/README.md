@@ -68,7 +68,7 @@ Sincronizado con el plan PHP el 23-10-2026 (EP-01 a EP-11 cerradas allí). Son d
 | [ ] | 1.7 | Retirar implicit (decidido en PHP EP-08) y conservar los hybrid emitiendo solo los artefactos pedidos, con hashes y `fragment`; alinear discovery y tests. | S–M |
 | [x] | 1.8 | Admitir clientes confidenciales en authorization code, con autenticación en token y política PKCE definida; probar web app con secreto. Depende de 0.1 y 0.9. | M |
 | [ ] | 1.9 | Validar firma, tipo, issuer y revocación en introspección para todos los grants; probar `active` de password y client_credentials y después de revocar. | M |
-| [ ] | 1.10 | Cubrir casos negativos de code ajeno/doble canje, refresh robado/concurrente, audience ajena y redirect no registrado con pruebas HTTP + persistencia. **Parcial:** code y refresh cubiertos; faltan audiencia (0.3), redirect estricto (0.10) y MariaDB (V.1). | M |
+| [ ] | 1.10 | Cubrir casos negativos de code ajeno/doble canje, refresh robado/concurrente, audience ajena y redirect no registrado con pruebas HTTP + persistencia. **Parcial:** code y refresh cubiertos, también contra MariaDB (V.1); faltan audiencia (0.3) y redirect estricto (0.10). | M |
 | [ ] | 1.11 | Mantener PKCE `S256`, exigirlo a públicos y definir política para confidenciales; probar ausencia, `plain` y verifier erróneo. | S |
 | [ ] | 1.12 | Ligar `nonce` al code original, exigirlo en implicit/hybrid si se conservan y omitir el claim si no se envía; probar omisión y discordancia. | S |
 | [ ] | 1.13 | Separar claims por tipo: `auth_time`/`acr`/`amr` reales y hashes solo cuando correspondan; comprobar `sub` de UserInfo igual al del ID token. | M |

@@ -56,11 +56,13 @@ public interface TokenRevocationGateway {
   void cleanup();
 
   /**
-   * Revokes all non-expired refresh tokens for a given user/client pair.
+   * Revokes the access and refresh tokens of the user's interactive sessions with a client.
    *
    * <p>
-   * Called on theft detection: when a refresh token JTI appears that was already revoked, all
-   * active refresh tokens for the same user and client are invalidated to limit blast radius.
+   * Called on theft detection: when a refresh token JTI appears that was already revoked, the
+   * tokens registered on the user's sessions for the same client and tenant are invalidated to
+   * limit blast radius. Tokens of grants without session are covered by the revocation of their
+   * family; tokens of the same user name in other tenants are never touched.
    * </p>
    *
    * @param username authenticated username

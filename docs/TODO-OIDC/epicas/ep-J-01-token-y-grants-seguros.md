@@ -2,7 +2,7 @@
 
 **Prioridad:** bloqueante · **Tareas:** [0.1](../done/issue-0.1-canje-seguro-de-authorization-code.md), [0.2](../done/issue-0.2-refresh-cliente-sesion.md), [0.9](../done/issue-0.9-autenticacion-cliente-unificada.md), [0.13](../done/issue-0.13-ruta-revocacion-no-duplicada.md), [1.4](../done/issue-1.4-errores-cache-token.md), [1.8](../done/issue-1.8-code-clientes-confidenciales.md), [1.10](../issue-1.10-tests-negativos-seguridad.md), [1.16](../done/issue-1.16-emision-canje-fuera-tokencontroller.md). **Depende de:** política de [J-02](ep-J-02-clientes-tenant-secretos.md) para cliente/grant/tenant; la seguridad del code y refresh empieza antes de terminar toda la épica.
 
-**Estado (24-10-2026):** implementada salvo [1.10](../issue-1.10-tests-negativos-seguridad.md), parcial (audiencia ajena tras 0.3, redirect estricto tras 0.10). Queda la verificación concurrente contra MariaDB de 0.1, 0.2 y 1.10 en el arnés [V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md).
+**Estado (24-10-2026):** implementada salvo [1.10](../issue-1.10-tests-negativos-seguridad.md), parcial (audiencia ajena tras 0.3, redirect estricto tras 0.10). La concurrencia de code y refresh y la revocación persistida están verificadas contra MariaDB en el arnés [V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md) (`make test-mariadb`).
 
 ## Implementación
 
@@ -48,7 +48,7 @@ Introspección, revocación y PAR exigen secreto; `/device` admite públicos.
 | Robo de un code | Ligado a cliente, tenant, redirect y PKCE; quien no es el dueño recibe `invalid_grant` y el code no se gasta |
 | Doble canje o canjes simultáneos | Consumo atómico: un único vencedor |
 | Robo de un refresh | Ligado al cliente (`azp`) y al tenant (`iss`) |
-| Replay de un refresh rotado o rotaciones simultáneas | Un único vencedor; el reuso revoca la familia y los tokens del usuario para ese cliente |
+| Replay de un refresh rotado o rotaciones simultáneas | Un único vencedor; el reuso revoca la familia completa y, además, los access y refresh de las sesiones interactivas del usuario con ese cliente en ese tenant (los access de grants sin sesión siguen válidos hasta caducar) |
 | Refresh tras cerrar sesión | Rechazado si la familia nació de un login interactivo |
 | Prolongar un grant indefinidamente | Expiración absoluta de familia (`fexp`) |
 | Downgrade de PKCE o confidencial haciéndose pasar por público | Un público nunca canjea sin PKCE; un verifier para un code sin challenge se rechaza |
@@ -74,12 +74,14 @@ Introspección, revocación y PAR exigen secreto; `/device` admite públicos.
 | Code, refresh y emisión | `…/token/AuthorizationCodeGrant`, `RefreshTokenGrant`, `TokenIssuer` |
 | Error OAuth | `features/oauth/authentication/domain/exception/OAuthTokenException` |
 | Driver HTTP | `features/oauth/authentication/infrastructure/driver/rest/TokenController` |
-| Pruebas | `TokenGrantSecurityTest`, `TokenEndpointContractTest`, `ConfidentialCodeFlowTest`, `TokenGrantNegativeSecurityTest`, `ClientCredentialsUnitTest`, `ClientAuthenticatorUnitTest` |
+| Pruebas | `TokenGrantSecurityTest`, `TokenEndpointContractTest`, `ConfidentialCodeFlowTest`, `TokenGrantNegativeSecurityTest`, `ClientCredentialsUnitTest`, `ClientAuthenticatorUnitTest`; contra MariaDB, `TemporalKeysSqlAdapterMariaDbTest` y `TokenRevocationSqlAdapterMariaDbTest` |
 
 ### Pendiente y límites conocidos
 
-- MariaDB: dos canjes/rotaciones concurrentes reales y la familia revocada persistida ([V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md)).
+- Flujos HTTP encadenados contra MariaDB: hoy la concurrencia se verifica sobre los adaptadores SQL, no a través del endpoint ([V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md)).
+- La revocación de access tokens solo surte efecto donde se consulta (introspección); el bearer de las APIs aún no mira la lista de revocados ([0.8](../issue-0.8-verificacion-bearer-apis.md), [0.15](../issue-0.15-audiencia-tenant-revocacion-bearer.md)).
 - Revocar los tokens del primer canje si se reintenta un code ya usado (requiere guardar los codes gastados; anotado en 0.1).
 - `allowedGrants` aún son los valores por defecto del adaptador, y code/refresh no se filtran por ellos: aplicar `grantTypesJson` es [0.4](../issue-0.4-configuracion-por-cliente.md) (J-02).
 - Audiencias autorizadas ([0.3](../issue-0.3-audiencias-autorizadas.md)) y redirect exacto ([0.10](../issue-0.10-redirect-uri-estricta.md)), ambos en J-02.
+- **Corregido (24-10-2026):** `revokeAllForUser` (llamado ante replay) no filtraba por tenant y solo revocaba refresh; ahora filtra por el uid del tenant de la ruta (`auth_data.tenant`) e incluye los access JTI. Sin el filtro, insertar un JTI de otro tenant hacía que su siguiente rotación legítima chocara con la PK y se tratase como replay.
 - El canje de `device_code` no es atómico (lee y borra sin comprobar filas); queda fuera de esta épica.

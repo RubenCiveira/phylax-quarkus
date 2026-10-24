@@ -1,0 +1,79 @@
+package net.civeira.phylax.integrationtest.persistence;
+
+import java.util.List;
+import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
+import net.civeira.phylax.features.oauth.session.infrastructure.driven.TemporalKeysSqlAdapter;
+
+/**
+ * Atomic authorization code consumption of {@link TemporalKeysSqlAdapter} against MariaDB (V.1 for
+ * 0.1 and 1.10).
+ */
+@Tag("mariadb")
+@ExtendWith(MariaDbSchema.class)
+class TemporalKeysSqlAdapterMariaDbTest {
+
+  private TemporalKeysSqlAdapter codes;
+
+  @BeforeEach
+  void setUp(DataSource dataSource) {
+    codes = new TemporalKeysSqlAdapter(dataSource, new AesCipherService("v1-test-key"),
+        MariaDbSchema.mapper());
+  }
+
+  private String register() {
+    AuthenticationData data = new AuthenticationData();
+    data.setUsername("alice");
+    return codes.registerTemporalAuthCode(TemporalAuthCode.builder().data(data)
+        .client(ClientDetails.builder().clientId("web").allowedScopes(List.of())
+            .allowedGrants(List.of()).build())
+        .request(AuthRequest.builder().tenant("tenant-a").clientId(Optional.of("web"))
+            .redirect(Optional.of("https://app.example/callback")).build())
+        .build());
+  }
+
+  @Test
+  void code_storedAndRead_keepsTheBinding() {
+    String code = register();
+
+    TemporalAuthCode redeemed = codes.consumeTemporalAuthCode(code, c -> true).orElseThrow();
+
+    Assertions.assertEquals("web", redeemed.client.getClientId());
+    Assertions.assertEquals("tenant-a", redeemed.request.getTenant());
+    Assertions.assertEquals(Optional.of("https://app.example/callback"),
+        redeemed.request.getRedirect());
+  }
+
+  @Test
+  void code_consumedConcurrently_hasASingleWinner() throws Exception {
+    String code = register();
+
+    List<Optional<TemporalAuthCode>> results =
+        Concurrently.run(16, () -> codes.consumeTemporalAuthCode(code, c -> true));
+
+    Assertions.assertEquals(1, results.stream().filter(Optional::isPresent).count());
+  }
+
+  @Test
+  void code_rejectedByTheValidator_isNotSpent() {
+    String code = register();
+
+    Assertions.assertTrue(codes.consumeTemporalAuthCode(code, c -> false).isEmpty());
+    Assertions.assertTrue(codes.consumeTemporalAuthCode(code, c -> true).isPresent());
+    Assertions.assertTrue(codes.consumeTemporalAuthCode(code, c -> true).isEmpty(),
+        "A redeemed code cannot be redeemed again");
+  }
+}
