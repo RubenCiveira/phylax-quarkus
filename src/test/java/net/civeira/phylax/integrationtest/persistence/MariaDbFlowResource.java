@@ -1,0 +1,51 @@
+package net.civeira.phylax.integrationtest.persistence;
+
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+
+/**
+ * Points a Quarkus test run at a throwaway MariaDB schema: the application migrates it on start
+ * ({@code MigrationsManager}) and it is dropped when the run ends.
+ */
+public class MariaDbFlowResource implements QuarkusTestResourceLifecycleManager {
+
+  private MariaDbSchema.Server server;
+  private String schema;
+
+  @Override
+  public Map<String, String> start() {
+    server = MariaDbSchema.Server.configured().orElseThrow(
+        () -> new IllegalStateException("V1_MARIADB_URL is required by MariaDbFlowResource"));
+    try {
+      schema = server.createSchema();
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+    String url = server.url(schema);
+    Map<String, String> config = new HashMap<>();
+    for (String prefix : new String[] {"quarkus.datasource.", "quarkus.datasource.replica.",
+        "app.migration."}) {
+      config.put(prefix + "jdbc.url", url);
+      config.put(prefix + "username", server.user());
+      config.put(prefix + "password", server.password());
+    }
+    // Concurrent requests need their own connections to race in the database.
+    config.put("quarkus.datasource.jdbc.max-size", "20");
+    config.put("quarkus.datasource.replica.jdbc.max-size", "20");
+    return config;
+  }
+
+  @Override
+  public void stop() {
+    if (schema != null) {
+      try {
+        server.dropSchema(schema);
+      } catch (SQLException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+  }
+}

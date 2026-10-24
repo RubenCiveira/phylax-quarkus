@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.With;
 import lombok.extern.jackson.Jacksonized;
 
 /**
@@ -89,6 +90,7 @@ public class AuthRequest {
    */
   private final Optional<String> responseType = Optional.empty();
   @Builder.Default
+  @With
   /**
    * Requested audiences for token issuance.
    */

@@ -3,6 +3,7 @@ package net.civeira.phylax.integrationtest.features.oauth.scenario;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import io.quarkus.arc.profile.IfBuildProfile;
@@ -36,21 +37,43 @@ public class ScenarioLoginGateway implements LoginGateway {
     this.onPreAuth = behavior;
   }
 
+  /**
+   * Resource owner credential checks, the step where roles are computed for the audiences.
+   */
+  private final AtomicInteger validations = new AtomicInteger();
+
   public void reset() {
     onValidate = () -> AuthenticationResult.right(defaultData());
     onPreAuth = () -> AuthenticationResult.right(defaultData());
+    validations.set(0);
+  }
+
+  public int validations() {
+    return validations.get();
   }
 
   @Override
   public AuthenticationResult validateUserData(AuthRequest request, String username,
       String password, ClientDetails client, List<AuthenticationChallenge> challenges) {
-    return onValidate.get();
+    validations.incrementAndGet();
+    return withAudiences(onValidate.get(), request);
   }
 
   @Override
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
       ClientDetails client, List<AuthenticationChallenge> challenges, AuthenticationMode mode) {
-    return onPreAuth.get();
+    return withAudiences(onPreAuth.get(), request);
+  }
+
+  /**
+   * Like UserLoginService, the granted data carries the audiences of the request.
+   */
+  private static AuthenticationResult withAudiences(AuthenticationResult result,
+      AuthRequest request) {
+    if (result.isRight() && request != null && result.getData().getAudiences().isEmpty()) {
+      result.getData().setAudiences(request.getAudiences());
+    }
+    return result;
   }
 
   private static AuthenticationData defaultData() {

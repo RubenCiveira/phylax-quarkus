@@ -63,6 +63,13 @@ public class ClientDetails {
   private final List<String> postLogoutRedirectUris = List.of();
 
   /**
+   * Resource servers this client may request tokens for, besides itself (task 0.3).
+   */
+  @Builder.Default
+  @NonNull
+  private final List<String> allowedAudiences = List.of();
+
+  /**
    * Back-channel logout URI for server-to-server logout notifications. Null when not configured.
    */
   private final String backchannelLogoutUri;
@@ -82,6 +89,20 @@ public class ClientDetails {
    * configuration.
    */
   private final Integer m2mTokenTtlSeconds;
+
+  /**
+   * Checks that every requested audience is this client or one registered for it.
+   *
+   * Used by authorize, the token endpoint and device authorization to reject foreign resource
+   * servers ({@code invalid_target}, RFC 8707) before authenticating the user.
+   *
+   * @param audiences requested audiences
+   * @return true when all of them are allowed
+   */
+  public boolean allowsAudiences(List<String> audiences) {
+    return audiences == null || audiences.stream()
+        .allMatch(aud -> clientId.equals(aud) || allowedAudiences.contains(aud));
+  }
 
   public Optional<String> findBackchannelLogoutUri() {
     return Optional.ofNullable(backchannelLogoutUri).filter(u -> !u.isBlank());

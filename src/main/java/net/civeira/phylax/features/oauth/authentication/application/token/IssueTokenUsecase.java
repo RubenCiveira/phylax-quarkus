@@ -1,13 +1,18 @@
 package net.civeira.phylax.features.oauth.authentication.application.token;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Instance;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.application.granter.TokenGranter;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.AuthenticationException;
@@ -32,9 +37,10 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
  * secret for the rest;</li>
  * <li>authorization_code and refresh_token run their own use cases ({@link AuthorizationCodeGrant},
  * {@link RefreshTokenGrant});</li>
- * <li>the other grants must be allowed to the client ({@code unauthorized_client}) and are resolved
- * by their {@link TokenGranter}; a rejected resource owner is {@code invalid_grant}, except a
- * pending second factor ({@code mfa_required}).</li>
+ * <li>the other grants must be allowed to the client ({@code unauthorized_client}), may only ask
+ * for audiences registered for it ({@code invalid_target}) and are resolved by their
+ * {@link TokenGranter}; a rejected resource owner is {@code invalid_grant}, except a pending second
+ * factor ({@code mfa_required}).</li>
  * </ol>
  * Every failure is an {@link OAuthTokenException}; the driver only turns it into HTTP.
  */
@@ -84,8 +90,8 @@ public class IssueTokenUsecase {
     if (!client.allowedGrant(grant)) {
       throw OAuthTokenException.unauthorizedClient("The client is not allowed to use " + grant);
     }
-    AuthenticationResult result =
-        granter.get().authenticate(request.request(), client, request.params());
+    AuthRequest authRequest = withAudiences(request, client);
+    AuthenticationResult result = granter.get().authenticate(authRequest, client, request.params());
     if (!result.isRight()) {
       throw rejected(result.getFail());
     }
@@ -100,8 +106,27 @@ public class IssueTokenUsecase {
     if (CLIENT_CREDENTIALS.equals(grant)) {
       return tokenBuilder.buildClientCredentialsToken(request.tenant(), client, data.getScopes());
     }
-    return issuer.issue(request.tenant(), client, grant, data, request.request(), Optional.empty(),
+    return issuer.issue(request.tenant(), client, grant, data, authRequest, Optional.empty(),
         Optional.empty(), tokenBuilder.newRefreshFamily(request.tenant(), false));
+  }
+
+  /**
+   * Request context with the audiences asked for in the query and in the body, once they are
+   * checked against the client (task 0.3). A foreign one stops the grant before authenticating the
+   * resource owner, so no roles are computed for it.
+   */
+  private static AuthRequest withAudiences(TokenGrantRequest request, ClientDetails client) {
+    Set<String> audiences = new LinkedHashSet<>(request.request().getAudiences());
+    List<String> body = request.params().get("audience");
+    if (body != null) {
+      body.stream().filter(Objects::nonNull).flatMap(value -> Arrays.stream(value.split("[,\\s]+")))
+          .filter(aud -> !aud.isBlank()).forEach(audiences::add);
+    }
+    List<String> requested = List.copyOf(audiences);
+    if (!client.allowsAudiences(requested)) {
+      throw OAuthTokenException.invalidTarget();
+    }
+    return request.request().withAudiences(requested);
   }
 
   private Optional<TokenGranter> granter(String grant) {

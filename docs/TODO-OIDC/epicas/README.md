@@ -4,7 +4,7 @@ Adaptación del [plan PHP](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/
 
 | Épica | Propietaria de tareas Java | Prioridad | Depende de | Referencia PHP |
 |---|---|---|---|---|
-| [J-01 Token y grants seguros](ep-J-01-token-y-grants-seguros.md) | 0.1, 0.2, 0.9, 0.13, 1.4, 1.8, 1.10, 1.16 | bloqueante | J-02 política cliente | 017, 019, 020 hechos; EP-05, 064 |
+| [J-01 Token y grants seguros](done/ep-J-01-token-y-grants-seguros.md) | 0.1, 0.2, 0.9, 0.13, 1.4, 1.8, 1.10, 1.16 | **cerrada** (24-10-2026; adelantó 0.3 y 0.10 de J-02) | J-02 política cliente | 017, 019, 020 hechos; EP-05, 064 |
 | [J-02 Clientes, tenant y secretos](ep-J-02-clientes-tenant-secretos.md) | 0.3, 0.4, 0.5, 0.10, 2.1, 2.4, 2.8, 2.9 | bloqueante | — | EP-02; EP-03 hecha en PHP |
 | [J-03 Emisión y claims](ep-J-03-emision-claims-proposito.md) | 0.7, 1.2, 1.13, 1.15, 2.6, 3.5 | alta | J-02, J-01 | EP-04 hecha; EP-05 |
 | [J-04 Bearer, introspección y UserInfo](ep-J-04-bearer-introspeccion-userinfo.md) | 0.8, 0.15, 1.5, 1.9 | crítica | J-03 tipo; J-02 audiencia | EP-06 |

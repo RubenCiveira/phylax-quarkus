@@ -9,6 +9,8 @@ public final class OidcTestFixtures {
   public static final String OTHER_TENANT = "other-tenant";
   /** Confidential web app registered for client_secret_basic, without public access. */
   public static final String WEB_CLIENT_ID = "web-client";
+  /** Resource server registered as allowed audience of every test client. */
+  public static final String API_AUDIENCE = "test-api";
   /** Public client registered for none. */
   public static final String SPA_CLIENT_ID = "spa-client";
   public static final String REDIRECT_URI = "http://localhost/callback";

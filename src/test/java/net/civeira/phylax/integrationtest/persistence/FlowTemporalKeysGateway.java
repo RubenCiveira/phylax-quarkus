@@ -1,0 +1,63 @@
+package net.civeira.phylax.integrationtest.persistence;
+
+import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.quarkus.arc.properties.IfBuildProperty;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Inject;
+import net.civeira.phylax.common.crypto.AesCipherService;
+import net.civeira.phylax.features.oauth.session.infrastructure.driven.TemporalKeysSqlAdapter;
+
+/**
+ * Production code store ({@link TemporalKeysSqlAdapter}: authorization codes registered and
+ * consumed in MariaDB) with the fixed key handling of the flow tests, so the fixture {@code csid}
+ * and the clear-text password of the login form are accepted as in
+ * {@code FixedTemporalKeysGateway}.
+ */
+@IfBuildProperty(name = MariaDbFlowProfile.ENABLED, stringValue = "true")
+@Alternative
+@Priority(1)
+@ApplicationScoped
+public class FlowTemporalKeysGateway extends TemporalKeysSqlAdapter {
+
+  private static final String FIXED_KEY = "0123456789abcdef0123456789abcdef";
+
+  /**
+   * For the client proxy of the normal scope only.
+   */
+  protected FlowTemporalKeysGateway() {
+    this(null, null, null);
+  }
+
+  @Inject
+  public FlowTemporalKeysGateway(DataSource datasource, AesCipherService cipher,
+      ObjectMapper mapper) {
+    super(datasource, cipher, mapper);
+  }
+
+  @Override
+  public String currentKey() {
+    return FIXED_KEY;
+  }
+
+  @Override
+  public String encrypt(String value) {
+    return value;
+  }
+
+  @Override
+  public Optional<String> verifyCypher(String value) {
+    return Optional.ofNullable(value);
+  }
+
+  @Override
+  public Optional<String> verifyToken(String token) {
+    return token == null || token.isBlank() ? Optional.empty() : Optional.of("verified");
+  }
+}

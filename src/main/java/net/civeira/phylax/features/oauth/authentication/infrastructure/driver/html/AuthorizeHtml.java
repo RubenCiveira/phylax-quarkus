@@ -196,6 +196,10 @@ public class AuthorizeHtml {
       return parErrorResponse(ex);
     }
     return loadClient(request).map(loadClient -> {
+      if (!loadClient.allowsAudiences(request.getAudiences())) {
+        // Foreign resource server: rejected before any login, so no roles are computed for it.
+        return responseBuilder.errorRedirect(request, "invalid_target");
+      }
       String prompt = request.getPrompt().orElse("");
 
       // prompt=login / select_account: ignore existing session, force re-auth
@@ -254,6 +258,9 @@ public class AuthorizeHtml {
     String prompt = request.getPrompt().orElse("");
 
     return loadClient(request).map(loadClient -> {
+      if (!loadClient.allowsAudiences(request.getAudiences())) {
+        return responseBuilder.errorRedirect(request, "invalid_target");
+      }
       // prompt=login / select_account: ignore existing session, force re-auth
       Optional<SessionInfo> sessionInfo = FORCE_REAUTH_PROMPTS.contains(prompt) ? Optional.empty()
           : resolveSession(session, tenant, request);

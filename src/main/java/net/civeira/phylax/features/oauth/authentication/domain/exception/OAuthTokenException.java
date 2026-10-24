@@ -64,6 +64,15 @@ public class OAuthTokenException extends RuntimeException {
     return of("unsupported_grant_type", "The grant type is not supported", 400);
   }
 
+  /**
+   * A requested audience is not this client nor a resource server registered for it (RFC 8707).
+   *
+   * @return the exception
+   */
+  public static OAuthTokenException invalidTarget() {
+    return of("invalid_target", "The requested audience is not allowed for this client", 400);
+  }
+
   public static OAuthTokenException invalidScope(String description) {
     return of("invalid_scope", description, 400);
   }

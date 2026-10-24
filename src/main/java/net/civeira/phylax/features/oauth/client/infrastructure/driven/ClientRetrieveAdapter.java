@@ -12,6 +12,7 @@ import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
@@ -20,6 +21,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedCl
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.RedirectUriPolicy;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 
 @Slf4j
@@ -120,18 +122,11 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   private boolean redirectAllowed(TrustedClient app, String redirect) {
     List<String> redirects =
         app.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList();
-    return redirects.stream().anyMatch(allowed -> redirectMatches(allowed, redirect));
-  }
-
-  private boolean redirectMatches(String allowed, String redirect) {
-    if ("*".equals(allowed) || allowed.equals(redirect)) {
-      return true;
+    boolean allowed = RedirectUriPolicy.allows(redirects, redirect);
+    if (!allowed) {
+      log.warn("Redirect {} is not registered for client {}", redirect, app.getCodeValue());
     }
-    if (allowed.endsWith("/*")) {
-      String prefix = allowed.substring(0, allowed.length() - 1);
-      return redirect.startsWith(prefix);
-    }
-    return false;
+    return allowed;
   }
 
   private Optional<ClientDetails> privateClient(TrustedClient app, String clientId, String secret) {
@@ -154,6 +149,8 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
         .allowedScopes(DEFAULT_SCOPES)
         .tokenEndpointAuthMethod(
             ClientAuthMethod.from(app.getTokenEndpointAuthMethod().name()).orElse(null))
+        .allowedAudiences(
+            app.getAllowedAudiences().stream().map(AllowedAudiences::getAudience).toList())
         .postLogoutRedirectUris(postLogoutUris(app))
         .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
         .backchannelLogoutSessionRequired(

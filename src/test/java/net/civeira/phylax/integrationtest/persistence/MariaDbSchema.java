@@ -45,9 +45,51 @@ public class MariaDbSchema implements BeforeAllCallback, AfterAllCallback, Param
 
   private static final String MIGRATIONS = "migration/mysql/changelog.txt";
 
-  private String server;
-  private String user;
-  private String password;
+  /**
+   * Connection settings of the MariaDB server given by the environment.
+   *
+   * @param server JDBC URL without database
+   * @param user user allowed to create and drop databases
+   * @param password its password
+   */
+  public record Server(String server, String user, String password) {
+
+    /**
+     * The configured server, empty when the harness is not enabled.
+     */
+    public static Optional<Server> configured() {
+      return setting("V1_MARIADB_URL").map(url -> new Server(url.replaceAll("/+$", ""),
+          setting("V1_MARIADB_USER").orElse("root"), setting("V1_MARIADB_PASSWORD").orElse("")));
+    }
+
+    /**
+     * Creates an empty database with a random {@code phylax_v1_} name.
+     *
+     * @return its name
+     */
+    public String createSchema() throws SQLException {
+      String schema = "phylax_v1_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+      try (Connection admin = DriverManager.getConnection(server + "/", user, password);
+          Statement st = admin.createStatement()) {
+        st.execute("CREATE DATABASE " + schema
+            + " CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+      }
+      return schema;
+    }
+
+    public void dropSchema(String schema) throws SQLException {
+      try (Connection admin = DriverManager.getConnection(server + "/", user, password);
+          Statement st = admin.createStatement()) {
+        st.execute("DROP DATABASE IF EXISTS " + schema);
+      }
+    }
+
+    public String url(String schema) {
+      return server + "/" + schema;
+    }
+  }
+
+  private Server server;
   private String schema;
   private MariaDbDataSource dataSource;
 
@@ -67,19 +109,14 @@ public class MariaDbSchema implements BeforeAllCallback, AfterAllCallback, Param
 
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
-    Optional<String> url = setting("V1_MARIADB_URL");
-    Assumptions.assumeTrue(url.isPresent(), "V1_MARIADB_URL not set: MariaDB harness skipped");
-    server = url.get().replaceAll("/+$", "");
-    user = setting("V1_MARIADB_USER").orElse("root");
-    password = setting("V1_MARIADB_PASSWORD").orElse("");
-    schema = "phylax_v1_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
-    try (Connection admin = DriverManager.getConnection(server + "/", user, password);
-        Statement st = admin.createStatement()) {
-      st.execute("CREATE DATABASE " + schema + " CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    }
-    dataSource = new MariaDbDataSource(server + "/" + schema);
-    dataSource.setUser(user);
-    dataSource.setPassword(password);
+    Optional<Server> configured = Server.configured();
+    Assumptions.assumeTrue(configured.isPresent(),
+        "V1_MARIADB_URL not set: MariaDB harness skipped");
+    server = configured.get();
+    schema = server.createSchema();
+    dataSource = new MariaDbDataSource(server.url(schema));
+    dataSource.setUser(server.user());
+    dataSource.setPassword(server.password());
     try (Connection connection = dataSource.getConnection();
         Migrations migrations = new Migrations(connection, MIGRATIONS, "mysql")) {
       Map<String, Object> result = migrations.runMigrations();
@@ -92,12 +129,8 @@ public class MariaDbSchema implements BeforeAllCallback, AfterAllCallback, Param
 
   @Override
   public void afterAll(ExtensionContext context) throws SQLException {
-    if (schema == null) {
-      return;
-    }
-    try (Connection admin = DriverManager.getConnection(server + "/", user, password);
-        Statement st = admin.createStatement()) {
-      st.execute("DROP DATABASE IF EXISTS " + schema);
+    if (schema != null) {
+      server.dropSchema(schema);
     }
   }
 

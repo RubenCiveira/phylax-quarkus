@@ -1,0 +1,26 @@
+package net.civeira.phylax.features.oauth.client.domain;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class ClientDetailsAudiencesUnitTest {
+
+  private static final ClientDetails CLIENT = ClientDetails.builder().clientId("web")
+      .allowedScopes(List.of()).allowedGrants(List.of()).allowedAudiences(List.of("api")).build();
+
+  @Test
+  @DisplayName("The client itself and its registered resource servers are allowed")
+  void test_allowed() {
+    Assertions.assertTrue(CLIENT.allowsAudiences(List.of()));
+    Assertions.assertTrue(CLIENT.allowsAudiences(List.of("web", "api")));
+  }
+
+  @Test
+  @DisplayName("A single foreign audience rejects the whole request")
+  void test_foreign() {
+    Assertions.assertFalse(CLIENT.allowsAudiences(List.of("api", "other-api")));
+  }
+}

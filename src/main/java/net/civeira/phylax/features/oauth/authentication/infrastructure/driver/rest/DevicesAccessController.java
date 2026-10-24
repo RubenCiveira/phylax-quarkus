@@ -83,6 +83,9 @@ public class DevicesAccessController {
     String scope = paramMap.getFirst("scope");
     List<String> audiences =
         paramMap.containsKey("audience") ? paramMap.get("audience") : List.of();
+    if (!client.allowsAudiences(audiences)) {
+      return errorResponse(400, "invalid_target", "The requested audience is not allowed");
+    }
 
     DeviceAuthorization auth = deviceService.createAuthorization(tenant, client, scope, audiences);
 

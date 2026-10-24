@@ -1,6 +1,8 @@
 # J-02 — Clientes, tenant y secretos
 
-**Prioridad:** bloqueante · **Tareas:** [0.3](../issue-0.3-audiencias-autorizadas.md), [0.4](../issue-0.4-configuracion-por-cliente.md), [0.5](../issue-0.5-aislamiento-clientes-tenant.md), [0.10](../issue-0.10-redirect-uri-estricta.md), [2.1](../issue-2.1-registro-dinamico-clientes.md), [2.4](../issue-2.4-redirects-logout.md), [2.8](../issue-2.8-proteccion-secretos.md), [2.9](../issue-2.9-migracion-secretos-cifrado.md). **Desbloquea:** política común de J-01, J-03, J-05 y J-07.
+**Avance (24-10-2026):** [0.3](../done/issue-0.3-audiencias-autorizadas.md) y [0.10](../done/issue-0.10-redirect-uri-estricta.md) hechas al cerrar [J-01](done/ep-J-01-token-y-grants-seguros.md).
+
+**Prioridad:** bloqueante · **Tareas:** [0.3](../done/issue-0.3-audiencias-autorizadas.md), [0.4](../issue-0.4-configuracion-por-cliente.md), [0.5](../issue-0.5-aislamiento-clientes-tenant.md), [0.10](../done/issue-0.10-redirect-uri-estricta.md), [2.1](../issue-2.1-registro-dinamico-clientes.md), [2.4](../issue-2.4-redirects-logout.md), [2.8](../issue-2.8-proteccion-secretos.md), [2.9](../issue-2.9-migracion-secretos-cifrado.md). **Desbloquea:** política común de J-01, J-03, J-05 y J-07.
 
 ## Implementación
 

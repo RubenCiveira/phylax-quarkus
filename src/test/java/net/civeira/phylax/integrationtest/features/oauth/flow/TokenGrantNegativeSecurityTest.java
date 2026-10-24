@@ -20,9 +20,10 @@ import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtur
 
 /**
  * Negative security cases of the code and refresh grants (1.10): codes and refresh tokens of
- * another client or tenant, double and concurrent redemption, and unregistered redirects. The
- * concurrent cases run against the in-memory stores, whose consumption is atomic like the SQL one;
- * the MariaDB run belongs to the V.1 harness.
+ * another client or tenant, double and concurrent redemption, foreign audiences (0.3) and
+ * unregistered or loosely matching redirects (0.10). The concurrent cases here run against the
+ * in-memory stores; {@code TokenGrantMariaDbFlowTest} repeats them through the endpoint with
+ * MariaDB (V.1).
  */
 @Tag("oidc-flow")
 @QuarkusTest
@@ -184,5 +185,129 @@ class TokenGrantNegativeSecurityTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(400, afterReplay.statusCode(),
         "The concurrent replay revoked the family, including the winner's new token");
     Assertions.assertEquals("invalid_grant", afterReplay.jsonPath().getString("error"));
+  }
+
+  // ── audiences (0.3) ───────────────────────────────────────────────────────
+
+  private Response passwordFor(String audience) {
+    return client.token(OidcTestFixtures.TENANT,
+        OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET),
+        Map.of("grant_type", "password", "username", OidcTestFixtures.USERNAME, "password",
+            OidcTestFixtures.PASSWORD, "scope", "openid", "audience", audience));
+  }
+
+  private static Response authorizeFor(String audience) {
+    return io.restassured.RestAssured.given().redirects().follow(false)
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("response_type", "code").queryParam("scope", OidcTestFixtures.SCOPE)
+        .queryParam("state", OidcTestFixtures.STATE).queryParam("audience", audience)
+        .contentType(io.restassured.http.ContentType.URLENC)
+        .formParam("username", OidcTestFixtures.USERNAME)
+        .formParam("password", OidcTestFixtures.PASSWORD).formParam("csid", OidcTestFixtures.CSID)
+        .post("/oauth/openid/" + OidcTestFixtures.TENANT + "/auth");
+  }
+
+  @Test
+  void password_withRegisteredAudience_isIssuedForIt() {
+    Response response = passwordFor(OidcTestFixtures.API_AUDIENCE);
+
+    Assertions.assertEquals(200, response.statusCode());
+    Assertions.assertTrue(
+        claimAsList(decodeToken(response.jsonPath().getString("access_token")).get("aud"))
+            .contains(OidcTestFixtures.API_AUDIENCE));
+  }
+
+  @Test
+  void password_withForeignAudience_isInvalidTarget_beforeCheckingTheUser() {
+    Response response = passwordFor("foreign-api");
+
+    Assertions.assertEquals(400, response.statusCode());
+    Assertions.assertEquals("invalid_target", response.jsonPath().getString("error"));
+    Assertions.assertEquals(0, loginGateway.validations(),
+        "No credentials are checked (nor roles computed) for a foreign audience");
+  }
+
+  @Test
+  void clientCredentials_withForeignAudience_isInvalidTarget() {
+    Response response = client.token(OidcTestFixtures.TENANT,
+        OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET),
+        Map.of("grant_type", "client_credentials", "audience",
+            OidcTestFixtures.API_AUDIENCE + ",foreign-api"));
+
+    Assertions.assertEquals(400, response.statusCode());
+    Assertions.assertEquals("invalid_target", response.jsonPath().getString("error"));
+  }
+
+  @Test
+  void deviceAuthorization_withForeignAudience_isInvalidTarget() {
+    Response response =
+        io.restassured.RestAssured.given().contentType(io.restassured.http.ContentType.URLENC)
+            .header("Authorization",
+                OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET))
+            .formParam("scope", "openid").formParam("audience", "foreign-api")
+            .post("/oauth/openid/" + OidcTestFixtures.TENANT + "/device");
+
+    Assertions.assertEquals(400, response.statusCode(), response.asString());
+    Assertions.assertEquals("invalid_target", response.jsonPath().getString("error"));
+  }
+
+  @Test
+  void authorize_withForeignAudience_redirectsInvalidTarget_withoutLogin() {
+    Response response = authorizeFor("foreign-api");
+
+    Assertions.assertEquals(302, response.statusCode());
+    Assertions.assertTrue(response.getHeader("Location").contains("error=invalid_target"));
+    Assertions.assertNull(client.extractAuthCode(response));
+    Assertions.assertEquals(0, loginGateway.validations());
+  }
+
+  @Test
+  void code_keepsTheAuthorizedAudience_andTheTokenRequestCannotWidenIt() {
+    String code = client.extractAuthCode(authorizeFor(OidcTestFixtures.API_AUDIENCE));
+    Assertions.assertNotNull(code);
+
+    Response exchange = client.token(OidcTestFixtures.TENANT,
+        OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET),
+        Map.of("grant_type", "authorization_code", "code", code, "redirect_uri",
+            OidcTestFixtures.REDIRECT_URI, "audience", "foreign-api"));
+
+    Assertions.assertEquals(200, exchange.statusCode());
+    List<String> aud =
+        claimAsList(decodeToken(exchange.jsonPath().getString("access_token")).get("aud"));
+    Assertions.assertTrue(aud.contains(OidcTestFixtures.API_AUDIENCE));
+    Assertions.assertFalse(aud.contains("foreign-api"));
+
+    Response refreshed = client.token(OidcTestFixtures.TENANT,
+        OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET),
+        Map.of("grant_type", "refresh_token", "refresh_token",
+            exchange.jsonPath().getString("refresh_token"), "audience", "foreign-api"));
+    Assertions.assertEquals(200, refreshed.statusCode());
+    Assertions.assertFalse(
+        claimAsList(decodeToken(refreshed.jsonPath().getString("access_token")).get("aud"))
+            .contains("foreign-api"),
+        "A refresh never widens the original audience");
+  }
+
+  // ── strict redirect (0.10) ────────────────────────────────────────────────
+
+  @Test
+  void authorize_withLooselyMatchingRedirect_issuesNoCode() {
+    for (String redirect : List.of(OidcTestFixtures.REDIRECT_URI + "/extra",
+        OidcTestFixtures.REDIRECT_URI + "x", OidcTestFixtures.REDIRECT_URI + "?next=evil",
+        "http://localhost/callback/../admin", "http://evil.example/localhost/callback")) {
+      Response login = io.restassured.RestAssured.given().redirects().follow(false)
+          .queryParam("client_id", OidcTestFixtures.CLIENT_ID).queryParam("redirect_uri", redirect)
+          .queryParam("response_type", "code").queryParam("scope", OidcTestFixtures.SCOPE)
+          .queryParam("state", OidcTestFixtures.STATE)
+          .contentType(io.restassured.http.ContentType.URLENC)
+          .formParam("username", OidcTestFixtures.USERNAME)
+          .formParam("password", OidcTestFixtures.PASSWORD).formParam("csid", OidcTestFixtures.CSID)
+          .post("/oauth/openid/" + OidcTestFixtures.TENANT + "/auth");
+
+      Assertions.assertNull(client.extractAuthCode(login), redirect);
+      String location = login.getHeader("Location");
+      Assertions.assertTrue(location == null || !location.startsWith(redirect), redirect);
+    }
   }
 }

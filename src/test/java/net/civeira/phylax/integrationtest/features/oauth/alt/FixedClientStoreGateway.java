@@ -12,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.RedirectUriPolicy;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
 
@@ -25,12 +26,18 @@ import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtur
  * client_secret_basic, without public access;</li>
  * <li>{@link OidcTestFixtures#SPA_CLIENT_ID}: public client registered for none.</li>
  * </ul>
+ * All of them register {@link OidcTestFixtures#REDIRECT_URI} (exact match) and may request tokens
+ * for {@link OidcTestFixtures#API_AUDIENCE}.
  */
 @IfBuildProfile("test")
 @Alternative
 @Priority(1)
 @ApplicationScoped
 public class FixedClientStoreGateway implements ClientStoreGateway {
+  /**
+   * Registered redirects, checked with the production {@link RedirectUriPolicy}.
+   */
+  private static final List<String> REDIRECTS = List.of(OidcTestFixtures.REDIRECT_URI);
   private final AtomicReference<List<String>> allowedScopes = new AtomicReference<>();
   private final AtomicReference<List<String>> allowedGrants = new AtomicReference<>();
 
@@ -61,7 +68,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   @Override
   public Optional<ClientDetails> loadForAuthorization(String tenant, String clientId,
       String redirect) {
-    boolean redirectAllowed = redirect != null && redirect.contains("localhost/callback");
+    boolean redirectAllowed = RedirectUriPolicy.allows(REDIRECTS, redirect);
     return redirectAllowed
         ? method(tenant, clientId).map(_ -> buildClient(clientId, !isSpa(clientId)))
         : Optional.empty();
@@ -108,6 +115,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     return ClientDetails.builder().clientId(clientId).allowedScopes(allowedScopes.get())
         .allowedGrants(allowedGrants.get()).protectedWithSecret(confidential)
         .tokenEndpointAuthMethod(registered).requirePkce(isSpa(clientId))
+        .allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE))
         .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId)).postLogoutRedirectUris(
             List.of("http://localhost/after-logout", "http://localhost/callback"))
         .build();
