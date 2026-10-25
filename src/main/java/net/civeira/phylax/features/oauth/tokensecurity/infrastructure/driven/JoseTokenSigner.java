@@ -60,12 +60,18 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenStore
  * stored keys.
  *
  * Design notes: - Uses TokenStoreGateway for key rotation and storage. - Performs RSA key parsing
- * and validation internally.
+ * and validation internally. - All tenants share one global key ring, so resource servers can
+ * verify with a single JWKS; the issuer stays per tenant and is what isolates them. A signer per
+ * tenant is postponed (docs/TODO-OIDC/pospuestos/issue-2.11-firmante-por-tenant.md).
  */
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class JoseTokenSigner implements TokenSigner {
+  /**
+   * Key ring shared by every tenant. Not a valid tenant code, so it never collides with one.
+   */
+  static final String GLOBAL_KEY_RING = "_global";
   /**
    * Request context for building issuer URLs.
    */
@@ -96,7 +102,7 @@ public class JoseTokenSigner implements TokenSigner {
   private final String storePair;
 
   /**
-   * Signs a JWT using the current tenant key.
+   * Signs a JWT using the current global key.
    *
    * Applies expiration and key id before signing. Uses RSA algorithm based on stored key data.
    *
@@ -107,7 +113,7 @@ public class JoseTokenSigner implements TokenSigner {
    */
   @Override
   public String sign(String tenant, Builder data, Instant expiration) {
-    KeyInformation currentKey = currentKey(tenant);
+    KeyInformation currentKey = currentKey();
     return data.withExpiresAt(expiration).withKeyId(currentKey.getKeyId())
         .sign(signAlgoritm(currentKey));
   }
@@ -116,15 +122,16 @@ public class JoseTokenSigner implements TokenSigner {
    * Builds a JWKS for the given tenant.
    *
    * Converts stored public keys into JWK entries. Logs errors when public keys cannot be parsed.
+   * Every tenant publishes the same global key ring.
    *
    * @param tenant tenant identifier
    * @return JWKS set
    */
   @Override
   public JwkSet keysAsJwks(String tenant) {
-    checkNewNeeded(tenant);
+    checkNewNeeded();
     List<Jks> syncCopy = new ArrayList<>();
-    List<PublicKeyInformation> publicKeys = repository.listPublicKeys(tenant);
+    List<PublicKeyInformation> publicKeys = repository.listPublicKeys(GLOBAL_KEY_RING);
     for (PublicKeyInformation stream : publicKeys) {
       try {
         syncCopy.add(generateJWK(stream.getKeyId(), readKey(stream.getPublicKey())));
@@ -147,7 +154,7 @@ public class JoseTokenSigner implements TokenSigner {
    */
   @Override
   public String signKeypass(String tenant, Builder data, Instant expiration) {
-    KeyInformation currentKey = currentKey(tenant);
+    KeyInformation currentKey = currentKey();
     return data.withExpiresAt(expiration).withKeyId(currentKey.getPrivateKey())
         .sign(signAlgoritm(currentKey));
   }
@@ -201,7 +208,7 @@ public class JoseTokenSigner implements TokenSigner {
    */
   private Optional<DecodedJWT> verifyToken(String tenant, String token, boolean issuerValidation) {
     String keyId = extractSignerId(token).orElse(null);
-    List<PublicKeyInformation> publicKeys = repository.listPublicKeys(tenant);
+    List<PublicKeyInformation> publicKeys = repository.listPublicKeys(GLOBAL_KEY_RING);
     List<PublicKeyInformation> candidates = new ArrayList<>();
     if (null != keyId) {
       publicKeys.stream().filter(key -> keyId.equals(key.getKeyId())).forEach(candidates::add);
@@ -236,16 +243,15 @@ public class JoseTokenSigner implements TokenSigner {
   }
 
   /**
-   * Returns the current active key for a tenant.
+   * Returns the current active key of the global key ring.
    *
    * Ensures key rotation is up to date before retrieval. Throws when no active key exists.
    *
-   * @param tenant tenant identifier
    * @return key information
    */
-  private KeyInformation currentKey(String tenant) {
-    checkNewNeeded(tenant);
-    return repository.currentKey(tenant)
+  private KeyInformation currentKey() {
+    checkNewNeeded();
+    return repository.currentKey(GLOBAL_KEY_RING)
         .orElseThrow(() -> new IllegalStateException("There is no active key"));
   }
 
@@ -377,17 +383,15 @@ public class JoseTokenSigner implements TokenSigner {
    * Ensures enough future keys are generated for rotation.
    *
    * Compares expected future expiration to stored keys. Generates and persists new keys when
-   * needed.
-   *
-   * @param tenant tenant identifier
+   * needed. Works on the global key ring.
    */
-  private void checkNewNeeded(String tenant) {
+  private void checkNewNeeded() {
     KeyConfig config = KeyConfig.builder().ttl(keyDuration).futures(futureKeysNumber).build();
     Instant expected = Instant.now();
     for (int i = 0; i < config.getFutures(); i++) {
       expected = expected.plus(config.getTtl());
     }
-    Instant end = repository.nextKeysExpiration(tenant);
+    Instant end = repository.nextKeysExpiration(GLOBAL_KEY_RING);
 
     if (expected.isAfter(end)) {
       Instant since = Instant.now().minusSeconds(3600);
@@ -397,7 +401,7 @@ public class JoseTokenSigner implements TokenSigner {
 
       for (int i = 0; i < numberOfIntervals; i++) {
         KeyInformation pair = createKeys();
-        repository.saveKey(tenant, pair, since, config.getTtl());
+        repository.saveKey(GLOBAL_KEY_RING, pair, since, config.getTtl());
         since = since.plus(config.getTtl());
       }
     }

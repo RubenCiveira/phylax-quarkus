@@ -57,7 +57,25 @@ public class JwksController {
   @Path("oauth/openid/{tenant}/jwks")
   public Response jwks(final @PathParam("tenant") String tenant, @Context Request request,
       @Context HttpHeaders headers) {
-    JwkSet jwkSet = tokenSigner.keysAsJwks(tenant);
+    return jwksResponse(tokenSigner.keysAsJwks(tenant), request);
+  }
+
+  /**
+   * Returns the JWKS document shared by every tenant.
+   *
+   * All tenants sign with one global key ring, so resource servers can verify any tenant's tokens
+   * with this single URL (for example as {@code mp.jwt.verify.publickey.location}).
+   *
+   * @param request HTTP request context
+   * @return JWKS response
+   */
+  @GET
+  @Path("oauth/jwks")
+  public Response globalJwks(@Context Request request) {
+    return jwksResponse(tokenSigner.keysAsJwks(null), request);
+  }
+
+  private Response jwksResponse(JwkSet jwkSet, Request request) {
     EntityTag etag = new EntityTag(hash(jwkSet));
     CacheControl cacheControl = new CacheControl();
     cacheControl.setMaxAge(3600);
