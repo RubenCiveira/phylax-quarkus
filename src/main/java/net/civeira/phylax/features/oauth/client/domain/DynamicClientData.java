@@ -10,7 +10,7 @@ import lombok.Getter;
 /**
  * Registered dynamic client metadata (RFC 7591 / RFC 7592 read response).
  */
-@Builder
+@Builder(toBuilder = true)
 @Getter
 public class DynamicClientData {
 
@@ -27,6 +27,8 @@ public class DynamicClientData {
   private final String tosUri;
   private final String backchannelLogoutUri;
   private final String frontchannelLogoutUri;
+  @Builder.Default
+  private final List<String> postLogoutRedirectUris = List.of();
   private final long clientIdIssuedAt;
   private final String registrationClientUri;
 

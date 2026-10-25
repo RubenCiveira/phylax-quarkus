@@ -94,7 +94,7 @@ public class OidcResponseBuilder {
       String code = temporalStore.registerTemporalAuthCode(
           TemporalAuthCode.builder().client(clientDetails).request(request)
               .nonce(request.getNonce().orElse(null)).data(validationData).sessionId(uid).build());
-      to = redirectUri + separator + "code=" + code + "&state=" + request.getState().orElseThrow();
+      to = redirectUri + separator + "code=" + code + stateParam(request);
     } else {
       boolean hybrid = type.contains("code");
       String authCode = null;
@@ -104,20 +104,22 @@ public class OidcResponseBuilder {
             .data(validationData).sessionId(uid).build());
       }
       IdToken buildIdToken =
-          tokenBuilder.buildIdToken(request.getTenant(), request.getState().orElseThrow(),
+          tokenBuilder.buildIdToken(request.getTenant(), request.getState().orElse(null),
               request.getNonce().orElse(null), clientDetails, grant, validationData, authCode);
-      StringBuilder fragment = new StringBuilder();
-      fragment.append("#state=").append(request.getState().orElseThrow());
+      StringBuilder fragment = new StringBuilder("#");
       if (authCode != null) {
-        fragment.append("&code=").append(authCode);
+        fragment.append("code=").append(authCode);
       }
+      fragment.append(stateParam(request));
       fragment.append("&session_state=").append(buildIdToken.getSessionState()).append("&iss=")
-          .append(URLEncoder.encode(buildIdToken.getIss(), StandardCharsets.UTF_8))
-          .append("&id_token=").append(buildIdToken.getIdToken()).append("&access_token=")
-          .append(buildIdToken.getAccessToken()).append("&token_type=")
+          .append(URLEncoder.encode(buildIdToken.getIss(), StandardCharsets.UTF_8));
+      if (buildIdToken.getIdToken() != null) {
+        fragment.append("&id_token=").append(buildIdToken.getIdToken());
+      }
+      fragment.append("&access_token=").append(buildIdToken.getAccessToken()).append("&token_type=")
           .append(buildIdToken.getTokenType()).append("&expires_in=")
           .append(buildIdToken.getExpiresIn());
-      to = request.getRedirect().orElseThrow() + fragment.toString();
+      to = request.getRedirect().orElseThrow() + fragment.toString().replace("#&", "#");
     }
     return securer
         .secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to)).cookie(
@@ -133,9 +135,18 @@ public class OidcResponseBuilder {
    */
   public Response errorRedirect(AuthRequest request, String message) {
     String to = request.getRedirect().orElse("") + "#error="
-        + URLEncoder.encode(message, StandardCharsets.UTF_8);
+        + URLEncoder.encode(message, StandardCharsets.UTF_8) + stateParam(request);
     return securer.secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to))
         .cookie(cookieManager.clearAuthSession(request.getTenant())));
+  }
+
+  /**
+   * {@code &state=...} encoded, so reserved characters come back intact; nothing without state
+   * (task 0.11).
+   */
+  private static String stateParam(AuthRequest request) {
+    return request.getState().filter(state -> !state.isEmpty())
+        .map(state -> "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8)).orElse("");
   }
 
   private int ssoTtl(String tenantName) {

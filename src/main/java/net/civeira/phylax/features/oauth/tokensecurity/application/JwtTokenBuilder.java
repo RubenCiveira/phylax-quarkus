@@ -39,6 +39,8 @@ public class JwtTokenBuilder {
   private static final String CLAIM_SCOPE = "scope";
   private static final String CHALLENGE = "challenge";
   private static final String MFA_SCOPE = "mfa";
+  private static final String REFRESH_GRANT = "refresh_token";
+  private static final String OPENID = "openid";
 
   private final ClaimsMapper claimsMapper;
   private final TokenVerifier tokenVerifier;
@@ -50,27 +52,29 @@ public class JwtTokenBuilder {
     return buildIdToken(tenant, state, nonce, details, grantType, validationData, null);
   }
 
+  /**
+   * Tokens of a hybrid authorization response: an access token and, with {@code openid}, an ID
+   * token whose hashes bind both and the code (task 1.13).
+   */
   public IdToken buildIdToken(String tenant, String state, String nonce, ClientDetails details,
       String grantType, AuthenticationData validationData, String authorizationCode) {
     Duration expiration = claimsMapper.accessTokenTtl();
     Instant authExpires = Instant.now().plus(expiration);
-    Instant refreshExpires = Instant.now().plus(claimsMapper.refreshTtl(tenant));
 
     String sessionState = UUID.randomUUID().toString();
     String accessToken = tokenSigner.sign(tenant,
         claimsMapper.accessToken(tenant, details, grantType, validationData), authExpires);
-
-    Builder identityBuilder =
-        claimsMapper.identityToken(tenant, accessToken, details, grantType, validationData);
-    claimsMapper.withChallengeClaims(identityBuilder, state, sessionState, nonce);
-    claimsMapper.withCodeHash(identityBuilder, authorizationCode);
 
     IdToken idToken = new IdToken();
     idToken.setIss(claimsMapper.issuer(tenant));
     idToken.setTokenType(BEARER);
     idToken.setExpiresIn(expiration.getSeconds());
     idToken.setAccessToken(accessToken);
-    idToken.setIdToken(tokenSigner.sign(tenant, identityBuilder, refreshExpires));
+    if (validationData.getScopes().contains(OPENID)) {
+      idToken.setIdToken(
+          tokenSigner.sign(tenant, claimsMapper.idToken(tenant, details, validationData, nonce,
+              accessToken, authorizationCode), Instant.now().plus(claimsMapper.idTokenTtl())));
+    }
     idToken.setSessionState(sessionState);
     return idToken;
   }
@@ -84,7 +88,9 @@ public class JwtTokenBuilder {
         JWT.create().withIssuer(claimsMapper.issuer(tenant)).withIssuedAt(new Date()).withJWTId(jti)
             .withClaim(CHALLENGE, map).withArrayClaim(CLAIM_SCOPE, new String[] {CHALLENGE});
 
-    return tokenSigner.signKeypass(tenant, builder, Instant.now().plus(expiration));
+    // Signed like any other token: its key id is the public one (task 0.7). Only verifyChalleger
+    // accepts it, by its single scope "challenge".
+    return tokenSigner.sign(tenant, builder, Instant.now().plus(expiration));
   }
 
   public <T> Optional<T> verifyChalleger(Class<T> type, String token, String tenant) {
@@ -123,11 +129,7 @@ public class JwtTokenBuilder {
     if (request != null && validationData.getScopes().isEmpty()) {
       List<String> requested = request.getScope().map(s -> Arrays.stream(s.split("\\s+"))
           .filter(sc -> !sc.isBlank()).collect(Collectors.toList())).orElse(List.of());
-      boolean wildcard = details.getAllowedScopes().contains("*");
-      List<String> granted = wildcard ? requested
-          : requested.stream().filter(details.getAllowedScopes()::contains)
-              .collect(Collectors.toList());
-      validationData.setScopes(granted);
+      validationData.setScopes(details.grantableScopes(requested));
     }
 
     Duration expiration = claimsMapper.accessTokenTtl();
@@ -141,17 +143,21 @@ public class JwtTokenBuilder {
     authorization.setExpiresIn(expiration.getSeconds());
     authorization.setAccessToken(tokenSigner.sign(tenant,
         claimsMapper.accessToken(tenant, details, grantType, validationData), authExpires));
-    authorization.setRefreshToken(tokenSigner.sign(tenant,
-        claimsMapper.refreshToken(tenant, details, validationData, family), refreshExpires));
-
-    if (null != request) {
-      String sessionState = UUID.randomUUID().toString();
-      Builder identityBuilder = claimsMapper.identityToken(tenant, authorization.getAccessToken(),
-          details, grantType, validationData);
-      claimsMapper.withChallengeClaims(identityBuilder, request.getState().orElse(""), sessionState,
-          request.getNonce().orElse(""));
-      authorization.setIdToken(tokenSigner.sign(tenant, identityBuilder, refreshExpires));
+    if (details.allowedGrant(REFRESH_GRANT)) {
+      // Only clients registered for refresh_token get one (task 0.4).
+      authorization.setRefreshToken(tokenSigner.sign(tenant,
+          claimsMapper.refreshToken(tenant, details, validationData, family), refreshExpires));
     }
+
+    // An ID token only for OpenID requests, for the client alone and with its own lifetime
+    // (task 1.2).
+    if (null != request && validationData.getScopes().contains(OPENID)) {
+      authorization.setIdToken(tokenSigner.sign(tenant,
+          claimsMapper.idToken(tenant, details, validationData, request.getNonce().orElse(null),
+              authorization.getAccessToken(), null),
+          Instant.now().plus(claimsMapper.idTokenTtl())));
+    }
+    authorization.setScope(String.join(" ", validationData.getScopes()));
 
     return authorization;
   }
@@ -175,6 +181,7 @@ public class JwtTokenBuilder {
     token.setExpiresIn(expiration.getSeconds());
     token.setAccessToken(tokenSigner.sign(tenant,
         claimsMapper.accessToken(tenant, client, "client_credentials", data), expires));
+    token.setScope(String.join(" ", data.getScopes()));
     return token;
   }
 

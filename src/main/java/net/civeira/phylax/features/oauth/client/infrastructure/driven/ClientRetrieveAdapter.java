@@ -4,6 +4,8 @@ package net.civeira.phylax.features.oauth.client.infrastructure.driven;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,72 +14,79 @@ import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
-import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.RedirectUriPolicy;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 
+/**
+ * Loads OAuth clients from the {@link TrustedClient} masters.
+ *
+ * <p>
+ * Every lookup is scoped to an enabled tenant: the tenant's own client wins over a global one with
+ * the same code, and a client of another tenant is never returned (task 0.5). The registered
+ * grants, response types, scopes and auth method become the {@link ClientDetails} policy (task 0.4,
+ * see {@link TrustedClientPolicy}).
+ */
 @Slf4j
 @Transactional
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ClientRetrieveAdapter implements ClientStoreGateway {
-  private static final List<String> DEFAULT_SCOPES = List.of("*");
-  private static final List<String> DEFAULT_GRANTERS = List.of("password", "refresh", "mfa",
-      "urn:ietf:params:oauth:grant-type:device_code", "client_credentials");
 
   private final SecretDigester secretDigester;
   private final TenantQueryRepositoryGateway tenants;
   private final TrustedClientQueryRepositoryGateway clients;
+  private final PostLogoutRedirectSqlStore postLogoutRedirects;
+  /**
+   * Whether every confidential client must use PKCE, besides those that register it (task 1.11).
+   */
+  @ConfigProperty(name = "oauth.pkce.require-for-confidential", defaultValue = "false")
+  private final boolean pkceForConfidential;
 
   @Override
   public Optional<ClientDetails> loadPreautorized(String tenant, String clientId) {
-    return tenant(tenant)
-        .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
-        .filter(this::clientEnabled)
-        .map(app -> base(app, clientId).protectedWithSecret(false).requirePkce(false).build());
+    return find(tenant, clientId)
+        .map(app -> base(app).protectedWithSecret(false).requirePkce(false).build());
   }
 
   @Override
   public Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret) {
-    return verify(tenant, clientId, Optional.of(clientSecret), Optional.empty());
+    return find(tenant, clientId).flatMap(client -> privateClient(client, clientSecret));
   }
 
   @Override
   public Optional<ClientDetails> loadPublicById(String tenant, String clientId) {
-    return tenant(tenant)
-        .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
-        .filter(this::clientEnabled).filter(this::publicAllowed)
-        .map(app -> base(app, clientId).protectedWithSecret(false).requirePkce(true).build());
+    return find(tenant, clientId).filter(this::publicAllowed)
+        .map(app -> base(app).protectedWithSecret(false).requirePkce(true).build());
   }
 
   @Override
   public Optional<ClientDetails> loadForAuthorization(String tenant, String clientId,
       String redirect) {
-    return verify(tenant, clientId, Optional.empty(), Optional.of(redirect));
+    return find(tenant, clientId).flatMap(client -> authorizingClient(client, redirect));
   }
 
-  public Optional<ClientDetails> verify(final String tenant, String clientId,
-      Optional<String> clientSecret, Optional<String> withRedirect) {
+  /**
+   * The enabled client a tenant sees for a code: its own, else a global one.
+   */
+  private Optional<TrustedClient> find(String tenant, String clientId) {
+    if (clientId == null || clientId.isBlank()) {
+      return Optional.empty();
+    }
     return tenant(tenant)
-        .flatMap(_ -> clients.find(TrustedClientFilter.builder().code(clientId).build()))
-        .filter(this::clientEnabled)
-        .flatMap(client -> clientSecret.isEmpty()
-            ? authorizingClient(client, clientId, withRedirect.orElseThrow())
-            : privateClient(client, clientId, clientSecret.get()));
+        .flatMap(t -> TrustedClientPolicy
+            .select(clients.list(TrustedClientFilter.builder().code(clientId).build()), t.getUid()))
+        .filter(this::clientEnabled);
   }
 
-  private Optional<String> tenant(String name) {
-    return "main".equals(name) ? Optional.of(name)
-        : tenants.find(TenantFilter.builder().name(name).build()).filter(this::tenantEnabled)
-            .map(Tenant::getName);
+  private Optional<Tenant> tenant(String name) {
+    return tenants.find(TenantFilter.builder().name(name).build()).filter(this::tenantEnabled);
   }
 
   private boolean tenantEnabled(Tenant tenant) {
@@ -109,14 +118,13 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
    * long as the redirect is registered. A confidential client authenticates later, at the token
    * endpoint; a public one must use PKCE.
    */
-  private Optional<ClientDetails> authorizingClient(TrustedClient app, String clientId,
-      String redirect) {
+  private Optional<ClientDetails> authorizingClient(TrustedClient app, String redirect) {
     if (!redirectAllowed(app, redirect)) {
       return Optional.empty();
     }
     boolean publicAccess = publicAllowed(app);
-    return Optional.of(base(app, clientId).protectedWithSecret(!publicAccess)
-        .requirePkce(publicAccess || app.isRequirePkce()).build());
+    return Optional.of(base(app).protectedWithSecret(!publicAccess)
+        .requirePkce(publicAccess || requiresPkce(app)).build());
   }
 
   private boolean redirectAllowed(TrustedClient app, String redirect) {
@@ -129,36 +137,26 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return allowed;
   }
 
-  private Optional<ClientDetails> privateClient(TrustedClient app, String clientId, String secret) {
+  private Optional<ClientDetails> privateClient(TrustedClient app, String secret) {
     SecretOauthVO secretOauth = app.getSecretOauthValue();
     if (secret != null && secretOauth.verify(secretDigester, secret)) {
       Integer m2mTtl = app.getM2mTokenTtlSecondsValue() != null
           ? app.getM2mTokenTtlSecondsValue().getM2mTokenTtlSeconds()
           : null;
-      return Optional
-          .of(base(app, clientId).protectedWithSecret(true).requirePkce(app.isRequirePkce())
-              .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
-              .m2mTokenTtlSeconds(m2mTtl).build());
+      return Optional.of(base(app).protectedWithSecret(true).requirePkce(requiresPkce(app))
+          .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
+          .m2mTokenTtlSeconds(m2mTtl).build());
     } else {
       return Optional.empty();
     }
   }
 
-  private ClientDetails.ClientDetailsBuilder base(TrustedClient app, String clientId) {
-    return ClientDetails.builder().clientId(clientId).allowedGrants(DEFAULT_GRANTERS)
-        .allowedScopes(DEFAULT_SCOPES)
-        .tokenEndpointAuthMethod(
-            ClientAuthMethod.from(app.getTokenEndpointAuthMethod().name()).orElse(null))
-        .allowedAudiences(
-            app.getAllowedAudiences().stream().map(AllowedAudiences::getAudience).toList())
-        .postLogoutRedirectUris(postLogoutUris(app))
-        .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
-        .backchannelLogoutSessionRequired(
-            Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()));
+  private boolean requiresPkce(TrustedClient app) {
+    return pkceForConfidential || Boolean.TRUE.equals(app.isRequirePkce());
   }
 
-  private List<String> postLogoutUris(TrustedClient app) {
-    return app.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList();
+  private ClientDetails.ClientDetailsBuilder base(TrustedClient app) {
+    return TrustedClientPolicy.details(app, postLogoutRedirects.list(app.getUid()));
   }
 
 }

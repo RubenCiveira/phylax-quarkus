@@ -6,7 +6,7 @@ Si aún no lo has hecho, únete a nuestro [grupo de Slack](https://slack.com/int
 
 Aquí tienes algunos recursos importantes:
 
-- [Equipo](./TEAM.md): quiénes somos,
+- [Equipo](TEAM.md): quiénes somos,
 - [Hoja de ruta](./ROADMAP.md): nuestros objetivos.
 - [Issues](http://pivotaltracker.com/projects/): gestión diaria del proyecto.
 - [Errores](https://participatorypolitics.lighthouseapp.com/projects/): dónde reportarlos.
@@ -251,7 +251,7 @@ Este proyecto está centrado en la API. Puedes utilizar los siguientes recursos:
 
 Estos entornos están desplegados continuamente para validación y demostraciones:
 
-> 🔐 Para obtener credenciales, consulta al equipo. Revisa [TEAM.md](./TEAM.md) para más información.
+> 🔐 Para obtener credenciales, consulta al equipo. Revisa [TEAM.md](TEAM.md) para más información.
 
 **Develop**  
 > URL: https://dev.example.com  

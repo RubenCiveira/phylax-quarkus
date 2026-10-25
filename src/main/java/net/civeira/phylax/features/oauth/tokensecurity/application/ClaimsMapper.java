@@ -4,14 +4,14 @@ package net.civeira.phylax.features.oauth.tokensecurity.application;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator.Builder;
@@ -43,45 +43,79 @@ public class ClaimsMapper {
   private static final String CLAIM_CLIENT_ID = "azp";
   private static final String CLAIM_AUDIENCE_ID = "aud";
   private static final String CLAIM_ROLES = "roles";
-  private static final String CLAIM_GROUPS = "groups";
   private static final String CLAIM_SCOPE = "scope";
   private static final String REFRESH_SCOPE = "refresh";
+  private static final String CLAIM_CLIENT = "client_id";
+  private static final String CLAIM_SID = "sid";
+  private static final String CLAIM_AUTH_TIME = "auth_time";
+  private static final String CLAIM_AMR = "amr";
+  private static final String CLIENT_CREDENTIALS = "client_credentials";
+  private static final String ACCESS_TOKEN_TYPE = "at+jwt";
 
   private final CurrentRequest current;
   private final TenantQueryRepositoryGateway tenantRepo;
   private final TenantConfigQueryRepositoryGateway tenantConfigs;
+  private final AcrPolicy acrPolicy;
+  /**
+   * Whether access tokens follow the RFC 9068 profile (task 3.5). Off by default until every
+   * resource server reads the {@code scope} string.
+   */
+  @ConfigProperty(name = "oauth.jwt.access-token.rfc9068", defaultValue = "false")
+  private final boolean rfc9068;
+  /**
+   * Lifetime of ID tokens (task 1.2).
+   */
+  @ConfigProperty(name = "oauth.jwt.expiration.id-token", defaultValue = "5m")
+  private final Duration idTokenTtl;
 
+  /**
+   * Claims of an access token (task 1.13).
+   *
+   * <p>
+   * Issuer, subject, audiences, {@code client_id}, {@code jti} and scope; for a user grant also the
+   * real {@code auth_time}, {@code amr} and the {@code acr} derived from it. Without the RFC 9068
+   * profile ({@code oauth.jwt.access-token.rfc9068}, task 3.5) the legacy shape is kept: scope as
+   * an array and a {@code typ} claim. With it the header carries {@code typ: at+jwt} and the scope
+   * is a space-separated string, so a resource server can tell an access token from any other JWT
+   * signed with the same keys.
+   */
   public Builder accessToken(String tenant, ClientDetails client, String grantType,
       AuthenticationData validationData) {
-    String jti = UUID.randomUUID().toString();
-    List<String> scopes = validationData.getScopes().isEmpty() ? new ArrayList<>()
-        : new ArrayList<>(validationData.getScopes());
-
-    String authLevel = null == validationData.getMode() ? "0" : validationData.getMode().getAcr();
-
-    Builder builder = JWT.create().withIssuer(issuer(tenant)).withJWTId(jti)
-        .withIssuedAt(new Date()).withSubject(validationData.getUsername())
-        .withClaim("aud", validationData.getAudiences()).withClaim(CLAIM_GRANT_TYPE, grantType)
-        .withClaim("typ", "Bearer").withClaim(CLAIM_USER_NAME, validationData.getUsername());
-
+    List<String> scopes =
+        validationData.getScopes() == null ? List.of() : List.copyOf(validationData.getScopes());
+    Builder builder =
+        JWT.create().withIssuer(issuer(tenant)).withJWTId(UUID.randomUUID().toString())
+            .withIssuedAt(new Date()).withSubject(validationData.getUsername())
+            .withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
+            .withClaim(CLAIM_CLIENT, client.getClientId()).withClaim(CLAIM_GRANT_TYPE, grantType)
+            .withClaim(CLAIM_ROLES, validationData.getRoles());
     if (null != validationData.getTenant()) {
       builder = builder.withClaim("tid", validationData.getTenant());
     }
     if (null != validationData.getUid() && !validationData.getUid().isBlank()) {
       builder = builder.withClaim("uid", validationData.getUid());
     }
-
-    return builder.withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
-        .withClaim("aud", validationData.getAudiences()).withClaim("acr", authLevel)
-        .withClaim("amr", authLevel).withClaim(CLAIM_ROLES, validationData.getRoles())
-        .withArrayClaim(CLAIM_SCOPE, scopes.toArray(new String[0]));
+    if (!CLIENT_CREDENTIALS.equals(grantType)) {
+      builder = withAuthentication(builder, validationData);
+    }
+    if (rfc9068) {
+      return builder.withHeader(Map.of("typ", ACCESS_TOKEN_TYPE)).withClaim(CLAIM_SCOPE,
+          String.join(" ", scopes));
+    }
+    return builder.withClaim("typ", "Bearer").withArrayClaim(CLAIM_SCOPE,
+        scopes.toArray(new String[0]));
   }
 
+  /**
+   * Claims of a refresh token: its own purpose ({@code scope = refresh}), the granted scopes, the
+   * family, and the authentication facts ({@code sid}, {@code auth_time}, {@code amr}) that the
+   * rotated tokens must keep.
+   */
   public Builder refreshToken(String tenant, ClientDetails client,
       AuthenticationData validationData, RefreshFamily family) {
     String jti = UUID.randomUUID().toString();
-    return JWT.create().withIssuer(issuer(tenant)).withJWTId(jti).withIssuedAt(new Date())
-        .withClaim("aud", validationData.getAudiences())
+    Builder builder = JWT.create().withIssuer(issuer(tenant)).withJWTId(jti)
+        .withIssuedAt(new Date()).withClaim("aud", validationData.getAudiences())
         .withClaim(CLAIM_USER_NAME, validationData.getUsername())
         .withClaim(CLAIM_CLIENT_ID, client.getClientId())
         .withArrayClaim(CLAIM_SCOPE, new String[] {REFRESH_SCOPE})
@@ -89,47 +123,82 @@ public class ClaimsMapper {
         .withClaim(TokenVerifier.CLAIM_FAMILY_ID, family.getFid())
         .withClaim(TokenVerifier.CLAIM_FAMILY_EXPIRATION, family.getFexp().getEpochSecond())
         .withClaim(TokenVerifier.CLAIM_SESSION_BOUND, family.isSessionBound());
-  }
-
-  public Builder identityToken(String tenant, String accessToken, ClientDetails client,
-      String grantType, AuthenticationData validationData) {
-    String jti = UUID.randomUUID().toString();
-    String authLevel = null == validationData.getMode() ? "0" : validationData.getMode().getAcr();
-    Instant authTime = validationData.getTime();
-
-    Builder builder = JWT.create().withIssuer(issuer(tenant)).withJWTId(jti)
-        .withClaim("acr", authLevel).withIssuedAt(new Date())
-        .withSubject(validationData.getUsername()).withClaim("at_hash", generateHash(accessToken));
-    if (null != authTime) {
-      builder = builder.withClaim("auth_time", authTime.getEpochSecond());
+    if (validationData.getSid() != null) {
+      builder = builder.withClaim(CLAIM_SID, validationData.getSid());
     }
-    return builder.withClaim("typ", "ID")
-        .withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
-        .withClaim(CLAIM_GRANT_TYPE, grantType)
-        .withClaim(CLAIM_USER_NAME, validationData.getUsername())
-        .withClaim(CLAIM_CLIENT_ID, client.getClientId())
-        .withClaim(CLAIM_ROLES, validationData.getRoles())
-        .withClaim(CLAIM_GROUPS, validationData.getGroups());
-  }
-
-  public Builder withChallengeClaims(Builder builder, String state, String session, String nonce) {
-    if (null != state) {
-      builder = builder.withClaim("s_hash", generateHash(state));
+    if (validationData.getTime() != null) {
+      builder = builder.withClaim(CLAIM_AUTH_TIME, validationData.getTime().getEpochSecond());
     }
-    if (null != session) {
-      builder = builder.withClaim("session_state", session);
-    }
-    if (null != nonce) {
-      builder = builder.withClaim("nonce", nonce);
+    if (validationData.getAmr() != null && !validationData.getAmr().isEmpty()) {
+      builder = builder.withClaim(CLAIM_AMR, validationData.getAmr());
     }
     return builder;
   }
 
-  public Builder withCodeHash(Builder builder, String authorizationCode) {
-    if (null != authorizationCode) {
+  /**
+   * Claims of an ID token (tasks 1.2 and 1.13), for the relying party only.
+   *
+   * <p>
+   * {@code aud} is the client and {@code azp} too; {@code auth_time}, {@code amr} and {@code acr}
+   * come from the real login; {@code sid} is the public session id; {@code nonce} only when the
+   * request sent one. The hashes depend on the flow: {@code at_hash} when an access token is issued
+   * in the same response, {@code c_hash} when a code is (hybrid). Roles, groups and scopes are not
+   * repeated here: they belong to the access token and UserInfo.
+   *
+   * @param tenant tenant
+   * @param client relying party
+   * @param validationData authenticated user
+   * @param nonce nonce of the authorization request, if any
+   * @param accessToken access token of the same response, if any
+   * @param authorizationCode code of the same response, if any
+   * @return claims to sign with {@link #idTokenTtl()}
+   */
+  public Builder idToken(String tenant, ClientDetails client, AuthenticationData validationData,
+      String nonce, String accessToken, String authorizationCode) {
+    Builder builder =
+        JWT.create().withIssuer(issuer(tenant)).withJWTId(UUID.randomUUID().toString())
+            .withIssuedAt(new Date()).withSubject(validationData.getUsername())
+            .withAudience(client.getClientId()).withClaim(CLAIM_CLIENT_ID, client.getClientId());
+    builder = withAuthentication(builder, validationData);
+    if (validationData.getSid() != null) {
+      builder = builder.withClaim(CLAIM_SID, validationData.getSid());
+    }
+    if (nonce != null && !nonce.isBlank()) {
+      builder = builder.withClaim("nonce", nonce);
+    }
+    if (accessToken != null) {
+      builder = builder.withClaim("at_hash", generateHash(accessToken));
+    }
+    if (authorizationCode != null) {
       builder = builder.withClaim("c_hash", generateHash(authorizationCode));
     }
     return builder;
+  }
+
+  /**
+   * Adds the facts of the real authentication: {@code auth_time}, {@code amr} and the {@code acr}
+   * that follows from it.
+   */
+  private Builder withAuthentication(Builder builder, AuthenticationData validationData) {
+    List<String> amr = validationData.getAmr() == null ? List.of() : validationData.getAmr();
+    Builder result = builder.withClaim("acr", acrPolicy.acr(amr));
+    if (!amr.isEmpty()) {
+      result = result.withClaim(CLAIM_AMR, amr);
+    }
+    if (validationData.getTime() != null) {
+      result = result.withClaim(CLAIM_AUTH_TIME, validationData.getTime().getEpochSecond());
+    }
+    return result;
+  }
+
+  /**
+   * Lifetime of an ID token: {@code oauth.jwt.expiration.id-token}, 5 minutes by default. It is its
+   * own, never the refresh token one.
+   *
+   * @return ID token lifetime
+   */
+  public Duration idTokenTtl() {
+    return idTokenTtl;
   }
 
   public String issuer(String tenant) {

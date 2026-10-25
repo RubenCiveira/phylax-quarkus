@@ -68,4 +68,50 @@ class ClientDetailsUnitTest {
     Assertions.assertNotNull(client.getPostLogoutRedirectUris());
     Assertions.assertTrue(client.getPostLogoutRedirectUris().isEmpty());
   }
+
+  @Test
+  @DisplayName("Response types are compared as sets and code needs the authorization_code grant")
+  void test_allows_response_type() {
+    ClientDetails hybrid = ClientDetails.builder().clientId("c").allowedScopes(List.of())
+        .allowedGrants(List.of("authorization_code"))
+        .allowedResponseTypes(List.of("code", "code id_token")).build();
+    Assertions.assertTrue(hybrid.allowsResponseType("code"));
+    Assertions.assertTrue(hybrid.allowsResponseType("id_token code"));
+    Assertions.assertFalse(hybrid.allowsResponseType("token"));
+    Assertions.assertFalse(hybrid.allowsResponseType(" "));
+    ClientDetails m2m = ClientDetails.builder().clientId("c").allowedScopes(List.of())
+        .allowedGrants(List.of("client_credentials")).build();
+    Assertions.assertFalse(m2m.allowsResponseType("code"));
+  }
+
+  @Test
+  @DisplayName("The mfa grant follows the password grant")
+  void test_mfa_follows_password() {
+    ClientDetails withPassword = ClientDetails.builder().clientId("c").allowedScopes(List.of())
+        .allowedGrants(List.of("password")).build();
+    Assertions.assertTrue(withPassword.allowedGrant("mfa"));
+    Assertions.assertFalse(publicClient().allowedGrant("mfa"));
+  }
+
+  @Test
+  @DisplayName("M2M scopes: all of them by default, the requested subset otherwise")
+  void test_m2m_scopes() {
+    ClientDetails client = ClientDetails.builder().clientId("c").allowedScopes(List.of("*"))
+        .allowedGrants(List.of("client_credentials"))
+        .allowedScopesM2m(List.of("orders:read", "orders:write")).build();
+    Assertions.assertEquals(List.of("orders:read", "orders:write"), client.m2mScopes(List.of()));
+    Assertions.assertEquals(List.of("orders:read"),
+        client.m2mScopes(List.of("orders:read", "admin")));
+    Assertions.assertEquals(List.of(), client.m2mScopes(List.of("admin")));
+    Assertions.assertEquals(List.of(), publicClient().m2mScopes(List.of()));
+  }
+
+  @Test
+  @DisplayName("User scopes are compared exactly: myprofile does not grant profile")
+  void test_grantable_scopes_exact() {
+    ClientDetails client = ClientDetails.builder().clientId("c")
+        .allowedScopes(List.of("openid", "myprofile")).allowedGrants(List.of()).build();
+    Assertions.assertEquals(List.of("myprofile"),
+        client.grantableScopes(List.of("profile", "myprofile")));
+  }
 }

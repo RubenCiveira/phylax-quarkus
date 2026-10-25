@@ -8,24 +8,26 @@ import lombok.Getter;
 
 /**
  * Client metadata provided in a Dynamic Client Registration request (RFC 7591).
+ *
+ * <p>
+ * A null value means the client omitted the field; {@link DcrMetadataPolicy} applies the RFC 7591
+ * defaults and returns the normalized request that is stored.
  */
-@Builder
+@Builder(toBuilder = true)
 @Getter
 public class DynamicClientRequest {
 
-  private final List<String> redirectUris;
+  @Builder.Default
+  private final List<String> redirectUris = List.of();
   private final String clientName;
 
-  @Builder.Default
-  private final List<String> grantTypes = List.of("authorization_code");
+  private final List<String> grantTypes;
 
-  @Builder.Default
-  private final List<String> responseTypes = List.of("code");
+  private final List<String> responseTypes;
 
   private final String scope;
 
-  @Builder.Default
-  private final String tokenEndpointAuthMethod = "client_secret_basic";
+  private final String tokenEndpointAuthMethod;
 
   private final String logoUri;
   private final String clientUri;
@@ -33,4 +35,9 @@ public class DynamicClientRequest {
   private final String tosUri;
   private final String backchannelLogoutUri;
   private final String frontchannelLogoutUri;
+  /**
+   * OIDC RP-Initiated Logout §3.1: where the client may be sent back after logout.
+   */
+  @Builder.Default
+  private final List<String> postLogoutRedirectUris = List.of();
 }

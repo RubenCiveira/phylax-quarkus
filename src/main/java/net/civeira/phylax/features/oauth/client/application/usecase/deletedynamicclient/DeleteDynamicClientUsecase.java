@@ -3,10 +3,12 @@ package net.civeira.phylax.features.oauth.client.application.usecase.deletedynam
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
 import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGateway;
 
 /**
- * Deletes a registered dynamic client (RFC 7592 DELETE).
+ * Deletes a dynamically registered client (RFC 7592 §2.3, task 2.1), only from the tenant that owns
+ * it and with its registration access token.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -15,13 +17,16 @@ public class DeleteDynamicClientUsecase {
   private final DynamicClientGateway gateway;
 
   /**
-   * Deletes the client identified by the given credentials.
+   * Deletes a client.
    *
-   * @param clientId client_id
-   * @param registrationAccessToken registration management token
-   * @return true when deleted, false when not found or unauthorized
+   * @param tenant tenant name of the endpoint
+   * @param clientId client identifier
+   * @param registrationAccessToken token presented in clear
+   * @throws DynamicClientException invalid_token when the client or token does not match
    */
-  public boolean delete(String clientId, String registrationAccessToken) {
-    return gateway.delete(clientId, registrationAccessToken);
+  public void delete(String tenant, String clientId, String registrationAccessToken) {
+    if (!gateway.delete(tenant, clientId, registrationAccessToken)) {
+      throw DynamicClientException.invalidRegistrationToken();
+    }
   }
 }

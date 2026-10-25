@@ -73,15 +73,18 @@ public class ParRequestSqlAdapter implements ParRequestGateway {
   }
 
   @Override
-  public void markUsed(String requestUri, String tenant) {
-    String sql =
-        "UPDATE _oauth_par_request SET used_at = ? WHERE request_uri = ? AND tenant_id = ?";
+  public boolean consume(String requestUri, String tenant, OffsetDateTime until) {
+    String sql = "UPDATE _oauth_par_request SET used_at = ?, expires_at = ? WHERE request_uri = ? "
+        + "AND tenant_id = ? AND used_at IS NULL AND expires_at > ?";
+    Timestamp now = Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant());
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
-      stat.setTimestamp(1, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()));
-      stat.setString(2, requestUri);
-      stat.setString(3, tenant);
-      stat.execute();
+      stat.setTimestamp(1, now);
+      stat.setTimestamp(2, Timestamp.from(until.toInstant()));
+      stat.setString(3, requestUri);
+      stat.setString(4, tenant);
+      stat.setTimestamp(5, now);
+      return stat.executeUpdate() == 1;
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }

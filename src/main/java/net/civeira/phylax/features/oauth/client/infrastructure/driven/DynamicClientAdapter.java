@@ -7,96 +7,153 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.crypto.SecretDigester;
+import net.civeira.phylax.features.oauth.client.domain.DcrRegistrationRules;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
 import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGateway;
 
+/**
+ * DCR clients over the {@code access_trusted_client} master (task 2.1).
+ *
+ * <p>
+ * A client is stored in the tenant of the endpoint, enabled, dynamically registered and without
+ * {@code allow-all-scopes}; a public one ({@code none}) allows public access and requires PKCE.
+ * Every lookup is scoped by tenant and by the digest of the registration access token. The secret
+ * and the token are stored as {@link SecretDigester} digests and never read back.
+ */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class DynamicClientAdapter implements DynamicClientGateway {
 
-  private static final TypeReference<List<String>> LIST_TYPE = new TypeReference<>() {};
+  private static final String DISABLED = "disabled";
+  private static final String NONE = "none";
+  private static final String CLIENT_COLUMNS =
+      "c.uid, c.token_endpoint_auth_method, c.client_name, c.logo_uri, c.client_uri, "
+          + "c.policy_uri, c.tos_uri, c.back_channel_logout_uri, c.front_channel_logout_uri, "
+          + "c.grant_types_json, c.response_types_json, c.registered_at";
+  private static final String OWNED_CLIENT = "FROM access_trusted_client c "
+      + "JOIN access_tenant t ON t.uid = c.tenant WHERE t.name = ? AND c.uid = ? "
+      + "AND c.dynamically_registered = ? AND c.registration_access = ?";
 
   private final DataSource source;
   private final ObjectMapper mapper;
   private final SecretDigester secretDigester;
+  private final PostLogoutRedirectSqlStore postLogoutRedirects;
 
   @Override
-  public DynamicClientData create(String clientId, String clientSecret,
-      String registrationAccessToken, DynamicClientRequest request) {
-    Instant now = Instant.now();
-    String sql =
-        "INSERT INTO access_trusted_client (uid, version, allow_all_scopes, allowed_scopes_m_2m, back_channel_logout_session_required, back_channel_logout_uri, client_name, client_uri, code, dynamically_registered, enabled, front_channel_logout_session_required, front_channel_logout_uri, grant_types_json, jwks_json, jwks_uri, logo_uri, m_2m_token_ttl_seconds, policy_uri, public_allow, registered_at, registration_access, request_object_signing_alg, response_types_json, secret_oauth, token_endpoint_auth_method, tos_uri) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  public DcrRegistrationRules readRegistrationRules(String tenant) {
+    String sql = "SELECT c.dynamic_registration_policy, c.dcr_allowed_grant_types, "
+        + "c.dcr_allowed_auth_methods, c.allow_password_grant FROM access_tenant_config c "
+        + "JOIN access_tenant t ON t.uid = c.tenant WHERE t.name = ? AND t.enabled = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
-      stat.setString(1, clientId);
-      stat.setInt(2, 0);
-      stat.setBoolean(3, false);
-      stat.setString(4, null);
-      stat.setBoolean(5, false);
-      stat.setString(6, request.getBackchannelLogoutUri());
-      stat.setString(7, request.getClientName());
-      stat.setString(8, request.getClientUri());
-      stat.setString(9, clientId);
-      stat.setBoolean(10, true);
-      stat.setBoolean(11, true);
-      stat.setBoolean(12, false);
-      stat.setString(13, request.getFrontchannelLogoutUri());
-      stat.setString(14, mapper.writeValueAsString(request.getGrantTypes()));
-      stat.setString(15, null);
-      stat.setString(16, null);
-      stat.setString(17, request.getLogoUri());
-      stat.setInt(18, 3600);
-      stat.setString(19, request.getPolicyUri());
-      stat.setBoolean(20, true);
-      stat.setTimestamp(21, Timestamp.from(now));
-      stat.setString(22, secretDigester.digest(registrationAccessToken));
-      stat.setString(23, null);
-      stat.setString(24, mapper.writeValueAsString(request.getResponseTypes()));
-      stat.setString(25, secretDigester.digest(clientSecret));
-      stat.setString(26, request.getTokenEndpointAuthMethod());
-      stat.setString(27, request.getTosUri());
-      stat.execute();
-      replaceRedirects(conn, clientId, request.getRedirectUris());
-    } catch (SQLException | JsonProcessingException ex) {
+      stat.setString(1, tenant);
+      stat.setBoolean(2, true);
+      try (ResultSet rs = stat.executeQuery()) {
+        if (!rs.next()) {
+          return DcrRegistrationRules.disabled();
+        }
+        String policy = rs.getString(1);
+        if (policy == null || policy.isBlank() || DISABLED.equalsIgnoreCase(policy.trim())) {
+          return DcrRegistrationRules.disabled();
+        }
+        List<String> grants = TrustedClientPolicy.parseList(rs.getString(2))
+            .orElse(DcrRegistrationRules.DEFAULT_GRANT_TYPES);
+        List<String> methods = TrustedClientPolicy.parseList(rs.getString(3))
+            .orElse(DcrRegistrationRules.VERIFIABLE_AUTH_METHODS);
+        return new DcrRegistrationRules(true, Set.copyOf(grants), Set.copyOf(methods),
+            rs.getBoolean(4));
+      }
+    } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }
-    DynamicClientData data =
-        DynamicClientData.builder().clientId(clientId).redirectUris(request.getRedirectUris())
-            .grantTypes(request.getGrantTypes()).responseTypes(request.getResponseTypes())
-            .scope(request.getScope()).tokenEndpointAuthMethod(request.getTokenEndpointAuthMethod())
-            .clientName(request.getClientName()).logoUri(request.getLogoUri())
-            .clientUri(request.getClientUri()).policyUri(request.getPolicyUri())
-            .tosUri(request.getTosUri()).backchannelLogoutUri(request.getBackchannelLogoutUri())
-            .frontchannelLogoutUri(request.getFrontchannelLogoutUri())
-            .clientIdIssuedAt(now.getEpochSecond()).registrationClientUri("").build();
-    return data;
   }
 
   @Override
-  public Optional<DynamicClientData> findByClientIdAndToken(String clientId,
-      String registrationAccessToken) {
-    String sql =
-        "SELECT uid, token_endpoint_auth_method, client_name, logo_uri, client_uri, policy_uri, tos_uri, back_channel_logout_uri, front_channel_logout_uri, grant_types_json, response_types_json, registered_at FROM access_trusted_client WHERE uid = ? AND dynamically_registered = ? AND registration_access = ?";
+  public DynamicClientData create(String tenant, String clientId, Optional<String> clientSecret,
+      String registrationAccessToken, DynamicClientRequest request) {
+    Instant now = Instant.now();
+    boolean publicClient = NONE.equals(request.getTokenEndpointAuthMethod());
+    String sql = "INSERT INTO access_trusted_client (uid, version, code, tenant, enabled, "
+        + "dynamically_registered, registered_at, registration_access, secret_oauth, "
+        + "token_endpoint_auth_method, public_allow, require_pkce, allow_all_scopes, "
+        + "grant_types_json, response_types_json, client_name, logo_uri, client_uri, policy_uri, "
+        + "tos_uri, back_channel_logout_uri, front_channel_logout_uri, m_2m_token_ttl_seconds, "
+        + "is_resource_server, require_pushed_authorization_requests, subject_type, "
+        + "dpop_bound_access_tokens, tls_client_certificate_bound_access_tokens) "
+        + "SELECT ?, 0, ?, t.uid, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 3600, "
+        + "?, ?, 'PUBLIC', ?, ? FROM access_tenant t WHERE t.name = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
-      stat.setString(1, clientId);
-      stat.setBoolean(2, true);
-      stat.setString(3, secretDigester.digest(registrationAccessToken));
+      int i = 1;
+      stat.setString(i++, clientId);
+      stat.setString(i++, clientId);
+      stat.setBoolean(i++, true);
+      stat.setBoolean(i++, true);
+      stat.setTimestamp(i++, Timestamp.from(now));
+      stat.setString(i++, secretDigester.digest(registrationAccessToken));
+      stat.setString(i++, clientSecret.map(secretDigester::digest).orElse(null));
+      stat.setString(i++, request.getTokenEndpointAuthMethod().toUpperCase(Locale.ROOT));
+      stat.setBoolean(i++, publicClient);
+      stat.setBoolean(i++, publicClient);
+      stat.setBoolean(i++, false);
+      stat.setString(i++, mapper.writeValueAsString(request.getGrantTypes()));
+      stat.setString(i++, mapper.writeValueAsString(request.getResponseTypes()));
+      stat.setString(i++, request.getClientName());
+      stat.setString(i++, request.getLogoUri());
+      stat.setString(i++, request.getClientUri());
+      stat.setString(i++, request.getPolicyUri());
+      stat.setString(i++, request.getTosUri());
+      stat.setString(i++, request.getBackchannelLogoutUri());
+      stat.setString(i++, request.getFrontchannelLogoutUri());
+      stat.setBoolean(i++, false);
+      stat.setBoolean(i++, false);
+      stat.setBoolean(i++, false);
+      stat.setBoolean(i++, false);
+      stat.setString(i, tenant);
+      if (stat.executeUpdate() != 1) {
+        throw new IllegalStateException("Unknown tenant " + tenant);
+      }
+      replaceRedirects(conn, clientId, request.getRedirectUris());
+      postLogoutRedirects.replace(conn, clientId, request.getPostLogoutRedirectUris());
+    } catch (SQLException | JsonProcessingException ex) {
+      throw new IllegalStateException(ex);
+    }
+    return DynamicClientData.builder().clientId(clientId).redirectUris(request.getRedirectUris())
+        .grantTypes(request.getGrantTypes()).responseTypes(request.getResponseTypes())
+        .tokenEndpointAuthMethod(request.getTokenEndpointAuthMethod())
+        .clientName(request.getClientName()).logoUri(request.getLogoUri())
+        .clientUri(request.getClientUri()).policyUri(request.getPolicyUri())
+        .tosUri(request.getTosUri()).backchannelLogoutUri(request.getBackchannelLogoutUri())
+        .frontchannelLogoutUri(request.getFrontchannelLogoutUri())
+        .postLogoutRedirectUris(request.getPostLogoutRedirectUris())
+        .clientIdIssuedAt(now.getEpochSecond()).build();
+  }
+
+  @Override
+  public Optional<DynamicClientData> find(String tenant, String clientId,
+      String registrationAccessToken) {
+    String sql = "SELECT " + CLIENT_COLUMNS + " " + OWNED_CLIENT;
+    try (Connection conn = source.getConnection();
+        PreparedStatement stat = conn.prepareStatement(sql)) {
+      bindOwned(stat, 1, tenant, clientId, registrationAccessToken);
       try (ResultSet rs = stat.executeQuery()) {
         if (!rs.next()) {
           return Optional.empty();
@@ -109,89 +166,86 @@ public class DynamicClientAdapter implements DynamicClientGateway {
   }
 
   @Override
-  public Optional<DynamicClientData> update(String clientId, String registrationAccessToken,
-      DynamicClientRequest request) {
-    String sql =
-        "UPDATE access_trusted_client SET client_name = ?, logo_uri = ?, client_uri = ?, policy_uri = ?, tos_uri = ?, token_endpoint_auth_method = ?, grant_types_json = ?, response_types_json = ?, back_channel_logout_uri = ?, front_channel_logout_uri = ?, version = version + 1 WHERE uid = ? AND dynamically_registered = ? AND registration_access = ?";
+  public Optional<DynamicClientData> update(String tenant, String clientId,
+      String registrationAccessToken, DynamicClientRequest request) {
+    String sql = "UPDATE access_trusted_client SET client_name = ?, logo_uri = ?, client_uri = ?, "
+        + "policy_uri = ?, tos_uri = ?, grant_types_json = ?, response_types_json = ?, "
+        + "back_channel_logout_uri = ?, front_channel_logout_uri = ?, version = version + 1 "
+        + "WHERE uid = ? AND dynamically_registered = ? AND registration_access = ? "
+        + "AND tenant = (SELECT t.uid FROM access_tenant t WHERE t.name = ?)";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
-      stat.setString(1, request.getClientName());
-      stat.setString(2, request.getLogoUri());
-      stat.setString(3, request.getClientUri());
-      stat.setString(4, request.getPolicyUri());
-      stat.setString(5, request.getTosUri());
-      stat.setString(6, request.getTokenEndpointAuthMethod());
-      stat.setString(7, mapper.writeValueAsString(request.getGrantTypes()));
-      stat.setString(8, mapper.writeValueAsString(request.getResponseTypes()));
-      stat.setString(9, request.getBackchannelLogoutUri());
-      stat.setString(10, request.getFrontchannelLogoutUri());
-      stat.setString(11, clientId);
-      stat.setBoolean(12, true);
-      stat.setString(13, secretDigester.digest(registrationAccessToken));
+      int i = 1;
+      stat.setString(i++, request.getClientName());
+      stat.setString(i++, request.getLogoUri());
+      stat.setString(i++, request.getClientUri());
+      stat.setString(i++, request.getPolicyUri());
+      stat.setString(i++, request.getTosUri());
+      stat.setString(i++, mapper.writeValueAsString(request.getGrantTypes()));
+      stat.setString(i++, mapper.writeValueAsString(request.getResponseTypes()));
+      stat.setString(i++, request.getBackchannelLogoutUri());
+      stat.setString(i++, request.getFrontchannelLogoutUri());
+      stat.setString(i++, clientId);
+      stat.setBoolean(i++, true);
+      stat.setString(i++, secretDigester.digest(registrationAccessToken));
+      stat.setString(i, tenant);
       if (stat.executeUpdate() == 0) {
         return Optional.empty();
       }
       replaceRedirects(conn, clientId, request.getRedirectUris());
-      return findByClientIdAndToken(clientId, registrationAccessToken);
+      postLogoutRedirects.replace(conn, clientId, request.getPostLogoutRedirectUris());
     } catch (SQLException | JsonProcessingException ex) {
       throw new IllegalStateException(ex);
     }
+    return find(tenant, clientId, registrationAccessToken);
   }
 
   @Override
-  public boolean delete(String clientId, String registrationAccessToken) {
-    String sql =
-        "DELETE FROM access_trusted_client WHERE uid = ? AND dynamically_registered = ? AND registration_access = ?";
-    try (Connection conn = source.getConnection();
-        PreparedStatement stat = conn.prepareStatement(sql)) {
-      stat.setString(1, clientId);
-      stat.setBoolean(2, true);
-      stat.setString(3, secretDigester.digest(registrationAccessToken));
-      boolean deleted = stat.executeUpdate() > 0;
-      if (deleted) {
-        deleteRedirects(conn, clientId);
-      }
-      return deleted;
-    } catch (SQLException ex) {
-      throw new IllegalStateException(ex);
+  public boolean delete(String tenant, String clientId, String registrationAccessToken) {
+    if (find(tenant, clientId, registrationAccessToken).isEmpty()) {
+      return false;
     }
-  }
-
-  @Override
-  public String readRegistrationPolicy(String tenant) {
-    String sql =
-        "SELECT c.dynamic_registration_policy FROM access_tenant_config c JOIN access_tenant t ON t.uid = c.tenant WHERE t.name = ?";
-    try (Connection conn = source.getConnection();
-        PreparedStatement stat = conn.prepareStatement(sql)) {
-      stat.setString(1, tenant);
-      try (ResultSet rs = stat.executeQuery()) {
-        if (!rs.next()) {
-          return "disabled";
-        }
-        String policy = rs.getString(1);
-        return policy == null || policy.isBlank() ? "disabled" : policy;
+    try (Connection conn = source.getConnection()) {
+      deleteRedirects(conn, clientId);
+      postLogoutRedirects.deleteAll(conn, clientId);
+      try (PreparedStatement stat = conn.prepareStatement(
+          "DELETE FROM access_trusted_client WHERE uid = ? AND dynamically_registered = ? "
+              + "AND registration_access = ?")) {
+        stat.setString(1, clientId);
+        stat.setBoolean(2, true);
+        stat.setString(3, secretDigester.digest(registrationAccessToken));
+        return stat.executeUpdate() > 0;
       }
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }
+  }
+
+  private void bindOwned(PreparedStatement stat, int from, String tenant, String clientId,
+      String registrationAccessToken) throws SQLException {
+    stat.setString(from, tenant);
+    stat.setString(from + 1, clientId);
+    stat.setBoolean(from + 2, true);
+    stat.setString(from + 3, secretDigester.digest(registrationAccessToken));
   }
 
   private DynamicClientData mapClient(Connection conn, ResultSet rs) throws SQLException {
-    List<String> redirectUris = loadRedirects(conn, rs.getString("uid"));
-    List<String> grantTypes =
-        readList(rs.getString("grant_types_json"), List.of("authorization_code"));
-    List<String> responseTypes = readList(rs.getString("response_types_json"), List.of("code"));
+    String uid = rs.getString("uid");
     Timestamp issuedAt = rs.getTimestamp("registered_at");
-    return DynamicClientData.builder().clientId(rs.getString("uid")).redirectUris(redirectUris)
-        .grantTypes(grantTypes).responseTypes(responseTypes).scope(null)
-        .tokenEndpointAuthMethod(rs.getString("token_endpoint_auth_method"))
+    return DynamicClientData.builder().clientId(uid).redirectUris(loadRedirects(conn, uid))
+        .grantTypes(TrustedClientPolicy.parseList(rs.getString("grant_types_json"))
+            .orElse(List.of("authorization_code")))
+        .responseTypes(
+            TrustedClientPolicy.parseList(rs.getString("response_types_json")).orElse(List.of()))
+        .tokenEndpointAuthMethod(
+            rs.getString("token_endpoint_auth_method").toLowerCase(Locale.ROOT))
         .clientName(rs.getString("client_name")).logoUri(rs.getString("logo_uri"))
         .clientUri(rs.getString("client_uri")).policyUri(rs.getString("policy_uri"))
         .tosUri(rs.getString("tos_uri"))
         .backchannelLogoutUri(rs.getString("back_channel_logout_uri"))
         .frontchannelLogoutUri(rs.getString("front_channel_logout_uri"))
-        .clientIdIssuedAt(issuedAt != null ? issuedAt.toInstant().getEpochSecond() : 0)
-        .registrationClientUri("").build();
+        .postLogoutRedirectUris(postLogoutRedirects.list(uid))
+        .clientIdIssuedAt(issuedAt != null ? issuedAt.toInstant().getEpochSecond() : 0).build();
   }
 
   private List<String> loadRedirects(Connection conn, String clientId) throws SQLException {
@@ -199,14 +253,14 @@ public class DynamicClientAdapter implements DynamicClientGateway {
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientId);
       try (ResultSet rs = stat.executeQuery()) {
-        java.util.ArrayList<String> result = new java.util.ArrayList<>();
+        Set<String> result = new LinkedHashSet<>();
         while (rs.next()) {
           String url = rs.getString(1);
           if (url != null && !url.isBlank()) {
             result.add(url);
           }
         }
-        return List.copyOf(result);
+        return new ArrayList<>(result);
       }
     }
   }
@@ -236,18 +290,6 @@ public class DynamicClientAdapter implements DynamicClientGateway {
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientId);
       stat.execute();
-    }
-  }
-
-  private List<String> readList(String json, List<String> defaultValue) {
-    if (json == null || json.isBlank()) {
-      return defaultValue;
-    }
-    try {
-      List<String> list = mapper.readValue(json, LIST_TYPE);
-      return list == null || list.isEmpty() ? defaultValue : list;
-    } catch (JsonProcessingException ex) {
-      return defaultValue;
     }
   }
 }

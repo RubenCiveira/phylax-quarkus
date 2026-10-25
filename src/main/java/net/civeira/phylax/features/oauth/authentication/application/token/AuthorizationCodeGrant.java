@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.oauth.authentication.application.token;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,6 +65,11 @@ public class AuthorizationCodeGrant {
     if (!auth.isRight()) {
       throw OAuthTokenException.invalidGrant("The user can not be authenticated");
     }
+    // The tokens describe the login that produced the code, not this exchange (task 1.13).
+    auth.getData().setSid(code.data.getSid());
+    auth.getData().setTime(code.data.getTime());
+    auth.getData().setAmr(
+        code.data.getAmr() == null ? new ArrayList<>() : new ArrayList<>(code.data.getAmr()));
     boolean withSession = code.sessionId != null && !code.sessionId.isBlank();
     return issuer.issue(tenant, client, GRANT_TYPE, auth.getData(), code.request,
         Optional.ofNullable(code.sessionId), Optional.empty(),
@@ -94,9 +100,11 @@ public class AuthorizationCodeGrant {
     }
     String challenge = code.request.getCodeChallenge().orElse(null);
     if (challenge == null) {
-      // Without PKCE only an authenticated confidential client may redeem, and a verifier for a
-      // code without challenge is a downgrade attempt (RFC 9700 §2.1.1).
-      return client.isProtectedWithSecret() && (verifier == null || verifier.isBlank());
+      // Without PKCE only an authenticated confidential client that does not require it may redeem
+      // (task 1.11), and a verifier for a code without challenge is a downgrade attempt (RFC 9700
+      // §2.1.1).
+      return client.isProtectedWithSecret() && !client.isRequirePkce()
+          && (verifier == null || verifier.isBlank());
     }
     return verifier != null && !verifier.isBlank()
         && "S256".equals(code.request.getCodeChallengeMethod().orElse(""))

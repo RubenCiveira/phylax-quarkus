@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.oauth.authentication.application.token;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,11 @@ public class TokenIssuer {
     AutorizationToken token =
         tokenBuilder.buildToken(tenant, client, grantType, auth, request, family);
     Optional<String> accessJti = tokenBuilder.tokenJti(token.getAccessToken(), tenant);
-    Optional<String> refreshJti = tokenBuilder.tokenJti(token.getRefreshToken(), tenant);
+    // A client without the refresh_token grant gets no refresh token: its session keeps an unused
+    // placeholder JTI, so logout still reaches the access token.
+    Optional<String> refreshJti =
+        token.getRefreshToken() == null ? Optional.of(UUID.randomUUID().toString())
+            : tokenBuilder.tokenJti(token.getRefreshToken(), tenant);
     if (accessJti.isPresent() && refreshJti.isPresent()) {
       if (sessionId.isPresent() && !sessionId.get().isBlank()) {
         sessionStore.updateTokenJtis(sessionId.get(), accessJti.get(), refreshJti.get());

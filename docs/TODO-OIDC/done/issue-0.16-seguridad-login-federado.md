@@ -35,7 +35,7 @@
 - Pruebas HTTP + persistencia para cada fallo: aserción SAML sin firmar, firmada por otro certificado, con *signature wrapping*, de otro emisor o audiencia, no solicitada o repetida; usuario de Google con nombre o email de una cuenta local existente; callback sin `state`, con `state` de otro navegador o repetido; `code`/`provider` con HTML en la query.
 - Enlace de un proveedor de otro tenant rechazado; dos primeros accesos concurrentes del mismo sujeto crean un único enlace.
 
-- **Dependencias:** [0.5](../issue-0.5-aislamiento-clientes-tenant.md) (tenant del proveedor); almacén anti-replay de [J-05](../epicas/ep-J-05-solicitudes-authorize-par-jar.md) (si llega antes, se crea aquí).
+- **Dependencias:** [0.5](issue-0.5-aislamiento-clientes-tenant.md) (tenant del proveedor); almacén anti-replay de [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) (si llega antes, se crea aquí).
 
 ## Implementación Java (23-10-2026)
 

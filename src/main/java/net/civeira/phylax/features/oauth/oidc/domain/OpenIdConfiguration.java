@@ -296,4 +296,9 @@ public class OpenIdConfiguration {
    */
   @JsonProperty("prompt_values_supported")
   private final List<String> promptValuesSupported;
+  /**
+   * Languages of the login pages that {@code ui_locales} can select (task 3.10).
+   */
+  @JsonProperty("ui_locales_supported")
+  private final List<String> uiLocalesSupported;
 }

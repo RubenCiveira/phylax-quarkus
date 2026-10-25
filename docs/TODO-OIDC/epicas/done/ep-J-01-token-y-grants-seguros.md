@@ -1,8 +1,8 @@
 # J-01 — Token y grants seguros
 
-**Prioridad:** bloqueante · **Tareas:** [0.1](../../done/issue-0.1-canje-seguro-de-authorization-code.md), [0.2](../../done/issue-0.2-refresh-cliente-sesion.md), [0.9](../../done/issue-0.9-autenticacion-cliente-unificada.md), [0.13](../../done/issue-0.13-ruta-revocacion-no-duplicada.md), [1.4](../../done/issue-1.4-errores-cache-token.md), [1.8](../../done/issue-1.8-code-clientes-confidenciales.md), [1.10](../../done/issue-1.10-tests-negativos-seguridad.md), [1.16](../../done/issue-1.16-emision-canje-fuera-tokencontroller.md). **Depende de:** política de [J-02](../ep-J-02-clientes-tenant-secretos.md) para cliente/grant/tenant; la seguridad del code y refresh empieza antes de terminar toda la épica.
+**Prioridad:** bloqueante · **Tareas:** [0.1](../../done/issue-0.1-canje-seguro-de-authorization-code.md), [0.2](../../done/issue-0.2-refresh-cliente-sesion.md), [0.9](../../done/issue-0.9-autenticacion-cliente-unificada.md), [0.13](../../done/issue-0.13-ruta-revocacion-no-duplicada.md), [1.4](../../done/issue-1.4-errores-cache-token.md), [1.8](../../done/issue-1.8-code-clientes-confidenciales.md), [1.10](../../done/issue-1.10-tests-negativos-seguridad.md), [1.16](../../done/issue-1.16-emision-canje-fuera-tokencontroller.md). **Depende de:** política de [J-02](ep-J-02-clientes-tenant-secretos.md) para cliente/grant/tenant; la seguridad del code y refresh empieza antes de terminar toda la épica.
 
-**Estado:** cerrada (24-10-2026). Todas sus fichas están en [`done/`](../../done/README.md); la aceptación HTTP + BD se verifica con `make test-mariadb` ([V.1](../../issue-V.1-fixtures-pruebas-http-persistencia.md)). Para cerrar [1.10](../../done/issue-1.10-tests-negativos-seguridad.md) se adelantaron de [J-02](../ep-J-02-clientes-tenant-secretos.md) las fichas [0.3](../../done/issue-0.3-audiencias-autorizadas.md) (audiencias) y [0.10](../../done/issue-0.10-redirect-uri-estricta.md) (redirect estricto).
+**Estado:** cerrada (24-10-2026). Todas sus fichas están en [`done/`](../../done/README.md); la aceptación HTTP + BD se verifica con `make test-mariadb` ([V.1](../../issue-V.1-fixtures-pruebas-http-persistencia.md)). Para cerrar [1.10](../../done/issue-1.10-tests-negativos-seguridad.md) se adelantaron de [J-02](ep-J-02-clientes-tenant-secretos.md) las fichas [0.3](../../done/issue-0.3-audiencias-autorizadas.md) (audiencias) y [0.10](../../done/issue-0.10-redirect-uri-estricta.md) (redirect estricto).
 
 ## Implementación
 
@@ -84,8 +84,8 @@ Introspección, revocación y PAR exigen secreto; `/device` admite públicos.
 ### Límites conocidos (no bloquean el cierre)
 
 - Revocar los tokens del primer canje si se reintenta un code ya usado (requiere guardar los codes gastados; anotado en 0.1).
-- `allowedGrants` aún son los valores por defecto del adaptador, y code/refresh no se filtran por ellos: aplicar `grantTypesJson` es [0.4](../../issue-0.4-configuracion-por-cliente.md) (J-02).
+- `allowedGrants` aún son los valores por defecto del adaptador, y code/refresh no se filtran por ellos: aplicar `grantTypesJson` es [0.4](../../done/issue-0.4-configuracion-por-cliente.md) (J-02).
 - La revocación de access tokens solo surte efecto donde se consulta (introspección); el bearer de las APIs aún no mira la lista de revocados ([0.8](../../issue-0.8-verificacion-bearer-apis.md), [0.15](../../issue-0.15-audiencia-tenant-revocacion-bearer.md)).
-- `post_logout_redirect_uri` todavía admite comodines ([2.4](../../issue-2.4-redirects-logout.md)).
+- `post_logout_redirect_uri` todavía admite comodines ([2.4](../../done/issue-2.4-redirects-logout.md)).
 - El canje de `device_code` no es atómico (lee y borra sin comprobar filas).
 - Los flujos de prueba con dobles arrancan con el perfil `test` y la base de `.env`: `OAuthTestProfile` no se aplica porque `@TestProfile` no se hereda de la clase base.

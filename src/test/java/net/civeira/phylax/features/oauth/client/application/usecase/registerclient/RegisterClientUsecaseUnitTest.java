@@ -2,139 +2,142 @@
 package net.civeira.phylax.features.oauth.client.application.usecase.registerclient;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import net.civeira.phylax.features.oauth.client.domain.DcrInitialAccessToken;
+import net.civeira.phylax.features.oauth.client.domain.DcrRegistrationRules;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
 import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
+import net.civeira.phylax.features.oauth.client.domain.gateway.DcrInitialAccessTokenGateway;
 import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGateway;
 
+/**
+ * DCR registration (task 2.1): an initial access token is always required and a rejected request
+ * spends nothing.
+ */
 class RegisterClientUsecaseUnitTest {
 
-  private DynamicClientGateway gateway = Mockito.mock(DynamicClientGateway.class);
+  private static final String TENANT = "tenant";
+  private static final DcrRegistrationRules ENABLED =
+      new DcrRegistrationRules(true, Set.of("authorization_code", "refresh_token"),
+          Set.copyOf(DcrRegistrationRules.VERIFIABLE_AUTH_METHODS), false);
+
+  private final DynamicClientGateway gateway = Mockito.mock(DynamicClientGateway.class);
+  private final DcrInitialAccessTokenGateway tokens =
+      Mockito.mock(DcrInitialAccessTokenGateway.class);
   private RegisterClientUsecase usecase;
 
   @BeforeEach
   void setUp() {
-    Mockito.reset(gateway);
-    usecase = new RegisterClientUsecase(gateway);
+    Mockito.reset(gateway, tokens);
+    usecase = new RegisterClientUsecase(gateway, tokens);
+    Mockito.when(gateway.readRegistrationRules(TENANT)).thenReturn(ENABLED);
+    Mockito.when(tokens.findUsable(TENANT, "valid"))
+        .thenReturn(Optional.of(new DcrInitialAccessToken("iat-1", Optional.empty())));
+    Mockito.when(tokens.consume("iat-1")).thenReturn(true);
+    Mockito
+        .when(gateway.create(Mockito.eq(TENANT), Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any()))
+        .thenAnswer(inv -> DynamicClientData.builder().clientId(inv.getArgument(1))
+            .clientIdIssuedAt(1000L).build());
   }
 
-  private DynamicClientRequest minimalRequest(String... redirectUris) {
-    return DynamicClientRequest.builder().redirectUris(List.of(redirectUris)).build();
+  private static RegisterClientParams params(String token, DynamicClientRequest request) {
+    return RegisterClientParams.builder().tenant(TENANT).issuer("https://auth.example.com/t")
+        .request(request).initialAccessToken(token).build();
   }
 
-  private DynamicClientData stubbedClientData(String clientId) {
-    return DynamicClientData.builder().clientId(clientId).clientIdIssuedAt(1000L)
-        .redirectUris(List.of()).grantTypes(List.of()).responseTypes(List.of()).build();
-  }
-
-  @Test
-  @DisplayName("disabled policy throws DynamicClientException")
-  void test_disabled_policy() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("disabled");
-    RegisterClientParams params =
-        RegisterClientParams.builder().tenant("tenant").issuer("https://auth.example.com")
-            .request(minimalRequest("https://app.example.com")).build();
-    DynamicClientException ex =
-        Assertions.assertThrows(DynamicClientException.class, () -> usecase.register(params));
-    Assertions.assertEquals("registration_not_allowed", ex.getErrorCode());
-  }
-
-  @Test
-  @DisplayName("token-required policy without token throws DynamicClientException")
-  void test_token_required_no_token() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("token-required");
-    RegisterClientParams params =
-        RegisterClientParams.builder().tenant("tenant").issuer("https://auth.example.com")
-            .request(minimalRequest("https://app.example.com")).initialAccessToken(null).build();
-    DynamicClientException ex =
-        Assertions.assertThrows(DynamicClientException.class, () -> usecase.register(params));
-    Assertions.assertEquals("invalid_initial_access_token", ex.getErrorCode());
+  private static DynamicClientRequest web() {
+    return DynamicClientRequest.builder().redirectUris(List.of("https://app.example.com/cb"))
+        .build();
   }
 
   @Test
-  @DisplayName("token-required policy with blank token throws DynamicClientException")
-  void test_token_required_blank_token() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("token_required");
-    RegisterClientParams params =
-        RegisterClientParams.builder().tenant("tenant").issuer("https://auth.example.com")
-            .request(minimalRequest("https://app.example.com")).initialAccessToken("   ").build();
-    DynamicClientException ex =
-        Assertions.assertThrows(DynamicClientException.class, () -> usecase.register(params));
-    Assertions.assertEquals("invalid_initial_access_token", ex.getErrorCode());
+  @DisplayName("A tenant without DCR rejects the registration")
+  void disabled_tenant() {
+    Mockito.when(gateway.readRegistrationRules(TENANT)).thenReturn(DcrRegistrationRules.disabled());
+    DynamicClientException ex = Assertions.assertThrows(DynamicClientException.class,
+        () -> usecase.register(params("valid", web())));
+    Assertions.assertEquals(403, ex.getStatus());
   }
 
   @Test
-  @DisplayName("token-required policy with valid token registers successfully")
-  void test_token_required_with_valid_token() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("token-required");
-    Mockito.when(gateway.create(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(stubbedClientData("generated-client-id"));
-    RegisterClientParams params = RegisterClientParams.builder().tenant("tenant")
-        .issuer("https://auth.example.com").request(minimalRequest("https://app.example.com"))
-        .initialAccessToken("valid-token").build();
-    RegisterClientResult result = usecase.register(params);
-    Assertions.assertNotNull(result.getClientId());
+  @DisplayName("Missing, unknown, expired or exhausted initial access token: invalid_token")
+  void initial_access_token_required() {
+    for (String token : new String[] {null, " ", "unknown"}) {
+      DynamicClientException ex = Assertions.assertThrows(DynamicClientException.class,
+          () -> usecase.register(params(token, web())));
+      Assertions.assertEquals("invalid_token", ex.getErrorCode());
+      Assertions.assertEquals(401, ex.getStatus());
+    }
+    Mockito.verify(gateway, Mockito.never()).create(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  @DisplayName("Invalid metadata does not spend a use of the token")
+  void invalid_metadata_spends_nothing() {
+    DynamicClientRequest bad =
+        DynamicClientRequest.builder().redirectUris(List.of("https://app.example.com/*")).build();
+    Assertions.assertThrows(DynamicClientException.class,
+        () -> usecase.register(params("valid", bad)));
+    Mockito.verify(tokens, Mockito.never()).consume(Mockito.any());
+  }
+
+  @Test
+  @DisplayName("A token exhausted by a concurrent registration does not create the client")
+  void exhausted_meanwhile() {
+    Mockito.when(tokens.consume("iat-1")).thenReturn(false);
+    Assertions.assertThrows(DynamicClientException.class,
+        () -> usecase.register(params("valid", web())));
+    Mockito.verify(gateway, Mockito.never()).create(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  @DisplayName("A confidential client gets a secret and a registration access token")
+  void confidential_registration() {
+    RegisterClientResult result = usecase.register(params("valid", web()));
     Assertions.assertNotNull(result.getClientSecret());
     Assertions.assertNotNull(result.getRegistrationAccessToken());
+    Assertions.assertEquals("https://auth.example.com/t/connect/" + result.getClientId(),
+        result.getRegistrationClientUri());
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Optional<String>> secret = ArgumentCaptor.forClass(Optional.class);
+    Mockito.verify(gateway).create(Mockito.eq(TENANT), Mockito.eq(result.getClientId()),
+        secret.capture(), Mockito.eq(result.getRegistrationAccessToken()), Mockito.any());
+    Assertions.assertEquals(Optional.of(result.getClientSecret()), secret.getValue());
   }
 
   @Test
-  @DisplayName("open policy registers without token")
-  void test_open_policy() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("open");
-    Mockito.when(gateway.create(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(stubbedClientData("new-client"));
-    RegisterClientParams params =
-        RegisterClientParams.builder().tenant("tenant").issuer("https://auth.example.com")
-            .request(minimalRequest("https://app.example.com/callback")).build();
-    RegisterClientResult result = usecase.register(params);
-    Assertions.assertEquals("new-client", result.getClientId());
-    Assertions.assertEquals(0L, result.getClientSecretExpiresAt());
-    Assertions.assertTrue(
-        result.getRegistrationClientUri().startsWith("https://auth.example.com/register/"));
+  @DisplayName("A public client (none) gets no secret")
+  void public_registration() {
+    DynamicClientRequest spa =
+        DynamicClientRequest.builder().redirectUris(List.of("https://app.example.com/cb"))
+            .tokenEndpointAuthMethod("none").build();
+    RegisterClientResult result = usecase.register(params("valid", spa));
+    Assertions.assertNull(result.getClientSecret());
   }
 
   @Test
-  @DisplayName("javascript redirect URI throws DynamicClientException")
-  void test_javascript_redirect_uri_forbidden() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("open");
-    RegisterClientParams params = RegisterClientParams.builder().tenant("tenant")
-        .issuer("https://auth.example.com").request(minimalRequest("javascript:alert(1)")).build();
-    DynamicClientException ex =
-        Assertions.assertThrows(DynamicClientException.class, () -> usecase.register(params));
-    Assertions.assertEquals("invalid_redirect_uri", ex.getErrorCode());
-  }
-
-  @Test
-  @DisplayName("data redirect URI throws DynamicClientException")
-  void test_data_redirect_uri_forbidden() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("open");
-    RegisterClientParams params =
-        RegisterClientParams.builder().tenant("tenant").issuer("https://auth.example.com")
-            .request(minimalRequest("data:text/html,<h1>x</h1>")).build();
-    DynamicClientException ex =
-        Assertions.assertThrows(DynamicClientException.class, () -> usecase.register(params));
-    Assertions.assertEquals("invalid_redirect_uri", ex.getErrorCode());
-  }
-
-  @Test
-  @DisplayName("generated credentials are 64 hex characters (32 bytes)")
-  void test_generated_credentials_length() {
-    Mockito.when(gateway.readRegistrationPolicy("tenant")).thenReturn("open");
-    Mockito.when(gateway.create(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(stubbedClientData("cid"));
-    RegisterClientParams params =
-        RegisterClientParams.builder().tenant("tenant").issuer("https://auth.example.com")
-            .request(minimalRequest("https://app.example.com/cb")).build();
-    RegisterClientResult result = usecase.register(params);
-    Assertions.assertEquals(64, result.getClientSecret().length());
-    Assertions.assertEquals(64, result.getRegistrationAccessToken().length());
+  @DisplayName("The grants of the initial access token prevail over the tenant ones")
+  void token_grants_prevail() {
+    Mockito.when(tokens.findUsable(TENANT, "m2m")).thenReturn(Optional
+        .of(new DcrInitialAccessToken("iat-2", Optional.of(List.of("client_credentials")))));
+    Mockito.when(tokens.consume("iat-2")).thenReturn(true);
+    DynamicClientRequest m2m =
+        DynamicClientRequest.builder().grantTypes(List.of("client_credentials")).build();
+    Assertions.assertDoesNotThrow(() -> usecase.register(params("m2m", m2m)));
+    Assertions.assertThrows(DynamicClientException.class,
+        () -> usecase.register(params("valid", m2m)));
   }
 }

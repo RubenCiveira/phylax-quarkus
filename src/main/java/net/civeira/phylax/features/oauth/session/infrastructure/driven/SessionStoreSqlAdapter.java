@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.session.domain.PublicSessionId;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 
@@ -65,6 +66,11 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
           if (executeQuery.next()) {
             String authJson = executeQuery.getString(3);
             AuthenticationData auth = mapper.readValue(authJson, AuthenticationData.class);
+            if (auth.getSid() == null) {
+              // Session created before the public sid existed: it gets one now, for good.
+              auth.setSid(PublicSessionId.random());
+              storeAuthData(connection, state, auth);
+            }
             AuthenticationMode originalMode = auth.getMode();
             auth.setMode(AuthenticationMode.SESSION);
             return Optional.of(SessionInfo.builder().clientId(executeQuery.getString(1))
@@ -98,6 +104,9 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(
             "INSERT INTO _oauth_session (session, expiration, client_id, issuer, auth_data, csid, user_uid) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+      if (validationData.getSid() == null) {
+        validationData.setSid(PublicSessionId.random());
+      }
       stat.setString(1, state);
       stat.setTimestamp(2, new Timestamp(System.currentTimeMillis() + 360000000));
       stat.setString(3, clientDetails.getClientId());
@@ -108,6 +117,16 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
       stat.execute();
     } catch (SQLException | JsonProcessingException ex) {
       throw new IllegalStateException(ex);
+    }
+  }
+
+  private void storeAuthData(Connection connection, String state, AuthenticationData auth)
+      throws SQLException, JsonProcessingException {
+    try (PreparedStatement update =
+        connection.prepareStatement("UPDATE _oauth_session SET auth_data = ? WHERE session = ?")) {
+      update.setString(1, mapper.writeValueAsString(auth));
+      update.setString(2, state);
+      update.execute();
     }
   }
 

@@ -42,18 +42,6 @@ public interface TokenSigner {
   JwkSet keysAsJwks(String tenant);
 
   /**
-   * Signs a JWT using a keypass strategy.
-   *
-   * Uses private key id as key id in the JWT. Returns the signed token string.
-   *
-   * @param tenant tenant identifier
-   * @param data JWT builder
-   * @param expiration token expiration instant
-   * @return signed JWT token
-   */
-  String signKeypass(String tenant, Builder data, Instant expiration);
-
-  /**
    * Verifies a token and returns its payload claims.
    *
    * Returns an empty map when verification fails. Used by internal services to validate tokens.
@@ -65,13 +53,35 @@ public interface TokenSigner {
   Map<String, Object> verifyTokenPayload(String tenant, String token);
 
   /**
-   * Verifies a token and returns its keypass identifier.
+   * Verifies the signature of a token, without checking its issuer, and returns its key id.
    *
-   * Returns an empty string when verification fails. Used for keypass token validation.
+   * The key id is always the public identifier of the signing key published in the JWKS (task 0.7).
+   * Returns an empty string when verification fails.
    *
    * @param tenant tenant identifier
    * @param token token string
    * @return keypass id
    */
   String verifiedKeypass(String tenant, String token);
+
+  /**
+   * Verifies a token of the tenant as {@link #verifyTokenPayload}, but also when it has expired:
+   * for hints such as {@code id_token_hint}, which identify a past authentication (task 2.7).
+   *
+   * @param tenant tenant identifier
+   * @param token token string
+   * @return payload claims, empty when the signature or issuer is wrong
+   */
+  default Map<String, Object> verifyTokenPayloadAcceptingExpired(String tenant, String token) {
+    return verifyTokenPayload(tenant, token);
+  }
+
+  /**
+   * Generates the signing keys needed for the coming rotations, outside any request (task 2.6).
+   *
+   * Does nothing for signers without stored keys.
+   */
+  default void rotateKeys() {
+    // No stored keys to rotate.
+  }
 }

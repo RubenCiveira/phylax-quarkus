@@ -35,6 +35,7 @@ public class OAuthCleanupScheduler {
     deleteOnce("DELETE FROM _oauth_par_request WHERE expires_at < ?");
     deleteOnce("DELETE FROM _oauth_webauthn_challenge WHERE expires_at < ?");
     deleteOnce("DELETE FROM _oauth_delegated_state WHERE expires_at < ?");
+    deleteOnce("DELETE FROM _oauth_replay_jti WHERE expires_at < ?");
   }
 
   @Scheduled(cron = "${oauth.cleanup.audit-log.cron:0 0 4 * * ?}",

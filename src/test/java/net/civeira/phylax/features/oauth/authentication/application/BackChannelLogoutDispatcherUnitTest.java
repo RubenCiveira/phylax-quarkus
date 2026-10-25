@@ -1,0 +1,60 @@
+package net.civeira.phylax.features.oauth.authentication.application;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
+
+/**
+ * Back-channel logout only reaches clients the tenant sees (task 0.5).
+ */
+class BackChannelLogoutDispatcherUnitTest {
+
+  private static TrustedClient client(String code, String tenantUid) {
+    TrustedClient client = Mockito.mock(TrustedClient.class);
+    Mockito.when(client.getCode()).thenReturn(code);
+    Mockito.when(client.getTenantUid()).thenReturn(Optional.ofNullable(tenantUid));
+    return client;
+  }
+
+  @Test
+  @DisplayName("Clients of tenant A and global ones are notified, never those of tenant B")
+  void notifies_only_visible_clients() {
+    TenantQueryRepositoryGateway tenants = Mockito.mock(TenantQueryRepositoryGateway.class);
+    Tenant tenantA = Mockito.mock(Tenant.class);
+    Mockito.when(tenantA.getUid()).thenReturn("uid-a");
+    Mockito.when(tenants.find(Mockito.any())).thenReturn(Optional.of(tenantA));
+    TrustedClientQueryRepositoryGateway clients =
+        Mockito.mock(TrustedClientQueryRepositoryGateway.class);
+    List<TrustedClient> all =
+        List.of(client("of-a", "uid-a"), client("of-b", "uid-b"), client("global", null));
+    Mockito.when(clients.list(Mockito.any())).thenReturn(all);
+
+    BackChannelLogoutDispatcher dispatcher =
+        new BackChannelLogoutDispatcher(clients, tenants, Mockito.mock(TokenSigner.class));
+
+    Assertions.assertEquals(List.of("of-a", "global"),
+        dispatcher.recipients("tenant-a").stream().map(TrustedClient::getCode).toList());
+  }
+
+  @Test
+  @DisplayName("An unknown tenant notifies nobody")
+  void unknown_tenant_notifies_nobody() {
+    TenantQueryRepositoryGateway tenants = Mockito.mock(TenantQueryRepositoryGateway.class);
+    Mockito.when(tenants.find(Mockito.any())).thenReturn(Optional.empty());
+    BackChannelLogoutDispatcher dispatcher =
+        new BackChannelLogoutDispatcher(Mockito.mock(TrustedClientQueryRepositoryGateway.class),
+            tenants, Mockito.mock(TokenSigner.class));
+
+    Assertions.assertTrue(dispatcher.recipients("ghost").isEmpty());
+  }
+}

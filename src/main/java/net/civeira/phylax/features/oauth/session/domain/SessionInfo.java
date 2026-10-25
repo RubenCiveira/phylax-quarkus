@@ -49,6 +49,13 @@ public class SessionInfo {
   private final AuthenticationData validationData;
 
   /**
+   * Public session id ({@code sid}) of ID, refresh and logout tokens; never the cookie value.
+   */
+  public String getSid() {
+    return validationData != null ? validationData.getSid() : null;
+  }
+
+  /**
    * ACR level for this session: 2 if MFA was used, 1 for password-only.
    */
   public int getAcr() {

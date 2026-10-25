@@ -1,0 +1,22 @@
+package net.civeira.phylax.features.oauth.client.domain.gateway;
+
+import java.util.Map;
+import java.util.Optional;
+
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+
+/**
+ * Verifies the signature of a JWT with the keys a client registered (inline JWKS or
+ * {@code jwks_uri}), task 3.3.
+ */
+public interface ClientJwtSignatureGateway {
+
+  /**
+   * Verifies a JWT signed by the client.
+   *
+   * @param client client whose keys are used
+   * @param jwt compact JWT
+   * @return its claims when the signature and algorithm are valid, empty otherwise
+   */
+  Optional<Map<String, Object>> verify(ClientDetails client, String jwt);
+}

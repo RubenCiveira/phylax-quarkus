@@ -1,0 +1,118 @@
+package net.civeira.phylax.features.oauth.client.infrastructure.driven;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+
+/**
+ * Turns a {@link TrustedClient} into the policy of the OAuth flows (tasks 0.4 and 0.5).
+ *
+ * <p>
+ * Tenant rule: a client with {@code tenant = null} is global and visible from every tenant; a
+ * client of the tenant wins over a global one with the same code; a client of another tenant is
+ * never returned.
+ *
+ * <p>
+ * Registered configuration, with safe defaults when it is missing: grants from
+ * {@code grantTypesJson} ({@link ClientDetails#DEFAULT_GRANTS}, never password), response types
+ * from {@code responseTypesJson} ({@link ClientDetails#DEFAULT_RESPONSE_TYPES}), user scopes from
+ * {@code allowAllScopes} (any, or the standard OIDC ones) and M2M scopes from
+ * {@code allowedScopesM2m}.
+ */
+public final class TrustedClientPolicy {
+
+  private static final ObjectMapper JSON = new ObjectMapper();
+  private static final TypeReference<List<String>> LIST_TYPE = new TypeReference<>() {};
+
+  private TrustedClientPolicy() {}
+
+  /**
+   * Chooses the client a tenant sees among those sharing a code.
+   *
+   * @param candidates clients with the requested code
+   * @param tenantUid uid of the tenant of the request
+   * @return the tenant's own client, else the global one, else empty
+   */
+  public static Optional<TrustedClient> select(List<TrustedClient> candidates, String tenantUid) {
+    Optional<TrustedClient> own = candidates.stream()
+        .filter(c -> c.getTenantUid().filter(tenantUid::equals).isPresent()).findFirst();
+    return own.or(() -> candidates.stream().filter(c -> c.getTenantUid().isEmpty()).findFirst());
+  }
+
+  /**
+   * Whether a tenant may see a client: its own or a global one.
+   *
+   * @param client client
+   * @param tenantUid uid of the tenant
+   * @return true when visible
+   */
+  public static boolean visibleFrom(TrustedClient client, String tenantUid) {
+    return client.getTenantUid().map(tenantUid::equals).orElse(true);
+  }
+
+  /**
+   * Policy shared by every way of loading the client; the caller sets how it authenticated.
+   *
+   * @param app stored client
+   * @param postLogoutRedirectUris registered post-logout redirect URIs
+   * @return builder with the registered policy
+   */
+  static ClientDetails.ClientDetailsBuilder details(TrustedClient app,
+      List<String> postLogoutRedirectUris) {
+    List<String> grants =
+        parseList(app.getGrantTypesJson().orElse(null)).orElse(ClientDetails.DEFAULT_GRANTS);
+    List<String> responseTypes = parseList(app.getResponseTypesJson().orElse(null))
+        .orElse(ClientDetails.DEFAULT_RESPONSE_TYPES);
+    List<String> userScopes =
+        Boolean.TRUE.equals(app.isAllowAllScopes()) ? List.of("*") : ClientDetails.OIDC_SCOPES;
+    return ClientDetails.builder().clientId(app.getCode()).allowedGrants(grants)
+        .allowedResponseTypes(responseTypes).allowedScopes(userScopes)
+        .allowedScopesM2m(parseList(app.getAllowedScopesM2m().orElse(null)).orElse(List.of()))
+        .tokenEndpointAuthMethod(
+            ClientAuthMethod.from(app.getTokenEndpointAuthMethod().name()).orElse(null))
+        .allowedAudiences(
+            app.getAllowedAudiences().stream().map(AllowedAudiences::getAudience).toList())
+        .postLogoutRedirectUris(postLogoutRedirectUris)
+        .requirePar(Boolean.TRUE.equals(app.isRequirePushedAuthorizationRequests()))
+        .requestObjectSigningAlg(app.getRequestObjectSigningAlg().orElse(null))
+        .jwksUri(app.getJwksUri().orElse(null)).jwksJson(app.getJwksJson().orElse(null))
+        .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
+        .backchannelLogoutSessionRequired(
+            Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()));
+  }
+
+  /**
+   * Reads a registered list: a JSON array or values separated by spaces or commas.
+   *
+   * @param raw stored value
+   * @return the values, empty when nothing is registered (blank, empty or unreadable)
+   */
+  static Optional<List<String>> parseList(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return Optional.empty();
+    }
+    List<String> values;
+    if (raw.trim().startsWith("[")) {
+      try {
+        values = JSON.readValue(raw, LIST_TYPE);
+      } catch (JsonProcessingException ex) {
+        return Optional.empty();
+      }
+    } else {
+      values = Arrays.asList(raw.split("[,\\s]+"));
+    }
+    List<String> clean = values == null ? List.of()
+        : values.stream().filter(v -> v != null && !v.isBlank()).map(String::trim).distinct()
+            .toList();
+    return clean.isEmpty() ? Optional.empty() : Optional.of(clean);
+  }
+}

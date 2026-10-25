@@ -107,7 +107,7 @@ This separation allows swapping the access implementation without touching the O
 | Token issuance and grants | [`AuthenticationController`](../../src/main/java/net/civeira/phylax/features/oauth/authentication/infrastructure/driver/rest/AuthenticationController.java) |
 | How credentials are validated | [`UserLoginUsecase`](../../src/main/java/net/civeira/phylax/features/access/oauth/application/usecase/UserLoginUsecase.java) |
 | How an OAuth client is loaded | [`VerifyTrustedClientUsecase`](../../src/main/java/net/civeira/phylax/features/access/oauth/application/usecase/VerifyTrustedClientUsecase.java) |
-| Port contracts | [`user/domain/gateway/`](../../src/main/java/net/civeira/phylax/features/oauth/user/domain/gateway/) and [`client/domain/gateway/`](../../src/main/java/net/civeira/phylax/features/oauth/client/domain/gateway/) |
+| Port contracts | [`user/domain/gateway/`](../../src/main/java/net/civeira/phylax/features/oauth/user/domain/gateway) and [`client/domain/gateway/`](../../src/main/java/net/civeira/phylax/features/oauth/client/domain/gateway) |
 | Flow sequence diagrams | [flows.md](flows.md) |
 | Layered architecture | [architecture.md](architecture.md) |
 | ControllerPart catalog | [controller-parts.md](controller-parts.md) |

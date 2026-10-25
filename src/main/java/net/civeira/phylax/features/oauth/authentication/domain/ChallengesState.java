@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.authentication.domain;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -27,6 +28,8 @@ import lombok.Value;
 @RegisterForReflection
 public class ChallengesState {
 
+  private static final List<String> SECOND_FACTOR = List.of("otp", "mfa");
+
   /** Username that is progressing through the authentication flow. */
   String username;
 
@@ -39,6 +42,13 @@ public class ChallengesState {
   @JsonAlias("challenges")
   @Builder.Default
   List<AuthenticationChallenge> completed = List.of();
+
+  /**
+   * Authentication methods (RFC 8176) already proven in this flow, such as {@code pwd} after the
+   * password form; the final token carries them as {@code amr} (task 1.13).
+   */
+  @Builder.Default
+  List<String> amr = List.of();
 
   /**
    * Factory for a fresh state with no completed challenges.
@@ -60,5 +70,29 @@ public class ChallengesState {
     List<AuthenticationChallenge> next = new ArrayList<>(completed);
     next.add(challenge);
     return toBuilder().completed(Collections.unmodifiableList(next)).build();
+  }
+
+  /**
+   * Returns a new state that also records the given authentication methods.
+   *
+   * @param methods methods just proven
+   * @return new immutable state with the methods added, without duplicates
+   */
+  public ChallengesState withAmr(List<String> methods) {
+    if (methods == null || methods.isEmpty()) {
+      return this;
+    }
+    LinkedHashSet<String> next = new LinkedHashSet<>(amr);
+    next.addAll(methods);
+    return toBuilder().amr(List.copyOf(next)).build();
+  }
+
+  /**
+   * Methods proven in this flow, plus the second factor when its challenge was passed.
+   *
+   * @return methods for the {@code amr} claim
+   */
+  public List<String> provenAmr() {
+    return completed.contains(AuthenticationChallenge.MFA) ? withAmr(SECOND_FACTOR).getAmr() : amr;
   }
 }

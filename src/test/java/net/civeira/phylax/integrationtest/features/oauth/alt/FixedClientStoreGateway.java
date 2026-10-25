@@ -26,8 +26,9 @@ import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtur
  * client_secret_basic, without public access;</li>
  * <li>{@link OidcTestFixtures#SPA_CLIENT_ID}: public client registered for none.</li>
  * </ul>
- * All of them register {@link OidcTestFixtures#REDIRECT_URI} (exact match) and may request tokens
- * for {@link OidcTestFixtures#API_AUDIENCE}.
+ * All of them register {@link OidcTestFixtures#REDIRECT_URI} (exact match) for login, only
+ * {@link OidcTestFixtures#POST_LOGOUT_URI} for logout, and may request tokens for
+ * {@link OidcTestFixtures#API_AUDIENCE}.
  */
 @IfBuildProfile("test")
 @Alternative
@@ -40,6 +41,10 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   private static final List<String> REDIRECTS = List.of(OidcTestFixtures.REDIRECT_URI);
   private final AtomicReference<List<String>> allowedScopes = new AtomicReference<>();
   private final AtomicReference<List<String>> allowedGrants = new AtomicReference<>();
+  private final AtomicReference<List<String>> allowedScopesM2m = new AtomicReference<>();
+  private final AtomicReference<List<String>> allowedResponseTypes = new AtomicReference<>();
+  private final AtomicReference<Boolean> requirePar = new AtomicReference<>(false);
+  private final AtomicReference<String> jwksJson = new AtomicReference<>();
 
   @PostConstruct
   void init() {
@@ -54,7 +59,30 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     allowedGrants.set(List.copyOf(grants));
   }
 
+  public void setAllowedScopesM2m(List<String> scopes) {
+    allowedScopesM2m.set(List.copyOf(scopes));
+  }
+
+  public void setAllowedResponseTypes(List<String> responseTypes) {
+    allowedResponseTypes.set(List.copyOf(responseTypes));
+  }
+
+  public void setRequirePar(boolean required) {
+    requirePar.set(required);
+  }
+
+  /**
+   * Inline JWKS the clients verify their request objects with.
+   */
+  public void setJwksJson(String jwks) {
+    jwksJson.set(jwks);
+  }
+
   public void reset() {
+    requirePar.set(false);
+    jwksJson.set(null);
+    allowedScopesM2m.set(List.of());
+    allowedResponseTypes.set(List.of("code"));
     allowedScopes.set(List.of("*"));
     allowedGrants.set(List.of("authorization_code", "password", "refresh_token", "form",
         "client_credentials", "mfa", "urn:ietf:params:oauth:grant-type:device_code"));
@@ -116,8 +144,9 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
         .allowedGrants(allowedGrants.get()).protectedWithSecret(confidential)
         .tokenEndpointAuthMethod(registered).requirePkce(isSpa(clientId))
         .allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE))
-        .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId)).postLogoutRedirectUris(
-            List.of("http://localhost/after-logout", "http://localhost/callback"))
-        .build();
+        .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId))
+        .allowedScopesM2m(allowedScopesM2m.get()).allowedResponseTypes(allowedResponseTypes.get())
+        .requirePar(requirePar.get()).jwksJson(jwksJson.get())
+        .postLogoutRedirectUris(List.of(OidcTestFixtures.POST_LOGOUT_URI)).build();
   }
 }

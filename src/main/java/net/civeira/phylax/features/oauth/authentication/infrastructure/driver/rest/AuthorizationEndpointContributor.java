@@ -4,21 +4,28 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.r
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.oidc.domain.DiscoveryContributor;
 import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
+import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
 
 /**
  * Contributes authorization, token, and core OIDC capability fields to the discovery document.
  */
 @ApplicationScoped
+@RequiredArgsConstructor
 public class AuthorizationEndpointContributor implements DiscoveryContributor {
+
+  private final AcrPolicy acrPolicy;
 
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
     builder.authorizationEndpoint(base + "auth").tokenEndpoint(base + "token")
         .grantTypesSupported(List.of("authorization_code", "refresh_token", "password", "mfa",
             "urn:ietf:params:oauth:grant-type:device_code", "client_credentials"))
-        .acrValuesSupported(List.of("0", "1", "2"))
+        .acrValuesSupported(acrPolicy.supported())
+        .uiLocalesSupported(AuthRequest.supportedUiLocales())
         .responseTypesSupported(List.of("code", "none", "id_token", "token", "id_token token",
             "code id_token", "code token", "code id_token token"))
         .subjectTypesSupported(List.of("public", "pairwise"))
@@ -27,15 +34,14 @@ public class AuthorizationEndpointContributor implements DiscoveryContributor {
         .authorizationSigningAlgValuesSupported(List.of("RS256"))
         .authorizationEncryptionAlgValuesSupported(List.of("RSA-OAEP"))
         .authorizationEncryptionEncValuesSupported(List.of("A256GCM"))
-        .requestObjectSigningAlgValuesSupported(List.of("RS256"))
-        .requestObjectEncryptionAlgValuesSupported(List.of("RSA-OAEP"))
-        .requestObjectEncryptionEncValuesSupported(List.of("A256GCM"))
+        // Signed request objects by value or inside a push; never encrypted, never by reference.
+        .requestObjectSigningAlgValuesSupported(List.of("RS256", "ES256"))
         .claimsSupported(List.of("aud", "sub", "iss", "auth_time", "name", "given_name",
             "family_name", "preferred_username", "email", "acr"))
         .claimTypesSupported(List.of("normal")).claimsParameterSupported(true)
         .scopesSupported(List.of("roles", "profile", "email", "phone"))
-        .requestParameterSupported(true).requestUriParameterSupported(true)
-        .requireRequestUriRegistration(true).codeChallengeMethodsSupported(List.of("S256"))
+        .requestParameterSupported(true).requestUriParameterSupported(false)
+        .codeChallengeMethodsSupported(List.of("S256"))
         .promptValuesSupported(List.of("none", "login", "consent", "select_account"))
         .authorizationResponseIssParameterSupported(true)
         .backchannelAuthenticationEndpoint(base + "ciba-auth")

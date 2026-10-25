@@ -1,6 +1,6 @@
 # 0.3 — Audiencias autorizadas
 
-- **Fase:** 0 · **Esfuerzo:** S · **Estado:** hecha (24-10-2026), adelantada desde [J-02](../epicas/ep-J-02-clientes-tenant-secretos.md) para cerrar [1.10](issue-1.10-tests-negativos-seguridad.md).
+- **Fase:** 0 · **Esfuerzo:** S · **Estado:** hecha (24-10-2026), adelantada desde [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) para cerrar [1.10](issue-1.10-tests-negativos-seguridad.md).
 - **Implementación:** limitar `audience` a las audiencias configuradas para cliente o tenant en authorize, password y device.
 - **Cierre:** una audiencia propia se acepta y una ajena se rechaza en los tres flujos; no se calculan roles para la ajena.
 - **Fuente:** [§5, 0.3](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).

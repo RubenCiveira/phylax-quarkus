@@ -105,8 +105,9 @@ public class DevicesAccessController {
   /**
    * Handles pushed authorization requests (PAR) — RFC 9126 §2.
    *
-   * Authenticates the client via client_secret_basic or client_secret_post, validates the
-   * authorization parameters, stores the PAR, and returns request_uri + expires_in.
+   * Authenticates the client with its registered method (public clients included), validates the
+   * authorization parameters as the authorization endpoint would, stores the PAR, and returns
+   * request_uri + expires_in.
    *
    * @param tenant tenant identifier
    * @param headers HTTP request headers (used for Basic auth)
@@ -126,6 +127,7 @@ public class DevicesAccessController {
 
     try {
       PushAuthorizationParams params = PushAuthorizationParams.builder().tenant(tenant)
+          .issuer(current.getPublicHost() + "/oauth/openid/" + tenant)
           .credentials(
               ClientCredentials.from(headers.getHeaderString(HttpHeaders.AUTHORIZATION), paramMap))
           .authParams(authParams).build();

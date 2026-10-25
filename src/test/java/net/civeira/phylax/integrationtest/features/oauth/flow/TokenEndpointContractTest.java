@@ -162,8 +162,9 @@ class TokenEndpointContractTest extends OidcIntegrationTestBase {
 
   @Test
   void clientCredentials_withSecret_isIssued() {
+    clientStoreGateway.setAllowedScopesM2m(java.util.List.of("orders:read"));
     Response response = client.token(OidcTestFixtures.TENANT, BASIC,
-        Map.of("grant_type", "client_credentials", "scope", "openid"));
+        Map.of("grant_type", "client_credentials", "scope", "orders:read"));
 
     Assertions.assertEquals(200, response.statusCode());
     Assertions.assertNull(response.jsonPath().getString("refresh_token"));

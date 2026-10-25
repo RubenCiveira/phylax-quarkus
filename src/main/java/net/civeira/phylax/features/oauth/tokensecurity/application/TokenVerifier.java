@@ -78,7 +78,11 @@ public class TokenVerifier {
               .audiences(null == aud ? List.of() : aud).jti(jti).expiresAt(expiresAt)
               .grantedScopes(null == granted ? List.of()
                   : Arrays.stream(granted.split(" ")).filter(s -> !s.isBlank()).toList())
-              .family(family(payload)).build());
+              .family(family(payload)).sid(claimAsString(payload.get("sid")))
+              .authTime(payload.get("auth_time") instanceof Number t
+                  ? Instant.ofEpochSecond(t.longValue())
+                  : null)
+              .amr(claimAsList(payload.get("amr"))).build());
     } catch (NotAllowedException nae) {
       return Optional.empty();
     }
@@ -170,6 +174,8 @@ public class TokenVerifier {
     if (value instanceof String[]) {
       return Arrays.asList((String[]) value);
     }
-    return List.of(mapper.convertValue(value, String.class));
+    // A space-separated string, as the RFC 9068 profile writes the scope (task 3.5).
+    return Arrays.stream(mapper.convertValue(value, String.class).split("\\s+"))
+        .filter(v -> !v.isBlank()).toList();
   }
 }

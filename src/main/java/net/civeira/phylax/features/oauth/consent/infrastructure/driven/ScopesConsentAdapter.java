@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
@@ -23,6 +25,7 @@ import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.Use
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
 import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
+import net.civeira.phylax.features.oauth.client.infrastructure.driven.TrustedClientPolicy;
 import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
@@ -40,6 +43,7 @@ import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopesConsentGat
 public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApprovalGateway {
 
   private final UserQueryRepositoryGateway users;
+  private final TenantQueryRepositoryGateway tenants;
   private final TrustedClientQueryRepositoryGateway clients;
   private final UserConsentedScopesQueryRepositoryGateway consentRead;
   private final UserConsentedScopesCommandRepositoryGateway consentWrite;
@@ -54,12 +58,11 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     if (scopes.isEmpty()) {
       return List.of();
     }
-    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    User user = user(tenant, username).orElse(null);
     if (user == null) {
       return toPermissions(scopes);
     }
-    TrustedClient client =
-        clients.find(TrustedClientFilter.builder().code(clientId).build()).orElse(null);
+    TrustedClient client = client(tenant, clientId).orElse(null);
     if (client == null) {
       return toPermissions(scopes);
     }
@@ -73,12 +76,11 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     if (scopes.isEmpty()) {
       return;
     }
-    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    User user = user(tenant, username).orElse(null);
     if (user == null) {
       return;
     }
-    TrustedClient client =
-        clients.find(TrustedClientFilter.builder().code(clientId).build()).orElse(null);
+    TrustedClient client = client(tenant, clientId).orElse(null);
     if (client == null) {
       return;
     }
@@ -87,7 +89,7 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
 
   @Override
   public List<ClientConsentSummary> listGrantedByUser(String tenant, String username) {
-    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    User user = user(tenant, username).orElse(null);
     if (user == null) {
       return List.of();
     }
@@ -115,7 +117,7 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
 
   @Override
   public void revokeClientConsent(String tenant, String username, String clientUid) {
-    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    User user = user(tenant, username).orElse(null);
     if (user == null) {
       return;
     }
@@ -128,7 +130,7 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
 
   @Override
   public void revokeScopeConsent(String tenant, String username, String clientUid, String scope) {
-    User user = users.find(UserFilter.builder().name(username).build()).orElse(null);
+    User user = user(tenant, username).orElse(null);
     if (user == null) {
       return;
     }
@@ -158,6 +160,23 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
+
+  /**
+   * The user of the tenant: a namesake in another tenant is a different person (task 0.5).
+   */
+  private Optional<User> user(String tenant, String username) {
+    return tenants.find(TenantFilter.builder().name(tenant).build())
+        .flatMap(t -> users.find(UserFilter.builder().name(username).tenant(t).build()));
+  }
+
+  /**
+   * The client the tenant sees for a code: its own, else a global one (task 0.5).
+   */
+  private Optional<TrustedClient> client(String tenant, String clientId) {
+    return tenants.find(TenantFilter.builder().name(tenant).build())
+        .flatMap(t -> TrustedClientPolicy.select(
+            clients.list(TrustedClientFilter.builder().code(clientId).build()), t.getUid()));
+  }
 
   private Set<String> loadGrantedScopes(User user, TrustedClient client) {
     return consentRead

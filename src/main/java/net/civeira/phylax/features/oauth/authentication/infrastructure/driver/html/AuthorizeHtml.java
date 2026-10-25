@@ -3,6 +3,8 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.h
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
@@ -43,15 +46,18 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthorizationRequestPolicy;
 import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.MfaRequiredException;
 import net.civeira.phylax.features.oauth.authentication.infrastructure.event.OidcEventDispatcher;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.RedirectUriPolicy;
+import net.civeira.phylax.features.oauth.client.domain.exception.RequestObjectException;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
-import net.civeira.phylax.features.oauth.par.application.usecase.resolveparrequest.ResolveParRequestUsecase;
 import net.civeira.phylax.features.oauth.par.domain.exception.ParException;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
@@ -80,6 +86,7 @@ public class AuthorizeHtml {
   private static final String AUTH_SESSION_ID = OidcCookieManager.AUTH_SESSION_ID;
   private static final String PRE_SESSION_ID = OidcCookieManager.PRE_SESSION_ID;
   private static final String DELEGATED_BINDING = OidcCookieManager.DELEGATED_BINDING;
+  private static final String PAR_BINDING = OidcCookieManager.PAR_BINDING;
   /**
    * Cached translations indexed by locale.
    */
@@ -162,9 +169,13 @@ public class AuthorizeHtml {
    */
   private final CurrentRequest currentRequest;
   /**
-   * Resolves a PAR request_uri into stored authorization parameters.
+   * Resolves the source of the request parameters: pushed request, request object or query.
    */
-  private final ResolveParRequestUsecase resolveParRequest;
+  private final AuthorizationRequestResolver requestResolver;
+  /**
+   * Levels of assurance asked for in {@code acr_values}.
+   */
+  private final AcrPolicy acrPolicy;
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
@@ -188,56 +199,107 @@ public class AuthorizeHtml {
    */
   public Response showForm(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String session, final @Context UriInfo req,
-      @Context HttpHeaders headers) {
-    AuthRequest request;
-    try {
-      request = resolveAuthRequest(tenant, req, headers);
-    } catch (ParException ex) {
-      return parErrorResponse(ex);
-    }
-    return loadClient(request).map(loadClient -> {
-      if (!loadClient.allowsAudiences(request.getAudiences())) {
-        // Foreign resource server: rejected before any login, so no roles are computed for it.
-        return responseBuilder.errorRedirect(request, "invalid_target");
+      @Context HttpHeaders headers, @CookieParam(PAR_BINDING) String parBinding) {
+    return resolved(tenant, req, headers, parBinding,
+        request -> showResolved(tenant, session, headers, request));
+  }
+
+  private Response showResolved(String tenant, String session, HttpHeaders headers,
+      AuthRequest request) {
+    return withClient(tenant, headers, request, session, (client, sessionInfo) -> sessionInfo
+        .map(si -> doPaintVerifySession(si, client, request, session)).orElseGet(() -> {
+          StepInput input = StepInput.builder().request(request).clientDetails(client)
+              .challenges(Optional.empty()).formParams(new MultivaluedHashMap<>()).build();
+          return router.paintFallback(input, null);
+        }));
+  }
+
+  /**
+   * Part common to showing and processing the login: client and request policy, hints, prompt and
+   * level of assurance, before the step that renders or processes the form.
+   *
+   * <ul>
+   * <li>An {@code id_token_hint} must be an ID token of this tenant for the client (expired ones
+   * are accepted); otherwise {@code invalid_request}. If it names another user, the current session
+   * is not reused (task 2.7).</li>
+   * <li>{@code prompt=login} and {@code select_account} ignore the session; {@code prompt=none}
+   * never shows anything: {@code login_required} without a session, {@code interaction_required}
+   * when a higher level is needed.</li>
+   * <li>A session below the level asked for in {@code acr_values} goes through step-up (task
+   * 3.10).</li>
+   * </ul>
+   */
+  private Response withClient(String tenant, HttpHeaders headers, AuthRequest request,
+      String session, BiFunction<ClientDetails, Optional<SessionInfo>, Response> next) {
+    return loadClient(request).map(client -> {
+      Optional<Response> rejected = rejectRequest(request, client);
+      if (rejected.isPresent()) {
+        return rejected.get();
       }
+      Optional<String> hinted = Optional.empty();
+      if (request.getIdTokenHint().isPresent()) {
+        hinted = idTokenHintSubject(tenant, request.getIdTokenHint().get(), client);
+        if (hinted.isEmpty()) {
+          return responseBuilder.errorRedirect(request, "invalid_request");
+        }
+      }
+      Optional<String> expectedUser = hinted;
       String prompt = request.getPrompt().orElse("");
-
-      // prompt=login / select_account: ignore existing session, force re-auth
       Optional<SessionInfo> sessionInfo = FORCE_REAUTH_PROMPTS.contains(prompt) ? Optional.empty()
-          : resolveSession(session, tenant, request);
-
-      // prompt=none: must not render any UI
+          : resolveSession(session, tenant, request).filter(
+              si -> expectedUser.map(si.getValidationData().getUsername()::equals).orElse(true));
+      boolean stepUp = sessionInfo.map(si -> belowRequestedLevel(si, request)).orElse(false);
       if ("none".equals(prompt)) {
         if (sessionInfo.isEmpty()) {
           return responseBuilder.errorRedirect(request, "login_required");
         }
-        int requiredAcr = request.getMinRequiredAcr();
-        if (sessionInfo.get().getAcr() < requiredAcr) {
+        if (stepUp) {
           return responseBuilder.errorRedirect(request, "interaction_required");
         }
-        return doNoneRedirect(sessionInfo.get(), loadClient, request, session);
+        return doNoneRedirect(sessionInfo.get(), client, request, session);
       }
-
-      // ACR step-up: session exists but ACR is insufficient
-      if (sessionInfo.isPresent() && sessionInfo.get().getAcr() < request.getMinRequiredAcr()) {
-        return doStepUp(sessionInfo.get(), loadClient, request);
+      if (stepUp) {
+        return doStepUp(sessionInfo.get(), client, request);
       }
-
-      return sessionInfo.map(si -> doPaintVerifySession(si, loadClient, request, session))
-          .orElseGet(() -> {
-            StepInput input = StepInput.builder().request(request).clientDetails(loadClient)
-                .challenges(Optional.empty()).formParams(new MultivaluedHashMap<>()).build();
-            return router.paintFallback(input, null);
-          });
+      return next.apply(client, sessionInfo);
     }).orElseGet(() -> clientNotAllowedResponse(tenant, headers));
+  }
+
+  /**
+   * Subject of a valid {@code id_token_hint}: signed by this tenant, an ID token (it carries no
+   * scope, unlike access and refresh tokens) and issued to the client.
+   */
+  private Optional<String> idTokenHintSubject(String tenant, String hint, ClientDetails client) {
+    Map<String, Object> claims = tokenSigner.verifyTokenPayloadAcceptingExpired(tenant, hint);
+    Object aud = claims.get("aud");
+    boolean forClient = client.getClientId().equals(aud)
+        || aud instanceof List<?> list && list.contains(client.getClientId());
+    if (claims.isEmpty() || claims.containsKey("scope") || !forClient
+        || !(claims.get("sub") instanceof String sub)) {
+      log.warn("Rejected id_token_hint for client {} in tenant {}", client.getClientId(), tenant);
+      return Optional.empty();
+    }
+    return Optional.of(sub);
+  }
+
+  /**
+   * Whether the request asks for a second factor that the session did not prove.
+   */
+  private boolean belowRequestedLevel(SessionInfo session, AuthRequest request) {
+    if (!acrPolicy.requiresMultiFactor(request.getAcrValues().orElse(null))) {
+      return false;
+    }
+    boolean multi = session.isWithMfa()
+        || acrPolicy.level(session.getValidationData().getAmr()) == AcrPolicy.Level.MULTI_FACTOR;
+    return !multi;
   }
 
   @GET
   @Path("oauth/openid/{tenant}/authorize")
   public Response showAuthorizeForm(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String session, final @Context UriInfo req,
-      @Context HttpHeaders headers) {
-    return showForm(tenant, session, req, headers);
+      @Context HttpHeaders headers, @CookieParam(PAR_BINDING) String parBinding) {
+    return showForm(tenant, session, req, headers, parBinding);
   }
 
   @POST
@@ -248,43 +310,19 @@ public class AuthorizeHtml {
   public Response processForm(final @PathParam(TENANT) String tenant, final @Context UriInfo req,
       @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap,
       @CookieParam(AUTH_SESSION_ID) String session, @CookieParam(PRE_SESSION_ID) String cookie,
-      @CookieParam(DELEGATED_BINDING) String delegatedBinding) {
-    AuthRequest request;
-    try {
-      request = resolveAuthRequest(tenant, req, headers);
-    } catch (ParException ex) {
-      return parErrorResponse(ex);
-    }
-    String prompt = request.getPrompt().orElse("");
+      @CookieParam(DELEGATED_BINDING) String delegatedBinding,
+      @CookieParam(PAR_BINDING) String parBinding) {
+    return resolved(tenant, req, headers, parBinding, request -> processResolved(tenant, headers,
+        paramMap, session, cookie, delegatedBinding, request));
+  }
 
-    return loadClient(request).map(loadClient -> {
-      if (!loadClient.allowsAudiences(request.getAudiences())) {
-        return responseBuilder.errorRedirect(request, "invalid_target");
-      }
-      // prompt=login / select_account: ignore existing session, force re-auth
-      Optional<SessionInfo> sessionInfo = FORCE_REAUTH_PROMPTS.contains(prompt) ? Optional.empty()
-          : resolveSession(session, tenant, request);
-
-      // prompt=none with valid session: auto-redirect without UI
-      if ("none".equals(prompt)) {
-        if (sessionInfo.isEmpty()) {
-          return responseBuilder.errorRedirect(request, "login_required");
-        }
-        int requiredAcr = request.getMinRequiredAcr();
-        if (sessionInfo.get().getAcr() < requiredAcr) {
-          return responseBuilder.errorRedirect(request, "interaction_required");
-        }
-        return doNoneRedirect(sessionInfo.get(), loadClient, request, session);
-      }
-
-      // ACR step-up: session exists but ACR is insufficient
-      if (sessionInfo.isPresent() && sessionInfo.get().getAcr() < request.getMinRequiredAcr()) {
-        return doStepUp(sessionInfo.get(), loadClient, request);
-      }
-
-      return sessionInfo.map(si -> doCheckSession(si, loadClient, request, paramMap, session))
-          .orElseGet(() -> doExecStep(loadClient, request, paramMap, cookie, delegatedBinding));
-    }).orElseGet(() -> clientNotAllowedResponse(tenant, headers));
+  private Response processResolved(String tenant, HttpHeaders headers,
+      MultivaluedMap<String, String> paramMap, String session, String cookie,
+      String delegatedBinding, AuthRequest request) {
+    return withClient(tenant, headers, request, session,
+        (client, sessionInfo) -> sessionInfo
+            .map(si -> doCheckSession(si, client, request, paramMap, session))
+            .orElseGet(() -> doExecStep(client, request, paramMap, cookie, delegatedBinding)));
   }
 
   @POST
@@ -293,8 +331,10 @@ public class AuthorizeHtml {
       final @Context UriInfo req, @Context HttpHeaders headers,
       final MultivaluedMap<String, String> paramMap, @CookieParam(AUTH_SESSION_ID) String session,
       @CookieParam(PRE_SESSION_ID) String cookie,
-      @CookieParam(DELEGATED_BINDING) String delegatedBinding) {
-    return processForm(tenant, req, headers, paramMap, session, cookie, delegatedBinding);
+      @CookieParam(DELEGATED_BINDING) String delegatedBinding,
+      @CookieParam(PAR_BINDING) String parBinding) {
+    return processForm(tenant, req, headers, paramMap, session, cookie, delegatedBinding,
+        parBinding);
   }
 
   /**
@@ -343,7 +383,8 @@ public class AuthorizeHtml {
     // 2. Extract claims from id_token_hint when present
     String clientId = clientIdParam;
     String userSub = null;
-    String sessionId = cookie;
+    // The public sid of the session, never the cookie value (tasks 1.2 and 1.14).
+    String sessionId = sessionOpt.map(SessionInfo::getSid).orElse(null);
 
     if (idTokenHint != null && !idTokenHint.isBlank()) {
       java.util.Map<String, Object> hints = tokenSigner.verifyTokenPayload(tenant, idTokenHint);
@@ -372,14 +413,14 @@ public class AuthorizeHtml {
       }
     }
 
-    // 4. Validate post_logout_redirect_uri against the client's registered allowlist
+    // 4. Validate post_logout_redirect_uri against the client's own post-logout URIs (task 2.4):
+    // exact match, never the login redirects.
     String safeRedirect = null;
     if (redirectUri != null && !redirectUri.isBlank() && clientId != null && !clientId.isBlank()) {
       final String cid = clientId;
       safeRedirect = clientRetrieve.loadPreautorized(tenant, cid)
-          .filter(c -> c.getPostLogoutRedirectUris().stream()
-              .anyMatch(allowed -> redirectMatches(allowed, redirectUri)))
-          .map(_ -> stripQuery(redirectUri)).orElse(null);
+          .filter(c -> RedirectUriPolicy.allows(c.getPostLogoutRedirectUris(), redirectUri))
+          .map(_ -> redirectUri).orElse(null);
     }
 
     // 5. Revoke all active tokens for the user
@@ -399,8 +440,10 @@ public class AuthorizeHtml {
 
     // 8. Redirect or show logout confirmation page
     if (safeRedirect != null) {
-      String location =
-          (state != null && !state.isBlank()) ? safeRedirect + "?state=" + state : safeRedirect;
+      String location = (state != null && !state.isBlank())
+          ? safeRedirect + (safeRedirect.contains("?") ? "&" : "?") + "state="
+              + URLEncoder.encode(state, StandardCharsets.UTF_8)
+          : safeRedirect;
       return Response.status(302).cookie(cleared).location(buildUrl(location)).build();
     }
 
@@ -411,21 +454,6 @@ public class AuthorizeHtml {
                 + "<p><a href=\"javascript:window.close()\">Close this window</a></p>",
             locale))
         .cookie(cleared).header("Content-Type", TEXT_HTML).build();
-  }
-
-  private static String stripQuery(String uri) {
-    int q = uri.indexOf('?');
-    return q == -1 ? uri : uri.substring(0, q);
-  }
-
-  private static boolean redirectMatches(String allowed, String redirect) {
-    if ("*".equals(allowed) || allowed.equals(redirect)) {
-      return true;
-    }
-    if (allowed.endsWith("/*")) {
-      return redirect.startsWith(allowed.substring(0, allowed.length() - 1));
-    }
-    return false;
   }
 
   @GET
@@ -492,7 +520,8 @@ public class AuthorizeHtml {
     String username = session.getValidationData().getUsername();
     // Mark PASSWORD as already completed so the step router skips to MFA
     ChallengesState stepUpState =
-        ChallengesState.empty(username).withCompleted(AuthenticationChallenge.PASSWORD);
+        ChallengesState.empty(username).withCompleted(AuthenticationChallenge.PASSWORD)
+            .withAmr(session.getValidationData().getAmr());
     NewCookie preSession = cookieManager.writePreSession(stepUpState, request.getTenant());
     StepInput input = StepInput.builder().request(request).clientDetails(client)
         .challenges(Optional.of(stepUpState)).formParams(new MultivaluedHashMap<>()).build();
@@ -583,8 +612,21 @@ public class AuthorizeHtml {
     String password = securer.decrypt(first(paramMap, "password"));
     AuthenticationResult result = authenticateUser.authenticate(request, challenges,
         first(paramMap, USERNAME), password, clientDetails);
+    // A pending challenge means the password was right: the next steps carry "pwd" (task 1.13).
     return stepOutcomeHandler.routeChallenge(result,
-        ChallengesState.empty(first(paramMap, USERNAME)), clientDetails, request, paramMap);
+        ChallengesState.empty(first(paramMap, USERNAME)).withAmr(AuthenticationMode.PASSWORD.amr()),
+        clientDetails, request, paramMap);
+  }
+
+  /**
+   * Checks the request against the client's registered policy before any login, so nothing is
+   * computed for a request the client may not make ({@link AuthorizationRequestPolicy}).
+   *
+   * @return the error redirect, empty when the request may go on
+   */
+  private Optional<Response> rejectRequest(AuthRequest request, ClientDetails client) {
+    return AuthorizationRequestPolicy.violation(request, client)
+        .map(violation -> responseBuilder.errorRedirect(request, violation.error()));
   }
 
   /**
@@ -635,22 +677,28 @@ public class AuthorizeHtml {
   }
 
   /**
-   * Resolves the AuthRequest, merging stored PAR params when request_uri is present.
-   *
-   * PAR stored params win on conflict (RFC 9126 §4). Throws ParException if the request_uri is
-   * invalid, expired, or already used.
+   * Resolves where the request comes from ({@link AuthorizationRequestResolver}) and runs the step
+   * on it; the binding cookie of a pushed request is added to whatever the step answers.
    */
-  private AuthRequest resolveAuthRequest(String tenant, UriInfo req, HttpHeaders headers) {
-    String requestUri = req.getQueryParameters().getFirst("request_uri");
-    if (requestUri == null || requestUri.isBlank()) {
-      return new AuthRequest(tenant, req, headers);
+  private Response resolved(String tenant, UriInfo req, HttpHeaders headers, String parBinding,
+      java.util.function.Function<AuthRequest, Response> step) {
+    AuthorizationRequestResolver.Resolution resolution;
+    try {
+      resolution = requestResolver.resolve(tenant, req, headers, parBinding);
+    } catch (ParException ex) {
+      return parErrorResponse(ex);
+    } catch (RequestObjectException ex) {
+      return Response.status(400)
+          .entity(Map.of("error", ex.getErrorCode(), "error_description", ex.getMessage()))
+          .type(jakarta.ws.rs.core.MediaType.APPLICATION_JSON).build();
     }
-    // Resolve PAR — throws ParException on invalid/expired/used URI
-    var parRequest = resolveParRequest.resolve(requestUri, tenant);
-    // Merge: query params as base, stored PAR params override (PAR wins on conflict)
-    MultivaluedMap<String, String> merged = new MultivaluedHashMap<>(req.getQueryParameters());
-    parRequest.getParams().forEach(merged::putSingle);
-    return new AuthRequest(tenant, merged, headers);
+    if (resolution.redirect().isPresent()) {
+      return Response.seeOther(resolution.redirect().get())
+          .cookie(resolution.cookie().stream().toArray(NewCookie[]::new)).build();
+    }
+    Response response = step.apply(resolution.request());
+    return resolution.cookie()
+        .map(binding -> Response.fromResponse(response).cookie(binding).build()).orElse(response);
   }
 
   private Response parErrorResponse(ParException ex) {

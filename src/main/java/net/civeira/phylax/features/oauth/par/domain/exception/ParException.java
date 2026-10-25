@@ -28,6 +28,17 @@ public final class ParException extends RuntimeException {
     return new ParException("invalid_request", detail, 400);
   }
 
+  /**
+   * An authorization error found while validating the pushed request (RFC 9126 §2.3).
+   *
+   * @param error OAuth error code, e.g. unauthorized_client or invalid_target
+   * @param description reason
+   * @return a 400 error
+   */
+  public static ParException of(String error, String description) {
+    return new ParException(error, description, 400);
+  }
+
   public static ParException invalidRequestUri() {
     return new ParException("invalid_request_uri",
         "The request_uri is invalid, expired, or already used", 400);

@@ -35,12 +35,13 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
  * <li>client authentication with the methods the grant accepts ({@code invalid_client}): the
  * registered one for authorization_code and refresh_token, also public for the device grant, a
  * secret for the rest;</li>
+ * <li>the grant must be registered for the client ({@code unauthorized_client}, task 0.4);</li>
  * <li>authorization_code and refresh_token run their own use cases ({@link AuthorizationCodeGrant},
- * {@link RefreshTokenGrant});</li>
- * <li>the other grants must be allowed to the client ({@code unauthorized_client}), may only ask
- * for audiences registered for it ({@code invalid_target}) and are resolved by their
- * {@link TokenGranter}; a rejected resource owner is {@code invalid_grant}, except a pending second
- * factor ({@code mfa_required}).</li>
+ * {@link RefreshTokenGrant}); client_credentials grants the client's M2M scopes
+ * ({@code invalid_scope} when none of the requested ones is allowed);</li>
+ * <li>the other grants may only ask for audiences registered for the client
+ * ({@code invalid_target}) and are resolved by their {@link TokenGranter}; a rejected resource
+ * owner is {@code invalid_grant}, except a pending second factor ({@code mfa_required}).</li>
  * </ol>
  * Every failure is an {@link OAuthTokenException}; the driver only turns it into HTTP.
  */
@@ -81,33 +82,43 @@ public class IssueTokenUsecase {
     ClientDetails client =
         clientAuthenticator.authenticate(request.tenant(), request.credentials(), policy)
             .orElseThrow(OAuthTokenException::invalidClient);
+    if (!client.allowedGrant(grant)) {
+      throw OAuthTokenException.unauthorizedClient("The client is not allowed to use " + grant);
+    }
     if (code) {
       return codeGrant.exchange(request, client);
     }
     if (refresh) {
       return refreshGrant.rotate(request, client);
     }
-    if (!client.allowedGrant(grant)) {
-      throw OAuthTokenException.unauthorizedClient("The client is not allowed to use " + grant);
-    }
     AuthRequest authRequest = withAudiences(request, client);
     AuthenticationResult result = granter.get().authenticate(authRequest, client, request.params());
     if (!result.isRight()) {
       throw rejected(result.getFail());
     }
+    if (CLIENT_CREDENTIALS.equals(grant)) {
+      return clientCredentials(request, client);
+    }
     AuthenticationData data = result.getData();
     if (data.getScopes().isEmpty()) {
       // The scope of a POST token request comes in the body: grant the allowed ones.
-      List<String> requested = TokenParams.scopes(request.param("scope"));
-      boolean wildcard = client.getAllowedScopes().contains("*");
-      data.setScopes(wildcard ? requested
-          : requested.stream().filter(client.getAllowedScopes()::contains).toList());
-    }
-    if (CLIENT_CREDENTIALS.equals(grant)) {
-      return tokenBuilder.buildClientCredentialsToken(request.tenant(), client, data.getScopes());
+      data.setScopes(client.grantableScopes(TokenParams.scopes(request.param("scope"))));
     }
     return issuer.issue(request.tenant(), client, grant, data, authRequest, Optional.empty(),
         Optional.empty(), tokenBuilder.newRefreshFamily(request.tenant(), false));
+  }
+
+  /**
+   * The client_credentials grant: the client gets its own M2M scopes (task 0.4). Without a scope it
+   * gets all of them; asking only for scopes it does not have is {@code invalid_scope}.
+   */
+  private AutorizationToken clientCredentials(TokenGrantRequest request, ClientDetails client) {
+    List<String> requested = TokenParams.scopes(request.param("scope"));
+    List<String> granted = client.m2mScopes(requested);
+    if (!requested.isEmpty() && granted.isEmpty()) {
+      throw OAuthTokenException.invalidScope("No requested scope is allowed for this client");
+    }
+    return tokenBuilder.buildClientCredentialsToken(request.tenant(), client, granted);
   }
 
   /**

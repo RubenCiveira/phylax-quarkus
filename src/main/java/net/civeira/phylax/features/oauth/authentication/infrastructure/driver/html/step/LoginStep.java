@@ -6,6 +6,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
@@ -25,6 +27,7 @@ import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedAccessExt
 import net.civeira.phylax.features.oauth.delegatelogin.domain.DelegatedProviderDescription;
 import net.civeira.phylax.features.oauth.magiclink.application.usecase.requestmagiclink.RequestMagicLinkUsecase;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
 
 /**
  * Renders the primary login form for the OIDC authorization flow.
@@ -49,6 +52,7 @@ public class LoginStep implements OidcStep {
   private final RegistrationStep registrationStep;
   private final DelegateLogin delegateLogin;
   private final RequestMagicLinkUsecase magicLink;
+  private final AcrPolicy acrPolicy;
 
   @Override
   public AuthenticationChallenge challenge() {
@@ -139,18 +143,18 @@ public class LoginStep implements OidcStep {
           " <div class=\"social-login-buttons\">\r\n" + "" + delegatedLogins + "" + "</div>");
     }
 
-    return securer.secureHtmlResponse(Response
-        .ok(decorator.getFullPage(request.getTenant(), "Login", js + "<h1>" + title + "</h1>"
-            + "<p>" + help + "</p>"
+    return securer.secureHtmlResponse(Response.ok(decorator.getFullPage(request.getTenant(),
+        "Login",
+        js + "<h1>" + title + "</h1>" + "<p>" + help + "</p>"
             + (null == error ? "" : "<p class=\"error\">" + errorMsg + "</p>")
             + "<form id=\"login\" method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + usernameLabel
             + " <input type=\"text\" id=\"username\" name=\"username\" value=\""
-            + request.getLoginHint().orElse("") + "\" /></label>" + "<label>" + passwordLabel
-            + " <input type=\"password\" id=\"type_password\" value=\"" + "\" /></label>"
-            + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\"" + "\" />"
-            + "<input class=\"primary-button action-button\" type=\"submit\" value=\"" + enter
-            + "\" />" + "</form>" + delegatedLogins + execAuto
+            + StringEscapeUtils.escapeHtml4(request.getLoginHint().orElse("")) + "\" /></label>"
+            + "<label>" + passwordLabel + " <input type=\"password\" id=\"type_password\" value=\""
+            + "\" /></label>" + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\""
+            + "\" />" + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
+            + enter + "\" />" + "</form>" + delegatedLogins + execAuto
             + (recoverStep.allowRecover(request.getTenant()) ? "<form method=\"POST\">"
                 + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />" + "<p>"
                 + recoverText + "</p></form>" : "")
@@ -160,13 +164,15 @@ public class LoginStep implements OidcStep {
                     + "<input class=\"inline\" type=\"submit\" value=\""
                     + AuthorizeHtml.i18n(locale, "login.register-label") + "\"/>" + "</p></form>"
                 : "")
+            // No sign-in link when the request asks for a second factor (task 3.10).
             + (magicLink.isEnabled(request.getTenant())
-                ? "<form method=\"POST\">"
-                    + "<input type=\"hidden\" name=\"step\" value=\"show-magic-link\" />" + "<p>"
-                    + magicLinkText + "</p></form>"
-                : ""),
-            locale))
-        .type(AuthorizeHtml.TEXT_HTML).cookie(cookieManager.clearAuthSession(request.getTenant()))
+                && !acrPolicy.requiresMultiFactor(request.getAcrValues().orElse(null))
+                    ? "<form method=\"POST\">"
+                        + "<input type=\"hidden\" name=\"step\" value=\"show-magic-link\" />"
+                        + "<p>" + magicLinkText + "</p></form>"
+                    : ""),
+        locale)).type(AuthorizeHtml.TEXT_HTML)
+        .cookie(cookieManager.clearAuthSession(request.getTenant()))
         .cookie(cookieManager.clearPreSession(request.getTenant())));
   }
 }

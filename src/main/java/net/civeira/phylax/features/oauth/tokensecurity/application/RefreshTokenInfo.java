@@ -32,4 +32,17 @@ public class RefreshTokenInfo {
    */
   @Builder.Default
   private final Optional<RefreshFamily> family = Optional.empty();
+  /**
+   * Public session id of the grant, kept in the rotated ID tokens; null without session.
+   */
+  private final String sid;
+  /**
+   * When the user authenticated, kept as {@code auth_time} of the rotated tokens.
+   */
+  private final Instant authTime;
+  /**
+   * Methods the user authenticated with, kept as {@code amr} of the rotated tokens.
+   */
+  @Builder.Default
+  private final List<String> amr = List.of();
 }

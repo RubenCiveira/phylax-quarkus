@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.OptionalInt;
+
+import org.eclipse.microprofile.config.ConfigProvider;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -31,9 +32,10 @@ import lombok.extern.jackson.Jacksonized;
  */
 @Data
 @Jacksonized
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class AuthRequest {
+  private static final int MAX_LOGIN_HINT = 256;
   /**
    * Tenant identifier for this request.
    */
@@ -102,6 +104,20 @@ public class AuthRequest {
   private final Optional<String> loginHint = Optional.empty();
   @Builder.Default
   /**
+   * ID token previously issued to the client, as a hint of the expected user (task 2.7).
+   */
+  private final Optional<String> idTokenHint = Optional.empty();
+  @Builder.Default
+  /**
+   * Preferred languages of the login pages, as requested (task 3.10).
+   */
+  private final Optional<String> uiLocales = Optional.empty();
+  /**
+   * Whether the parameters come from a pushed authorization request, never from the query.
+   */
+  private final boolean pushed;
+  @Builder.Default
+  /**
    * Maximum age (seconds) of an existing authentication. -1 means not specified.
    */
   private final int maxAge = -1;
@@ -112,38 +128,15 @@ public class AuthRequest {
   private final Optional<String> acrValues = Optional.empty();
 
   /**
-   * Creates an AuthRequest from a pre-built parameter map (used when PAR params are merged).
+   * Creates an AuthRequest from a pre-built parameter map: the stored parameters of a PAR or the
+   * claims of a request object.
    *
    * @param tenant tenant identifier
-   * @param params merged authorization parameters
+   * @param params authorization parameters
    * @param headers request headers
    */
   public AuthRequest(String tenant, MultivaluedMap<String, String> params, HttpHeaders headers) {
-    this.tenant = tenant;
-    this.prompt = Optional.ofNullable(params.getFirst("prompt"));
-    this.clientId = Optional.ofNullable(params.getFirst("client_id"));
-    this.scope = Optional.ofNullable(params.getFirst("scope"));
-    this.state = Optional.ofNullable(params.getFirst("state"));
-    this.nonce = Optional.ofNullable(params.getFirst("nonce"));
-    this.codeChallenge = Optional.ofNullable(params.getFirst("code_challenge"));
-    this.codeChallengeMethod = Optional.ofNullable(params.getFirst("code_challenge_method"));
-    this.redirect = Optional.ofNullable(params.getFirst("redirect_uri"));
-    this.locale =
-        Optional.ofNullable(headers.getAcceptableLanguages().get(0)).orElse(Locale.getDefault());
-    this.responseType = Optional.ofNullable(params.getFirst("response_type"));
-    this.loginHint = Optional.ofNullable(params.getFirst("login_hint"));
-    this.acrValues = Optional.ofNullable(params.getFirst("acr_values"));
-    String maxAgeRaw = params.getFirst("max_age");
-    this.maxAge = maxAgeRaw != null ? parseMaxAge(maxAgeRaw) : -1;
-    String aus = params.getFirst("audience");
-    List<String> explicitAud =
-        new ArrayList<>(null == aus ? List.of() : Arrays.asList(aus.split("\\,")));
-    this.clientId.ifPresent(azp -> {
-      if (!explicitAud.contains(azp)) {
-        explicitAud.add(azp);
-      }
-    });
-    this.audiences = explicitAud.stream().toList();
+    this(tenant, params, acceptLanguage(headers));
   }
 
   /**
@@ -157,8 +150,23 @@ public class AuthRequest {
    * @param headers request headers
    */
   public AuthRequest(String tenant, UriInfo req, HttpHeaders headers) {
-    MultivaluedMap<String, String> params = req.getQueryParameters();
-    String aus = params.getFirst("audience");
+    this(tenant, req.getQueryParameters(), acceptLanguage(headers));
+  }
+
+  /**
+   * Creates an AuthRequest from parameters, outside an HTTP request (pushed requests).
+   *
+   * @param tenant tenant identifier
+   * @param params authorization parameters
+   * @param fallbackLocale locale when {@code ui_locales} names no supported one
+   * @return the parsed request
+   */
+  public static AuthRequest fromParams(String tenant, MultivaluedMap<String, String> params,
+      Locale fallbackLocale) {
+    return new AuthRequest(tenant, params, fallbackLocale);
+  }
+
+  private AuthRequest(String tenant, MultivaluedMap<String, String> params, Locale fallbackLocale) {
     this.tenant = tenant;
     this.prompt = Optional.ofNullable(params.getFirst("prompt"));
     this.clientId = Optional.ofNullable(params.getFirst("client_id"));
@@ -168,13 +176,17 @@ public class AuthRequest {
     this.codeChallenge = Optional.ofNullable(params.getFirst("code_challenge"));
     this.codeChallengeMethod = Optional.ofNullable(params.getFirst("code_challenge_method"));
     this.redirect = Optional.ofNullable(params.getFirst("redirect_uri"));
-    this.locale =
-        Optional.ofNullable(headers.getAcceptableLanguages().get(0)).orElse(Locale.getDefault());
+    this.uiLocales = Optional.ofNullable(params.getFirst("ui_locales"));
+    this.locale = uiLocale(this.uiLocales.orElse(null)).orElse(fallbackLocale);
     this.responseType = Optional.ofNullable(params.getFirst("response_type"));
-    this.loginHint = Optional.ofNullable(params.getFirst("login_hint"));
+    // A login hint only pre-fills the username, and only a reasonable one (task 2.7).
+    this.loginHint = Optional.ofNullable(params.getFirst("login_hint"))
+        .filter(hint -> !hint.isBlank() && hint.length() <= MAX_LOGIN_HINT);
+    this.idTokenHint = Optional.ofNullable(params.getFirst("id_token_hint"));
     this.acrValues = Optional.ofNullable(params.getFirst("acr_values"));
     String maxAgeRaw = params.getFirst("max_age");
     this.maxAge = maxAgeRaw != null ? parseMaxAge(maxAgeRaw) : -1;
+    String aus = params.getFirst("audience");
     List<String> explicitAud =
         new ArrayList<>(null == aus ? List.of() : Arrays.asList(aus.split("\\,")));
     this.clientId.ifPresent(azp -> {
@@ -183,6 +195,50 @@ public class AuthRequest {
       }
     });
     this.audiences = explicitAud.stream().toList();
+    this.pushed = false;
+  }
+
+  /**
+   * The same request, marked as coming from a pushed authorization request (RFC 9126).
+   *
+   * @return a copy with {@code pushed = true}
+   */
+  public AuthRequest asPushed() {
+    return toBuilder().pushed(true).build();
+  }
+
+  private static Locale acceptLanguage(HttpHeaders headers) {
+    List<Locale> languages = headers.getAcceptableLanguages();
+    return languages == null || languages.isEmpty() || languages.get(0) == null
+        ? Locale.getDefault()
+        : languages.get(0);
+  }
+
+  /**
+   * First locale of {@code ui_locales} that the login pages support ({@code oauth.ui-locales},
+   * {@code en} by default), task 3.10.
+   */
+  private static Optional<Locale> uiLocale(String uiLocales) {
+    if (uiLocales == null || uiLocales.isBlank()) {
+      return Optional.empty();
+    }
+    List<String> supported = supportedUiLocales();
+    return Arrays.stream(uiLocales.trim().split("\\s+"))
+        .filter(tag -> supported.stream()
+            .anyMatch(s -> s.equalsIgnoreCase(tag)
+                || s.equalsIgnoreCase(Locale.forLanguageTag(tag).getLanguage())))
+        .map(Locale::forLanguageTag).findFirst();
+  }
+
+  /**
+   * Locales of the login pages, announced as {@code ui_locales_supported}.
+   *
+   * @return language tags
+   */
+  public static List<String> supportedUiLocales() {
+    return ConfigProvider.getConfig().getOptionalValue("oauth.ui-locales", String.class)
+        .map(v -> Arrays.stream(v.split(",")).map(String::trim).filter(t -> !t.isEmpty()).toList())
+        .orElse(List.of("en"));
   }
 
   /**
@@ -201,24 +257,7 @@ public class AuthRequest {
         + append("code_challenge_method", getCodeChallengeMethod())
         + append("redirect_uri", getRedirect()) + append("response_type", getResponseType())
         + append("login_hint", getLoginHint()) + append("acr_values", getAcrValues())
-        + (maxAge >= 0 ? "&max_age=" + maxAge : "");
-  }
-
-  /**
-   * Returns the highest numeric ACR level from acr_values, or 0 if not specified.
-   *
-   * Parses the space-separated acr_values list and returns the maximum integer value found.
-   * Non-numeric tokens are ignored.
-   */
-  public int getMinRequiredAcr() {
-    return acrValues
-        .map(vals -> Arrays.stream(vals.split("\\s+")).filter(s -> !s.isBlank()).flatMapToInt(s -> {
-          try {
-            return OptionalInt.of(Integer.parseInt(s)).stream();
-          } catch (NumberFormatException e) {
-            return OptionalInt.empty().stream();
-          }
-        }).max().orElse(0)).orElse(0);
+        + append("ui_locales", getUiLocales()) + (maxAge >= 0 ? "&max_age=" + maxAge : "");
   }
 
   private static int parseMaxAge(String raw) {

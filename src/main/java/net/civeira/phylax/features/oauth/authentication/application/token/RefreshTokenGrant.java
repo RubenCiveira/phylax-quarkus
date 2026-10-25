@@ -1,6 +1,7 @@
 package net.civeira.phylax.features.oauth.authentication.application.token;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,6 +90,10 @@ public class RefreshTokenGrant {
       throw OAuthTokenException.invalidGrant("The user can not be authenticated");
     }
     auth.getData().setScopes(scopes);
+    // The rotated tokens keep the facts of the original login, not those of this refresh.
+    auth.getData().setSid(info.getSid());
+    auth.getData().setTime(info.getAuthTime());
+    auth.getData().setAmr(new ArrayList<>(info.getAmr()));
     if (!revocationGateway.consumeJti(info.getJti(), tenant, "refresh", info.getExpiresAt())) {
       throw replay(tenant, info, family);
     }

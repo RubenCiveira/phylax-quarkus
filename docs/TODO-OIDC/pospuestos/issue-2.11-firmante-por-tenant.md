@@ -1,6 +1,6 @@
 # 2.11 — Firmante por tenant
 
-- **Fase:** 2 · **Estado:** pospuesta (24-10-2026, decidida al abordar [J-02](../epicas/ep-J-02-clientes-tenant-secretos.md)).
+- **Fase:** 2 · **Estado:** pospuesta (24-10-2026, decidida al abordar [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md)).
 - **Decisión:** todos los tenants firman con un único juego de claves global y común (`JoseTokenSigner.GLOBAL_KEY_RING`, fila `tenant = '_global'` de `_oauth_keys_storer`). El emisor sigue siendo por tenant (`<host>/oauth/openid/<tenant>`) y es lo que aísla los tenants: toda verificación interna exige el `iss` exacto del tenant de la ruta.
 - **Motivo:** que los demás microservicios validen los tokens de forma sencilla con SmallRye JWT estándar: `mp.jwt.verify.publickey.location` admite una sola ubicación fija, y con claves por tenant cada servicio necesitaría un resolver dinámico (`quarkus-oidc` con `TenantConfigResolver` o una `JWTCallerPrincipalFactory` propia). La JWKS común se publica en `/oauth/jwks`; `/oauth/openid/<tenant>/jwks` devuelve las mismas claves.
 - **Consecuencias:**

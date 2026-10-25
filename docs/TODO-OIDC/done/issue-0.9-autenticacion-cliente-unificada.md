@@ -42,10 +42,10 @@ Reglas que no dependen de la política:
   - `/device` sin secreto usaba `loadPreautorized`, que aceptaba **cualquier** cliente habilitado; ahora exige acceso público.
   - El `device_code` queda ligado al cliente que lo pidió (`DeviceAuthorizationService::exchangeDeviceCode(code, clientId)`): otro cliente recibe `invalid_grant`.
   - El grant `device_code` en `/token` admite ahora clientes públicos (antes exigía secreto, contra RFC 8628).
-  - PAR deja de guardar `client_secret`/`client_assertion` entre los parámetros de la solicitud (adelanta parte de [0.11](../issue-0.11-state-seguro-secreto-fuera-par.md)).
+  - PAR deja de guardar `client_secret`/`client_assertion` entre los parámetros de la solicitud (adelanta parte de [0.11](issue-0.11-state-seguro-secreto-fuera-par.md)).
   - Introspección y revocación responden `invalid_client` en JSON (antes 401 sin cuerpo).
 - **Decisiones:**
-  - El Basic se toma **literal**, sin decodificar `application/x-www-form-urlencoded` (RFC 6749 §2.3.1). Decodificarlo rompería a clientes existentes cuyos secretos tienen `+` o `%`; se revisará con la migración de secretos ([2.9](../issue-2.9-migracion-secretos-cifrado.md)).
+  - El Basic se toma **literal**, sin decodificar `application/x-www-form-urlencoded` (RFC 6749 §2.3.1). Decodificarlo rompería a clientes existentes cuyos secretos tienen `+` o `%`; se revisará con la migración de secretos ([2.9](issue-2.9-migracion-secretos-cifrado.md)).
   - Java conserva el modelo «método secreto registrado + `publicAllow`»: un cliente instalado con `client_secret_post` y `publicAllow` (consola) puede seguir canjeando como SPA con PKCE. PHP exige un único método registrado; la diferencia es intencionada y está acotada por PKCE.
   - Revocación sigue exigiendo cliente confidencial (PHP admite públicos): `RevokeTokenUseCase` aún no comprueba que el token pertenezca al cliente, así que abrirla a públicos debe esperar a esa comprobación ([0.15](../issue-0.15-audiencia-tenant-revocacion-bearer.md)).
 - **Pruebas:** `ClientCredentialsUnitTest` y `ClientAuthenticatorUnitTest` (métodos, mezclas, Basic mal formado, `none`, `private_key_jwt`, método registrado exacto); `TokenEndpointContractTest` y `ConfidentialCodeFlowTest` por HTTP. Device y PAR no tienen prueba HTTP: el perfil de test los excluye (sin adaptadores de persistencia en memoria).

@@ -44,9 +44,11 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationDat
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.infrastructure.driven.TrustedClientPolicy;
 import net.civeira.phylax.features.oauth.consent.application.ScopesConsentUsecase;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.infrastructure.RequiredConsentService;
+import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
 
 @Slf4j
 @ApplicationScoped
@@ -78,6 +80,8 @@ public class UserLoginService {
   // private final MfaConfigUsecase otp;
 
   private final ScopesConsentUsecase scopesConsent;
+
+  private final AcrPolicy acrPolicy;
 
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
       ClientDetails appkey, List<AuthenticationChallenge> challenges, AuthenticationMode mode) {
@@ -145,6 +149,7 @@ public class UserLoginService {
     ud.setTenant(user.getTenantUid());
     ud.setMode(mode);
     ud.setTime(Instant.now());
+    ud.setAmr(new ArrayList<>(mode.amr()));
     ud.setAudiences(request.getAudiences());
 
     List<String> forAllClient =
@@ -159,8 +164,9 @@ public class UserLoginService {
       List<String> audRoles = new ArrayList<>(forAllPlatform);
       List<String> audGroups = new ArrayList<>(forAllClient);
 
-      Optional<TrustedClient> isClient =
-          clients.find(TrustedClientFilter.builder().code(aud).build());
+      // The client the tenant sees for that code: its own, else a global one (task 0.5).
+      Optional<TrustedClient> isClient = TrustedClientPolicy
+          .select(clients.list(TrustedClientFilter.builder().code(aud).build()), tenant.getUid());
       if (isClient.isPresent()) {
         audRoles.addAll(rolesFromIdentities(userRoles.list(
             UserRoleAssignmentFilter.builder().user(user).trustedClient(isClient.get()).build()),
@@ -209,7 +215,10 @@ public class UserLoginService {
 
   private Optional<AuthenticationResult> checkMfa(AuthRequest request, User user,
       AuthenticationMode mode) {
-    if (AuthenticationMode.PASSWORD == mode && user.isUseSecondFactors()) {
+    // A second factor when the user has one, or when the request asks for it: then a user
+    // without one must enroll (task 3.10).
+    boolean asked = acrPolicy.requiresMultiFactor(request.getAcrValues().orElse(null));
+    if (AuthenticationMode.PASSWORD == mode && (user.isUseSecondFactors() || asked)) {
       if (!user.getSecondFactorSeedStored(secretStorage, user.getUid()).isPresent()) {
         return Optional
             .of(AuthenticationResult.newMfaRequired(request.getTenant(), user.getName()));

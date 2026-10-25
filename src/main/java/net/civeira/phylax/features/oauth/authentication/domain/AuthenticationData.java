@@ -58,9 +58,22 @@ public class AuthenticationData {
   private AuthenticationMode mode;
 
   /**
-   * Timestamp of authentication completion.
+   * When the user actually authenticated (OIDC {@code auth_time}). A code exchange or a refresh
+   * keeps the one of the original login (task 1.13).
    */
   private Instant time;
+
+  /**
+   * Authentication methods the user actually used (RFC 8176 values: {@code pwd}, {@code otp},
+   * {@code mfa}), carried from the login to every token of the grant (task 1.13).
+   */
+  private List<String> amr = new ArrayList<>();
+
+  /**
+   * Public identifier of the SSO session (OIDC {@code sid}): random, stable while the session lives
+   * and distinct from the session cookie (tasks 1.2 and 1.14). Null outside a session.
+   */
+  private String sid;
 
   /**
    * Adds role names for the given audience.

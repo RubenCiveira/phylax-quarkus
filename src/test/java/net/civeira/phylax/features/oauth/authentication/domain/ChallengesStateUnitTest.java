@@ -1,0 +1,24 @@
+package net.civeira.phylax.features.oauth.authentication.domain;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Authentication methods carried along the login steps (task 1.13).
+ */
+class ChallengesStateUnitTest {
+
+  @Test
+  @DisplayName("Methods proven along the flow add up, plus the second factor once passed")
+  void proven_amr() {
+    ChallengesState afterPassword = ChallengesState.empty("alice").withAmr(List.of("pwd"));
+    Assertions.assertEquals(List.of("pwd"), afterPassword.provenAmr());
+    Assertions.assertEquals(List.of("pwd", "otp", "mfa"),
+        afterPassword.withCompleted(AuthenticationChallenge.MFA).provenAmr());
+    Assertions.assertEquals(List.of(), ChallengesState.empty("alice").provenAmr());
+    Assertions.assertSame(afterPassword, afterPassword.withAmr(null));
+  }
+}

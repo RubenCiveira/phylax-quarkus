@@ -73,6 +73,10 @@ public class JoseTokenSigner implements TokenSigner {
    */
   static final String GLOBAL_KEY_RING = "_global";
   /**
+   * How long after its expiration a hint still verifies: in practice, as long as its key exists.
+   */
+  private static final long EXPIRED_HINT_LEEWAY_SECONDS = 10L * 365 * 24 * 3600;
+  /**
    * Request context for building issuer URLs.
    */
   private final CurrentRequest current;
@@ -104,7 +108,9 @@ public class JoseTokenSigner implements TokenSigner {
   /**
    * Signs a JWT using the current global key.
    *
-   * Applies expiration and key id before signing. Uses RSA algorithm based on stored key data.
+   * Applies expiration and key id before signing. Uses RSA algorithm based on stored key data. The
+   * key id is the public identifier of the key, the one published in the JWKS: the key material
+   * never leaves the server, not even in pre-session cookies (task 0.7).
    *
    * @param tenant tenant identifier
    * @param data JWT builder
@@ -129,7 +135,6 @@ public class JoseTokenSigner implements TokenSigner {
    */
   @Override
   public JwkSet keysAsJwks(String tenant) {
-    checkNewNeeded();
     List<Jks> syncCopy = new ArrayList<>();
     List<PublicKeyInformation> publicKeys = repository.listPublicKeys(GLOBAL_KEY_RING);
     for (PublicKeyInformation stream : publicKeys) {
@@ -143,23 +148,6 @@ public class JoseTokenSigner implements TokenSigner {
   }
 
   /**
-   * Signs a JWT using the private key as key id.
-   *
-   * Uses the keypass strategy for key identification. Returns the signed token string.
-   *
-   * @param tenant tenant identifier
-   * @param data JWT builder
-   * @param expiration token expiration instant
-   * @return signed JWT token
-   */
-  @Override
-  public String signKeypass(String tenant, Builder data, Instant expiration) {
-    KeyInformation currentKey = currentKey();
-    return data.withExpiresAt(expiration).withKeyId(currentKey.getPrivateKey())
-        .sign(signAlgoritm(currentKey));
-  }
-
-  /**
    * Verifies a token and returns its payload claims.
    *
    * Uses issuer validation when verifying the token. Returns an empty map when verification fails.
@@ -168,6 +156,11 @@ public class JoseTokenSigner implements TokenSigner {
    * @param token token string
    * @return map of payload claims
    */
+  @Override
+  public Map<String, Object> verifyTokenPayloadAcceptingExpired(String tenant, String token) {
+    return payload(verifyToken(tenant, token, true, true));
+  }
+
   @Override
   public Map<String, Object> verifyTokenPayload(String tenant, String token) {
     Optional<DecodedJWT> decoded = verifyToken(tenant, token, true);
@@ -206,7 +199,19 @@ public class JoseTokenSigner implements TokenSigner {
    * @param issuerValidation whether to enforce issuer validation
    * @return optional decoded JWT
    */
+  private static Map<String, Object> payload(Optional<DecodedJWT> decoded) {
+    Map<String, Object> payload = new HashMap<>();
+    decoded.ifPresent(
+        jwt -> jwt.getClaims().forEach((key, claim) -> payload.put(key, claim.as(Object.class))));
+    return payload;
+  }
+
   private Optional<DecodedJWT> verifyToken(String tenant, String token, boolean issuerValidation) {
+    return verifyToken(tenant, token, issuerValidation, false);
+  }
+
+  private Optional<DecodedJWT> verifyToken(String tenant, String token, boolean issuerValidation,
+      boolean acceptExpired) {
     String keyId = extractSignerId(token).orElse(null);
     List<PublicKeyInformation> publicKeys = repository.listPublicKeys(GLOBAL_KEY_RING);
     List<PublicKeyInformation> candidates = new ArrayList<>();
@@ -217,7 +222,7 @@ public class JoseTokenSigner implements TokenSigner {
       candidates.addAll(publicKeys);
     }
     for (PublicKeyInformation key : candidates) {
-      Optional<DecodedJWT> decode = decode(key, tenant, token, issuerValidation);
+      Optional<DecodedJWT> decode = decode(key, tenant, token, issuerValidation, acceptExpired);
       if (decode.isPresent()) {
         return decode;
       }
@@ -245,12 +250,12 @@ public class JoseTokenSigner implements TokenSigner {
   /**
    * Returns the current active key of the global key ring.
    *
-   * Ensures key rotation is up to date before retrieval. Throws when no active key exists.
+   * Never generates keys: that is the job of {@link #rotateKeys()} (task 2.6). Throws when no
+   * active key exists.
    *
    * @return key information
    */
   private KeyInformation currentKey() {
-    checkNewNeeded();
     return repository.currentKey(GLOBAL_KEY_RING)
         .orElseThrow(() -> new IllegalStateException("There is no active key"));
   }
@@ -268,14 +273,17 @@ public class JoseTokenSigner implements TokenSigner {
    * @return optional decoded JWT
    */
   private Optional<DecodedJWT> decode(PublicKeyInformation key, String tenant, String token,
-      boolean issuerValidation) {
+      boolean issuerValidation, boolean acceptExpired) {
     try {
       Algorithm algorithm = Algorithm.RSA256(readKey(key.getPublicKey()));
-      if (issuerValidation) {
-        return Optional
-            .of(JWT.require(algorithm).withIssuer(getIssuer(tenant)).build().verify(token));
+      com.auth0.jwt.interfaces.Verification verification = JWT.require(algorithm);
+      if (acceptExpired) {
+        verification = verification.acceptExpiresAt(EXPIRED_HINT_LEEWAY_SECONDS);
       }
-      return Optional.of(JWT.require(algorithm).build().verify(token));
+      if (issuerValidation) {
+        verification = verification.withIssuer(getIssuer(tenant));
+      }
+      return Optional.of(verification.build().verify(token));
     } catch (TokenExpiredException ex) {
       logError("Expired token", ex);
       throw new NotAllowedException("");
@@ -380,12 +388,15 @@ public class JoseTokenSigner implements TokenSigner {
   }
 
   /**
-   * Ensures enough future keys are generated for rotation.
+   * Ensures enough future keys are generated for rotation (task 2.6).
    *
    * Compares expected future expiration to stored keys. Generates and persists new keys when
-   * needed. Works on the global key ring.
+   * needed. Works on the global key ring. Called on startup and periodically by
+   * {@code SigningKeyRotationJob}, never while signing or publishing the JWKS, so a request never
+   * pays for an RSA key generation.
    */
-  private void checkNewNeeded() {
+  @Override
+  public void rotateKeys() {
     KeyConfig config = KeyConfig.builder().ttl(keyDuration).futures(futureKeysNumber).build();
     Instant expected = Instant.now();
     for (int i = 0; i < config.getFutures(); i++) {

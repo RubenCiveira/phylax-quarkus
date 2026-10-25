@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.auth0.jwt.JWT;
@@ -16,6 +17,9 @@ import com.auth0.jwt.JWT;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.access.tenant.domain.Tenant;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
@@ -39,12 +43,14 @@ public class BackChannelLogoutDispatcher {
   private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(5);
 
   private final TrustedClientQueryRepositoryGateway clients;
+  private final TenantQueryRepositoryGateway tenants;
   private final TokenSigner signer;
 
   private final HttpClient http = HttpClient.newBuilder().connectTimeout(HTTP_TIMEOUT).build();
 
   /**
-   * Sends a {@code logout_token} JWT to every enabled RP that has a {@code backchannel_logout_uri}.
+   * Sends a {@code logout_token} JWT to every RP of the tenant (its own clients and the global
+   * ones) that has a {@code backchannel_logout_uri}.
    *
    * @param tenant tenant identifier used to sign tokens
    * @param issuer token {@code iss} claim
@@ -56,13 +62,27 @@ public class BackChannelLogoutDispatcher {
       return;
     }
 
-    List<TrustedClient> allClients =
-        clients.list(TrustedClientFilter.builder().withBackChannelUrl(true).build());
-
-    for (TrustedClient client : allClients) {
+    for (TrustedClient client : recipients(tenant)) {
       client.getBackChannelLogoutUri().filter(uri -> !uri.isBlank()).ifPresent(
           uri -> sendLogoutToken(tenant, issuer, userSub, sessionId, client.getCode(), uri));
     }
+  }
+
+  /**
+   * Clients with a back-channel logout URI that the tenant sees: its own and the global ones, never
+   * another tenant's (task 0.5).
+   *
+   * @param tenant tenant name
+   * @return the clients to notify
+   */
+  List<TrustedClient> recipients(String tenant) {
+    Optional<String> tenantUid =
+        tenants.find(TenantFilter.builder().name(tenant).build()).map(Tenant::getUid);
+    if (tenantUid.isEmpty()) {
+      return List.of();
+    }
+    return clients.list(TrustedClientFilter.builder().withBackChannelUrl(true).build()).stream()
+        .filter(c -> c.getTenantUid().map(tenantUid.get()::equals).orElse(true)).toList();
   }
 
   private void sendLogoutToken(String tenant, String issuer, String userSub, String sessionId,

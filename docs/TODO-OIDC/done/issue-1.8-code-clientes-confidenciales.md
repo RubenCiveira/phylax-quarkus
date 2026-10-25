@@ -3,7 +3,7 @@
 - **Fase:** 1 · **Esfuerzo:** M · **Estado:** hecha (24-10-2026).
 - **Implementación:** permitir authorize/code a web apps confidenciales y exigir autenticación en canje conforme a su método registrado.
 - **Cierre:** code válido canjeado por cliente confidencial; credencial ausente/incorrecta y otro cliente rechazados.
-- **Dependencias:** [0.1](issue-0.1-canje-seguro-de-authorization-code.md), [0.9](issue-0.9-autenticacion-cliente-unificada.md) y política [1.11](../issue-1.11-politica-pkce.md).
+- **Dependencias:** [0.1](issue-0.1-canje-seguro-de-authorization-code.md), [0.9](issue-0.9-autenticacion-cliente-unificada.md) y política [1.11](issue-1.11-politica-pkce.md).
 - **Fuente:** [§5, 1.8](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).
 
 ## Qué hace (funcional)
@@ -25,5 +25,5 @@ Una aplicación web con backend (cliente confidencial, sin acceso público) pued
 
 - `ClientStoreGateway::loadPublic` pasa a `loadForAuthorization`: acepta cualquier cliente habilitado con la redirección registrada, no solo los `publicAllow`. Devuelve `protectedWithSecret = !acceso público` y `requirePkce = acceso público || requirePkce`; la autenticación real ocurre en el canje. Lo usan authorize, registro, recuperación y magic link.
 - `AuthorizationCodeGrant` emite con el cliente **autenticado en el canje**, no con el `ClientDetails` congelado en el code.
-- La política PKCE de confidenciales sigue siendo la de [0.1](issue-0.1-canje-seguro-de-authorization-code.md): sin challenge solo canjea un confidencial autenticado y sin `code_verifier`; [1.11](../issue-1.11-politica-pkce.md) decidirá si se exige PKCE también a ellos.
+- La política PKCE de confidenciales sigue siendo la de [0.1](issue-0.1-canje-seguro-de-authorization-code.md): sin challenge solo canjea un confidencial autenticado y sin `code_verifier`; [1.11](issue-1.11-politica-pkce.md) decidirá si se exige PKCE también a ellos.
 - **Pruebas:** `ConfidentialCodeFlowTest` (canje y refresh con Basic, sin credenciales sin gastar el code, `client_secret_post` no registrado, secreto erróneo, code de otro cliente, SPA pública con PKCE).

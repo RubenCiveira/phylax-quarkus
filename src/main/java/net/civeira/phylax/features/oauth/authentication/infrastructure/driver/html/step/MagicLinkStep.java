@@ -18,6 +18,7 @@ import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.ht
 import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html.StepOutcome;
 import net.civeira.phylax.features.oauth.magiclink.application.usecase.requestmagiclink.RequestMagicLinkUsecase;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class MagicLinkStep implements OidcStep {
   private final SecureHtmlBuilder securer;
   private final DecoratePageGateway decorator;
   private final RequestMagicLinkUsecase requestMagicLink;
+  private final AcrPolicy acrPolicy;
 
   @Override
   public AuthenticationChallenge challenge() {
@@ -49,7 +51,9 @@ public class MagicLinkStep implements OidcStep {
 
   @Override
   public Optional<Response> paintInitial(StepInput input, String error) {
-    if (!requestMagicLink.isEnabled(input.tenant())) {
+    if (!requestMagicLink.isEnabled(input.tenant())
+        || acrPolicy.requiresMultiFactor(input.getRequest().getAcrValues().orElse(null))) {
+      // A sign-in link is one factor: never when the request asks for a second one (task 3.10).
       return Optional.empty();
     }
     return Optional.of(paintAskForm(input, error));
@@ -65,7 +69,9 @@ public class MagicLinkStep implements OidcStep {
     if (!"send-magic-link".equals(input.step())) {
       return Optional.empty();
     }
-    if (!requestMagicLink.isEnabled(input.tenant())) {
+    if (!requestMagicLink.isEnabled(input.tenant())
+        || acrPolicy.requiresMultiFactor(input.getRequest().getAcrValues().orElse(null))) {
+      // A sign-in link is one factor: never when the request asks for a second one (task 3.10).
       return Optional.of(new StepOutcome.Render(
           paintAskForm(input, AuthorizeHtml.i18n(input.locale(), "magic-link.ask.disabled"))));
     }

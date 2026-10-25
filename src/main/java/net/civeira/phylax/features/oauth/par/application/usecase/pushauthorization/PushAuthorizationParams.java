@@ -13,6 +13,10 @@ public class PushAuthorizationParams {
 
   private final String tenant;
   /**
+   * Issuer of the tenant, the audience of a request object inside the push.
+   */
+  private final String issuer;
+  /**
    * Client credentials of the request, verified by {@code ClientAuthenticator}.
    */
   private final ClientCredentials credentials;

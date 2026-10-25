@@ -7,6 +7,10 @@ import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
 
 /**
  * Contributes the PAR endpoint and its requirement flag to the discovery document.
+ *
+ * <p>
+ * PAR is required per client ({@code require-pushed-authorization-requests}), never for the whole
+ * tenant, so the server does not announce it as mandatory (task 2.3).
  */
 @ApplicationScoped
 public class ParContributor implements DiscoveryContributor {
@@ -14,6 +18,6 @@ public class ParContributor implements DiscoveryContributor {
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
     builder.pushedAuthorizationRequestEndpoint(base + "par-request")
-        .requirePushedAuthorizationRequests(true);
+        .requirePushedAuthorizationRequests(false);
   }
 }

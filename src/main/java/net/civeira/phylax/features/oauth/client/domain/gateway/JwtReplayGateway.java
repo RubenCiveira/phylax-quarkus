@@ -1,0 +1,21 @@
+package net.civeira.phylax.features.oauth.client.domain.gateway;
+
+import java.time.Instant;
+
+/**
+ * One-time use of the JWTs a client signs (task 3.3; shared with client assertions, task 3.2).
+ */
+public interface JwtReplayGateway {
+
+  /**
+   * Records the first use of a JWT identifier.
+   *
+   * @param tenant tenant of the endpoint
+   * @param clientId client that signed the JWT
+   * @param purpose what the JWT is for ({@code request_object}, {@code client_assertion})
+   * @param jti identifier of the JWT
+   * @param expiresAt when the JWT expires, after which the record can be forgotten
+   * @return true for the first use, false for a replay
+   */
+  boolean firstUse(String tenant, String clientId, String purpose, String jti, Instant expiresAt);
+}

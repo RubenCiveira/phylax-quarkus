@@ -1,0 +1,190 @@
+package net.civeira.phylax.integrationtest.features.oauth.flow;
+
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import net.civeira.phylax.integrationtest.features.oauth.client.OidcFlowClient;
+import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
+
+/**
+ * Registered client policy over HTTP (task 0.4) and post-logout redirects of their own (task 2.4).
+ */
+@Tag("oidc-flow")
+@QuarkusTest
+class ClientPolicyFlowTest extends OidcIntegrationTestBase {
+
+  private static final String BASIC =
+      OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET);
+
+  private static void assertError(Response response, int status, String error) {
+    Assertions.assertEquals(status, response.statusCode());
+    Assertions.assertEquals(error, response.jsonPath().getString("error"));
+  }
+
+  private Response password(String scope) {
+    return client.passwordGrant(OidcTestFixtures.TENANT, OidcTestFixtures.CLIENT_ID,
+        OidcTestFixtures.CLIENT_SECRET, OidcTestFixtures.USERNAME, OidcTestFixtures.PASSWORD,
+        scope);
+  }
+
+  private static Response authorize(String responseType) {
+    return RestAssured.given().redirects().follow(false)
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("response_type", responseType).queryParam("scope", OidcTestFixtures.SCOPE)
+        .queryParam("state", OidcTestFixtures.STATE)
+        .get("/oauth/openid/" + OidcTestFixtures.TENANT + "/auth");
+  }
+
+  // ── 0.4 grants ────────────────────────────────────────────────────────────
+
+  @Test
+  void passwordGrant_notRegistered_isUnauthorizedClient() {
+    clientStoreGateway.setAllowedGrants(List.of("authorization_code", "refresh_token"));
+
+    assertError(password(OidcTestFixtures.SCOPE), 400, "unauthorized_client");
+    Assertions.assertEquals(0, loginGateway.validations(),
+        "The user is not authenticated for a grant the client may not use");
+  }
+
+  @Test
+  void refreshGrant_notRegistered_isUnauthorizedClient() {
+    String refresh = password(OidcTestFixtures.SCOPE).jsonPath().getString("refresh_token");
+    clientStoreGateway.setAllowedGrants(List.of("password"));
+
+    assertError(client.refreshToken(OidcTestFixtures.TENANT, refresh, OidcTestFixtures.CLIENT_ID,
+        OidcTestFixtures.CLIENT_SECRET), 400, "unauthorized_client");
+  }
+
+  @Test
+  void clientWithoutRefreshGrant_getsNoRefreshToken() {
+    clientStoreGateway.setAllowedGrants(List.of("password"));
+
+    Response response = password(OidcTestFixtures.SCOPE);
+
+    Assertions.assertEquals(200, response.statusCode());
+    Assertions.assertNotNull(response.jsonPath().getString("access_token"));
+    Assertions.assertFalse(response.getBody().asString().contains("refresh_token"));
+  }
+
+  // ── 0.4 scopes ────────────────────────────────────────────────────────────
+
+  @Test
+  void userScopes_notAllowed_areNotGranted() {
+    clientStoreGateway.setAllowedScopes(List.of("openid", "email"));
+
+    Response response = password("openid profile email");
+
+    Assertions.assertEquals(200, response.statusCode());
+    List<String> scopes = tokenScopes(response.jsonPath().getString("access_token"));
+    Assertions.assertEquals(List.of("openid", "email"), scopes);
+  }
+
+  @Test
+  void clientCredentials_getsItsM2mScopes() {
+    clientStoreGateway.setAllowedScopesM2m(List.of("orders:read", "orders:write"));
+
+    Response all =
+        client.token(OidcTestFixtures.TENANT, BASIC, Map.of("grant_type", "client_credentials"));
+    Assertions.assertEquals(200, all.statusCode());
+    Assertions.assertEquals(List.of("orders:read", "orders:write"),
+        tokenScopes(all.jsonPath().getString("access_token")));
+
+    Response some = client.token(OidcTestFixtures.TENANT, BASIC,
+        Map.of("grant_type", "client_credentials", "scope", "orders:read admin"));
+    Assertions.assertEquals(List.of("orders:read"),
+        tokenScopes(some.jsonPath().getString("access_token")));
+
+    assertError(client.token(OidcTestFixtures.TENANT, BASIC,
+        Map.of("grant_type", "client_credentials", "scope", "admin")), 400, "invalid_scope");
+  }
+
+  // ── 0.4 response types ────────────────────────────────────────────────────
+
+  @Test
+  void responseType_notRegistered_isUnauthorizedClient() {
+    Response response = authorize("code id_token");
+
+    Assertions.assertEquals(302, response.statusCode());
+    Assertions.assertTrue(response.getHeader("Location").contains("error=unauthorized_client"));
+  }
+
+  @Test
+  void responseType_registered_showsLogin() {
+    clientStoreGateway.setAllowedResponseTypes(List.of("code", "id_token code"));
+
+    Assertions.assertEquals(200, authorize("code").statusCode());
+    Assertions.assertEquals(200, authorize("code id_token").statusCode());
+  }
+
+  @Test
+  void responseType_missing_isInvalidRequest() {
+    Response response = RestAssured.given().redirects().follow(false)
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
+        .queryParam("state", OidcTestFixtures.STATE)
+        .get("/oauth/openid/" + OidcTestFixtures.TENANT + "/auth");
+
+    Assertions.assertEquals(302, response.statusCode());
+    Assertions.assertTrue(response.getHeader("Location").contains("error=invalid_request"));
+  }
+
+  // ── 2.4 post-logout redirects ─────────────────────────────────────────────
+
+  private String loggedIn() {
+    String cookie = client.extractAuthSessionCookie(client.submitLogin(OidcTestFixtures.TENANT,
+        OidcTestFixtures.USERNAME, OidcTestFixtures.PASSWORD, null));
+    Assertions.assertNotNull(cookie);
+    return cookie;
+  }
+
+  private static Response logout(String cookie, String uri, String state) {
+    var spec = RestAssured.given().redirects().follow(false).cookie("AUTH_SESSION_ID", cookie)
+        .queryParam("post_logout_redirect_uri", uri)
+        .queryParam("client_id", OidcTestFixtures.CLIENT_ID);
+    if (state != null) {
+      spec = spec.queryParam("state", state);
+    }
+    return spec.get("/oauth/openid/" + OidcTestFixtures.TENANT + "/logout");
+  }
+
+  @Test
+  void logout_toPostLogoutUri_redirects_withEncodedState() {
+    Response response = logout(loggedIn(), OidcTestFixtures.POST_LOGOUT_URI, "a b&c=d");
+
+    Assertions.assertEquals(302, response.statusCode());
+    Assertions.assertEquals(OidcTestFixtures.POST_LOGOUT_URI + "?state=a+b%26c%3Dd",
+        response.getHeader("Location"));
+  }
+
+  @Test
+  void logout_toLoginRedirect_isNotFollowed() {
+    Response response = logout(loggedIn(), OidcTestFixtures.REDIRECT_URI, null);
+
+    Assertions.assertEquals(200, response.statusCode(),
+        "A login redirect is not a post-logout redirect: the logout page is shown");
+    Assertions.assertNull(response.getHeader("Location"));
+  }
+
+  @Test
+  void logout_toExternalUri_isNotFollowed() {
+    Response response = logout(loggedIn(), "https://evil.example/after-logout", null);
+
+    Assertions.assertEquals(200, response.statusCode());
+    Assertions.assertNull(response.getHeader("Location"));
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<String> tokenScopes(String accessToken) {
+    Object scope =
+        tokenSigner.verifyTokenPayload(OidcTestFixtures.TENANT, accessToken).get("scope");
+    return (List<String>) scope;
+  }
+}
