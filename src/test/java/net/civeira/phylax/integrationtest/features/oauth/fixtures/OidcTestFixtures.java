@@ -14,8 +14,6 @@ public final class OidcTestFixtures {
   /** Public client registered for none. */
   public static final String SPA_CLIENT_ID = "spa-client";
   public static final String REDIRECT_URI = "http://localhost/callback";
-  /** Only post-logout redirect URI of the test clients, distinct from the login one. */
-  public static final String POST_LOGOUT_URI = "http://localhost/after-logout";
   public static final String USERNAME = "alice@example.com";
   public static final String PASSWORD = "correct-password";
   public static final String WRONG_PASSWORD = "wrong-password";
@@ -25,8 +23,7 @@ public final class OidcTestFixtures {
   public static final String REGISTER_CODE = "valid-register-code";
   public static final String REGISTER_EMAIL = "newuser@example.com";
   public static final String STATE = "test-state";
-  /** S256 challenge of the RFC 7636 example verifier. */
-  public static final String CODE_CHALLENGE = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM";
+  public static final String CODE_CHALLENGE = "test-verifier";
   public static final String CSID = "test-csid";
 
   private OidcTestFixtures() {}

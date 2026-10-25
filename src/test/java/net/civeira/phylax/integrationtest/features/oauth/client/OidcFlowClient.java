@@ -20,7 +20,7 @@ public class OidcFlowClient {
         .queryParam("response_type", "code").queryParam("scope", scope)
         .queryParam("state", OidcTestFixtures.STATE)
         .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE)
-        .queryParam("code_challenge_method", "S256").get("/oauth/openid/" + tenant + "/auth");
+        .get("/oauth/openid/" + tenant + "/auth");
   }
 
   public Response startAuthFlowWithSession(String tenant, String clientId, String redirect,
@@ -30,7 +30,6 @@ public class OidcFlowClient {
         .queryParam("response_type", "code").queryParam("scope", scope)
         .queryParam("state", OidcTestFixtures.STATE)
         .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE)
-        .queryParam("code_challenge_method", "S256")
         .cookie("AUTH_SESSION_ID", nullToEmpty(authSessionCookie))
         .get("/oauth/openid/" + tenant + "/auth");
   }
@@ -129,8 +128,7 @@ public class OidcFlowClient {
         .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
         .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
         .queryParam("response_type", "code").queryParam("state", OidcTestFixtures.STATE)
-        .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE)
-        .queryParam("code_challenge_method", "S256").queryParam("email", email)
+        .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE).queryParam("email", email)
         .queryParam("regcode", regcode).get("/oauth/openid/" + tenant + "/register");
   }
 
@@ -139,8 +137,7 @@ public class OidcFlowClient {
         .queryParam("client_id", OidcTestFixtures.CLIENT_ID)
         .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
         .queryParam("response_type", "code").queryParam("state", OidcTestFixtures.STATE)
-        .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE)
-        .queryParam("code_challenge_method", "S256").queryParam("email", email)
+        .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE).queryParam("email", email)
         .formParam("regcode", regcode).formParam("csid", OidcTestFixtures.CSID)
         .post("/oauth/openid/" + tenant + "/register");
   }
@@ -337,8 +334,8 @@ public class OidcFlowClient {
         .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
         .queryParam("response_type", "code").queryParam("state", OidcTestFixtures.STATE)
         .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE)
-        .queryParam("code_challenge_method", "S256").queryParam("username", username)
-        .queryParam("recovercode", recoverCode).get("/oauth/openid/" + tenant + "/recover");
+        .queryParam("username", username).queryParam("recovercode", recoverCode)
+        .get("/oauth/openid/" + tenant + "/recover");
   }
 
   public Response submitRecover(String tenant, String username, String recoverCode,
@@ -348,10 +345,9 @@ public class OidcFlowClient {
         .queryParam("redirect_uri", OidcTestFixtures.REDIRECT_URI)
         .queryParam("response_type", "code").queryParam("state", OidcTestFixtures.STATE)
         .queryParam("code_challenge", OidcTestFixtures.CODE_CHALLENGE)
-        .queryParam("code_challenge_method", "S256").queryParam("username", username)
-        .formParam("recovercode", recoverCode).formParam("code", recoverCode)
-        .formParam("password", newPassword).formParam("csid", OidcTestFixtures.CSID)
-        .post("/oauth/openid/" + tenant + "/recover");
+        .queryParam("username", username).formParam("recovercode", recoverCode)
+        .formParam("code", recoverCode).formParam("password", newPassword)
+        .formParam("csid", OidcTestFixtures.CSID).post("/oauth/openid/" + tenant + "/recover");
   }
 
   public Response exchangeCodeWithBadVerifier(String tenant, String code, String redirectUri,

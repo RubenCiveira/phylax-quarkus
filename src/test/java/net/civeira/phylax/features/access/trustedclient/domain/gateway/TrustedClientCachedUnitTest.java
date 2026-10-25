@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedLogoutRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientBackchannelTokenDeliveryModeOptions;
@@ -19,6 +20,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubj
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedAudiencesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedLogoutRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedScopesM2mVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AuthorizationDetailsTypesVO;
@@ -108,6 +110,8 @@ class TrustedClientCachedUnitTest {
         .sectorIdentifierUriValue(SectorIdentifierUriVO.from("one"))
         .allowedRedirectsValue(AllowedRedirectsVO
             .from(List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build())))
+        .allowedLogoutRedirectsValue(AllowedLogoutRedirectsVO.from(
+            List.of(AllowedLogoutRedirects.builder().uid("one").url("one").version(1).build())))
         .allowedAudiencesValue(AllowedAudiencesVO.from(
             List.of(AllowedAudiences.builder().uid("one").audience("one").version(1).build())))
         .grantTypesJsonValue(GrantTypesJsonVO.from("one"))

@@ -14733,6 +14733,20 @@ components:
           description: Campo con el número de version de trusted client allowed redirect para controlar bloqueos optimistas
           type: integer
           format: int32
+    AllowedLogoutRedirectsApiDto:
+      type: object
+      description: trusted-client-allowed-logout-redirect
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        url:
+          description: El url de trusted client allowed logout redirect
+          type: string
+        version:
+          description: Campo con el número de version de trusted client allowed logout redirect para controlar bloqueos optimistas
+          type: integer
+          format: int32
     AllowedAudiencesApiDto:
       type: object
       description: trusted-client-allowed-audience
@@ -14838,6 +14852,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AllowedRedirectsApiDto'
+        allowedLogoutRedirects:
+          description: El allowed logout redirects de trusted client
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedLogoutRedirectsApiDto'
         allowedAudiences:
           description: El allowed audiences de trusted client
           type: array

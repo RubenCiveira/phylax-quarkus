@@ -11,7 +11,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
-import net.civeira.phylax.features.oauth.session.domain.PublicSessionId;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 
@@ -34,9 +33,6 @@ public class FixedSessionStore implements SessionStoreGateway {
   @Override
   public void saveSession(String state, ClientDetails clientDetails, String grant,
       AuthenticationData validationData, String csid) {
-    if (validationData.getSid() == null) {
-      validationData.setSid(PublicSessionId.random());
-    }
     SessionInfo info = SessionInfo.builder().csid(csid).clientId(clientDetails.getClientId())
         .grant(grant).issuer(null).userId(validationData.getUsername()).withMfa(false)
         .validationData(validationData).build();

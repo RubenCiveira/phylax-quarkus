@@ -56,27 +56,13 @@ public class ScenarioLoginGateway implements LoginGateway {
   public AuthenticationResult validateUserData(AuthRequest request, String username,
       String password, ClientDetails client, List<AuthenticationChallenge> challenges) {
     validations.incrementAndGet();
-    return withMode(withAudiences(onValidate.get(), request), AuthenticationMode.PASSWORD);
+    return withAudiences(onValidate.get(), request);
   }
 
   @Override
   public AuthenticationResult validatePreAuthenticated(AuthRequest request, String username,
       ClientDetails client, List<AuthenticationChallenge> challenges, AuthenticationMode mode) {
-    return withMode(withAudiences(onPreAuth.get(), request), mode);
-  }
-
-  /**
-   * Like UserLoginService, the data says how this call authenticated: its mode, now, and the
-   * methods that mode proves by itself.
-   */
-  private static AuthenticationResult withMode(AuthenticationResult result,
-      AuthenticationMode mode) {
-    if (result.isRight()) {
-      result.getData().setMode(mode);
-      result.getData().setTime(Instant.now());
-      result.getData().setAmr(new java.util.ArrayList<>(mode.amr()));
-    }
-    return result;
+    return withAudiences(onPreAuth.get(), request);
   }
 
   /**

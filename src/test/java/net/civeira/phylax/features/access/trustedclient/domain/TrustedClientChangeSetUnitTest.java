@@ -34,6 +34,8 @@ class TrustedClientChangeSetUnitTest {
         .defaultAcrValues("one").defaultMaxAge(1).sectorIdentifierUri("one")
         .allowedRedirects(
             List.of(AllowedRedirects.builder().uid("one").url("one").version(1).build()))
+        .allowedLogoutRedirects(
+            List.of(AllowedLogoutRedirects.builder().uid("one").url("one").version(1).build()))
         .allowedAudiences(
             List.of(AllowedAudiences.builder().uid("one").audience("one").version(1).build()))
         .grantTypesJson("one").isResourceServer(true).requirePushedAuthorizationRequests(true)
@@ -240,6 +242,17 @@ class TrustedClientChangeSetUnitTest {
         one.getAllowedRedirects().get(), "Value must equals to the assigned value");
     one.unset("allowedRedirects");
     Assertions.assertFalse(one.getAllowedRedirects().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(
+        List.of(AllowedLogoutRedirects.builder().uid("one").url("one").version(1).build()),
+        one.getAllowedLogoutRedirects().get(), "Value must equals to the intial value");
+    one.allowedLogoutRedirects(
+        List.of(AllowedLogoutRedirects.builder().uid("two").url("two").version(2).build()));
+    Assertions.assertEquals(
+        List.of(AllowedLogoutRedirects.builder().uid("two").url("two").version(2).build()),
+        one.getAllowedLogoutRedirects().get(), "Value must equals to the assigned value");
+    one.unset("allowedLogoutRedirects");
+    Assertions.assertFalse(one.getAllowedLogoutRedirects().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         List.of(AllowedAudiences.builder().uid("one").audience("one").version(1).build()),

@@ -118,6 +118,8 @@ public class TrustedClientRbacRegister {
         .description("El sector identifier uri de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedRedirects")
         .description("El allowed redirects de trusted client").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedLogoutRedirects")
+        .description("El allowed logout redirects de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedAudiences")
         .description("El allowed audiences de trusted client").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("grantTypesJson")

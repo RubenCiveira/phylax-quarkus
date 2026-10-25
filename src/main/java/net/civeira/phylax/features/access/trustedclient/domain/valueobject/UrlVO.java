@@ -10,8 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el url de trusted client allowed redirect of
- * trustedClientAllowedRedirect.
+ * Value Object representing el url de trusted client allowed logout redirect of
+ * trustedClientAllowedLogoutRedirect.
  * <p>
  * This class ensures that the url is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.
