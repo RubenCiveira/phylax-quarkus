@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import com.auth0.jwt.JWT;
@@ -39,7 +40,6 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigne
 @Slf4j
 public class BackChannelLogoutDispatcher {
 
-  private static final String LOGOUT_TOKEN_SCOPE = "backchannel_logout";
   private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(5);
 
   private final TrustedClientQueryRepositoryGateway clients;
@@ -58,11 +58,18 @@ public class BackChannelLogoutDispatcher {
    * @param sessionId session being terminated ({@code sid} claim)
    */
   public void dispatch(String tenant, String issuer, String userSub, String sessionId) {
+    dispatch(tenant, issuer, userSub, sessionId, Set.of());
+  }
+
+  public void dispatch(String tenant, String issuer, String userSub, String sessionId,
+      Set<String> participants) {
     if (userSub == null || userSub.isBlank() || sessionId == null || sessionId.isBlank()) {
       return;
     }
 
     for (TrustedClient client : recipients(tenant)) {
+      if (!participants.contains(client.getCode()))
+        continue;
       client.getBackChannelLogoutUri().filter(uri -> !uri.isBlank()).ifPresent(
           uri -> sendLogoutToken(tenant, issuer, userSub, sessionId, client.getCode(), uri));
     }
@@ -111,13 +118,11 @@ public class BackChannelLogoutDispatcher {
       String clientId) {
     Instant expiry = Instant.now().plus(Duration.ofMinutes(2));
     return signer.sign(tenant,
-        JWT.create().withIssuer(issuer).withIssuedAt(new Date())
-            .withJWTId(UUID.randomUUID().toString()).withSubject(userSub).withAudience(clientId)
-            .withClaim("sid", sessionId)
-            .withClaim("events",
-                java.util.Map.of("http://schemas.openid.net/event/backchannel-logout",
-                    java.util.Map.of()))
-            .withArrayClaim("scope", new String[] {LOGOUT_TOKEN_SCOPE}),
+        JWT.create().withHeader(java.util.Map.of("typ", "logout+jwt")).withIssuer(issuer)
+            .withIssuedAt(new Date()).withJWTId(UUID.randomUUID().toString()).withSubject(userSub)
+            .withAudience(clientId).withClaim("sid", sessionId)
+            .withClaim("events", java.util.Map
+                .of("http://schemas.openid.net/event/backchannel-logout", java.util.Map.of())),
         expiry);
   }
 }

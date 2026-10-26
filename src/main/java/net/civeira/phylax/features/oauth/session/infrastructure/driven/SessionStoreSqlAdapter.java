@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -37,6 +39,26 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGate
 @ApplicationScoped
 @RequiredArgsConstructor
 public class SessionStoreSqlAdapter implements SessionStoreGateway {
+  @Override
+  public Set<String> participatingClients(String state) {
+    if (state == null)
+      return Set.of();
+    Set<String> ids = new HashSet<>();
+    try (Connection conn = source.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(
+            "SELECT client_id FROM _oauth_session WHERE session = ? UNION SELECT client_id FROM _oauth_session_grant WHERE session = ?")) {
+      stmt.setString(1, state);
+      stmt.setString(2, state);
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next())
+          ids.add(rs.getString(1));
+      }
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+    return ids;
+  }
+
   /**
    * Data source used for JDBC operations.
    */
@@ -178,6 +200,12 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
 
   @Override
   public void updateTokenJtis(String sessionId, String accessJti, String refreshJti) {
+    updateTokenJtis(sessionId, null, accessJti, refreshJti);
+  }
+
+  @Override
+  public void updateTokenJtis(String sessionId, String participatingClientId, String accessJti,
+      String refreshJti) {
     long now = System.currentTimeMillis();
     Timestamp issuedAt = new Timestamp(now);
     Timestamp expiresAt = new Timestamp(now + 360000000);
@@ -192,7 +220,8 @@ public class SessionStoreSqlAdapter implements SessionStoreGateway {
         load.setTimestamp(2, issuedAt);
         try (ResultSet rs = load.executeQuery()) {
           if (rs.next()) {
-            clientId = rs.getString("client_id");
+            clientId =
+                participatingClientId == null ? rs.getString("client_id") : participatingClientId;
             grantType = rs.getString("issuer");
             authData = rs.getString("auth_data");
           }

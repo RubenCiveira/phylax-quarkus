@@ -58,19 +58,28 @@ public class JwtTokenBuilder {
    */
   public IdToken buildIdToken(String tenant, String state, String nonce, ClientDetails details,
       String grantType, AuthenticationData validationData, String authorizationCode) {
+    return buildFrontChannelTokens(tenant, nonce, details, grantType, validationData,
+        authorizationCode, true, true);
+  }
+
+  public IdToken buildFrontChannelTokens(String tenant, String nonce, ClientDetails details,
+      String grantType, AuthenticationData validationData, String authorizationCode,
+      boolean includeAccessToken, boolean includeIdToken) {
     Duration expiration = claimsMapper.accessTokenTtl();
     Instant authExpires = Instant.now().plus(expiration);
 
     String sessionState = UUID.randomUUID().toString();
-    String accessToken = tokenSigner.sign(tenant,
-        claimsMapper.accessToken(tenant, details, grantType, validationData), authExpires);
+    String accessToken = includeAccessToken
+        ? tokenSigner.sign(tenant,
+            claimsMapper.accessToken(tenant, details, grantType, validationData), authExpires)
+        : null;
 
     IdToken idToken = new IdToken();
     idToken.setIss(claimsMapper.issuer(tenant));
     idToken.setTokenType(BEARER);
     idToken.setExpiresIn(expiration.getSeconds());
     idToken.setAccessToken(accessToken);
-    if (validationData.getScopes().contains(OPENID)) {
+    if (includeIdToken && validationData.getScopes().contains(OPENID)) {
       idToken.setIdToken(
           tokenSigner.sign(tenant, claimsMapper.idToken(tenant, details, validationData, nonce,
               accessToken, authorizationCode), Instant.now().plus(claimsMapper.idTokenTtl())));
@@ -173,6 +182,7 @@ public class JwtTokenBuilder {
     data.setUsername(client.getClientId());
     data.setTenant(tenant);
     data.setScopes(scopes != null ? scopes : List.of());
+    data.setAudiences(List.of(client.getClientId()));
 
     AutorizationToken token = new AutorizationToken();
     token.setGrantType("client_credentials");

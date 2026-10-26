@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
  * <p>
  * Table {@code access_trusted_client_allowed_logout_redirect}, of the
  * {@code allowed-logout-redirects} composition generated from
- * {@code docs/TODO-OIDC/cambios-modelo-J02-J05.md}. Before the migration is applied, reads fail
- * closed (no URI is registered) and writes fail rather than reporting an unregistered URI as
+ * {@code docs/TODO-OIDC/done/cambios-modelo-J02-J05.md}. Before the migration is applied, reads
+ * fail closed (no URI is registered) and writes fail rather than reporting an unregistered URI as
  * successfully registered.
  */
 @Slf4j

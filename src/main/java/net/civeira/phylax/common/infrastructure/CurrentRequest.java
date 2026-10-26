@@ -297,7 +297,10 @@ public class CurrentRequest {
     boolean rememberMe = hasClaim("typ", "remember-me");
     boolean impersonated = hasClaim("act");
     boolean secureTransport = getPublicHost().startsWith("https://");
-    String authenticationMethod = jwt.getClaim("amr");
+    Object amrClaim = jwt.getClaim("amr");
+    String authenticationMethod = amrClaim instanceof Collection<?> methods
+        ? methods.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(" "))
+        : amrClaim == null ? null : String.valueOf(amrClaim);
     String sessionId = jwt.getClaim("sid");
     ZonedDateTime authenticatedAt = resolveAuthenticatedAt();
     Duration age = Duration.between(authenticatedAt, ZonedDateTime.now());

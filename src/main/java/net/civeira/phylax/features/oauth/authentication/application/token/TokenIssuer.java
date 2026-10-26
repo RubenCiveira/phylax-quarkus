@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.oauth.authentication.application.token;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,6 +30,21 @@ public class TokenIssuer {
   private final JwtTokenBuilder tokenBuilder;
   private final SessionStoreGateway sessionStore;
 
+  public AutorizationToken issueClientCredentials(String tenant, ClientDetails client,
+      List<String> scopes) {
+    AutorizationToken token = tokenBuilder.buildClientCredentialsToken(tenant, client, scopes);
+    AuthenticationData auth = new AuthenticationData();
+    auth.setUsername(client.getClientId());
+    auth.setTenant(tenant);
+    auth.setScopes(scopes);
+    auth.setAudiences(List.of(client.getClientId()));
+    String sessionId = UUID.randomUUID().toString();
+    sessionStore.saveSession(sessionId, client, "client_credentials", auth, sessionId);
+    tokenBuilder.tokenJti(token.getAccessToken(), tenant).ifPresent(jti -> sessionStore
+        .updateTokenJtis(sessionId, client.getClientId(), jti, UUID.randomUUID().toString()));
+    return token;
+  }
+
   /**
    * Issues the tokens of a grant.
    *
@@ -55,11 +71,17 @@ public class TokenIssuer {
             : tokenBuilder.tokenJti(token.getRefreshToken(), tenant);
     if (accessJti.isPresent() && refreshJti.isPresent()) {
       if (sessionId.isPresent() && !sessionId.get().isBlank()) {
-        sessionStore.updateTokenJtis(sessionId.get(), accessJti.get(), refreshJti.get());
+        sessionStore.updateTokenJtis(sessionId.get(), client.getClientId(), accessJti.get(),
+            refreshJti.get());
       } else if (previousRefreshToken.isPresent()) {
         tokenBuilder.tokenJti(previousRefreshToken.get(), tenant)
             .ifPresent(oldRefreshJti -> sessionStore.updateTokenJtisByRefreshJti(oldRefreshJti,
                 accessJti.get(), refreshJti.get()));
+      } else {
+        String standaloneSession = UUID.randomUUID().toString();
+        sessionStore.saveSession(standaloneSession, client, grantType, auth, standaloneSession);
+        sessionStore.updateTokenJtis(standaloneSession, client.getClientId(), accessJti.get(),
+            refreshJti.get());
       }
     }
     return token;

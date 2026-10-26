@@ -57,7 +57,7 @@ public class TokenLookupSqlAdapter implements TokenLookupGateway {
   public Optional<TokenIntrospectionResult> lookupByJti(String tenantSlug, String jti) {
     try (Connection conn = source.getConnection();
         PreparedStatement stmt = conn.prepareStatement(
-            "SELECT t.jti, t.client_id as token_client_id, t.scope as token_scope, t.auth_data as token_auth_data, s.expiration, s.client_id, s.auth_data FROM _oauth_session_token t JOIN _oauth_session s ON s.session = t.session WHERE t.jti = ? AND t.revoked_at IS NULL AND t.expires_at > ? AND s.expiration > ?")) {
+            "SELECT t.jti, t.client_id as token_client_id, t.scope as token_scope, t.auth_data as token_auth_data, s.expiration, s.client_id, s.auth_data FROM _oauth_session_token t JOIN _oauth_session s ON s.session = t.session WHERE t.jti = ? AND t.revoked_at IS NULL AND s.revoked_at IS NULL AND t.expires_at > ? AND s.expiration > ?")) {
       stmt.setString(1, jti);
       stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
       stmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));

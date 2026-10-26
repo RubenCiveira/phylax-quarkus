@@ -13,6 +13,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator.Builder;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospectionResult;
@@ -119,5 +120,26 @@ class TokenIntrospectionTest extends OidcIntegrationTestBase {
     Response response = client.introspect(OidcTestFixtures.TENANT);
 
     Assertions.assertEquals(401, response.statusCode());
+  }
+
+  @Test
+  void userinfoGetAndPostRequireActiveOpenidAccessToken() {
+    Response issued = client.passwordGrant(OidcTestFixtures.TENANT, OidcTestFixtures.CLIENT_ID,
+        OidcTestFixtures.CLIENT_SECRET, OidcTestFixtures.USERNAME, OidcTestFixtures.PASSWORD,
+        OidcTestFixtures.SCOPE);
+    Assertions.assertEquals(200, issued.statusCode());
+    String token = issued.jsonPath().getString("access_token");
+    String jti = String.valueOf(decodeToken(token).get("jti"));
+    tokenLookupGateway.storeByJti(jti, TokenIntrospectionResult.builder().active(true)
+        .clientId(OidcTestFixtures.CLIENT_ID).jti(jti).build());
+    String path = "/oauth/openid/" + OidcTestFixtures.TENANT + "/userinfo";
+    Response get = RestAssured.given().auth().oauth2(token).get(path);
+    Response post = RestAssured.given().auth().oauth2(token).post(path);
+    Assertions.assertEquals(200, get.statusCode());
+    Assertions.assertEquals(get.jsonPath().getString("sub"), post.jsonPath().getString("sub"));
+    tokenLookupGateway.revoke(jti);
+    Response revoked = RestAssured.given().auth().oauth2(token).get(path);
+    Assertions.assertEquals(401, revoked.statusCode());
+    Assertions.assertTrue(revoked.getHeader("WWW-Authenticate").startsWith("Bearer"));
   }
 }

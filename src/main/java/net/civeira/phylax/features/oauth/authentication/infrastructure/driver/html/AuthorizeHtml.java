@@ -18,6 +18,7 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.CookieParam;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -56,6 +57,7 @@ import net.civeira.phylax.features.oauth.client.domain.exception.RequestObjectEx
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.par.domain.exception.ParException;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
+import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
@@ -176,6 +178,8 @@ public class AuthorizeHtml {
    * Levels of assurance asked for in {@code acr_values}.
    */
   private final AcrPolicy acrPolicy;
+  private final SessionStoreGateway sessionStore;
+  private static final String LOGOUT_CSRF = "LOGOUT_CSRF";
 
   @ServerExceptionMapper
   @Produces(TEXT_HTML)
@@ -358,16 +362,42 @@ public class AuthorizeHtml {
       @QueryParam("post_logout_redirect_uri") String redirectUri,
       @QueryParam("id_token_hint") String idTokenHint, @QueryParam("state") String state,
       @QueryParam("client_id") String clientIdParam, @Context HttpHeaders headers) {
-    return doLogout(tenant, cookie, redirectUri, idTokenHint, state, clientIdParam, headers);
+    String csrf = java.util.UUID.randomUUID().toString();
+    StringBuilder form = new StringBuilder("<h1>Sign out?</h1><form method=\"post\">");
+    for (var entry : Map
+        .of("csrf", csrf, "post_logout_redirect_uri", redirectUri == null ? "" : redirectUri,
+            "id_token_hint", idTokenHint == null ? "" : idTokenHint, "state",
+            state == null ? "" : state, "client_id", clientIdParam == null ? "" : clientIdParam)
+        .entrySet()) {
+      form.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"")
+          .append(escapeHtml(entry.getValue())).append("\">");
+    }
+    form.append("<button type=\"submit\">Sign out</button></form>");
+    NewCookie csrfCookie =
+        new NewCookie.Builder(LOGOUT_CSRF).value(csrf).path("/oauth/openid/" + tenant).secure(true)
+            .httpOnly(true).sameSite(NewCookie.SameSite.LAX).build();
+    return Response.ok(decorator.getGenericFullPage("Sign out", form.toString(), Locale.ENGLISH))
+        .type(TEXT_HTML).cookie(csrfCookie).header("Cache-Control", "no-store").build();
+  }
+
+  private static String escapeHtml(String text) {
+    return text.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">",
+        "&gt;");
   }
 
   @POST
   @Path("oauth/openid/{tenant}/logout")
   public Response logoutPost(final @PathParam(TENANT) String tenant,
       @CookieParam(AUTH_SESSION_ID) String cookie,
-      @QueryParam("post_logout_redirect_uri") String redirectUri,
-      @QueryParam("id_token_hint") String idTokenHint, @QueryParam("state") String state,
-      @QueryParam("client_id") String clientIdParam, @Context HttpHeaders headers) {
+      @FormParam("post_logout_redirect_uri") String redirectUri,
+      @FormParam("id_token_hint") String idTokenHint, @FormParam("state") String state,
+      @FormParam("client_id") String clientIdParam, @FormParam("csrf") String csrf,
+      @CookieParam(LOGOUT_CSRF) String csrfCookie, @Context HttpHeaders headers) {
+    if (csrf == null || csrfCookie == null
+        || !java.security.MessageDigest.isEqual(csrf.getBytes(StandardCharsets.UTF_8),
+            csrfCookie.getBytes(StandardCharsets.UTF_8))) {
+      return Response.status(403).build();
+    }
     return doLogout(tenant, cookie, redirectUri, idTokenHint, state, clientIdParam, headers);
   }
 
@@ -378,7 +408,10 @@ public class AuthorizeHtml {
   private Response doLogout(String tenant, String cookie, String redirectUri, String idTokenHint,
       String state, String clientIdParam, HttpHeaders headers) {
     // 1. Load session before removing it so we can read userId / clientId
-    Optional<SessionInfo> sessionOpt = sessionManager.loadSession(cookie);
+    Optional<SessionInfo> sessionOpt =
+        sessionManager.loadSession(cookie).filter(si -> belongsToTenant(si, tenant));
+    if (sessionOpt.isEmpty())
+      return Response.status(400).build();
 
     // 2. Extract claims from id_token_hint when present
     String clientId = clientIdParam;
@@ -387,9 +420,17 @@ public class AuthorizeHtml {
     String sessionId = sessionOpt.map(SessionInfo::getSid).orElse(null);
 
     if (idTokenHint != null && !idTokenHint.isBlank()) {
-      java.util.Map<String, Object> hints = tokenSigner.verifyTokenPayload(tenant, idTokenHint);
-      if (!hints.isEmpty()) {
+      java.util.Map<String, Object> hints =
+          tokenSigner.verifyTokenPayloadAcceptingExpired(tenant, idTokenHint);
+      if (hints.isEmpty() || hints.containsKey("scope") || hints.containsKey("events")
+          || !sessionOpt.get().getValidationData().getUsername().equals(hints.get("sub"))
+          || !sessionOpt.get().getSid().equals(hints.get("sid")))
+        return Response.status(400).build();
+      {
         Object aud = hints.get("aud");
+        if (clientId != null && !clientId.isBlank()
+            && !(clientId.equals(aud) || aud instanceof List<?> list && list.contains(clientId)))
+          return Response.status(400).build();
         if (aud instanceof String s && (clientId == null || clientId.isBlank())) {
           clientId = s;
         }
@@ -406,7 +447,7 @@ public class AuthorizeHtml {
     if (sessionOpt.isPresent()) {
       SessionInfo si = sessionOpt.get();
       if (userSub == null) {
-        userSub = si.getUserId();
+        userSub = si.getValidationData().getUsername();
       }
       if (clientId == null || clientId.isBlank()) {
         clientId = si.getClientId();
@@ -422,11 +463,15 @@ public class AuthorizeHtml {
           .filter(c -> RedirectUriPolicy.allows(c.getPostLogoutRedirectUris(), redirectUri))
           .map(_ -> redirectUri).orElse(null);
     }
+    if (redirectUri != null && !redirectUri.isBlank() && safeRedirect == null)
+      return Response.status(400).build();
+
+    Set<String> participants = sessionStore.participatingClients(cookie);
+    if (clientId != null && !participants.contains(clientId))
+      return Response.status(400).build();
 
     // 5. Revoke all active tokens for the user
-    if (userSub != null && !userSub.isBlank() && clientId != null && !clientId.isBlank()) {
-      tokenRevocationGateway.revokeAllForUser(userSub, clientId, tenant);
-    }
+    tokenRevocationGateway.revokeAllForSession(cookie, tenant);
 
     // 6. Remove session and clear cookie
     sessionManager.removeSession(cookie);
@@ -435,7 +480,7 @@ public class AuthorizeHtml {
     // 7. Fire back-channel logout notifications (async — must not block the response)
     if (userSub != null && !userSub.isBlank()) {
       String issuer = currentRequest.getPublicHost() + "/oauth/openid/" + tenant;
-      backChannelLogoutDispatcher.dispatch(tenant, issuer, userSub, sessionId);
+      backChannelLogoutDispatcher.dispatch(tenant, issuer, userSub, sessionId, participants);
     }
 
     // 8. Redirect or show logout confirmation page
@@ -480,23 +525,30 @@ public class AuthorizeHtml {
    */
   private Optional<SessionInfo> resolveSession(String sessionId, String tenantName,
       AuthRequest request) {
-    return sessionManager.loadSession(sessionId).filter(info -> {
-      Instant authTime = info.getValidationData().getTime();
-      if (authTime == null) {
-        return true;
-      }
-      int ttl = tenantRepo.find(TenantFilter.builder().name(tenantName).build())
-          .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
-          .map(cfg -> cfg.getSessionSsoTtlSeconds()).orElse(3600);
-      if (!authTime.plusSeconds(ttl).isAfter(Instant.now())) {
-        return false;
-      }
-      int maxAge = request.getMaxAge();
-      if (maxAge >= 0 && authTime.plusSeconds(maxAge).isBefore(Instant.now())) {
-        return false;
-      }
-      return true;
-    });
+    return sessionManager.loadSession(sessionId).filter(info -> belongsToTenant(info, tenantName))
+        .filter(info -> {
+          Instant authTime = info.getValidationData().getTime();
+          if (authTime == null) {
+            return true;
+          }
+          int ttl = tenantRepo.find(TenantFilter.builder().name(tenantName).build())
+              .flatMap(t -> tenantConfigs.find(TenantConfigFilter.builder().tenant(t).build()))
+              .map(cfg -> cfg.getSessionSsoTtlSeconds()).orElse(3600);
+          if (!authTime.plusSeconds(ttl).isAfter(Instant.now())) {
+            return false;
+          }
+          int maxAge = request.getMaxAge();
+          if (maxAge >= 0 && authTime.plusSeconds(maxAge).isBefore(Instant.now())) {
+            return false;
+          }
+          return true;
+        });
+  }
+
+  private boolean belongsToTenant(SessionInfo session, String tenant) {
+    return tenant.equals(session.getIssuer())
+        || tenantRepo.find(TenantFilter.builder().name(tenant).build())
+            .map(t -> t.getUid().equals(session.getIssuer())).orElse(false);
   }
 
   /**
@@ -625,8 +677,8 @@ public class AuthorizeHtml {
    * @return the error redirect, empty when the request may go on
    */
   private Optional<Response> rejectRequest(AuthRequest request, ClientDetails client) {
-    return AuthorizationRequestPolicy.violation(request, client)
-        .map(violation -> responseBuilder.errorRedirect(request, violation.error()));
+    return AuthorizationRequestPolicy.violation(request, client).map(violation -> responseBuilder
+        .errorRedirect(request, violation.error(), violation.description()));
   }
 
   /**

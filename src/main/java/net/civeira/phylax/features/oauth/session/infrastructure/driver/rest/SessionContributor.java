@@ -13,8 +13,8 @@ public class SessionContributor implements DiscoveryContributor {
 
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
-    builder.checkSessionIframe(base + "login-status-iframe").endSessionEndpoint(base + "logout")
-        .frontchannelLogoutSupported(false).frontchannelLogoutSessionSupported(false)
-        .backchannelLogoutSupported(true).backchannelLogoutSessionSupported(true);
+    builder.endSessionEndpoint(base + "logout").frontchannelLogoutSupported(false)
+        .frontchannelLogoutSessionSupported(false).backchannelLogoutSupported(true)
+        .backchannelLogoutSessionSupported(true);
   }
 }

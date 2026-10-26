@@ -22,6 +22,7 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.ClaimsMapper;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.IdToken;
 
@@ -46,6 +47,7 @@ public class OidcResponseBuilder {
   private final OidcCookieManager cookieManager;
   private final TenantQueryRepositoryGateway tenantRepo;
   private final TenantConfigQueryRepositoryGateway tenantConfigs;
+  private final ClaimsMapper claimsMapper;
 
   /**
    * Builds a redirect response after successful authentication.
@@ -66,6 +68,10 @@ public class OidcResponseBuilder {
       String grant, AuthRequest request, AuthenticationData validationData,
       MultivaluedMap<String, String> paramMap) {
     String type = request.getResponseType().orElse("code");
+    if (List.of(type.split(" ")).contains("id_token")
+        && request.getNonce().filter(n -> !n.isBlank()).isEmpty()) {
+      return errorRedirect(request, "invalid_request");
+    }
     if ("code".equals(type)) {
       if (clientDetails.isRequirePkce() && request.getCodeChallenge().isEmpty()) {
         return errorRedirect(request, "invalid_request");
@@ -74,6 +80,7 @@ public class OidcResponseBuilder {
         return errorRedirect(request, "invalid_request");
       }
     }
+    validationData.setAudiences(request.getAudiences());
     String uid = UUID.randomUUID().toString();
     if (existingSession.isPresent()) {
       sessionStore.updateSession(uid, existingSession.get());
@@ -81,7 +88,6 @@ public class OidcResponseBuilder {
       String csid = securer.verifyToken(first(paramMap, "csid")).orElseThrow();
       sessionStore.saveSession(uid, clientDetails, grant, validationData, csid);
     }
-    validationData.setAudiences(request.getAudiences());
     String to;
     if ("code".equals(type)) {
       String redirectUri = request.getRedirect().orElseThrow();
@@ -94,7 +100,8 @@ public class OidcResponseBuilder {
       String code = temporalStore.registerTemporalAuthCode(
           TemporalAuthCode.builder().client(clientDetails).request(request)
               .nonce(request.getNonce().orElse(null)).data(validationData).sessionId(uid).build());
-      to = redirectUri + separator + "code=" + code + stateParam(request);
+      to = redirectUri + separator + "code=" + encode(code) + stateParam(request) + "&iss="
+          + encode(claimsMapper.issuer(request.getTenant()));
     } else {
       boolean hybrid = type.contains("code");
       String authCode = null;
@@ -103,22 +110,30 @@ public class OidcResponseBuilder {
             .client(clientDetails).request(request).nonce(request.getNonce().orElse(null))
             .data(validationData).sessionId(uid).build());
       }
+      boolean withId = List.of(type.split(" ")).contains("id_token");
+      boolean withAccess = List.of(type.split(" ")).contains("token");
       IdToken buildIdToken =
-          tokenBuilder.buildIdToken(request.getTenant(), request.getState().orElse(null),
-              request.getNonce().orElse(null), clientDetails, grant, validationData, authCode);
+          tokenBuilder.buildFrontChannelTokens(request.getTenant(), request.getNonce().orElse(null),
+              clientDetails, grant, validationData, authCode, withAccess, withId);
+      if (withAccess) {
+        tokenBuilder.tokenJti(buildIdToken.getAccessToken(), request.getTenant())
+            .ifPresent(jti -> sessionStore.updateTokenJtis(uid, clientDetails.getClientId(), jti,
+                UUID.randomUUID().toString()));
+      }
       StringBuilder fragment = new StringBuilder("#");
       if (authCode != null) {
-        fragment.append("code=").append(authCode);
+        fragment.append("code=").append(encode(authCode));
       }
       fragment.append(stateParam(request));
-      fragment.append("&session_state=").append(buildIdToken.getSessionState()).append("&iss=")
+      fragment.append("&iss=")
           .append(URLEncoder.encode(buildIdToken.getIss(), StandardCharsets.UTF_8));
       if (buildIdToken.getIdToken() != null) {
         fragment.append("&id_token=").append(buildIdToken.getIdToken());
       }
-      fragment.append("&access_token=").append(buildIdToken.getAccessToken()).append("&token_type=")
-          .append(buildIdToken.getTokenType()).append("&expires_in=")
-          .append(buildIdToken.getExpiresIn());
+      if (withAccess) {
+        fragment.append("&access_token=").append(encode(buildIdToken.getAccessToken()))
+            .append("&token_type=Bearer&expires_in=").append(buildIdToken.getExpiresIn());
+      }
       to = request.getRedirect().orElseThrow() + fragment.toString().replace("#&", "#");
     }
     return securer
@@ -134,10 +149,25 @@ public class OidcResponseBuilder {
    * @return 302 redirect response with cleared AUTH_SESSION_ID cookie
    */
   public Response errorRedirect(AuthRequest request, String message) {
-    String to = request.getRedirect().orElse("") + "#error="
-        + URLEncoder.encode(message, StandardCharsets.UTF_8) + stateParam(request);
-    return securer.secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to))
-        .cookie(cookieManager.clearAuthSession(request.getTenant())));
+    return errorRedirect(request, message, null);
+  }
+
+  public Response errorRedirect(AuthRequest request, String message, String description) {
+    if (request.getRedirect().isEmpty()) {
+      return Response.status(400).entity(Map.of("error", message)).build();
+    }
+    String redirect = request.getRedirect().get();
+    boolean fragment = !"code".equals(request.getResponseType().orElse("code"));
+    String separator = fragment ? "#" : redirect.contains("?") ? "&" : "?";
+    String to = redirect + separator + "error=" + encode(message)
+        + (description == null ? "" : "&error_description=" + encode(description))
+        + stateParam(request) + "&iss=" + encode(claimsMapper.issuer(request.getTenant()));
+    return securer
+        .secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to)));
+  }
+
+  private static String encode(String value) {
+    return URLEncoder.encode(value, StandardCharsets.UTF_8);
   }
 
   /**

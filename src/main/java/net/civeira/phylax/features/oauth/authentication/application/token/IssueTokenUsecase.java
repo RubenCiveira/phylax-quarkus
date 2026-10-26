@@ -100,6 +100,7 @@ public class IssueTokenUsecase {
       return clientCredentials(request, client);
     }
     AuthenticationData data = result.getData();
+    data.setAudiences(authRequest.getAudiences());
     if (data.getScopes().isEmpty()) {
       // The scope of a POST token request comes in the body: grant the allowed ones.
       data.setScopes(client.grantableScopes(TokenParams.scopes(request.param("scope"))));
@@ -118,7 +119,8 @@ public class IssueTokenUsecase {
     if (!requested.isEmpty() && granted.isEmpty()) {
       throw OAuthTokenException.invalidScope("No requested scope is allowed for this client");
     }
-    return tokenBuilder.buildClientCredentialsToken(request.tenant(), client, granted);
+    // M2M tokens also need a revocable JTI record, independently of any browser session.
+    return issuer.issueClientCredentials(request.tenant(), client, granted);
   }
 
   /**
@@ -133,6 +135,8 @@ public class IssueTokenUsecase {
       body.stream().filter(Objects::nonNull).flatMap(value -> Arrays.stream(value.split("[,\\s]+")))
           .filter(aud -> !aud.isBlank()).forEach(audiences::add);
     }
+    if (audiences.isEmpty())
+      audiences.add(client.getClientId());
     List<String> requested = List.copyOf(audiences);
     if (!client.allowsAudiences(requested)) {
       throw OAuthTokenException.invalidTarget();

@@ -38,8 +38,8 @@ public class FixedSessionStore implements SessionStoreGateway {
       validationData.setSid(PublicSessionId.random());
     }
     SessionInfo info = SessionInfo.builder().csid(csid).clientId(clientDetails.getClientId())
-        .grant(grant).issuer(null).userId(validationData.getUsername()).withMfa(false)
-        .validationData(validationData).build();
+        .grant(grant).issuer(validationData.getTenant()).userId(validationData.getUsername())
+        .withMfa(false).validationData(validationData).build();
     sessions.put(state, info);
   }
 
@@ -76,6 +76,12 @@ public class FixedSessionStore implements SessionStoreGateway {
   @Override
   public void deleteSession(String state) {
     sessions.remove(state);
+  }
+
+  @Override
+  public java.util.Set<String> participatingClients(String state) {
+    return loadSession(state).map(si -> java.util.Set.of(si.getClientId()))
+        .orElseGet(java.util.Set::of);
   }
 
   public void clear() {

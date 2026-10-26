@@ -16,9 +16,9 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.JwtReplayGateway;
 
 /**
  * One-time JWT identifiers over {@code _oauth_replay_jti} (task 3.3), the table requested in
- * {@code docs/TODO-OIDC/cambios-modelo-J02-J05.md}. Its primary key makes the first insert win; a
- * duplicate is a replay. Until the model is regenerated the table does not exist and every use
- * fails (closed).
+ * {@code docs/TODO-OIDC/done/cambios-modelo-J02-J05.md}. Its primary key makes the first insert
+ * win; a duplicate is a replay. Until the model is regenerated the table does not exist and every
+ * use fails (closed).
  */
 @ApplicationScoped
 @RequiredArgsConstructor

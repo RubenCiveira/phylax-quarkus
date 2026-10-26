@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.oidc.domain;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -21,6 +22,7 @@ import lombok.Data;
 @Data
 @Builder
 @RegisterForReflection
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OpenIdConfiguration {
   /**
    * Issuer URL for the OIDC provider.

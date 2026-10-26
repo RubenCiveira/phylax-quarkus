@@ -3,7 +3,6 @@ package net.civeira.phylax.features.oauth.oidc.infrastructure.driver.rest;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import net.civeira.phylax.features.oauth.oidc.domain.DiscoveryContributor;
-import net.civeira.phylax.features.oauth.oidc.domain.MtlsEndpointAliases;
 import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
 
 /**
@@ -14,11 +13,6 @@ public class MtlsDiscoveryContributor implements DiscoveryContributor {
 
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
-    builder.mtlsEndpointAliases(MtlsEndpointAliases.builder().tokenEndpoint(base + "token")
-        .revocationEndpoint(base + "revocation").introspectionEndpoint(base + "introspect")
-        .deviceAuthorizationEndpoint(base + "device").registrationEndpoint(base + "registration")
-        .userinfoEndpoint(base + "userinfo")
-        .pushedAuthorizationRequestEndpoint(base + "par-request")
-        .backchannelAuthenticationEndpoint(base + "ciba-auth").build());
+    // No certificate-bound token verification or distinct mTLS routes yet.
   }
 }

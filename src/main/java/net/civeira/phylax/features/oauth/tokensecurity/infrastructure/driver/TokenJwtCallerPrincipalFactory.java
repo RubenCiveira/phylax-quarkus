@@ -25,6 +25,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.oauth.tokensecurity.application.AccessTokenPolicy;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
@@ -151,6 +152,7 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
    * Token signer used to validate keypass signatures.
    */
   private final TokenSigner tokenSigner;
+  private final AccessTokenPolicy accessTokenPolicy;
 
   /**
    * Creates the factory with the required token signer.
@@ -160,9 +162,11 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
    *
    * @param tokenSigner token signer implementation
    */
-  public TokenJwtCallerPrincipalFactory(TokenSigner tokenSigner) {
+  public TokenJwtCallerPrincipalFactory(TokenSigner tokenSigner,
+      AccessTokenPolicy accessTokenPolicy) {
     super();
     this.tokenSigner = tokenSigner;
+    this.accessTokenPolicy = accessTokenPolicy;
   }
 
   /**
@@ -181,7 +185,7 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
     if (token == null || token.isBlank()) {
       throw new ParseException("Empty token", null);
     }
-    return this.caller(token).principalLoaded();
+    return this.caller(token, authContextInfo).principalLoaded();
   }
 
   /**
@@ -193,7 +197,7 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
    * @param token raw JWT token
    * @return cacheable result
    */
-  private Cacheable caller(String token) {
+  private Cacheable caller(String token, JWTAuthContextInfo authContextInfo) {
     ParsedToken parsed;
     try {
       parsed = parseHeaderAndClaims(token);
@@ -202,6 +206,15 @@ public class TokenJwtCallerPrincipalFactory extends JWTCallerPrincipalFactory {
     }
     try {
       String tenant = resolveTenant(parsed.getClaims());
+      if (accessTokenPolicy.validateEarly(tenant, token, null).isEmpty()) {
+        return Cacheable.fail("Invalid or revoked access token");
+      }
+      if (authContextInfo != null && authContextInfo.getExpectedAudience() != null
+          && !authContextInfo.getExpectedAudience().isEmpty()
+          && authContextInfo.getExpectedAudience().stream().noneMatch(
+              audience -> accessTokenPolicy.validateEarly(tenant, token, audience).isPresent())) {
+        return Cacheable.fail("Wrong access token audience");
+      }
       String issuer = safeIssuer(parsed.getClaims());
       String tid = safeClaim(parsed.getClaims(), "tid");
       String keypass = tokenSigner.verifiedKeypass(tenant, token);

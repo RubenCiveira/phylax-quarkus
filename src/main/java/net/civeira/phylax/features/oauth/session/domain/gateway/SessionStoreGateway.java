@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.session.domain.gateway;
 
 import java.util.Optional;
+import java.util.Set;
 
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
@@ -63,6 +64,11 @@ public interface SessionStoreGateway {
    */
   void updateTokenJtis(String sessionId, String accessJti, String refreshJti);
 
+  default void updateTokenJtis(String sessionId, String clientId, String accessJti,
+      String refreshJti) {
+    updateTokenJtis(sessionId, accessJti, refreshJti);
+  }
+
   /**
    * Rotates token identifiers using the current refresh token jti.
    *
@@ -92,4 +98,9 @@ public interface SessionStoreGateway {
    * @param state session identifier
    */
   void deleteSession(String state);
+
+  /** Clients that actually participated in this browser session. */
+  default Set<String> participatingClients(String state) {
+    return Set.of();
+  }
 }

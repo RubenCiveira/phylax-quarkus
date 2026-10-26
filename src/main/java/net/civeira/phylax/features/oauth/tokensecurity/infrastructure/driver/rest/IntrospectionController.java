@@ -68,7 +68,8 @@ public class IntrospectionController {
     }
 
     String rawToken = paramMap.getFirst("token");
-    TokenIntrospectionResult result = introspectTokenUseCase.introspect(tenant, rawToken);
+    TokenIntrospectionResult result =
+        introspectTokenUseCase.introspect(tenant, rawToken, clientOpt.get().getClientId());
     return Response.ok(result).header("Cache-Control", "no-store").header("Pragma", "no-cache")
         .build();
   }

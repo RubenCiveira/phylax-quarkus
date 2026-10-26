@@ -1,0 +1,94 @@
+package net.civeira.phylax.features.oauth.tokensecurity.application;
+
+import java.util.Map;
+import java.util.Optional;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospectionResult;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenLookupGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
+
+/** Shared, uncached access-token validation for bearer consumers and introspection. */
+@ApplicationScoped
+@RequiredArgsConstructor
+public class AccessTokenPolicy {
+  private final TokenSigner signer;
+  private final TokenLookupGateway lookup;
+  private final ClaimsMapper claimsMapper;
+  private final TenantQueryRepositoryGateway tenants;
+  private final TokenRevocationGateway revocations;
+
+  public Optional<Map<String, Object>> validate(String tenant, String token, String audience) {
+    return validate(tenant, token, audience, false);
+  }
+
+  /** Authentication happens before Quarkus activates the HTTP request context. */
+  public Optional<Map<String, Object>> validateEarly(String tenant, String token, String audience) {
+    return validate(tenant, token, audience, true);
+  }
+
+  private Optional<Map<String, Object>> validate(String tenant, String token, String audience,
+      boolean early) {
+    if (tenant == null || tenant.isBlank() || token == null || token.isBlank()) {
+      return Optional.empty();
+    }
+    try {
+      Map<String, Object> claims;
+      if (early) {
+        if (signer.verifiedKeypass(tenant, token).isBlank())
+          return Optional.empty();
+        DecodedJWT jwt = JWT.decode(token);
+        if (jwt.getExpiresAt() == null
+            || !jwt.getExpiresAt().toInstant().isAfter(java.time.Instant.now())
+            || jwt.getIssuer() == null || !jwt.getIssuer().endsWith("/oauth/openid/" + tenant))
+          return Optional.empty();
+        claims = new java.util.HashMap<>();
+        jwt.getClaims().forEach((key, value) -> claims.put(key, value.as(Object.class)));
+      } else {
+        claims = signer.verifyTokenPayload(tenant, token);
+        if (!claimsMapper.issuer(tenant).equals(claims.get("iss")))
+          return Optional.empty();
+      }
+      if (claims.isEmpty() || !(claims.get("jti") instanceof String jti) || jti.isBlank()
+          || !(claims.get("client_id") instanceof String)
+          || !early && claims.get("tid") != null && !tenant.equals(claims.get("tid"))
+              && !tenants.find(TenantFilter.builder().name(tenant).build())
+                  .map(t -> t.getUid().equals(claims.get("tid"))).orElse(false)
+          || claims.containsKey("granted_scope") || claims.containsKey("fid")
+          || claims.containsKey("events") || !accessType(token, claims)
+          || (audience != null && !hasAudience(claims.get("aud"), audience))) {
+        return Optional.empty();
+      }
+      if (revocations.isRevoked(jti, tenant))
+        return Optional.empty();
+      Optional<TokenIntrospectionResult> record = lookup.lookupByJti(tenant, jti);
+      if (record.isEmpty() || !record.get().isActive()
+          || !claims.get("client_id").equals(record.get().getClientId())) {
+        return Optional.empty();
+      }
+      return Optional.of(claims);
+    } catch (RuntimeException ex) {
+      return Optional.empty();
+    }
+  }
+
+  private boolean accessType(String token, Map<String, Object> claims) {
+    String headerType = JWT.decode(token).getType();
+    return "at+jwt".equals(headerType)
+        || ((headerType == null || "JWT".equalsIgnoreCase(headerType))
+            && "Bearer".equals(claims.get("typ")));
+  }
+
+  private boolean hasAudience(Object aud, String expected) {
+    return expected.equals(aud)
+        || aud instanceof Iterable<?> values && java.util.stream.StreamSupport
+            .stream(values.spliterator(), false).anyMatch(expected::equals);
+  }
+}

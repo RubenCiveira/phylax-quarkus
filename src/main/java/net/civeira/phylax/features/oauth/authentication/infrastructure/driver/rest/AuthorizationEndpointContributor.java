@@ -28,24 +28,18 @@ public class AuthorizationEndpointContributor implements DiscoveryContributor {
         .uiLocalesSupported(AuthRequest.supportedUiLocales())
         .responseTypesSupported(List.of("code", "none", "id_token", "token", "id_token token",
             "code id_token", "code token", "code id_token token"))
-        .subjectTypesSupported(List.of("public", "pairwise"))
+        .subjectTypesSupported(List.of("public"))
         .responseModesSupported(List.of("query", "fragment"))
         .tokenEndpointAuthSigningAlgValuesSupported(List.of("RS256"))
-        .authorizationSigningAlgValuesSupported(List.of("RS256"))
-        .authorizationEncryptionAlgValuesSupported(List.of("RSA-OAEP"))
-        .authorizationEncryptionEncValuesSupported(List.of("A256GCM"))
         // Signed request objects by value or inside a push; never encrypted, never by reference.
         .requestObjectSigningAlgValuesSupported(List.of("RS256", "ES256"))
         .claimsSupported(List.of("aud", "sub", "iss", "auth_time", "name", "given_name",
             "family_name", "preferred_username", "email", "acr"))
         .claimTypesSupported(List.of("normal")).claimsParameterSupported(true)
-        .scopesSupported(List.of("roles", "profile", "email", "phone"))
+        .scopesSupported(List.of("openid", "roles", "profile", "email", "phone"))
         .requestParameterSupported(true).requestUriParameterSupported(false)
         .codeChallengeMethodsSupported(List.of("S256"))
         .promptValuesSupported(List.of("none", "login", "consent", "select_account"))
-        .authorizationResponseIssParameterSupported(true)
-        .backchannelAuthenticationEndpoint(base + "ciba-auth")
-        .backchannelTokenDeliveryModesSupported(List.of("poll", "ping"))
-        .backchannelAuthenticationRequestSigningAlgValuesSupported(List.of("RS256"));
+        .authorizationResponseIssParameterSupported(true);
   }
 }

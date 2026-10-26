@@ -1,0 +1,51 @@
+package net.civeira.phylax.features.oauth.tokensecurity.application;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospectionResult;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenLookupGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
+
+class AccessTokenPolicyUnitTest {
+  private final TokenSigner signer = mock(TokenSigner.class);
+  private final TokenLookupGateway lookup = mock(TokenLookupGateway.class);
+  private final ClaimsMapper mapper = mock(ClaimsMapper.class);
+  private final AccessTokenPolicy policy = new AccessTokenPolicy(signer, lookup, mapper,
+      mock(TenantQueryRepositoryGateway.class), mock(TokenRevocationGateway.class));
+  private final String token = JWT.create().sign(Algorithm.HMAC256("test-key"));
+
+  @Test
+  void checksIssuerAudiencePurposeAndRevocationEveryTime() {
+    when(mapper.issuer("acme")).thenReturn("https://issuer/oauth/openid/acme");
+    Map<String, Object> claims = Map.of("iss", "https://issuer/oauth/openid/acme", "jti", "j1",
+        "client_id", "client", "typ", "Bearer", "aud", List.of("resource"));
+    when(signer.verifyTokenPayload("acme", token)).thenReturn(claims);
+    when(lookup.lookupByJti("acme", "j1")).thenReturn(
+        Optional.of(TokenIntrospectionResult.builder().active(true).clientId("client").build()),
+        Optional.empty());
+    assertFalse(policy.validate("acme", token, "other").isPresent());
+    assertTrue(policy.validate("acme", token, "resource").isPresent());
+    assertFalse(policy.validate("acme", token, "resource").isPresent());
+    when(signer.verifyTokenPayload("acme", token))
+        .thenReturn(Map.of("iss", "https://issuer/oauth/openid/acme", "jti", "j1", "client_id",
+            "client", "scope", List.of("refresh"), "granted_scope", "openid", "typ", "Bearer"));
+    assertFalse(policy.validate("acme", token, null).isPresent());
+    when(signer.verifyTokenPayload("acme", token)).thenReturn(Map.of("iss",
+        "https://issuer/oauth/openid/other", "jti", "j1", "client_id", "client", "typ", "Bearer"));
+    assertFalse(policy.validate("acme", token, null).isPresent());
+  }
+}

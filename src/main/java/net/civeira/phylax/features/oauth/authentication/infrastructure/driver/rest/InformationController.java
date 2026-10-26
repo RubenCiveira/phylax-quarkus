@@ -8,6 +8,7 @@ import java.util.Map;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
@@ -15,10 +16,12 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.access.user.domain.User;
+import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
+import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.profile.application.ProfileService;
 import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
-import net.civeira.phylax.features.oauth.tokensecurity.application.usecase.IntrospectTokenUseCase;
-import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
+import net.civeira.phylax.features.oauth.tokensecurity.application.AccessTokenPolicy;
 
 /**
  * REST controller for retrieving userinfo claims (OIDC Core §5.3).
@@ -34,9 +37,9 @@ public class InformationController {
 
   private static final String WWW_AUTHENTICATE_INVALID = "Bearer error=\"invalid_token\"";
 
-  private final IntrospectTokenUseCase introspectTokenUseCase;
-  private final TokenSigner tokenSigner;
   private final ProfileService profileService;
+  private final AccessTokenPolicy accessTokenPolicy;
+  private final UserQueryRepositoryGateway users;
 
   /**
    * Returns the current authenticated user's claims filtered by granted scopes.
@@ -58,17 +61,9 @@ public class InformationController {
       log.warn("userinfo unauthorized: empty bearer token for tenant={}", tenant);
       return unauthorized();
     }
-    var introspection = introspectTokenUseCase.introspect(tenant, token);
-    if (!introspection.isActive()) {
-      log.warn("userinfo unauthorized: token inactive for tenant={} sub={} clientId={} jti={}",
-          tenant, introspection.getSub(), introspection.getClientId(), introspection.getJti());
+    Map<String, Object> payload = accessTokenPolicy.validate(tenant, token, null).orElse(null);
+    if (payload == null)
       return unauthorized();
-    }
-    Map<String, Object> payload = tokenSigner.verifyTokenPayload(tenant, token);
-    if (payload.isEmpty()) {
-      log.warn("userinfo unauthorized: payload verification failed for tenant={}", tenant);
-      return unauthorized();
-    }
     String subject = claimAsString(payload.get("sub"));
     if (subject == null || subject.isBlank()) {
       log.warn("userinfo unauthorized: token without subject for tenant={}", tenant);
@@ -76,19 +71,29 @@ public class InformationController {
     }
     String uid = claimAsString(payload.get("uid"));
     List<String> scopes = claimAsList(payload.get("scope"));
+    if (!scopes.contains("openid"))
+      return unauthorized();
     log.info("userinfo token verified tenant={} sub={} uid={} scopes={}", tenant, subject, uid,
         scopes);
 
     OidcProfile profile =
         uid != null && !uid.isBlank() ? profileService.getProfile(uid).orElse(null) : null;
 
-    Map<String, Object> claims = buildClaims(subject, scopes, profile);
+    User user = uid != null ? users.find(UserFilter.builder().uid(uid).build()).orElse(null) : null;
+    Map<String, Object> claims = buildClaims(subject, scopes, profile, user);
 
     return Response.ok(claims).header("Cache-Control", "no-store").build();
   }
 
-  private Map<String, Object> buildClaims(String subject, List<String> scopes,
-      OidcProfile profile) {
+  @POST
+  @Path("oauth/openid/{tenant}/userinfo")
+  public Response retrieveUserDataPost(@PathParam("tenant") String tenant,
+      @Context HttpHeaders headers) {
+    return retrieveUserData(tenant, headers);
+  }
+
+  private Map<String, Object> buildClaims(String subject, List<String> scopes, OidcProfile profile,
+      User user) {
     Map<String, Object> claims = new LinkedHashMap<>();
     claims.put("sub", subject);
 
@@ -111,8 +116,8 @@ public class InformationController {
       }
     }
 
-    if (scopes.contains("email")) {
-      claims.put("email", subject);
+    if (scopes.contains("email") && user != null) {
+      user.getEmail().ifPresent(v -> claims.put("email", v));
     }
 
     if (scopes.contains("phone") && profile != null) {

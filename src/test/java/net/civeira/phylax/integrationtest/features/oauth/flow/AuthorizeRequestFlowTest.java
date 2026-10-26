@@ -39,6 +39,19 @@ class AuthorizeRequestFlowTest extends OidcIntegrationTestBase {
   private static final String AUTH = "/oauth/openid/" + OidcTestFixtures.TENANT + "/auth";
   private static final String BINDING = "PAR_BINDING";
 
+  @Test
+  void discoveryOnlyAdvertisesImplementedSessionAndTokenCapabilities() {
+    Response discovery = RestAssured
+        .get("/oauth/openid/" + OidcTestFixtures.TENANT + "/.well-known/openid-configuration");
+    Assertions.assertEquals(200, discovery.statusCode());
+    Map<String, Object> metadata = discovery.jsonPath().getMap("$");
+    Assertions.assertFalse(metadata.containsKey("check_session_iframe"));
+    Assertions.assertFalse(metadata.containsKey("mtls_endpoint_aliases"));
+    Assertions.assertFalse(metadata.containsKey("backchannel_authentication_endpoint"));
+    Assertions.assertEquals(true, metadata.get("authorization_response_iss_parameter_supported"));
+    Assertions.assertTrue(discovery.jsonPath().getList("scopes_supported").contains("openid"));
+  }
+
   // ── helpers ───────────────────────────────────────────────────────────────
 
   private static Map<String, String> spaRequest() {
@@ -123,7 +136,7 @@ class AuthorizeRequestFlowTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(302, done.statusCode());
     String location = done.getHeader("Location");
     Assertions.assertTrue(location.startsWith(OidcTestFixtures.REDIRECT_URI + "?code="), location);
-    Assertions.assertTrue(location.endsWith("&state=pushed-state"), location);
+    Assertions.assertTrue(location.contains("&state=pushed-state&iss="), location);
   }
 
   @Test
@@ -225,8 +238,39 @@ class AuthorizeRequestFlowTest extends OidcIntegrationTestBase {
 
     Response done = loginWith(query, null);
 
-    Assertions.assertTrue(done.getHeader("Location").endsWith("&state=a+b%26c%3Dd%2F%C3%A9"),
+    Assertions.assertTrue(done.getHeader("Location").contains("&state=a+b%26c%3Dd%2F%C3%A9&iss="),
         done.getHeader("Location"));
+  }
+
+  @Test
+  void logoutGetAndInvalidPostKeepTheExistingSession() {
+    Response login = loginWith(directRequest(), null);
+    Assertions.assertEquals(302, login.statusCode());
+    String session = login.getCookie("AUTH_SESSION_ID");
+    Assertions.assertNotNull(session);
+    String logout = "/oauth/openid/" + OidcTestFixtures.TENANT + "/logout";
+    Response confirmation = RestAssured.given().cookie("AUTH_SESSION_ID", session).get(logout);
+    Assertions.assertEquals(200, confirmation.statusCode());
+    Assertions.assertNotNull(confirmation.getCookie("LOGOUT_CSRF"));
+    Response rejected = RestAssured.given().contentType(ContentType.URLENC)
+        .cookie("AUTH_SESSION_ID", session).formParam("csrf", "invalid").post(logout);
+    Assertions.assertEquals(403, rejected.statusCode());
+    Assertions.assertEquals(200,
+        RestAssured.given().cookie("AUTH_SESSION_ID", session).get(logout).statusCode());
+  }
+
+  @Test
+  void logoutConfirmationPostsWithCsrfAndClearsSession() {
+    Response login = loginWith(directRequest(), null);
+    Assertions.assertEquals(302, login.statusCode());
+    String session = login.getCookie("AUTH_SESSION_ID");
+    String logout = "/oauth/openid/" + OidcTestFixtures.TENANT + "/logout";
+    String csrf =
+        RestAssured.given().cookie("AUTH_SESSION_ID", session).get(logout).getCookie("LOGOUT_CSRF");
+    Response done =
+        RestAssured.given().contentType(ContentType.URLENC).cookie("AUTH_SESSION_ID", session)
+            .cookie("LOGOUT_CSRF", csrf).formParam("csrf", csrf).post(logout);
+    Assertions.assertEquals(200, done.statusCode(), done.getBody().asString());
   }
 
   // ── PKCE (1.11) ───────────────────────────────────────────────────────────
