@@ -1,6 +1,6 @@
 # 3.3 — Request objects firmados
 
-- **Fase:** 3 (según necesidad) · **Estado:** hecha (25-10-2026), [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md); **requiere regenerar el modelo** · **Referencia:** RFC 9101.
+- **Fase:** 3 (según necesidad) · **Estado:** hecha e integrada con modelo regenerado (26-10-2026), [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) · **Referencia:** RFC 9101.
 - **Implementación:** validar `request`/`request_uri` externos con JWKS, `iss`/`aud`/`exp`/`nbf`/`iat`/`jti` y anti-replay; resolver conflictos de parámetros. Para `jwks_uri` remoto, usar un fetcher de infraestructura con HTTPS, bloqueo de redes privadas/loopback, límites de tiempo/tamaño y caché por cliente; reutilizarlo en [3.2](../issue-3.2-autenticacion-jwt-cliente.md) y [3.4](../pospuestos/issue-3.4-federacion-oidc-generica.md).
 - **Cierre:** objeto válido aceptado y objeto expirado, de otro cliente, mal firmado o reutilizado rechazado; discovery coherente.
 - **Fuente:** [§5, 3.3](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-3--extensiones-de-un-idp-moderno).
@@ -20,6 +20,6 @@
 ## Implementación Java
 
 - `RequestObjectVerifier`, `ClientJwtSignatureGateway`/`JwksSignatureAdapter`, `JwtReplayGateway`/`JwtReplaySqlAdapter`, `RemoteJwksFetcher`, `AuthorizationRequestResolver`, `ResolveParRequestUsecase.adopt`.
-- **Hasta regenerar el modelo** ([cambios de modelo](../cambios-modelo-J02-J05.md) §3) la tabla anti-replay no existe y todo request object se rechaza (fallo cerrado).
+- La tabla anti-replay ya figura en las migraciones del [modelo](../cambios-modelo-J02-J05.md) (§3). Si no se ha migrado, todo request object devuelve `invalid_request_object` (fallo cerrado).
 - Discovery: `request_parameter_supported: true`, `request_uri_parameter_supported: false`, `request_object_signing_alg_values_supported: [RS256, ES256]`, sin algoritmos de cifrado.
-- **Pruebas:** `RequestObjectVerifierUnitTest`, `JwksSignatureAdapterUnitTest`, `RemoteJwksFetcherUnitTest` (SSRF), `AuthorizeRequestFlowTest` (válido una vez, replay, otra audiencia, `none`, por referencia).
+- **Pruebas:** `RequestObjectVerifierUnitTest`, `JwksSignatureAdapterUnitTest`, `RemoteJwksFetcherUnitTest` (SSRF), `AuthorizeRequestFlowTest` (válido una vez, replay, otra audiencia, `none`, por referencia) y `DynamicClientRegistrationMariaDbTest` (primer uso atómico y aislado por tenant/cliente).

@@ -25,4 +25,4 @@
 - Dominio: `DcrRegistrationRules`, `DcrMetadataPolicy`, `DcrInitialAccessToken`, puerto `DcrInitialAccessTokenGateway`; `DynamicClientException` con estado HTTP.
 - Infraestructura: `DcrInitialAccessTokenSqlAdapter`, `DynamicClientAdapter` reescrito (antes insertaba sin tenant, sin las columnas `NOT NULL` y con el método en minúsculas), `ClientRegisterController` (antes 403 fijo).
 - **Pruebas:** `DcrMetadataPolicyUnitTest`, `RegisterClientUsecaseUnitTest`, `DynamicClientRegistrationMariaDbTest` (MariaDB real).
-- **Pendiente:** acción `issue` que genere el token y lo muestre una vez (hoy el admin lo crea con el CRUD generado, que guarda su digest); `post_logout_redirect_uris` se persiste en cuanto exista la tabla de [cambios de modelo](../cambios-modelo-J02-J05.md); discovery y *Dynamic OP* en J-09 ([V.3](../issue-V.3-conformidad-dcr.md)).
+- **Pendiente:** acción `issue` que genere el token y lo muestre una vez (hoy el admin lo crea con el CRUD generado, que guarda su digest); discovery y *Dynamic OP* en J-09 ([V.3](../issue-V.3-conformidad-dcr.md)). Las `post_logout_redirect_uris` se persisten con el esquema regenerado y se comprueban en MariaDB real.

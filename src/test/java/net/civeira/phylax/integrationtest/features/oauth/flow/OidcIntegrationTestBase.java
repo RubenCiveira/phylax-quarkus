@@ -16,6 +16,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedClientStoreGateway;
+import net.civeira.phylax.integrationtest.features.oauth.alt.FixedParRequestGateway;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedSessionStore;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTemporalKeysGateway;
 import net.civeira.phylax.integrationtest.features.oauth.alt.FixedTokenLookupGateway;
@@ -44,6 +45,8 @@ public abstract class OidcIntegrationTestBase {
   FixedTemporalKeysGateway temporalKeysGateway;
   @Inject
   FixedClientStoreGateway clientStoreGateway;
+  @Inject
+  FixedParRequestGateway parRequestGateway;
   @Inject
   ScenarioLoginGateway loginGateway;
   @Inject
@@ -78,6 +81,7 @@ public abstract class OidcIntegrationTestBase {
     sessionStore.clear();
     temporalKeysGateway.clear();
     clientStoreGateway.reset();
+    parRequestGateway.clear();
     loginGateway.reset();
     touConsentGateway.reset();
     gdprConsentGateway.reset();

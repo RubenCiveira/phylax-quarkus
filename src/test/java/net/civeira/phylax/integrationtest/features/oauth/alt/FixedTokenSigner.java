@@ -34,7 +34,6 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigne
 @ApplicationScoped
 public class FixedTokenSigner implements TokenSigner {
   private static final String KEY_ID = "test-key";
-  private static final String KEYPASS = "test-keypass";
 
   private RSAPublicKey publicKey;
   private RSAPrivateKey privateKey;
@@ -66,12 +65,6 @@ public class FixedTokenSigner implements TokenSigner {
   }
 
   @Override
-  public String signKeypass(String tenant, Builder data, Instant expiration) {
-    Algorithm algorithm = Algorithm.HMAC256(KEYPASS);
-    return data.withKeyId(KEYPASS).withExpiresAt(java.util.Date.from(expiration)).sign(algorithm);
-  }
-
-  @Override
   public Map<String, Object> verifyTokenPayload(String tenant, String token) {
     try {
       Algorithm algorithm = Algorithm.RSA256(publicKey, null);
@@ -80,22 +73,30 @@ public class FixedTokenSigner implements TokenSigner {
       decoded.getClaims().forEach((key, claim) -> payload.put(key, claim.as(Object.class)));
       return payload;
     } catch (JWTVerificationException ex) {
-      try {
-        Algorithm algorithm = Algorithm.HMAC256(KEYPASS);
-        DecodedJWT decoded = JWT.require(algorithm).build().verify(token);
-        Map<String, Object> payload = new HashMap<>();
-        decoded.getClaims().forEach((key, claim) -> payload.put(key, claim.as(Object.class)));
-        return payload;
-      } catch (JWTVerificationException hmacEx) {
+      return Map.of();
+    }
+  }
+
+  @Override
+  public Map<String, Object> verifyTokenPayloadAcceptingExpired(String tenant, String token) {
+    try {
+      Algorithm algorithm = Algorithm.RSA256(publicKey, null);
+      DecodedJWT decoded = JWT.require(algorithm).acceptExpiresAt(120).build().verify(token);
+      if (decoded.getIssuer() == null || !decoded.getIssuer().endsWith("/oauth/openid/" + tenant)) {
         return Map.of();
       }
+      Map<String, Object> payload = new HashMap<>();
+      decoded.getClaims().forEach((key, claim) -> payload.put(key, claim.as(Object.class)));
+      return payload;
+    } catch (JWTVerificationException ex) {
+      return Map.of();
     }
   }
 
   @Override
   public String verifiedKeypass(String tenant, String token) {
     try {
-      Algorithm algorithm = Algorithm.HMAC256(KEYPASS);
+      Algorithm algorithm = Algorithm.RSA256(publicKey, null);
       DecodedJWT decoded = JWT.require(algorithm).build().verify(token);
       return decoded.getKeyId();
     } catch (JWTVerificationException ex) {

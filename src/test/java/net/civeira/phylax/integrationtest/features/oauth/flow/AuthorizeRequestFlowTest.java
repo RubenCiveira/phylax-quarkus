@@ -260,7 +260,7 @@ class AuthorizeRequestFlowTest extends OidcIntegrationTestBase {
   }
 
   private String idToken(String subject, String audience) {
-    return tokenSigner.sign(OidcTestFixtures.TENANT, JWT.create().withIssuer("issuer")
+    return tokenSigner.sign(OidcTestFixtures.TENANT, JWT.create().withIssuer(issuer())
         .withSubject(subject).withAudience(audience).withClaim("azp", audience),
         Instant.now().minusSeconds(60));
   }

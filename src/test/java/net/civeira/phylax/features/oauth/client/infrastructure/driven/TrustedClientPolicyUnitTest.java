@@ -14,6 +14,7 @@ import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubj
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowAllScopesVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedAudiencesVO;
+import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedLogoutRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedRedirectsVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.AllowedScopesM2mVO;
 import net.civeira.phylax.features.access.trustedclient.domain.valueobject.CodeVO;
@@ -52,6 +53,7 @@ class TrustedClientPolicyUnitTest {
             TlsClientCertificateBoundAccessTokensVO.from(false))
         .subjectTypeValue(SubjectTypeVO.from(TrustedClientSubjectTypeOptions.PUBLIC))
         .allowedRedirectsValue(AllowedRedirectsVO.from(List.<AllowedRedirects>of()))
+        .allowedLogoutRedirectsValue(AllowedLogoutRedirectsVO.from(List.of()))
         .allowedAudiencesValue(AllowedAudiencesVO.from(List.<AllowedAudiences>of()))
         .isResourceServerValue(IsResourceServerVO.from(false))
         .requirePushedAuthorizationRequestsValue(RequirePushedAuthorizationRequestsVO.from(false))

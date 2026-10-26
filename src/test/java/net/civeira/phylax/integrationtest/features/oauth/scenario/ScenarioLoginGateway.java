@@ -82,6 +82,7 @@ public class ScenarioLoginGateway implements LoginGateway {
     data.setUsername(OidcTestFixtures.USERNAME);
     data.setTenant(OidcTestFixtures.TENANT);
     data.setMode(AuthenticationMode.PASSWORD);
+    data.setAmr(List.of("pwd"));
     data.setTime(Instant.now());
     return data;
   }

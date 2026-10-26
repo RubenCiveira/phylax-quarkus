@@ -102,6 +102,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         + "?, ?, 'PUBLIC', ?, ? FROM access_tenant t WHERE t.name = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
+      conn.setAutoCommit(false);
       int i = 1;
       stat.setString(i++, clientId);
       stat.setString(i++, clientId);
@@ -133,6 +134,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       }
       replaceRedirects(conn, clientId, request.getRedirectUris());
       postLogoutRedirects.replace(conn, clientId, request.getPostLogoutRedirectUris());
+      conn.commit();
     } catch (SQLException | JsonProcessingException ex) {
       throw new IllegalStateException(ex);
     }
@@ -175,6 +177,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         + "AND tenant = (SELECT t.uid FROM access_tenant t WHERE t.name = ?)";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
+      conn.setAutoCommit(false);
       int i = 1;
       stat.setString(i++, request.getClientName());
       stat.setString(i++, request.getLogoUri());
@@ -194,6 +197,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       }
       replaceRedirects(conn, clientId, request.getRedirectUris());
       postLogoutRedirects.replace(conn, clientId, request.getPostLogoutRedirectUris());
+      conn.commit();
     } catch (SQLException | JsonProcessingException ex) {
       throw new IllegalStateException(ex);
     }
@@ -206,6 +210,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       return false;
     }
     try (Connection conn = source.getConnection()) {
+      conn.setAutoCommit(false);
       deleteRedirects(conn, clientId);
       postLogoutRedirects.deleteAll(conn, clientId);
       try (PreparedStatement stat = conn.prepareStatement(
@@ -214,7 +219,13 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         stat.setString(1, clientId);
         stat.setBoolean(2, true);
         stat.setString(3, secretDigester.digest(registrationAccessToken));
-        return stat.executeUpdate() > 0;
+        boolean deleted = stat.executeUpdate() > 0;
+        if (deleted) {
+          conn.commit();
+        } else {
+          conn.rollback();
+        }
+        return deleted;
       }
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);

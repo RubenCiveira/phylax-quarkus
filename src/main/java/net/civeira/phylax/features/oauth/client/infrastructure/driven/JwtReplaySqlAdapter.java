@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.client.domain.gateway.JwtReplayGateway;
 
 /**
@@ -21,6 +22,7 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.JwtReplayGateway;
  */
 @ApplicationScoped
 @RequiredArgsConstructor
+@Slf4j
 public class JwtReplaySqlAdapter implements JwtReplayGateway {
 
   private final DataSource source;
@@ -42,6 +44,10 @@ public class JwtReplaySqlAdapter implements JwtReplayGateway {
     } catch (SQLIntegrityConstraintViolationException ex) {
       return false;
     } catch (SQLException ex) {
+      if ("42S02".equals(ex.getSQLState())) {
+        log.error("JWT replay table is unavailable: {}", ex.getMessage());
+        return false;
+      }
       if ("23000".equals(ex.getSQLState()) || "23505".equals(ex.getSQLState())) {
         return false;
       }

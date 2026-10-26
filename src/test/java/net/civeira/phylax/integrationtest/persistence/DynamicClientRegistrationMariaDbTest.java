@@ -28,6 +28,7 @@ import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
 import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
 import net.civeira.phylax.features.oauth.client.infrastructure.driven.DcrInitialAccessTokenSqlAdapter;
 import net.civeira.phylax.features.oauth.client.infrastructure.driven.DynamicClientAdapter;
+import net.civeira.phylax.features.oauth.client.infrastructure.driven.JwtReplaySqlAdapter;
 import net.civeira.phylax.features.oauth.client.infrastructure.driven.PostLogoutRedirectSqlStore;
 
 /**
@@ -59,6 +60,7 @@ class DynamicClientRegistrationMariaDbTest {
     read = new ReadDynamicClientUsecase(clients);
     delete = new DeleteDynamicClientUsecase(clients);
     try (Connection c = dataSource.getConnection()) {
+      c.createStatement().execute("DELETE FROM access_trusted_client_allowed_logout_redirect");
       c.createStatement().execute("DELETE FROM access_trusted_client_allowed_redirect");
       c.createStatement().execute("DELETE FROM access_trusted_client");
       c.createStatement().execute("DELETE FROM access_dcr_initial_access_token");
@@ -147,6 +149,9 @@ class DynamicClientRegistrationMariaDbTest {
     Assertions.assertEquals("CLIENT_SECRET_BASIC",
         column("access_trusted_client", "token_endpoint_auth_method", result.getClientId()));
     Assertions.assertEquals("1", column("access_dcr_initial_access_token", "uses", "iat"));
+    Assertions.assertEquals(List.of("https://app.example/bye"),
+        read.read(TENANT_A, ISSUER, result.getClientId(), result.getRegistrationAccessToken())
+            .getPostLogoutRedirectUris());
   }
 
   @Test
@@ -214,5 +219,17 @@ class DynamicClientRegistrationMariaDbTest {
         () -> registerIn(TENANT_A, "iat-secret"));
     Assertions.assertEquals(403, ex.getStatus());
     Assertions.assertEquals("0", column("access_dcr_initial_access_token", "uses", "iat"));
+  }
+
+  @Test
+  void requestObjectJti_isAtomicAndScopedByTenantAndClient() throws Exception {
+    JwtReplaySqlAdapter replay = new JwtReplaySqlAdapter(dataSource);
+    Instant expiry = later();
+    Assertions.assertEquals(1,
+        Concurrently
+            .run(8, () -> replay.firstUse("uid-a", "client-a", "request_object", "jti-1", expiry))
+            .stream().filter(Boolean::booleanValue).count());
+    Assertions.assertTrue(replay.firstUse("uid-b", "client-a", "request_object", "jti-1", expiry));
+    Assertions.assertTrue(replay.firstUse("uid-a", "client-b", "request_object", "jti-1", expiry));
   }
 }

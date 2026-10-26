@@ -19,10 +19,11 @@ import lombok.extern.slf4j.Slf4j;
  * Post-logout redirect URIs of a client, kept apart from its login redirects (task 2.4).
  *
  * <p>
- * Table {@code access_trusted_client_allowed_post_logout_redirect}, of the
- * {@code allowed-post-logout-redirects} composition requested in
- * {@code docs/TODO-OIDC/cambios-modelo-J02-J05.md}. Until the model is regenerated the table does
- * not exist: reads fail closed (no URI is registered) and writes are skipped, both logged.
+ * Table {@code access_trusted_client_allowed_logout_redirect}, of the
+ * {@code allowed-logout-redirects} composition generated from
+ * {@code docs/TODO-OIDC/cambios-modelo-J02-J05.md}. Before the migration is applied, reads fail
+ * closed (no URI is registered) and writes fail rather than reporting an unregistered URI as
+ * successfully registered.
  */
 @Slf4j
 @ApplicationScoped
@@ -38,8 +39,7 @@ public class PostLogoutRedirectSqlStore {
    * @return the URIs, empty when none or when the table is missing
    */
   public List<String> list(String clientUid) {
-    String sql =
-        "SELECT url FROM access_trusted_client_allowed_post_logout_redirect WHERE client = ?";
+    String sql = "SELECT url FROM access_trusted_client_allowed_logout_redirect WHERE client = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientUid);
@@ -67,27 +67,22 @@ public class PostLogoutRedirectSqlStore {
    * @param clientUid uid of the client
    * @param uris new URIs
    */
-  public void replace(Connection conn, String clientUid, List<String> uris) {
-    try {
-      delete(conn, clientUid);
-      if (uris == null || uris.isEmpty()) {
-        return;
+  public void replace(Connection conn, String clientUid, List<String> uris) throws SQLException {
+    delete(conn, clientUid);
+    if (uris == null || uris.isEmpty()) {
+      return;
+    }
+    String sql =
+        "INSERT INTO access_trusted_client_allowed_logout_redirect (uid, version, url, client) VALUES (?, ?, ?, ?)";
+    try (PreparedStatement stat = conn.prepareStatement(sql)) {
+      for (String uri : uris) {
+        stat.setString(1, HexFormat.of().formatHex(UUID.randomUUID().toString().getBytes()));
+        stat.setInt(2, 0);
+        stat.setString(3, uri);
+        stat.setString(4, clientUid);
+        stat.addBatch();
       }
-      String sql =
-          "INSERT INTO access_trusted_client_allowed_post_logout_redirect (uid, version, url, client) VALUES (?, ?, ?, ?)";
-      try (PreparedStatement stat = conn.prepareStatement(sql)) {
-        for (String uri : uris) {
-          stat.setString(1, HexFormat.of().formatHex(UUID.randomUUID().toString().getBytes()));
-          stat.setInt(2, 0);
-          stat.setString(3, uri);
-          stat.setString(4, clientUid);
-          stat.addBatch();
-        }
-        stat.executeBatch();
-      }
-    } catch (SQLException ex) {
-      log.error("Unable to store post-logout redirects of client {}: {}", clientUid,
-          ex.getMessage());
+      stat.executeBatch();
     }
   }
 
@@ -97,17 +92,12 @@ public class PostLogoutRedirectSqlStore {
    * @param conn open connection of the caller's unit of work
    * @param clientUid uid of the client
    */
-  public void deleteAll(Connection conn, String clientUid) {
-    try {
-      delete(conn, clientUid);
-    } catch (SQLException ex) {
-      log.error("Unable to delete post-logout redirects of client {}: {}", clientUid,
-          ex.getMessage());
-    }
+  public void deleteAll(Connection conn, String clientUid) throws SQLException {
+    delete(conn, clientUid);
   }
 
   private static void delete(Connection conn, String clientUid) throws SQLException {
-    String sql = "DELETE FROM access_trusted_client_allowed_post_logout_redirect WHERE client = ?";
+    String sql = "DELETE FROM access_trusted_client_allowed_logout_redirect WHERE client = ?";
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientUid);
       stat.execute();

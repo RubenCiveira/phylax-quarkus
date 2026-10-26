@@ -12,5 +12,5 @@
 - Se elimina `signKeypass` del puerto `TokenSigner`: la pre-sesión se firma con `sign`, cuyo `kid` es el identificador público publicado en `/oauth/jwks`.
 - La pre-sesión solo se acepta en `verifyChalleger`, que exige `scope = [challenge]` exacto y emisor del tenant.
 - Las cookies emitidas antes del cambio siguen verificando (se prueba con todas las claves si el `kid` no coincide) hasta caducar.
-- **Acción de despliegue obligatoria:** las claves actuales han estado expuestas. Hay que **retirarlas y generar claves nuevas** (vaciar `_oauth_keys_storer` del anillo global con la aplicación parada; el job de [2.6](issue-2.6-generacion-claves-fuera-peticion.md) las regenera al arrancar). Todas las sesiones y tokens vigentes quedan invalidados.
+- **Antes de utilizar claves heredadas fuera de desarrollo:** las claves antiguas han estado expuestas. Hay que retirarlas y generar claves nuevas (vaciar `_oauth_keys_storer` del anillo global con la aplicación parada; el job de [2.6](issue-2.6-generacion-claves-fuera-peticion.md) las regenera al arrancar). En estos entornos de desarrollo no hay sesiones ni tokens de producción que preservar.
 - **Pruebas:** `JoseTokenSignerUnitTest` (el `kid` está en el JWKS y no es material de clave).

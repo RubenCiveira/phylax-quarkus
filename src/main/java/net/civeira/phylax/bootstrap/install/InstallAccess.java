@@ -102,7 +102,7 @@ public class InstallAccess implements MigrationSeed {
         .publicAllow(Boolean.TRUE).isResourceServer(Boolean.FALSE).requirePkce(Boolean.TRUE)
         .tokenEndpointAuthMethod(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_POST)
         .m2mTokenTtlSeconds(3600).allowedRedirects(List.of(localhost))
-        .allowedAudiences(List.of(partyAudience))
+        .allowedLogoutRedirects(List.of()).allowedAudiences(List.of(partyAudience))
         .subjectType(TrustedClientSubjectTypeOptions.PUBLIC)
         .requirePushedAuthorizationRequests(Boolean.FALSE).dpopBoundAccessTokens(Boolean.FALSE)
         .tlsClientCertificateBoundAccessTokens(Boolean.FALSE).enabled(Boolean.TRUE);

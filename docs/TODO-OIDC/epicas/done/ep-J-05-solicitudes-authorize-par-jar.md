@@ -2,7 +2,7 @@
 
 **Prioridad:** alta para PAR/PKCE · **Tareas:** [0.11](../../done/issue-0.11-state-seguro-secreto-fuera-par.md), [0.14](../../done/issue-0.14-par-vinculado-un-solo-uso.md), [1.11](../../done/issue-1.11-politica-pkce.md), [2.3](../../done/issue-2.3-politica-par.md), [2.7](../../done/issue-2.7-hints-authorize.md), [3.3](../../done/issue-3.3-request-objects-firmados.md) opcional JAR, [3.10](../../done/issue-3.10-hints-acr-localizacion.md) opcional hints/locales. **Depende de:** J-02; coordinar `AuthorizeHtml` con J-06.
 
-**Estado:** cerrada (25-10-2026), incluidas las opcionales 3.3 y 3.10. Fichas en [`done/`](../../done/README.md). JAR rechaza todo request object hasta [regenerar el modelo](../../cambios-modelo-J02-J05.md) (tabla anti-replay).
+**Estado:** cerrada (26-10-2026), incluidas las opcionales 3.3 y 3.10. Fichas en [`done/`](../../done/README.md). La tabla anti-replay está en las migraciones del modelo; se verifica su unicidad en MariaDB real.
 
 ## Implementación
 

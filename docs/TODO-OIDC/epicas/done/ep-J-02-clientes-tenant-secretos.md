@@ -6,7 +6,7 @@
 
 **Prioridad:** bloqueante · **Tareas:** [0.3](../../done/issue-0.3-audiencias-autorizadas.md), [0.4](../../done/issue-0.4-configuracion-por-cliente.md), [0.5](../../done/issue-0.5-aislamiento-clientes-tenant.md), [0.10](../../done/issue-0.10-redirect-uri-estricta.md), [2.1](../../done/issue-2.1-registro-dinamico-clientes.md), [2.4](../../done/issue-2.4-redirects-logout.md), [2.8](../../done/issue-2.8-proteccion-secretos.md), [2.9](../../done/issue-2.9-migracion-secretos-cifrado.md). **Desbloquea:** política común de J-01, J-03, J-05 y J-07.
 
-**Estado:** cerrada (25-10-2026). Fichas en [`done/`](../../done/README.md). Dos piezas esperan a [regenerar el modelo](../../cambios-modelo-J02-J05.md): la tabla de redirects post-logout (2.4, fallo cerrado hasta entonces) y la persistencia de `post_logout_redirect_uris` de DCR.
+**Estado:** cerrada (26-10-2026). Fichas en [`done/`](../../done/README.md). Modelo regenerado e integración de redirects post-logout verificada con `make test-mariadb`.
 
 ## Implementación
 

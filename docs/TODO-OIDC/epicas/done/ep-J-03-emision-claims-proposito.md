@@ -2,7 +2,7 @@
 
 **Prioridad:** alta · **Tareas:** [0.7](../../done/issue-0.7-clave-publica-y-presesion.md), [1.2](../../done/issue-1.2-id-token-conforme.md), [1.13](../../done/issue-1.13-claims-proposito-token.md), [1.15](../../done/issue-1.15-scopes-conjuntos-exactos.md), [2.6](../../done/issue-2.6-generacion-claves-fuera-peticion.md), [3.5](../../done/issue-3.5-perfil-at-jwt.md) (RFC 9068 según necesidad). **Depende de:** clientes J-02 y extracción J-01; **desbloquea:** J-04, J-06, J-07.
 
-**Estado:** cerrada (25-10-2026). Fichas en [`done/`](../../done/README.md). **Acción de despliegue obligatoria** por 0.7: rotar las claves de firma (han estado expuestas en cookies).
+**Estado:** cerrada (26-10-2026). Fichas en [`done/`](../../done/README.md). En estos entornos de desarrollo no hay claves de producción que rotar; si se conservaran claves de un entorno anterior, deben descartarse antes de usarlo fuera de desarrollo.
 
 ## Implementación
 

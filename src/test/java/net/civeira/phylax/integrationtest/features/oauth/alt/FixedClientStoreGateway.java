@@ -40,6 +40,10 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   private static final List<String> REDIRECTS = List.of(OidcTestFixtures.REDIRECT_URI);
   private final AtomicReference<List<String>> allowedScopes = new AtomicReference<>();
   private final AtomicReference<List<String>> allowedGrants = new AtomicReference<>();
+  private final AtomicReference<List<String>> allowedScopesM2m = new AtomicReference<>();
+  private final AtomicReference<List<String>> allowedResponseTypes = new AtomicReference<>();
+  private volatile boolean requirePar;
+  private volatile String jwksJson;
 
   @PostConstruct
   void init() {
@@ -54,10 +58,30 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     allowedGrants.set(List.copyOf(grants));
   }
 
+  public void setAllowedScopesM2m(List<String> scopes) {
+    allowedScopesM2m.set(List.copyOf(scopes));
+  }
+
+  public void setAllowedResponseTypes(List<String> types) {
+    allowedResponseTypes.set(List.copyOf(types));
+  }
+
+  public void setRequirePar(boolean required) {
+    requirePar = required;
+  }
+
+  public void setJwksJson(String jwks) {
+    jwksJson = jwks;
+  }
+
   public void reset() {
     allowedScopes.set(List.of("*"));
     allowedGrants.set(List.of("authorization_code", "password", "refresh_token", "form",
         "client_credentials", "mfa", "urn:ietf:params:oauth:grant-type:device_code"));
+    allowedScopesM2m.set(List.of("orders:read", "orders:write"));
+    allowedResponseTypes.set(List.of("code"));
+    requirePar = false;
+    jwksJson = null;
   }
 
   @Override
@@ -113,11 +137,11 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     ClientAuthMethod registered = isWeb(clientId) ? ClientAuthMethod.CLIENT_SECRET_BASIC
         : isSpa(clientId) ? ClientAuthMethod.NONE : null;
     return ClientDetails.builder().clientId(clientId).allowedScopes(allowedScopes.get())
-        .allowedGrants(allowedGrants.get()).protectedWithSecret(confidential)
-        .tokenEndpointAuthMethod(registered).requirePkce(isSpa(clientId))
-        .allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE))
-        .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId)).postLogoutRedirectUris(
-            List.of("http://localhost/after-logout", "http://localhost/callback"))
-        .build();
+        .allowedScopesM2m(allowedScopesM2m.get()).allowedResponseTypes(allowedResponseTypes.get())
+        .allowedGrants(allowedGrants.get()).requirePar(requirePar).jwksJson(jwksJson)
+        .protectedWithSecret(confidential).tokenEndpointAuthMethod(registered)
+        .requirePkce(isSpa(clientId)).allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE))
+        .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId))
+        .postLogoutRedirectUris(List.of(OidcTestFixtures.POST_LOGOUT_URI)).build();
   }
 }
