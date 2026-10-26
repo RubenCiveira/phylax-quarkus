@@ -1,3 +1,1 @@
-/migration/mysql/000.001.001/20261020185923-model.changelog.mysql.sql
-/migration/mysql/000.001.001/20261023155432-model.changelog.mysql.sql
-/migration/mysql/000.001.001/20261025211629-model.changelog.mysql.sql
+/migration/mysql/000.001.001/20261026130509-model.changelog.mysql.sql
