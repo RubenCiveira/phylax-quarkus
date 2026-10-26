@@ -25,7 +25,7 @@ public class MariaDbFlowProfile implements QuarkusTestProfile {
     String doubles = "net.civeira.phylax.integrationtest.features.oauth.alt.";
     return Map.of(ENABLED, "true", "quarkus.arc.exclude-types",
         doubles + "FixedTemporalKeysGateway," + doubles + "FixedTokenRevocationGateway," + doubles
-            + "FixedSessionStore");
+            + "FixedSessionStore," + doubles + "FixedTokenLookupGateway");
   }
 
   @Override

@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospectionResult;
@@ -29,7 +29,7 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenLooku
  * {@code jti} column must be indexed for efficient lookups (added in task 01-05). - Opaque token
  * lookup is a no-op placeholder for future support.
  */
-@RequestScoped
+@ApplicationScoped
 @RequiredArgsConstructor
 public class TokenLookupSqlAdapter implements TokenLookupGateway {
 

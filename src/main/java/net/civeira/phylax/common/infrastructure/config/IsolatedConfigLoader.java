@@ -6,12 +6,14 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import io.smallrye.config.DotEnvConfigSourceProvider;
 import io.smallrye.config.EnvConfigSource;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
@@ -39,6 +41,11 @@ import lombok.extern.slf4j.Slf4j;
  * </ol>
  *
  * <p>
+ * As on the application configuration, the {@code .env} file of the working directory completes the
+ * environment variables (a real variable wins over the file).
+ * </p>
+ *
+ * <p>
  * The active profiles of the application apply, so the file may define {@code "%dev":} values.
  * </p>
  */
@@ -63,7 +70,7 @@ public class IsolatedConfigLoader {
       @ConfigProperty(name = "app.isolated-config.location",
           defaultValue = "config") final String externalLocation) {
     this(Path.of(externalLocation), config.unwrap(SmallRyeConfig.class).getProfiles(),
-        System.getenv());
+        environment(dotEnvFile(), System.getenv()));
   }
 
   IsolatedConfigLoader(final Path externalLocation, final List<String> profiles,
@@ -97,6 +104,24 @@ public class IsolatedConfigLoader {
       log.warn("Isolated config {} not found on the classpath nor on {}", path, externalLocation);
     }
     return new IsolatedConfig(path, found, builder.build());
+  }
+
+  /**
+   * @param dotEnv the {@code .env} file, it may not exist
+   * @param variables the environment variables of the process
+   * @return the variables of the {@code .env} file overridden by the environment variables
+   */
+  static Map<String, String> environment(final Path dotEnv, final Map<String, String> variables) {
+    Map<String, String> environment = new HashMap<>();
+    DotEnvConfigSourceProvider
+        .dotEnvSources(dotEnv.toUri().toString(), Thread.currentThread().getContextClassLoader())
+        .forEach(source -> environment.putAll(source.getProperties()));
+    environment.putAll(variables);
+    return environment;
+  }
+
+  private static Path dotEnvFile() {
+    return Path.of(System.getProperty("user.dir"), ".env");
   }
 
   private static YamlConfigSource yaml(final URL url, final int ordinal) {

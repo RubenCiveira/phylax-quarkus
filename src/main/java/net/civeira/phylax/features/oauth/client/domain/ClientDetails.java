@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.client.domain;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -223,6 +224,22 @@ public class ClientDetails {
   public List<String> grantableScopes(List<String> requested) {
     return allowedScopes.contains(WILDCARD) ? List.copyOf(requested)
         : requested.stream().filter(allowedScopes::contains).toList();
+  }
+
+  /**
+   * Scopes granted from a user flow request, keeping the ones the login already granted (for
+   * example {@code platform:global_access} on the root tenant).
+   *
+   * @param requested requested scopes
+   * @param granted scopes granted by the login, may be null
+   * @return the allowed requested scopes followed by the granted ones, without repetitions
+   */
+  public List<String> grantableScopes(List<String> requested, List<String> granted) {
+    Set<String> scopes = new LinkedHashSet<>(grantableScopes(requested));
+    if (granted != null) {
+      scopes.addAll(granted);
+    }
+    return List.copyOf(scopes);
   }
 
   /**

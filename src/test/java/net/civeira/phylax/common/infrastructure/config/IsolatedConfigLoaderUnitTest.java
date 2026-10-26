@@ -84,6 +84,37 @@ class IsolatedConfigLoaderUnitTest {
     assertEquals(Optional.empty(), config.getConfig("root.name"));
   }
 
+  @Test
+  void testDotEnvResolvesExpressions() throws IOException {
+    Path dotEnv = external.resolve(".env");
+    Files.writeString(dotEnv, "# comment\nSAMPLE_ROOT_PASSWORD=from-dotenv\n");
+
+    IsolatedConfig config =
+        loader(List.of(), IsolatedConfigLoader.environment(dotEnv, Map.of())).load(SAMPLE);
+
+    assertEquals(Optional.of("from-dotenv"), config.getConfig("root.password"));
+  }
+
+  @Test
+  void testEnvironmentOverridesDotEnv() throws IOException {
+    Path dotEnv = external.resolve(".env");
+    Files.writeString(dotEnv, "SAMPLE_ROOT_PASSWORD=from-dotenv\n");
+
+    IsolatedConfig config = loader(List.of(),
+        IsolatedConfigLoader.environment(dotEnv, Map.of("SAMPLE_ROOT_PASSWORD", "from-env")))
+            .load(SAMPLE);
+
+    assertEquals(Optional.of("from-env"), config.getConfig("root.password"));
+  }
+
+  @Test
+  void testMissingDotEnvKeepsTheEnvironment() {
+    Map<String, String> environment = IsolatedConfigLoader.environment(external.resolve(".env"),
+        Map.of("SAMPLE_ROOT_PASSWORD", "from-env"));
+
+    assertEquals(Map.of("SAMPLE_ROOT_PASSWORD", "from-env"), environment);
+  }
+
   private IsolatedConfigLoader loader(List<String> profiles, Map<String, String> environment) {
     return new IsolatedConfigLoader(external, profiles, environment);
   }

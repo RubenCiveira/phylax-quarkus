@@ -1,4 +1,4 @@
-masterpassword: sesamo
+# masterpassword: sesamo
 oauth:
   base-url: no
   jwt:

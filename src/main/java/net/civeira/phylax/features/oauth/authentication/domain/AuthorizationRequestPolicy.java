@@ -49,6 +49,11 @@ public final class AuthorizationRequestPolicy {
     if (responseType.isEmpty()) {
       return reject("invalid_request", "response_type is required");
     }
+    var parts = Arrays.asList(responseType.get().trim().split("\\s+"));
+    if (!parts.contains("code") || parts.stream().anyMatch(
+        part -> !"code".equals(part) && !"id_token".equals(part) && !"token".equals(part))) {
+      return reject("unsupported_response_type", "The response_type is not supported");
+    }
     if (!client.allowsResponseType(responseType.get())) {
       return reject("unauthorized_client", "The client may not use this response_type");
     }
@@ -58,8 +63,7 @@ public final class AuthorizationRequestPolicy {
     if (client.isRequirePar() && !request.isPushed()) {
       return reject("invalid_request", "The client must push its authorization requests");
     }
-    boolean code = Arrays.asList(responseType.get().trim().split("\\s+")).contains("code");
-    return code ? pkceViolation(request, client) : Optional.empty();
+    return pkceViolation(request, client);
   }
 
   private static Optional<Violation> pkceViolation(AuthRequest request, ClientDetails client) {

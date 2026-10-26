@@ -114,4 +114,17 @@ class ClientDetailsUnitTest {
     Assertions.assertEquals(List.of("myprofile"),
         client.grantableScopes(List.of("profile", "myprofile")));
   }
+
+  @Test
+  @DisplayName("Scopes granted by the login are kept next to the requested ones (root tenant)")
+  void test_grantable_scopes_keep_granted() {
+    ClientDetails client = ClientDetails.builder().clientId("c")
+        .allowedScopes(List.of("openid", "profile")).allowedGrants(List.of()).build();
+    Assertions.assertEquals(List.of("openid", "profile", "platform:global_access"),
+        client.grantableScopes(List.of("openid", "profile", "admin"),
+            List.of("platform:global_access", "openid")));
+    Assertions.assertEquals(List.of("openid"), client.grantableScopes(List.of("openid"), null));
+    Assertions.assertEquals(List.of("platform:global_access"),
+        client.grantableScopes(List.of(), List.of("platform:global_access")));
+  }
 }

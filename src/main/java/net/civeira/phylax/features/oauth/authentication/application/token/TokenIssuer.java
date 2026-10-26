@@ -1,5 +1,6 @@
 package net.civeira.phylax.features.oauth.authentication.application.token;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +36,9 @@ public class TokenIssuer {
     AutorizationToken token = tokenBuilder.buildClientCredentialsToken(tenant, client, scopes);
     AuthenticationData auth = new AuthenticationData();
     auth.setUsername(client.getClientId());
+    auth.setUid(UUID
+        .nameUUIDFromBytes((tenant + ":" + client.getClientId()).getBytes(StandardCharsets.UTF_8))
+        .toString());
     auth.setTenant(tenant);
     auth.setScopes(scopes);
     auth.setAudiences(List.of(client.getClientId()));

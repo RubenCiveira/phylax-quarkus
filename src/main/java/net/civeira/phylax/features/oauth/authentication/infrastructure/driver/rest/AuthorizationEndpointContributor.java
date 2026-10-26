@@ -26,8 +26,8 @@ public class AuthorizationEndpointContributor implements DiscoveryContributor {
             "urn:ietf:params:oauth:grant-type:device_code", "client_credentials"))
         .acrValuesSupported(acrPolicy.supported())
         .uiLocalesSupported(AuthRequest.supportedUiLocales())
-        .responseTypesSupported(List.of("code", "none", "id_token", "token", "id_token token",
-            "code id_token", "code token", "code id_token token"))
+        .responseTypesSupported(
+            List.of("code", "code id_token", "code token", "code id_token token"))
         .subjectTypesSupported(List.of("public"))
         .responseModesSupported(List.of("query", "fragment"))
         .tokenEndpointAuthSigningAlgValuesSupported(List.of("RS256"))

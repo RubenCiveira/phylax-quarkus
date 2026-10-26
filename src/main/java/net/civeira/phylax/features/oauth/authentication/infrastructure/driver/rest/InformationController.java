@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -40,6 +43,7 @@ public class InformationController {
   private final ProfileService profileService;
   private final AccessTokenPolicy accessTokenPolicy;
   private final UserQueryRepositoryGateway users;
+  private final ObjectMapper mapper;
 
   /**
    * Returns the current authenticated user's claims filtered by granted scopes.
@@ -118,11 +122,24 @@ public class InformationController {
 
     if (scopes.contains("email") && user != null) {
       user.getEmail().ifPresent(v -> claims.put("email", v));
+      user.getEmail().ifPresent(v -> claims.put("email_verified", user.isEmailVerified()));
     }
 
     if (scopes.contains("phone") && profile != null) {
       profile.getPhoneNumber().ifPresent(v -> claims.put("phone_number", v));
       profile.getPhoneNumberVerified().ifPresent(v -> claims.put("phone_number_verified", v));
+    }
+
+    if (scopes.contains("address") && profile != null) {
+      profile.getAddressJson().ifPresent(json -> {
+        try {
+          Object address = mapper.readValue(json, Map.class);
+          if (address instanceof Map<?, ?>)
+            claims.put("address", address);
+        } catch (JsonProcessingException ignored) {
+          // Unknown address format is not advertised as a known OIDC address.
+        }
+      });
     }
 
     return claims;

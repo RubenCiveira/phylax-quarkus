@@ -135,10 +135,11 @@ public class JwtTokenBuilder {
 
   public AutorizationToken buildToken(String tenant, ClientDetails details, String grantType,
       AuthenticationData validationData, AuthRequest request, RefreshFamily family) {
-    if (request != null && validationData.getScopes().isEmpty()) {
+    if (request != null) {
+      // The login may have granted its own scopes (root tenant): they are added, not a replacement.
       List<String> requested = request.getScope().map(s -> Arrays.stream(s.split("\\s+"))
           .filter(sc -> !sc.isBlank()).collect(Collectors.toList())).orElse(List.of());
-      validationData.setScopes(details.grantableScopes(requested));
+      validationData.setScopes(details.grantableScopes(requested, validationData.getScopes()));
     }
 
     Duration expiration = claimsMapper.accessTokenTtl();

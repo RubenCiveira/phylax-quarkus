@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.h
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,6 +72,14 @@ public class OidcResponseBuilder {
     if (List.of(type.split(" ")).contains("id_token")
         && request.getNonce().filter(n -> !n.isBlank()).isEmpty()) {
       return errorRedirect(request, "invalid_request");
+    }
+    // The login may have granted its own scopes (root tenant): they are added, not a replacement.
+    List<String> requested = Arrays.stream(request.getScope().orElse("").split("\\s+"))
+        .filter(scope -> !scope.isBlank()).toList();
+    validationData.setScopes(clientDetails.grantableScopes(requested, validationData.getScopes()));
+    if (List.of(type.split(" ")).contains("id_token")
+        && !validationData.getScopes().contains("openid")) {
+      return errorRedirect(request, "invalid_scope");
     }
     if ("code".equals(type)) {
       if (clientDetails.isRequirePkce() && request.getCodeChallenge().isEmpty()) {
