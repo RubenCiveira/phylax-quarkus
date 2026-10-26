@@ -25,15 +25,15 @@ oidc:
     sync: ${OIDC_API_KEYS_SYNC:}
 
 # Valores fijos para desarrollo local; nunca se aplican fuera del perfil dev.
-"%dev":
-  oidc:
-    root:
-      password: sesamo
-      temporal-password: false
-    relying-party:
-      api-key: "1111"
-    trusted-client:
-      secret: "123456"
-    api-keys:
-      collector: hcaik_01jtteh99vbsv4qrj22trvh3wg35g1n4tgkcxzgqv0034y2cby7dceaf43
-      sync: sck_01jtteh99vbsv4qrj22trvh3wg35g2n3tgkcxngqv0034y2cby7dceaf43
+# "%dev":
+#   oidc:
+#     root:
+#       password: ${OIDC_ROOT_PASSWORD:sesamo}
+#       temporal-password: false
+#     relying-party:
+#       api-key: "1111"
+#     trusted-client:
+#       secret: "123456"
+#     api-keys:
+#       collector: hcaik_01jtteh99vbsv4qrj22trvh3wg35g1n4tgkcxzgqv0034y2cby7dceaf43
+#       sync: sck_01jtteh99vbsv4qrj22trvh3wg35g2n3tgkcxngqv0034y2cby7dceaf43
