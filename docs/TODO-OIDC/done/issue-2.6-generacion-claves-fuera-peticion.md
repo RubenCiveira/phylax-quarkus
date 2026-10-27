@@ -8,6 +8,6 @@
 ## Qué hace (funcional)
 
 - Firmar y publicar `/oauth/jwks` solo leen las claves guardadas; ninguna petición genera una clave RSA de 4096 bits.
-- `SigningKeyRotationJob` genera las claves al arrancar (tras las migraciones) y cada 15 minutos (`oauth.jwt.authorization.rotation-cron`) para mantener `key-futures` claves por delante. Si falla, lo registra y reintenta: las claves vigentes siguen sirviendo.
+- `SigningKeyRotationJob` genera las claves al arrancar (tras las migraciones) y cada 15 minutos (`oidc.jwt.authorization.rotation-cron`) para mantener `key-futures` claves por delante. Si falla, lo registra y reintenta: las claves vigentes siguen sirviendo.
 - Dos instancias que roten a la vez pueden añadir claves de más: se publican y caducan como las demás.
 - **Pruebas:** `JoseTokenSignerUnitTest` (sin claves la firma falla en vez de generar; tras rotar, el `kid` se publica; un token sigue verificando tras otra rotación).

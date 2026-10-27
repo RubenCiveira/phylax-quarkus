@@ -8,7 +8,7 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
 /**
  * Verifies the signature of a JWT with the keys a client registered (inline JWKS or
- * {@code jwks_uri}), task 3.3.
+ * {@code jwks_uri}): request objects (task 3.3) and client assertions (task 3.2).
  */
 public interface ClientJwtSignatureGateway {
 
@@ -19,5 +19,18 @@ public interface ClientJwtSignatureGateway {
    * @param jwt compact JWT
    * @return its claims when the signature and algorithm are valid, empty otherwise
    */
-  Optional<Map<String, Object>> verify(ClientDetails client, String jwt);
+  default Optional<Map<String, Object>> verify(ClientDetails client, String jwt) {
+    return verify(client, jwt, client.getRequestObjectSigningAlg());
+  }
+
+  /**
+   * Verifies a JWT signed by the client with the algorithm registered for its purpose.
+   *
+   * @param client client whose keys are used
+   * @param jwt compact JWT
+   * @param registeredAlg algorithm the client registered for this kind of JWT; null for any
+   *        supported asymmetric one
+   * @return its claims when the signature and algorithm are valid, empty otherwise
+   */
+  Optional<Map<String, Object>> verify(ClientDetails client, String jwt, String registeredAlg);
 }

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 
@@ -94,7 +95,19 @@ public final class TrustedClientPolicy {
         .jwksUri(app.getJwksUri().orElse(null)).jwksJson(app.getJwksJson().orElse(null))
         .backchannelLogoutUri(app.getBackChannelLogoutUri().orElse(null))
         .backchannelLogoutSessionRequired(
-            Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()));
+            Boolean.TRUE.equals(app.isBackChannelLogoutSessionRequired()))
+        .tokenEndpointAuthSigningAlg(app.getTokenEndpointAuthSigningAlg().orElse(null))
+        .pairwiseSubject(TrustedClientSubjectTypeOptions.PAIRWISE == app.getSubjectType())
+        .sectorIdentifierUri(app.getSectorIdentifierUri().orElse(null))
+        .dpopBoundAccessTokens(Boolean.TRUE.equals(app.isDpopBoundAccessTokens()))
+        .authorizationSignedResponseAlg(app.getAuthorizationSignedResponseAlg().orElse(null))
+        .userinfoSignedResponseAlg(app.getUserinfoSignedResponseAlg().orElse(null))
+        .idTokenEncryptedResponseAlg(app.getIdTokenEncryptedResponseAlg().orElse(null))
+        .idTokenEncryptedResponseEnc(app.getIdTokenEncryptedResponseEnc().orElse(null))
+        .userinfoEncryptedResponseAlg(app.getUserinfoEncryptedResponseAlg().orElse(null))
+        .userinfoEncryptedResponseEnc(app.getUserinfoEncryptedResponseEnc().orElse(null))
+        .authorizationDetailsTypes(
+            parseList(app.getAuthorizationDetailsTypes().orElse(null)).orElse(List.of()));
   }
 
   /**

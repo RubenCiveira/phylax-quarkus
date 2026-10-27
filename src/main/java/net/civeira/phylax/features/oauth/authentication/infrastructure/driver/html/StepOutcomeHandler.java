@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.authentication.infrastructure.driver.html;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,6 +79,14 @@ public class StepOutcomeHandler {
    */
   public Response routeChallenge(AuthenticationResult result, ChallengesState currentState,
       ClientDetails client, AuthRequest request, MultivaluedMap<String, String> paramMap) {
+    if (result.isRight() && request.promptsConsent()
+        && !currentState.getCompleted().contains(AuthenticationChallenge.CLIENT_CONSENT)) {
+      // prompt=consent: a new decision on every requested scope, even if consented before (1.6).
+      result = AuthenticationResult.clientScopeConsentRequired(request.getTenant(),
+          result.getData().getUsername(), client.getClientId(),
+          Arrays.stream(request.getScope().orElse("").split("\\s+"))
+              .filter(scope -> !scope.isBlank()).toList());
+    }
     if (result.isRight()) {
       return responseBuilder.successRedirect(Optional.empty(), client, "form", request,
           result.getData(), paramMap);

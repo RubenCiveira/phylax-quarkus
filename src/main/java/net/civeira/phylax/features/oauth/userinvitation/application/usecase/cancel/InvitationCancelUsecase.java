@@ -11,7 +11,14 @@ public class InvitationCancelUsecase {
 
   private final InvitationStoreGateway store;
 
-  public void cancel(String uid) {
-    store.cancel(uid);
+  /**
+   * Cancels a pending invitation of a tenant.
+   *
+   * @param uid invitation identifier
+   * @param tenantUid tenant of the administrator
+   * @return true when it was pending there and is now cancelled
+   */
+  public boolean cancel(String uid, String tenantUid) {
+    return store.cancel(uid, tenantUid);
   }
 }

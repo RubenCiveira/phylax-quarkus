@@ -3,6 +3,7 @@ package net.civeira.phylax.features.oauth.webauthn.infrastructure.driver.rest;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -38,8 +39,11 @@ public class WebAuthnController {
   private final BeginAuthenticationUsecase beginAuthentication;
   private final FinishAuthenticationUsecase finishAuthentication;
 
-  @ConfigProperty(name = "oauth.base-url", defaultValue = "")
-  private final String baseUrl;
+  /**
+   * Public host for links and origins; without it, derived from the request.
+   */
+  @ConfigProperty(name = "oidc.base-url")
+  private final Optional<String> baseUrl;
 
   @POST
   @Path("oauth/openid/{tenant}/webauthn/register/begin")
@@ -122,8 +126,8 @@ public class WebAuthnController {
   }
 
   private String resolveBaseUrl(HttpHeaders headers) {
-    if (baseUrl != null && !baseUrl.isBlank()) {
-      return baseUrl;
+    if (baseUrl.filter(url -> !url.isBlank()).isPresent()) {
+      return baseUrl.get();
     }
     String proto = firstHeaderValue(headers, "X-Forwarded-Proto");
     if (proto == null || proto.isBlank()) {

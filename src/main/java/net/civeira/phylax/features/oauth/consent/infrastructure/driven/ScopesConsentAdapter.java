@@ -157,6 +157,23 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     storeAcceptedScopes(tenant, username, clientId, acceptedScopes);
   }
 
+  @Override
+  public void withdrawScopes(String tenant, String username, String clientId, List<String> scopes) {
+    if (scopes.isEmpty()) {
+      return;
+    }
+    Optional<User> user = user(tenant, username);
+    Optional<TrustedClient> client = client(tenant, clientId);
+    if (user.isEmpty() || client.isEmpty()) {
+      return;
+    }
+    consentWrite
+        .listForUpdate(UserConsentedScopesFilter.builder().user(user.get())
+            .trustedClient(client.get()).build())
+        .stream().filter(c -> scopes.contains(c.getScope().orElse(null)))
+        .forEach(c -> consentWrite.delete(c.delete()));
+  }
+
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------

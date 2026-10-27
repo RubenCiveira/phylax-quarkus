@@ -45,4 +45,8 @@ public class RefreshTokenInfo {
    */
   @Builder.Default
   private final List<String> amr = List.of();
+  /**
+   * Thumbprint of the DPoP key the token is bound to ({@code cnf.jkt}), null when not bound.
+   */
+  private final String jkt;
 }

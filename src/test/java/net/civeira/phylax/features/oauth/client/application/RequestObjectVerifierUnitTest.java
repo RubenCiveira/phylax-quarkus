@@ -39,7 +39,7 @@ class RequestObjectVerifierUnitTest {
     claims.put("jti", "j-1");
     claims.put("redirect_uri", "https://app.example/cb");
     claims.put("scope", List.of("openid", "profile"));
-    verifier = new RequestObjectVerifier((client, jwt) -> Optional.of(claims),
+    verifier = new RequestObjectVerifier((client, jwt, alg) -> Optional.of(claims),
         (tenant, clientId, purpose, jti, exp) -> used.add(jti));
   }
 

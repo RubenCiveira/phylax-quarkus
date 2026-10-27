@@ -37,7 +37,7 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 @RequiredArgsConstructor
 public class ClaimsMapper {
 
-  private static final String EXPIRATION_CONF = "oauth.jwt.expiration.access-token";
+  private static final String EXPIRATION_CONF = "oidc.jwt.expiration.access-token";
   private static final String CLAIM_USER_NAME = "sub";
   private static final String CLAIM_GRANT_TYPE = "grant_type";
   private static final String CLAIM_CLIENT_ID = "azp";
@@ -60,13 +60,17 @@ public class ClaimsMapper {
    * Whether access tokens follow the RFC 9068 profile (task 3.5). Off by default until every
    * resource server reads the {@code scope} string.
    */
-  @ConfigProperty(name = "oauth.jwt.access-token.rfc9068", defaultValue = "false")
+  @ConfigProperty(name = "oidc.jwt.access-token.rfc9068", defaultValue = "false")
   private final boolean rfc9068;
   /**
    * Lifetime of ID tokens (task 1.2).
    */
-  @ConfigProperty(name = "oauth.jwt.expiration.id-token", defaultValue = "5m")
+  @ConfigProperty(name = "oidc.jwt.expiration.id-token", defaultValue = "5m")
   private final Duration idTokenTtl;
+  /**
+   * Public or pairwise subject of each relying party (task 4.4).
+   */
+  private final SubjectResolver subjects;
 
   /**
    * Claims of an access token (task 1.13).
@@ -74,25 +78,28 @@ public class ClaimsMapper {
    * <p>
    * Issuer, subject, audiences, {@code client_id}, {@code jti} and scope; for a user grant also the
    * real {@code auth_time}, {@code amr} and the {@code acr} derived from it. Without the RFC 9068
-   * profile ({@code oauth.jwt.access-token.rfc9068}, task 3.5) the legacy shape is kept: scope as
-   * an array and a {@code typ} claim. With it the header carries {@code typ: at+jwt} and the scope
-   * is a space-separated string, so a resource server can tell an access token from any other JWT
+   * profile ({@code oidc.jwt.access-token.rfc9068}, task 3.5) the legacy shape is kept: scope as an
+   * array and a {@code typ} claim. With it the header carries {@code typ: at+jwt} and the scope is
+   * a space-separated string, so a resource server can tell an access token from any other JWT
    * signed with the same keys.
    */
   public Builder accessToken(String tenant, ClientDetails client, String grantType,
       AuthenticationData validationData) {
     List<String> scopes =
         validationData.getScopes() == null ? List.of() : List.copyOf(validationData.getScopes());
-    Builder builder =
-        JWT.create().withIssuer(issuer(tenant)).withJWTId(UUID.randomUUID().toString())
-            .withIssuedAt(new Date()).withSubject(validationData.getUsername())
-            .withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
-            .withClaim(CLAIM_CLIENT, client.getClientId()).withClaim(CLAIM_GRANT_TYPE, grantType)
-            .withClaim(CLAIM_ROLES, validationData.getRoles());
+    Builder builder = JWT.create().withIssuer(issuer(tenant))
+        .withJWTId(UUID.randomUUID().toString()).withIssuedAt(new Date())
+        .withSubject(CLIENT_CREDENTIALS.equals(grantType) ? validationData.getUsername()
+            : subjects.subject(client, validationData.getUsername()))
+        .withClaim(CLAIM_AUDIENCE_ID, validationData.getAudiences())
+        .withClaim(CLAIM_CLIENT, client.getClientId()).withClaim(CLAIM_GRANT_TYPE, grantType)
+        .withClaim(CLAIM_ROLES, validationData.getRoles());
     if (null != validationData.getTenant()) {
       builder = builder.withClaim("tid", validationData.getTenant());
     }
-    if (null != validationData.getUid() && !validationData.getUid().isBlank()) {
+    // A pairwise client never gets the global user id either (task 4.4).
+    if (null != validationData.getUid() && !validationData.getUid().isBlank()
+        && !client.isPairwiseSubject()) {
       builder = builder.withClaim("uid", validationData.getUid());
     }
     if (!CLIENT_CREDENTIALS.equals(grantType)) {
@@ -114,15 +121,19 @@ public class ClaimsMapper {
   public Builder refreshToken(String tenant, ClientDetails client,
       AuthenticationData validationData, RefreshFamily family) {
     String jti = UUID.randomUUID().toString();
-    Builder builder = JWT.create().withIssuer(issuer(tenant)).withJWTId(jti)
-        .withIssuedAt(new Date()).withClaim("aud", validationData.getAudiences())
-        .withClaim(CLAIM_USER_NAME, validationData.getUsername())
-        .withClaim(CLAIM_CLIENT_ID, client.getClientId())
-        .withArrayClaim(CLAIM_SCOPE, new String[] {REFRESH_SCOPE})
-        .withClaim(TokenVerifier.CLAIM_GRANTED_SCOPE, String.join(" ", validationData.getScopes()))
-        .withClaim(TokenVerifier.CLAIM_FAMILY_ID, family.getFid())
-        .withClaim(TokenVerifier.CLAIM_FAMILY_EXPIRATION, family.getFexp().getEpochSecond())
-        .withClaim(TokenVerifier.CLAIM_SESSION_BOUND, family.isSessionBound());
+    Builder builder =
+        JWT.create().withIssuer(issuer(tenant)).withJWTId(jti).withIssuedAt(new Date())
+            .withClaim("aud",
+                validationData.getGrantAudiences() != null ? validationData.getGrantAudiences()
+                    : validationData.getAudiences())
+            .withClaim(CLAIM_USER_NAME, validationData.getUsername())
+            .withClaim(CLAIM_CLIENT_ID, client.getClientId())
+            .withArrayClaim(CLAIM_SCOPE, new String[] {REFRESH_SCOPE})
+            .withClaim(TokenVerifier.CLAIM_GRANTED_SCOPE,
+                String.join(" ", validationData.getScopes()))
+            .withClaim(TokenVerifier.CLAIM_FAMILY_ID, family.getFid())
+            .withClaim(TokenVerifier.CLAIM_FAMILY_EXPIRATION, family.getFexp().getEpochSecond())
+            .withClaim(TokenVerifier.CLAIM_SESSION_BOUND, family.isSessionBound());
     if (validationData.getSid() != null) {
       builder = builder.withClaim(CLAIM_SID, validationData.getSid());
     }
@@ -155,10 +166,10 @@ public class ClaimsMapper {
    */
   public Builder idToken(String tenant, ClientDetails client, AuthenticationData validationData,
       String nonce, String accessToken, String authorizationCode) {
-    Builder builder =
-        JWT.create().withIssuer(issuer(tenant)).withJWTId(UUID.randomUUID().toString())
-            .withIssuedAt(new Date()).withSubject(validationData.getUsername())
-            .withAudience(client.getClientId()).withClaim(CLAIM_CLIENT_ID, client.getClientId());
+    Builder builder = JWT.create().withIssuer(issuer(tenant))
+        .withJWTId(UUID.randomUUID().toString()).withIssuedAt(new Date())
+        .withSubject(subjects.subject(client, validationData.getUsername()))
+        .withAudience(client.getClientId()).withClaim(CLAIM_CLIENT_ID, client.getClientId());
     builder = withAuthentication(builder, validationData);
     if (validationData.getSid() != null) {
       builder = builder.withClaim(CLAIM_SID, validationData.getSid());
@@ -192,7 +203,7 @@ public class ClaimsMapper {
   }
 
   /**
-   * Lifetime of an ID token: {@code oauth.jwt.expiration.id-token}, 5 minutes by default. It is its
+   * Lifetime of an ID token: {@code oidc.jwt.expiration.id-token}, 5 minutes by default. It is its
    * own, never the refresh token one.
    *
    * @return ID token lifetime

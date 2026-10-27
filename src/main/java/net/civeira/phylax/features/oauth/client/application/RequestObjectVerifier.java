@@ -37,7 +37,7 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.JwtReplayGateway;
 @RequiredArgsConstructor
 public class RequestObjectVerifier {
 
-  public static final String PURPOSE = "request_object";
+  public static final String PURPOSE = JwtReplayGateway.CLIENT_SIGNED;
   private static final Duration MAX_LIFETIME = Duration.ofHours(1);
   private static final Duration SKEW = Duration.ofSeconds(60);
 

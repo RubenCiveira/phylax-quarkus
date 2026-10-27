@@ -48,8 +48,15 @@ public class IntrospectTokenUseCase {
       return TokenIntrospectionResult.inactive();
     }
 
-    return accessTokenPolicy.validate(tenant, rawToken, audience)
-        .flatMap(payload -> tokenLookupGateway.lookupByJti(tenant, (String) payload.get("jti")))
+    return accessTokenPolicy
+        .validateIgnoringBinding(tenant, rawToken, audience).flatMap(
+            payload -> tokenLookupGateway.lookupByJti(tenant, (String) payload.get("jti"))
+                // The resource server sees the sub of the token, pairwise when it is (task 4.4).
+                .map(found -> found.toBuilder().sub(String.valueOf(payload.get("sub"))).build())
+                .map(found -> AccessTokenPolicy.bound(payload)
+                    .map(jkt -> found.toBuilder().cnf(java.util.Map.of("jkt", jkt))
+                        .tokenType("DPoP").build())
+                    .orElse(found)))
         .orElse(TokenIntrospectionResult.inactive());
   }
 }

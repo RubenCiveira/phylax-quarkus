@@ -43,6 +43,11 @@ public class AuthenticationData {
    */
   private List<String> audiences = new ArrayList<>();
   /**
+   * Audiences of the whole grant, kept by its refresh tokens when an access token is narrowed to
+   * some resources (RFC 8707, task 4.7). Null when they are the access token ones.
+   */
+  private List<String> grantAudiences;
+  /**
    * Scopes granted to the access token. Used by resource servers for authorization.
    */
   private List<String> scopes = new ArrayList<>();

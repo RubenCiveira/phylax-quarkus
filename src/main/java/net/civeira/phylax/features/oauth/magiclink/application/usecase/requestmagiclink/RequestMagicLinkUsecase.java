@@ -4,6 +4,7 @@ package net.civeira.phylax.features.oauth.magiclink.application.usecase.requestm
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -49,8 +50,11 @@ public class RequestMagicLinkUsecase {
   private final MagicLinkEnabledGateway enabled;
   private final SecureTokenService secureTokenService;
 
-  @ConfigProperty(name = "oauth.base-url", defaultValue = "")
-  private final String baseUrl;
+  /**
+   * Public host for links and origins; without it, derived from the request.
+   */
+  @ConfigProperty(name = "oidc.base-url")
+  private final Optional<String> baseUrl;
 
   public boolean isEnabled(String tenantName) {
     return enabled.isEnabled(tenantName);
@@ -110,8 +114,8 @@ public class RequestMagicLinkUsecase {
   }
 
   private String resolveBaseUrl(String redirectUri) {
-    if (baseUrl != null && !baseUrl.isBlank()) {
-      return baseUrl;
+    if (baseUrl.filter(url -> !url.isBlank()).isPresent()) {
+      return baseUrl.get();
     }
     try {
       URI uri = URI.create(redirectUri);
@@ -119,7 +123,7 @@ public class RequestMagicLinkUsecase {
         return uri.getScheme() + "://" + uri.getAuthority();
       }
     } catch (RuntimeException ignored) {
-      log.debug("Unable to derive oauth.base-url from redirect_uri");
+      log.debug("Unable to derive oidc.base-url from redirect_uri");
     }
     return "http://localhost";
   }

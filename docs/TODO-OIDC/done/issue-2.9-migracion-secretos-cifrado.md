@@ -1,7 +1,7 @@
 # 2.9 — Migración de secretos y cifrado en reposo
 
 - **Fase:** 2 (adelantar si se habilita DCR) · **Esfuerzo:** L · **Estado:** hecha (25-10-2026), [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md).
-- **Decisión heredada (PHP EP-02):** opción A de 063: verificador HMAC + *pepper* para todos los secretos de cliente (por eso [3.2](../issue-3.2-autenticacion-jwt-cliente.md) solo implementa `private_key_jwt`); re-hash de contraseñas de usuario **en bloque**, no perezoso. La ubicación de la clave AES y del *pepper* (variable de entorno o secreto montado) y el versionado del *pepper* se deciden para el despliegue Java.
+- **Decisión heredada (PHP EP-02):** opción A de 063: verificador HMAC + *pepper* para todos los secretos de cliente (por eso [3.2](issue-3.2-autenticacion-jwt-cliente.md) solo implementa `private_key_jwt`); re-hash de contraseñas de usuario **en bloque**, no perezoso. La ubicación de la clave AES y del *pepper* (variable de entorno o secreto montado) y el versionado del *pepper* se deciden para el despliegue Java.
 - **Implementación:** decidir formato no reversible para secreto OAuth y transición de registros cifrados existentes sin interrumpir autenticación; mantener verificación temporalmente segura. Revisar origen/rotación de la clave AES y esquema de contraseñas de usuario, con migración o rehash documentado.
 - **Cierre:** clientes antiguos y nuevos autentican durante despliegue, luego los secretos no son recuperables ni reaparecen en GET de DCR; pruebas de migración y contraseña errónea. No reutilizar el cifrado reversible como verificador.
 - **Dependencias:** [0.9](issue-0.9-autenticacion-cliente-unificada.md), [2.8](issue-2.8-proteccion-secretos.md), [2.1](issue-2.1-registro-dinamico-clientes.md).

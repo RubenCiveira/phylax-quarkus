@@ -12,7 +12,7 @@ quarkus:
       - config/database.yaml
       - config/telemetry.yaml
       - config/security.yaml
-      - config/oauth.yaml
+      - config/oidc.yaml
       - config/mail.yaml
       - META-INF/native-image/config.yaml
   http:

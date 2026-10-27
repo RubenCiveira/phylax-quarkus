@@ -45,6 +45,9 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   private final AtomicReference<List<String>> allowedResponseTypes = new AtomicReference<>();
   private volatile boolean requirePar;
   private volatile String jwksJson;
+  private volatile boolean pairwise;
+  private volatile java.util.function.UnaryOperator<ClientDetails.ClientDetailsBuilder> customizer =
+      builder -> builder;
 
   @PostConstruct
   void init() {
@@ -75,6 +78,17 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     requirePar = required;
   }
 
+  /**
+   * Registers extra metadata on every test client (encryption, signing, DPoP...).
+   */
+  public void customize(java.util.function.UnaryOperator<ClientDetails.ClientDetailsBuilder> how) {
+    customizer = how;
+  }
+
+  public void setPairwise(boolean pairwiseSubject) {
+    pairwise = pairwiseSubject;
+  }
+
   public void setJwksJson(String jwks) {
     jwksJson = jwks;
   }
@@ -82,12 +96,15 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   public void reset() {
     allowedScopes.set(List.of("*"));
     allowedGrants.set(List.of("authorization_code", "password", "refresh_token", "form",
-        "client_credentials", "mfa", "urn:ietf:params:oauth:grant-type:device_code"));
+        "client_credentials", "mfa", "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange"));
     allowedScopesM2m.set(List.of("orders:read", "orders:write"));
     allowedResponseTypes.set(List.of("code"));
     allowedRedirects.set(REDIRECTS);
     requirePar = false;
     jwksJson = null;
+    pairwise = false;
+    customizer = builder -> builder;
   }
 
   @Override
@@ -106,15 +123,21 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
 
   @Override
   public Optional<ClientDetails> loadPublicById(String tenant, String clientId) {
-    return method(tenant, clientId).filter(_ -> !isWeb(clientId))
+    return method(tenant, clientId).filter(_ -> !isWeb(clientId) && !isJwt(clientId))
         .map(_ -> buildClient(clientId, false));
+  }
+
+  @Override
+  public Optional<ClientDetails> loadForAssertion(String tenant, String clientId) {
+    return method(tenant, clientId).filter(_ -> isJwt(clientId))
+        .map(_ -> buildClient(clientId, true));
   }
 
   @Override
   public Optional<ClientDetails> loadPrivate(String tenant, String clientId, String clientSecret) {
     boolean secretMatches = OidcTestFixtures.CLIENT_SECRET.equals(clientSecret);
     return secretMatches ? method(tenant, clientId).map(_ -> buildClient(clientId, true))
-        : Optional.empty();
+        .filter(client -> !isJwt(clientId)) : Optional.empty();
   }
 
   /**
@@ -126,13 +149,17 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
           ? Optional.of(clientId)
           : Optional.empty();
     }
-    return OidcTestFixtures.TENANT.equals(tenant) && (isWeb(clientId) || isSpa(clientId))
-        ? Optional.of(clientId)
-        : Optional.empty();
+    return OidcTestFixtures.TENANT.equals(tenant)
+        && (isWeb(clientId) || isSpa(clientId) || isJwt(clientId)) ? Optional.of(clientId)
+            : Optional.empty();
   }
 
   private static boolean isWeb(String clientId) {
     return OidcTestFixtures.WEB_CLIENT_ID.equals(clientId);
+  }
+
+  private static boolean isJwt(String clientId) {
+    return OidcTestFixtures.JWT_CLIENT_ID.equals(clientId);
   }
 
   private static boolean isSpa(String clientId) {
@@ -141,14 +168,16 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
 
   private ClientDetails buildClient(String clientId, boolean confidential) {
     ClientAuthMethod registered = isWeb(clientId) ? ClientAuthMethod.CLIENT_SECRET_BASIC
-        : isSpa(clientId) ? ClientAuthMethod.NONE : null;
-    return ClientDetails.builder().clientId(clientId).allowedScopes(allowedScopes.get())
-        .allowedScopesM2m(allowedScopesM2m.get()).allowedResponseTypes(allowedResponseTypes.get())
-        .allowedGrants(allowedGrants.get()).requirePar(requirePar).jwksJson(jwksJson)
-        .protectedWithSecret(confidential).tokenEndpointAuthMethod(registered)
-        .requirePkce(isSpa(clientId)).allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE))
+        : isSpa(clientId) ? ClientAuthMethod.NONE
+            : isJwt(clientId) ? ClientAuthMethod.PRIVATE_KEY_JWT : null;
+    return customizer.apply(ClientDetails.builder().clientId(clientId)
+        .allowedScopes(allowedScopes.get()).allowedScopesM2m(allowedScopesM2m.get())
+        .allowedResponseTypes(allowedResponseTypes.get()).allowedGrants(allowedGrants.get())
+        .requirePar(requirePar).jwksJson(jwksJson).protectedWithSecret(confidential)
+        .tokenEndpointAuthMethod(registered).requirePkce(isSpa(clientId))
+        .allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE, OidcTestFixtures.RESOURCE_URI))
         .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId))
-        .allowedRedirectUris(allowedRedirects.get())
-        .postLogoutRedirectUris(List.of(OidcTestFixtures.POST_LOGOUT_URI)).build();
+        .allowedRedirectUris(allowedRedirects.get()).pairwiseSubject(pairwise)
+        .postLogoutRedirectUris(List.of(OidcTestFixtures.POST_LOGOUT_URI))).build();
   }
 }

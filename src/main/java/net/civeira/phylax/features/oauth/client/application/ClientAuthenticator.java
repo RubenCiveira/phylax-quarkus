@@ -3,9 +3,13 @@ package net.civeira.phylax.features.oauth.client.application;
 
 import java.util.Optional;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthPolicy;
 import net.civeira.phylax.features.oauth.client.domain.ClientCredentials;
@@ -24,7 +28,9 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGatewa
  * endpoint accepts, and a client never authenticates with a method it did not register:
  * <ul>
  * <li>registered {@code none}: only as public, never with a secret;</li>
- * <li>registered {@code private_key_jwt}: rejected until client assertions exist (task 3.2);</li>
+ * <li>registered {@code private_key_jwt}: only with a valid assertion signed with its keys
+ * ({@link ClientAssertionVerifier}, task 3.2), never with a secret or as public; the assertion
+ * counts as a confidential authentication for every policy;</li>
  * <li>registered secret method: under {@link ClientAuthPolicy#REGISTERED_METHOD} only that one
  * (Basic or body); public access only if the client also allows it.</li>
  * </ul>
@@ -38,6 +44,8 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGatewa
 public class ClientAuthenticator {
 
   private final ClientStoreGateway clients;
+  private final ClientAssertionVerifier assertions;
+  private final CurrentRequest current;
 
   /**
    * Authenticates the client of a request.
@@ -50,14 +58,14 @@ public class ClientAuthenticator {
   public Optional<ClientDetails> authenticate(String tenant, ClientCredentials credentials,
       ClientAuthPolicy policy) {
     Optional<ClientAuthMethod> method = credentials.method();
+    if (method.isPresent() && method.get() == ClientAuthMethod.PRIVATE_KEY_JWT) {
+      return byAssertion(tenant, credentials);
+    }
     Optional<String> clientId = credentials.clientId();
     if (method.isEmpty() || clientId.isEmpty()) {
       return rejected(tenant, credentials, "malformed or mixed credentials");
     }
     ClientAuthMethod used = method.get();
-    if (used == ClientAuthMethod.PRIVATE_KEY_JWT) {
-      return rejected(tenant, credentials, "client assertions are not supported");
-    }
     if (used == ClientAuthMethod.NONE) {
       return policy == ClientAuthPolicy.SECRET ? rejected(tenant, credentials, "secret required")
           : clients.loadPublicById(tenant, clientId.get())
@@ -68,6 +76,34 @@ public class ClientAuthenticator {
     return clients.loadPrivate(tenant, clientId.get(), credentials.secret())
         .filter(client -> allowsSecretMethod(client.getTokenEndpointAuthMethod(), used, policy))
         .or(() -> rejected(tenant, credentials, "invalid secret or unregistered method"));
+  }
+
+  /**
+   * A {@code private_key_jwt} authentication: the assertion names the client ({@code sub}, or the
+   * {@code client_id} parameter that must match it) and is verified with the client's keys.
+   */
+  private Optional<ClientDetails> byAssertion(String tenant, ClientCredentials credentials) {
+    Optional<String> jwt = credentials.jwtAssertion();
+    if (jwt.isEmpty()) {
+      return rejected(tenant, credentials, "unsupported client_assertion_type");
+    }
+    Optional<String> subject = unverifiedSubject(jwt.get());
+    Optional<String> named = credentials.clientId();
+    if (subject.isEmpty() || named.isPresent() && !named.get().equals(subject.get())) {
+      return rejected(tenant, credentials, "assertion without matching sub");
+    }
+    String issuer = current.getPublicHost() + "/oauth/openid/" + tenant;
+    return clients.loadForAssertion(tenant, subject.get())
+        .filter(client -> assertions.verify(tenant, issuer, client, jwt.get()))
+        .or(() -> rejected(tenant, credentials, "invalid assertion or unregistered method"));
+  }
+
+  private static Optional<String> unverifiedSubject(String jwt) {
+    try {
+      return Optional.ofNullable(JWT.decode(jwt).getSubject()).filter(s -> !s.isBlank());
+    } catch (JWTDecodeException ex) {
+      return Optional.empty();
+    }
   }
 
   /**

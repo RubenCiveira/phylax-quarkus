@@ -114,7 +114,7 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
   }
 
   @Test
-  void e2e_scopeConsent_denied_returnsToLoginForm() {
+  void e2e_scopeConsent_denied_redirectsWithAccessDenied() {
     loginGateway
         .whenValidate(() -> AuthenticationResult.clientScopeConsentRequired(OidcTestFixtures.TENANT,
             OidcTestFixtures.USERNAME, OidcTestFixtures.CLIENT_ID,
@@ -126,12 +126,14 @@ class EndToEndFlowTest extends OidcIntegrationTestBase {
     String preSession = client.extractPreSessionCookie(login);
     Assertions.assertNotNull(preSession);
 
-    // User clicks Deny — posts step=start which returns to the login form
+    // User clicks Deny: the client gets access_denied, with its state (task 1.6)
     Response deny = client.submitDenyScopeConsent(OidcTestFixtures.TENANT, preSession);
 
-    Assertions.assertEquals(200, deny.statusCode());
+    Assertions.assertEquals(302, deny.statusCode());
     Assertions.assertNull(client.extractAuthCode(deny));
-    Assertions.assertTrue(deny.getBody().asString().contains("name=\"password\""));
+    String location = deny.getHeader("Location");
+    Assertions.assertTrue(location.contains("error=access_denied"), location);
+    Assertions.assertTrue(location.contains("state=" + OidcTestFixtures.STATE), location);
     Assertions.assertEquals(0, scopeConsentGateway.getAcceptedCount());
   }
 

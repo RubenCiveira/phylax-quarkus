@@ -6,9 +6,12 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.AuthorizationRequestPolicy;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.oidc.domain.DiscoveryContributor;
 import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
 import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
+import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 
 /**
  * Contributes authorization, token, and core OIDC capability fields to the discovery document.
@@ -18,25 +21,36 @@ import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
 public class AuthorizationEndpointContributor implements DiscoveryContributor {
 
   private final AcrPolicy acrPolicy;
+  private final SubjectResolver subjects;
+
+  /**
+   * Grants the server resolves (task 1.1). {@code implicit} stands for the hybrid responses that
+   * return tokens from authorize (RFC 7591 §2.1, task 1.7); the {@code mfa} continuation of the
+   * password grant is not a grant of its own to announce.
+   */
+  static final List<String> GRANTS = List.of("authorization_code", "implicit", "refresh_token",
+      "password", "client_credentials", "urn:ietf:params:oauth:grant-type:device_code",
+      "urn:ietf:params:oauth:grant-type:token-exchange");
 
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
     builder.authorizationEndpoint(base + "auth").tokenEndpoint(base + "token")
-        .grantTypesSupported(List.of("authorization_code", "implicit", "refresh_token", "password",
-            "mfa", "urn:ietf:params:oauth:grant-type:device_code", "client_credentials"))
-        .acrValuesSupported(acrPolicy.supported())
+        .grantTypesSupported(GRANTS).acrValuesSupported(acrPolicy.supported())
         .uiLocalesSupported(AuthRequest.supportedUiLocales())
         .responseTypesSupported(
             List.of("code", "code id_token", "code token", "code id_token token"))
-        .subjectTypesSupported(List.of("public"))
-        .responseModesSupported(List.of("query", "fragment", "form_post"))
-        .tokenEndpointAuthSigningAlgValuesSupported(List.of("RS256"))
+        .subjectTypesSupported(
+            subjects.pairwiseAvailable() ? List.of("public", "pairwise") : List.of("public"))
+        .responseModesSupported(AuthorizationRequestPolicy.MODES)
+        .authorizationSigningAlgValuesSupported(AuthorizationRequestPolicy.JARM_ALGORITHMS)
+        .tokenEndpointAuthMethodsSupported(ClientAuthMethod.TOKEN_ENDPOINT)
+        .tokenEndpointAuthSigningAlgValuesSupported(ClientAuthMethod.ASSERTION_ALGORITHMS)
         // Signed request objects by value or inside a push; never encrypted, never by reference.
         .requestObjectSigningAlgValuesSupported(List.of("RS256", "ES256"))
-        .claimsSupported(List.of("aud", "sub", "iss", "auth_time", "name", "given_name",
-            "family_name", "preferred_username", "email", "acr"))
+        .claimsSupported(AuthorizationRequestPolicy.SUPPORTED_CLAIMS)
         .claimTypesSupported(List.of("normal")).claimsParameterSupported(true)
-        .scopesSupported(List.of("openid", "roles", "profile", "email", "phone"))
+        .scopesSupported(
+            List.of("openid", "profile", "email", "address", "phone", "offline_access"))
         .requestParameterSupported(true).requestUriParameterSupported(false)
         .codeChallengeMethodsSupported(List.of("S256"))
         .promptValuesSupported(List.of("none", "login", "consent", "select_account"))

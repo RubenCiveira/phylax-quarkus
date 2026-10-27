@@ -19,7 +19,7 @@ import lombok.Data;
  * via Lombok builder; use {@link #inactive()} for the inactive sentinel.
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @RegisterForReflection
 @JsonInclude(Include.NON_NULL)
 public class TokenIntrospectionResult {
@@ -70,6 +70,28 @@ public class TokenIntrospectionResult {
    */
   @JsonProperty("jti")
   private final String jti;
+
+  /**
+   * Confirmation of a token bound to a DPoP key ({@code jkt}, RFC 9449 §6.2).
+   */
+  @JsonProperty("cnf")
+  private final java.util.Map<String, String> cnf;
+
+  @JsonProperty("token_type")
+  private final String tokenType;
+
+  /**
+   * Local username of the token, from the server record: never serialized, since the {@code sub} a
+   * resource server sees may be pairwise (task 4.4).
+   */
+  @com.fasterxml.jackson.annotation.JsonIgnore
+  private final String localSubject;
+
+  /**
+   * Local user identifier of the token, from the server record; never serialized.
+   */
+  @com.fasterxml.jackson.annotation.JsonIgnore
+  private final String localUid;
 
   /**
    * Returns the inactive sentinel value.

@@ -14,7 +14,7 @@ Todo endpoint que exige identificar al cliente lo hace de la misma forma y con l
 | `client_secret_basic` | `Authorization: Basic base64(id:secreto)` | cliente confidencial |
 | `client_secret_post` | `client_id` + `client_secret` en el cuerpo | cliente confidencial |
 | `none` | solo `client_id` en el cuerpo | cliente con acceso público (`publicAllow` o método `none` registrado) |
-| `private_key_jwt` | `client_assertion` | **todavía no**: se rechaza hasta [3.2](../issue-3.2-autenticacion-jwt-cliente.md) |
+| `private_key_jwt` | `client_assertion` | **todavía no**: se rechaza hasta [3.2](issue-3.2-autenticacion-jwt-cliente.md) |
 
 Se responde `invalid_client` (401, `WWW-Authenticate`, sin caché) cuando: se mezclan métodos (Basic y `client_secret` a la vez, RFC 6749 §2.3), el Basic está mal formado, Basic y `client_id` nombran clientes distintos, el secreto no coincide, el cliente no existe en el tenant o el método no es uno de los registrados. Nunca un 500.
 

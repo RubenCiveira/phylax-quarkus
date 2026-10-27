@@ -12,11 +12,14 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.authentication.application.token.IssueTokenUsecase;
 import net.civeira.phylax.features.oauth.authentication.application.token.TokenGrantRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.exception.OAuthTokenException;
 import net.civeira.phylax.features.oauth.client.domain.ClientCredentials;
+import net.civeira.phylax.features.oauth.tokensecurity.application.DpopBinding;
+import net.civeira.phylax.features.oauth.tokensecurity.application.DpopProofVerifier;
 
 /**
  * REST driver of the OAuth token endpoint ({@code POST /oauth/openid/{tenant}/token}).
@@ -37,6 +40,9 @@ public class TokenController {
    * Use case that authenticates the client and runs the grant.
    */
   private final IssueTokenUsecase issueToken;
+  private final DpopProofVerifier dpopVerifier;
+  private final DpopBinding dpop;
+  private final CurrentRequest current;
 
   /**
    * Issues tokens for the supported grant types.
@@ -52,6 +58,15 @@ public class TokenController {
   public Response tenantLogin(final @PathParam("tenant") String tenant, final @Context UriInfo req,
       final @Context HttpHeaders headers, final MultivaluedMap<String, String> paramMap) {
     try {
+      String proof = headers.getHeaderString("DPoP");
+      if (proof != null) {
+        // A proof, when present, must be valid; the tokens are then bound to its key (3.6).
+        dpop.bind(dpopVerifier
+            .verify(tenant, proof, "POST",
+                current.getPublicHost() + "/oauth/openid/" + tenant + "/token", null)
+            .orElseThrow(() -> OAuthTokenException.of("invalid_dpop_proof",
+                "The DPoP proof is not valid", 400)));
+      }
       TokenGrantRequest request =
           new TokenGrantRequest(tenant, paramMap.getFirst("grant_type"), paramMap,
               ClientCredentials.from(headers.getHeaderString(HttpHeaders.AUTHORIZATION), paramMap),

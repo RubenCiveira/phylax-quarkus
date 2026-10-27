@@ -37,23 +37,23 @@ security:
     keys: ${SECURITY_SECRETS_KEYS}
     current: ${SECURITY_SECRETS_CURRENT}
 
-"%dev":
-  security:
-    digest:
-      peppers: d0:dev-digest-pepper-not-for-production
-      current: d0
-    secrets:
-      keys: k0:dev-secret-key-not-for-production
-      current: k0
+# "%dev":
+#   security:
+#     digest:
+#       peppers: d0:dev-digest-pepper-not-for-production
+#       current: d0
+#     secrets:
+#       keys: k0:dev-secret-key-not-for-production
+#       current: k0
 
-"%test":
-  security:
-    digest:
-      peppers: t0:test-digest-pepper
-      current: t0
-    secrets:
-      keys: t0:test-secret-key
-      current: t0
+# "%test":
+#   security:
+#     digest:
+#       peppers: t0:test-digest-pepper
+#       current: t0
+#     secrets:
+#       keys: t0:test-secret-key
+#       current: t0
 
 quarkus:
   http:

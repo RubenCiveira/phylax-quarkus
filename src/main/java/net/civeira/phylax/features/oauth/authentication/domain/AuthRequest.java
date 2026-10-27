@@ -5,9 +5,12 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -101,6 +104,17 @@ public class AuthRequest {
   private final List<String> audiences = List.of();
   @Builder.Default
   /**
+   * Resource indicators of the request (RFC 8707, task 4.7): absolute URIs of the resource servers
+   * the tokens are for. They are also audiences of the request.
+   */
+  private final List<String> resources = List.of();
+  @Builder.Default
+  /**
+   * The {@code claims} parameter as sent, a JSON object (task 4.8).
+   */
+  private final Optional<String> claims = Optional.empty();
+  @Builder.Default
+  /**
    * Hint to pre-fill the username field in the login form.
    */
   private final Optional<String> loginHint = Optional.empty();
@@ -186,12 +200,16 @@ public class AuthRequest {
     this.loginHint = Optional.ofNullable(params.getFirst("login_hint"))
         .filter(hint -> !hint.isBlank() && hint.length() <= MAX_LOGIN_HINT);
     this.idTokenHint = Optional.ofNullable(params.getFirst("id_token_hint"));
+    this.claims = Optional.ofNullable(params.getFirst("claims")).filter(c -> !c.isBlank());
     this.acrValues = Optional.ofNullable(params.getFirst("acr_values"));
     String maxAgeRaw = params.getFirst("max_age");
     this.maxAge = maxAgeRaw != null ? parseMaxAge(maxAgeRaw) : -1;
     String aus = params.getFirst("audience");
     List<String> explicitAud =
         new ArrayList<>(null == aus ? List.of() : Arrays.asList(aus.split("\\,")));
+    this.resources = resourceIndicators(params.get("resource"));
+    this.resources.stream().filter(resource -> !explicitAud.contains(resource))
+        .forEach(explicitAud::add);
     this.clientId.ifPresent(azp -> {
       if (!explicitAud.contains(azp)) {
         explicitAud.add(azp);
@@ -199,6 +217,55 @@ public class AuthRequest {
     });
     this.audiences = explicitAud.stream().toList();
     this.pushed = false;
+  }
+
+  /**
+   * The {@code resource} values of a request: repeated parameters, each one possibly holding
+   * several space-separated URIs (the form a pushed or signed request stores them in).
+   *
+   * @param values raw parameter values, may be null
+   * @return distinct values in order
+   */
+  public static List<String> resourceIndicators(List<String> values) {
+    return values == null ? List.of()
+        : values.stream().filter(v -> v != null).flatMap(v -> Arrays.stream(v.trim().split("\\s+")))
+            .filter(v -> !v.isBlank()).distinct().toList();
+  }
+
+  /**
+   * Whether a resource indicator is valid (RFC 8707 §2): an absolute URI without fragment.
+   *
+   * @param resource indicator
+   * @return true when well formed
+   */
+  public static boolean validResource(String resource) {
+    try {
+      java.net.URI uri = new java.net.URI(resource);
+      return uri.isAbsolute() && uri.getRawFragment() == null;
+    } catch (java.net.URISyntaxException ex) {
+      return false;
+    }
+  }
+
+  /**
+   * Values of the {@code prompt} parameter, a space-separated set (OIDC Core §3.1.2.1).
+   *
+   * @return the requested prompts, empty without the parameter
+   */
+  public Set<String> prompts() {
+    return prompt.<Set<String>>map(p -> Arrays.stream(p.trim().split("\\s+"))
+        .filter(v -> !v.isBlank()).collect(Collectors.toCollection(LinkedHashSet::new)))
+        .orElse(Set.of());
+  }
+
+  /**
+   * Whether the request asks the user to decide on the scopes again ({@code prompt=consent}, task
+   * 1.6), even with a stored consent.
+   *
+   * @return true when {@code consent} is among the prompts
+   */
+  public boolean promptsConsent() {
+    return prompts().contains("consent");
   }
 
   /**
@@ -218,7 +285,7 @@ public class AuthRequest {
   }
 
   /**
-   * First locale of {@code ui_locales} that the login pages support ({@code oauth.ui-locales},
+   * First locale of {@code ui_locales} that the login pages support ({@code oidc.ui-locales},
    * {@code en} by default), task 3.10.
    */
   private static Optional<Locale> uiLocale(String uiLocales) {
@@ -239,7 +306,7 @@ public class AuthRequest {
    * @return language tags
    */
   public static List<String> supportedUiLocales() {
-    return ConfigProvider.getConfig().getOptionalValue("oauth.ui-locales", String.class)
+    return ConfigProvider.getConfig().getOptionalValue("oidc.ui-locales", String.class)
         .map(v -> Arrays.stream(v.split(",")).map(String::trim).filter(t -> !t.isEmpty()).toList())
         .orElse(List.of("en"));
   }
@@ -261,6 +328,9 @@ public class AuthRequest {
         + append("redirect_uri", getRedirect()) + append("response_type", getResponseType())
         + append("response_mode", getResponseMode()) + append("login_hint", getLoginHint())
         + append("acr_values", getAcrValues()) + append("ui_locales", getUiLocales())
+        + append("claims", getClaims())
+        + (resources.isEmpty() ? ""
+            : "&resource=" + URLEncoder.encode(String.join(" ", resources), StandardCharsets.UTF_8))
         + (maxAge >= 0 ? "&max_age=" + maxAge : "");
   }
 

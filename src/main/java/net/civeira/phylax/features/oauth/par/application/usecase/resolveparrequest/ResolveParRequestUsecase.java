@@ -23,7 +23,7 @@ import net.civeira.phylax.features.oauth.par.domain.gateway.ParRequestGateway;
  * <li>The pushed request must be of this tenant and the outer {@code client_id} must be the one it
  * was pushed for.</li>
  * <li>Single use: the first resolution spends it atomically and returns a browser binding; from
- * then on, for the rest of that login ({@code oauth.par.flow-ttl}, 10 minutes by default), only the
+ * then on, for the rest of that login ({@code oidc.par.flow-ttl}, 10 minutes by default), only the
  * browser that presents the binding may resolve it again (the login forms post to the same URL).
  * Any other use is {@code invalid_request_uri}.</li>
  * <li>Only the stored parameters count: the caller must ignore the rest of the query.</li>
@@ -35,7 +35,7 @@ public class ResolveParRequestUsecase {
 
   private final ParRequestGateway gateway;
   private final ParBindingGateway bindings;
-  @ConfigProperty(name = "oauth.par.flow-ttl", defaultValue = "10m")
+  @ConfigProperty(name = "oidc.par.flow-ttl", defaultValue = "10m")
   private final Duration flowTtl;
 
   /**

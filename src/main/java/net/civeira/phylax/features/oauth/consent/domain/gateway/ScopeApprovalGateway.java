@@ -56,4 +56,17 @@ public interface ScopeApprovalGateway {
    */
   void storeApprovedScopes(String tenant, String username, String clientId,
       List<String> acceptedScopes);
+
+  /**
+   * Withdraws stored consents the user did not accept again ({@code prompt=consent}, task 1.6).
+   *
+   * @param tenant tenant identifier
+   * @param username authenticated username
+   * @param clientId OAuth client identifier
+   * @param scopes previously consented scopes left unchecked
+   */
+  default void withdrawScopes(String tenant, String username, String clientId,
+      List<String> scopes) {
+    // Without stored consents there is nothing to withdraw.
+  }
 }

@@ -25,7 +25,7 @@ Toda respuesta de `POST /token`, de cualquier grant, lleva `Cache-Control: no-st
 - `OAuthTokenException` (dominio de `authentication`) lleva `error`, descripción y estado; los casos de uso la lanzan y `TokenController` solo la serializa. `DeviceCodeGranter` traduce `DeviceAuthorizationException` a ella en lugar de lanzar una `WebApplicationException` desde la capa de aplicación.
 - **Cambios de contrato:**
   - Credenciales de usuario erróneas en `password`: de 401 sin formato a 400 `invalid_grant` (RFC 6749 §5.2).
-  - `mfa_required`: de 401 a 403 con el mismo cuerpo. 401 queda reservado a `invalid_client`; 403 es la convención de facto (Auth0) para este error no estándar. El grant `mfa` está descartado en PHP (decisión 040) y queda pendiente de [2.5](../issue-2.5-grants-inalcanzables-codigo-muerto.md).
+  - `mfa_required`: de 401 a 403 con el mismo cuerpo. 401 queda reservado a `invalid_client`; 403 es la convención de facto (Auth0) para este error no estándar. El grant `mfa` está descartado en PHP (decisión 040) y queda pendiente de [2.5](issue-2.5-grants-inalcanzables-codigo-muerto.md).
   - Grant no permitido: de `unsupported_grant_type` a `unauthorized_client`.
 - **Corregido:** `PasswordGranter` y `MfaGranter` lanzaban `NullPointerException` (500) si faltaba un parámetro.
 - **Pendiente fuera de la ficha:** scopes como conjuntos exactos en toda la emisión ([1.15](issue-1.15-scopes-conjuntos-exactos.md)); el endpoint ya los trocea por espacios y compara elementos completos.

@@ -26,13 +26,62 @@ public class AccessTokenPolicy {
   private final TenantQueryRepositoryGateway tenants;
   private final TokenRevocationGateway revocations;
 
+  /**
+   * A bearer access token: a token bound to a DPoP key ({@code cnf}) is refused (RFC 9449 §7.1).
+   */
   public Optional<Map<String, Object>> validate(String tenant, String token, String audience) {
+    return validate(tenant, token, audience, false).filter(claims -> bound(claims).isEmpty());
+  }
+
+  /**
+   * A DPoP access token: bound to the key of the proof that came with it (task 3.6). An unbound
+   * token is accepted too, as a client may use the DPoP scheme for a bearer token.
+   *
+   * @param jkt thumbprint of the verified proof
+   */
+  public Optional<Map<String, Object>> validateWithProof(String tenant, String token,
+      String audience, String jkt) {
+    return validate(tenant, token, audience, false)
+        .filter(claims -> bound(claims).map(jkt::equals).orElse(true));
+  }
+
+  /**
+   * For introspection: the binding is reported ({@code cnf}), not enforced, since the resource
+   * server checks the proof.
+   */
+  public Optional<Map<String, Object>> validateIgnoringBinding(String tenant, String token,
+      String audience) {
     return validate(tenant, token, audience, false);
   }
 
   /** Authentication happens before Quarkus activates the HTTP request context. */
   public Optional<Map<String, Object>> validateEarly(String tenant, String token, String audience) {
-    return validate(tenant, token, audience, true);
+    return validate(tenant, token, audience, true).filter(claims -> bound(claims).isEmpty());
+  }
+
+  /**
+   * The server record of a validated access token, with its local user ({@code localSubject},
+   * {@code localUid}): the {@code sub} of the token is pairwise for a pairwise client (task 4.4).
+   *
+   * @param tenant tenant
+   * @param claims claims returned by a validation
+   * @return the record, empty when it is no longer active
+   */
+  public Optional<TokenIntrospectionResult> record(String tenant, Map<String, Object> claims) {
+    return claims.get("jti") instanceof String jti ? lookup.lookupByJti(tenant, jti)
+        : Optional.empty();
+  }
+
+  /**
+   * Thumbprint of the DPoP key a token is bound to.
+   *
+   * @param claims token claims
+   * @return {@code cnf.jkt}, empty when not bound
+   */
+  public static Optional<String> bound(Map<String, Object> claims) {
+    return claims.get("cnf") instanceof Map<?, ?> cnf && cnf.get("jkt") instanceof String jkt
+        ? Optional.of(jkt)
+        : Optional.empty();
   }
 
   private Optional<Map<String, Object>> validate(String tenant, String token, String audience,

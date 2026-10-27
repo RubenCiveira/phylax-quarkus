@@ -25,9 +25,23 @@ import java.util.Optional;
  * @param bodySecret the {@code client_secret} body parameter
  * @param assertion whether the body carries a client assertion
  * @param malformed the Authorization header uses Basic but cannot be decoded
+ * @param clientAssertion the {@code client_assertion} body parameter
+ * @param clientAssertionType the {@code client_assertion_type} body parameter
  */
 public record ClientCredentials(String bodyClientId, String basicId, String basicSecret,
-    String bodySecret, boolean assertion, boolean malformed) {
+    String bodySecret, boolean assertion, boolean malformed, String clientAssertion,
+    String clientAssertionType) {
+
+  /**
+   * The only client assertion type (RFC 7523 §2.2).
+   */
+  public static final String JWT_BEARER_ASSERTION =
+      "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+
+  public ClientCredentials(String bodyClientId, String basicId, String basicSecret,
+      String bodySecret, boolean assertion, boolean malformed) {
+    this(bodyClientId, basicId, basicSecret, bodySecret, assertion, malformed, null, null);
+  }
 
   /**
    * Reads the credentials from the Authorization header and the form body. Other Authorization
@@ -61,7 +75,7 @@ public record ClientCredentials(String bodyClientId, String basicId, String basi
     return new ClientCredentials(param(body, "client_id"), basicId, basicSecret,
         param(body, "client_secret"),
         param(body, "client_assertion") != null || param(body, "client_assertion_type") != null,
-        malformed);
+        malformed, param(body, "client_assertion"), param(body, "client_assertion_type"));
   }
 
   /**
@@ -80,7 +94,8 @@ public record ClientCredentials(String bodyClientId, String basicId, String basi
     if (assertion) {
       methods.add(ClientAuthMethod.PRIVATE_KEY_JWT);
     }
-    if (malformed || methods.size() > 1 || clientId().isEmpty()) {
+    // With an assertion the client may be named only by its sub (RFC 7523 §3).
+    if (malformed || methods.size() > 1 || clientId().isEmpty() && !assertion) {
       return Optional.empty();
     }
     return Optional.of(methods.isEmpty() ? ClientAuthMethod.NONE : methods.get(0));
@@ -105,6 +120,17 @@ public record ClientCredentials(String bodyClientId, String basicId, String basi
    */
   public String secret() {
     return basicSecret != null ? basicSecret : bodySecret != null ? bodySecret : "";
+  }
+
+  /**
+   * The JWT of a {@code private_key_jwt} authentication.
+   *
+   * @return the assertion, empty when missing or of another type
+   */
+  public Optional<String> jwtAssertion() {
+    return JWT_BEARER_ASSERTION.equals(clientAssertionType)
+        ? Optional.ofNullable(clientAssertion).filter(a -> !a.isBlank())
+        : Optional.empty();
   }
 
   @Override

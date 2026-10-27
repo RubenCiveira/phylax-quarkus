@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.auth0.jwt.JWT;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.NewCookie;
@@ -25,6 +27,7 @@ import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConf
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.ClaimsRequest;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.session.application.SessionStateService;
 import net.civeira.phylax.features.oauth.session.domain.TemporalAuthCode;
@@ -33,6 +36,8 @@ import net.civeira.phylax.features.oauth.session.domain.gateway.TemporalKeysGate
 import net.civeira.phylax.features.oauth.tokensecurity.application.ClaimsMapper;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.IdToken;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.UserClaimsGateway;
 
 /**
  * Builds the final HTTP redirect responses for the OIDC authorization flow.
@@ -57,6 +62,8 @@ public class OidcResponseBuilder {
   private final TenantConfigQueryRepositoryGateway tenantConfigs;
   private final ClaimsMapper claimsMapper;
   private final SessionStateService sessionStates;
+  private final TokenSigner tokenSigner;
+  private final UserClaimsGateway userClaims;
   private static final SecureRandom RANDOM = new SecureRandom();
 
   /**
@@ -89,6 +96,11 @@ public class OidcResponseBuilder {
     if (List.of(type.split(" ")).contains("id_token")
         && !validationData.getScopes().contains("openid")) {
       return errorRedirect(request, "invalid_scope");
+    }
+    Optional<String> missing = missingEssentialClaim(request, validationData);
+    if (missing.isPresent()) {
+      return errorRedirect(request, "access_denied",
+          "The essential claim " + missing.get() + " is not available for this user");
     }
     if ("code".equals(type)) {
       if (clientDetails.isRequirePkce() && request.getCodeChallenge().isEmpty()) {
@@ -156,6 +168,10 @@ public class OidcResponseBuilder {
     }
     NewCookie cookie =
         cookieManager.writeAuthSession(uid, request.getTenant(), ssoTtl(request.getTenant()));
+    Optional<String> jarm = jarmMode(request);
+    if (jarm.isPresent()) {
+      return jarm(request, to, jarm.get(), cookie);
+    }
     if ("form_post".equals(request.getResponseMode().orElse(""))) {
       return formPost(request.getRedirect().orElseThrow(), to, cookie);
     }
@@ -182,15 +198,87 @@ public class OidcResponseBuilder {
     String redirect = request.getRedirect().get();
     boolean fragment = !"code".equals(request.getResponseType().orElse("code"))
         || "fragment".equals(request.getResponseMode().orElse(""));
+    Optional<String> jarm = jarmMode(request);
     String separator = fragment ? "#" : redirect.contains("?") ? "&" : "?";
     String to = redirect + separator + "error=" + encode(message) + "&error_description="
         + encode(description == null ? message : description) + stateParam(request) + "&iss="
         + encode(claimsMapper.issuer(request.getTenant()));
+    if (jarm.isPresent()) {
+      return jarm(request, to, jarm.get(), null);
+    }
     if ("form_post".equals(request.getResponseMode().orElse(""))) {
       return formPost(redirect, to, null);
     }
     return securer
         .secureRedirectResponse(Response.status(302).location(AuthorizeHtml.buildUrl(to)));
+  }
+
+  /**
+   * An essential claim of the {@code claims} parameter that the user does not have with the granted
+   * scopes (task 4.8): the request ends before any code or token is issued.
+   */
+  private Optional<String> missingEssentialClaim(AuthRequest request, AuthenticationData data) {
+    try {
+      return ClaimsRequest.parse(request.getClaims().orElse(null))
+          .flatMap(claims -> claims.essentialMissing(
+              userClaims.claims(data.getUid(), data.getUsername(), data.getScopes()).entrySet()
+                  .stream().filter(e -> e.getValue() != null).map(Map.Entry::getKey).toList()));
+    } catch (IllegalArgumentException ex) {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * The JWT secured mode of the request (JARM, task 4.2): {@code jwt} is {@code query.jwt} for a
+   * code and {@code fragment.jwt} when tokens are returned.
+   */
+  private static Optional<String> jarmMode(AuthRequest request) {
+    String mode = request.getResponseMode().orElse("");
+    if ("jwt".equals(mode)) {
+      return Optional.of(
+          "code".equals(request.getResponseType().orElse("code")) ? "query.jwt" : "fragment.jwt");
+    }
+    return mode.endsWith(".jwt") ? Optional.of(mode) : Optional.empty();
+  }
+
+  /**
+   * Delivers the parameters of a response as a single {@code response} JWT signed by the server,
+   * with {@code iss}, {@code aud} (the client) and a 10 minute {@code exp}, in the query, the
+   * fragment or a form post.
+   */
+  private Response jarm(AuthRequest request, String location, String mode, NewCookie cookie) {
+    String redirect = request.getRedirect().orElseThrow();
+    Map<String, Object> params = new LinkedHashMap<>(parameters(redirect, location));
+    params.remove("iss");
+    String response = tokenSigner.sign(request.getTenant(),
+        JWT.create().withPayload(params).withIssuer(claimsMapper.issuer(request.getTenant()))
+            .withAudience(request.getClientId().orElse("")).withIssuedAt(new java.util.Date()),
+        java.time.Instant.now().plus(java.time.Duration.ofMinutes(10)));
+    if ("form_post.jwt".equals(mode)) {
+      return formPost(redirect, redirect + "?response=" + response, cookie);
+    }
+    String to = "fragment.jwt".equals(mode) ? redirect + "#response=" + response
+        : redirect + (redirect.contains("?") ? "&" : "?") + "response=" + response;
+    Response.ResponseBuilder builder = Response.status(302).location(AuthorizeHtml.buildUrl(to));
+    if (cookie != null) {
+      builder.cookie(cookie);
+    }
+    return securer.secureRedirectResponse(builder);
+  }
+
+  private static Map<String, String> parameters(String redirect, String location) {
+    String suffix = location.substring(redirect.length());
+    if (!suffix.isEmpty())
+      suffix = suffix.substring(1);
+    Map<String, String> fields = new LinkedHashMap<>();
+    for (String pair : suffix.split("&")) {
+      int equals = pair.indexOf('=');
+      if (equals > 0) {
+        fields.put(URLDecoder.decode(pair.substring(0, equals), StandardCharsets.UTF_8),
+            URLDecoder.decode(pair.substring(equals + 1), StandardCharsets.UTF_8));
+      }
+    }
+    return fields;
   }
 
   private Response formPost(String redirect, String location, NewCookie cookie) {

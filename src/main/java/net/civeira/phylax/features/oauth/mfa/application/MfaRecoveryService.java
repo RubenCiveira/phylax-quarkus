@@ -2,7 +2,6 @@
 package net.civeira.phylax.features.oauth.mfa.application;
 
 import java.security.SecureRandom;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +14,7 @@ import net.civeira.phylax.features.access.usermfarecoverycode.domain.UserMfaReco
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeCommandRepositoryGateway;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeFilter;
 import net.civeira.phylax.features.access.usermfarecoverycode.domain.gateway.UserMfaRecoveryCodeQueryRepositoryGateway;
+import net.civeira.phylax.features.oauth.mfa.domain.gateway.RecoveryCodeConsumptionGateway;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -26,6 +26,7 @@ public class MfaRecoveryService {
   private final UserMfaRecoveryCodeQueryRepositoryGateway readGateway;
   private final UserMfaRecoveryCodeCommandRepositoryGateway writeGateway;
   private final PasswordHasher passwordHasher;
+  private final RecoveryCodeConsumptionGateway consumption;
 
   /** Generates {@code count} single-use codes, replacing any existing ones for the user. */
   public List<String> generateCodes(String userUid, int count) {
@@ -50,10 +51,8 @@ public class MfaRecoveryService {
     return readGateway
         .list(UserMfaRecoveryCodeFilter.builder().userUnused(UserReference.of(userUid)).build())
         .stream().filter(c -> c.getCodeHashValue().verify(passwordHasher, candidate)).findFirst()
-        .map(code -> {
-          writeGateway.update(code, code.consume(OffsetDateTime.now()));
-          return true;
-        }).orElse(false);
+        // The read only finds the candidate; the conditional update decides who consumes it.
+        .map(code -> consumption.consume(code.getUid(), userUid)).orElse(false);
   }
 
   /** Returns the number of unused recovery codes for the user. */

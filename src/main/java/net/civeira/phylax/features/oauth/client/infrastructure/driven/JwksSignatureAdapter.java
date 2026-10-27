@@ -56,7 +56,7 @@ public class JwksSignatureAdapter implements ClientJwtSignatureGateway {
   private final ObjectMapper mapper;
 
   @Override
-  public Optional<Map<String, Object>> verify(ClientDetails client, String jwt) {
+  public Optional<Map<String, Object>> verify(ClientDetails client, String jwt, String registered) {
     DecodedJWT unverified;
     try {
       unverified = JWT.decode(jwt);
@@ -64,7 +64,6 @@ public class JwksSignatureAdapter implements ClientJwtSignatureGateway {
       return Optional.empty();
     }
     String alg = unverified.getAlgorithm();
-    String registered = client.getRequestObjectSigningAlg();
     if (!ALGORITHMS.contains(alg) || registered != null && !registered.equals(alg)) {
       log.warn("Client {} signed with a forbidden algorithm {}", client.getClientId(), alg);
       return Optional.empty();

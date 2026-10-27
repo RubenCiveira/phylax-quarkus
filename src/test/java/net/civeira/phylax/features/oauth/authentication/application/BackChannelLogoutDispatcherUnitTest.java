@@ -13,6 +13,7 @@ import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
@@ -42,8 +43,8 @@ class BackChannelLogoutDispatcherUnitTest {
         List.of(client("of-a", "uid-a"), client("of-b", "uid-b"), client("global", null));
     Mockito.when(clients.list(Mockito.any())).thenReturn(all);
 
-    BackChannelLogoutDispatcher dispatcher =
-        new BackChannelLogoutDispatcher(clients, tenants, Mockito.mock(TokenSigner.class));
+    BackChannelLogoutDispatcher dispatcher = new BackChannelLogoutDispatcher(clients, tenants,
+        Mockito.mock(TokenSigner.class), new SubjectResolver(java.util.Optional.empty()));
 
     Assertions.assertEquals(List.of("of-a", "global"),
         dispatcher.recipients("tenant-a").stream().map(TrustedClient::getCode).toList());
@@ -54,9 +55,9 @@ class BackChannelLogoutDispatcherUnitTest {
   void unknown_tenant_notifies_nobody() {
     TenantQueryRepositoryGateway tenants = Mockito.mock(TenantQueryRepositoryGateway.class);
     Mockito.when(tenants.find(Mockito.any())).thenReturn(Optional.empty());
-    BackChannelLogoutDispatcher dispatcher =
-        new BackChannelLogoutDispatcher(Mockito.mock(TrustedClientQueryRepositoryGateway.class),
-            tenants, Mockito.mock(TokenSigner.class));
+    BackChannelLogoutDispatcher dispatcher = new BackChannelLogoutDispatcher(
+        Mockito.mock(TrustedClientQueryRepositoryGateway.class), tenants,
+        Mockito.mock(TokenSigner.class), new SubjectResolver(java.util.Optional.empty()));
 
     Assertions.assertTrue(dispatcher.recipients("ghost").isEmpty());
   }

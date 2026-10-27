@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
+import net.civeira.phylax.features.oauth.authentication.domain.exception.OAuthTokenException;
+
 /**
  * Parsing of token endpoint parameters shared by the grants.
  */
@@ -17,6 +20,40 @@ final class TokenParams {
     return values == null || values.isEmpty() || values.get(0) == null || values.get(0).isEmpty()
         ? null
         : values.get(0);
+  }
+
+  /**
+   * Resource indicators of a token request (RFC 8707, task 4.7).
+   *
+   * @throws OAuthTokenException invalid_target when one is not an absolute URI without fragment
+   */
+  static List<String> resources(Map<String, List<String>> params) {
+    List<String> resources =
+        AuthRequest.resourceIndicators(params == null ? null : params.get("resource"));
+    if (resources.stream().anyMatch(resource -> !AuthRequest.validResource(resource))) {
+      throw OAuthTokenException.invalidTarget();
+    }
+    return resources;
+  }
+
+  /**
+   * Audiences of a grant narrowed to the requested resources: each one must be among the granted
+   * audiences, and the client stays as audience. Without resources the grant keeps its audiences.
+   *
+   * @throws OAuthTokenException invalid_target when a resource was not granted
+   */
+  static List<String> narrowed(List<String> granted, List<String> requested, String clientId) {
+    if (requested.isEmpty()) {
+      return granted;
+    }
+    if (!granted.containsAll(requested)) {
+      throw OAuthTokenException.invalidTarget();
+    }
+    List<String> audiences = new java.util.ArrayList<>(requested);
+    if (!audiences.contains(clientId)) {
+      audiences.add(clientId);
+    }
+    return List.copyOf(audiences);
   }
 
   /**

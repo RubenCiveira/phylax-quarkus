@@ -19,11 +19,14 @@ import jakarta.enterprise.context.RequestScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.features.oauth.authentication.domain.ClaimsRequest;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtEncryptionGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.IdToken;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.MfaToken;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.UserClaimsGateway;
 
 /**
  * Thin facade for JWT token issuance and verification.
@@ -41,11 +44,16 @@ public class JwtTokenBuilder {
   private static final String MFA_SCOPE = "mfa";
   private static final String REFRESH_GRANT = "refresh_token";
   private static final String OPENID = "openid";
+  public static final String TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange";
+  public static final String ACCESS_TOKEN_TYPE = "urn:ietf:params:oauth:token-type:access_token";
 
   private final ClaimsMapper claimsMapper;
   private final TokenVerifier tokenVerifier;
   private final TokenSigner tokenSigner;
   private final ObjectMapper objectMapper;
+  private final ClientJwtEncryptionGateway encryption;
+  private final DpopBinding dpop;
+  private final UserClaimsGateway userClaims;
 
   public IdToken buildIdToken(String tenant, String state, String nonce, ClientDetails details,
       String grantType, AuthenticationData validationData) {
@@ -80,12 +88,64 @@ public class JwtTokenBuilder {
     idToken.setExpiresIn(expiration.getSeconds());
     idToken.setAccessToken(accessToken);
     if (includeIdToken && validationData.getScopes().contains(OPENID)) {
-      idToken.setIdToken(
-          tokenSigner.sign(tenant, claimsMapper.idToken(tenant, details, validationData, nonce,
-              accessToken, authorizationCode), Instant.now().plus(claimsMapper.idTokenTtl())));
+      idToken
+          .setIdToken(
+              forClient(details,
+                  tokenSigner.sign(
+                      tenant, claimsMapper.idToken(tenant, details, validationData, nonce,
+                          accessToken, authorizationCode),
+                      Instant.now().plus(claimsMapper.idTokenTtl()))));
     }
     idToken.setSessionState(sessionState);
     return idToken;
+  }
+
+  /**
+   * Adds to the ID token the user claims the {@code claims} parameter asks for there (task 4.8),
+   * only those the granted scopes already release: the parameter never widens the consent. The ID
+   * tokens of a refresh carry none, so a rotation never widens either.
+   */
+  private Builder requestedClaims(Builder idToken, AuthRequest request, AuthenticationData data) {
+    Map<String, Boolean> asked;
+    try {
+      asked = ClaimsRequest.parse(request.getClaims().orElse(null)).map(ClaimsRequest::idToken)
+          .orElse(Map.of());
+    } catch (IllegalArgumentException ex) {
+      return idToken;
+    }
+    if (asked.isEmpty()) {
+      return idToken;
+    }
+    Map<String, Object> released = new java.util.LinkedHashMap<>();
+    userClaims.claims(data.getUid(), data.getUsername(), data.getScopes())
+        .forEach((name, value) -> {
+          if (asked.containsKey(name) && !"sub".equals(name) && value != null) {
+            released.put(name, value);
+          }
+        });
+    return released.isEmpty() ? idToken : idToken.withPayload(released);
+  }
+
+  /**
+   * The signed ID token as the client registered it: encrypted for it after signing when it
+   * registered {@code id_token_encrypted_response_alg} (task 4.5).
+   */
+  private String forClient(ClientDetails client, String signedIdToken) {
+    String alg = client.getIdTokenEncryptedResponseAlg();
+    return alg == null || alg.isBlank() ? signedIdToken
+        : encryption.encrypt(client, signedIdToken, true, alg,
+            client.getIdTokenEncryptedResponseEnc());
+  }
+
+  /**
+   * Binds the token to the DPoP key the request proved ({@code cnf.jkt}, RFC 9449 §6, task 3.6).
+   */
+  private Builder bound(Builder claims) {
+    return dpop.jkt().map(jkt -> claims.withClaim("cnf", Map.of("jkt", jkt))).orElse(claims);
+  }
+
+  private String tokenType() {
+    return dpop.jkt().isPresent() ? "DPoP" : BEARER;
   }
 
   public <T> String buildChallengerToken(String tenant, T bean, Duration expiration) {
@@ -108,7 +168,7 @@ public class JwtTokenBuilder {
 
   public MfaToken buildMfaToken(String username, String tenant) {
     String jti = UUID.randomUUID().toString();
-    Duration expiration = claimsMapper.tokenTtl("oauth.jwt.expiration.mfa-token");
+    Duration expiration = claimsMapper.tokenTtl("oidc.jwt.expiration.mfa-token");
     Instant authExpires = Instant.now().plus(expiration);
 
     Builder builder =
@@ -148,24 +208,28 @@ public class JwtTokenBuilder {
 
     AutorizationToken authorization = new AutorizationToken();
     authorization.setGrantType(grantType);
-    authorization.setTokenType(BEARER);
+    authorization.setTokenType(tokenType());
     authorization.setUsername(validationData.getUsername());
     authorization.setExpiresIn(expiration.getSeconds());
     authorization.setAccessToken(tokenSigner.sign(tenant,
-        claimsMapper.accessToken(tenant, details, grantType, validationData), authExpires));
+        bound(claimsMapper.accessToken(tenant, details, grantType, validationData)), authExpires));
     if (details.allowedGrant(REFRESH_GRANT)) {
       // Only clients registered for refresh_token get one (task 0.4).
       authorization.setRefreshToken(tokenSigner.sign(tenant,
-          claimsMapper.refreshToken(tenant, details, validationData, family), refreshExpires));
+          bound(claimsMapper.refreshToken(tenant, details, validationData, family)),
+          refreshExpires));
     }
 
     // An ID token only for OpenID requests, for the client alone and with its own lifetime
     // (task 1.2).
     if (null != request && validationData.getScopes().contains(OPENID)) {
-      authorization.setIdToken(tokenSigner.sign(tenant,
-          claimsMapper.idToken(tenant, details, validationData, request.getNonce().orElse(null),
-              authorization.getAccessToken(), null),
-          Instant.now().plus(claimsMapper.idTokenTtl())));
+      authorization.setIdToken(forClient(details,
+          tokenSigner.sign(tenant,
+              requestedClaims(
+                  claimsMapper.idToken(tenant, details, validationData,
+                      request.getNonce().orElse(null), authorization.getAccessToken(), null),
+                  request, validationData),
+              Instant.now().plus(claimsMapper.idTokenTtl()))));
     }
     authorization.setScope(String.join(" ", validationData.getScopes()));
 
@@ -174,6 +238,14 @@ public class JwtTokenBuilder {
 
   public AutorizationToken buildClientCredentialsToken(String tenant, ClientDetails client,
       List<String> scopes) {
+    return buildClientCredentialsToken(tenant, client, scopes, List.of(client.getClientId()));
+  }
+
+  /**
+   * Access token of the client itself, for the audiences it asked for (its own id by default).
+   */
+  public AutorizationToken buildClientCredentialsToken(String tenant, ClientDetails client,
+      List<String> scopes, List<String> audiences) {
     Duration expiration =
         client.getM2mTokenTtlSeconds() != null ? Duration.ofSeconds(client.getM2mTokenTtlSeconds())
             : claimsMapper.accessTokenTtl();
@@ -183,16 +255,43 @@ public class JwtTokenBuilder {
     data.setUsername(client.getClientId());
     data.setTenant(tenant);
     data.setScopes(scopes != null ? scopes : List.of());
-    data.setAudiences(List.of(client.getClientId()));
+    data.setAudiences(audiences == null || audiences.isEmpty() ? List.of(client.getClientId())
+        : List.copyOf(audiences));
 
     AutorizationToken token = new AutorizationToken();
     token.setGrantType("client_credentials");
-    token.setTokenType(BEARER);
+    token.setTokenType(tokenType());
     token.setUsername(client.getClientId());
     token.setExpiresIn(expiration.getSeconds());
     token.setAccessToken(tokenSigner.sign(tenant,
-        claimsMapper.accessToken(tenant, client, "client_credentials", data), expires));
+        bound(claimsMapper.accessToken(tenant, client, "client_credentials", data)), expires));
     token.setScope(String.join(" ", data.getScopes()));
+    return token;
+  }
+
+  /**
+   * Access token of a token exchange (RFC 8693, task 3.8): the subject of the exchanged token, an
+   * {@code act} claim naming the client that acts for it, and no refresh nor ID token.
+   *
+   * @param tenant tenant
+   * @param client acting client
+   * @param data subject, scopes and audiences of the new token
+   * @param act actor claim
+   * @return the issued token
+   */
+  public AutorizationToken buildExchangedToken(String tenant, ClientDetails client,
+      AuthenticationData data, Map<String, Object> act) {
+    Duration expiration = claimsMapper.accessTokenTtl();
+    AutorizationToken token = new AutorizationToken();
+    token.setGrantType(TOKEN_EXCHANGE);
+    token.setTokenType(tokenType());
+    token.setUsername(data.getUsername());
+    token.setExpiresIn(expiration.getSeconds());
+    token.setAccessToken(tokenSigner.sign(tenant,
+        bound(claimsMapper.accessToken(tenant, client, TOKEN_EXCHANGE, data)).withClaim("act", act),
+        Instant.now().plus(expiration)));
+    token.setScope(String.join(" ", data.getScopes()));
+    token.setIssuedTokenType(ACCESS_TOKEN_TYPE);
     return token;
   }
 

@@ -7,7 +7,7 @@
 
 ## Qué hace (funcional)
 
-Con `oauth.jwt.access-token.rfc9068=true` el access token lleva cabecera `typ: at+jwt` y `scope` como cadena separada por espacios; siempre lleva `iss`, `sub`, `aud`, `exp`, `iat`, `jti` y `client_id` (y `auth_time`/`acr`/`amr` en grants de usuario). Así un servidor de recursos distingue un access token de cualquier otro JWT firmado con las mismas claves.
+Con `oidc.jwt.access-token.rfc9068=true` el access token lleva cabecera `typ: at+jwt` y `scope` como cadena separada por espacios; siempre lleva `iss`, `sub`, `aud`, `exp`, `iat`, `jti` y `client_id` (y `auth_time`/`acr`/`amr` en grants de usuario). Así un servidor de recursos distingue un access token de cualquier otro JWT firmado con las mismas claves.
 
 - Desactivado por defecto: los consumidores externos que leen `scope` como array deben adaptarse antes. Los internos (`TokenVerifier`, UserInfo) ya aceptan ambos formatos.
 - El rechazo por propósito o audiencia en los servidores de recursos quedó cubierto por [0.8](issue-0.8-verificacion-bearer-apis.md) y [0.15](issue-0.15-audiencia-tenant-revocacion-bearer.md) (J-04).

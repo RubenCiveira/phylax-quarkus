@@ -64,4 +64,14 @@ public interface ClientStoreGateway {
    * @return client details, only for clients that allow public access
    */
   Optional<ClientDetails> loadPublicById(String tenant, String clientId);
+
+  /**
+   * Loads a confidential client that authenticates with a signed assertion
+   * ({@code private_key_jwt}, task 3.2), before the assertion is verified with its keys.
+   *
+   * @param tenant tenant identifier
+   * @param clientId client identifier
+   * @return client details as a confidential client, only when it registered private_key_jwt
+   */
+  Optional<ClientDetails> loadForAssertion(String tenant, String clientId);
 }

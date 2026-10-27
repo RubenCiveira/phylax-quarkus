@@ -87,7 +87,8 @@ public class OidcFlowClient {
   }
 
   public Response submitDenyScopeConsent(String tenant, String preSessionCookie) {
-    return baseAuthPost(tenant).contentType(ContentType.URLENC).formParam("step", "start")
+    return baseAuthPost(tenant).contentType(ContentType.URLENC)
+        .formParam("step", "scope_consent_deny")
         .cookie("PRE_SESSION_ID", nullToEmpty(preSessionCookie))
         .post("/oauth/openid/" + tenant + "/auth");
   }

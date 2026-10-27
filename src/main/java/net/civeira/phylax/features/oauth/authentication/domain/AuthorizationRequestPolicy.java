@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.authentication.domain;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -14,10 +15,15 @@ import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
  * <ul>
  * <li>{@code response_type} is required ({@code invalid_request}) and registered for the client
  * ({@code unauthorized_client});</li>
- * <li>every audience is the client or one registered for it ({@code invalid_target});</li>
+ * <li>every audience, resource indicators included, is the client or one registered for it, and a
+ * resource is an absolute URI without fragment ({@code invalid_target}, RFC 8707);</li>
  * <li>PKCE, for a response with a code: only {@code S256}, so a challenge without method (which
  * means {@code plain}) is rejected; a public client, or one that requires PKCE, must send it
  * ({@code invalid_request});</li>
+ * <li>{@code response_mode} is one of {@link #MODES}, never {@code query} with tokens, and a JWT
+ * mode only with an algorithm the server signs with ({@code invalid_request});</li>
+ * <li>{@code claims} is well formed, and every essential claim is one the server issues and the
+ * requested scopes release ({@code invalid_request});</li>
  * <li>a client that requires PAR only accepts pushed requests ({@code invalid_request}).</li>
  * </ul>
  */
@@ -35,6 +41,26 @@ public final class AuthorizationRequestPolicy {
    * @param description human readable reason
    */
   public record Violation(String error, String description) {}
+
+  /**
+   * Response modes: the plain ones and the JWT secured ones (JARM, task 4.2).
+   */
+  public static final List<String> MODES = List.of("query", "fragment", "form_post", "jwt",
+      "query.jwt", "fragment.jwt", "form_post.jwt");
+  /**
+   * Algorithms of a JWT secured authorization response: those of the server keys.
+   */
+  public static final List<String> JARM_ALGORITHMS = List.of("RS256");
+
+  /**
+   * Claims this provider issues in ID tokens and UserInfo, announced as {@code claims_supported}
+   * (tasks 1.1 and 4.8).
+   */
+  public static final List<String> SUPPORTED_CLAIMS = List.of("iss", "sub", "aud", "exp", "iat",
+      "auth_time", "nonce", "acr", "amr", "azp", "sid", "at_hash", "c_hash", "name", "given_name",
+      "family_name", "middle_name", "nickname", "preferred_username", "picture", "website",
+      "gender", "birthdate", "zoneinfo", "locale", "updated_at", "email", "email_verified",
+      "phone_number", "phone_number_verified", "address");
 
   private AuthorizationRequestPolicy() {}
 
@@ -56,15 +82,40 @@ public final class AuthorizationRequestPolicy {
       return reject("unsupported_response_type", "The response_type is not supported");
     }
     String mode = request.getResponseMode().orElse("");
-    if ((!mode.isEmpty() && !"query".equals(mode) && !"fragment".equals(mode)
-        && !"form_post".equals(mode)) || ("query".equals(mode) && parts.size() > 1)) {
+    if ((!mode.isEmpty() && !MODES.contains(mode))
+        || ((mode.equals("query") || mode.equals("query.jwt")) && parts.size() > 1)) {
       return reject("invalid_request", "The response_mode is not compatible with response_type");
+    }
+    String jarmAlg = client.getAuthorizationSignedResponseAlg();
+    if (mode.endsWith("jwt") && jarmAlg != null && !JARM_ALGORITHMS.contains(jarmAlg)) {
+      return reject("invalid_request", "The signing algorithm of the client is not supported");
     }
     if (!client.allowsResponseType(responseType.get())) {
       return reject("unauthorized_client", "The client may not use this response_type");
     }
+    if (request.getResources().stream().anyMatch(r -> !AuthRequest.validResource(r))) {
+      return reject("invalid_target", "A resource must be an absolute URI without fragment");
+    }
     if (!client.allowsAudiences(request.getAudiences())) {
       return reject("invalid_target", "The audience is not registered for the client");
+    }
+    try {
+      Optional<ClaimsRequest> claims = ClaimsRequest.parse(request.getClaims().orElse(null));
+      Optional<String> missing =
+          claims.flatMap(asked -> asked.unavailableEssential(SUPPORTED_CLAIMS));
+      if (missing.isPresent()) {
+        return reject("invalid_request",
+            "The essential claim " + missing.get() + " is not available");
+      }
+      // The parameter never widens the consent: an essential claim needs its scope (task 4.8).
+      List<String> scopes = Arrays.asList(request.getScope().orElse("").trim().split("\\s+"));
+      Optional<String> outside = claims.flatMap(asked -> asked.essentialOutside(scopes));
+      if (outside.isPresent()) {
+        return reject("invalid_request",
+            "The essential claim " + outside.get() + " needs a scope that was not requested");
+      }
+    } catch (IllegalArgumentException ex) {
+      return reject("invalid_request", ex.getMessage());
     }
     if (client.isRequirePar() && !request.isPushed()) {
       return reject("invalid_request", "The client must push its authorization requests");

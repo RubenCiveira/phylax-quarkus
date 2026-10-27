@@ -33,6 +33,7 @@ public class ScenarioScopeConsentGateway implements ScopesConsentGateway, ScopeA
   private String lastUsername;
   private String lastClientId;
   private List<String> lastAcceptedScopes;
+  private List<String> lastWithdrawnScopes;
 
   public void whenPending(BiFunction<String, List<String>, List<String>> behavior) {
     this.pendingProvider = behavior;
@@ -50,6 +51,16 @@ public class ScenarioScopeConsentGateway implements ScopesConsentGateway, ScopeA
     lastUsername = null;
     lastClientId = null;
     lastAcceptedScopes = null;
+    lastWithdrawnScopes = null;
+  }
+
+  public List<String> getLastWithdrawnScopes() {
+    return lastWithdrawnScopes;
+  }
+
+  @Override
+  public void withdrawScopes(String tenant, String username, String clientId, List<String> scopes) {
+    lastWithdrawnScopes = List.copyOf(scopes);
   }
 
   public int getAcceptedCount() {

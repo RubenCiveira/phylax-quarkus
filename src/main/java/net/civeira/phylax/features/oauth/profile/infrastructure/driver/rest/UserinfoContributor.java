@@ -2,6 +2,8 @@
 package net.civeira.phylax.features.oauth.profile.infrastructure.driver.rest;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.features.oauth.authentication.infrastructure.driver.rest.InformationController;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtEncryptionGateway;
 import net.civeira.phylax.features.oauth.oidc.domain.DiscoveryContributor;
 import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
 
@@ -13,6 +15,9 @@ public class UserinfoContributor implements DiscoveryContributor {
 
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
-    builder.userinfoEndpoint(base + "userinfo");
+    builder.userinfoEndpoint(base + "userinfo")
+        .userinfoSigningAlgValuesSupported(InformationController.SIGNING_ALGORITHMS)
+        .userinfoEncryptionAlgValuesSupported(ClientJwtEncryptionGateway.ALGORITHMS)
+        .userinfoEncryptionEncValuesSupported(ClientJwtEncryptionGateway.ENCRYPTIONS);
   }
 }

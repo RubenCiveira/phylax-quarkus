@@ -121,7 +121,10 @@ public class DevicesAccessController {
     Map<String, String> authParams = new LinkedHashMap<>();
     for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
       if (!entry.getValue().isEmpty() && !CLIENT_CREDENTIAL_PARAMS.contains(entry.getKey())) {
-        authParams.put(entry.getKey(), entry.getValue().get(0));
+        // Every resource indicator is kept (RFC 8707 §2): URIs cannot contain spaces.
+        authParams.put(entry.getKey(),
+            "resource".equals(entry.getKey()) ? String.join(" ", entry.getValue())
+                : entry.getValue().get(0));
       }
     }
 

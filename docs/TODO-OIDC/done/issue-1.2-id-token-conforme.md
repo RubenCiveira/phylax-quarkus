@@ -9,7 +9,7 @@
 ## Qué hace (funcional)
 
 - El ID token solo se emite si el scope concedido incluye `openid` (token endpoint e híbrido).
-- `aud` es solo el cliente y `azp` el cliente; caduca con su propio TTL (`oauth.jwt.expiration.id-token`, 5 min por defecto), no con el del refresh.
+- `aud` es solo el cliente y `azp` el cliente; caduca con su propio TTL (`oidc.jwt.expiration.id-token`, 5 min por defecto), no con el del refresh.
 - `sid`: identificador público y aleatorio de la sesión SSO, distinto de la cookie (que rota en cada autorización); es estable mientras vive la sesión y viaja en ID token, refresh token y logout token. Las sesiones previas reciben uno la primera vez que se leen.
 - `amr` es un array con los métodos reales (`pwd`; `pwd otp mfa` tras el segundo factor); `nonce` solo si la petición lo trajo.
 - Se retiran del ID token `roles`, `groups`, `grant_type`, `typ`, `s_hash` y `session_state`.

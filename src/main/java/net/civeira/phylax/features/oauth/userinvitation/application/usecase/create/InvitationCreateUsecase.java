@@ -32,9 +32,11 @@ public class InvitationCreateUsecase {
   private final SecureTokenService secureTokenService;
 
   public InvitationCreateResult create(InvitationCreateParams params) {
+    if (params.getEmail() == null || !params.getEmail().matches("[^@\\s]+@[^@\\s]+")) {
+      throw new IllegalArgumentException("A valid email is required.");
+    }
     queryGateway.findPendingByEmail(params.getEmail(), params.getTenantId()).ifPresent(existing -> {
-      var exp = existing.getExpiredAt();
-      if (exp.isAfter(OffsetDateTime.now(ZoneOffset.UTC))) {
+      if (existing.open(java.time.Instant.now())) {
         throw new IllegalStateException("There is already a pending invitation for this email.");
       }
     });

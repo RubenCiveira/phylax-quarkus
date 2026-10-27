@@ -9,11 +9,17 @@ import java.time.Instant;
 public interface JwtReplayGateway {
 
   /**
+   * Purpose shared by every JWT a client signs for this server, request objects and client
+   * assertions alike, so the same JWT is used only once for any of them (task 3.2).
+   */
+  String CLIENT_SIGNED = "client_jwt";
+
+  /**
    * Records the first use of a JWT identifier.
    *
    * @param tenant tenant of the endpoint
    * @param clientId client that signed the JWT
-   * @param purpose what the JWT is for ({@code request_object}, {@code client_assertion})
+   * @param purpose what the JWT is for ({@link #CLIENT_SIGNED} for those the client signs)
    * @param jti identifier of the JWT
    * @param expiresAt when the JWT expires, after which the record can be forgotten
    * @return true for the first use, false for a replay

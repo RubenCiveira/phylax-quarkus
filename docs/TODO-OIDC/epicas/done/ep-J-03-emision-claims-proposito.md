@@ -22,6 +22,6 @@
 - **Canje y refresh** conservan `auth_time`, `amr` y `sid` del login original.
 - **ACR:** `urn:lugh:acr:1fa` / `urn:lugh:acr:mfa` (configurables) derivados del `amr`.
 - **Respuesta de `/token`:** `scope` concedido; campos vacíos omitidos.
-- **RFC 9068** (`oauth.jwt.access-token.rfc9068`, desactivado): `typ: at+jwt` y `scope` como cadena.
+- **RFC 9068** (`oidc.jwt.access-token.rfc9068`, desactivado): `typ: at+jwt` y `scope` como cadena.
 
 Código: `ClaimsMapper`, `JwtTokenBuilder`, `AcrPolicy`, `JoseTokenSigner`, `SigningKeyRotationJob`, `PublicSessionId`, `ChallengesState`. Pruebas: `IdTokenClaimsFlowTest`, `ClaimsMapperUnitTest`, `AcrPolicyUnitTest`, `ChallengesStateUnitTest`, `JoseTokenSignerUnitTest`.

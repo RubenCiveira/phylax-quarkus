@@ -4,6 +4,7 @@ package net.civeira.phylax.features.oauth.authentication.application.token;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -57,10 +58,17 @@ public class AuthorizationCodeGrant {
     }
     String redirect = request.param("redirect_uri");
     String verifier = request.param("code_verifier");
-    TemporalAuthCode code = temporalStore
-        .consumeTemporalAuthCode(codeValue,
-            stored -> codeMatches(stored, tenant, client, redirect, verifier))
-        .orElseThrow(() -> OAuthTokenException.invalidGrant("Invalid authorization code"));
+    List<String> resources = TokenParams.resources(request.params());
+    // A resource that the code does not cover is invalid_target and does not spend the code.
+    AtomicBoolean foreignResource = new AtomicBoolean();
+    TemporalAuthCode code = temporalStore.consumeTemporalAuthCode(codeValue, stored -> {
+      if (!codeMatches(stored, tenant, client, redirect, verifier)) {
+        return false;
+      }
+      foreignResource.set(!stored.request.getAudiences().containsAll(resources));
+      return !foreignResource.get();
+    }).orElseThrow(() -> foreignResource.get() ? OAuthTokenException.invalidTarget()
+        : OAuthTokenException.invalidGrant("Invalid authorization code"));
     AuthenticationResult auth = loginUsecase.fillPreAuthenticated(code.request,
         code.data.getUsername(), client, List.of(), AuthenticationMode.CODE_EXCHANGE);
     if (!auth.isRight()) {
@@ -71,6 +79,10 @@ public class AuthorizationCodeGrant {
     auth.getData().setTime(code.data.getTime());
     auth.getData().setAmr(
         code.data.getAmr() == null ? new ArrayList<>() : new ArrayList<>(code.data.getAmr()));
+    // A resource of the token request narrows the audiences of the code, never widens them (4.7).
+    auth.getData().setGrantAudiences(new ArrayList<>(code.request.getAudiences()));
+    auth.getData().setAudiences(new ArrayList<>(
+        TokenParams.narrowed(code.request.getAudiences(), resources, client.getClientId())));
     boolean withSession = code.sessionId != null && !code.sessionId.isBlank();
     return issuer.issue(tenant, client, GRANT_TYPE, auth.getData(), code.request,
         Optional.ofNullable(code.sessionId), Optional.empty(),

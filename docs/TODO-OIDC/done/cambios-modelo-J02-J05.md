@@ -6,7 +6,7 @@ La migración consolidada `src/main/resources/migration/mysql/000.001.001/202610
 |---|---|---|---|
 | 1 | Composición `allowed-logout-redirects` en `trusted-client` | [2.4](issue-2.4-redirects-logout.md) | Maestro (`access_*`) |
 | 2 | Columna `_oauth_session.sid` (**generada; el SID público vive en `auth_data`**) | [1.14](issue-1.14-hint-sid-logout.md) | Estado OAuth (`_oauth_*`) |
-| 3 | Tabla `_oauth_replay_jti` | [3.3](issue-3.3-request-objects-firmados.md), [3.2](../issue-3.2-autenticacion-jwt-cliente.md) | Estado OAuth (`_oauth_*`) |
+| 3 | Tabla `_oauth_replay_jti` | [3.3](issue-3.3-request-objects-firmados.md), [3.2](issue-3.2-autenticacion-jwt-cliente.md) | Estado OAuth (`_oauth_*`) |
 
 ## 1. Composición `allowed-logout-redirects` en `trusted-client`
 

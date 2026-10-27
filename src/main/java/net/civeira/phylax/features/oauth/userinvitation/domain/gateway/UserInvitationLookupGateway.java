@@ -3,11 +3,28 @@ package net.civeira.phylax.features.oauth.userinvitation.domain.gateway;
 
 import java.util.Optional;
 
-import net.civeira.phylax.features.access.userinvitation.domain.UserInvitation;
+import net.civeira.phylax.features.oauth.userinvitation.domain.InvitationRecord;
 
+/**
+ * Reads invitations (task 2.2).
+ */
 public interface UserInvitationLookupGateway {
 
-  Optional<UserInvitation> findByTokenHash(String tokenHash, String tenantId);
+  /**
+   * The invitation of a link: its token is stored only as a digest.
+   *
+   * @param rawToken token of the link
+   * @param tenantUid tenant of the request
+   * @return the invitation, whatever its status, empty when unknown in that tenant
+   */
+  Optional<InvitationRecord> findByToken(String rawToken, String tenantUid);
 
-  Optional<UserInvitation> findPendingByEmail(String email, String tenantId);
+  /**
+   * The latest pending invitation of an address in a tenant.
+   *
+   * @param email invitee address
+   * @param tenantUid tenant
+   * @return the pending invitation, maybe expired
+   */
+  Optional<InvitationRecord> findPendingByEmail(String email, String tenantUid);
 }

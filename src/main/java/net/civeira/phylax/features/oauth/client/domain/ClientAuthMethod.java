@@ -2,18 +2,34 @@
 package net.civeira.phylax.features.oauth.client.domain;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Client authentication methods at the token endpoint (RFC 7591 §2, token_endpoint_auth_method).
  *
  * <p>
- * Only the secret methods and {@code none} are verified today; {@code private_key_jwt} can be
- * registered but is rejected until client assertions are supported (task 3.2).
+ * The secret methods, {@code private_key_jwt} (task 3.2) and {@code none}. There is no
+ * {@code client_secret_jwt}: the server only keeps a verifier of the secret (task 2.9).
  */
 public enum ClientAuthMethod {
   CLIENT_SECRET_BASIC("client_secret_basic"), CLIENT_SECRET_POST(
       "client_secret_post"), PRIVATE_KEY_JWT("private_key_jwt"), NONE("none");
+
+  /**
+   * Methods of the endpoints that only accept confidential clients (introspection, revocation).
+   */
+  public static final List<String> CONFIDENTIAL =
+      List.of("client_secret_basic", "client_secret_post", "private_key_jwt");
+  /**
+   * Methods of the token endpoint: the confidential ones and {@code none}.
+   */
+  public static final List<String> TOKEN_ENDPOINT =
+      List.of("client_secret_basic", "client_secret_post", "private_key_jwt", "none");
+  /**
+   * Algorithms of a {@code private_key_jwt} assertion.
+   */
+  public static final List<String> ASSERTION_ALGORITHMS = List.of("RS256", "ES256");
 
   private final String value;
 

@@ -57,4 +57,9 @@ public class AutorizationToken {
    * Username associated with the token.
    */
   private String username;
+  /**
+   * Type of the issued token in a token exchange (RFC 8693 §2.2.1).
+   */
+  @JsonProperty("issued_token_type")
+  private String issuedTokenType;
 }

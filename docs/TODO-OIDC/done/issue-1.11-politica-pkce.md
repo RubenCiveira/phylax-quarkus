@@ -8,7 +8,7 @@
 ## Qué hace (funcional)
 
 - En authorize, **antes del login**: solo `S256`. Un `code_challenge` sin método (que significa `plain`) o con `plain` es `invalid_request`, igual que un reto mal formado (43–128 caracteres no reservados).
-- Obligatorio para clientes públicos y para los que registran `require-pkce`; para el resto de confidenciales, `oauth.pkce.require-for-confidential` (por defecto `false`) lo hace obligatorio para todos.
+- Obligatorio para clientes públicos y para los que registran `require-pkce`; para el resto de confidenciales, `oidc.pkce.require-for-confidential` (por defecto `false`) lo hace obligatorio para todos.
 - La misma política al canjear: un confidencial que exige PKCE no canjea un code sin reto; un verifier para un code sin reto sigue siendo un *downgrade* rechazado (J-01).
 
 ## Implementación Java

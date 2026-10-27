@@ -21,9 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
+import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
 import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
 /**
@@ -45,6 +48,7 @@ public class BackChannelLogoutDispatcher {
   private final TrustedClientQueryRepositoryGateway clients;
   private final TenantQueryRepositoryGateway tenants;
   private final TokenSigner signer;
+  private final SubjectResolver subjects;
 
   private final HttpClient http = HttpClient.newBuilder().connectTimeout(HTTP_TIMEOUT).build();
 
@@ -70,8 +74,9 @@ public class BackChannelLogoutDispatcher {
     for (TrustedClient client : recipients(tenant)) {
       if (!participants.contains(client.getCode()))
         continue;
-      client.getBackChannelLogoutUri().filter(uri -> !uri.isBlank()).ifPresent(
-          uri -> sendLogoutToken(tenant, issuer, userSub, sessionId, client.getCode(), uri));
+      client.getBackChannelLogoutUri().filter(uri -> !uri.isBlank())
+          .ifPresent(uri -> sendLogoutToken(tenant, issuer, subjectFor(client, userSub), sessionId,
+              client.getCode(), uri));
     }
   }
 
@@ -82,6 +87,21 @@ public class BackChannelLogoutDispatcher {
    * @param tenant tenant name
    * @return the clients to notify
    */
+  /**
+   * The {@code sub} the client knows: pairwise when it registered it (task 4.4). Without a pairwise
+   * subject the token is sent with none of the user's identifiers, only the {@code sid}.
+   */
+  private String subjectFor(TrustedClient client, String userSub) {
+    try {
+      return subjects.subject(TrustedClientSubjectTypeOptions.PAIRWISE == client.getSubjectType(),
+          client.getSectorIdentifierUri().orElse(null),
+          client.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList(), userSub);
+    } catch (IllegalStateException ex) {
+      log.warn("No pairwise subject for client {}: {}", client.getCode(), ex.getMessage());
+      return null;
+    }
+  }
+
   List<TrustedClient> recipients(String tenant) {
     Optional<String> tenantUid =
         tenants.find(TenantFilter.builder().name(tenant).build()).map(Tenant::getUid);
@@ -121,12 +141,15 @@ public class BackChannelLogoutDispatcher {
   private String buildLogoutToken(String tenant, String issuer, String userSub, String sessionId,
       String clientId) {
     Instant expiry = Instant.now().plus(Duration.ofMinutes(2));
-    return signer.sign(tenant,
+    com.auth0.jwt.JWTCreator.Builder token =
         JWT.create().withHeader(java.util.Map.of("typ", "logout+jwt")).withIssuer(issuer)
-            .withIssuedAt(new Date()).withJWTId(UUID.randomUUID().toString()).withSubject(userSub)
-            .withAudience(clientId).withClaim("sid", sessionId)
-            .withClaim("events", java.util.Map
-                .of("http://schemas.openid.net/event/backchannel-logout", java.util.Map.of())),
-        expiry);
+            .withIssuedAt(new Date()).withJWTId(UUID.randomUUID().toString()).withAudience(clientId)
+            .withClaim("sid", sessionId).withClaim("events", java.util.Map
+                .of("http://schemas.openid.net/event/backchannel-logout", java.util.Map.of()));
+    if (userSub != null) {
+      token = token.withSubject(userSub);
+    }
+    return signer.sign(tenant, token, expiry);
   }
+
 }

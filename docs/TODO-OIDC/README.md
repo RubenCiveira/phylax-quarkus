@@ -5,10 +5,10 @@ Fuentes: [CAPACIDADES_OIDC.md](../../src/docs/oidc/CAPACIDADES_OIDC.md), §5 (co
 **Fichas por fase** (la tabla siguiente conserva la vista de conjunto):
 
 - Seguridad: [0.1](done/issue-0.1-canje-seguro-de-authorization-code.md) · [0.2](done/issue-0.2-refresh-cliente-sesion.md) · [0.3](done/issue-0.3-audiencias-autorizadas.md) · [0.4](done/issue-0.4-configuracion-por-cliente.md) · [0.5](done/issue-0.5-aislamiento-clientes-tenant.md) · [0.6](done/issue-0.6-logout-clientes-participantes.md) · [0.7](done/issue-0.7-clave-publica-y-presesion.md) · [0.8](done/issue-0.8-verificacion-bearer-apis.md) · [0.9](done/issue-0.9-autenticacion-cliente-unificada.md) · [0.10](done/issue-0.10-redirect-uri-estricta.md) · [0.11](done/issue-0.11-state-seguro-secreto-fuera-par.md) · [0.12](done/issue-0.12-logout-post-confirmacion.md) · [0.13](done/issue-0.13-ruta-revocacion-no-duplicada.md) · [0.14](done/issue-0.14-par-vinculado-un-solo-uso.md) · [0.15](done/issue-0.15-audiencia-tenant-revocacion-bearer.md) · [0.16](done/issue-0.16-seguridad-login-federado.md).
-- OIDC Core: [1.1](issue-1.1-discovery-honesto.md) · [1.2](done/issue-1.2-id-token-conforme.md) · [1.3](done/issue-1.3-respuestas-autorizacion-errores.md) · [1.4](done/issue-1.4-errores-cache-token.md) · [1.5](done/issue-1.5-userinfo-conforme.md) · [1.6](issue-1.6-prompt-consent.md) · [1.7](done/issue-1.7-politica-implicit-hybrid.md) · [1.8](done/issue-1.8-code-clientes-confidenciales.md) · [1.9](done/issue-1.9-introspeccion-todos-grants.md) · [1.10](done/issue-1.10-tests-negativos-seguridad.md) · [1.11](done/issue-1.11-politica-pkce.md) · [1.12](done/issue-1.12-nonce-ligado-autorizacion.md) · [1.13](done/issue-1.13-claims-proposito-token.md) · [1.14](done/issue-1.14-hint-sid-logout.md) · [1.15](done/issue-1.15-scopes-conjuntos-exactos.md) · [1.16](done/issue-1.16-emision-canje-fuera-tokencontroller.md).
-- Funcionalidad parcial: [2.1](done/issue-2.1-registro-dinamico-clientes.md) · [2.2](issue-2.2-endpoints-invitaciones.md) · [2.3](done/issue-2.3-politica-par.md) · [2.4](done/issue-2.4-redirects-logout.md) · [2.5](issue-2.5-grants-inalcanzables-codigo-muerto.md) · [2.6](done/issue-2.6-generacion-claves-fuera-peticion.md) · [2.7](done/issue-2.7-hints-authorize.md) · [2.8](done/issue-2.8-proteccion-secretos.md) · [2.9](done/issue-2.9-migracion-secretos-cifrado.md) · [2.10](issue-2.10-documentacion-oauth-pruebas.md) · [2.11](pospuestos/issue-2.11-firmante-por-tenant.md).
-- Extensiones: [3.1](done/issue-3.1-response-mode-form-post.md) · [3.2](issue-3.2-autenticacion-jwt-cliente.md) · [3.3](done/issue-3.3-request-objects-firmados.md) · [3.4](pospuestos/issue-3.4-federacion-oidc-generica.md) · [3.5](done/issue-3.5-perfil-at-jwt.md) · [3.6](issue-3.6-dpop.md) · [3.7](issue-3.7-algoritmos-es256-eddsa.md) · [3.8](issue-3.8-token-exchange.md) · [3.9](pospuestos/issue-3.9-grant-jwt-bearer.md) · [3.10](done/issue-3.10-hints-acr-localizacion.md) · [3.11](issue-3.11-userinfo-firmado.md).
-- Perfil alto: [4.1](issue-4.1-mtls-tokens-certificado.md) · [4.2](issue-4.2-jarm.md) · [4.3](issue-4.3-ciba.md) · [4.4](issue-4.4-subject-pairwise.md) · [4.5](issue-4.5-cifrado-jwe-id-token-userinfo.md) · [4.6](issue-4.6-rich-authorization-requests.md) · [4.7](issue-4.7-resource-indicators.md) · [4.8](issue-4.8-claims-authorize.md) · [4.9](done/issue-4.9-session-management-iframe.md) · [4.10](done/issue-4.10-front-channel-logout.md).
+- OIDC Core: [1.1](done/issue-1.1-discovery-honesto.md) · [1.2](done/issue-1.2-id-token-conforme.md) · [1.3](done/issue-1.3-respuestas-autorizacion-errores.md) · [1.4](done/issue-1.4-errores-cache-token.md) · [1.5](done/issue-1.5-userinfo-conforme.md) · [1.6](done/issue-1.6-prompt-consent.md) · [1.7](done/issue-1.7-politica-implicit-hybrid.md) · [1.8](done/issue-1.8-code-clientes-confidenciales.md) · [1.9](done/issue-1.9-introspeccion-todos-grants.md) · [1.10](done/issue-1.10-tests-negativos-seguridad.md) · [1.11](done/issue-1.11-politica-pkce.md) · [1.12](done/issue-1.12-nonce-ligado-autorizacion.md) · [1.13](done/issue-1.13-claims-proposito-token.md) · [1.14](done/issue-1.14-hint-sid-logout.md) · [1.15](done/issue-1.15-scopes-conjuntos-exactos.md) · [1.16](done/issue-1.16-emision-canje-fuera-tokencontroller.md).
+- Funcionalidad parcial: [2.1](done/issue-2.1-registro-dinamico-clientes.md) · [2.2](done/issue-2.2-endpoints-invitaciones.md) · [2.3](done/issue-2.3-politica-par.md) · [2.4](done/issue-2.4-redirects-logout.md) · [2.5](done/issue-2.5-grants-inalcanzables-codigo-muerto.md) · [2.6](done/issue-2.6-generacion-claves-fuera-peticion.md) · [2.7](done/issue-2.7-hints-authorize.md) · [2.8](done/issue-2.8-proteccion-secretos.md) · [2.9](done/issue-2.9-migracion-secretos-cifrado.md) · [2.10](issue-2.10-documentacion-oauth-pruebas.md) · [2.11](pospuestos/issue-2.11-firmante-por-tenant.md).
+- Extensiones: [3.1](done/issue-3.1-response-mode-form-post.md) · [3.2](done/issue-3.2-autenticacion-jwt-cliente.md) · [3.3](done/issue-3.3-request-objects-firmados.md) · [3.4](pospuestos/issue-3.4-federacion-oidc-generica.md) · [3.5](done/issue-3.5-perfil-at-jwt.md) · [3.6](done/issue-3.6-dpop.md) · [3.7](pospuestos/issue-3.7-algoritmos-es256-eddsa.md) · [3.8](done/issue-3.8-token-exchange.md) · [3.9](pospuestos/issue-3.9-grant-jwt-bearer.md) · [3.10](done/issue-3.10-hints-acr-localizacion.md) · [3.11](done/issue-3.11-userinfo-firmado.md).
+- Perfil alto: [4.1](pospuestos/issue-4.1-mtls-tokens-certificado.md) · [4.2](done/issue-4.2-jarm.md) · [4.3](pospuestos/issue-4.3-ciba.md) · [4.4](done/issue-4.4-subject-pairwise.md) · [4.5](done/issue-4.5-cifrado-jwe-id-token-userinfo.md) · [4.6](pospuestos/issue-4.6-rich-authorization-requests.md) · [4.7](done/issue-4.7-resource-indicators.md) · [4.8](done/issue-4.8-claims-authorize.md) · [4.9](done/issue-4.9-session-management-iframe.md) · [4.10](done/issue-4.10-front-channel-logout.md).
 - Validación: [V.1](issue-V.1-fixtures-pruebas-http-persistencia.md) · [V.2](issue-V.2-openid-conformance-suite.md) · [V.3](issue-V.3-conformidad-dcr.md).
 
 **Leyenda de estado:** `[ ]` pendiente · `[x]` hecho y verificado en Java · `—` descartada o pospuesta (no se implementa sin caso de uso).
@@ -31,6 +31,8 @@ Sincronizado con el plan PHP el 23-10-2026 (EP-01 a EP-11 cerradas allí). Son d
 | Federación OIDC genérica descartada; SSO corporativo por SAML | 3.4 | 051 |
 | Login federado endurecido (identidad enlazada, SAML estricto, `state` de un solo uso) | 0.16 | 072 |
 | Pospuestas: API administrativa de sesiones y grant JWT bearer; el iframe de Session Management ya funciona en Java | 3.9 (4.9 hecha) | 041, 062, 069 |
+| Delegación por token exchange (actor = cliente autenticado, token emitido para él, sin ampliar scope ni audiencia); sin `delegated` propietario | 2.5, 3.8 | 043, 052 |
+| Decisiones Java del 27-10-2026: `sub` pairwise con sal propia (`OIDC_PAIRWISE_SALT`), DPoP en lugar de mTLS, JWE/JARM/UserInfo firmado sobre RS256; pospuestas 3.7 (modelo), 4.1, 4.3 y 4.6 | 3.6, 3.7, 4.1–4.6 | EP-13 a EP-15 (abiertas en PHP) |
 
 **Al sincronizar de nuevo:** revisar `done/` y `pospuestos/` de PHP, añadir aquí cada decisión nueva y reflejarla en su ficha. Las tareas abiertas en PHP (EP-12 a EP-16) siguen siendo referencia, no decisión.
 
@@ -59,12 +61,12 @@ Sincronizado con el plan PHP el 23-10-2026 (EP-01 a EP-11 cerradas allí). Son d
 
 | Hecho | ID | Tarea y criterio de cierre | Esfuerzo |
 |:---:|:---:|---|:---:|
-| [ ] | 1.1 | Ajustar contributors de discovery a rutas/capacidades reales (§4 de la fuente): retirar DCR, CIBA, iframe, JAR/`claims`, `pairwise`, JWE/JARM, mTLS y auth JWT mientras no funcionen; no exigir PAR falsamente, ajustar response types, métodos de autenticación, claims y grants. Probar metadata frente a endpoints. | S |
+| [x] | 1.1 | Ajustar contributors de discovery a rutas/capacidades reales (§4 de la fuente): retirar DCR, CIBA, iframe, JAR/`claims`, `pairwise`, JWE/JARM, mTLS y auth JWT mientras no funcionen; no exigir PAR falsamente, ajustar response types, métodos de autenticación, claims y grants. Probar metadata frente a endpoints. | S |
 | [x] | 1.2 | Emitir ID token solo con `openid`, `aud` del cliente, TTL corto propio, `sid` de sesión y `amr` array; omitir `nonce` vacío. Probar claims y caducidad. | M |
 | [x] | 1.3 | Usar modo correcto en errores de autorización, preservar `state`, añadir `iss` y `error_description`; incluir `iss` también en respuesta code. Probar éxito/error y caracteres especiales. | S |
 | [x] | 1.4 | Devolver errores OAuth estándar en `/token` (`invalid_grant`, `invalid_client`, etc.), `WWW-Authenticate` cuando corresponda y `Cache-Control: no-store`; probar respuestas negativas. | S |
 | [x] | 1.5 | Añadir POST UserInfo, email real, `email_verified` y `address` según scope; validar access tokens sin depender de sesión interactiva. Probar scopes y `sub` consistente. | S–M |
-| [ ] | 1.6 | Hacer que `prompt=consent` fuerce una nueva decisión de scopes; probar aun con consentimiento previo. | S |
+| [x] | 1.6 | Hacer que `prompt=consent` fuerce una nueva decisión de scopes; probar aun con consentimiento previo. | S |
 | [x] | 1.7 | Retirar implicit (decidido en PHP EP-08) y conservar los hybrid emitiendo solo los artefactos pedidos, con hashes y `fragment`; alinear discovery y tests. | S–M |
 | [x] | 1.8 | Admitir clientes confidenciales en authorization code, con autenticación en token y política PKCE definida; probar web app con secreto. Depende de 0.1 y 0.9. | M |
 | [x] | 1.9 | Validar firma, tipo, issuer y revocación en introspección para todos los grants; probar `active` de password y client_credentials y después de revocar. | M |
@@ -81,10 +83,10 @@ Sincronizado con el plan PHP el 23-10-2026 (EP-01 a EP-11 cerradas allí). Son d
 | Hecho | ID | Tarea y criterio de cierre | Esfuerzo |
 |:---:|:---:|---|:---:|
 | [x] | 2.1 | Exponer DCR RFC 7591/7592 sobre los casos de uso existentes; validar caducidad/usos de `initial_access_token`, grants, metadata y tenant. Anunciarlo solo cuando funcione. | M |
-| [ ] | 2.2 | Exponer create/accept/cancel/resend de invitaciones y probar autorización, caducidad y uso único. | S–M |
+| [x] | 2.2 | Exponer create/accept/cancel/resend de invitaciones y probar autorización, caducidad y uso único. | S–M |
 | [x] | 2.3 | Admitir PAR de clientes públicos, validar redirect/solicitud en el push y permitir exigirlo por cliente; alinear discovery. Depende de 0.14. | S |
 | [x] | 2.4 | Mantener `post_logout_redirect_uris` separadas de redirects de login; rechazar las no registradas. | S |
-| [ ] | 2.5 | Decidir habilitar o eliminar `delegated` y consolidar/eliminar `RefreshGranter`; ajustar grants anunciados y probar las rutas que permanezcan. | S |
+| [x] | 2.5 | Decidir habilitar o eliminar `delegated` y consolidar/eliminar `RefreshGranter`; ajustar grants anunciados y probar las rutas que permanezcan. | S |
 | [x] | 2.6 | Generar claves en un job fuera de JWKS/firma; probar disponibilidad y rotación sin generación síncrona en la petición. | S |
 | [x] | 2.7 | Aplicar `login_hint` e `id_token_hint` válidos en authorize; probar hint inválido y `prompt=none`. | S |
 | [x] | 2.8 | Revisar hash/comparación temporalmente segura de secretos y su exposición posterior al alta DCR; revisar protección de contraseñas de usuario. Probar que lectura DCR no devuelve el secreto. | M |
@@ -97,29 +99,29 @@ Sincronizado con el plan PHP el 23-10-2026 (EP-01 a EP-11 cerradas allí). Son d
 | Hecho | ID | Tarea y criterio de cierre | Referencia |
 |:---:|:---:|---|---|
 | [x] | 3.1 | Añadir `response_mode=form_post` con formulario escapado y tests de éxito/error. | OAuth Form Post |
-| [ ] | 3.2 | Autenticar clientes con `private_key_jwt` (sin `client_secret_jwt`, por la opción A de 2.9), validando firma, claims y replay compartido con JAR; anunciar solo métodos operativos. | RFC 7523, OIDC Core §9 |
+| [x] | 3.2 | Autenticar clientes con `private_key_jwt` (sin `client_secret_jwt`, por la opción A de 2.9), validando firma, claims y replay compartido con JAR; anunciar solo métodos operativos. | RFC 7523, OIDC Core §9 |
 | [x] | 3.3 | Procesar JAR firmado (`request`/`request_uri`) con JWKS, claims y anti-replay; anunciarlo tras las pruebas. | RFC 9101 |
 | — | 3.4 | **Descartada** (PHP 051, 22-10-2026); se reabre con un cliente que aporte su IdP OIDC. ~~Añadir proveedor federado OIDC genérico (discovery, JWKS, validación y vínculo de cuentas); adaptar Microsoft, Apple y GitHub según requisito.~~ | OIDC Core |
 | [x] | 3.5 | Emitir access token con cabecera `typ: at+jwt` y claims RFC 9068; probar rechazo de otro propósito/audiencia. | RFC 9068 |
-| [ ] | 3.6 | Incorporar DPoP en emisión y consumo, con prueba de posesión y replay. | RFC 9449 |
-| [ ] | 3.7 | Añadir ES256/EdDSA si se necesitan, con claves, JWKS, verificación y metadata coherentes. | RFC 7518 / 8037 |
-| [ ] | 3.8 | Implementar token exchange con política de actores, audiencia, scopes y confianza; probar denegación de escaladas. | RFC 8693 |
+| [x] | 3.6 | Incorporar DPoP en emisión y consumo, con prueba de posesión y replay. | RFC 9449 |
+| — | 3.7 | Añadir ES256/EdDSA si se necesitan, con claves, JWKS, verificación y metadata coherentes. | RFC 7518 / 8037 |
+| [x] | 3.8 | Implementar token exchange con política de actores, audiencia, scopes y confianza; probar denegación de escaladas. | RFC 8693 |
 | — | 3.9 | **Pospuesta** (PHP 069). Implementar JWT bearer solo con caso de uso aprobado; validar emisor, audiencia y anti-replay. | RFC 7523 |
 | [x] | 3.10 | Definir selector `select_account`, documentar ACR y aplicar `ui_locales`/`claims_locales` si se ofrecen; probar step-up y selección. | OIDC Core |
-| [ ] | 3.11 | UserInfo firmado por cliente con `iss`/`aud` y claims consentidas; anunciar solo si funciona. | OIDC Core §5.3.2 |
+| [x] | 3.11 | UserInfo firmado por cliente con `iss`/`aud` y claims consentidas; anunciar solo si funciona. | OIDC Core §5.3.2 |
 
 ## Fase 4 — Perfil alto (solo con requisito)
 
 | Hecho | ID | Tarea y criterio de cierre |
 |:---:|:---:|---|
-| [ ] | 4.1 | mTLS y access tokens ligados a certificado: verificar certificado en emisión y consumo; anunciar endpoints/aliases reales (RFC 8705). |
-| [ ] | 4.2 | JARM: firmar respuestas de autorización y validar modos y claims (OIDC JARM). |
-| [ ] | 4.3 | CIBA: implementar solicitud, aprobación y modos anunciados; eliminar el 403 antes de publicarlo. |
-| [ ] | 4.4 | `sub` pairwise: derivación estable por sector y aislamiento entre RP. |
-| [ ] | 4.5 | JWE: cifrar ID token y UserInfo para clientes configurados y publicar algoritmos reales. |
-| [ ] | 4.6 | RAR: validar `authorization_details` y limitarlo a lo concedido (RFC 9396). |
-| [ ] | 4.7 | Resource indicators: validar `resource` y restringir audiencias en emisión/consumo (RFC 8707). |
-| [ ] | 4.8 | Parámetro `claims`: validar claims esenciales/opcionales y respetar consentimiento y scopes antes de volver a anunciarlo. |
+| — | 4.1 | mTLS y access tokens ligados a certificado: verificar certificado en emisión y consumo; anunciar endpoints/aliases reales (RFC 8705). |
+| [x] | 4.2 | JARM: firmar respuestas de autorización y validar modos y claims (OIDC JARM). |
+| — | 4.3 | CIBA: implementar solicitud, aprobación y modos anunciados; eliminar el 403 antes de publicarlo. |
+| [x] | 4.4 | `sub` pairwise: derivación estable por sector y aislamiento entre RP. |
+| [x] | 4.5 | JWE: cifrar ID token y UserInfo para clientes configurados y publicar algoritmos reales. |
+| — | 4.6 | RAR: validar `authorization_details` y limitarlo a lo concedido (RFC 9396). |
+| [x] | 4.7 | Resource indicators: validar `resource` y restringir audiencias en emisión/consumo (RFC 8707). |
+| [x] | 4.8 | Parámetro `claims`: validar claims esenciales/opcionales y respetar consentimiento y scopes antes de volver a anunciarlo. |
 | [x] | 4.9 | Iframe OIDC Session Management: comprobación por origen registrado y `session_state` derivado del `sid` público, estable tras rotación de cookie y `changed` tras logout. |
 | [x] | 4.10 | Front-channel logout: iframes solo para RP de la sesión, con `iss`/`sid` cuando el cliente lo requiera. |
 

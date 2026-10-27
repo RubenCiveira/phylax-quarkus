@@ -8,6 +8,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigCommandRepositoryGateway;
+import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.InvitationStoreGateway;
 import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvitationMailGateway;
 
@@ -15,26 +17,36 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvit
 @RequiredArgsConstructor
 public class InvitationResendUsecase {
 
-  private static final int EXPIRES_DAYS = 7;
+  private static final int DEFAULT_EXPIRES_DAYS = 7;
 
   private final InvitationStoreGateway store;
   private final UserInvitationMailGateway mailer;
   private final SecureTokenService secureTokenService;
+  private final TenantConfigCommandRepositoryGateway tenantConfigs;
 
-  public void resend(String uid, String tenantName, String tenantId, String baseUrl) {
+  /**
+   * Sends a pending invitation again with a new link and expiry; the old link stops working.
+   *
+   * @param uid invitation identifier
+   * @param tenantName tenant name, for the link
+   * @param tenantId tenant of the administrator
+   * @param baseUrl public host
+   * @return false when the invitation is not pending in that tenant
+   */
+  public boolean resend(String uid, String tenantName, String tenantId, String baseUrl) {
     String rawToken = secureTokenService.generate();
-    String tokenHash = secureTokenService.hash(rawToken);
-    OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(EXPIRES_DAYS);
-
-    var refreshData = store.refresh(uid, tokenHash, expiresAt);
-
-    String acceptUrl = baseUrl.replaceAll("/+$", "") + "/oauth/openid/"
-        + java.net.URLEncoder.encode(tenantName, java.nio.charset.StandardCharsets.UTF_8)
-        + "/invitation/accept?token="
-        + java.net.URLEncoder.encode(rawToken, java.nio.charset.StandardCharsets.UTF_8);
-
-    mailer.sendInvitation(refreshData.inviteeEmail(), TenantReference.of(tenantId), acceptUrl,
-        refreshData.inviterEmail(), expiresAt);
+    int expiryDays = tenantConfigs
+        .find(TenantConfigFilter.builder().tenant(TenantReference.of(tenantId)).build())
+        .map(c -> c.getInvitationExpiryDays()).orElse(DEFAULT_EXPIRES_DAYS);
+    OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(expiryDays);
+    return store.refresh(uid, tenantId, rawToken, expiresAt).map(refreshData -> {
+      String acceptUrl = baseUrl.replaceAll("/+$", "") + "/oauth/openid/"
+          + java.net.URLEncoder.encode(tenantName, java.nio.charset.StandardCharsets.UTF_8)
+          + "/invitation/accept?token="
+          + java.net.URLEncoder.encode(rawToken, java.nio.charset.StandardCharsets.UTF_8);
+      mailer.sendInvitation(refreshData.inviteeEmail(), TenantReference.of(tenantId), acceptUrl,
+          refreshData.inviterEmail(), expiresAt);
+      return true;
+    }).orElse(false);
   }
-
 }

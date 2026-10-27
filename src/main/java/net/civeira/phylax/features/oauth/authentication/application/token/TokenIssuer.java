@@ -33,8 +33,9 @@ public class TokenIssuer {
   private final SessionStoreGateway sessionStore;
 
   public AutorizationToken issueClientCredentials(String tenant, ClientDetails client,
-      List<String> scopes) {
-    AutorizationToken token = tokenBuilder.buildClientCredentialsToken(tenant, client, scopes);
+      List<String> scopes, List<String> audiences) {
+    AutorizationToken token =
+        tokenBuilder.buildClientCredentialsToken(tenant, client, scopes, audiences);
     AuthenticationData auth = new AuthenticationData();
     auth.setUsername(client.getClientId());
     auth.setUid(UUID
@@ -42,9 +43,22 @@ public class TokenIssuer {
         .toString());
     auth.setTenant(tenant);
     auth.setScopes(scopes);
-    auth.setAudiences(List.of(client.getClientId()));
+    auth.setAudiences(audiences);
     String sessionId = UUID.randomUUID().toString();
     sessionStore.saveSession(sessionId, client, "client_credentials", auth, sessionId);
+    tokenBuilder.tokenJti(token.getAccessToken(), tenant).ifPresent(jti -> sessionStore
+        .updateTokenJtis(sessionId, client.getClientId(), jti, UUID.randomUUID().toString()));
+    return token;
+  }
+
+  /**
+   * Issues the token of a token exchange, with its own revocable session record (task 3.8).
+   */
+  public AutorizationToken issueExchanged(String tenant, ClientDetails client,
+      AuthenticationData auth, java.util.Map<String, Object> act) {
+    AutorizationToken token = tokenBuilder.buildExchangedToken(tenant, client, auth, act);
+    String sessionId = UUID.randomUUID().toString();
+    sessionStore.saveSession(sessionId, client, JwtTokenBuilder.TOKEN_EXCHANGE, auth, sessionId);
     tokenBuilder.tokenJti(token.getAccessToken(), tenant).ifPresent(jti -> sessionStore
         .updateTokenJtis(sessionId, client.getClientId(), jti, UUID.randomUUID().toString()));
     return token;

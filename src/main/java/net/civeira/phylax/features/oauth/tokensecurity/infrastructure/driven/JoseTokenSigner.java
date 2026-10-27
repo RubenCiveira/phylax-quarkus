@@ -83,12 +83,12 @@ public class JoseTokenSigner implements TokenSigner {
   /**
    * Duration for which each signing key is valid.
    */
-  @ConfigProperty(name = "oauth.jwt.authorization.key-duration", defaultValue = "7d")
+  @ConfigProperty(name = "oidc.jwt.authorization.key-duration", defaultValue = "7d")
   private final Duration keyDuration;
   /**
    * Number of future keys to pre-generate.
    */
-  @ConfigProperty(name = "oauth.jwt.authorization.key-futures", defaultValue = "3")
+  @ConfigProperty(name = "oidc.jwt.authorization.key-futures", defaultValue = "3")
   private final int futureKeysNumber;
   /**
    * Repository for storing and retrieving signing keys.
@@ -97,12 +97,12 @@ public class JoseTokenSigner implements TokenSigner {
   /**
    * Store password configuration value.
    */
-  @ConfigProperty(name = "oauth.jwt.authorization.store-pass")
+  @ConfigProperty(name = "oidc.jwt.authorization.store-pass")
   private final String storePass;
   /**
    * Store pair configuration value.
    */
-  @ConfigProperty(name = "oauth.jwt.authorization.store-pair")
+  @ConfigProperty(name = "oidc.jwt.authorization.store-pair")
   private final String storePair;
 
   /**

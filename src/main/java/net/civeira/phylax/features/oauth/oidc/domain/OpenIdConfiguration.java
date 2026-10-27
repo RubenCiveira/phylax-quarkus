@@ -294,6 +294,11 @@ public class OpenIdConfiguration {
   @JsonProperty("authorization_response_iss_parameter_supported")
   private final boolean authorizationResponseIssParameterSupported;
   /**
+   * Algorithms of DPoP proofs (RFC 9449 §5.1, task 3.6).
+   */
+  @JsonProperty("dpop_signing_alg_values_supported")
+  private final List<String> dpopSigningAlgValuesSupported;
+  /**
    * Prompt values supported by this provider.
    */
   @JsonProperty("prompt_values_supported")

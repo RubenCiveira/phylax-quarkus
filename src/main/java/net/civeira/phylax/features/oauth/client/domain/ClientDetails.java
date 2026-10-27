@@ -157,6 +157,65 @@ public class ClientDetails {
   private final Integer m2mTokenTtlSeconds;
 
   /**
+   * Algorithm of the client's {@code private_key_jwt} assertions (task 3.2). Null when not
+   * registered: then any supported asymmetric one.
+   */
+  private final String tokenEndpointAuthSigningAlg;
+
+  /**
+   * Whether the client gets a pairwise {@code sub} (task 4.4) instead of the public one.
+   */
+  private final boolean pairwiseSubject;
+
+  /**
+   * Registered {@code sector_identifier_uri}: its host is the sector of a pairwise client. Null
+   * when not registered: then the host of its only redirect host.
+   */
+  private final String sectorIdentifierUri;
+
+  /**
+   * Whether every access token of the client must be bound to a DPoP key (RFC 9449 §5, task 3.6).
+   */
+  private final boolean dpopBoundAccessTokens;
+
+  /**
+   * Algorithm of signed authorization responses (JARM, task 4.2). Null: the default RS256.
+   */
+  private final String authorizationSignedResponseAlg;
+
+  /**
+   * Algorithm of a signed UserInfo response (task 3.11). Null: plain JSON.
+   */
+  private final String userinfoSignedResponseAlg;
+
+  /**
+   * Key management algorithm to encrypt ID tokens for the client (task 4.5). Null: not encrypted.
+   */
+  private final String idTokenEncryptedResponseAlg;
+
+  /**
+   * Content encryption of ID tokens; with an algorithm and no value, {@code A128CBC-HS256}.
+   */
+  private final String idTokenEncryptedResponseEnc;
+
+  /**
+   * Key management algorithm to encrypt UserInfo for the client (task 4.5). Null: not encrypted.
+   */
+  private final String userinfoEncryptedResponseAlg;
+
+  /**
+   * Content encryption of UserInfo; with an algorithm and no value, {@code A128CBC-HS256}.
+   */
+  private final String userinfoEncryptedResponseEnc;
+
+  /**
+   * {@code authorization_details} types the client may request (RAR, task 4.6).
+   */
+  @Builder.Default
+  @NonNull
+  private final List<String> authorizationDetailsTypes = List.of();
+
+  /**
    * Checks that every requested audience is this client or one registered for it.
    *
    * Used by authorize, the token endpoint and device authorization to reject foreign resource

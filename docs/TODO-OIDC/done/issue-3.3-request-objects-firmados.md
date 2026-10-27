@@ -1,7 +1,7 @@
 # 3.3 — Request objects firmados
 
 - **Fase:** 3 (según necesidad) · **Estado:** hecha e integrada con modelo regenerado (26-10-2026), [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) · **Referencia:** RFC 9101.
-- **Implementación:** validar `request`/`request_uri` externos con JWKS, `iss`/`aud`/`exp`/`nbf`/`iat`/`jti` y anti-replay; resolver conflictos de parámetros. Para `jwks_uri` remoto, usar un fetcher de infraestructura con HTTPS, bloqueo de redes privadas/loopback, límites de tiempo/tamaño y caché por cliente; reutilizarlo en [3.2](../issue-3.2-autenticacion-jwt-cliente.md) y [3.4](../pospuestos/issue-3.4-federacion-oidc-generica.md).
+- **Implementación:** validar `request`/`request_uri` externos con JWKS, `iss`/`aud`/`exp`/`nbf`/`iat`/`jti` y anti-replay; resolver conflictos de parámetros. Para `jwks_uri` remoto, usar un fetcher de infraestructura con HTTPS, bloqueo de redes privadas/loopback, límites de tiempo/tamaño y caché por cliente; reutilizarlo en [3.2](issue-3.2-autenticacion-jwt-cliente.md) y [3.4](../pospuestos/issue-3.4-federacion-oidc-generica.md).
 - **Cierre:** objeto válido aceptado y objeto expirado, de otro cliente, mal firmado o reutilizado rechazado; discovery coherente.
 - **Fuente:** [§5, 3.3](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-3--extensiones-de-un-idp-moderno).
 

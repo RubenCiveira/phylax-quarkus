@@ -34,7 +34,8 @@ class ClaimsMapperUnitTest {
     Mockito.when(current.getPublicHost()).thenReturn("https://auth.example.com");
     return new ClaimsMapper(current, Mockito.mock(TenantQueryRepositoryGateway.class),
         Mockito.mock(TenantConfigQueryRepositoryGateway.class),
-        new AcrPolicy("urn:lugh:acr:1fa", "urn:lugh:acr:mfa"), rfc9068, Duration.ofMinutes(5));
+        new AcrPolicy("urn:lugh:acr:1fa", "urn:lugh:acr:mfa"), rfc9068, Duration.ofMinutes(5),
+        new SubjectResolver(java.util.Optional.of("test-salt")));
   }
 
   private static AuthenticationData user() {

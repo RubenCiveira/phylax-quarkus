@@ -46,7 +46,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   /**
    * Whether every confidential client must use PKCE, besides those that register it (task 1.11).
    */
-  @ConfigProperty(name = "oauth.pkce.require-for-confidential", defaultValue = "false")
+  @ConfigProperty(name = "oidc.pkce.require-for-confidential", defaultValue = "false")
   private final boolean pkceForConfidential;
 
   @Override
@@ -64,6 +64,18 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   public Optional<ClientDetails> loadPublicById(String tenant, String clientId) {
     return find(tenant, clientId).filter(this::publicAllowed)
         .map(app -> base(app).protectedWithSecret(false).requirePkce(true).build());
+  }
+
+  @Override
+  public Optional<ClientDetails> loadForAssertion(String tenant, String clientId) {
+    return find(tenant, clientId).filter(app -> app
+        .getTokenEndpointAuthMethod() == TrustedClientTokenEndpointAuthMethodOptions.PRIVATE_KEY_JWT)
+        .map(app -> base(app).protectedWithSecret(true).requirePkce(requiresPkce(app))
+            .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
+            .m2mTokenTtlSeconds(app.getM2mTokenTtlSecondsValue() != null
+                ? app.getM2mTokenTtlSecondsValue().getM2mTokenTtlSeconds()
+                : null)
+            .build());
   }
 
   @Override

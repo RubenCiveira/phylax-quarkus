@@ -11,8 +11,12 @@ public final class OidcTestFixtures {
   public static final String WEB_CLIENT_ID = "web-client";
   /** Resource server registered as allowed audience of every test client. */
   public static final String API_AUDIENCE = "test-api";
+  /** Resource indicator (RFC 8707) registered as allowed audience of every test client. */
+  public static final String RESOURCE_URI = "https://api.example/orders";
   /** Public client registered for none. */
   public static final String SPA_CLIENT_ID = "spa-client";
+  /** Confidential client registered for private_key_jwt, with the JWKS set by each test. */
+  public static final String JWT_CLIENT_ID = "jwt-client";
   public static final String REDIRECT_URI = "http://localhost/callback";
   public static final String POST_LOGOUT_URI = "http://localhost/after-logout";
   public static final String USERNAME = "alice@example.com";

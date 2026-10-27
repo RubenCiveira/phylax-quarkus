@@ -16,7 +16,7 @@ La [especificación de modelo J-02/J-03/J-05](cambios-modelo-J02-J05.md) está a
 | [0.3 Audiencias autorizadas](issue-0.3-audiencias-autorizadas.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) (cerrada en J-01) | Registrar en `allowedAudiences` las audiencias que ya piden los clientes existentes (antes se ignoraban en el cuerpo de `/token`) |
 | [0.10 Redirect URI estricta](issue-0.10-redirect-uri-estricta.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) (cerrada en J-01) | Revisar redirects registrados con `*` o `/*` fuera de loopback antes de desplegar |
 | [1.10 Tests negativos de seguridad](issue-1.10-tests-negativos-seguridad.md) | [J-01](../epicas/done/ep-J-01-token-y-grants-seguros.md) | — (HTTP + MariaDB con `make test-mariadb`) |
-| [0.16 Seguridad del login federado](issue-0.16-seguridad-login-federado.md) | [J-08](../epicas/ep-J-08-login-consentimiento-producto.md) | Login real con un IdP SAML (firma de respuesta y de aserción) y con Google; migrar la configuración SAML de los proveedores existentes |
+| [0.16 Seguridad del login federado](issue-0.16-seguridad-login-federado.md) | [J-08](../epicas/done/ep-J-08-login-consentimiento-producto.md) | Login real con un IdP SAML (firma de respuesta y de aserción) y con Google; migrar la configuración SAML de los proveedores existentes |
 | [0.4 Configuración efectiva por cliente](issue-0.4-configuracion-por-cliente.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Clientes existentes sin `grantTypesJson` o `allowAllScopes`: revisar qué grants y scopes necesitan antes de desplegar |
 | [0.5 Aislamiento de clientes por tenant](issue-0.5-aislamiento-clientes-tenant.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Asignar tenant a los clientes que no deban ser globales |
 | [2.1 Registro dinámico de clientes](issue-2.1-registro-dinamico-clientes.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Acción `issue` del initial access token; *Dynamic OP* (V.3). `post_logout_redirect_uris` verificado en MariaDB real |
@@ -28,7 +28,7 @@ La [especificación de modelo J-02/J-03/J-05](cambios-modelo-J02-J05.md) está a
 | [1.13 Claims según propósito del token](issue-1.13-claims-proposito-token.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | `amr` de login federado y enlace mágico |
 | [1.15 Scopes como conjuntos exactos](issue-1.15-scopes-conjuntos-exactos.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | — |
 | [2.6 Generación de claves fuera de la petición](issue-2.6-generacion-claves-fuera-peticion.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | Varias instancias rotando a la vez |
-| [3.5 Perfil at+jwt](issue-3.5-perfil-at-jwt.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | Adaptar consumidores externos antes de activar `oauth.jwt.access-token.rfc9068` |
+| [3.5 Perfil at+jwt](issue-3.5-perfil-at-jwt.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | Adaptar consumidores externos antes de activar `oidc.jwt.access-token.rfc9068` |
 | [0.11 State seguro y secreto fuera de PAR](issue-0.11-state-seguro-secreto-fuera-par.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | — |
 | [0.14 PAR vinculado y de un solo uso](issue-0.14-par-vinculado-un-solo-uso.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | PAR real con un navegador (cookie `PAR_BINDING` con `Secure`) |
 | [1.11 Política PKCE](issue-1.11-politica-pkce.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | Avisar a clientes que envían `code_challenge` sin método |
@@ -49,3 +49,16 @@ La [especificación de modelo J-02/J-03/J-05](cambios-modelo-J02-J05.md) está a
 | [1.14 Hint y SID logout](issue-1.14-hint-sid-logout.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos; Conformance RP-Initiated/Back-Channel (J-09) |
 | [4.9 Session Management iframe](issue-4.9-session-management-iframe.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos (27-10-2026) |
 | [4.10 Front-channel logout](issue-4.10-front-channel-logout.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos (27-10-2026) |
+| [1.1 Discovery honesto](issue-1.1-discovery-honesto.md) | [J-09](../epicas/ep-J-09-discovery-e2e-documentacion.md) | Conformance *Config OP* (V.2) |
+| [1.6 Prompt consent](issue-1.6-prompt-consent.md) | [J-08](../epicas/done/ep-J-08-login-consentimiento-producto.md) | — |
+| [2.2 Endpoints de invitaciones](issue-2.2-endpoints-invitaciones.md) | [J-08](../epicas/done/ep-J-08-login-consentimiento-producto.md) | MariaDB hecho; plantilla `user.invitation`, roles y auto-login |
+| [2.5 Grants inalcanzables](issue-2.5-grants-inalcanzables-codigo-muerto.md) | [J-08](../epicas/done/ep-J-08-login-consentimiento-producto.md) | — |
+| [3.2 Autenticación JWT de cliente](issue-3.2-autenticacion-jwt-cliente.md) | [J-10](../epicas/done/ep-J-10-aserciones-jwt-cliente-grant.md) | `jwks_uri` real; alta por DCR |
+| [3.6 DPoP](issue-3.6-dpop.md) | [J-11](../epicas/done/ep-J-11-tokens-ligados-clave-certificado.md) | Resource servers externos validando la prueba |
+| [3.8 Token exchange](issue-3.8-token-exchange.md) | [J-08](../epicas/done/ep-J-08-login-consentimiento-producto.md) | Registrar el grant solo en los clientes que delegan |
+| [3.11 UserInfo firmado](issue-3.11-userinfo-firmado.md) | [J-12](../epicas/done/ep-J-12-algoritmos-firma-cifrado.md) | RP real |
+| [4.2 JARM](issue-4.2-jarm.md) | [J-12](../epicas/done/ep-J-12-algoritmos-firma-cifrado.md) | RP real |
+| [4.4 Subject pairwise](issue-4.4-subject-pairwise.md) | [J-13](../epicas/done/ep-J-13-solicitudes-claims-avanzados.md) | Configurar `OIDC_PAIRWISE_SALT` (no rotar) |
+| [4.5 JWE ID token y UserInfo](issue-4.5-cifrado-jwe-id-token-userinfo.md) | [J-12](../epicas/done/ep-J-12-algoritmos-firma-cifrado.md) | RP real con `jwks_uri` |
+| [4.7 Resource indicators](issue-4.7-resource-indicators.md) | [J-13](../epicas/done/ep-J-13-solicitudes-claims-avanzados.md) | Registrar las URIs de recurso como audiencias |
+| [4.8 Parámetro claims](issue-4.8-claims-authorize.md) | [J-13](../epicas/done/ep-J-13-solicitudes-claims-avanzados.md) | Conformance *Basic OP* (V.2) |

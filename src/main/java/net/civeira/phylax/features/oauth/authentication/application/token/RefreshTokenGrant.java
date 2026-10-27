@@ -15,6 +15,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationRes
 import net.civeira.phylax.features.oauth.authentication.domain.exception.OAuthTokenException;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.DpopBinding;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.tokensecurity.application.RefreshFamily;
 import net.civeira.phylax.features.oauth.tokensecurity.application.RefreshTokenInfo;
@@ -46,6 +47,7 @@ public class RefreshTokenGrant {
   private final TokenRevocationGateway revocationGateway;
   private final LoginUsecase loginUsecase;
   private final TokenIssuer issuer;
+  private final DpopBinding dpop;
 
   /**
    * Rotates the refresh token of a token request.
@@ -67,6 +69,11 @@ public class RefreshTokenGrant {
         .filter(found -> found.getJti() != null && found.getFamily().isPresent())
         .orElseThrow(() -> OAuthTokenException.invalidGrant("Invalid refresh token"));
     RefreshFamily family = info.getFamily().get();
+    if (info.getJkt() != null && !info.getJkt().equals(dpop.jkt().orElse(null))) {
+      // A bound refresh token only works with a proof of the same key (RFC 9449 §5).
+      throw OAuthTokenException.of("invalid_dpop_proof", "The refresh token is bound to a key",
+          400);
+    }
     if (revocationGateway.isRevoked(info.getJti(), tenant)) {
       throw replay(tenant, info, family);
     }
@@ -82,7 +89,10 @@ public class RefreshTokenGrant {
       throw OAuthTokenException.invalidScope("The scope exceeds the original grant");
     }
     List<String> scopes = requested.isEmpty() ? info.getGrantedScopes() : requested;
-    AuthRequest authRequest = AuthRequest.builder().audiences(info.getAudiences()).tenant(tenant)
+    // Resources narrow the audiences of this access token; the family keeps the original ones.
+    List<String> audiences = TokenParams.narrowed(info.getAudiences(),
+        TokenParams.resources(request.params()), client.getClientId());
+    AuthRequest authRequest = AuthRequest.builder().audiences(audiences).tenant(tenant)
         .clientId(Optional.of(client.getClientId())).scope(Optional.of(String.join(" ", scopes)))
         .build();
     AuthenticationResult auth = loginUsecase.fillPreAuthenticated(authRequest, info.getUsername(),
@@ -91,6 +101,7 @@ public class RefreshTokenGrant {
       throw OAuthTokenException.invalidGrant("The user can not be authenticated");
     }
     auth.getData().setScopes(scopes);
+    auth.getData().setGrantAudiences(new ArrayList<>(info.getAudiences()));
     // The rotated tokens keep the facts of the original login, not those of this refresh.
     auth.getData().setSid(info.getSid());
     auth.getData().setTime(info.getAuthTime());

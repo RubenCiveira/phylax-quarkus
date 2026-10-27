@@ -63,6 +63,7 @@ import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.features.oauth.theme.domain.gateway.DecoratePageGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
+import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
@@ -184,6 +185,7 @@ public class AuthorizeHtml {
    */
   private final AcrPolicy acrPolicy;
   private final SessionStoreGateway sessionStore;
+  private final SubjectResolver subjects;
   private static final String LOGOUT_CSRF = "LOGOUT_CSRF";
 
   @ServerExceptionMapper
@@ -253,12 +255,18 @@ public class AuthorizeHtml {
         }
       }
       Optional<String> expectedUser = hinted;
-      String prompt = request.getPrompt().orElse("");
-      Optional<SessionInfo> sessionInfo = FORCE_REAUTH_PROMPTS.contains(prompt) ? Optional.empty()
-          : resolveSession(session, tenant, request).filter(
-              si -> expectedUser.map(si.getValidationData().getUsername()::equals).orElse(true));
+      Set<String> prompts = request.prompts();
+      if (prompts.contains("none") && prompts.size() > 1) {
+        // none cannot be combined with any other value (OIDC Core §3.1.2.1).
+        return responseBuilder.errorRedirect(request, "invalid_request");
+      }
+      Optional<SessionInfo> sessionInfo = prompts.stream().anyMatch(FORCE_REAUTH_PROMPTS::contains)
+          ? Optional.empty()
+          : resolveSession(session, tenant, request).filter(si -> expectedUser.map(
+              hint -> hint.equals(subjects.subject(client, si.getValidationData().getUsername())))
+              .orElse(true));
       boolean stepUp = sessionInfo.map(si -> belowRequestedLevel(si, request)).orElse(false);
-      if ("none".equals(prompt)) {
+      if (prompts.contains("none")) {
         if (sessionInfo.isEmpty()) {
           return responseBuilder.errorRedirect(request, "login_required");
         }
@@ -269,6 +277,9 @@ public class AuthorizeHtml {
       }
       if (stepUp) {
         return doStepUp(sessionInfo.get(), client, request);
+      }
+      if (sessionInfo.isPresent() && request.promptsConsent()) {
+        return doRenewConsent(sessionInfo.get(), client, request);
       }
       return next.apply(client, sessionInfo);
     }).orElseGet(() -> clientNotAllowedResponse(tenant, headers));
@@ -289,6 +300,20 @@ public class AuthorizeHtml {
       return Optional.empty();
     }
     return Optional.of(sub);
+  }
+
+  /**
+   * Whether an {@code id_token_hint} names the user of the session, for the client it was issued
+   * to: its {@code sub} is pairwise for a pairwise client (task 4.4).
+   */
+  private boolean subjectOfSession(String tenant, Object aud, SessionInfo session, Object sub) {
+    String username = session.getValidationData().getUsername();
+    String clientId = aud instanceof String single ? single
+        : aud instanceof List<?> list && list.size() == 1 ? String.valueOf(list.get(0)) : null;
+    String expected = clientId == null ? username
+        : clientRetrieve.loadPreautorized(tenant, clientId)
+            .map(client -> subjects.subject(client, username)).orElse(username);
+    return expected != null && expected.equals(sub);
   }
 
   /**
@@ -428,7 +453,7 @@ public class AuthorizeHtml {
       java.util.Map<String, Object> hints =
           tokenSigner.verifyTokenPayloadAcceptingExpired(tenant, idTokenHint);
       if (hints.isEmpty() || hints.containsKey("scope") || hints.containsKey("events")
-          || !sessionOpt.get().getValidationData().getUsername().equals(hints.get("sub"))
+          || !subjectOfSession(tenant, hints.get("aud"), sessionOpt.get(), hints.get("sub"))
           || !sessionOpt.get().getSid().equals(hints.get("sid")))
         return Response.status(400).build();
       {
@@ -439,9 +464,7 @@ public class AuthorizeHtml {
         if (aud instanceof String s && (clientId == null || clientId.isBlank())) {
           clientId = s;
         }
-        if (hints.get("sub") instanceof String s) {
-          userSub = s;
-        }
+        // The hint may carry a pairwise sub (task 4.4): the logout goes on with the local user.
         if (hints.get("sid") instanceof String s) {
           sessionId = s;
         }
@@ -603,6 +626,24 @@ public class AuthorizeHtml {
     Response base = router.paint(MfaRequiredException.class, input, preSession)
         .orElseGet(() -> router.paintFallback(input, null));
     // Clear AUTH_SESSION_ID so the POST goes to doExecStep (step flow, not session flow)
+    return Response.fromResponse(base).cookie(cookieManager.clearAuthSession(request.getTenant()))
+        .build();
+  }
+
+  /**
+   * {@code prompt=consent} over a live session (task 1.6): the user decides again on every
+   * requested scope. The pre-session keeps what the session proved, and the session cookie is
+   * cleared so the decision goes through the step flow, like a step-up.
+   */
+  private Response doRenewConsent(SessionInfo session, ClientDetails client, AuthRequest request) {
+    String username = session.getValidationData().getUsername();
+    ChallengesState state =
+        ChallengesState.empty(username).withCompleted(AuthenticationChallenge.PASSWORD)
+            .withAmr(session.getValidationData().getAmr());
+    AuthenticationResult renew = AuthenticationResult
+        .clientScopeConsentRequired(request.getTenant(), username, client.getClientId(), List.of());
+    Response base = stepOutcomeHandler.routeChallenge(renew, state, client, request,
+        new MultivaluedHashMap<>());
     return Response.fromResponse(base).cookie(cookieManager.clearAuthSession(request.getTenant()))
         .build();
   }

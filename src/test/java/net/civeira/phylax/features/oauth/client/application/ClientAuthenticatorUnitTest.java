@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthPolicy;
 import net.civeira.phylax.features.oauth.client.domain.ClientCredentials;
@@ -31,7 +32,8 @@ class ClientAuthenticatorUnitTest {
   @BeforeEach
   void setUp() {
     Mockito.reset(clients);
-    authenticator = new ClientAuthenticator(clients);
+    authenticator = new ClientAuthenticator(clients, Mockito.mock(ClientAssertionVerifier.class),
+        Mockito.mock(CurrentRequest.class));
   }
 
   private static ClientDetails client(ClientAuthMethod registered, boolean confidential) {

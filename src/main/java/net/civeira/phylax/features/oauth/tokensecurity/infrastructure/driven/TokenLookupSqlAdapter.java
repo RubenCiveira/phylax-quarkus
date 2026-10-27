@@ -78,7 +78,8 @@ public class TokenLookupSqlAdapter implements TokenLookupGateway {
             clientId = rs.getString("client_id");
           }
           return Optional.of(TokenIntrospectionResult.builder().active(true).sub(auth.getUsername())
-              .clientId(clientId).scope(scopeStr).exp(expEpoch).jti(jti).build());
+              .localSubject(auth.getUsername()).localUid(auth.getUid()).clientId(clientId)
+              .scope(scopeStr).exp(expEpoch).jti(jti).build());
         }
       }
     } catch (SQLException | JsonProcessingException ex) {

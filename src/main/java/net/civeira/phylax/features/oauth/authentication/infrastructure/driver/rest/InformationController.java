@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,12 +21,16 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.features.access.user.domain.User;
-import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
-import net.civeira.phylax.features.oauth.profile.application.ProfileService;
-import net.civeira.phylax.features.oauth.profile.domain.OidcProfile;
+import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtEncryptionGateway;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.AccessTokenPolicy;
+import net.civeira.phylax.features.oauth.tokensecurity.application.ClaimsMapper;
+import net.civeira.phylax.features.oauth.tokensecurity.application.DpopProofVerifier;
+import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.TokenIntrospectionResult;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
+import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.UserClaimsGateway;
 
 /**
  * REST controller for retrieving userinfo claims (OIDC Core §5.3).
@@ -40,10 +46,20 @@ public class InformationController {
 
   private static final String WWW_AUTHENTICATE_INVALID = "Bearer error=\"invalid_token\"";
 
-  private final ProfileService profileService;
   private final AccessTokenPolicy accessTokenPolicy;
-  private final UserQueryRepositoryGateway users;
+  private final UserClaimsGateway userClaims;
   private final ObjectMapper mapper;
+  private final ClientStoreGateway clients;
+  private final SubjectResolver subjects;
+  private final TokenSigner tokenSigner;
+  private final ClaimsMapper claimsMapper;
+  private final ClientJwtEncryptionGateway encryption;
+  private final DpopProofVerifier dpopVerifier;
+
+  /**
+   * Algorithms of a signed UserInfo: those of the server keys (task 3.11).
+   */
+  public static final List<String> SIGNING_ALGORITHMS = List.of("RS256");
 
   /**
    * Returns the current authenticated user's claims filtered by granted scopes.
@@ -55,17 +71,37 @@ public class InformationController {
   @Path("oauth/openid/{tenant}/userinfo")
   public Response retrieveUserData(@PathParam("tenant") String tenant,
       @Context HttpHeaders headers) {
+    return userinfo(tenant, headers, "GET");
+  }
+
+  /**
+   * UserInfo for a {@code Bearer} token, or a {@code DPoP} token with a proof of its key for this
+   * method and URL (RFC 9449 §7, task 3.6). A bound token sent as Bearer is refused.
+   */
+  private Response userinfo(String tenant, HttpHeaders headers, String method) {
     String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    boolean dpop = authHeader != null && authHeader.regionMatches(true, 0, "DPoP ", 0, 5);
+    if (authHeader == null || !authHeader.startsWith("Bearer ") && !dpop) {
       log.warn("userinfo unauthorized: missing/invalid Authorization header for tenant={}", tenant);
       return unauthorized();
     }
-    String token = authHeader.substring(7).trim();
+    String token = authHeader.substring(dpop ? 5 : 7).trim();
     if (token.isEmpty()) {
       log.warn("userinfo unauthorized: empty bearer token for tenant={}", tenant);
       return unauthorized();
     }
-    Map<String, Object> payload = accessTokenPolicy.validate(tenant, token, null).orElse(null);
+    Map<String, Object> payload;
+    if (dpop) {
+      Optional<String> jkt = dpopVerifier.verify(tenant, headers.getHeaderString("DPoP"), method,
+          claimsMapper.issuer(tenant) + "/userinfo", token);
+      if (jkt.isEmpty()) {
+        return Response.status(401)
+            .header(HttpHeaders.WWW_AUTHENTICATE, "DPoP error=\"invalid_dpop_proof\"").build();
+      }
+      payload = accessTokenPolicy.validateWithProof(tenant, token, null, jkt.get()).orElse(null);
+    } else {
+      payload = accessTokenPolicy.validate(tenant, token, null).orElse(null);
+    }
     if (payload == null)
       return unauthorized();
     String subject = claimAsString(payload.get("sub"));
@@ -80,87 +116,68 @@ public class InformationController {
     log.info("userinfo token verified tenant={} sub={} uid={} scopes={}", tenant, subject, uid,
         scopes);
 
-    OidcProfile profile =
-        uid != null && !uid.isBlank() ? profileService.getProfile(uid).orElse(null) : null;
+    // The relying party sees its own sub: pairwise for a pairwise client (task 4.4).
+    Optional<ClientDetails> client =
+        clients.loadPreautorized(tenant, claimAsString(payload.get("client_id")));
+    if (client.isEmpty())
+      return unauthorized();
+    // The token of a pairwise client carries its sectorial sub and no uid: the local user comes
+    // from the server record of the token (task 4.4).
+    Optional<TokenIntrospectionResult> record = accessTokenPolicy.record(tenant, payload);
+    String local = record.map(TokenIntrospectionResult::getLocalSubject)
+        .orElse(client.get().isPairwiseSubject() ? null : subject);
+    if (local == null)
+      return unauthorized();
+    String localUid = record.map(TokenIntrospectionResult::getLocalUid).orElse(uid);
+    Map<String, Object> claims = new LinkedHashMap<>(userClaims.claims(localUid, local, scopes));
+    claims.put("sub", subjects.subject(client.get(), local));
 
-    User user = uid != null ? users.find(UserFilter.builder().uid(uid).build()).orElse(null) : null;
-    Map<String, Object> claims = buildClaims(subject, scopes, profile, user);
+    return respond(tenant, client.get(), claims);
+  }
 
-    return Response.ok(claims).header("Cache-Control", "no-store").build();
+  /**
+   * The UserInfo response the client registered (OIDC Core §5.3.2): plain JSON; a JWT signed with
+   * the server keys ({@code userinfo_signed_response_alg}, only {@code RS256}, task 3.11) with
+   * {@code iss} and {@code aud}; encrypted for the client after signing
+   * ({@code userinfo_encrypted_response_alg}, task 4.5). A registered value the server cannot honor
+   * is an error, never a clear response.
+   */
+  private Response respond(String tenant, ClientDetails client, Map<String, Object> claims) {
+    String signAlg = client.getUserinfoSignedResponseAlg();
+    String encAlg = client.getUserinfoEncryptedResponseAlg();
+    boolean signed = signAlg != null && !signAlg.isBlank();
+    boolean encrypted = encAlg != null && !encAlg.isBlank();
+    if (!signed && !encrypted) {
+      return Response.ok(claims).header("Cache-Control", "no-store").build();
+    }
+    try {
+      if (signed && !SIGNING_ALGORITHMS.contains(signAlg)) {
+        throw new IllegalStateException("Unsupported userinfo signing algorithm " + signAlg);
+      }
+      String body = signed
+          ? tokenSigner.sign(tenant,
+              JWT.create().withPayload(claims).withIssuer(claimsMapper.issuer(tenant))
+                  .withAudience(client.getClientId()).withIssuedAt(new java.util.Date()),
+              java.time.Instant.now().plus(java.time.Duration.ofMinutes(5)))
+          : mapper.writeValueAsString(claims);
+      if (encrypted) {
+        body = encryption.encrypt(client, body, signed, encAlg,
+            client.getUserinfoEncryptedResponseEnc());
+      }
+      return Response.ok(body).type("application/jwt").header("Cache-Control", "no-store").build();
+    } catch (IllegalStateException | JsonProcessingException ex) {
+      log.error("userinfo for client {} cannot be issued as registered: {}", client.getClientId(),
+          ex.getMessage());
+      return Response.status(500).entity(Map.of("error", "server_error")).type("application/json")
+          .build();
+    }
   }
 
   @POST
   @Path("oauth/openid/{tenant}/userinfo")
   public Response retrieveUserDataPost(@PathParam("tenant") String tenant,
       @Context HttpHeaders headers) {
-    return retrieveUserData(tenant, headers);
-  }
-
-  private Map<String, Object> buildClaims(String subject, List<String> scopes, OidcProfile profile,
-      User user) {
-    Map<String, Object> claims = new LinkedHashMap<>();
-    claims.put("sub", subject);
-
-    if (scopes.contains("profile")) {
-      String name = resolvedName(subject, profile);
-      claims.put("name", name);
-      if (profile != null) {
-        profile.getGivenName().ifPresent(v -> claims.put("given_name", v));
-        profile.getFamilyName().ifPresent(v -> claims.put("family_name", v));
-        profile.getMiddleName().ifPresent(v -> claims.put("middle_name", v));
-        profile.getNickname().ifPresent(v -> claims.put("nickname", v));
-        profile.getPreferredUsername().ifPresent(v -> claims.put("preferred_username", v));
-        profile.getPictureUrl().ifPresent(v -> claims.put("picture", v));
-        profile.getWebsiteUrl().ifPresent(v -> claims.put("website", v));
-        profile.getGender().ifPresent(v -> claims.put("gender", v));
-        profile.getBirthdate().ifPresent(v -> claims.put("birthdate", v));
-        profile.getZoneinfo().ifPresent(v -> claims.put("zoneinfo", v));
-        profile.getLocale().ifPresent(v -> claims.put("locale", v));
-        profile.getUpdatedAt().ifPresent(v -> claims.put("updated_at", v));
-      }
-    }
-
-    if (scopes.contains("email") && user != null) {
-      user.getEmail().ifPresent(v -> claims.put("email", v));
-      user.getEmail().ifPresent(v -> claims.put("email_verified", user.isEmailVerified()));
-    }
-
-    if (scopes.contains("phone") && profile != null) {
-      profile.getPhoneNumber().ifPresent(v -> claims.put("phone_number", v));
-      profile.getPhoneNumberVerified().ifPresent(v -> claims.put("phone_number_verified", v));
-    }
-
-    if (scopes.contains("address") && profile != null) {
-      profile.getAddressJson().ifPresent(json -> {
-        try {
-          Object address = mapper.readValue(json, Map.class);
-          if (address instanceof Map<?, ?>)
-            claims.put("address", address);
-        } catch (JsonProcessingException ignored) {
-          // Unknown address format is not advertised as a known OIDC address.
-        }
-      });
-    }
-
-    return claims;
-  }
-
-  private String resolvedName(String subject, OidcProfile profile) {
-    if (profile == null) {
-      return subject;
-    }
-    String given = profile.getGivenName().orElse(null);
-    String family = profile.getFamilyName().orElse(null);
-    if (given != null && family != null) {
-      return given + " " + family;
-    }
-    if (given != null) {
-      return given;
-    }
-    if (family != null) {
-      return family;
-    }
-    return profile.getNickname().orElse(subject);
+    return userinfo(tenant, headers, "POST");
   }
 
   private Response unauthorized() {

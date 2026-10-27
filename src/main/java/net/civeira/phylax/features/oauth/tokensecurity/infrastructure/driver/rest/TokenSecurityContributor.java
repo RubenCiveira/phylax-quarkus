@@ -4,8 +4,11 @@ package net.civeira.phylax.features.oauth.tokensecurity.infrastructure.driver.re
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtEncryptionGateway;
 import net.civeira.phylax.features.oauth.oidc.domain.DiscoveryContributor;
 import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
+import net.civeira.phylax.features.oauth.tokensecurity.application.DpopProofVerifier;
 
 /**
  * Contributes JWKS, id-token algorithms, introspection, and revocation fields to the discovery
@@ -16,11 +19,15 @@ public class TokenSecurityContributor implements DiscoveryContributor {
 
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
-    builder.jwksUri(base + "jwks").idTokenSigningAlgValuesSupported(List.of("RS256"))
+    builder.dpopSigningAlgValuesSupported(DpopProofVerifier.ALGORITHMS).jwksUri(base + "jwks")
+        .idTokenSigningAlgValuesSupported(List.of("RS256"))
+        .idTokenEncryptionAlgValuesSupported(ClientJwtEncryptionGateway.ALGORITHMS)
+        .idTokenEncryptionEncValuesSupported(ClientJwtEncryptionGateway.ENCRYPTIONS)
         .introspectionEndpoint(base + "introspect")
-        .introspectionEndpointAuthMethodsSupported(
-            List.of("client_secret_basic", "client_secret_post"))
-        .revocationEndpoint(base + "revocation").revocationEndpointAuthMethodsSupported(
-            List.of("client_secret_basic", "client_secret_post"));
+        .introspectionEndpointAuthMethodsSupported(ClientAuthMethod.CONFIDENTIAL)
+        .introspectionEndpointAuthSigningAlgValuesSupported(ClientAuthMethod.ASSERTION_ALGORITHMS)
+        .revocationEndpoint(base + "revocation")
+        .revocationEndpointAuthMethodsSupported(ClientAuthMethod.CONFIDENTIAL)
+        .revocationEndpointAuthSigningAlgValuesSupported(ClientAuthMethod.ASSERTION_ALGORITHMS);
   }
 }

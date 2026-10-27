@@ -40,7 +40,7 @@ class RequestMagicLinkUsecaseUnitTest {
     Mockito.reset(users, tenants, tenantConfigs, clients, gateway, mailer, enabled,
         secureTokenService);
     usecase = new RequestMagicLinkUsecase(users, tenants, tenantConfigs, clients, gateway, mailer,
-        enabled, secureTokenService, "https://auth.example.com");
+        enabled, secureTokenService, java.util.Optional.of("https://auth.example.com"));
   }
 
   @Test

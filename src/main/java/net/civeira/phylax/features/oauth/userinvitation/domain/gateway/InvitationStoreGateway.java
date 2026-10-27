@@ -2,20 +2,38 @@
 package net.civeira.phylax.features.oauth.userinvitation.domain.gateway;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 /**
- * Write operations on invitations that require locking or cross-field updates.
+ * Changes of a pending invitation (task 2.2). Both only touch an invitation of the given tenant
+ * that is still pending.
  */
 public interface InvitationStoreGateway {
 
-  void cancel(String uid);
+  /**
+   * Cancels a pending invitation: its link stops working.
+   *
+   * @param uid invitation identifier
+   * @param tenantUid tenant of the request
+   * @return true when it was pending in that tenant and is now cancelled
+   */
+  boolean cancel(String uid, String tenantUid);
 
   /**
-   * Refreshes the invitation token and expiry. Returns email data needed to send the resend
-   * notification: invitee email and inviter email (inviterEmail may be empty if unknown).
+   * Replaces the token and expiry of a pending invitation; the previous link stops working.
+   *
+   * @param uid invitation identifier
+   * @param tenantUid tenant of the request
+   * @param rawToken new token, stored only as a digest
+   * @param newExpiresAt new expiry
+   * @return the addresses for the new email, empty when it was not pending in that tenant
    */
-  RefreshData refresh(String uid, String newTokenHash, OffsetDateTime newExpiresAt);
+  Optional<RefreshData> refresh(String uid, String tenantUid, String rawToken,
+      OffsetDateTime newExpiresAt);
 
+  /**
+   * Invitee email and inviter email (empty when unknown).
+   */
   record RefreshData(String inviteeEmail, String inviterEmail) {
   }
 }

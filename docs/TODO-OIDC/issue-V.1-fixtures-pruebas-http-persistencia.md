@@ -33,6 +33,8 @@ Dos niveles de prueba que se complementan:
 
 | `TokenEndpointMariaDbTest` (vía `POST /token`) | 8 canjes simultáneos de un code → un vencedor y la fila desaparece; code de otro cliente, tenant o redirect → `invalid_grant` sin borrar la fila; 8 rotaciones simultáneas de un refresh → un vencedor, JTI consumido y familia revocada en la base de datos; refresh de otro cliente/tenant no consume el JTI; refresh de una sesión borrada → `invalid_grant` |
 
+| `InvitationMariaDbTest` (27-10-2026) | Invitación localizada por digest solo en su tenant; 8 aceptaciones simultáneas → una cuenta; caducada o con cuenta existente no se acepta; cancelar y reenviar solo una pendiente del tenant, y el reenvío invalida el enlace anterior |
+
 La prueba de aislamiento se comprobó por mutación: con el SQL anterior (sin filtro de tenant) falla.
 
 ## Pendiente

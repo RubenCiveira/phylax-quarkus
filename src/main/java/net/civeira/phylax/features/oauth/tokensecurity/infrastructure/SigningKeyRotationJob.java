@@ -17,7 +17,7 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigne
  *
  * <p>
  * Runs once on startup, after the schema migrations, so the first token can be signed, and then
- * periodically ({@code oauth.jwt.authorization.rotation-cron}, every 15 minutes by default) to keep
+ * periodically ({@code oidc.jwt.authorization.rotation-cron}, every 15 minutes by default) to keep
  * {@code key-futures} keys ahead. Signing and the JWKS only read the stored keys. Instances that
  * rotate at the same time may both add keys: the extra ones are published and expire as usual.
  */
@@ -35,7 +35,7 @@ public class SigningKeyRotationJob {
   /**
    * Tops up the key ring.
    */
-  @Scheduled(cron = "${oauth.jwt.authorization.rotation-cron:0 */15 * * * ?}",
+  @Scheduled(cron = "${oidc.jwt.authorization.rotation-cron:0 */15 * * * ?}",
       concurrentExecution = ConcurrentExecution.SKIP)
   public void rotate() {
     try {

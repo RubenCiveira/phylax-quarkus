@@ -82,7 +82,9 @@ public class TokenVerifier {
               .authTime(payload.get("auth_time") instanceof Number t
                   ? Instant.ofEpochSecond(t.longValue())
                   : null)
-              .amr(claimAsList(payload.get("amr"))).build());
+              .amr(claimAsList(payload.get("amr"))).jkt(payload.get("cnf") instanceof Map<?, ?> cnf
+                  && cnf.get("jkt") instanceof String jkt ? jkt : null)
+              .build());
     } catch (NotAllowedException nae) {
       return Optional.empty();
     }

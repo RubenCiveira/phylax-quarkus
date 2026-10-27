@@ -21,6 +21,6 @@
 - **ACR por niveles** con `AcrPolicy` (decisiones arriba): `acr_values` toma el primer valor conocido; una sesión de un factor ante `urn:lugh:acr:mfa` pasa por step-up (solo el TOTP sobre la misma sesión) o, con `prompt=none`, `interaction_required`. Un login nuevo que pide MFA exige el segundo factor, o su alta si el usuario no lo tiene. El enlace mágico no se ofrece ni se acepta cuando se pide MFA. Se retira el `acr` numérico (`0`/`1`/`2`).
 - **Tokens:** `acr`, `amr` y `auth_time` (J-03, [1.13](issue-1.13-claims-proposito-token.md)). Discovery: `acr_values_supported` = valor emitido de cada nivel.
 - `select_account` = `prompt=login` (ya lo era).
-- `ui_locales`: primer idioma soportado (`oauth.ui-locales`, `en` por defecto; anunciado como `ui_locales_supported`), si no `Accept-Language`. `claims_locales` no se ofrece ni se anuncia.
+- `ui_locales`: primer idioma soportado (`oidc.ui-locales`, `en` por defecto; anunciado como `ui_locales_supported`), si no `Accept-Language`. `claims_locales` no se ofrece ni se anuncia.
 - **Límites:** el step-up de una sesión cuyo usuario no tiene TOTP muestra el formulario de TOTP, no el alta; la respuesta `401 insufficient_user_authentication` de las APIs (RFC 9470) es de J-04, y debe emitir los nuevos valores URN (la consola web reenvía el `acr` que le devuelve el servidor).
 - **Pruebas:** `AcrPolicyUnitTest`, `AuthorizationRequestPolicyUnitTest` (`ui_locales`), `AuthorizeRequestFlowTest` (`interaction_required` y step-up).

@@ -37,7 +37,7 @@ Toda respuesta lleva `Cache-Control: no-store` y `Pragma: no-cache` ([1.4](../..
 | Web app confidencial | Su método registrado (`client_secret_basic` o `client_secret_post`) | code (con o sin PKCE), refresh, password, client_credentials, device |
 | SPA / móvil (público) | Solo `client_id` (`none`) | code **con PKCE**, refresh, device |
 | Mixto (secreto + `publicAllow`, como el cliente de la consola) | Su método secreto o como público | Lo de cada tipo según cómo se autentique en cada petición |
-| Registrado como `private_key_jwt` | — | Ninguno hasta [3.2](../../issue-3.2-autenticacion-jwt-cliente.md) |
+| Registrado como `private_key_jwt` | — | Ninguno hasta [3.2](../../done/issue-3.2-autenticacion-jwt-cliente.md) |
 
 Introspección, revocación y PAR exigen secreto; `/device` admite públicos.
 

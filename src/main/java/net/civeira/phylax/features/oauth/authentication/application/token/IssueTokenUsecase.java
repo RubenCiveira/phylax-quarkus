@@ -22,6 +22,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.exception.OAuthTo
 import net.civeira.phylax.features.oauth.client.application.ClientAuthenticator;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthPolicy;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.tokensecurity.application.DpopBinding;
 import net.civeira.phylax.features.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
 
@@ -40,9 +41,10 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.AutorizationToken;
  * <li>authorization_code and refresh_token run their own use cases ({@link AuthorizationCodeGrant},
  * {@link RefreshTokenGrant}); client_credentials grants the client's M2M scopes
  * ({@code invalid_scope} when none of the requested ones is allowed);</li>
- * <li>the other grants may only ask for audiences registered for the client
- * ({@code invalid_target}) and are resolved by their {@link TokenGranter}; a rejected resource
- * owner is {@code invalid_grant}, except a pending second factor ({@code mfa_required}).</li>
+ * <li>the other grants may only ask for audiences and resources (RFC 8707) registered for the
+ * client ({@code invalid_target}) and are resolved by their {@link TokenGranter}; a rejected
+ * resource owner is {@code invalid_grant}, except a pending second factor
+ * ({@code mfa_required}).</li>
  * </ol>
  * Every failure is an {@link OAuthTokenException}; the driver only turns it into HTTP.
  */
@@ -57,8 +59,10 @@ public class IssueTokenUsecase {
   private final ClientAuthenticator clientAuthenticator;
   private final AuthorizationCodeGrant codeGrant;
   private final RefreshTokenGrant refreshGrant;
+  private final TokenExchangeGrant exchangeGrant;
   private final TokenIssuer issuer;
   private final JwtTokenBuilder tokenBuilder;
+  private final DpopBinding dpop;
 
   /**
    * Issues the tokens of a token request.
@@ -74,8 +78,10 @@ public class IssueTokenUsecase {
     }
     boolean code = AuthorizationCodeGrant.GRANT_TYPE.equals(grant);
     boolean refresh = RefreshTokenGrant.GRANT_TYPE.equals(grant);
-    Optional<TokenGranter> granter = code || refresh ? Optional.empty() : granter(grant);
-    if (!code && !refresh && granter.isEmpty()) {
+    boolean exchange = TokenExchangeGrant.GRANT_TYPE.equals(grant);
+    Optional<TokenGranter> granter =
+        code || refresh || exchange ? Optional.empty() : granter(grant);
+    if (!code && !refresh && !exchange && granter.isEmpty()) {
       throw OAuthTokenException.unsupportedGrantType();
     }
     ClientAuthPolicy policy = code || refresh ? ClientAuthPolicy.REGISTERED_METHOD
@@ -86,11 +92,18 @@ public class IssueTokenUsecase {
     if (!client.allowedGrant(grant)) {
       throw OAuthTokenException.unauthorizedClient("The client is not allowed to use " + grant);
     }
+    if (client.isDpopBoundAccessTokens() && dpop.jkt().isEmpty()) {
+      // The client registered dpop_bound_access_tokens: never a plain bearer token (3.6).
+      throw OAuthTokenException.of("invalid_dpop_proof", "A DPoP proof is required", 400);
+    }
     if (code) {
       return codeGrant.exchange(request, client);
     }
     if (refresh) {
       return refreshGrant.rotate(request, client);
+    }
+    if (exchange) {
+      return exchangeGrant.exchange(request, client);
     }
     AuthRequest authRequest = withAudiences(request, client);
     AuthenticationResult result = granter.get().authenticate(authRequest, client, request.params());
@@ -98,7 +111,7 @@ public class IssueTokenUsecase {
       throw rejected(result.getFail());
     }
     if (CLIENT_CREDENTIALS.equals(grant)) {
-      return clientCredentials(request, client);
+      return clientCredentials(request, client, authRequest.getAudiences());
     }
     AuthenticationData data = result.getData();
     data.setAudiences(authRequest.getAudiences());
@@ -114,14 +127,15 @@ public class IssueTokenUsecase {
    * The client_credentials grant: the client gets its own M2M scopes (task 0.4). Without a scope it
    * gets all of them; asking only for scopes it does not have is {@code invalid_scope}.
    */
-  private AutorizationToken clientCredentials(TokenGrantRequest request, ClientDetails client) {
+  private AutorizationToken clientCredentials(TokenGrantRequest request, ClientDetails client,
+      List<String> audiences) {
     List<String> requested = TokenParams.scopes(request.param("scope"));
     List<String> granted = client.m2mScopes(requested);
     if (!requested.isEmpty() && granted.isEmpty()) {
       throw OAuthTokenException.invalidScope("No requested scope is allowed for this client");
     }
     // M2M tokens also need a revocable JTI record, independently of any browser session.
-    return issuer.issueClientCredentials(request.tenant(), client, granted);
+    return issuer.issueClientCredentials(request.tenant(), client, granted, audiences);
   }
 
   /**
@@ -136,6 +150,8 @@ public class IssueTokenUsecase {
       body.stream().filter(Objects::nonNull).flatMap(value -> Arrays.stream(value.split("[,\\s]+")))
           .filter(aud -> !aud.isBlank()).forEach(audiences::add);
     }
+    // Resource indicators (RFC 8707, task 4.7) are audiences that must be registered too.
+    audiences.addAll(TokenParams.resources(request.params()));
     if (audiences.isEmpty())
       audiences.add(client.getClientId());
     List<String> requested = List.copyOf(audiences);
