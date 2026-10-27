@@ -240,8 +240,13 @@ public class CurrentRequest {
         resolvedScopes = List.of();
       }
 
-      builder = builder.uid(jwt.getSubject()).name(security.getPrincipal().getName())
-          .roles(resolvedRoles).groups(resolvedGroups).scopes(resolvedScopes);
+      builder =
+          builder.uid(jwt.getSubject()).name(security.getPrincipal().getName()).roles(resolvedRoles)
+              .groups(resolvedGroups).scopes(resolvedScopes).mfa(hasClaim("amr", "mfa"));
+      Object authTime = jwt.getClaim("auth_time");
+      if (authTime != null) {
+        builder = builder.authenticatedAt(asZonedDateTime(authTime).toInstant());
+      }
       Object claim = jwt.getClaim("tid");
       if (null != claim) {
         builder = builder.tenant(String.valueOf(claim));
