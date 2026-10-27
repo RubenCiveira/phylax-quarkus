@@ -20,6 +20,6 @@
 ## Implementación Java
 
 - `RequestObjectVerifier`, `ClientJwtSignatureGateway`/`JwksSignatureAdapter`, `JwtReplayGateway`/`JwtReplaySqlAdapter`, `RemoteJwksFetcher`, `AuthorizationRequestResolver`, `ResolveParRequestUsecase.adopt`.
-- La tabla anti-replay ya figura en las migraciones del [modelo](../cambios-modelo-J02-J05.md) (§3). Si no se ha migrado, todo request object devuelve `invalid_request_object` (fallo cerrado).
+- La tabla anti-replay ya figura en las migraciones del [modelo](cambios-modelo-J02-J05.md) (§3). Si no se ha migrado, todo request object devuelve `invalid_request_object` (fallo cerrado).
 - Discovery: `request_parameter_supported: true`, `request_uri_parameter_supported: false`, `request_object_signing_alg_values_supported: [RS256, ES256]`, sin algoritmos de cifrado.
 - **Pruebas:** `RequestObjectVerifierUnitTest`, `JwksSignatureAdapterUnitTest`, `RemoteJwksFetcherUnitTest` (SSRF), `AuthorizeRequestFlowTest` (válido una vez, replay, otra audiencia, `none`, por referencia) y `DynamicClientRegistrationMariaDbTest` (primer uso atómico y aislado por tenant/cliente).

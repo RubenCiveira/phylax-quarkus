@@ -55,6 +55,11 @@ public final class AuthorizationRequestPolicy {
         part -> !"code".equals(part) && !"id_token".equals(part) && !"token".equals(part))) {
       return reject("unsupported_response_type", "The response_type is not supported");
     }
+    String mode = request.getResponseMode().orElse("");
+    if ((!mode.isEmpty() && !"query".equals(mode) && !"fragment".equals(mode)
+        && !"form_post".equals(mode)) || ("query".equals(mode) && parts.size() > 1)) {
+      return reject("invalid_request", "The response_mode is not compatible with response_type");
+    }
     if (!client.allowsResponseType(responseType.get())) {
       return reject("unauthorized_client", "The client may not use this response_type");
     }

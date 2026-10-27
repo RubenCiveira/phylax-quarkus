@@ -38,6 +38,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
    * Registered redirects, checked with the production {@link RedirectUriPolicy}.
    */
   private static final List<String> REDIRECTS = List.of(OidcTestFixtures.REDIRECT_URI);
+  private final AtomicReference<List<String>> allowedRedirects = new AtomicReference<>(REDIRECTS);
   private final AtomicReference<List<String>> allowedScopes = new AtomicReference<>();
   private final AtomicReference<List<String>> allowedGrants = new AtomicReference<>();
   private final AtomicReference<List<String>> allowedScopesM2m = new AtomicReference<>();
@@ -66,6 +67,10 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     allowedResponseTypes.set(List.copyOf(types));
   }
 
+  public void setAllowedRedirects(List<String> redirects) {
+    allowedRedirects.set(List.copyOf(redirects));
+  }
+
   public void setRequirePar(boolean required) {
     requirePar = required;
   }
@@ -80,6 +85,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
         "client_credentials", "mfa", "urn:ietf:params:oauth:grant-type:device_code"));
     allowedScopesM2m.set(List.of("orders:read", "orders:write"));
     allowedResponseTypes.set(List.of("code"));
+    allowedRedirects.set(REDIRECTS);
     requirePar = false;
     jwksJson = null;
   }
@@ -92,7 +98,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   @Override
   public Optional<ClientDetails> loadForAuthorization(String tenant, String clientId,
       String redirect) {
-    boolean redirectAllowed = RedirectUriPolicy.allows(REDIRECTS, redirect);
+    boolean redirectAllowed = RedirectUriPolicy.allows(allowedRedirects.get(), redirect);
     return redirectAllowed
         ? method(tenant, clientId).map(_ -> buildClient(clientId, !isSpa(clientId)))
         : Optional.empty();
@@ -142,6 +148,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
         .protectedWithSecret(confidential).tokenEndpointAuthMethod(registered)
         .requirePkce(isSpa(clientId)).allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE))
         .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId))
+        .allowedRedirectUris(allowedRedirects.get())
         .postLogoutRedirectUris(List.of(OidcTestFixtures.POST_LOGOUT_URI)).build();
   }
 }

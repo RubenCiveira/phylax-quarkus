@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
@@ -83,6 +84,11 @@ public final class TrustedClientPolicy {
         .allowedAudiences(
             app.getAllowedAudiences().stream().map(AllowedAudiences::getAudience).toList())
         .postLogoutRedirectUris(postLogoutRedirectUris)
+        .allowedRedirectUris(
+            app.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList())
+        .frontchannelLogoutUri(app.getFrontChannelLogoutUri().orElse(null))
+        .frontchannelLogoutSessionRequired(
+            Boolean.TRUE.equals(app.isFrontChannelLogoutSessionRequired()))
         .requirePar(Boolean.TRUE.equals(app.isRequirePushedAuthorizationRequests()))
         .requestObjectSigningAlg(app.getRequestObjectSigningAlg().orElse(null))
         .jwksUri(app.getJwksUri().orElse(null)).jwksJson(app.getJwksJson().orElse(null))

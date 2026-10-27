@@ -88,8 +88,12 @@ public class BackChannelLogoutDispatcher {
     if (tenantUid.isEmpty()) {
       return List.of();
     }
-    return clients.list(TrustedClientFilter.builder().withBackChannelUrl(true).build()).stream()
-        .filter(c -> c.getTenantUid().map(tenantUid.get()::equals).orElse(true)).toList();
+    // The generated withBackChannelUrl filter currently selects IS NULL; filter non-empty
+    // registered URIs here so no RP is silently lost from a logout notification.
+    return clients.list(TrustedClientFilter.builder().build()).stream()
+        .filter(c -> c.getTenantUid().map(tenantUid.get()::equals).orElse(true))
+        .filter(c -> c.getBackChannelLogoutUri().filter(uri -> !uri.isBlank()).isPresent())
+        .toList();
   }
 
   private void sendLogoutToken(String tenant, String issuer, String userSub, String sessionId,

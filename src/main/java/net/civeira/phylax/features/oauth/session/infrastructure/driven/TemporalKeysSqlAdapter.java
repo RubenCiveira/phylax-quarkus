@@ -137,7 +137,6 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
   public String registerTemporalAuthCode(TemporalAuthCode code) {
     String sql = "INSERT INTO _oauth_temporal_codes(code, code_data, expiration) VALUES(?,?,?)";
     try (Connection connection = datasource.getConnection()) {
-      clearCodes(connection);
       try (PreparedStatement prepareStatement = connection.prepareStatement(sql)) {
         Instant expiration = Instant.now().plus(codeDuration);
         String json = mapper.writeValueAsString(code);
@@ -173,7 +172,6 @@ public class TemporalKeysSqlAdapter implements TemporalKeysGateway {
     Optional<TemporalAuthCode> response;
     String sql = "SELECT code_data FROM _oauth_temporal_codes WHERE code = ? and expiration > ?";
     try (Connection connection = datasource.getConnection()) {
-      clearCodes(connection);
       try (PreparedStatement prepareStatement = connection.prepareStatement(sql)) {
         prepareStatement.setString(1, code);
         prepareStatement.setTimestamp(2, new Timestamp(Instant.now().toEpochMilli()));

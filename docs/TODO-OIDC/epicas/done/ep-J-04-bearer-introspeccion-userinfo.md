@@ -1,6 +1,8 @@
 # J-04 — Bearer, introspección y UserInfo
 
-**Prioridad:** crítica · **Tareas:** [0.8](../issue-0.8-verificacion-bearer-apis.md), [0.15](../issue-0.15-audiencia-tenant-revocacion-bearer.md), [1.5](../issue-1.5-userinfo-conforme.md), [1.9](../issue-1.9-introspeccion-todos-grants.md). **Depende de:** tipo/claims J-03 y audiencia/tenant J-02.
+**Prioridad:** crítica · **Tareas:** [0.8](../../done/issue-0.8-verificacion-bearer-apis.md), [0.15](../../done/issue-0.15-audiencia-tenant-revocacion-bearer.md), [1.5](../../done/issue-1.5-userinfo-conforme.md), [1.9](../../done/issue-1.9-introspeccion-todos-grants.md). **Depende de:** tipo/claims J-03 y audiencia/tenant J-02.
+
+**Estado:** cerrada (27-10-2026). `BearerContractMariaDbTest`, `TokenIntrospectionTest` y `ApiBearerTenantFlowTest` cubren firma/tipo, tenant de ruta, issuer canónico, audiencia, revocación tras acceso válido, UserInfo e introspección de grants no interactivos.
 
 ## Implementación
 

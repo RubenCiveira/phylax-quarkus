@@ -1,6 +1,8 @@
 # J-07 — Sesión SSO y logout
 
-**Prioridad:** alta · **Tareas:** [0.6](../issue-0.6-logout-clientes-participantes.md), [0.12](../issue-0.12-logout-post-confirmacion.md), [1.14](../issue-1.14-hint-sid-logout.md), [4.9](../issue-4.9-session-management-iframe.md) y [4.10](../issue-4.10-front-channel-logout.md) opcionales. **Depende de:** clientes/tenant J-02 y `sid`/`auth_time` J-03.
+**Prioridad:** alta · **Tareas:** [0.6](../../done/issue-0.6-logout-clientes-participantes.md), [0.12](../../done/issue-0.12-logout-post-confirmacion.md), [1.14](../../done/issue-1.14-hint-sid-logout.md), [4.9](../../done/issue-4.9-session-management-iframe.md) y [4.10](../../done/issue-4.10-front-channel-logout.md). **Depende de:** clientes/tenant J-02 y `sid`/`auth_time` J-03.
+
+**Estado:** cerrada (27-10-2026), incluidos Session Management y front-channel. `SessionStateFlowTest` y `SessionLogoutMariaDbTest` verifican `sid` público, cookie rotada, origen de RP, clientes participantes, notificaciones y revocación selectiva.
 
 ## Implementación
 

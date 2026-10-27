@@ -45,7 +45,9 @@ class AuthorizeRequestFlowTest extends OidcIntegrationTestBase {
         .get("/oauth/openid/" + OidcTestFixtures.TENANT + "/.well-known/openid-configuration");
     Assertions.assertEquals(200, discovery.statusCode());
     Map<String, Object> metadata = discovery.jsonPath().getMap("$");
-    Assertions.assertFalse(metadata.containsKey("check_session_iframe"));
+    Assertions.assertEquals(discovery.jsonPath().getString("issuer") + "/login-status-iframe",
+        metadata.get("check_session_iframe"));
+    Assertions.assertEquals(true, metadata.get("frontchannel_logout_supported"));
     Assertions.assertFalse(metadata.containsKey("mtls_endpoint_aliases"));
     Assertions.assertFalse(metadata.containsKey("backchannel_authentication_endpoint"));
     Assertions.assertEquals(true, metadata.get("authorization_response_iss_parameter_supported"));

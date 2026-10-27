@@ -24,6 +24,8 @@ class BackChannelLogoutDispatcherUnitTest {
     TrustedClient client = Mockito.mock(TrustedClient.class);
     Mockito.when(client.getCode()).thenReturn(code);
     Mockito.when(client.getTenantUid()).thenReturn(Optional.ofNullable(tenantUid));
+    Mockito.when(client.getBackChannelLogoutUri())
+        .thenReturn(Optional.of("https://example.invalid/back-channel"));
     return client;
   }
 

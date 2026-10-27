@@ -92,6 +92,8 @@ public class AuthRequest {
    */
   private final Optional<String> responseType = Optional.empty();
   @Builder.Default
+  private final Optional<String> responseMode = Optional.empty();
+  @Builder.Default
   @With
   /**
    * Requested audiences for token issuance.
@@ -179,6 +181,7 @@ public class AuthRequest {
     this.uiLocales = Optional.ofNullable(params.getFirst("ui_locales"));
     this.locale = uiLocale(this.uiLocales.orElse(null)).orElse(fallbackLocale);
     this.responseType = Optional.ofNullable(params.getFirst("response_type"));
+    this.responseMode = Optional.ofNullable(params.getFirst("response_mode"));
     // A login hint only pre-fills the username, and only a reasonable one (task 2.7).
     this.loginHint = Optional.ofNullable(params.getFirst("login_hint"))
         .filter(hint -> !hint.isBlank() && hint.length() <= MAX_LOGIN_HINT);
@@ -256,8 +259,9 @@ public class AuthRequest {
         + append("code_challenge", getCodeChallenge())
         + append("code_challenge_method", getCodeChallengeMethod())
         + append("redirect_uri", getRedirect()) + append("response_type", getResponseType())
-        + append("login_hint", getLoginHint()) + append("acr_values", getAcrValues())
-        + append("ui_locales", getUiLocales()) + (maxAge >= 0 ? "&max_age=" + maxAge : "");
+        + append("response_mode", getResponseMode()) + append("login_hint", getLoginHint())
+        + append("acr_values", getAcrValues()) + append("ui_locales", getUiLocales())
+        + (maxAge >= 0 ? "&max_age=" + maxAge : "");
   }
 
   private static int parseMaxAge(String raw) {

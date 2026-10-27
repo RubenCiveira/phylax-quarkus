@@ -5,7 +5,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -42,6 +44,7 @@ import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConf
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.application.AuthenticateUser;
 import net.civeira.phylax.features.oauth.authentication.application.BackChannelLogoutDispatcher;
+import net.civeira.phylax.features.oauth.authentication.application.FrontChannelLogoutUseCase;
 import net.civeira.phylax.features.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
@@ -158,6 +161,8 @@ public class AuthorizeHtml {
    * Sends back-channel logout notifications to registered relying parties.
    */
   private final BackChannelLogoutDispatcher backChannelLogoutDispatcher;
+  private final FrontChannelLogoutUseCase frontChannelLogout;
+  private static final SecureRandom FRONT_CHANNEL_RANDOM = new SecureRandom();
   /**
    * Revokes tokens on logout.
    */
@@ -483,12 +488,16 @@ public class AuthorizeHtml {
       backChannelLogoutDispatcher.dispatch(tenant, issuer, userSub, sessionId, participants);
     }
 
-    // 8. Redirect or show logout confirmation page
-    if (safeRedirect != null) {
-      String location = (state != null && !state.isBlank())
-          ? safeRedirect + (safeRedirect.contains("?") ? "&" : "?") + "state="
-              + URLEncoder.encode(state, StandardCharsets.UTF_8)
-          : safeRedirect;
+    // 8. Render RP iframes before leaving the OP; a registered redirect follows their load.
+    String location = safeRedirect != null && state != null && !state.isBlank()
+        ? safeRedirect + (safeRedirect.contains("?") ? "&" : "?") + "state="
+            + URLEncoder.encode(state, StandardCharsets.UTF_8)
+        : safeRedirect;
+    List<String> frontUrls = frontChannelLogout.notificationUris(tenant,
+        currentRequest.getPublicHost() + "/oauth/openid/" + tenant, sessionId, participants);
+    if (!frontUrls.isEmpty())
+      return frontChannelPage(frontUrls, location, cleared);
+    if (location != null) {
       return Response.status(302).cookie(cleared).location(buildUrl(location)).build();
     }
 
@@ -501,21 +510,35 @@ public class AuthorizeHtml {
         .cookie(cleared).header("Content-Type", TEXT_HTML).build();
   }
 
-  @GET
-  @Path("oauth/openid/{tenant}/login-status-iframe")
-  @Produces(TEXT_HTML)
-  /**
-   * Returns a placeholder HTML for login status iframe checks.
-   */
-  public String checkSession(final @PathParam(TENANT) String tenant) {
-    return "<h1>Check</h1>";
-  }
-
-  @GET
-  @Path("oauth/openid/{tenant}/check-session")
-  @Produces(TEXT_HTML)
-  public String checkSessionAlias(final @PathParam(TENANT) String tenant) {
-    return checkSession(tenant);
+  private Response frontChannelPage(List<String> urls, String redirect, NewCookie cleared) {
+    byte[] random = new byte[24];
+    FRONT_CHANNEL_RANDOM.nextBytes(random);
+    String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(random);
+    StringBuilder html = new StringBuilder("<!doctype html><html><head><meta charset=\"utf-8\">"
+        + "<title>Signed out</title></head><body><h1>Signed out</h1>");
+    urls.forEach(url -> html.append("<iframe hidden title=\"RP logout\" src=\"")
+        .append(escapeHtml(url)).append("\"></iframe>"));
+    if (redirect != null) {
+      html.append("<a href=\"").append(escapeHtml(redirect)).append("\">Continue</a>");
+      String target = Base64.getEncoder().encodeToString(redirect.getBytes(StandardCharsets.UTF_8));
+      html.append("<script nonce=\"").append(nonce)
+          .append("\">const frames=document.querySelectorAll('iframe');")
+          .append("let count=0;const next=()=>location.replace(new TextDecoder().decode(")
+          .append("Uint8Array.from(atob('").append(target)
+          .append("'),c=>c.charCodeAt(0))));frames.forEach(f=>f.addEventListener('load',")
+          .append("()=>{if(++count===frames.length)next()}));setTimeout(next,2500);</script>");
+    }
+    html.append("</body></html>");
+    String origins = urls.stream().map(url -> {
+      URI uri = URI.create(url);
+      return uri.getScheme() + "://" + uri.getRawAuthority();
+    }).distinct().reduce((a, b) -> a + " " + b).orElse("'none'");
+    return Response.ok(html.toString()).type("text/html;charset=UTF-8").cookie(cleared)
+        .header("Cache-Control", "no-store").header("Referrer-Policy", "no-referrer")
+        .header("X-Content-Type-Options", "nosniff")
+        .header("Content-Security-Policy", "default-src 'none'; frame-src " + origins
+            + "; script-src 'nonce-" + nonce + "'; base-uri 'none'; frame-ancestors 'none'")
+        .build();
   }
 
   /**

@@ -5,12 +5,12 @@ Adaptación del [plan PHP](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/
 | Épica | Propietaria de tareas Java | Prioridad | Depende de | Referencia PHP |
 |---|---|---|---|---|
 | [J-01 Token y grants seguros](done/ep-J-01-token-y-grants-seguros.md) | 0.1, 0.2, 0.9, 0.13, 1.4, 1.8, 1.10, 1.16 | **cerrada** (24-10-2026; adelantó 0.3 y 0.10 de J-02) | J-02 política cliente | 017, 019, 020 hechos; EP-05, 064 |
-| [J-02 Clientes, tenant y secretos](done/ep-J-02-clientes-tenant-secretos.md) | 0.3, 0.4, 0.5, 0.10, 2.1, 2.4, 2.8, 2.9 | **cerrada** (25-10-2026; modelo pendiente de regenerar para 2.4) | — | EP-02; EP-03 hecha en PHP |
-| [J-03 Emisión y claims](done/ep-J-03-emision-claims-proposito.md) | 0.7, 1.2, 1.13, 1.15, 2.6, 3.5 | **cerrada** (25-10-2026; rotar claves por 0.7) | J-02, J-01 | EP-04 hecha; EP-05 |
-| [J-04 Bearer, introspección y UserInfo](ep-J-04-bearer-introspeccion-userinfo.md) | 0.8, 0.15, 1.5, 1.9 | crítica | J-03 tipo; J-02 audiencia | EP-06 |
-| [J-05 Solicitudes authorize, PAR y JAR](done/ep-J-05-solicitudes-authorize-par-jar.md) | 0.11, 0.14, 1.11, 2.3, 2.7, 3.3, 3.10 | **cerrada** (25-10-2026, con 3.3 y 3.10; modelo pendiente para JAR) | J-02 | EP-07; 034, 046, 047, 068 |
-| [J-06 Respuestas authorize](ep-J-06-respuestas-authorize.md) | 1.3, 1.7, 1.12, 3.1 | alta; form_post opc. | J-03, J-05 | EP-08 |
-| [J-07 Sesión y logout](ep-J-07-sesion-sso-logout.md) | 0.6, 0.12, 1.14, 4.9, 4.10 | alta; iframes opc. | J-02, J-03 | EP-09; 021 hecha en PHP |
+| [J-02 Clientes, tenant y secretos](done/ep-J-02-clientes-tenant-secretos.md) | 0.3, 0.4, 0.5, 0.10, 2.1, 2.4, 2.8, 2.9 | **cerrada** (26-10-2026; modelo aplicado y probado) | — | EP-02; EP-03 hecha en PHP |
+| [J-03 Emisión y claims](done/ep-J-03-emision-claims-proposito.md) | 0.7, 1.2, 1.13, 1.15, 2.6, 3.5 | **cerrada** (26-10-2026; desarrollo sin claves de producción) | J-02, J-01 | EP-04 hecha; EP-05 |
+| [J-04 Bearer, introspección y UserInfo](done/ep-J-04-bearer-introspeccion-userinfo.md) | 0.8, 0.15, 1.5, 1.9 | **cerrada** (27-10-2026; HTTP + MariaDB) | J-03 tipo; J-02 audiencia | EP-06 |
+| [J-05 Solicitudes authorize, PAR y JAR](done/ep-J-05-solicitudes-authorize-par-jar.md) | 0.11, 0.14, 1.11, 2.3, 2.7, 3.3, 3.10 | **cerrada** (26-10-2026, con 3.3 y 3.10; anti-replay probado) | J-02 | EP-07; 034, 046, 047, 068 |
+| [J-06 Respuestas authorize](done/ep-J-06-respuestas-authorize.md) | 1.3, 1.7, 1.12, 3.1 | **cerrada** (27-10-2026; incluye form_post) | J-03, J-05 | EP-08 |
+| [J-07 Sesión y logout](done/ep-J-07-sesion-sso-logout.md) | 0.6, 0.12, 1.14, 4.9, 4.10 | **cerrada** (27-10-2026; HTTP + MariaDB e iframes) | J-02, J-03 | EP-09; 021 hecha en PHP |
 | [J-08 Login, federación y grants de producto](ep-J-08-login-consentimiento-producto.md) | 0.16, 1.6, 2.2, 2.5, 3.8, 4.3 (3.4 descartada) | **crítica (0.16)**; media el resto; extensiones opc. | J-02, J-04 (0.16: solo 0.5) | EP-10, 072, EP-12 |
 | [J-09 Discovery, E2E y documentación](ep-J-09-discovery-e2e-documentacion.md) | 1.1, 2.10, V.1, V.2, V.3 | inmediata/paralela y cierre | V.2 tras tareas obligatorias J-01–J-08 | EP-01 hecha, EP-16 |
 | [J-10 Aserciones JWT](ep-J-10-aserciones-jwt-cliente-grant.md) | 3.2 (3.9 pospuesta) | opcional | J-02, J-05 | EP-11 |

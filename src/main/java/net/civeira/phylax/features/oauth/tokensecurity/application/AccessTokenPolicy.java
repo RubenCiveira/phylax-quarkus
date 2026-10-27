@@ -59,6 +59,7 @@ public class AccessTokenPolicy {
       }
       if (claims.isEmpty() || !(claims.get("jti") instanceof String jti) || jti.isBlank()
           || !(claims.get("client_id") instanceof String)
+          || !(claims.get("tid") instanceof String tid) || tid.isBlank()
           || !early && claims.get("tid") != null && !tenant.equals(claims.get("tid"))
               && !tenants.find(TenantFilter.builder().name(tenant).build())
                   .map(t -> t.getUid().equals(claims.get("tid"))).orElse(false)

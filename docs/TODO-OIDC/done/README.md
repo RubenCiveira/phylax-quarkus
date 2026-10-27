@@ -1,6 +1,8 @@
 # Implementadas
 
-Fichas implementadas en Java y cubiertas por pruebas automáticas (unitarias y HTTP con dobles en memoria). La última columna recoge la verificación contra sistemas reales que queda por hacer; no bloquea el cierre, pero hay que hacerla antes de desplegar.
+Fichas implementadas en Java y cubiertas por pruebas automáticas (unitarias, HTTP con dobles y, donde se indica, HTTP con MariaDB real). La última columna recoge la verificación contra sistemas reales que queda por hacer; no bloquea el cierre, pero hay que hacerla antes de desplegar.
+
+La [especificación de modelo J-02/J-03/J-05](cambios-modelo-J02-J05.md) está aplicada y verificada con MariaDB real.
 
 | Ficha | Épica | Verificación real pendiente |
 |---|---|---|
@@ -17,8 +19,8 @@ Fichas implementadas en Java y cubiertas por pruebas automáticas (unitarias y H
 | [0.16 Seguridad del login federado](issue-0.16-seguridad-login-federado.md) | [J-08](../epicas/ep-J-08-login-consentimiento-producto.md) | Login real con un IdP SAML (firma de respuesta y de aserción) y con Google; migrar la configuración SAML de los proveedores existentes |
 | [0.4 Configuración efectiva por cliente](issue-0.4-configuracion-por-cliente.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Clientes existentes sin `grantTypesJson` o `allowAllScopes`: revisar qué grants y scopes necesitan antes de desplegar |
 | [0.5 Aislamiento de clientes por tenant](issue-0.5-aislamiento-clientes-tenant.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Asignar tenant a los clientes que no deban ser globales |
-| [2.1 Registro dinámico de clientes](issue-2.1-registro-dinamico-clientes.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Acción `issue` del initial access token; persistir `post_logout_redirect_uris` tras regenerar el modelo; *Dynamic OP* (V.3) |
-| [2.4 Redirects propios de logout](issue-2.4-redirects-logout.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | **Regenerar el modelo** (tabla post-logout) y registrar las URIs post-logout de cada cliente |
+| [2.1 Registro dinámico de clientes](issue-2.1-registro-dinamico-clientes.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Acción `issue` del initial access token; *Dynamic OP* (V.3). `post_logout_redirect_uris` verificado en MariaDB real |
+| [2.4 Redirects propios de logout](issue-2.4-redirects-logout.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Modelo aplicado y probado; registrar las URIs post-logout de cada cliente |
 | [2.8 Protección de secretos](issue-2.8-proteccion-secretos.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | — |
 | [2.9 Migración de secretos y cifrado en reposo](issue-2.9-migracion-secretos-cifrado.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Arranque contra una base con credenciales heredadas (revisar log de la migración) |
 | [0.7 Clave pública y pre-sesión](issue-0.7-clave-publica-y-presesion.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | **Rotar las claves de firma** (expuestas en cookies de pre-sesión) |
@@ -32,5 +34,18 @@ Fichas implementadas en Java y cubiertas por pruebas automáticas (unitarias y H
 | [1.11 Política PKCE](issue-1.11-politica-pkce.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | Avisar a clientes que envían `code_challenge` sin método |
 | [2.3 Completar política de PAR](issue-2.3-politica-par.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | Device/PAR con clientes públicos reales |
 | [2.7 Hints en authorize](issue-2.7-hints-authorize.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | — |
-| [3.3 Request objects firmados](issue-3.3-request-objects-firmados.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | **Regenerar el modelo** (`_oauth_replay_jti`); `jwks_uri` real de un cliente |
+| [3.3 Request objects firmados](issue-3.3-request-objects-firmados.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | Modelo aplicado y anti-replay probado en MariaDB real; `jwks_uri` real de un cliente |
 | [3.10 Hints, ACR y localización](issue-3.10-hints-acr-localizacion.md) | [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md) | APIs deben emitir el `acr` URN (J-04); alta de TOTP en step-up |
+| [0.8 Verificación bearer APIs](issue-0.8-verificacion-bearer-apis.md) | [J-04](../epicas/done/ep-J-04-bearer-introspeccion-userinfo.md) | Recursos externos con su audiencia configurada |
+| [0.15 Audiencia, tenant y revocación bearer](issue-0.15-audiencia-tenant-revocacion-bearer.md) | [J-04](../epicas/done/ep-J-04-bearer-introspeccion-userinfo.md) | HTTP y MariaDB hechos (27-10-2026) |
+| [1.5 UserInfo conforme](issue-1.5-userinfo-conforme.md) | [J-04](../epicas/done/ep-J-04-bearer-introspeccion-userinfo.md) | HTTP y MariaDB hechos; Conformance *Basic OP* (J-09) |
+| [1.9 Introspección de todos los grants](issue-1.9-introspeccion-todos-grants.md) | [J-04](../epicas/done/ep-J-04-bearer-introspeccion-userinfo.md) | HTTP y MariaDB hechos (27-10-2026) |
+| [1.3 Respuestas y errores authorize](issue-1.3-respuestas-autorizacion-errores.md) | [J-06](../epicas/done/ep-J-06-respuestas-authorize.md) | Conformance *Basic OP* (J-09) |
+| [1.7 Política implicit/hybrid](issue-1.7-politica-implicit-hybrid.md) | [J-06](../epicas/done/ep-J-06-respuestas-authorize.md) | HTTP probado; Conformance *Basic OP* (J-09) |
+| [1.12 Nonce ligado](issue-1.12-nonce-ligado-autorizacion.md) | [J-06](../epicas/done/ep-J-06-respuestas-authorize.md) | HTTP probado; Conformance *Basic OP* (J-09) |
+| [3.1 form_post](issue-3.1-response-mode-form-post.md) | [J-06](../epicas/done/ep-J-06-respuestas-authorize.md) | HTTP code/hybrid y errores probado (27-10-2026) |
+| [0.6 Logout clientes participantes](issue-0.6-logout-clientes-participantes.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos (27-10-2026) |
+| [0.12 Logout POST y confirmación](issue-0.12-logout-post-confirmacion.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos (27-10-2026) |
+| [1.14 Hint y SID logout](issue-1.14-hint-sid-logout.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos; Conformance RP-Initiated/Back-Channel (J-09) |
+| [4.9 Session Management iframe](issue-4.9-session-management-iframe.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos (27-10-2026) |
+| [4.10 Front-channel logout](issue-4.10-front-channel-logout.md) | [J-07](../epicas/done/ep-J-07-sesion-sso-logout.md) | HTTP y MariaDB hechos (27-10-2026) |

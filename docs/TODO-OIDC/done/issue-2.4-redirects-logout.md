@@ -12,6 +12,6 @@
 
 ## Implementación Java
 
-- `PostLogoutRedirectSqlStore` lee y escribe `access_trusted_client_allowed_logout_redirect`, la composición generada de [cambios de modelo](../cambios-modelo-J02-J05.md) (§1). `ClientRetrieveAdapter` la carga en `ClientDetails.postLogoutRedirectUris`; `AuthorizeHtml.doLogout` la valida con `RedirectUriPolicy`.
+- `PostLogoutRedirectSqlStore` lee y escribe `access_trusted_client_allowed_logout_redirect`, la composición generada de [cambios de modelo](cambios-modelo-J02-J05.md) (§1). `ClientRetrieveAdapter` la carga en `ClientDetails.postLogoutRedirectUris`; `AuthorizeHtml.doLogout` la valida con `RedirectUriPolicy`.
 - DCR confirma el alta solo si pudo guardar también las URIs post-logout; cliente y redirects se escriben en una transacción. Cambio de contrato: los clientes deben registrar sus URIs post-logout.
 - **Pruebas:** `ClientPolicyFlowTest` (URI de logout aceptada con `state` codificado; de login y externa rechazadas) y `DynamicClientRegistrationMariaDbTest` (lectura tras alta con MariaDB real).

@@ -119,6 +119,15 @@ public class ClientDetails {
   @NonNull
   private final List<String> postLogoutRedirectUris = List.of();
 
+  /** Exact authorization redirects used to authorize RP origins for Session Management. */
+  @Builder.Default
+  @NonNull
+  private final List<String> allowedRedirectUris = List.of();
+
+  /** Registered RP URL receiving a front-channel logout iframe. */
+  private final String frontchannelLogoutUri;
+  private final boolean frontchannelLogoutSessionRequired;
+
   /**
    * Resource servers this client may request tokens for, besides itself (task 0.3).
    */

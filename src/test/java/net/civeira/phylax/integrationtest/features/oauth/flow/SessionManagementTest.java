@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
@@ -40,7 +42,15 @@ class SessionManagementTest extends OidcIntegrationTestBase {
 
     // Logout with a post-logout redirect URI
     String postLogoutUri = "http://localhost/after-logout";
-    Response logout = client.logout(OidcTestFixtures.TENANT, authCookie, postLogoutUri);
+    Response confirmation = client.logout(OidcTestFixtures.TENANT, authCookie, postLogoutUri);
+    Assertions.assertEquals(200, confirmation.statusCode());
+    String csrf = confirmation.getCookie("LOGOUT_CSRF");
+    Assertions.assertNotNull(csrf);
+    Response logout = RestAssured.given().redirects().follow(false).contentType(ContentType.URLENC)
+        .cookie("AUTH_SESSION_ID", authCookie).cookie("LOGOUT_CSRF", csrf).formParam("csrf", csrf)
+        .formParam("client_id", OidcTestFixtures.CLIENT_ID)
+        .formParam("post_logout_redirect_uri", postLogoutUri)
+        .post("/oauth/openid/" + OidcTestFixtures.TENANT + "/logout");
 
     // Verify redirect to post-logout URI (query params stripped)
     Assertions.assertEquals(302, logout.statusCode());

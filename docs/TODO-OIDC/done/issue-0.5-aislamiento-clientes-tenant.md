@@ -21,4 +21,4 @@ No hace falta migración: el esquema ya tenía `access_trusted_client.tenant` y 
 - `ClientRetrieveAdapter` resuelve el tenant y elige con `TrustedClientPolicy.select` (propio > global > nada).
 - La misma regla en `BackChannelLogoutDispatcher.recipients`, en el consentimiento de scopes (`ScopesConsentAdapter`, que además buscaba al **usuario** por nombre en cualquier tenant) y en el cálculo de roles por audiencia (`UserLoginService`).
 - **Pruebas:** `TrustedClientPolicyUnitTest` (A/B/global), `BackChannelLogoutDispatcherUnitTest`, `DynamicClientRegistrationMariaDbTest` (DCR solo desde su tenant).
-- **Pendiente fuera de la ficha:** limitar el logout a los clientes participantes de la sesión es [0.6](../issue-0.6-logout-clientes-participantes.md) (J-07).
+- **Cubierto fuera de la ficha:** limitar el logout a los clientes participantes de la sesión es [0.6](issue-0.6-logout-clientes-participantes.md) (J-07).

@@ -3,7 +3,7 @@
 - **Fase:** 1 · **Esfuerzo:** M · **Estado:** hecha (25-10-2026), [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md).
 - **Implementación:** reflejar `auth_time`, `acr` y `amr` alcanzados; emitir `at_hash`/`c_hash` solo cuando correspondan y separar claims ID/access.
 - **Cierre:** claims por flujo comprobados, sin contaminación entre tipos; `sub` de UserInfo coincide con ID token.
-- **Dependencias:** [1.2](issue-1.2-id-token-conforme.md), [1.5](../issue-1.5-userinfo-conforme.md) y [1.7](../issue-1.7-politica-implicit-hybrid.md).
+- **Dependencias:** [1.2](issue-1.2-id-token-conforme.md), [1.5](issue-1.5-userinfo-conforme.md) y [1.7](issue-1.7-politica-implicit-hybrid.md).
 - **Fuente:** [§5, 1.13](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).
 
 ## Qué hace (funcional)
@@ -26,4 +26,4 @@
 
 - `AuthenticationData.amr`/`sid`, `AuthenticationMode.amr()`, `ChallengesState.withAmr`/`provenAmr`, `AcrPolicy`, `ClaimsMapper` (`accessToken`, `refreshToken`, `idToken`), `AuthorizationCodeGrant` y `RefreshTokenGrant`.
 - **Límite:** un login federado o por enlace mágico no aporta `amr` propio (queda vacío y `acr` de un factor).
-- **Pruebas:** `IdTokenClaimsFlowTest`, `ClaimsMapperUnitTest`, `AcrPolicyUnitTest`, `ChallengesStateUnitTest`. `sub` de UserInfo frente al ID token queda para [1.5](../issue-1.5-userinfo-conforme.md) (J-04).
+- **Pruebas:** `IdTokenClaimsFlowTest`, `ClaimsMapperUnitTest`, `AcrPolicyUnitTest`, `ChallengesStateUnitTest`. `sub` de UserInfo frente al ID token se comprueba en [1.5](issue-1.5-userinfo-conforme.md) (J-04).

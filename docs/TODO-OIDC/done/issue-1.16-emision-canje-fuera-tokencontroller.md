@@ -35,5 +35,5 @@ POST /token ─► TokenController (HTTP: formulario, credenciales, cabeceras, J
 - **Eliminado:** `RefreshGranter` (inalcanzable: el controller resolvía `refresh_token` antes de consultar granters) y `verifyRefresh`, que solo él usaba.
 - **Cambio de orden en refresh:** ahora se autentica al cliente antes de verificar la firma del token (antes al revés). Un refresh falso con cliente erróneo da `invalid_client` en lugar de `invalid_grant`; ninguno gasta el token.
 - **Defensa añadida:** `TokenVerifier::verifyRefreshInfo` exige que el `iss` del refresh sea el del tenant de la ruta. Antes solo lo impedía que cada tenant firmara con claves distintas.
-- La emisión HTML (`OidcResponseBuilder`, implicit/hybrid) no se toca: es de [J-06](../epicas/ep-J-06-respuestas-authorize.md).
+- La emisión HTML (`OidcResponseBuilder`, implicit/hybrid) quedó cubierta por [J-06](../epicas/done/ep-J-06-respuestas-authorize.md).
 - **Pruebas:** toda la batería OAuth existente (contratos positivos sin cambios salvo los de [1.4](issue-1.4-errores-cache-token.md)) más `TokenEndpointContractTest`, `ConfidentialCodeFlowTest` y `TokenGrantNegativeSecurityTest`.

@@ -22,14 +22,14 @@ public class AuthorizationEndpointContributor implements DiscoveryContributor {
   @Override
   public void contribute(OpenIdConfiguration.OpenIdConfigurationBuilder builder, String base) {
     builder.authorizationEndpoint(base + "auth").tokenEndpoint(base + "token")
-        .grantTypesSupported(List.of("authorization_code", "refresh_token", "password", "mfa",
-            "urn:ietf:params:oauth:grant-type:device_code", "client_credentials"))
+        .grantTypesSupported(List.of("authorization_code", "implicit", "refresh_token", "password",
+            "mfa", "urn:ietf:params:oauth:grant-type:device_code", "client_credentials"))
         .acrValuesSupported(acrPolicy.supported())
         .uiLocalesSupported(AuthRequest.supportedUiLocales())
         .responseTypesSupported(
             List.of("code", "code id_token", "code token", "code id_token token"))
         .subjectTypesSupported(List.of("public"))
-        .responseModesSupported(List.of("query", "fragment"))
+        .responseModesSupported(List.of("query", "fragment", "form_post"))
         .tokenEndpointAuthSigningAlgValuesSupported(List.of("RS256"))
         // Signed request objects by value or inside a push; never encrypted, never by reference.
         .requestObjectSigningAlgValuesSupported(List.of("RS256", "ES256"))

@@ -33,7 +33,7 @@ class AccessTokenPolicyUnitTest {
   void checksIssuerAudiencePurposeAndRevocationEveryTime() {
     when(mapper.issuer("acme")).thenReturn("https://issuer/oauth/openid/acme");
     Map<String, Object> claims = Map.of("iss", "https://issuer/oauth/openid/acme", "jti", "j1",
-        "client_id", "client", "typ", "Bearer", "aud", List.of("resource"));
+        "client_id", "client", "tid", "acme", "typ", "Bearer", "aud", List.of("resource"));
     when(signer.verifyTokenPayload("acme", token)).thenReturn(claims);
     when(lookup.lookupByJti("acme", "j1")).thenReturn(
         Optional.of(TokenIntrospectionResult.builder().active(true).clientId("client").build()),
@@ -41,9 +41,9 @@ class AccessTokenPolicyUnitTest {
     assertFalse(policy.validate("acme", token, "other").isPresent());
     assertTrue(policy.validate("acme", token, "resource").isPresent());
     assertFalse(policy.validate("acme", token, "resource").isPresent());
-    when(signer.verifyTokenPayload("acme", token))
-        .thenReturn(Map.of("iss", "https://issuer/oauth/openid/acme", "jti", "j1", "client_id",
-            "client", "scope", List.of("refresh"), "granted_scope", "openid", "typ", "Bearer"));
+    when(signer.verifyTokenPayload("acme", token)).thenReturn(
+        Map.of("iss", "https://issuer/oauth/openid/acme", "jti", "j1", "client_id", "client", "tid",
+            "acme", "scope", List.of("refresh"), "granted_scope", "openid", "typ", "Bearer"));
     assertFalse(policy.validate("acme", token, null).isPresent());
     when(signer.verifyTokenPayload("acme", token)).thenReturn(Map.of("iss",
         "https://issuer/oauth/openid/other", "jti", "j1", "client_id", "client", "typ", "Bearer"));

@@ -1,6 +1,8 @@
 # J-06 — Respuestas authorize, errores y nonce
 
-**Prioridad:** alta · **Tareas:** [1.3](../issue-1.3-respuestas-autorizacion-errores.md), [1.7](../issue-1.7-politica-implicit-hybrid.md), [1.12](../issue-1.12-nonce-ligado-autorizacion.md), [3.1](../issue-3.1-response-mode-form-post.md) opcional. **Depende de:** claims/hashes J-03 y solicitud validada J-05.
+**Prioridad:** alta · **Tareas:** [1.3](../../done/issue-1.3-respuestas-autorizacion-errores.md), [1.7](../../done/issue-1.7-politica-implicit-hybrid.md), [1.12](../../done/issue-1.12-nonce-ligado-autorizacion.md), [3.1](../../done/issue-3.1-response-mode-form-post.md). **Depende de:** claims/hashes J-03 y solicitud validada J-05.
+
+**Estado:** cerrada (27-10-2026), incluido `form_post`. `AuthorizeResponseContractTest` comprueba code/hybrid, hash, nonce, issuer y state, error y éxito en form_post con escaping y CSP.
 
 ## Implementación
 
