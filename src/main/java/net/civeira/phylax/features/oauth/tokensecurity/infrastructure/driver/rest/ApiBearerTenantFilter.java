@@ -6,6 +6,9 @@ import java.util.Arrays;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
+
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Priorities;
@@ -15,6 +18,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.tokensecurity.application.AccessTokenPolicy;
 
 /**
@@ -24,6 +28,7 @@ import net.civeira.phylax.features.oauth.tokensecurity.application.AccessTokenPo
 @ApplicationScoped
 @Priority(Priorities.AUTHORIZATION)
 @RequiredArgsConstructor
+@Slf4j
 public class ApiBearerTenantFilter implements ContainerRequestFilter {
   private final AccessTokenPolicy tokens;
   private final @ConfigProperty(name = "mp.jwt.audiences",
@@ -34,16 +39,34 @@ public class ApiBearerTenantFilter implements ContainerRequestFilter {
     String authorization = request.getHeaderString(HttpHeaders.AUTHORIZATION);
     if (authorization == null || !authorization.regionMatches(true, 0, "Bearer ", 0, 7))
       return;
-    String[] path = request.getUriInfo().getPath().replaceFirst("^/+", "").split("/");
-    if (path.length < 3 || !"api".equals(path[0]))
+    // Only routes declared as api/{tenant}/... carry a tenant; the rest (api/access/...) were
+    // already checked against the issuer tenant by the JWT principal factory.
+    String tenant = request.getUriInfo().getPathParameters().getFirst("tenant");
+    if (tenant == null || tenant.isBlank()
+        || !request.getUriInfo().getPath().replaceFirst("^/+", "").startsWith("api/"))
       return;
-    String tenant = path[1];
     String bearer = authorization.substring(7).trim();
     boolean allowed =
         Arrays.stream(audiences.split(",")).map(String::trim).filter(value -> !value.isEmpty())
             .anyMatch(audience -> tokens.validate(tenant, bearer, audience).isPresent());
-    if (!allowed)
+    if (!allowed) {
+      log.error(
+          "Bearer rejected with 401 on {} {}: token not valid for route tenant={} and audiences=[{}]"
+              + " (token {}). Causes: tenant mismatch, wrong issuer/audience, expired, revoked"
+              + " or unknown jti.",
+          request.getMethod(), request.getUriInfo().getPath(), tenant, audiences, describe(bearer));
       request.abortWith(Response.status(401)
           .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer error=\"invalid_token\"").build());
+    }
+  }
+
+  private String describe(String bearer) {
+    try {
+      DecodedJWT jwt = JWT.decode(bearer);
+      return "iss=" + jwt.getIssuer() + " tid=" + jwt.getClaim("tid").asString() + " aud="
+          + jwt.getAudience() + " jti=" + jwt.getId() + " exp=" + jwt.getExpiresAt();
+    } catch (RuntimeException ex) {
+      return "undecodable: " + ex.getMessage();
+    }
   }
 }

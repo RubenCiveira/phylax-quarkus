@@ -252,7 +252,7 @@ public class CurrentRequest {
       for (String string : jwt.getClaimNames()) {
         Object claimWithName = jwt.getClaim(string);
         if (claimWithName != null) {
-          claims.put(string, claim.toString());
+          claims.put(string, claimWithName.toString());
         }
       }
     }
