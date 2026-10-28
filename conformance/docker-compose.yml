@@ -1,0 +1,51 @@
+# OP bajo prueba para la OpenID Conformance Suite (V.2): MariaDB, phylax (imagen JVM) y Caddy
+# delante con TLS (la suite exige HTTPS). El issuer sale de X-Forwarded-*, que Caddy envía.
+#
+# La suite corre en su propio compose (ver README.md); los dos lados se alcanzan por el host:
+#   - la suite llega al OP en https://op.phylax.test:9443 (extra_hosts en suite-override.yml);
+#   - phylax llega a la suite (back-channel logout) en https://localhost.emobix.co.uk:8443.
+name: phylax-conformance
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: conformance
+      MARIADB_DATABASE: phylax
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      retries: 30
+    ports: ["13306:3306"]
+
+  phylax:
+    build:
+      context: ..
+      dockerfile: src/main/docker/Dockerfile.jvm.multistage
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      DATASOURCE_HOST: mariadb
+      DATASOURCE_PORT: "3306"
+      DATASOURCE_PATH: phylax
+      DATASOURCE_USER: root
+      DATASOURCE_PASS: conformance
+      SECURITY_DIGEST_PEPPERS: c0:${CONFORMANCE_PEPPER:-conformance-digest-pepper}
+      SECURITY_DIGEST_CURRENT: c0
+      OIDC_ROOT_PASSWORD: ${CONFORMANCE_PASSWORD:-Conformance-1234}
+      OIDC_PAIRWISE_SALT: conformance-pairwise-salt
+      QUARKUS_HTTP_PROXY_PROXY_ADDRESS_FORWARDING: "true"
+      QUARKUS_HTTP_PROXY_ALLOW_X_FORWARDED: "true"
+      QUARKUS_HTTP_PROXY_ENABLE_FORWARDED_HOST: "true"
+    volumes:
+      # temporal-password: false, para que el login automatizado no pida cambiar la contraseña.
+      - ./oidc-seed.yaml:/deployments/config/migration/seed/oidc-seed.yaml:ro
+    extra_hosts:
+      - "localhost.emobix.co.uk:host-gateway"
+
+  op:
+    image: caddy:2.8
+    depends_on: [phylax]
+    command: caddy reverse-proxy --from https://op.phylax.test:9443 --to phylax:8090 --internal-certs
+    ports: ["9443:9443"]

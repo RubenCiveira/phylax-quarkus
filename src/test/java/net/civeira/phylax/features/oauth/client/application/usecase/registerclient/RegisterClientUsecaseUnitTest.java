@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import net.civeira.phylax.features.oauth.client.domain.DcrExtensionMetadata;
 import net.civeira.phylax.features.oauth.client.domain.DcrInitialAccessToken;
 import net.civeira.phylax.features.oauth.client.domain.DcrRegistrationRules;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
@@ -126,6 +127,20 @@ class RegisterClientUsecaseUnitTest {
             .tokenEndpointAuthMethod("none").build();
     RegisterClientResult result = usecase.register(params("valid", spa));
     Assertions.assertNull(result.getClientSecret());
+  }
+
+  @Test
+  @DisplayName("A private_key_jwt client gets no secret: it authenticates with its keys")
+  void private_key_jwt_registration() {
+    DynamicClientRequest signed =
+        DynamicClientRequest.builder().redirectUris(List.of("https://app.example.com/cb"))
+            .tokenEndpointAuthMethod("private_key_jwt")
+            .extensions(
+                DcrExtensionMetadata.builder().jwksUri("https://app.example.com/jwks").build())
+            .build();
+    RegisterClientResult result = usecase.register(params("valid", signed));
+    Assertions.assertNull(result.getClientSecret());
+    Assertions.assertNotNull(result.getRegistrationAccessToken());
   }
 
   @Test

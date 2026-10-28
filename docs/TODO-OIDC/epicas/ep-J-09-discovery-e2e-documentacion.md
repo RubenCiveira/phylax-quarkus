@@ -1,8 +1,8 @@
 # J-09 — Discovery, E2E y documentación
 
-**Estado (27-10-2026):** 1.1 hecha (cada anuncio sale de la misma constante que usa la lógica y tiene prueba). Quedan 2.10, el resto de V.1, V.2 (ejecutar la suite) y V.3 (DCR aún no acepta `jwks`/`jwks_uri` ni los metadatos de extensión).
+**Estado (27-10-2026):** 1.1 y 2.10 hechas. V.1: HTTP + MariaDB en todas las áreas (device, PAR y DCR añadidos; encontraron y corrigieron seis fallos de producción) y CI escrito; faltan login y clientes reales, reloj y claves compartidas con PHP. V.2: arnés en `conformance/`, sin ejecutar (sin Docker disponible). V.3: DCR acepta claves, algoritmos y flags validados contra el discovery y funciona por HTTP; *Dynamic OP* espera una decisión sobre el registro sin initial access token.
 
-**Prioridad:** inmediata (arnés/discovery) y de cierre (suite) · **Tareas:** [1.1](../done/issue-1.1-discovery-honesto.md), [2.10](../issue-2.10-documentacion-oauth-pruebas.md), [V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md), [V.2](../issue-V.2-openid-conformance-suite.md), [V.3](../issue-V.3-conformidad-dcr.md). **Depende de:** V.2 tras el núcleo obligatorio de J-01–J-08; los opcionales no bloquean la conformidad básica. V.3 tras DCR J-02.
+**Prioridad:** inmediata (arnés/discovery) y de cierre (suite) · **Tareas:** [1.1](../done/issue-1.1-discovery-honesto.md), [2.10](../done/issue-2.10-documentacion-oauth-pruebas.md), [V.1](../issue-V.1-fixtures-pruebas-http-persistencia.md), [V.2](../issue-V.2-openid-conformance-suite.md), [V.3](../issue-V.3-conformidad-dcr.md). **Depende de:** V.2 tras el núcleo obligatorio de J-01–J-08; los opcionales no bloquean la conformidad básica. V.3 tras DCR J-02.
 
 ## Implementación
 

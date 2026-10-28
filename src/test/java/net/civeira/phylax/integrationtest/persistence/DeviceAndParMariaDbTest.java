@@ -1,0 +1,221 @@
+package net.civeira.phylax.integrationtest.persistence;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import jakarta.inject.Inject;
+import net.civeira.phylax.integrationtest.features.oauth.client.OidcFlowClient;
+import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
+
+/**
+ * Device grant and PAR over HTTP and MariaDB (V.1): device codes and pushed requests live in a
+ * throwaway schema ({@link MariaDbFlowProfile}), so single use and tenant binding are those of the
+ * production SQL.
+ */
+@Tag("mariadb")
+@QuarkusTest
+@TestProfile(MariaDbFlowProfile.class)
+@EnabledIfEnvironmentVariable(named = "V1_MARIADB_URL", matches = ".+")
+class DeviceAndParMariaDbTest {
+
+  private static final int CONCURRENT = 8;
+  private static final String TENANT = OidcTestFixtures.TENANT;
+  private static final String DEVICE_GRANT = "urn:ietf:params:oauth:grant-type:device_code";
+  private static final Pattern CSRF = Pattern.compile("name=\"csrf\" value=\"([^\"]+)\"");
+
+  private final OidcFlowClient client = new OidcFlowClient();
+
+  @Inject
+  DataSource dataSource;
+
+  private String query(String sql, String value) {
+    try (Connection c = dataSource.getConnection();
+        PreparedStatement ps = c.prepareStatement(sql)) {
+      ps.setString(1, value);
+      try (ResultSet rs = ps.executeQuery()) {
+        return rs.next() ? rs.getString(1) : null;
+      }
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  private void update(String sql, String first, String second) {
+    try (Connection c = dataSource.getConnection();
+        PreparedStatement ps = c.prepareStatement(sql)) {
+      ps.setString(1, first);
+      ps.setString(2, second);
+      Assertions.assertEquals(1, ps.executeUpdate());
+    } catch (SQLException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  // ── device grant (RFC 8628) ───────────────────────────────────────────────
+
+  private Response deviceRequest() {
+    Response response = RestAssured.given().contentType(ContentType.URLENC)
+        .header("Authorization",
+            OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET))
+        .formParam("scope", "openid").post("/oauth/openid/" + TENANT + "/device");
+    Assertions.assertEquals(200, response.statusCode(), response.asString());
+    return response;
+  }
+
+  private String status(String deviceCode) {
+    return query("SELECT status FROM _oauth_device_codes WHERE device_code = ?", deviceCode);
+  }
+
+  private String sessionCookie(String tenant) {
+    Response login = client.submitLoginAs(tenant, OidcTestFixtures.CLIENT_ID,
+        OidcTestFixtures.USERNAME, OidcTestFixtures.PASSWORD);
+    Assertions.assertEquals(302, login.statusCode(), login.asString());
+    String cookie = client.extractAuthSessionCookie(login);
+    Assertions.assertNotNull(cookie);
+    return cookie;
+  }
+
+  /**
+   * Opens the verification form of a user code: the double-submit token and its cookie.
+   */
+  private String[] verificationForm(String userCode) {
+    Response form = RestAssured.given().queryParam("user_code", userCode)
+        .get("/oauth/openid/" + TENANT + "/device/verify");
+    Assertions.assertEquals(200, form.statusCode());
+    Matcher matcher = CSRF.matcher(form.asString());
+    Assertions.assertTrue(matcher.find(), form.asString());
+    String cookie = form.getCookie("DEVICE_CSRF");
+    Assertions.assertEquals(matcher.group(1), cookie);
+    return new String[] {matcher.group(1), cookie};
+  }
+
+  private Response approve(String userCode, String session, String csrf, String csrfCookie) {
+    var request = RestAssured.given().contentType(ContentType.URLENC)
+        .formParam("user_code", userCode).cookie("AUTH_SESSION_ID", session);
+    if (csrf != null) {
+      request.formParam("csrf", csrf);
+    }
+    if (csrfCookie != null) {
+      request.cookie("DEVICE_CSRF", csrfCookie);
+    }
+    return request.post("/oauth/openid/" + TENANT + "/device/verify");
+  }
+
+  private Response poll(String tenant, String deviceCode) {
+    return client.token(tenant,
+        OidcFlowClient.basic(OidcTestFixtures.CLIENT_ID, OidcTestFixtures.CLIENT_SECRET),
+        Map.of("grant_type", DEVICE_GRANT, "device_code", deviceCode));
+  }
+
+  @Test
+  void device_approvalNeedsTheFormToken_andASessionOfTheTenant() {
+    Response device = deviceRequest();
+    String deviceCode = device.jsonPath().getString("device_code");
+    String userCode = device.jsonPath().getString("user_code");
+    Assertions.assertEquals("PENDING", status(deviceCode));
+    String session = sessionCookie(TENANT);
+
+    // A cross-site form has the session cookie but neither the token nor its cookie.
+    Assertions.assertEquals(403, approve(userCode, session, null, null).statusCode());
+    String[] csrf = verificationForm(userCode);
+    Assertions.assertEquals(403, approve(userCode, session, "forged", csrf[1]).statusCode());
+    // A session of another tenant does not authorize this one (the login double always opens
+    // sessions in TENANT, so the stored one is moved as a real login elsewhere would leave it).
+    String foreign = sessionCookie(TENANT);
+    update("UPDATE _oauth_session SET auth_data = JSON_SET(auth_data, '$.tenant', ?)"
+        + " WHERE session = ?", OidcTestFixtures.OTHER_TENANT, foreign);
+    approve(userCode, foreign, csrf[0], csrf[1]);
+    Assertions.assertEquals("PENDING", status(deviceCode));
+
+    Response approved = approve(userCode, session, csrf[0], csrf[1]);
+    Assertions.assertEquals(200, approved.statusCode());
+    Assertions.assertEquals("APPROVED", status(deviceCode));
+  }
+
+  @Test
+  void device_approvedCode_isRedeemedOnce_andOnlyInItsTenant() throws Exception {
+    Response device = deviceRequest();
+    String deviceCode = device.jsonPath().getString("device_code");
+    String userCode = device.jsonPath().getString("user_code");
+
+    Response pending = poll(TENANT, deviceCode);
+    Assertions.assertEquals(400, pending.statusCode());
+    Assertions.assertEquals("authorization_pending", pending.jsonPath().getString("error"));
+
+    String[] csrf = verificationForm(userCode);
+    Assertions.assertEquals(200,
+        approve(userCode, sessionCookie(TENANT), csrf[0], csrf[1]).statusCode());
+
+    Response foreign = poll(OidcTestFixtures.OTHER_TENANT, deviceCode);
+    Assertions.assertEquals(400, foreign.statusCode(), foreign.asString());
+    Assertions.assertEquals("invalid_grant", foreign.jsonPath().getString("error"));
+    Assertions.assertEquals("APPROVED", status(deviceCode), "Another tenant does not spend it");
+
+    List<Response> responses = Concurrently.run(CONCURRENT, () -> poll(TENANT, deviceCode));
+    Assertions.assertEquals(1, responses.stream().filter(r -> r.statusCode() == 200).count());
+    responses.stream().filter(r -> r.statusCode() != 200).forEach(r -> Assertions
+        .assertEquals("invalid_grant", r.jsonPath().getString("error"), r.asString()));
+    Assertions.assertNull(status(deviceCode), "The redeemed code leaves no row");
+  }
+
+  // ── PAR (RFC 9126) ────────────────────────────────────────────────────────
+
+  private static Map<String, String> spaRequest() {
+    Map<String, String> params = new LinkedHashMap<>();
+    params.put("client_id", OidcTestFixtures.SPA_CLIENT_ID);
+    params.put("redirect_uri", OidcTestFixtures.REDIRECT_URI);
+    params.put("response_type", "code");
+    params.put("scope", OidcTestFixtures.SCOPE);
+    params.put("state", "pushed-state");
+    params.put("code_challenge", OidcTestFixtures.CODE_CHALLENGE);
+    params.put("code_challenge_method", "S256");
+    return params;
+  }
+
+  private static Response authorize(String tenant, String requestUri) {
+    return RestAssured.given().redirects().follow(false)
+        .queryParam("client_id", OidcTestFixtures.SPA_CLIENT_ID)
+        .queryParam("request_uri", requestUri).get("/oauth/openid/" + tenant + "/auth");
+  }
+
+  @Test
+  void par_isStoredInItsTenant_andConsumedOnceUnderConcurrency() throws Exception {
+    Response push = RestAssured.given().contentType(ContentType.URLENC).formParams(spaRequest())
+        .post("/oauth/openid/" + TENANT + "/par-request");
+    Assertions.assertEquals(201, push.statusCode(), push.asString());
+    String requestUri = push.jsonPath().getString("request_uri");
+    Assertions.assertEquals(TENANT,
+        query("SELECT tenant_id FROM _oauth_par_request WHERE request_uri = ?", requestUri));
+
+    Assertions.assertEquals(400, authorize(OidcTestFixtures.OTHER_TENANT, requestUri).statusCode());
+    Assertions.assertNull(
+        query("SELECT used_at FROM _oauth_par_request WHERE request_uri = ?", requestUri),
+        "Another tenant does not spend the pushed request");
+
+    List<Response> responses = Concurrently.run(CONCURRENT, () -> authorize(TENANT, requestUri));
+    Assertions.assertEquals(1, responses.stream().filter(r -> r.statusCode() == 200).count());
+    responses.stream().filter(r -> r.statusCode() != 200).forEach(r -> Assertions
+        .assertEquals("invalid_request_uri", r.jsonPath().getString("error"), r.asString()));
+    Assertions.assertNotNull(
+        query("SELECT used_at FROM _oauth_par_request WHERE request_uri = ?", requestUri));
+  }
+}

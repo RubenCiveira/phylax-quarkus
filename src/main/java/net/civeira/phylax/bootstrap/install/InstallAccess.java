@@ -26,6 +26,7 @@ import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantCommandRepositoryGateway;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
+import net.civeira.phylax.features.access.trustedclient.domain.AllowedLogoutRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
 import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
@@ -93,6 +94,8 @@ public class InstallAccess implements MigrationSeed {
 
     AllowedRedirects localhost = AllowedRedirects.builder().newUid()
         .url(config.getRequiredConfig("oidc.trusted-client.redirect")).build();
+    AllowedLogoutRedirects localhostLogout = AllowedLogoutRedirects.builder().newUid()
+        .url(config.getRequiredConfig("oidc.trusted-client.logout-redirect")).build();
     AllowedAudiences partyAudience = AllowedAudiences.builder().newUid()
         .audience(config.getRequiredConfig("oidc.relying-party.code")).build();
 
@@ -102,7 +105,7 @@ public class InstallAccess implements MigrationSeed {
         .publicAllow(Boolean.TRUE).isResourceServer(Boolean.FALSE).requirePkce(Boolean.TRUE)
         .tokenEndpointAuthMethod(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_POST)
         .m2mTokenTtlSeconds(3600).allowedRedirects(List.of(localhost))
-        .allowedLogoutRedirects(List.of()).allowedAudiences(List.of(partyAudience))
+        .allowedLogoutRedirects(List.of(localhostLogout)).allowedAudiences(List.of(partyAudience))
         .subjectType(TrustedClientSubjectTypeOptions.PUBLIC)
         .requirePushedAuthorizationRequests(Boolean.FALSE).dpopBoundAccessTokens(Boolean.FALSE)
         .tlsClientCertificateBoundAccessTokens(Boolean.FALSE).enabled(Boolean.TRUE);

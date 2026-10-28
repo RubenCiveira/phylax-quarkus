@@ -1,0 +1,39 @@
+{
+  "alias": "${ALIAS}",
+  "description": "phylax-api: Dynamic OP (V.3)",
+  "server": {
+    "discoveryUrl": "${ISSUER}/.well-known/openid-configuration"
+  },
+  "browser": [
+    {
+      "match": "${ISSUER}/auth*",
+      "tasks": [
+        {
+          "task": "Login",
+          "optional": true,
+          "match": "${ISSUER}/auth*",
+          "commands": [
+            ["text", "id", "username", "${USERNAME}"],
+            ["text", "id", "type_password", "${PASSWORD}"],
+            ["click", "xpath", "//form[@id='login']//input[@type='submit']"]
+          ]
+        },
+        {
+          "task": "Consent",
+          "optional": true,
+          "match": "${ISSUER}/auth*",
+          "commands": [
+            ["click", "xpath", "//input[@name='step' and @value='scope_consent']/../input[@type='submit']"]
+          ]
+        },
+        {
+          "task": "Verify Complete",
+          "match": "${SUITE_BASE}/callback*",
+          "commands": [
+            ["wait", "id", "submission_complete", 10]
+          ]
+        }
+      ]
+    }
+  ]
+}

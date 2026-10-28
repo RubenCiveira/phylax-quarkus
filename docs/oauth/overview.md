@@ -1,133 +1,105 @@
-# OAuth / OIDC — Bounded context overview
+# OAuth / OIDC — Overview
 
-## What does this module do?
+Multi-tenant OAuth 2.0 / OpenID Connect authorization server. Every protocol route lives under
+`/oauth/openid/{tenant}/…`, and the issuer of a tenant is `{public host}/oauth/openid/{tenant}`.
+The public host comes from `X-Forwarded-*` when the server runs behind a proxy.
 
-Implements a multi-tenant **OAuth 2.0 / OIDC authorization server**. It exposes the endpoints
-required for client applications (_relying parties_) to authenticate users and obtain tokens
-via the Authorization Code flow (with PKCE).
-
-This module is the only part of the system that owns the concepts of "authentication session"
-and "pending challenge". All other parts of the platform consume the resulting tokens without
-interacting with this module.
-
----
-
-## Key concepts
-
-| Concept | Description |
-|---------|-------------|
-| **Tenant** | Organization using the platform. Each tenant has its own users, clients and configuration. Appears in all paths: `/oauth/openid/{tenant}/...` |
-| **Relying Party (RP)** | Application requesting authentication. Corresponds to the OAuth `client_id`. A token can have multiple audiences (RPs). |
-| **Challenge** (`AuthenticationChallege`) | Additional requirement the user must satisfy before receiving a token: `PASSWORD`, `MFA`, `FRESH_PASSWORD`, `USE_CONSENT`, `CLIENT_CONSENT`. |
-| **Pre-session** | `PRE_SESSION_ID` cookie that carries intermediate state between steps (pending challenges, username). Exists only while there are unresolved challenges. |
-| **Auth session** | `AUTH_SESSION_ID` cookie representing an already-authenticated user session (allows re-use without re-login). |
-| **Authorization code** | One-time code sent in the final redirect. The client exchanges it for tokens at `/token`. |
+> **Status (2026-10-27, task 2.10).** This page only lists routes that exist in the code. The
+> "Verified by" column names the tests that exercise each one over HTTP; a route without an HTTP
+> test says so. **No conformance is claimed:** the OpenID Conformance Suite has not been run yet
+> (see [conformance/README.md](../../conformance/README.md) and task V.2). Per-task detail and
+> evidence: [docs/TODO-OIDC](../TODO-OIDC/README.md).
 
 ---
 
-## Public endpoints
+## Protocol endpoints
 
-The module is spread across four controllers:
+| Method | Path (`/oauth/openid/{tenant}/…`) | Controller | Verified by |
+|---|---|---|---|
+| GET | `.well-known/openid-configuration` (alias `configuration`) | `OpenIdConfigurationController` + `*Contributor` | `AuthorizeRequestFlowTest`, `DynamicClientHttpMariaDbTest`, `JoseResponsesFlowTest` |
+| GET | `jwks` (global: `/oauth/jwks`) | `JwksController` | no direct HTTP test; signatures are checked in every flow test |
+| GET, POST | `auth` (alias `authorize`) | `AuthorizeHtml` | `AuthorizeRequestFlowTest`, `AuthorizeResponseContractTest`, `ConsentFlowTest`, `PkceFlowTest`, `PromptConsentFlowTest`, `ClaimsParameterFlowTest` |
+| POST | `token` | `TokenController` | `TokenEndpointContractTest`, `TokenGrantSecurityTest`, `TokenGrantNegativeSecurityTest`, `TokenEndpointMariaDbTest` |
+| GET, POST | `userinfo` | `InformationController` | `BearerContractMariaDbTest`, `JoseResponsesFlowTest`, `PairwiseSubjectFlowTest` |
+| POST | `introspect` (alias `introspection`) | `IntrospectionController` | `TokenIntrospectionTest`, `BearerContractMariaDbTest` |
+| POST | `revocation` | `TokenRevocationController` | `TokenEndpointContractTest`, `ClientAssertionFlowTest` |
+| POST | `par-request` (alias `par`) | `DevicesAccessController` | `AuthorizeRequestFlowTest`, `DeviceAndParMariaDbTest` |
+| POST | `device` | `DevicesAccessController` | `DeviceAndParMariaDbTest`, `TokenGrantNegativeSecurityTest` |
+| GET, POST | `device/verify` | `DeviceVerificationHtml` | `DeviceAndParMariaDbTest` |
+| POST | `connect` (RFC 7591) | `ClientRegisterController` | `DynamicClientHttpMariaDbTest` |
+| GET, PUT, DELETE | `connect/{clientId}` (RFC 7592) | `ClientRegisterController` | `DynamicClientHttpMariaDbTest` (GET), `DynamicClientRegistrationMariaDbTest` (all, at use case level) |
+| GET, POST | `logout` | `AuthorizeHtml` | `AuthorizeRequestFlowTest`, `ClientPolicyFlowTest`, `SessionLogoutMariaDbTest` |
+| GET | `login-status-iframe`, `session-check` | `SessionManagementController` | `SessionStateFlowTest`, `SessionManagementTest` |
+| POST | `ciba-auth` | `DevicesAccessController` | always 403, not announced (task 4.3 postponed) |
 
-### `FrontAcessController` — Browser-facing HTML flows
+## User-facing pages
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/oauth/openid/{tenant}/auth` | Starts the flow or shows the login form |
-| POST | `/oauth/openid/{tenant}/auth` | Processes credentials and all intermediate challenge steps |
-| GET | `/oauth/openid/{tenant}/recover` | Shows the new-password form (with recovery code pre-filled from URL) |
-| POST | `/oauth/openid/{tenant}/recover` | Applies the password change using the recovery code |
-| GET | `/oauth/openid/{tenant}/register` | Shows the email-verification form (with code pre-filled from URL) |
-| POST | `/oauth/openid/{tenant}/register` | Verifies the registration code and completes registration |
-| POST | `/oauth/openid/{tenant}/revocation` | Revokes an active token |
-| GET | `/oauth/openid/{tenant}/logout` | Logs the user out |
-| GET | `/oauth/openid/{tenant}/delegated-auth` | Callback from an external login provider |
-| GET | `/oauth/openid/{tenant}/mfa-setup` | MFA method selector page |
-| GET | `/oauth/openid/{tenant}/me` | Returns information about the authenticated user (HTML) |
-| GET | `/oauth/openid/{tenant}/login-status-iframe` | Silent session check iframe |
-
-### `AuthenticationController` — REST / token endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/oauth/openid/{tenant}/token` | Exchanges an authorization code (or other grants) for tokens |
-| POST | `/oauth/openid/{tenant}/introspect` | Token introspection |
-
-### `InformationController`
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/oauth/openid/{tenant}/userinfo` | Returns claims for the authenticated user (OIDC UserInfo) |
-
-### `DevicesAccessController` — Flows not yet implemented
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/oauth/openid/{tenant}/device` | Device Authorization Grant (returns 405) |
-| POST | `/oauth/openid/{tenant}/par-request` | Pushed Authorization Request (returns 405) |
-| POST | `/oauth/openid/{tenant}/ciba-auth` | CIBA (returns 405) |
-
-### `DelegatedAccessController` — External provider token exchange
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/oauth/openid/{tenant}/delegated/token/{provider}` | Token exchange for delegated login providers |
+| Path (`/oauth/openid/{tenant}/…`) | Controller | Verified by |
+|---|---|---|
+| `recover` | `RecoverController` | `RecoverPasswordFlowTest` |
+| `register` | `RegisterController` | `RegisterUserFlowTest` |
+| `mfa-setup` | `MfaSetupController` | `MfaFlowTest`, `NewMfaFlowTest` |
+| `magic-link/request`, `magic-link/verify` | `MagicLinkRequestController`, `MagicLinkVerifyHtml` | no HTTP test |
+| `webauthn/{register,authenticate}/{begin,finish}` | `WebAuthnController` | no HTTP test |
+| `invitation/accept` | `InvitationController` | no HTTP test; persistence in `InvitationMariaDbTest` |
+| `profile`, `me/**` | `ProfileHtmlController`, `ProfileMeController` | no HTTP test |
+| `/oauth/openid/-/delegated/authorization/{provider}` | `DelegatedAccessController` | `DelegatedLoginFlowTest` |
 
 ---
 
-## Two-module split
+## What the discovery announces
 
-The code is divided into two packages with distinct responsibilities:
+Each value comes from the constant the logic uses (task 1.1), so the metadata cannot drift from the
+behaviour:
 
-```
-features/oauth/           → OIDC protocol layer (database-agnostic)
-  authentication/         → HTTP flow, controllers, domain objects
-  user/                   → User ports (gateway interfaces)
-  client/                 → OAuth client ports
+| Metadata | Source |
+|---|---|
+| `id_token_signing_alg_values_supported`, `userinfo_signing_alg_values_supported`, `authorization_signing_alg_values_supported` | `JwtAlgorithms.SERVER_SIGNING` (RS256) |
+| `request_object_signing_alg_values_supported`, `token_endpoint_auth_signing_alg_values_supported` | `JwtAlgorithms.CLIENT_SIGNING` (RS256, ES256) |
+| `token_endpoint_auth_methods_supported` | `ClientAuthMethod.TOKEN_ENDPOINT` (`client_secret_basic`, `client_secret_post`, `private_key_jwt`, `none`) |
+| `*_encryption_alg_values_supported`, `*_encryption_enc_values_supported` | `ClientJwtEncryptionGateway` |
+| `subject_types_supported` | `public`, plus `pairwise` when `OIDC_PAIRWISE_SALT` is set |
+| `registration_endpoint` | `ClientRegistrationContributor` |
 
-features/access/oauth/    → Concrete implementation (integrates with the database)
-  application/            → Business domain usecases and services
-  infrastructure/         → Interactors (port adapters)
-```
+DCR validates the same constants (`DcrMetadataPolicy`), so a client can register only keys and
+algorithms the server announces (task V.3).
 
-`features/oauth/` defines **what** is needed (interfaces/ports) without knowing **how** data is
-stored. `features/access/oauth/` provides the **how** by connecting to repositories, encryption,
-notifications, etc.
+---
 
-This separation allows swapping the access implementation without touching the OIDC protocol logic.
+## Dynamic Client Registration
+
+- The tenant enables it with `dynamic-registration-policy` (absent or `disabled`: 403). There is no
+  open mode: every registration needs an **initial access token** of the tenant, created by an
+  administrator and stored as a digest (task 2.1).
+- Accepted metadata: grants and response types the tenant allows, `token_endpoint_auth_method`
+  (`client_secret_basic`, `client_secret_post`, `private_key_jwt`, `none`), exact redirect and
+  logout URIs, `jwks` (public RSA/EC keys only) **or** `jwks_uri` (HTTPS), the signing and
+  encryption algorithms above, `subject_type` (`pairwise` only with the salt and a single redirect
+  host), and the flags `backchannel_logout_session_required`,
+  `frontchannel_logout_session_required`, `dpop_bound_access_tokens` and
+  `require_pushed_authorization_requests`.
+- Rejected with `invalid_client_metadata`: `private_key_jwt`, request objects or encryption without
+  keys, `sector_identifier_uri` (sector documents are not fetched) and
+  `tls_client_certificate_bound_access_tokens` (mTLS postponed, task 4.1). A rejected request spends
+  no use of the initial access token.
+- The secret is returned only once, and only to `client_secret_*` clients. Reads never return it.
+- The initial and registration access tokens are opaque, so `RegistrationAwareJwtAuthMechanism`
+  keeps the JWT mechanism of the API away from `connect` routes.
 
 ---
 
 ## Code navigation
 
-| I want to understand... | Start here |
-|-------------------------|------------|
-| The full browser-facing flow | [`FrontAcessController`](../../src/main/java/net/civeira/phylax/features/oauth/authentication/infrastructure/driver/html/FrontAcessController.java) |
-| How each challenge is resolved | [`part/`](../../src/main/java/net/civeira/phylax/features/oauth/authentication/infrastructure/driver/html/part/) — see [controller-parts.md](controller-parts.md) |
-| Token issuance and grants | [`AuthenticationController`](../../src/main/java/net/civeira/phylax/features/oauth/authentication/infrastructure/driver/rest/AuthenticationController.java) |
-| How credentials are validated | [`UserLoginUsecase`](../../src/main/java/net/civeira/phylax/features/access/oauth/application/usecase/UserLoginUsecase.java) |
-| How an OAuth client is loaded | [`VerifyTrustedClientUsecase`](../../src/main/java/net/civeira/phylax/features/access/oauth/application/usecase/VerifyTrustedClientUsecase.java) |
-| Port contracts | [`user/domain/gateway/`](../../src/main/java/net/civeira/phylax/features/oauth/user/domain/gateway) and [`client/domain/gateway/`](../../src/main/java/net/civeira/phylax/features/oauth/client/domain/gateway) |
-| Flow sequence diagrams | [flows.md](flows.md) |
-| Layered architecture | [architecture.md](architecture.md) |
-| ControllerPart catalog | [controller-parts.md](controller-parts.md) |
+Each sub-package of `features/oauth` documents itself in its `package-info.java`:
 
----
+| Area | Package |
+|---|---|
+| Authorization endpoint, login steps, token endpoint, grants | `authentication` |
+| Clients, client authentication, DCR | `client` |
+| Token signing, verification, introspection, revocation, JWKS | `tokensecurity` |
+| Discovery | `oidc` |
+| Device grant | `device` |
+| Pushed authorization requests | `par` |
+| Browser sessions and Session Management | `session` |
 
-## Integration tests
-
-The OIDC flow tests use `@QuarkusTest` with CDI `@Alternative @Priority(1)` to replace real
-implementations with configurable in-memory gateways.
-
-```
-src/test/java/net/civeira/phylax/testing/oauth/
-  scenario/   → Alternative gateways (ScenarioLoginGateway, ScenarioConsentGateway, ...)
-  alt/        → Alternative infrastructure beans (sessions, keys, cipher)
-  client/     → OidcFlowClient — RestAssured helper for tests
-  flow/       → Tests: LoginFlowTest, ConsentFlowTest, MfaFlowTest, ...
-```
-
-Run with:
-```bash
-mvn test -Dgroups="oidc-flow"
-```
+Test layers and how to run them: [tests.md](tests.md).

@@ -118,3 +118,7 @@ hs_err_pid*
 
 .agents/
 .claude/
+
+# OpenID Conformance Suite (V.2): clon de la suite y resultados
+conformance/.suite/
+conformance/out/

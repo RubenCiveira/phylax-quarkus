@@ -8,6 +8,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -23,6 +25,8 @@ import net.civeira.phylax.features.oauth.client.application.usecase.readdynamicc
 import net.civeira.phylax.features.oauth.client.application.usecase.registerclient.RegisterClientParams;
 import net.civeira.phylax.features.oauth.client.application.usecase.registerclient.RegisterClientResult;
 import net.civeira.phylax.features.oauth.client.application.usecase.registerclient.RegisterClientUsecase;
+import net.civeira.phylax.features.oauth.client.application.usecase.updatedynamicclient.UpdateDynamicClientUsecase;
+import net.civeira.phylax.features.oauth.client.domain.DcrExtensionMetadata;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
 import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
@@ -30,6 +34,7 @@ import net.civeira.phylax.features.oauth.client.infrastructure.driven.DcrInitial
 import net.civeira.phylax.features.oauth.client.infrastructure.driven.DynamicClientAdapter;
 import net.civeira.phylax.features.oauth.client.infrastructure.driven.JwtReplaySqlAdapter;
 import net.civeira.phylax.features.oauth.client.infrastructure.driven.PostLogoutRedirectSqlStore;
+import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 
 /**
  * DCR against MariaDB (V.1 for 2.1, 2.8 and V.3): initial access tokens of the tenant with atomic
@@ -48,17 +53,20 @@ class DynamicClientRegistrationMariaDbTest {
   private RegisterClientUsecase register;
   private ReadDynamicClientUsecase read;
   private DeleteDynamicClientUsecase delete;
+  private UpdateDynamicClientUsecase update;
   private final SecretDigester digester = new SecretDigester("t0:test-digest-pepper", "t0");
 
   @BeforeEach
   void setUp(DataSource dataSource) throws SQLException {
     this.dataSource = dataSource;
     DynamicClientAdapter clients = new DynamicClientAdapter(dataSource, MariaDbSchema.mapper(),
-        digester, new PostLogoutRedirectSqlStore(dataSource));
+        digester, new PostLogoutRedirectSqlStore(dataSource),
+        new SubjectResolver(Optional.of("test-pairwise-salt")));
     register = new RegisterClientUsecase(clients,
         new DcrInitialAccessTokenSqlAdapter(dataSource, digester));
     read = new ReadDynamicClientUsecase(clients);
     delete = new DeleteDynamicClientUsecase(clients);
+    update = new UpdateDynamicClientUsecase(clients);
     try (Connection c = dataSource.getConnection()) {
       c.createStatement().execute("DELETE FROM access_trusted_client_allowed_logout_redirect");
       c.createStatement().execute("DELETE FROM access_trusted_client_allowed_redirect");
@@ -219,6 +227,60 @@ class DynamicClientRegistrationMariaDbTest {
         () -> registerIn(TENANT_A, "iat-secret"));
     Assertions.assertEquals(403, ex.getStatus());
     Assertions.assertEquals("0", column("access_dcr_initial_access_token", "uses", "iat"));
+  }
+
+  @Test
+  void keysAlgorithmsAndFlags_areStoredInTheRuntimeColumns_andReadBack() throws Exception {
+    initialToken("iat", "uid-a", "iat-secret", 1, later(), null);
+    Map<String, Object> jwks =
+        Map.of("keys", List.of(Map.of("kty", "EC", "crv", "P-256", "x", "AQAB", "y", "AQAB")));
+    RegisterClientResult result =
+        register.register(RegisterClientParams.builder().tenant(TENANT_A).issuer(ISSUER)
+            .request(DynamicClientRequest.builder().redirectUris(List.of("https://app.example/cb"))
+                .tokenEndpointAuthMethod("private_key_jwt")
+                .extensions(DcrExtensionMetadata.builder().jwks(jwks)
+                    .tokenEndpointAuthSigningAlg("ES256").requestObjectSigningAlg("ES256")
+                    .idTokenEncryptedResponseAlg("RSA-OAEP-256").userinfoSignedResponseAlg("RS256")
+                    .authorizationSignedResponseAlg("RS256").subjectType("pairwise")
+                    .dpopBoundAccessTokens(true).requirePushedAuthorizationRequests(true)
+                    .backchannelLogoutSessionRequired(true).build())
+                .build())
+            .initialAccessToken("iat-secret").build());
+    String id = result.getClientId();
+
+    Assertions.assertNull(result.getClientSecret());
+    Assertions.assertNull(column("access_trusted_client", "secret_oauth", id));
+    Assertions.assertEquals("PRIVATE_KEY_JWT",
+        column("access_trusted_client", "token_endpoint_auth_method", id));
+    Assertions.assertEquals(jwks, MariaDbSchema.mapper()
+        .readValue(column("access_trusted_client", "jwks_json", id), Map.class));
+    Assertions.assertEquals("ES256",
+        column("access_trusted_client", "request_object_signing_alg", id));
+    Assertions.assertEquals("RSA-OAEP-256",
+        column("access_trusted_client", "id_token_encrypted_response_alg", id));
+    Assertions.assertEquals("PAIRWISE", column("access_trusted_client", "subject_type", id));
+    Assertions.assertEquals("true",
+        column("access_trusted_client", "dpop_bound_access_tokens", id));
+    Assertions.assertEquals("true",
+        column("access_trusted_client", "require_pushed_authorization_requests", id));
+
+    DcrExtensionMetadata read =
+        this.read.read(TENANT_A, ISSUER, id, result.getRegistrationAccessToken()).getExtensions();
+    Assertions.assertEquals(jwks, read.getJwks());
+    Assertions.assertEquals("pairwise", read.getSubjectType());
+    Assertions.assertTrue(read.isBackchannelLogoutSessionRequired());
+
+    DynamicClientData updated = update.update(TENANT_A, ISSUER, id,
+        result.getRegistrationAccessToken(),
+        DynamicClientRequest.builder().redirectUris(List.of("https://app.example/cb"))
+            .tokenEndpointAuthMethod("private_key_jwt")
+            .extensions(DcrExtensionMetadata.builder().jwksUri("https://app.example/jwks").build())
+            .build());
+    Assertions.assertNull(updated.getExtensions().getJwks());
+    Assertions.assertEquals("https://app.example/jwks", updated.getExtensions().getJwksUri());
+    Assertions.assertEquals("PUBLIC", column("access_trusted_client", "subject_type", id));
+    Assertions.assertEquals("false",
+        column("access_trusted_client", "dpop_bound_access_tokens", id));
   }
 
   @Test

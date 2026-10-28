@@ -16,7 +16,7 @@ import net.civeira.phylax.common.infrastructure.config.IsolatedConfig;
 import net.civeira.phylax.common.infrastructure.config.IsolatedConfigLoaderTestSupport;
 
 class OidcSeedConfigUnitTest {
-  private static final String SEED = "migration/seed/oidc-seed.yaml";
+  private static final String SEED = LocalSeed.PATH;
   private static final List<String> SECRETS =
       List.of("oidc.root.password", "oidc.relying-party.api-key", "oidc.trusted-client.secret",
           "oidc.api-keys.collector", "oidc.api-keys.sync");
@@ -37,8 +37,9 @@ class OidcSeedConfigUnitTest {
   }
 
   @Test
-  void testDevKeepsTheLocalValues() {
-    IsolatedConfig config = load(List.of("dev"), Map.of());
+  void testTheExternalFileProvidesTheLocalValues() {
+    LocalSeed.install(external);
+    IsolatedConfig config = load(List.of("prod"), Map.of());
 
     SECRETS.forEach(key -> assertTrue(config.getConfig(key).isPresent(), key));
     assertEquals(Boolean.FALSE,

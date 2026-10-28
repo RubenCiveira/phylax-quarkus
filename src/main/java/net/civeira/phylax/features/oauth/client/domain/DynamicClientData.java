@@ -29,6 +29,8 @@ public class DynamicClientData {
   private final String frontchannelLogoutUri;
   @Builder.Default
   private final List<String> postLogoutRedirectUris = List.of();
+  @Builder.Default
+  private final DcrExtensionMetadata extensions = DcrExtensionMetadata.NONE;
   private final long clientIdIssuedAt;
   private final String registrationClientUri;
 

@@ -25,6 +25,7 @@ import net.civeira.phylax.features.oauth.client.application.usecase.registerclie
 import net.civeira.phylax.features.oauth.client.application.usecase.registerclient.RegisterClientResult;
 import net.civeira.phylax.features.oauth.client.application.usecase.registerclient.RegisterClientUsecase;
 import net.civeira.phylax.features.oauth.client.application.usecase.updatedynamicclient.UpdateDynamicClientUsecase;
+import net.civeira.phylax.features.oauth.client.domain.DcrExtensionMetadata;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
 import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
@@ -193,6 +194,7 @@ public class ClientRegisterController {
     putIfPresent(entity, "tos_uri", data.getTosUri());
     putIfPresent(entity, "backchannel_logout_uri", data.getBackchannelLogoutUri().orElse(null));
     putIfPresent(entity, "frontchannel_logout_uri", data.getFrontchannelLogoutUri().orElse(null));
+    extensions(entity, data.getExtensions());
     return entity;
   }
 
@@ -210,6 +212,36 @@ public class ClientRegisterController {
     putIfPresent(entity, "tos_uri", request.getTosUri());
     putIfPresent(entity, "backchannel_logout_uri", request.getBackchannelLogoutUri());
     putIfPresent(entity, "frontchannel_logout_uri", request.getFrontchannelLogoutUri());
+    extensions(entity, request.getExtensions());
+  }
+
+  private static void extensions(Map<String, Object> entity, DcrExtensionMetadata ext) {
+    putIfPresent(entity, "jwks", ext.getJwks());
+    putIfPresent(entity, "jwks_uri", ext.getJwksUri());
+    putIfPresent(entity, "token_endpoint_auth_signing_alg", ext.getTokenEndpointAuthSigningAlg());
+    putIfPresent(entity, "request_object_signing_alg", ext.getRequestObjectSigningAlg());
+    putIfPresent(entity, "id_token_signed_response_alg", ext.getIdTokenSignedResponseAlg());
+    putIfPresent(entity, "id_token_encrypted_response_alg", ext.getIdTokenEncryptedResponseAlg());
+    putIfPresent(entity, "id_token_encrypted_response_enc", ext.getIdTokenEncryptedResponseEnc());
+    putIfPresent(entity, "userinfo_signed_response_alg", ext.getUserinfoSignedResponseAlg());
+    putIfPresent(entity, "userinfo_encrypted_response_alg", ext.getUserinfoEncryptedResponseAlg());
+    putIfPresent(entity, "userinfo_encrypted_response_enc", ext.getUserinfoEncryptedResponseEnc());
+    putIfPresent(entity, "authorization_signed_response_alg",
+        ext.getAuthorizationSignedResponseAlg());
+    putIfPresent(entity, "subject_type", ext.getSubjectType());
+    putIfTrue(entity, "backchannel_logout_session_required",
+        ext.isBackchannelLogoutSessionRequired());
+    putIfTrue(entity, "frontchannel_logout_session_required",
+        ext.isFrontchannelLogoutSessionRequired());
+    putIfTrue(entity, "dpop_bound_access_tokens", ext.isDpopBoundAccessTokens());
+    putIfTrue(entity, "require_pushed_authorization_requests",
+        ext.isRequirePushedAuthorizationRequests());
+  }
+
+  private static void putIfTrue(Map<String, Object> entity, String key, boolean value) {
+    if (value) {
+      entity.put(key, true);
+    }
   }
 
   private static void putIfPresent(Map<String, Object> entity, String key, Object value) {
@@ -230,7 +262,28 @@ public class ClientRegisterController {
         .logoUri(text(source, "logo_uri")).clientUri(text(source, "client_uri"))
         .policyUri(text(source, "policy_uri")).tosUri(text(source, "tos_uri"))
         .backchannelLogoutUri(text(source, "backchannel_logout_uri"))
-        .frontchannelLogoutUri(text(source, "frontchannel_logout_uri"));
+        .frontchannelLogoutUri(text(source, "frontchannel_logout_uri"))
+        .extensions(DcrExtensionMetadata.builder().jwks(object(source, "jwks"))
+            .jwksUri(text(source, "jwks_uri"))
+            .tokenEndpointAuthSigningAlg(text(source, "token_endpoint_auth_signing_alg"))
+            .requestObjectSigningAlg(text(source, "request_object_signing_alg"))
+            .idTokenSignedResponseAlg(text(source, "id_token_signed_response_alg"))
+            .idTokenEncryptedResponseAlg(text(source, "id_token_encrypted_response_alg"))
+            .idTokenEncryptedResponseEnc(text(source, "id_token_encrypted_response_enc"))
+            .userinfoSignedResponseAlg(text(source, "userinfo_signed_response_alg"))
+            .userinfoEncryptedResponseAlg(text(source, "userinfo_encrypted_response_alg"))
+            .userinfoEncryptedResponseEnc(text(source, "userinfo_encrypted_response_enc"))
+            .authorizationSignedResponseAlg(text(source, "authorization_signed_response_alg"))
+            .subjectType(text(source, "subject_type"))
+            .sectorIdentifierUri(text(source, "sector_identifier_uri"))
+            .backchannelLogoutSessionRequired(flag(source, "backchannel_logout_session_required"))
+            .frontchannelLogoutSessionRequired(flag(source, "frontchannel_logout_session_required"))
+            .dpopBoundAccessTokens(flag(source, "dpop_bound_access_tokens"))
+            .requirePushedAuthorizationRequests(
+                flag(source, "require_pushed_authorization_requests"))
+            .tlsClientCertificateBoundAccessTokens(
+                flag(source, "tls_client_certificate_bound_access_tokens"))
+            .build());
     List<String> redirects = list(source, "redirect_uris");
     if (redirects != null) {
       builder.redirectUris(redirects);
@@ -251,6 +304,29 @@ public class ClientRegisterController {
       return s;
     }
     throw DynamicClientException.invalidClientMetadata(key + " must be a string");
+  }
+
+  private static boolean flag(Map<String, Object> source, String key) {
+    Object value = source.get(key);
+    if (value == null) {
+      return false;
+    }
+    if (value instanceof Boolean b) {
+      return b;
+    }
+    throw DynamicClientException.invalidClientMetadata(key + " must be a boolean");
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> object(Map<String, Object> source, String key) {
+    Object value = source.get(key);
+    if (value == null) {
+      return null;
+    }
+    if (value instanceof Map<?, ?> map) {
+      return (Map<String, Object>) map;
+    }
+    throw DynamicClientException.invalidClientMetadata(key + " must be an object");
   }
 
   private static List<String> list(Map<String, Object> source, String key) {

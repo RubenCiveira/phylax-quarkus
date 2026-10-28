@@ -1,5 +1,7 @@
 # OAuth / OIDC — ControllerPart catalog
 
+> **Historical (2026-10-27, task 2.10).** This page describes the design before the OIDC refactor (`FrontAcessController`, `ControllerPart`, `features/access/oauth`), which no longer exists. It is kept for context only: do not use it as a reference. Current routes, controllers and the tests that verify them: [overview.md](overview.md) and [tests.md](tests.md).
+
 ## The delegation pattern
 
 `FrontAcessController` processes every POST to `/auth` through a shared pipeline:

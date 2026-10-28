@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthorizationRequestPolicy;
 import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
+import net.civeira.phylax.features.oauth.client.domain.JwtAlgorithms;
 import net.civeira.phylax.features.oauth.oidc.domain.DiscoveryContributor;
 import net.civeira.phylax.features.oauth.oidc.domain.OpenIdConfiguration;
 import net.civeira.phylax.features.oauth.tokensecurity.application.AcrPolicy;
@@ -46,7 +47,7 @@ public class AuthorizationEndpointContributor implements DiscoveryContributor {
         .tokenEndpointAuthMethodsSupported(ClientAuthMethod.TOKEN_ENDPOINT)
         .tokenEndpointAuthSigningAlgValuesSupported(ClientAuthMethod.ASSERTION_ALGORITHMS)
         // Signed request objects by value or inside a push; never encrypted, never by reference.
-        .requestObjectSigningAlgValuesSupported(List.of("RS256", "ES256"))
+        .requestObjectSigningAlgValuesSupported(JwtAlgorithms.CLIENT_SIGNING)
         .claimsSupported(AuthorizationRequestPolicy.SUPPORTED_CLAIMS)
         .claimTypesSupported(List.of("normal")).claimsParameterSupported(true)
         .scopesSupported(

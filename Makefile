@@ -15,3 +15,7 @@ test-mariadb:
 	V1_MARIADB_URL="jdbc:mariadb://$${DATASOURCE_HOST:-localhost}:$${DATASOURCE_PORT:-3306}" \
 	V1_MARIADB_USER="$${DATASOURCE_USER}" V1_MARIADB_PASSWORD="$${DATASOURCE_PASS}" \
 	mvn test -Dtest='*MariaDbTest' -Dsurefire.failIfNoSpecifiedTests=false
+
+# V.2: OpenID Conformance Suite (Basic, Config, RP-Initiated y Back-Channel Logout OP); ver conformance/README.md.
+conformance:
+	./conformance/run.sh

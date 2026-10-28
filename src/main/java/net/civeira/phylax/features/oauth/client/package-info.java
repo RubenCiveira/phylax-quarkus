@@ -18,7 +18,10 @@
  * the registration_access_token and registration_client_uri alongside all RFC 7591 metadata fields
  * required for read, update, and delete operations per RFC 7592.</li>
  * <li>{@code DynamicClientRequest} — inbound DTO for RFC 7591 register and RFC 7592 update
- * requests. Validated by the corresponding use cases before persistence through the gateway.</li>
+ * requests. Validated by {@code DcrMetadataPolicy} before persistence through the gateway; keys,
+ * algorithms and flags beyond the core travel in {@code DcrExtensionMetadata}.</li>
+ * <li>{@code JwtAlgorithms} — JWS algorithms the server signs and verifies, shared by the logic,
+ * discovery and DCR.</li>
  * <li>{@code ApiKeyData} — value object representing a machine-to-machine client authenticated via
  * API key. Carries the hashed key, its associated scopes, and a reference client_id.</li>
  * <li>{@code ClientStoreGateway} — primary outbound port for resolving a {@code ClientDetails} by
@@ -54,8 +57,9 @@
  * <li>{@code ClientScopeConsentInteractor} — driven adapter for scope-consent persistence.</li>
  * <li>{@code DynamicClientAdapter} — driven adapter for the full DCR CRUD gateway contract.</li>
  * <li>{@code ApiKeyStoreAdapter} — driven adapter for API key lookup and resolution.</li>
- * <li>{@code ClientRegisterController} — REST driver exposing POST/GET/PUT/DELETE /register per RFC
- * 7591/7592 for dynamic client management.</li>
+ * <li>{@code ClientRegisterController} — REST driver exposing POST /connect and GET/PUT/DELETE
+ * /connect/{clientId} per RFC 7591/7592; {@code RegistrationAwareJwtAuthMechanism} keeps the JWT
+ * mechanism away from those routes, whose bearer tokens are opaque.</li>
  * <li>{@code ApiKeyController} — REST driver for API key management operations.</li>
  * </ul>
  *

@@ -34,8 +34,8 @@ public class DeviceCodeGranter implements TokenGranter {
   public AuthenticationResult authenticate(AuthRequest request, ClientDetails client,
       Map<String, List<String>> paramMap) {
     try {
-      return AuthenticationResult.right(
-          deviceService.exchangeDeviceCode(first(paramMap, "device_code"), client.getClientId()));
+      return AuthenticationResult.right(deviceService.exchangeDeviceCode(
+          first(paramMap, "device_code"), request.getTenant(), client.getClientId()));
     } catch (DeviceAuthorizationException e) {
       throw OAuthTokenException.of(e.getError(), e.getMessage(), e.getStatusCode());
     }

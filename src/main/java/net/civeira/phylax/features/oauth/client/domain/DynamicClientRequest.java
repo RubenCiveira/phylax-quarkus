@@ -40,4 +40,9 @@ public class DynamicClientRequest {
    */
   @Builder.Default
   private final List<String> postLogoutRedirectUris = List.of();
+  /**
+   * Keys, algorithms and flags beyond the RFC 7591 core (task V.3).
+   */
+  @Builder.Default
+  private final DcrExtensionMetadata extensions = DcrExtensionMetadata.NONE;
 }

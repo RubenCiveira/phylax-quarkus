@@ -9,9 +9,10 @@ import io.quarkus.test.junit.QuarkusTestProfile;
  * Flow tests through the real endpoints with the code, revocation and session stores in MariaDB.
  *
  * <p>
- * The in-memory doubles of those three stores are excluded, so the production SQL adapters serve
- * them ({@link FlowTemporalKeysGateway} only replaces the key handling of the form helpers). Login,
- * clients and signing keep their doubles, as in the other flow tests.
+ * The in-memory doubles of those stores and of pushed requests are excluded, so the production SQL
+ * adapters serve them, as they always serve device codes and DCR ({@link FlowTemporalKeysGateway}
+ * only replaces the key handling of the form helpers). Login, clients and signing keep their
+ * doubles, as in the other flow tests.
  */
 public class MariaDbFlowProfile implements QuarkusTestProfile {
 
@@ -25,7 +26,8 @@ public class MariaDbFlowProfile implements QuarkusTestProfile {
     String doubles = "net.civeira.phylax.integrationtest.features.oauth.alt.";
     return Map.of(ENABLED, "true", "quarkus.arc.exclude-types",
         doubles + "FixedTemporalKeysGateway," + doubles + "FixedTokenRevocationGateway," + doubles
-            + "FixedSessionStore," + doubles + "FixedTokenLookupGateway");
+            + "FixedSessionStore," + doubles + "FixedTokenLookupGateway," + doubles
+            + "FixedParRequestGateway");
   }
 
   @Override

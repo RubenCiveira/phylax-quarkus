@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.JwtAlgorithms;
 
 /**
  * What a client may ask for in an authorization request, checked before any login and again when
@@ -50,7 +51,7 @@ public final class AuthorizationRequestPolicy {
   /**
    * Algorithms of a JWT secured authorization response: those of the server keys.
    */
-  public static final List<String> JARM_ALGORITHMS = List.of("RS256");
+  public static final List<String> JARM_ALGORITHMS = JwtAlgorithms.SERVER_SIGNING;
 
   /**
    * Claims this provider issues in ID tokens and UserInfo, announced as {@code claims_supported}

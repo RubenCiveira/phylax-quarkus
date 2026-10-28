@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
+import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtEncryptionGateway;
 
 /**
  * Validates and normalizes the metadata of a DCR request (RFC 7591 §2, task 2.1).
@@ -29,7 +31,13 @@ import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientEx
  * <li>{@code redirect_uris} (required with authorization_code) and
  * {@code post_logout_redirect_uris}: absolute, without fragment or wildcard, HTTPS, HTTP only on
  * loopback, or a private-use scheme of a native app (RFC 8252 §7.1);</li>
- * <li>logout and information URIs: absolute HTTPS (HTTP only on loopback).</li>
+ * <li>logout and information URIs: absolute HTTPS (HTTP only on loopback);</li>
+ * <li>keys ({@code jwks} with public RSA/EC keys only, or an HTTPS {@code jwks_uri}, never both),
+ * needed by {@code private_key_jwt}, request objects and encryption; signing and encryption
+ * algorithms among the announced ones; {@code subject_type} {@code public} or, when configured,
+ * {@code pairwise} on a single redirect host (V.3). {@code sector_identifier_uri} and
+ * {@code tls_client_certificate_bound_access_tokens} are rejected: the server does not verify
+ * sector documents nor client certificates.</li>
  * </ul>
  */
 public final class DcrMetadataPolicy {
@@ -43,6 +51,15 @@ public final class DcrMetadataPolicy {
   private static final String PASSWORD_GRANT = "password";
   private static final String CLIENT_CREDENTIALS = "client_credentials";
   private static final String NONE = "none";
+  private static final String PRIVATE_KEY_JWT = "private_key_jwt";
+  private static final String PUBLIC_SUBJECT = "public";
+  private static final String PAIRWISE_SUBJECT = "pairwise";
+  private static final Set<String> KEY_TYPES = Set.of("RSA", "EC");
+  /**
+   * JWK members of private or symmetric keys (RFC 7518 §6.2.2, §6.3.2 and §6.4).
+   */
+  private static final List<String> PRIVATE_MEMBERS =
+      List.of("d", "p", "q", "dp", "dq", "qi", "oth", "k");
   private static final int MAX_URI_LENGTH = 255;
 
   private DcrMetadataPolicy() {}
@@ -107,9 +124,130 @@ public final class DcrMetadataPolicy {
     if (request.getClientName() != null && request.getClientName().length() > MAX_URI_LENGTH) {
       throw DynamicClientException.invalidClientMetadata("client_name is too long");
     }
+    DcrExtensionMetadata extensions = extensions(request.getExtensions(), method, redirects, rules);
     return request.toBuilder().grantTypes(grants).responseTypes(responseTypes)
         .tokenEndpointAuthMethod(method).redirectUris(redirects).postLogoutRedirectUris(postLogout)
-        .build();
+        .extensions(extensions).build();
+  }
+
+  private static DcrExtensionMetadata extensions(DcrExtensionMetadata ext, String method,
+      List<String> redirects, DcrRegistrationRules rules) {
+    if (ext.getJwks() != null && ext.getJwksUri() != null) {
+      // RFC 7591 §2: both MUST NOT be present in the same request.
+      throw DynamicClientException
+          .invalidClientMetadata("jwks and jwks_uri cannot be registered together");
+    }
+    if (ext.getJwks() != null) {
+      requirePublicJwks(ext.getJwks());
+    }
+    if (ext.getJwksUri() != null) {
+      requireHttps("jwks_uri", ext.getJwksUri());
+    }
+    if (PRIVATE_KEY_JWT.equals(method) && !ext.hasKeys()) {
+      throw DynamicClientException.invalidClientMetadata("private_key_jwt needs jwks or jwks_uri");
+    }
+    requireAlgorithm("token_endpoint_auth_signing_alg", ext.getTokenEndpointAuthSigningAlg(),
+        JwtAlgorithms.CLIENT_SIGNING);
+    requireAlgorithm("request_object_signing_alg", ext.getRequestObjectSigningAlg(),
+        JwtAlgorithms.CLIENT_SIGNING);
+    if (ext.getRequestObjectSigningAlg() != null && !ext.hasKeys()) {
+      throw DynamicClientException
+          .invalidClientMetadata("request_object_signing_alg needs jwks or jwks_uri");
+    }
+    requireAlgorithm("id_token_signed_response_alg", ext.getIdTokenSignedResponseAlg(),
+        JwtAlgorithms.SERVER_SIGNING);
+    requireAlgorithm("userinfo_signed_response_alg", ext.getUserinfoSignedResponseAlg(),
+        JwtAlgorithms.SERVER_SIGNING);
+    requireAlgorithm("authorization_signed_response_alg", ext.getAuthorizationSignedResponseAlg(),
+        JwtAlgorithms.SERVER_SIGNING);
+    requireEncryption("id_token", ext.getIdTokenEncryptedResponseAlg(),
+        ext.getIdTokenEncryptedResponseEnc(), ext.hasKeys());
+    requireEncryption("userinfo", ext.getUserinfoEncryptedResponseAlg(),
+        ext.getUserinfoEncryptedResponseEnc(), ext.hasKeys());
+    String subjectType = ext.getSubjectType() == null ? PUBLIC_SUBJECT : ext.getSubjectType();
+    if (!PUBLIC_SUBJECT.equals(subjectType) && !PAIRWISE_SUBJECT.equals(subjectType)) {
+      throw DynamicClientException
+          .invalidClientMetadata("Unsupported subject_type: " + subjectType);
+    }
+    if (ext.getSectorIdentifierUri() != null) {
+      // OIDC Registration §5 needs the sector document fetched and checked: not implemented.
+      throw DynamicClientException.invalidClientMetadata("sector_identifier_uri is not supported");
+    }
+    if (PAIRWISE_SUBJECT.equals(subjectType)) {
+      if (!rules.pairwiseSubjects()) {
+        throw DynamicClientException.invalidClientMetadata("pairwise subjects are not available");
+      }
+      // Without a sector document, the sector is the only host of the redirects (task 4.4).
+      List<Optional<String>> hosts =
+          redirects.stream().map(DcrMetadataPolicy::host).distinct().toList();
+      if (hosts.size() != 1 || hosts.get(0).isEmpty()) {
+        throw DynamicClientException
+            .invalidClientMetadata("A pairwise client needs its redirect URIs on a single host");
+      }
+    }
+    if (ext.isTlsClientCertificateBoundAccessTokens()) {
+      throw DynamicClientException
+          .invalidClientMetadata("tls_client_certificate_bound_access_tokens is not supported");
+    }
+    return ext.toBuilder().subjectType(subjectType).build();
+  }
+
+  /**
+   * An inline JWKS: a non-empty {@code keys} array of public RSA or EC keys.
+   */
+  private static void requirePublicJwks(Map<String, Object> jwks) {
+    if (!(jwks.get("keys") instanceof List<?> keys) || keys.isEmpty()) {
+      throw DynamicClientException.invalidClientMetadata("jwks needs a non-empty keys array");
+    }
+    for (Object key : keys) {
+      if (!(key instanceof Map<?, ?> jwk) || !(jwk.get("kty") instanceof String kty)
+          || !KEY_TYPES.contains(kty)) {
+        throw DynamicClientException.invalidClientMetadata("jwks keys must be RSA or EC keys");
+      }
+      if (PRIVATE_MEMBERS.stream().anyMatch(jwk::containsKey)) {
+        throw DynamicClientException.invalidClientMetadata("jwks must only hold public keys");
+      }
+    }
+  }
+
+  private static void requireAlgorithm(String field, String value, List<String> supported) {
+    if (value != null && !supported.contains(value)) {
+      throw DynamicClientException.invalidClientMetadata("Unsupported " + field + ": " + value);
+    }
+  }
+
+  /**
+   * OIDC Registration §2: an {@code enc} needs its {@code alg}; both among the announced ones, and
+   * the client needs keys to encrypt to.
+   */
+  private static void requireEncryption(String artifact, String alg, String enc, boolean hasKeys) {
+    if (alg == null) {
+      if (enc != null) {
+        throw DynamicClientException.invalidClientMetadata(
+            artifact + "_encrypted_response_enc needs " + artifact + "_encrypted_response_alg");
+      }
+      return;
+    }
+    requireAlgorithm(artifact + "_encrypted_response_alg", alg,
+        ClientJwtEncryptionGateway.ALGORITHMS);
+    requireAlgorithm(artifact + "_encrypted_response_enc", enc,
+        ClientJwtEncryptionGateway.ENCRYPTIONS);
+    if (!hasKeys) {
+      throw DynamicClientException
+          .invalidClientMetadata(artifact + " encryption needs jwks or jwks_uri");
+    }
+  }
+
+  private static void requireHttps(String field, String value) {
+    boolean allowed = parse(value).filter(uri -> "https".equalsIgnoreCase(uri.getScheme())
+        && uri.getHost() != null && uri.getRawFragment() == null).isPresent();
+    if (!allowed || value.length() > MAX_URI_LENGTH) {
+      throw DynamicClientException.invalidClientMetadata("Invalid " + field);
+    }
+  }
+
+  private static Optional<String> host(String uri) {
+    return parse(uri).map(URI::getHost).map(h -> h.toLowerCase(Locale.ROOT));
   }
 
   private static List<String> distinct(List<String> values, List<String> fallback) {

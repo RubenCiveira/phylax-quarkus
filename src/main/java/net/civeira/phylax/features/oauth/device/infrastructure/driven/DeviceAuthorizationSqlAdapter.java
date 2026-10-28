@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTransactionRollbackException;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -60,7 +61,6 @@ public class DeviceAuthorizationSqlAdapter implements DeviceAuthorizationGateway
 
   @Override
   public Optional<DeviceAuthorization> findByDeviceCode(String deviceCode) {
-    purgeExpired();
     String sql = "SELECT * FROM _oauth_device_codes WHERE device_code = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
@@ -78,7 +78,6 @@ public class DeviceAuthorizationSqlAdapter implements DeviceAuthorizationGateway
 
   @Override
   public Optional<DeviceAuthorization> findByUserCode(String tenant, String userCode) {
-    purgeExpired();
     String sql = "SELECT * FROM _oauth_device_codes WHERE tenant = ? AND user_code = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
@@ -97,12 +96,14 @@ public class DeviceAuthorizationSqlAdapter implements DeviceAuthorizationGateway
 
   @Override
   public boolean approve(String deviceCode, AuthenticationData auth) {
-    String sql = "UPDATE _oauth_device_codes SET status = ?, auth_data = ? WHERE device_code = ?";
+    String sql = "UPDATE _oauth_device_codes SET status = ?, auth_data = ? WHERE device_code = ? "
+        + "AND status = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, DeviceAuthorizationStatus.APPROVED.name());
       stat.setString(2, mapper.writeValueAsString(auth));
       stat.setString(3, deviceCode);
+      stat.setString(4, DeviceAuthorizationStatus.PENDING.name());
       return stat.executeUpdate() > 0;
     } catch (SQLException | JsonProcessingException ex) {
       throw new IllegalStateException(ex);
@@ -111,11 +112,12 @@ public class DeviceAuthorizationSqlAdapter implements DeviceAuthorizationGateway
 
   @Override
   public boolean deny(String deviceCode) {
-    String sql = "UPDATE _oauth_device_codes SET status = ? WHERE device_code = ?";
+    String sql = "UPDATE _oauth_device_codes SET status = ? WHERE device_code = ? AND status = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, DeviceAuthorizationStatus.DENIED.name());
       stat.setString(2, deviceCode);
+      stat.setString(3, DeviceAuthorizationStatus.PENDING.name());
       return stat.executeUpdate() > 0;
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
@@ -150,23 +152,29 @@ public class DeviceAuthorizationSqlAdapter implements DeviceAuthorizationGateway
   }
 
   @Override
-  public void consume(String deviceCode) {
+  public boolean consume(String deviceCode) {
     String sql = "DELETE FROM _oauth_device_codes WHERE device_code = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, deviceCode);
-      stat.execute();
+      return stat.executeUpdate() > 0;
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }
   }
 
+  /**
+   * Housekeeping on writes only: a range delete on every read deadlocks concurrent requests (V.1).
+   * Losing the race to a concurrent purge is fine, the other request removes the rows.
+   */
   private void purgeExpired() {
     String sql = "DELETE FROM _oauth_device_codes WHERE expires_at < ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setTimestamp(1, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()));
       stat.execute();
+    } catch (SQLTransactionRollbackException ex) {
+      // Deadlock with a concurrent purge: nothing to do.
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }

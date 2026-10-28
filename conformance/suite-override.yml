@@ -1,0 +1,6 @@
+# Se aplica sobre el docker-compose de la Conformance Suite: su servidor (llamadas al OP y
+# navegador automatizado) resuelve el OP por el host, donde Caddy publica el 9443.
+services:
+  server:
+    extra_hosts:
+      - "op.phylax.test:host-gateway"

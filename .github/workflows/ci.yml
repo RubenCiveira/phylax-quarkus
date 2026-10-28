@@ -1,0 +1,49 @@
+# Unit, flow and MariaDB tests (V.1). The MariaDB service backs both the Quarkus test profile
+# (DATASOURCE_*) and the throwaway phylax_v1_* schemas of the persistence harness (V1_MARIADB_*).
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: ci-root
+          MARIADB_DATABASE: phylax_ci
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      DATASOURCE_HOST: 127.0.0.1
+      DATASOURCE_PORT: "3306"
+      DATASOURCE_PATH: phylax_ci
+      DATASOURCE_USER: root
+      DATASOURCE_PASS: ci-root
+      V1_MARIADB_URL: jdbc:mariadb://127.0.0.1:3306
+      V1_MARIADB_USER: root
+      V1_MARIADB_PASSWORD: ci-root
+      SECURITY_DIGEST_PEPPERS: t0:ci-digest-pepper
+      SECURITY_DIGEST_CURRENT: t0
+      OIDC_PAIRWISE_SALT: ci-pairwise-salt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - name: Tests (unit, flow and MariaDB)
+        run: mvn -B -ntp test
+      - name: Test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports

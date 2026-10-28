@@ -18,8 +18,18 @@ public interface DeviceAuthorizationGateway {
 
   Optional<DeviceAuthorization> findByUserCode(String tenant, String userCode);
 
+  /**
+   * Approves a pending authorization; one already approved or denied is left as it is.
+   *
+   * @return true when this call approved it
+   */
   boolean approve(String deviceCode, AuthenticationData auth);
 
+  /**
+   * Denies a pending authorization; one already approved or denied is left as it is.
+   *
+   * @return true when this call denied it
+   */
   boolean deny(String deviceCode);
 
   void touchPoll(String deviceCode, OffsetDateTime now);
@@ -27,6 +37,10 @@ public interface DeviceAuthorizationGateway {
   /** Updates last_poll_at and increments interval_sec by 5 (RFC 8628 §3.5 slow_down). */
   void slowDown(String deviceCode, OffsetDateTime now);
 
-  /** Marks the record as consumed after token exchange. */
-  void consume(String deviceCode);
+  /**
+   * Removes the record once exchanged or expired, atomically: of concurrent calls only one wins.
+   *
+   * @return true when this call removed it
+   */
+  boolean consume(String deviceCode);
 }

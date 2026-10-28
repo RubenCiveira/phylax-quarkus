@@ -12,6 +12,7 @@ import java.util.HexFormat;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -19,15 +20,18 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.crypto.SecretDigester;
+import net.civeira.phylax.features.oauth.client.domain.DcrExtensionMetadata;
 import net.civeira.phylax.features.oauth.client.domain.DcrRegistrationRules;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientData;
 import net.civeira.phylax.features.oauth.client.domain.DynamicClientRequest;
 import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGateway;
+import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 
 /**
  * DCR clients over the {@code access_trusted_client} master (task 2.1).
@@ -36,7 +40,8 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGate
  * A client is stored in the tenant of the endpoint, enabled, dynamically registered and without
  * {@code allow-all-scopes}; a public one ({@code none}) allows public access and requires PKCE.
  * Every lookup is scoped by tenant and by the digest of the registration access token. The secret
- * and the token are stored as {@link SecretDigester} digests and never read back.
+ * and the token are stored as {@link SecretDigester} digests and never read back. Keys, algorithms
+ * and flags (V.3) go to the same columns an administrator fills, so the runtime reads them alike.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -44,10 +49,23 @@ public class DynamicClientAdapter implements DynamicClientGateway {
 
   private static final String DISABLED = "disabled";
   private static final String NONE = "none";
+  private static final TypeReference<Map<String, Object>> JWKS_TYPE = new TypeReference<>() {};
+  /**
+   * Columns of {@link DcrExtensionMetadata}, in the order {@link #bindExtensions} binds them.
+   */
+  private static final List<String> EXTENSION_COLUMNS =
+      List.of("jwks_json", "jwks_uri", "token_endpoint_auth_signing_alg",
+          "request_object_signing_alg", "id_token_signed_response_alg",
+          "id_token_encrypted_response_alg", "id_token_encrypted_response_enc",
+          "userinfo_signed_response_alg", "userinfo_encrypted_response_alg",
+          "userinfo_encrypted_response_enc", "authorization_signed_response_alg", "subject_type",
+          "back_channel_logout_session_required", "front_channel_logout_session_required",
+          "dpop_bound_access_tokens", "require_pushed_authorization_requests");
   private static final String CLIENT_COLUMNS =
       "c.uid, c.token_endpoint_auth_method, c.client_name, c.logo_uri, c.client_uri, "
           + "c.policy_uri, c.tos_uri, c.back_channel_logout_uri, c.front_channel_logout_uri, "
-          + "c.grant_types_json, c.response_types_json, c.registered_at";
+          + "c.grant_types_json, c.response_types_json, c.registered_at, "
+          + String.join(", ", EXTENSION_COLUMNS.stream().map(c -> "c." + c).toList());
   private static final String OWNED_CLIENT = "FROM access_trusted_client c "
       + "JOIN access_tenant t ON t.uid = c.tenant WHERE t.name = ? AND c.uid = ? "
       + "AND c.dynamically_registered = ? AND c.registration_access = ?";
@@ -56,6 +74,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
   private final ObjectMapper mapper;
   private final SecretDigester secretDigester;
   private final PostLogoutRedirectSqlStore postLogoutRedirects;
+  private final SubjectResolver subjects;
 
   @Override
   public DcrRegistrationRules readRegistrationRules(String tenant) {
@@ -79,7 +98,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         List<String> methods = TrustedClientPolicy.parseList(rs.getString(3))
             .orElse(DcrRegistrationRules.VERIFIABLE_AUTH_METHODS);
         return new DcrRegistrationRules(true, Set.copyOf(grants), Set.copyOf(methods),
-            rs.getBoolean(4));
+            rs.getBoolean(4), subjects.pairwiseAvailable());
       }
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
@@ -96,10 +115,10 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         + "token_endpoint_auth_method, public_allow, require_pkce, allow_all_scopes, "
         + "grant_types_json, response_types_json, client_name, logo_uri, client_uri, policy_uri, "
         + "tos_uri, back_channel_logout_uri, front_channel_logout_uri, m_2m_token_ttl_seconds, "
-        + "is_resource_server, require_pushed_authorization_requests, subject_type, "
-        + "dpop_bound_access_tokens, tls_client_certificate_bound_access_tokens) "
+        + "is_resource_server, tls_client_certificate_bound_access_tokens, "
+        + String.join(", ", EXTENSION_COLUMNS) + ") "
         + "SELECT ?, 0, ?, t.uid, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 3600, "
-        + "?, ?, 'PUBLIC', ?, ? FROM access_tenant t WHERE t.name = ?";
+        + "?, ?, " + placeholders() + " FROM access_tenant t WHERE t.name = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       conn.setAutoCommit(false);
@@ -126,8 +145,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       stat.setString(i++, request.getFrontchannelLogoutUri());
       stat.setBoolean(i++, false);
       stat.setBoolean(i++, false);
-      stat.setBoolean(i++, false);
-      stat.setBoolean(i++, false);
+      i = bindExtensions(stat, i, request.getExtensions());
       stat.setString(i, tenant);
       if (stat.executeUpdate() != 1) {
         throw new IllegalStateException("Unknown tenant " + tenant);
@@ -146,7 +164,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         .tosUri(request.getTosUri()).backchannelLogoutUri(request.getBackchannelLogoutUri())
         .frontchannelLogoutUri(request.getFrontchannelLogoutUri())
         .postLogoutRedirectUris(request.getPostLogoutRedirectUris())
-        .clientIdIssuedAt(now.getEpochSecond()).build();
+        .extensions(request.getExtensions()).clientIdIssuedAt(now.getEpochSecond()).build();
   }
 
   @Override
@@ -172,7 +190,9 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       String registrationAccessToken, DynamicClientRequest request) {
     String sql = "UPDATE access_trusted_client SET client_name = ?, logo_uri = ?, client_uri = ?, "
         + "policy_uri = ?, tos_uri = ?, grant_types_json = ?, response_types_json = ?, "
-        + "back_channel_logout_uri = ?, front_channel_logout_uri = ?, version = version + 1 "
+        + "back_channel_logout_uri = ?, front_channel_logout_uri = ?, "
+        + String.join(", ", EXTENSION_COLUMNS.stream().map(c -> c + " = ?").toList())
+        + ", version = version + 1 "
         + "WHERE uid = ? AND dynamically_registered = ? AND registration_access = ? "
         + "AND tenant = (SELECT t.uid FROM access_tenant t WHERE t.name = ?)";
     try (Connection conn = source.getConnection();
@@ -188,6 +208,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       stat.setString(i++, mapper.writeValueAsString(request.getResponseTypes()));
       stat.setString(i++, request.getBackchannelLogoutUri());
       stat.setString(i++, request.getFrontchannelLogoutUri());
+      i = bindExtensions(stat, i, request.getExtensions());
       stat.setString(i++, clientId);
       stat.setBoolean(i++, true);
       stat.setString(i++, secretDigester.digest(registrationAccessToken));
@@ -255,8 +276,66 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         .tosUri(rs.getString("tos_uri"))
         .backchannelLogoutUri(rs.getString("back_channel_logout_uri"))
         .frontchannelLogoutUri(rs.getString("front_channel_logout_uri"))
-        .postLogoutRedirectUris(postLogoutRedirects.list(uid))
+        .postLogoutRedirectUris(postLogoutRedirects.list(uid)).extensions(readExtensions(rs))
         .clientIdIssuedAt(issuedAt != null ? issuedAt.toInstant().getEpochSecond() : 0).build();
+  }
+
+  private static String placeholders() {
+    return String.join(", ", EXTENSION_COLUMNS.stream().map(c -> "?").toList());
+  }
+
+  /**
+   * Binds the {@link #EXTENSION_COLUMNS} from {@code from}.
+   *
+   * @return the next parameter index
+   */
+  private int bindExtensions(PreparedStatement stat, int from, DcrExtensionMetadata ext)
+      throws SQLException, JsonProcessingException {
+    int i = from;
+    stat.setString(i++, ext.getJwks() == null ? null : mapper.writeValueAsString(ext.getJwks()));
+    stat.setString(i++, ext.getJwksUri());
+    stat.setString(i++, ext.getTokenEndpointAuthSigningAlg());
+    stat.setString(i++, ext.getRequestObjectSigningAlg());
+    stat.setString(i++, ext.getIdTokenSignedResponseAlg());
+    stat.setString(i++, ext.getIdTokenEncryptedResponseAlg());
+    stat.setString(i++, ext.getIdTokenEncryptedResponseEnc());
+    stat.setString(i++, ext.getUserinfoSignedResponseAlg());
+    stat.setString(i++, ext.getUserinfoEncryptedResponseAlg());
+    stat.setString(i++, ext.getUserinfoEncryptedResponseEnc());
+    stat.setString(i++, ext.getAuthorizationSignedResponseAlg());
+    stat.setString(i++, ext.getSubjectType().toUpperCase(Locale.ROOT));
+    stat.setBoolean(i++, ext.isBackchannelLogoutSessionRequired());
+    stat.setBoolean(i++, ext.isFrontchannelLogoutSessionRequired());
+    stat.setBoolean(i++, ext.isDpopBoundAccessTokens());
+    stat.setBoolean(i++, ext.isRequirePushedAuthorizationRequests());
+    return i;
+  }
+
+  private DcrExtensionMetadata readExtensions(ResultSet rs) throws SQLException {
+    String jwks = rs.getString("jwks_json");
+    try {
+      return DcrExtensionMetadata.builder()
+          .jwks(jwks == null || jwks.isBlank() ? null : mapper.readValue(jwks, JWKS_TYPE))
+          .jwksUri(rs.getString("jwks_uri"))
+          .tokenEndpointAuthSigningAlg(rs.getString("token_endpoint_auth_signing_alg"))
+          .requestObjectSigningAlg(rs.getString("request_object_signing_alg"))
+          .idTokenSignedResponseAlg(rs.getString("id_token_signed_response_alg"))
+          .idTokenEncryptedResponseAlg(rs.getString("id_token_encrypted_response_alg"))
+          .idTokenEncryptedResponseEnc(rs.getString("id_token_encrypted_response_enc"))
+          .userinfoSignedResponseAlg(rs.getString("userinfo_signed_response_alg"))
+          .userinfoEncryptedResponseAlg(rs.getString("userinfo_encrypted_response_alg"))
+          .userinfoEncryptedResponseEnc(rs.getString("userinfo_encrypted_response_enc"))
+          .authorizationSignedResponseAlg(rs.getString("authorization_signed_response_alg"))
+          .subjectType(rs.getString("subject_type").toLowerCase(Locale.ROOT))
+          .backchannelLogoutSessionRequired(rs.getBoolean("back_channel_logout_session_required"))
+          .frontchannelLogoutSessionRequired(rs.getBoolean("front_channel_logout_session_required"))
+          .dpopBoundAccessTokens(rs.getBoolean("dpop_bound_access_tokens"))
+          .requirePushedAuthorizationRequests(
+              rs.getBoolean("require_pushed_authorization_requests"))
+          .build();
+    } catch (JsonProcessingException ex) {
+      throw new IllegalStateException("Unreadable jwks_json of a dynamic client", ex);
+    }
   }
 
   private List<String> loadRedirects(Connection conn, String clientId) throws SQLException {

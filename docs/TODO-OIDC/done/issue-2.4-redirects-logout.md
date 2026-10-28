@@ -7,7 +7,7 @@
 
 ## Qué hace (funcional)
 
-- `post_logout_redirect_uri` solo se sigue si está registrada como **URI post-logout** del cliente (coincidencia exacta; loopback como en el login). Una URI registrada solo para el login, o externa, no se sigue: se muestra la página de sesión cerrada.
+- `post_logout_redirect_uri` solo se sigue si está registrada como **URI post-logout** del cliente (coincidencia exacta; loopback como en el login). Una URI registrada solo para el login, o externa, no se sigue: el logout se rechaza con 400 y la sesión sigue abierta (endurecido el 26-10-2026; antes se cerraba la sesión y se mostraba la página de sesión cerrada).
 - Se conserva la query registrada y `state` se añade codificado (`?state=a+b%26c%3Dd`).
 
 ## Implementación Java

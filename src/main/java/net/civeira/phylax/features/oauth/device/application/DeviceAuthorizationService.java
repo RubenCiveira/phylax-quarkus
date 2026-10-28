@@ -69,20 +69,24 @@ public class DeviceAuthorizationService {
   /**
    * Exchanges a device_code for authentication data.
    *
-   * A device code issued to another client is unknown to this one ({@code invalid_grant}).
+   * A device code issued to another client or in another tenant is unknown to this one
+   * ({@code invalid_grant}), and an approved code is spent atomically: of concurrent polls only one
+   * gets the tokens (RFC 8628 §3.5, V.1).
    *
    * @param deviceCode the device_code of the token request
+   * @param tenant tenant of the token endpoint
    * @param clientId the authenticated client of the token request
    * @throws DeviceAuthorizationException on any grant error (pending, slow-down, denied, expired)
    */
-  public AuthenticationData exchangeDeviceCode(String deviceCode, String clientId) {
+  public AuthenticationData exchangeDeviceCode(String deviceCode, String tenant, String clientId) {
     if (deviceCode == null || deviceCode.isBlank()) {
       throw DeviceAuthorizationException.invalidRequest("device_code is required");
     }
 
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     DeviceAuthorization record =
-        gateway.findByDeviceCode(deviceCode).filter(found -> found.getClientId().equals(clientId))
+        gateway.findByDeviceCode(deviceCode).filter(found -> found.getTenant().equals(tenant))
+            .filter(found -> found.getClientId().equals(clientId))
             .orElseThrow(DeviceAuthorizationException::invalidGrant);
 
     if (record.isExpired()) {
@@ -106,7 +110,9 @@ public class DeviceAuthorizationService {
       case APPROVED -> {
         AuthenticationData auth =
             record.getAuth().orElseThrow(DeviceAuthorizationException::invalidGrant);
-        gateway.consume(deviceCode);
+        if (!gateway.consume(deviceCode)) {
+          throw DeviceAuthorizationException.invalidGrant();
+        }
         return auth;
       }
     }

@@ -1,5 +1,7 @@
 # Capacidades OIDC de phylax-api
 
+> **Vigencia (27-10-2026, tarea 2.10).** Este documento es la foto del código al 20-10-2026 y el origen de las fichas de [docs/TODO-OIDC](../../../docs/TODO-OIDC/README.md); no se actualiza. Desde entonces se han cerrado las fases 0 y 1, casi toda la 2 y buena parte de la 3 y la 4: entre otras cosas, DCR está expuesto, PAR y `client_secret_post` están corregidos, `private_key_jwt` funciona y el discovery solo anuncia lo operativo. Para el estado actual: rutas y pruebas en [docs/oauth/overview.md](../../../docs/oauth/overview.md), evidencia por tarea en `docs/TODO-OIDC/done/`. Sigue sin ejecutarse la OpenID Conformance Suite (V.2).
+
 > Fecha: 2026-10-20 · Rama `feat/refactor-oidc` · Alcance: `src/main/java/net/civeira/phylax/features/oauth` (373 ficheros) y su dependencia de `access/trustedclient`.
 > Método: lectura del código. Los documentos `ANALISIS_DESARROLLOS_OAUTH*.md` de este directorio (comparativa con lughauth-api, PHP) sirven de referencia, y cada afirmación sobre phylax se ha vuelto a comprobar en el código. No se han ejecutado tests ni la OpenID Conformance Suite.
 

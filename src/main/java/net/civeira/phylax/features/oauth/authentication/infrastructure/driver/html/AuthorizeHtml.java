@@ -592,9 +592,7 @@ public class AuthorizeHtml {
   }
 
   private boolean belongsToTenant(SessionInfo session, String tenant) {
-    return tenant.equals(session.getIssuer())
-        || tenantRepo.find(TenantFilter.builder().name(tenant).build())
-            .map(t -> t.getUid().equals(session.getIssuer())).orElse(false);
+    return sessionManager.belongsToTenant(session, tenant);
   }
 
   /**

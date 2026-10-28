@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.oauth.client.domain.ClientAuthMethod;
 import net.civeira.phylax.features.oauth.client.domain.DcrInitialAccessToken;
 import net.civeira.phylax.features.oauth.client.domain.DcrMetadataPolicy;
 import net.civeira.phylax.features.oauth.client.domain.DcrRegistrationRules;
@@ -31,8 +32,9 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGate
  * <li>one use of the token is spent atomically, so an exhausted token never registers a
  * client;</li>
  * <li>the client is created in the tenant of the endpoint. A confidential client gets a secret; a
- * public one ({@code none}) does not. Both get a registration access token. The clear values are
- * returned only now: only their digests are stored.</li>
+ * public one ({@code none}) or one that signs assertions ({@code private_key_jwt}) does not. Both
+ * get a registration access token. The clear values are returned only now: only their digests are
+ * stored.</li>
  * </ol>
  */
 @ApplicationScoped
@@ -67,9 +69,8 @@ public class RegisterClientUsecase {
     }
 
     String clientId = UUID.randomUUID().toString();
-    Optional<String> clientSecret =
-        "none".equals(metadata.getTokenEndpointAuthMethod()) ? Optional.empty()
-            : Optional.of(randomToken());
+    Optional<String> clientSecret = ClientAuthMethod.from(metadata.getTokenEndpointAuthMethod())
+        .filter(ClientAuthMethod::usesSecret).map(m -> randomToken());
     String registrationAccessToken = randomToken();
 
     DynamicClientData meta = gateway.create(params.getTenant(), clientId, clientSecret,

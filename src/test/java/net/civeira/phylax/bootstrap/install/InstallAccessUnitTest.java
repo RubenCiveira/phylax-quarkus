@@ -40,7 +40,7 @@ import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssi
 import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentCommandRepositoryGateway;
 
 class InstallAccessUnitTest {
-  private static final String DEV_COLLECTOR_KEY =
+  private static final String LOCAL_COLLECTOR_KEY =
       "hcaik_01jtteh99vbsv4qrj22trvh3wg35g1n4tgkcxzgqv0034y2cby7dceaf43";
 
   private final SecretDigester digester = new SecretDigester("t0:test-pepper", "t0");
@@ -78,14 +78,26 @@ class InstallAccessUnitTest {
   }
 
   @Test
-  void testUseTheDevValues() {
-    seed(List.of("dev"), Map.of()).run();
+  void testRegisterTheLocalLogoutRedirectApartFromTheLoginOne() {
+    seed(List.of("prod"), Map.of()).run();
+
+    TrustedClient client = created(clients, TrustedClient.class);
+    assertEquals(List.of("http://localhost:4200/*"),
+        client.getAllowedRedirects().stream().map(r -> r.getUrl()).toList());
+    assertEquals(List.of("http://localhost:4200/*"),
+        client.getAllowedLogoutRedirects().stream().map(r -> r.getUrl()).toList());
+  }
+
+  @Test
+  void testUseTheValuesOfTheExternalFile() {
+    LocalSeed.install(external);
+    seed(List.of("prod"), Map.of()).run();
 
     User root = created(users, User.class);
     assertEquals(Boolean.FALSE, root.isTemporalPassword());
     assertEquals("civi-acme-api", created(parties, RelyingParty.class).getCode());
     assertEquals("civi-acme-ui", created(clients, TrustedClient.class).getCode());
-    assertEquals(digester.digest(DEV_COLLECTOR_KEY), storedKey(createdKeys().get(0)));
+    assertEquals(digester.digest(LOCAL_COLLECTOR_KEY), storedKey(createdKeys().get(0)));
   }
 
   @Test

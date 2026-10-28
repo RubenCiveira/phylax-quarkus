@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
+import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.session.domain.SessionInfo;
 import net.civeira.phylax.features.oauth.session.domain.gateway.SessionStoreGateway;
 
@@ -25,6 +27,7 @@ public class SessionManager {
    * Gateway used to load and delete session data.
    */
   private final SessionStoreGateway sessionStore;
+  private final TenantQueryRepositoryGateway tenants;
 
   /**
    * Loads a session by its identifier.
@@ -37,6 +40,31 @@ public class SessionManager {
    */
   public Optional<SessionInfo> loadSession(String sessionId) {
     return sessionStore.loadSession(sessionId);
+  }
+
+  /**
+   * Loads a session only when it was opened in the given tenant, so a session of another tenant
+   * never acts on this one.
+   *
+   * @param sessionId session identifier
+   * @param tenant tenant name of the endpoint
+   * @return the session info if present and of the tenant
+   */
+  public Optional<SessionInfo> loadSession(String sessionId, String tenant) {
+    return loadSession(sessionId).filter(session -> belongsToTenant(session, tenant));
+  }
+
+  /**
+   * Whether a session was opened in a tenant: its issuer is the tenant name or uid.
+   *
+   * @param session session to check
+   * @param tenant tenant name
+   * @return true when it belongs to the tenant
+   */
+  public boolean belongsToTenant(SessionInfo session, String tenant) {
+    return tenant.equals(session.getIssuer())
+        || tenants.find(TenantFilter.builder().name(tenant).build())
+            .map(t -> t.getUid().equals(session.getIssuer())).orElse(false);
   }
 
   /**

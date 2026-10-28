@@ -2,6 +2,7 @@
 package net.civeira.phylax.features.oauth.client.domain;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -11,13 +12,16 @@ import org.junit.jupiter.api.Test;
 import net.civeira.phylax.features.oauth.client.domain.exception.DynamicClientException;
 
 /**
- * Metadata a client may register through DCR (task 2.1).
+ * Metadata a client may register through DCR (task 2.1), keys and algorithms included (V.3).
  */
 class DcrMetadataPolicyUnitTest {
 
   private static final DcrRegistrationRules RULES = new DcrRegistrationRules(true,
       Set.of("authorization_code", "refresh_token", "client_credentials", "password"),
       Set.copyOf(DcrRegistrationRules.VERIFIABLE_AUTH_METHODS), false);
+
+  private static final Map<String, Object> RSA_JWKS =
+      Map.of("keys", List.of(Map.of("kty", "RSA", "kid", "k1", "n", "AQAB", "e", "AQAB")));
 
   private static DynamicClientRequest.DynamicClientRequestBuilder web() {
     return DynamicClientRequest.builder().redirectUris(List.of("https://app.example.com/cb"));
@@ -77,7 +81,7 @@ class DcrMetadataPolicyUnitTest {
   }
 
   @Test
-  @DisplayName("private_key_jwt and methods the tenant does not allow are rejected")
+  @DisplayName("private_key_jwt without keys and methods the tenant does not allow are rejected")
   void auth_method_must_be_verifiable_and_allowed() {
     Assertions.assertEquals("invalid_client_metadata",
         error(web().tokenEndpointAuthMethod("private_key_jwt").build(), RULES));
@@ -121,5 +125,153 @@ class DcrMetadataPolicyUnitTest {
         error(web().postLogoutRedirectUris(List.of("https://app.example.com/*")).build(), RULES));
     Assertions.assertEquals("invalid_client_metadata",
         error(web().backchannelLogoutUri("http://app.example.com/logout").build(), RULES));
+  }
+
+  private static DynamicClientRequest.DynamicClientRequestBuilder withExtensions(
+      DcrExtensionMetadata.DcrExtensionMetadataBuilder extensions) {
+    return web().extensions(extensions.build());
+  }
+
+  @Test
+  @DisplayName("private_key_jwt with an inline JWKS or an HTTPS jwks_uri is registered")
+  void private_key_jwt_with_keys() {
+    DynamicClientRequest inline = DcrMetadataPolicy.validate(withExtensions(
+        DcrExtensionMetadata.builder().jwks(RSA_JWKS).tokenEndpointAuthSigningAlg("ES256"))
+            .tokenEndpointAuthMethod("private_key_jwt").build(),
+        RULES);
+    Assertions.assertEquals("private_key_jwt", inline.getTokenEndpointAuthMethod());
+    Assertions.assertEquals(RSA_JWKS, inline.getExtensions().getJwks());
+    Assertions.assertEquals("public", inline.getExtensions().getSubjectType());
+    Assertions.assertDoesNotThrow(() -> DcrMetadataPolicy.validate(
+        withExtensions(DcrExtensionMetadata.builder().jwksUri("https://app.example.com/jwks"))
+            .tokenEndpointAuthMethod("private_key_jwt").build(),
+        RULES));
+  }
+
+  @Test
+  @DisplayName("Keys: never jwks and jwks_uri together, only public RSA/EC keys, HTTPS jwks_uri")
+  void keys_rules() {
+    Assertions.assertEquals("invalid_client_metadata",
+        error(withExtensions(
+            DcrExtensionMetadata.builder().jwks(RSA_JWKS).jwksUri("https://app.example.com/jwks"))
+                .build(),
+            RULES));
+    Assertions.assertEquals("invalid_client_metadata",
+        error(withExtensions(DcrExtensionMetadata.builder().jwks(
+            Map.of("keys", List.of(Map.of("kty", "RSA", "n", "AQAB", "e", "AQAB", "d", "x")))))
+                .build(),
+            RULES));
+    Assertions.assertEquals("invalid_client_metadata",
+        error(
+            withExtensions(DcrExtensionMetadata.builder()
+                .jwks(Map.of("keys", List.of(Map.of("kty", "oct", "k", "c2VjcmV0"))))).build(),
+            RULES));
+    Assertions.assertEquals("invalid_client_metadata",
+        error(
+            withExtensions(DcrExtensionMetadata.builder().jwks(Map.of("keys", List.of()))).build(),
+            RULES));
+    Assertions
+        .assertEquals("invalid_client_metadata",
+            error(
+                withExtensions(
+                    DcrExtensionMetadata.builder().jwksUri("http://app.example.com/jwks")).build(),
+                RULES));
+  }
+
+  @Test
+  @DisplayName("Signing algorithms must be the announced ones")
+  void signing_algorithms() {
+    Assertions.assertEquals("invalid_client_metadata", error(
+        withExtensions(DcrExtensionMetadata.builder().idTokenSignedResponseAlg("ES256")).build(),
+        RULES));
+    Assertions.assertEquals("invalid_client_metadata", error(
+        withExtensions(DcrExtensionMetadata.builder().userinfoSignedResponseAlg("none")).build(),
+        RULES));
+    Assertions.assertEquals("invalid_client_metadata",
+        error(withExtensions(
+            DcrExtensionMetadata.builder().jwks(RSA_JWKS).tokenEndpointAuthSigningAlg("HS256"))
+                .tokenEndpointAuthMethod("private_key_jwt").build(),
+            RULES));
+    Assertions.assertEquals("invalid_client_metadata",
+        error(
+            withExtensions(DcrExtensionMetadata.builder().requestObjectSigningAlg("RS256")).build(),
+            RULES));
+    DynamicClientRequest result = DcrMetadataPolicy.validate(
+        withExtensions(DcrExtensionMetadata.builder().jwks(RSA_JWKS)
+            .requestObjectSigningAlg("ES256").idTokenSignedResponseAlg("RS256")
+            .userinfoSignedResponseAlg("RS256").authorizationSignedResponseAlg("RS256")).build(),
+        RULES);
+    Assertions.assertEquals("ES256", result.getExtensions().getRequestObjectSigningAlg());
+    Assertions.assertEquals("RS256", result.getExtensions().getAuthorizationSignedResponseAlg());
+  }
+
+  @Test
+  @DisplayName("Encryption: enc needs alg, both announced, and the client needs keys")
+  void encryption_rules() {
+    Assertions.assertEquals("invalid_client_metadata",
+        error(withExtensions(
+            DcrExtensionMetadata.builder().jwks(RSA_JWKS).idTokenEncryptedResponseEnc("A128GCM"))
+                .build(),
+            RULES));
+    Assertions.assertEquals("invalid_client_metadata",
+        error(withExtensions(
+            DcrExtensionMetadata.builder().jwks(RSA_JWKS).idTokenEncryptedResponseAlg("RSA1_5"))
+                .build(),
+            RULES));
+    Assertions
+        .assertEquals("invalid_client_metadata",
+            error(withExtensions(
+                DcrExtensionMetadata.builder().userinfoEncryptedResponseAlg("RSA-OAEP")).build(),
+                RULES));
+    Assertions.assertDoesNotThrow(() -> DcrMetadataPolicy.validate(
+        withExtensions(DcrExtensionMetadata.builder().jwksUri("https://app.example.com/jwks")
+            .idTokenEncryptedResponseAlg("RSA-OAEP-256").idTokenEncryptedResponseEnc("A256GCM")
+            .userinfoEncryptedResponseAlg("RSA-OAEP")).build(),
+        RULES));
+  }
+
+  @Test
+  @DisplayName("pairwise needs the server salt and a single redirect host; no sector documents")
+  void subject_type_rules() {
+    DcrRegistrationRules pairwise = RULES.withPairwiseSubjects(true);
+    Assertions.assertEquals("invalid_client_metadata", error(
+        withExtensions(DcrExtensionMetadata.builder().subjectType("pairwise")).build(), RULES));
+    Assertions.assertEquals("invalid_client_metadata", error(
+        withExtensions(DcrExtensionMetadata.builder().subjectType("ppid")).build(), pairwise));
+    Assertions.assertEquals("invalid_client_metadata",
+        error(withExtensions(DcrExtensionMetadata.builder().subjectType("pairwise"))
+            .redirectUris(List.of("https://a.example.com/cb", "https://b.example.com/cb")).build(),
+            pairwise));
+    Assertions
+        .assertEquals("invalid_client_metadata",
+            error(
+                withExtensions(DcrExtensionMetadata.builder().subjectType("pairwise")
+                    .sectorIdentifierUri("https://app.example.com/sector.json")).build(),
+                pairwise));
+    Assertions.assertEquals("pairwise",
+        DcrMetadataPolicy
+            .validate(withExtensions(DcrExtensionMetadata.builder().subjectType("pairwise"))
+                .redirectUris(List.of("https://app.example.com/a", "https://app.example.com/b"))
+                .build(), pairwise)
+            .getExtensions().getSubjectType());
+  }
+
+  @Test
+  @DisplayName("mTLS-bound tokens are rejected; DPoP, PAR and session flags are kept")
+  void flags() {
+    Assertions.assertEquals("invalid_client_metadata",
+        error(
+            withExtensions(
+                DcrExtensionMetadata.builder().tlsClientCertificateBoundAccessTokens(true)).build(),
+            RULES));
+    DcrExtensionMetadata result = DcrMetadataPolicy
+        .validate(withExtensions(DcrExtensionMetadata.builder().dpopBoundAccessTokens(true)
+            .requirePushedAuthorizationRequests(true).backchannelLogoutSessionRequired(true)
+            .frontchannelLogoutSessionRequired(true)).build(), RULES)
+        .getExtensions();
+    Assertions.assertTrue(result.isDpopBoundAccessTokens());
+    Assertions.assertTrue(result.isRequirePushedAuthorizationRequests());
+    Assertions.assertTrue(result.isBackchannelLogoutSessionRequired());
+    Assertions.assertTrue(result.isFrontchannelLogoutSessionRequired());
   }
 }

@@ -29,7 +29,7 @@ public enum ClientAuthMethod {
   /**
    * Algorithms of a {@code private_key_jwt} assertion.
    */
-  public static final List<String> ASSERTION_ALGORITHMS = List.of("RS256", "ES256");
+  public static final List<String> ASSERTION_ALGORITHMS = JwtAlgorithms.CLIENT_SIGNING;
 
   private final String value;
 

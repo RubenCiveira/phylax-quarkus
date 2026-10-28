@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTransactionRollbackException;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -54,7 +55,6 @@ public class ParRequestSqlAdapter implements ParRequestGateway {
 
   @Override
   public Optional<ParRequest> findByUri(String requestUri, String tenant) {
-    purgeExpired();
     String sql =
         "SELECT request_uri, tenant_id, client_id, params_json, expires_at, used_at FROM _oauth_par_request WHERE request_uri = ? AND tenant_id = ?";
     try (Connection conn = source.getConnection();
@@ -107,12 +107,18 @@ public class ParRequestSqlAdapter implements ParRequestGateway {
         usedAt != null ? usedAt.toInstant().atOffset(ZoneOffset.UTC) : null);
   }
 
+  /**
+   * Housekeeping on writes only: a range delete on every read deadlocks concurrent requests (V.1).
+   * Losing the race to a concurrent purge is fine, the other request removes the rows.
+   */
   private void purgeExpired() {
     String sql = "DELETE FROM _oauth_par_request WHERE expires_at < ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setTimestamp(1, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()));
       stat.execute();
+    } catch (SQLTransactionRollbackException ex) {
+      // Deadlock with a concurrent purge: nothing to do.
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);
     }

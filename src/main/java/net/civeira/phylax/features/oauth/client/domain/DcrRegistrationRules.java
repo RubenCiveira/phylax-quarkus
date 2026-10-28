@@ -4,6 +4,7 @@ package net.civeira.phylax.features.oauth.client.domain;
 import java.util.List;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
@@ -14,9 +15,11 @@ import lombok.experimental.Accessors;
  * Read from the tenant configuration: {@code dynamic-registration-policy} ({@code disabled} or
  * absent turns DCR off; any other value turns it on, always behind an initial access token),
  * {@code dcr-allowed-grant-types}, {@code dcr-allowed-auth-methods} and
- * {@code allow-password-grant}.
+ * {@code allow-password-grant}; whether pairwise subjects can be issued comes from the server
+ * configuration ({@code oidc.pairwise.salt}).
  */
 @Value
+@AllArgsConstructor
 @Accessors(fluent = true)
 public class DcrRegistrationRules {
 
@@ -25,10 +28,9 @@ public class DcrRegistrationRules {
    */
   public static final List<String> DEFAULT_GRANT_TYPES = ClientDetails.DEFAULT_GRANTS;
   /**
-   * Auth methods the token endpoint verifies; {@code private_key_jwt} waits for task 3.2.
+   * Auth methods the token endpoint verifies ({@code private_key_jwt} since task 3.2).
    */
-  public static final List<String> VERIFIABLE_AUTH_METHODS =
-      List.of("client_secret_basic", "client_secret_post", "none");
+  public static final List<String> VERIFIABLE_AUTH_METHODS = ClientAuthMethod.TOKEN_ENDPOINT;
 
   /**
    * Whether the tenant accepts registrations.
@@ -46,6 +48,23 @@ public class DcrRegistrationRules {
    * Whether the password grant may be registered at all.
    */
   boolean passwordGrantAllowed;
+  /**
+   * Whether {@code subject_type=pairwise} may be registered.
+   */
+  boolean pairwiseSubjects;
+
+  /**
+   * Rules without pairwise subjects.
+   *
+   * @param enabled whether the tenant accepts registrations
+   * @param grantTypes grants a registered client may ask for
+   * @param authMethods token endpoint auth methods a registered client may ask for
+   * @param passwordGrantAllowed whether the password grant may be registered
+   */
+  public DcrRegistrationRules(boolean enabled, Set<String> grantTypes, Set<String> authMethods,
+      boolean passwordGrantAllowed) {
+    this(enabled, grantTypes, authMethods, passwordGrantAllowed, false);
+  }
 
   /**
    * Same rules with other grants: those of an initial access token, which prevail over the tenant
@@ -55,7 +74,19 @@ public class DcrRegistrationRules {
    * @return rules with those grants
    */
   public DcrRegistrationRules withGrantTypes(Set<String> grants) {
-    return new DcrRegistrationRules(enabled, Set.copyOf(grants), authMethods, passwordGrantAllowed);
+    return new DcrRegistrationRules(enabled, Set.copyOf(grants), authMethods, passwordGrantAllowed,
+        pairwiseSubjects);
+  }
+
+  /**
+   * Same rules, stating whether the server can issue pairwise subjects.
+   *
+   * @param available whether {@code oidc.pairwise.salt} is configured
+   * @return rules with that capability
+   */
+  public DcrRegistrationRules withPairwiseSubjects(boolean available) {
+    return new DcrRegistrationRules(enabled, grantTypes, authMethods, passwordGrantAllowed,
+        available);
   }
 
   /**

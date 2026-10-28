@@ -1,0 +1,43 @@
+# OpenID Conformance Suite (V.2): bajo demanda, porque construye la suite y tarda. Los resultados
+# exportados quedan como artefacto; ver conformance/README.md.
+name: conformance
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite_ref:
+        description: Etiqueta o rama de la Conformance Suite
+        default: master
+      dynamic:
+        description: Ejecutar también Dynamic OP (V.3)
+        type: boolean
+        default: false
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve the suite host names
+        run: echo "127.0.0.1 localhost.emobix.co.uk op.phylax.test" | sudo tee -a /etc/hosts
+      - name: Run the plans
+        env:
+          SUITE_REF: ${{ inputs.suite_ref }}
+          RUN_DYNAMIC: ${{ inputs.dynamic && '1' || '0' }}
+        run: |
+          pip install httpx pyparsing
+          ./conformance/run.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: conformance-results
+          path: conformance/out

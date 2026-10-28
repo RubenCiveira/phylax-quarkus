@@ -1,0 +1,51 @@
+{
+  "alias": "${ALIAS}",
+  "description": "phylax-api: Basic, Config, RP-Initiated y Back-Channel Logout OP",
+  "server": {
+    "discoveryUrl": "${ISSUER}/.well-known/openid-configuration"
+  },
+  "client": {
+    "client_id": "${CLIENT1_ID}",
+    "client_secret": "${CLIENT1_SECRET}"
+  },
+  "client2": {
+    "client_id": "${CLIENT2_ID}",
+    "client_secret": "${CLIENT2_SECRET}"
+  },
+  "client_secret_post": {
+    "client_id": "${POST_ID}",
+    "client_secret": "${POST_SECRET}"
+  },
+  "browser": [
+    {
+      "match": "${ISSUER}/auth*",
+      "tasks": [
+        {
+          "task": "Login",
+          "optional": true,
+          "match": "${ISSUER}/auth*",
+          "commands": [
+            ["text", "id", "username", "${USERNAME}"],
+            ["text", "id", "type_password", "${PASSWORD}"],
+            ["click", "xpath", "//form[@id='login']//input[@type='submit']"]
+          ]
+        },
+        {
+          "task": "Consent",
+          "optional": true,
+          "match": "${ISSUER}/auth*",
+          "commands": [
+            ["click", "xpath", "//input[@name='step' and @value='scope_consent']/../input[@type='submit']"]
+          ]
+        },
+        {
+          "task": "Verify Complete",
+          "match": "${SUITE_BASE}/callback*",
+          "commands": [
+            ["wait", "id", "submission_complete", 10]
+          ]
+        }
+      ]
+    }
+  ]
+}

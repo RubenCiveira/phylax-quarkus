@@ -1,6 +1,6 @@
 # V.1 — Fixtures y pruebas HTTP + persistencia
 
-- **Fase:** validación transversal · **Estado:** en curso (24-10-2026): arnés HTTP + MariaDB operativo y aplicado a code, refresh y revocación ([J-01](epicas/done/ep-J-01-token-y-grants-seguros.md), cerrada); falta el resto de áreas.
+- **Fase:** validación transversal · **Estado:** en curso (27-10-2026): arnés HTTP + MariaDB aplicado a code, refresh, revocación, bearer/UserInfo, logout, device, PAR y DCR, y CI con MariaDB de servicio; faltan login y clientes reales, reloj y claves compartidas con PHP y verificar el CI.
 - **Implementación:** compartir escenarios semánticos con PHP: dos tenants, clientes público/confidencial, redirects válidos e inválidos, sesiones, claves y reloj controlado.
 - **Cierre:** pruebas de code/refresh concurrentes, grants, device, PAR, bearer/UserInfo, revocación y logout observables por HTTP y almacenamiento.
 - **Fuente:** [§5, validación](../../src/docs/oidc/CAPACIDADES_OIDC.md#validación).
@@ -33,13 +33,27 @@ Dos niveles de prueba que se complementan:
 
 | `TokenEndpointMariaDbTest` (vía `POST /token`) | 8 canjes simultáneos de un code → un vencedor y la fila desaparece; code de otro cliente, tenant o redirect → `invalid_grant` sin borrar la fila; 8 rotaciones simultáneas de un refresh → un vencedor, JTI consumido y familia revocada en la base de datos; refresh de otro cliente/tenant no consume el JTI; refresh de una sesión borrada → `invalid_grant` |
 
+| `BearerContractMariaDbTest` (J-04) | Introspección y UserInfo comparten el estado de revocación; otro tenant o propósito nunca es activo; UserInfo con el email persistido y solo los scopes concedidos |
+| `SessionLogoutMariaDbTest` (J-07) | El logout revoca solo los grants de su sesión; front- y back-channel solo a los clientes participantes, con `sid` público |
+| `DeviceAndParMariaDbTest` (27-10-2026, HTTP) | La aprobación device exige el token del formulario y una sesión del tenant; un device code aprobado se canjea una vez entre 8 sondeos simultáneos y no en otro tenant; un PAR se guarda en su tenant, otro tenant no lo gasta y entre 8 authorize simultáneos solo uno lo consume |
+| `DynamicClientHttpMariaDbTest` (27-10-2026, HTTP) | DCR por HTTP: alta y lectura sin secreto, metadatos inválidos sin gastar usos, credenciales de otro tenant/caducadas/agotadas rechazadas ([V.3](issue-V.3-conformidad-dcr.md)) |
 | `InvitationMariaDbTest` (27-10-2026) | Invitación localizada por digest solo en su tenant; 8 aceptaciones simultáneas → una cuenta; caducada o con cuenta existente no se acepta; cancelar y reenviar solo una pendiente del tenant, y el reenvío invalida el enlace anterior |
 
 La prueba de aislamiento se comprobó por mutación: con el SQL anterior (sin filtro de tenant) falla.
 
+**Fallos de producción que encontraron estas pruebas (27-10-2026), corregidos:**
+
+| Fallo | Corrección |
+|---|---|
+| **PAR inservible contra MariaDB:** el `request_uri` medía 106 caracteres y la columna es `VARCHAR(100)`, así que todo push daba 500 (los dobles en memoria lo ocultaban) | `ParRequest` usa 32 bytes de `SecureRandom` en base64url (77 caracteres, más entropía que el hex de un UUID) |
+| **Device code canjeable varias veces:** el canje leía `APPROVED` y borraba sin comprobar filas, así que sondeos simultáneos emitían varios juegos de tokens; `approve`/`deny` no exigían `PENDING` | `consume` devuelve si borró la fila y solo el ganador emite; `approve`/`deny` con `AND status = 'PENDING'` |
+| **Device code de otro tenant:** el canje solo comparaba el cliente; un cliente global podía canjear en el tenant B un código aprobado en el A | `exchangeDeviceCode` exige el tenant del token endpoint |
+| **CSRF en `POST /device/verify`:** la cookie de sesión es `SameSite=None`, así que una página ajena podía aprobar el código de un atacante con la sesión de la víctima (RFC 8628 §5.5) | Token de doble envío (`csrf` + cookie `DEVICE_CSRF`, `SameSite=Lax`); la sesión debe ser del tenant (`SessionManager.loadSession(id, tenant)`, compartido con `AuthorizeHtml`); `verification_uri_complete` muestra el formulario con el código guardado |
+| **Interbloqueo en el sondeo device:** cada lectura lanzaba un `DELETE` por rango de caducados, y sondeos simultáneos daban 500 por *deadlock* | La purga solo va en el alta (device y PAR) y tolera perder la carrera con otra purga |
+| **DCR inservible por HTTP:** ver [V.3](issue-V.3-conformidad-dcr.md) | `RegistrationAwareJwtAuthMechanism` |
+
 ## Pendiente
 
-- Extender el HTTP + BD a login y clientes reales (hoy con dobles). Los flujos con dobles siguen arrancando con el perfil `test` contra la base de `.env`: `OAuthTestProfile` no se aplica porque `@TestProfile` no se hereda; `TokenEndpointMariaDbTest` lleva su perfil en la propia clase.
-- Device, PAR, bearer/UserInfo, DCR y logout.
+- Extender el HTTP + BD a login y clientes reales (hoy con dobles; el doble de login abre siempre sesiones en `test-tenant`). Los flujos con dobles siguen arrancando con el perfil `test` contra la base de `.env`: `OAuthTestProfile` no se aplica porque `@TestProfile` no se hereda; las clases MariaDB llevan su perfil en la propia clase.
 - Reloj controlado y claves fijas compartidas con la batería PHP.
-- Ejecutar el arnés en CI con un MariaDB de servicio.
+- CI: `.github/workflows/ci.yml` levanta MariaDB de servicio y ejecuta `mvn test` con `V1_MARIADB_*`, así que corren las tres capas; **aún no se ha ejecutado en GitHub**, y puede necesitar más variables de `.env` (`SECURITY_SECRETS_*`, correo).

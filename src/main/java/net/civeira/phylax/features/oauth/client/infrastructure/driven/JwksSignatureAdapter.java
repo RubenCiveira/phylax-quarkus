@@ -32,6 +32,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.JwtAlgorithms;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtSignatureGateway;
 
 /**
@@ -49,7 +50,7 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtSignatur
 @RequiredArgsConstructor
 public class JwksSignatureAdapter implements ClientJwtSignatureGateway {
 
-  private static final Set<String> ALGORITHMS = Set.of("RS256", "ES256");
+  private static final Set<String> ALGORITHMS = Set.copyOf(JwtAlgorithms.CLIENT_SIGNING);
   private static final long LEEWAY_SECONDS = 60;
 
   private final RemoteJwksFetcher fetcher;

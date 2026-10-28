@@ -23,6 +23,7 @@ La [especificación de modelo J-02/J-03/J-05](cambios-modelo-J02-J05.md) está a
 | [2.4 Redirects propios de logout](issue-2.4-redirects-logout.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Modelo aplicado y probado; registrar las URIs post-logout de cada cliente |
 | [2.8 Protección de secretos](issue-2.8-proteccion-secretos.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | — |
 | [2.9 Migración de secretos y cifrado en reposo](issue-2.9-migracion-secretos-cifrado.md) | [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) | Arranque contra una base con credenciales heredadas (revisar log de la migración) |
+| [2.10 Documentación OAuth alineada con pruebas](issue-2.10-documentacion-oauth-pruebas.md) | [J-09](../epicas/ep-J-09-discovery-e2e-documentacion.md) | Repasar `docs/oauth/overview.md` tras la primera ejecución de la suite (V.2) |
 | [0.7 Clave pública y pre-sesión](issue-0.7-clave-publica-y-presesion.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | **Rotar las claves de firma** (expuestas en cookies de pre-sesión) |
 | [1.2 ID token básico conforme](issue-1.2-id-token-conforme.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | Conformance *Basic OP* (J-09) |
 | [1.13 Claims según propósito del token](issue-1.13-claims-proposito-token.md) | [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md) | `amr` de login federado y enlace mágico |

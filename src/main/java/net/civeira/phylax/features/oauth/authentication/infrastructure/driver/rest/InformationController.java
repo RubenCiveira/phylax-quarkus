@@ -22,6 +22,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.features.oauth.client.domain.JwtAlgorithms;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientJwtEncryptionGateway;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.AccessTokenPolicy;
@@ -59,7 +60,7 @@ public class InformationController {
   /**
    * Algorithms of a signed UserInfo: those of the server keys (task 3.11).
    */
-  public static final List<String> SIGNING_ALGORITHMS = List.of("RS256");
+  public static final List<String> SIGNING_ALGORITHMS = JwtAlgorithms.SERVER_SIGNING;
 
   /**
    * Returns the current authenticated user's claims filtered by granted scopes.
