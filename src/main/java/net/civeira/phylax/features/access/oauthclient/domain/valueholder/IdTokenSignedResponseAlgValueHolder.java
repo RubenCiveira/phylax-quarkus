@@ -73,7 +73,7 @@ public class IdTokenSignedResponseAlgValueHolder<T> {
    * @return
    */
   public T idTokenSignedResponseAlgNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(IdTokenSignedResponseAlgVO.nullValue());
     return this.holder;
   }
 

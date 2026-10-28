@@ -56,7 +56,7 @@ public class CreatedAtValueHolder<T> {
    * @return
    */
   public T createdAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(CreatedAtVO.nullValue());
     return this.holder;
   }
 

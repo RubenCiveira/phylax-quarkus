@@ -71,7 +71,7 @@ public class JwksJsonValueHolder<T> {
    * @return
    */
   public T jwksJsonNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(JwksJsonVO.nullValue());
     return this.holder;
   }
 

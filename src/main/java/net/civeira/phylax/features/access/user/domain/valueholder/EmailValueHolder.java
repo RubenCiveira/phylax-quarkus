@@ -55,7 +55,7 @@ public class EmailValueHolder<T> {
    * @return
    */
   public T emailNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(EmailVO.nullValue());
     return this.holder;
   }
 

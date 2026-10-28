@@ -104,7 +104,7 @@ public class VersionValueHolder<T> {
    * @return
    */
   public T versionNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(VersionVO.nullValue());
     return this.holder;
   }
 }

@@ -106,7 +106,7 @@ public class UserinfoEncryptedResponseEncValueHolder<T> {
    * @return
    */
   public T userinfoEncryptedResponseEncNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(UserinfoEncryptedResponseEncVO.nullValue());
     return this.holder;
   }
 }

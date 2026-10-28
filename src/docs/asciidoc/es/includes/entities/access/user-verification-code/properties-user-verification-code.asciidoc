@@ -3,7 +3,7 @@ Uid* (string)::
 A uid string to identify the entity
 User* (xref:#entidad-user[User])::
 El usuario para el que se tienen estos datos
-Purpose (UserVerificationCodePurposeOptions)::
+Purpose* (UserVerificationCodePurposeOptions)::
 El purpose de user verification codeLos posibles valores que toma el campo son:
  * PASSWORD_RECOVERY
  * EMAIL_VERIFICATION

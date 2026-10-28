@@ -55,7 +55,7 @@ public class BackchannelLogoutUriValueHolder<T> {
    * @return
    */
   public T backchannelLogoutUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(BackchannelLogoutUriVO.nullValue());
     return this.holder;
   }
 

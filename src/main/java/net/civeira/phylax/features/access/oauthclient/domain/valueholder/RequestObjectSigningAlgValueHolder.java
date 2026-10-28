@@ -83,7 +83,7 @@ public class RequestObjectSigningAlgValueHolder<T> {
    * @return
    */
   public T requestObjectSigningAlgNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RequestObjectSigningAlgVO.nullValue());
     return this.holder;
   }
 

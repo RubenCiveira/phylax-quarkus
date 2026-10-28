@@ -55,7 +55,7 @@ public class AcrValuesSupportedValueHolder<T> {
    * @return
    */
   public T acrValuesSupportedNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AcrValuesSupportedVO.nullValue());
     return this.holder;
   }
 

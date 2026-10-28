@@ -64,7 +64,7 @@ public class PendingSeedValueHolder<T> {
    * @return
    */
   public T pendingSeedNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PendingSeedVO.nullValue());
     return this.holder;
   }
 

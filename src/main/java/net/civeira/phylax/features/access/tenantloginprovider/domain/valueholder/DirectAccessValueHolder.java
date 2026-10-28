@@ -55,7 +55,7 @@ public class DirectAccessValueHolder<T> {
    * @return
    */
   public T directAccessNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DirectAccessVO.nullValue());
     return this.holder;
   }
 

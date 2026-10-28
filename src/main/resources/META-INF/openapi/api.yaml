@@ -9132,6 +9132,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: title
+          in: query
+          description: title
+          required: false
+          schema:
+            type: string
         - name: tenant
           in: query
           description: tenant
@@ -9204,6 +9210,12 @@ paths:
         - name: search
           in: query
           description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: title
           required: false
           schema:
             type: string

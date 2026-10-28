@@ -83,7 +83,7 @@ public class ResponseTypesJsonValueHolder<T> {
    * @return
    */
   public T responseTypesJsonNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ResponseTypesJsonVO.nullValue());
     return this.holder;
   }
 

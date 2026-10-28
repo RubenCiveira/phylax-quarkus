@@ -71,7 +71,7 @@ public class MiddleNameValueHolder<T> {
    * @return
    */
   public T middleNameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(MiddleNameVO.nullValue());
     return this.holder;
   }
 

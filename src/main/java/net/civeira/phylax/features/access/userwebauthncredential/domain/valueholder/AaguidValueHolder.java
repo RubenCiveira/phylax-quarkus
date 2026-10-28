@@ -55,7 +55,7 @@ public class AaguidValueHolder<T> {
    * @return
    */
   public T aaguidNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AaguidVO.nullValue());
     return this.holder;
   }
 

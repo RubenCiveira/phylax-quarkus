@@ -647,6 +647,8 @@ public class UserWebauthnCredentialJdbcDao {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
+    filter.getName()
+        .ifPresent(nameParam -> sq.where(NAME, SqlOperator.EQ, SqlParameterValue.of(nameParam)));
     filter.getUser().ifPresent(
         userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
     if (!filter.getUsers().isEmpty()) {

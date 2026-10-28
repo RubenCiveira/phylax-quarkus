@@ -61,11 +61,11 @@ public class ConsentPurposeListUsecase {
           "The policies for consent purpose dont allow to list: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    ConsentPurposeVisibilityFilter visibleFilter =
-        ConsentPurposeVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
-            .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
+    ConsentPurposeVisibilityFilter visibleFilter = ConsentPurposeVisibilityFilter.builder()
+        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null)).title(filter.getTitle().orElse(null))
+        .tenant(filter.getTenant().orElse(null)).tenants(filter.getTenants())
+        .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     ConsentPurposeCursor gatewayCursor = ConsentPurposeCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     ConsentPurposeCached values =

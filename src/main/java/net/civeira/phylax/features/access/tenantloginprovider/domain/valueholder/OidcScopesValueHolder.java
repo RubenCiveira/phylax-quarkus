@@ -71,7 +71,7 @@ public class OidcScopesValueHolder<T> {
    * @return
    */
   public T oidcScopesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(OidcScopesVO.nullValue());
     return this.holder;
   }
 

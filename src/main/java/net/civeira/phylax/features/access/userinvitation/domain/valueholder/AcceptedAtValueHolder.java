@@ -56,7 +56,7 @@ public class AcceptedAtValueHolder<T> {
    * @return
    */
   public T acceptedAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AcceptedAtVO.nullValue());
     return this.holder;
   }
 

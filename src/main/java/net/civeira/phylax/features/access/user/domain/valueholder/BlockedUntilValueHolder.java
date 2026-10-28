@@ -56,7 +56,7 @@ public class BlockedUntilValueHolder<T> {
    * @return
    */
   public T blockedUntilNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(BlockedUntilVO.nullValue());
     return this.holder;
   }
 

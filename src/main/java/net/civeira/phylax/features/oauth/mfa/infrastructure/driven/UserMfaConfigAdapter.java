@@ -75,7 +75,7 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
       Optional<UserMfaEnrollment> find =
           codes.findForUpdate(UserMfaEnrollmentFilter.builder().user(user).build());
       Optional<String> prev = find.filter(
-          code -> code.getExpiredAt().map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
+          code -> code.getExpiresAt().map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
           .flatMap(code -> code.getPendingSeedValue().plainValueWith(secretStorage, code.getUid()));
       if (prev.isPresent()) {
         return otp.getQr(
@@ -105,7 +105,7 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
       Optional<UserMfaEnrollment> find =
           codes.findForUpdate(UserMfaEnrollmentFilter.builder().user(user).build());
       Optional<String> prev = find
-          .filter(temps -> temps.getExpiredAt().map(date -> date.isAfter(OffsetDateTime.now()))
+          .filter(temps -> temps.getExpiresAt().map(date -> date.isAfter(OffsetDateTime.now()))
               .orElse(false))
           .flatMap(second -> second.getPendingSeedValue().plainValueWith(secretStorage,
               second.getUid()));

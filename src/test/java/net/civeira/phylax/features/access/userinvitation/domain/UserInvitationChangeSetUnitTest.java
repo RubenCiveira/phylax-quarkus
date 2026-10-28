@@ -24,7 +24,7 @@ class UserInvitationChangeSetUnitTest {
             .metadataJson("one").status(UserInvitationStatusOptions.PENDING)
             .createdAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
-            .expiredAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+            .expiresAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
             .acceptedAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
@@ -88,14 +88,14 @@ class UserInvitationChangeSetUnitTest {
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
-        one.getExpiredAt().get(), "Value must equals to the intial value");
-    one.expiredAt(
+        one.getExpiresAt().get(), "Value must equals to the intial value");
+    one.expiresAt(
         LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime());
     Assertions.assertEquals(
         LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
-        one.getExpiredAt().get(), "Value must equals to the assigned value");
-    one.unset("expiredAt");
-    Assertions.assertFalse(one.getExpiredAt().isPresent(),
+        one.getExpiresAt().get(), "Value must equals to the assigned value");
+    one.unset("expiresAt");
+    Assertions.assertFalse(one.getExpiresAt().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),

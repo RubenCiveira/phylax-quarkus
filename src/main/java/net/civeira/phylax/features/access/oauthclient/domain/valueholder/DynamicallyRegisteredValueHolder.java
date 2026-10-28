@@ -55,7 +55,7 @@ public class DynamicallyRegisteredValueHolder<T> {
    * @return
    */
   public T dynamicallyRegisteredNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DynamicallyRegisteredVO.nullValue());
     return this.holder;
   }
 

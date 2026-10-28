@@ -72,7 +72,7 @@ public class IdTokenEncryptedResponseEncValueHolder<T> {
    * @return
    */
   public T idTokenEncryptedResponseEncNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(IdTokenEncryptedResponseEncVO.nullValue());
     return this.holder;
   }
 

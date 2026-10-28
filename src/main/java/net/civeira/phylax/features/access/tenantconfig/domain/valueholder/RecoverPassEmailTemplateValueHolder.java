@@ -83,7 +83,7 @@ public class RecoverPassEmailTemplateValueHolder<T> {
    * @return
    */
   public T recoverPassEmailTemplateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RecoverPassEmailTemplateVO.nullValue());
     return this.holder;
   }
 

@@ -71,7 +71,7 @@ public class MagicLinkEnabledValueHolder<T> {
    * @return
    */
   public T magicLinkEnabledNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(MagicLinkEnabledVO.nullValue());
     return this.holder;
   }
 

@@ -57,7 +57,7 @@ public class AuthorizationSignedResponseAlgValueHolder<T> {
    * @return
    */
   public T authorizationSignedResponseAlgNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AuthorizationSignedResponseAlgVO.nullValue());
     return this.holder;
   }
 

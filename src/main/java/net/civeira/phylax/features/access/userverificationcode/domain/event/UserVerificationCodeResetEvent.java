@@ -7,5 +7,5 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-public class UserVerificationCodeGeneratedVerificationEvent extends UserVerificationCodeEvent {
+public class UserVerificationCodeResetEvent extends UserVerificationCodeEvent {
 }

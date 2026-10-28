@@ -71,7 +71,7 @@ public class PhoneNumberValueHolder<T> {
    * @return
    */
   public T phoneNumberNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PhoneNumberVO.nullValue());
     return this.holder;
   }
 

@@ -75,8 +75,8 @@ retrieve()
 create()
 update()
 delete()
-generatedVerification()
-resetRegisterVerification()
+generate()
+reset()
 }
 access.User "1"  o--  "N*" access.UserVerificationCode: user 
 
@@ -201,7 +201,7 @@ document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet
 class access.UserMfaEnrollment{
 uid:string
 pendingSeed:string
-expiredAt:datetime
+expiresAt:datetime
 version:integer
 list()
 retrieve()
@@ -530,7 +530,7 @@ tokenHash:string
 metadataJson:blob
 status:UserInvitationStatusOptions
 createdAt:datetime
-expiredAt:datetime
+expiresAt:datetime
 acceptedAt:datetime
 version:integer
 list()
@@ -791,8 +791,8 @@ retrieve()
 create()
 update()
 delete()
-generatedVerification()
-resetRegisterVerification()
+generate()
+reset()
 }
 access.User "1"  o--  "N*" access.UserVerificationCode: user 
 
@@ -917,7 +917,7 @@ document.Snippet "1"  o--  "N*" document.SnippetVersion: snippet
 class access.UserMfaEnrollment{
 uid:string
 pendingSeed:string
-expiredAt:datetime
+expiresAt:datetime
 version:integer
 list()
 retrieve()
@@ -1246,7 +1246,7 @@ tokenHash:string
 metadataJson:blob
 status:UserInvitationStatusOptions
 createdAt:datetime
-expiredAt:datetime
+expiresAt:datetime
 acceptedAt:datetime
 version:integer
 list()

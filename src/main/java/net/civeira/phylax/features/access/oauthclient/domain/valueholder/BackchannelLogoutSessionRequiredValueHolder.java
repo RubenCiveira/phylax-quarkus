@@ -58,7 +58,7 @@ public class BackchannelLogoutSessionRequiredValueHolder<T> {
    * @return
    */
   public T backchannelLogoutSessionRequiredNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(BackchannelLogoutSessionRequiredVO.nullValue());
     return this.holder;
   }
 

@@ -522,6 +522,8 @@ public class ConsentPurposeJdbcDao {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
+    filter.getTitle()
+        .ifPresent(titleParam -> sq.where(TITLE, SqlOperator.EQ, SqlParameterValue.of(titleParam)));
     filter.getTenant().ifPresent(tenantParam -> sq.where(TENANT, SqlOperator.EQ,
         SqlParameterValue.of(tenantParam.getUid())));
     if (!filter.getTenants().isEmpty()) {

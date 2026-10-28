@@ -97,7 +97,7 @@ public class ResourceServerValueHolder<T> {
    * @return
    */
   public T resourceServerNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ResourceServerVO.nullValue());
     return this.holder;
   }
 

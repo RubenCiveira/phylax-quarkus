@@ -104,7 +104,7 @@ public class UseSecondFactorsValueHolder<T> {
    * @return
    */
   public T useSecondFactorsNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(UseSecondFactorsVO.nullValue());
     return this.holder;
   }
 }

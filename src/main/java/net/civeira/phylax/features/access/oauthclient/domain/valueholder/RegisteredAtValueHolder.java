@@ -84,7 +84,7 @@ public class RegisteredAtValueHolder<T> {
    * @return
    */
   public T registeredAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RegisteredAtVO.nullValue());
     return this.holder;
   }
 

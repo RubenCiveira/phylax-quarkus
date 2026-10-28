@@ -55,7 +55,7 @@ public class FamilyNameValueHolder<T> {
    * @return
    */
   public T familyNameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(FamilyNameVO.nullValue());
     return this.holder;
   }
 

@@ -83,7 +83,7 @@ public class SubjectValueHolder<T> {
    * @return
    */
   public T subjectNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SubjectVO.nullValue());
     return this.holder;
   }
 

@@ -104,7 +104,7 @@ public class ZoneinfoValueHolder<T> {
    * @return
    */
   public T zoneinfoNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ZoneinfoVO.nullValue());
     return this.holder;
   }
 }

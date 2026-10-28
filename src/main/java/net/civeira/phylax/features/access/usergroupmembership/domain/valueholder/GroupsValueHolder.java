@@ -71,7 +71,7 @@ public class GroupsValueHolder<T> {
    * @return
    */
   public T groupsNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(GroupsVO.nullValue());
     return this.holder;
   }
 

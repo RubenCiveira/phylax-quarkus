@@ -56,7 +56,7 @@ public class ActivationDateValueHolder<T> {
    * @return
    */
   public T activationDateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ActivationDateVO.nullValue());
     return this.holder;
   }
 

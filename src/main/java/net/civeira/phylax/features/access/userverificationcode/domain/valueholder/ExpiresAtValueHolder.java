@@ -56,7 +56,7 @@ public class ExpiresAtValueHolder<T> {
    * @return
    */
   public T expiresAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ExpiresAtVO.nullValue());
     return this.holder;
   }
 

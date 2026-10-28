@@ -71,7 +71,7 @@ public class MetadataValueHolder<T> {
    * @return
    */
   public T metadataNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(MetadataVO.nullValue());
     return this.holder;
   }
 

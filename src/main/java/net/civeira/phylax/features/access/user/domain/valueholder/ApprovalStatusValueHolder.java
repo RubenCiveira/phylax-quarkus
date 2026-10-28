@@ -56,7 +56,7 @@ public class ApprovalStatusValueHolder<T> {
    * @return
    */
   public T approvalStatusNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ApprovalStatusVO.nullValue());
     return this.holder;
   }
 

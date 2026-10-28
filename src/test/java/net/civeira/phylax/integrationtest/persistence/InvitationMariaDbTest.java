@@ -86,7 +86,7 @@ class InvitationMariaDbTest {
       throws SQLException {
     try (Connection c = dataSource.getConnection();
         PreparedStatement ps = c.prepareStatement("INSERT INTO access_user_invitation (uid,"
-            + " version, created_at, email, expired_at, status, token_hash, invited_by, tenant)"
+            + " version, created_at, email, expires_at, status, token_hash, invited_by, tenant)"
             + " VALUES (?, 0, ?, ?, ?, 'PENDING', ?, ?, ?)")) {
       ps.setString(1, uid);
       ps.setTimestamp(2, Timestamp.from(Instant.now()));

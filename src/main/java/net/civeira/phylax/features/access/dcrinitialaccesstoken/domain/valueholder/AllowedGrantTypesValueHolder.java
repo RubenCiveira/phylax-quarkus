@@ -55,7 +55,7 @@ public class AllowedGrantTypesValueHolder<T> {
    * @return
    */
   public T allowedGrantTypesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AllowedGrantTypesVO.nullValue());
     return this.holder;
   }
 

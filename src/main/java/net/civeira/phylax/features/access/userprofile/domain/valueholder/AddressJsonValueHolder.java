@@ -55,7 +55,7 @@ public class AddressJsonValueHolder<T> {
    * @return
    */
   public T addressJsonNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AddressJsonVO.nullValue());
     return this.holder;
   }
 

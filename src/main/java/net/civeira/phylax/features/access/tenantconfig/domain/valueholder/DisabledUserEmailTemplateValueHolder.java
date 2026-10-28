@@ -56,7 +56,7 @@ public class DisabledUserEmailTemplateValueHolder<T> {
    * @return
    */
   public T disabledUserEmailTemplateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DisabledUserEmailTemplateVO.nullValue());
     return this.holder;
   }
 

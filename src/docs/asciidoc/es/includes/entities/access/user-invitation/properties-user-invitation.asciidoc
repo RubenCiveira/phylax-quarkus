@@ -22,8 +22,8 @@ El status de user invitationLos posibles valores que toma el campo son:
 
 Created at* (datetime)::
 El created at de user invitation
-Expired at* (datetime)::
-El expired at de user invitation
+Expires at* (datetime)::
+El expires at de user invitation
 Accepted at (datetime)::
 El accepted at de user invitation
 Accepted by (xref:#entidad-user[User])::

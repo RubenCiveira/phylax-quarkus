@@ -56,7 +56,7 @@ public class AutoApproveRegisteredUsersValueHolder<T> {
    * @return
    */
   public T autoApproveRegisteredUsersNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AutoApproveRegisteredUsersVO.nullValue());
     return this.holder;
   }
 

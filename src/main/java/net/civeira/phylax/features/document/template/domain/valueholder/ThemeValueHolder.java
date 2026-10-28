@@ -81,7 +81,7 @@ public class ThemeValueHolder<T> {
    * @return
    */
   public T themeNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ThemeVO.nullValue());
     return this.holder;
   }
 

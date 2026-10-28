@@ -104,7 +104,7 @@ public class UpdatedAtValueHolder<T> {
    * @return
    */
   public T updatedAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(UpdatedAtVO.nullValue());
     return this.holder;
   }
 }

@@ -55,7 +55,7 @@ public class EnabledValueHolder<T> {
    * @return
    */
   public T enabledNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(EnabledVO.nullValue());
     return this.holder;
   }
 

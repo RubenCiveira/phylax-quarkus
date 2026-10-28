@@ -83,7 +83,7 @@ public class TlsClientAuthSubjectDnValueHolder<T> {
    * @return
    */
   public T tlsClientAuthSubjectDnNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(TlsClientAuthSubjectDnVO.nullValue());
     return this.holder;
   }
 

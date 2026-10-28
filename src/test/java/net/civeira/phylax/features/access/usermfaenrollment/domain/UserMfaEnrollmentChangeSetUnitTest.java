@@ -18,7 +18,7 @@ class UserMfaEnrollmentChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_user_mfa_enrollment_change_set_builder() {
     UserMfaEnrollmentChangeSet one = new UserMfaEnrollmentChangeSet().uid("one")
-        .user(UserReference.of("one")).pendingSeedPlain("one").expiredAt(LocalDateTime
+        .user(UserReference.of("one")).pendingSeedPlain("one").expiresAt(LocalDateTime
             .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
         .version(1).newUid();
     one.uid("two");
@@ -34,14 +34,14 @@ class UserMfaEnrollmentChangeSetUnitTest {
     Assertions.assertFalse(one.getUser().isPresent(), "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
-        one.getExpiredAt().get(), "Value must equals to the intial value");
-    one.expiredAt(
+        one.getExpiresAt().get(), "Value must equals to the intial value");
+    one.expiresAt(
         LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime());
     Assertions.assertEquals(
         LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
-        one.getExpiredAt().get(), "Value must equals to the assigned value");
-    one.unset("expiredAt");
-    Assertions.assertFalse(one.getExpiredAt().isPresent(),
+        one.getExpiresAt().get(), "Value must equals to the assigned value");
+    one.unset("expiresAt");
+    Assertions.assertFalse(one.getExpiresAt().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(0, one.getVersion().get(), "Value must equals to the intial value");
     one.version(2);

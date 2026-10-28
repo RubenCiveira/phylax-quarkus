@@ -55,7 +55,7 @@ public class DocumentValueHolder<T> {
    * @return
    */
   public T documentNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DocumentVO.nullValue());
     return this.holder;
   }
 

@@ -55,7 +55,7 @@ public class ClientUriValueHolder<T> {
    * @return
    */
   public T clientUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ClientUriVO.nullValue());
     return this.holder;
   }
 

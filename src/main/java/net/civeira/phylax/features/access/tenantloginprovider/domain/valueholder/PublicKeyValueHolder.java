@@ -71,7 +71,7 @@ public class PublicKeyValueHolder<T> {
    * @return
    */
   public T publicKeyNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PublicKeyVO.nullValue());
     return this.holder;
   }
 

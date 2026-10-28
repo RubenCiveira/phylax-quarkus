@@ -63,7 +63,7 @@ public class KeyValueHolder<T> {
    * @return
    */
   public T keyNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(KeyVO.nullValue());
     return this.holder;
   }
 

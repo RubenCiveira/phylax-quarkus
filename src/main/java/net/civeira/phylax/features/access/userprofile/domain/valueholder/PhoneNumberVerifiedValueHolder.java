@@ -71,7 +71,7 @@ public class PhoneNumberVerifiedValueHolder<T> {
    * @return
    */
   public T phoneNumberVerifiedNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PhoneNumberVerifiedVO.nullValue());
     return this.holder;
   }
 

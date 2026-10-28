@@ -55,7 +55,7 @@ public class ContentTextValueHolder<T> {
    * @return
    */
   public T contentTextNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ContentTextVO.nullValue());
     return this.holder;
   }
 

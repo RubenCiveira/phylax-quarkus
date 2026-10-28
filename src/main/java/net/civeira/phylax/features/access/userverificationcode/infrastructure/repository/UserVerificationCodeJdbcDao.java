@@ -28,7 +28,6 @@ import net.civeira.phylax.common.infrastructure.sql.SqlResult;
 import net.civeira.phylax.common.infrastructure.sql.SqlSchematicQuery;
 import net.civeira.phylax.common.infrastructure.sql.SqlTemplate;
 import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCode;
-import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCodePurposeOptions;
 import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCodeRef;
 import net.civeira.phylax.features.access.userverificationcode.domain.gateway.UserVerificationCodeCursor;
 import net.civeira.phylax.features.access.userverificationcode.domain.gateway.UserVerificationCodeFilter;
@@ -485,8 +484,7 @@ public class UserVerificationCodeJdbcDao {
           "update \"access_user_verification_code\" set  \"user\" = :user, \"purpose\" = :purpose, \"code_hash\" = :codeHash, \"return_url\" = :returnUrl, \"expires_at\" = :expiresAt, \"version\" = \"version\" + 1 where \"uid\" = :uid and \"version\" = :version");
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(USER, SqlParameterValue.of(entity.getUserUid()));
-      sq.with(PURPOSE, entity.getPurpose().map(UserVerificationCodePurposeOptions::toString)
-          .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
+      sq.with(PURPOSE, SqlParameterValue.of(entity.getPurpose().toString()));
       sq.with(CODE_HASH, entity.getCodeHashStored(secretDigester).map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
       sq.with(RETURN_URL, entity.getReturnUrl().map(SqlParameterValue::of)
@@ -546,6 +544,8 @@ public class UserVerificationCodeJdbcDao {
     }
     filter.getSearch().ifPresent(
         search -> sq.where("uid", SqlOperator.LIKE, SqlParameterValue.of("%" + search + "%")));
+    filter.getPurpose().ifPresent(purposeParam -> sq.where(PURPOSE, SqlOperator.EQ,
+        SqlParameterValue.of(purposeParam.toString())));
     filter.getUser().ifPresent(
         userParam -> sq.where(USER, SqlOperator.EQ, SqlParameterValue.of(userParam.getUid())));
     if (!filter.getUsers().isEmpty()) {
@@ -594,8 +594,7 @@ public class UserVerificationCodeJdbcDao {
           "insert into \"access_user_verification_code\" ( \"uid\", \"user\", \"purpose\", \"code_hash\", \"return_url\", \"expires_at\", \"version\") values ( :uid, :user, :purpose, :codeHash, :returnUrl, :expiresAt, :version)");
       sq.with(UID, SqlParameterValue.of(entity.getUid()));
       sq.with(USER, SqlParameterValue.of(entity.getUserUid()));
-      sq.with(PURPOSE, entity.getPurpose().map(UserVerificationCodePurposeOptions::toString)
-          .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
+      sq.with(PURPOSE, SqlParameterValue.of(entity.getPurpose().toString()));
       sq.with(CODE_HASH, entity.getCodeHashStored(secretDigester).map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
       sq.with(RETURN_URL, entity.getReturnUrl().map(SqlParameterValue::of)

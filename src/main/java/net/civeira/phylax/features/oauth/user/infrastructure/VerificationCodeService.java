@@ -13,9 +13,6 @@ import net.civeira.phylax.features.access.userverificationcode.domain.UserVerifi
 import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCodePurposeOptions;
 import net.civeira.phylax.features.access.userverificationcode.domain.gateway.UserVerificationCodeCommandRepositoryGateway;
 import net.civeira.phylax.features.access.userverificationcode.domain.gateway.UserVerificationCodeFilter;
-import net.civeira.phylax.features.access.userverificationcode.domain.valueobject.CodeHashVO;
-import net.civeira.phylax.features.access.userverificationcode.domain.valueobject.ExpiresAtVO;
-import net.civeira.phylax.features.access.userverificationcode.domain.valueobject.ReturnUrlVO;
 
 /**
  * Single-use codes sent by email, one per user and purpose: issuing a code replaces the pending one
@@ -32,7 +29,7 @@ public class VerificationCodeService {
     UserVerificationCode current =
         find(user, purpose).orElseGet(() -> codes.create(UserVerificationCode
             .create(new UserVerificationCodeChangeSet().newUid().user(user).purpose(purpose))));
-    codes.update(current, current.generatedVerification(code, returnUrl, expiresAt));
+    codes.update(current, current.generate(code, returnUrl, expiresAt));
   }
 
   /**
@@ -53,17 +50,13 @@ public class VerificationCodeService {
     if (!alive || !current.verify(secretDigester, code)) {
       return false;
     }
-    // Not resetRegisterVerification(): the generated xNull() setters leave the previous value.
-    codes.update(current,
-        current.update(new UserVerificationCodeChangeSet().codeHash(CodeHashVO.nullValue())
-            .returnUrl(ReturnUrlVO.nullValue()).expiresAt(ExpiresAtVO.nullValue())));
+    codes.update(current, current.reset());
     return true;
   }
 
-  /** Locks the rows of the user: there is at most one per purpose. */
+  /** Locks the only row of that user and purpose (unique index). */
   private Optional<UserVerificationCode> find(UserRef user,
       UserVerificationCodePurposeOptions purpose) {
-    return codes.listForUpdate(UserVerificationCodeFilter.builder().user(user).build()).stream()
-        .filter(code -> code.getPurpose().filter(purpose::equals).isPresent()).findFirst();
+    return codes.findForUpdate(UserVerificationCodeFilter.byUserAndPurpose(user, purpose));
   }
 }

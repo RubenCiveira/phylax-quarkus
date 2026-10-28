@@ -81,7 +81,7 @@ public class TosUriValueHolder<T> {
    * @return
    */
   public T tosUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(TosUriVO.nullValue());
     return this.holder;
   }
 

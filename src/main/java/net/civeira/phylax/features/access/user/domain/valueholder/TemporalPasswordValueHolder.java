@@ -83,7 +83,7 @@ public class TemporalPasswordValueHolder<T> {
    * @return
    */
   public T temporalPasswordNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(TemporalPasswordVO.nullValue());
     return this.holder;
   }
 

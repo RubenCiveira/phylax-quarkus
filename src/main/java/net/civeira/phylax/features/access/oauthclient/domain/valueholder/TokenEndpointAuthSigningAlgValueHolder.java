@@ -84,7 +84,7 @@ public class TokenEndpointAuthSigningAlgValueHolder<T> {
    * @return
    */
   public T tokenEndpointAuthSigningAlgNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(TokenEndpointAuthSigningAlgVO.nullValue());
     return this.holder;
   }
 

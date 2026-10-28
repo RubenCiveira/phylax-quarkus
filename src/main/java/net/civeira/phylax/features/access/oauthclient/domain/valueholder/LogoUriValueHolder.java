@@ -71,7 +71,7 @@ public class LogoUriValueHolder<T> {
    * @return
    */
   public T logoUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(LogoUriVO.nullValue());
     return this.holder;
   }
 

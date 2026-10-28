@@ -104,7 +104,7 @@ public class UserAgentValueHolder<T> {
    * @return
    */
   public T userAgentNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(UserAgentVO.nullValue());
     return this.holder;
   }
 }

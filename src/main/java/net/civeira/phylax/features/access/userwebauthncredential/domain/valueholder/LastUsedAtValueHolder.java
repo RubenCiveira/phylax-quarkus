@@ -72,7 +72,7 @@ public class LastUsedAtValueHolder<T> {
    * @return
    */
   public T lastUsedAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(LastUsedAtVO.nullValue());
     return this.holder;
   }
 

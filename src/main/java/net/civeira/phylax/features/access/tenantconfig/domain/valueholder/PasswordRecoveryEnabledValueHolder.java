@@ -71,7 +71,7 @@ public class PasswordRecoveryEnabledValueHolder<T> {
    * @return
    */
   public T passwordRecoveryEnabledNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PasswordRecoveryEnabledVO.nullValue());
     return this.holder;
   }
 

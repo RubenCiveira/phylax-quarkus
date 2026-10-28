@@ -104,7 +104,7 @@ public class WelcomeEmailTemplateValueHolder<T> {
    * @return
    */
   public T welcomeEmailTemplateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(WelcomeEmailTemplateVO.nullValue());
     return this.holder;
   }
 }

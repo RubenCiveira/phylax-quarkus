@@ -71,7 +71,7 @@ public class GivenNameValueHolder<T> {
    * @return
    */
   public T givenNameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(GivenNameVO.nullValue());
     return this.holder;
   }
 

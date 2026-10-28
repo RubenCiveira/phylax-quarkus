@@ -94,7 +94,7 @@ public class TenantValueHolder<T> {
    * @return
    */
   public T tenantNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(TenantVO.nullValue());
     return this.holder;
   }
 

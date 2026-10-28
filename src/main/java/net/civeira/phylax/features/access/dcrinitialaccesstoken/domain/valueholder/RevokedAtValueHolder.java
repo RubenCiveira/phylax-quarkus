@@ -84,7 +84,7 @@ public class RevokedAtValueHolder<T> {
    * @return
    */
   public T revokedAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RevokedAtVO.nullValue());
     return this.holder;
   }
 

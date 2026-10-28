@@ -83,7 +83,7 @@ public class TransportsJsonValueHolder<T> {
    * @return
    */
   public T transportsJsonNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(TransportsJsonVO.nullValue());
     return this.holder;
   }
 

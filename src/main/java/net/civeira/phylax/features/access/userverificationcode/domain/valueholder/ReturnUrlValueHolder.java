@@ -83,7 +83,7 @@ public class ReturnUrlValueHolder<T> {
    * @return
    */
   public T returnUrlNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ReturnUrlVO.nullValue());
     return this.holder;
   }
 

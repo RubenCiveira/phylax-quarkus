@@ -83,7 +83,7 @@ public class SectorIdentifierUriValueHolder<T> {
    * @return
    */
   public T sectorIdentifierUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SectorIdentifierUriVO.nullValue());
     return this.holder;
   }
 

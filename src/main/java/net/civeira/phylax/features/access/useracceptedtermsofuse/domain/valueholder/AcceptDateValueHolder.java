@@ -56,7 +56,7 @@ public class AcceptDateValueHolder<T> {
    * @return
    */
   public T acceptDateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AcceptDateVO.nullValue());
     return this.holder;
   }
 

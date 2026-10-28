@@ -37,7 +37,7 @@ verifyEmail()
 class access.UserMfaEnrollment{
 uid:string
 pendingSeed:string
-expiredAt:datetime
+expiresAt:datetime
 version:integer
 list()
 retrieve()

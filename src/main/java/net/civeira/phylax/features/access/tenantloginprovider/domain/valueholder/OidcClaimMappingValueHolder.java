@@ -71,7 +71,7 @@ public class OidcClaimMappingValueHolder<T> {
    * @return
    */
   public T oidcClaimMappingNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(OidcClaimMappingVO.nullValue());
     return this.holder;
   }
 

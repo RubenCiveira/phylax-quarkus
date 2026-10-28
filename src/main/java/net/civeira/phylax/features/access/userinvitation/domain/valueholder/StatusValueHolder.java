@@ -84,7 +84,7 @@ public class StatusValueHolder<T> {
    * @return
    */
   public T statusNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(StatusVO.nullValue());
     return this.holder;
   }
 

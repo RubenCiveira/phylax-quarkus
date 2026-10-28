@@ -83,7 +83,7 @@ public class SamlIdpSsoUrlValueHolder<T> {
    * @return
    */
   public T samlIdpSsoUrlNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SamlIdpSsoUrlVO.nullValue());
     return this.holder;
   }
 

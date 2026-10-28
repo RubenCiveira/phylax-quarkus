@@ -104,7 +104,7 @@ public class ValueValueHolder<T> {
    * @return
    */
   public T valueNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ValueVO.nullValue());
     return this.holder;
   }
 }

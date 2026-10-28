@@ -58,7 +58,7 @@ public class DynamicRegistrationPolicyValueHolder<T> {
    * @return
    */
   public T dynamicRegistrationPolicyNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DynamicRegistrationPolicyVO.nullValue());
     return this.holder;
   }
 

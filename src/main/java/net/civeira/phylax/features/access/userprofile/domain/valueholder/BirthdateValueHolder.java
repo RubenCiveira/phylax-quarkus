@@ -55,7 +55,7 @@ public class BirthdateValueHolder<T> {
    * @return
    */
   public T birthdateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(BirthdateVO.nullValue());
     return this.holder;
   }
 

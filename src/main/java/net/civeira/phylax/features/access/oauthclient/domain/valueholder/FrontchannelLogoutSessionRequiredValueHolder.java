@@ -58,7 +58,7 @@ public class FrontchannelLogoutSessionRequiredValueHolder<T> {
    * @return
    */
   public T frontchannelLogoutSessionRequiredNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(FrontchannelLogoutSessionRequiredVO.nullValue());
     return this.holder;
   }
 

@@ -71,7 +71,7 @@ public class LocaleValueHolder<T> {
    * @return
    */
   public T localeNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(LocaleVO.nullValue());
     return this.holder;
   }
 

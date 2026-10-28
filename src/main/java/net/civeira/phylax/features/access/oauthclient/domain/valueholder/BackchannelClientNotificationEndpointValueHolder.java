@@ -58,7 +58,7 @@ public class BackchannelClientNotificationEndpointValueHolder<T> {
    * @return
    */
   public T backchannelClientNotificationEndpointNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(BackchannelClientNotificationEndpointVO.nullValue());
     return this.holder;
   }
 

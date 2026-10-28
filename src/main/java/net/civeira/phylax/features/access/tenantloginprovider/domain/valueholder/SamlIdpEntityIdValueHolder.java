@@ -83,7 +83,7 @@ public class SamlIdpEntityIdValueHolder<T> {
    * @return
    */
   public T samlIdpEntityIdNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SamlIdpEntityIdVO.nullValue());
     return this.holder;
   }
 

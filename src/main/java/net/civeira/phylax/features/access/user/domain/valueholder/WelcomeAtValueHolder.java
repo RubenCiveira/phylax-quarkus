@@ -103,7 +103,7 @@ public class WelcomeAtValueHolder<T> {
    * @return
    */
   public T welcomeAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(WelcomeAtVO.nullValue());
     return this.holder;
   }
 }

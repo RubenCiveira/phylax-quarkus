@@ -76,7 +76,7 @@ public class SecondFactorSeedValueHolder<T> {
    * @return
    */
   public T secondFactorSeedNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SecondFactorSeedVO.nullValue());
     return this.holder;
   }
 

@@ -82,7 +82,7 @@ public class ScopesValueHolder<T> {
    * @return
    */
   public T scopesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ScopesVO.nullValue());
     return this.holder;
   }
 

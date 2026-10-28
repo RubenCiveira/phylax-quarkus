@@ -71,7 +71,7 @@ public class OidcDiscoveryUrlValueHolder<T> {
    * @return
    */
   public T oidcDiscoveryUrlNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(OidcDiscoveryUrlVO.nullValue());
     return this.holder;
   }
 

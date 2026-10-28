@@ -327,7 +327,8 @@ public class ConsentPurposesVisibility {
     ConsentPurposeVisibilityFilter modified = proposal.getFilter();
     return ConsentPurposeFilter.builder().uid(modified.getUid().orElse(null))
         .uids(modified.getUids().stream().toList()).search(modified.getSearch().orElse(null))
-        .tenant(modified.getTenant().orElse(null)).tenants(modified.getTenants())
+        .title(modified.getTitle().orElse(null)).tenant(modified.getTenant().orElse(null))
+        .tenants(modified.getTenants())
         .tenantAccessible(modified.getTenantAccessible().orElse(null)).build();
   }
 

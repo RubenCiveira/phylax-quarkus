@@ -55,7 +55,7 @@ public class DefaultAcrValuesValueHolder<T> {
    * @return
    */
   public T defaultAcrValuesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DefaultAcrValuesVO.nullValue());
     return this.holder;
   }
 

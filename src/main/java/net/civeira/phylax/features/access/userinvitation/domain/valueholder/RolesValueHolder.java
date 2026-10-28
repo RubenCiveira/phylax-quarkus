@@ -82,7 +82,7 @@ public class RolesValueHolder<T> {
    * @return
    */
   public T rolesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RolesVO.nullValue());
     return this.holder;
   }
 

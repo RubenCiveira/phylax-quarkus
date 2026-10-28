@@ -83,7 +83,7 @@ public class SelfRegistrationEnabledValueHolder<T> {
    * @return
    */
   public T selfRegistrationEnabledNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SelfRegistrationEnabledVO.nullValue());
     return this.holder;
   }
 

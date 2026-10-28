@@ -83,7 +83,7 @@ public class SamlIdpMetadataUrlValueHolder<T> {
    * @return
    */
   public T samlIdpMetadataUrlNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SamlIdpMetadataUrlVO.nullValue());
     return this.holder;
   }
 

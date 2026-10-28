@@ -55,7 +55,7 @@ public class DcrAllowedAuthMethodsValueHolder<T> {
    * @return
    */
   public T dcrAllowedAuthMethodsNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DcrAllowedAuthMethodsVO.nullValue());
     return this.holder;
   }
 

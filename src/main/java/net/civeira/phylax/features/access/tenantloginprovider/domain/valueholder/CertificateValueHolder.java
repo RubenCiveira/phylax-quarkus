@@ -55,7 +55,7 @@ public class CertificateValueHolder<T> {
    * @return
    */
   public T certificateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(CertificateVO.nullValue());
     return this.holder;
   }
 

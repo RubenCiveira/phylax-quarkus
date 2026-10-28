@@ -105,7 +105,7 @@ public class UsedAtValueHolder<T> {
    * @return
    */
   public T usedAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(UsedAtVO.nullValue());
     return this.holder;
   }
 }

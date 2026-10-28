@@ -55,7 +55,7 @@ public class DisplayNameValueHolder<T> {
    * @return
    */
   public T displayNameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DisplayNameVO.nullValue());
     return this.holder;
   }
 

@@ -55,7 +55,7 @@ public class ClientNameValueHolder<T> {
    * @return
    */
   public T clientNameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ClientNameVO.nullValue());
     return this.holder;
   }
 

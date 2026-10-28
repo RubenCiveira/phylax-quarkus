@@ -71,7 +71,7 @@ public class PictureUrlValueHolder<T> {
    * @return
    */
   public T pictureUrlNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PictureUrlVO.nullValue());
     return this.holder;
   }
 

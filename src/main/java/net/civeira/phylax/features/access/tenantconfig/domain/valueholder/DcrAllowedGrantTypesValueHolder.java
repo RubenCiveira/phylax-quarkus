@@ -55,7 +55,7 @@ public class DcrAllowedGrantTypesValueHolder<T> {
    * @return
    */
   public T dcrAllowedGrantTypesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DcrAllowedGrantTypesVO.nullValue());
     return this.holder;
   }
 

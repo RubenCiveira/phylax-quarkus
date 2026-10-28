@@ -56,7 +56,7 @@ public class AuthorizationDetailsTypesValueHolder<T> {
    * @return
    */
   public T authorizationDetailsTypesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AuthorizationDetailsTypesVO.nullValue());
     return this.holder;
   }
 

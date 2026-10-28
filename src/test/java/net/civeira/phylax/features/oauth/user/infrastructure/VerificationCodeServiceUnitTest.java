@@ -14,11 +14,13 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import net.civeira.phylax.common.crypto.SecretDigester;
+import net.civeira.phylax.features.access.user.domain.UserRef;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCode;
 import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCodeChangeSet;
 import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCodePurposeOptions;
 import net.civeira.phylax.features.access.userverificationcode.domain.gateway.UserVerificationCodeCommandRepositoryGateway;
+import net.civeira.phylax.features.access.userverificationcode.domain.gateway.UserVerificationCodeFilter;
 
 class VerificationCodeServiceUnitTest {
   private static final UserReference USER = UserReference.of("user-1");
@@ -33,7 +35,15 @@ class VerificationCodeServiceUnitTest {
   void setUp() {
     UserVerificationCodeCommandRepositoryGateway codes =
         Mockito.mock(UserVerificationCodeCommandRepositoryGateway.class);
-    Mockito.when(codes.listForUpdate(ArgumentMatchers.any())).thenAnswer(_ -> List.copyOf(stored));
+    // As the repository: the filter selects the row of the unique index (user, purpose).
+    Mockito.when(codes.findForUpdate(ArgumentMatchers.any())).thenAnswer(call -> {
+      UserVerificationCodeFilter filter = call.getArgument(0);
+      return stored.stream()
+          .filter(code -> filter.getUser().map(UserRef::getUid)
+              .filter(code.getUser().getUid()::equals).isPresent())
+          .filter(code -> filter.getPurpose().filter(code.getPurpose()::equals).isPresent())
+          .findFirst();
+    });
     Mockito.when(codes.update(ArgumentMatchers.any(), ArgumentMatchers.any())).thenAnswer(call -> {
       UserVerificationCode updated = call.getArgument(1);
       stored.replaceAll(code -> code.getUid().equals(updated.getUid()) ? updated : code);

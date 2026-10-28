@@ -75,7 +75,7 @@ public class RegistrationAccessTokenValueHolder<T> {
    * @return
    */
   public T registrationAccessTokenNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RegistrationAccessTokenVO.nullValue());
     return this.holder;
   }
 

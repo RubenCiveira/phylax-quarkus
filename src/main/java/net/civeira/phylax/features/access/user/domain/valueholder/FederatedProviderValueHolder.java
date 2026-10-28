@@ -55,7 +55,7 @@ public class FederatedProviderValueHolder<T> {
    * @return
    */
   public T federatedProviderNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(FederatedProviderVO.nullValue());
     return this.holder;
   }
 

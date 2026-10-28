@@ -55,7 +55,7 @@ public class DescriptionValueHolder<T> {
    * @return
    */
   public T descriptionNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DescriptionVO.nullValue());
     return this.holder;
   }
 

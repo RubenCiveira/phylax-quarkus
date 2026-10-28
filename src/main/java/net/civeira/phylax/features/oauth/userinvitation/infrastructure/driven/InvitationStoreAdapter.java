@@ -45,7 +45,7 @@ public class InvitationStoreAdapter implements InvitationStoreGateway {
   @Override
   public Optional<RefreshData> refresh(String uid, String tenantUid, String rawToken,
       OffsetDateTime newExpiresAt) {
-    String update = "UPDATE access_user_invitation SET token_hash = ?, expired_at = ?,"
+    String update = "UPDATE access_user_invitation SET token_hash = ?, expires_at = ?,"
         + " version = version + 1 WHERE uid = ? AND tenant = ? AND status = 'PENDING'";
     String read = "SELECT i.email, u.email FROM access_user_invitation i"
         + " LEFT JOIN access_user u ON u.uid = i.invited_by WHERE i.uid = ?";

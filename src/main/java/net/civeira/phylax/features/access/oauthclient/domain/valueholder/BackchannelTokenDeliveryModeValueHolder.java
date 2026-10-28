@@ -59,7 +59,7 @@ public class BackchannelTokenDeliveryModeValueHolder<T> {
    * @return
    */
   public T backchannelTokenDeliveryModeNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(BackchannelTokenDeliveryModeVO.nullValue());
     return this.holder;
   }
 

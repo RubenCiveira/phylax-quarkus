@@ -81,7 +81,7 @@ public class RootValueHolder<T> {
    * @return
    */
   public T rootNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RootVO.nullValue());
     return this.holder;
   }
 

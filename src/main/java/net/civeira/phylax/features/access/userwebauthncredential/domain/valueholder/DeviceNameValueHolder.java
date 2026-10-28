@@ -55,7 +55,7 @@ public class DeviceNameValueHolder<T> {
    * @return
    */
   public T deviceNameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DeviceNameVO.nullValue());
     return this.holder;
   }
 

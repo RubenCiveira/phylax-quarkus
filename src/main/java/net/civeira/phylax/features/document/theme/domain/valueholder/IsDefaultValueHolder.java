@@ -71,7 +71,7 @@ public class IsDefaultValueHolder<T> {
    * @return
    */
   public T isDefaultNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(IsDefaultVO.nullValue());
     return this.holder;
   }
 

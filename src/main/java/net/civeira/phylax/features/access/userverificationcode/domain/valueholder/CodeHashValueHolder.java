@@ -46,7 +46,7 @@ public class CodeHashValueHolder<T> {
    * @return
    */
   public T codeHashNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(CodeHashVO.nullValue());
     return this.holder;
   }
 

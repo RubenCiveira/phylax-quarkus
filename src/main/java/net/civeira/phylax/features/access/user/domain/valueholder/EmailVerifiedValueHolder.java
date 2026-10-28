@@ -55,7 +55,7 @@ public class EmailVerifiedValueHolder<T> {
    * @return
    */
   public T emailVerifiedNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(EmailVerifiedVO.nullValue());
     return this.holder;
   }
 

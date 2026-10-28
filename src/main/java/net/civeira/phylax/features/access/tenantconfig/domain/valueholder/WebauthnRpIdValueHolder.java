@@ -104,7 +104,7 @@ public class WebauthnRpIdValueHolder<T> {
    * @return
    */
   public T webauthnRpIdNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(WebauthnRpIdVO.nullValue());
     return this.holder;
   }
 }

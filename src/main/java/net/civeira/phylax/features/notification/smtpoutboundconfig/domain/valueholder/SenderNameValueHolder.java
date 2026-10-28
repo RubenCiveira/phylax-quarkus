@@ -83,7 +83,7 @@ public class SenderNameValueHolder<T> {
    * @return
    */
   public T senderNameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SenderNameVO.nullValue());
     return this.holder;
   }
 

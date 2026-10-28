@@ -71,7 +71,7 @@ public class GrantTypesJsonValueHolder<T> {
    * @return
    */
   public T grantTypesJsonNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(GrantTypesJsonVO.nullValue());
     return this.holder;
   }
 

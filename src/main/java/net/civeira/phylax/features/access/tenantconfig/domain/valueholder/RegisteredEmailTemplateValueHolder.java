@@ -83,7 +83,7 @@ public class RegisteredEmailTemplateValueHolder<T> {
    * @return
    */
   public T registeredEmailTemplateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(RegisteredEmailTemplateVO.nullValue());
     return this.holder;
   }
 

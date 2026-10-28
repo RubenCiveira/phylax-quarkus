@@ -83,7 +83,7 @@ public class SamlIdpCertValueHolder<T> {
    * @return
    */
   public T samlIdpCertNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SamlIdpCertVO.nullValue());
     return this.holder;
   }
 

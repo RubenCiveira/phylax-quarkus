@@ -56,7 +56,7 @@ public class DecisionAtValueHolder<T> {
    * @return
    */
   public T decisionAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DecisionAtVO.nullValue());
     return this.holder;
   }
 

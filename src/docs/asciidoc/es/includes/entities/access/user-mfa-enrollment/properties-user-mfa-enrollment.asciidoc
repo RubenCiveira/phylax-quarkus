@@ -5,7 +5,7 @@ User* (xref:#entidad-user[User])::
 El usuario para el que se tienen estos datos
 Pending seed (string)::
 the seed used to the otp login
-Expired at (datetime)::
+Expires at (datetime)::
 La caducidad del código de recuperacion
 Version (integer)::
 Campo con el número de version de user mfa enrollment para controlar bloqueos optimistas

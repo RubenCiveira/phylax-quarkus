@@ -3,7 +3,7 @@ package net.civeira.phylax.features.oauth.user.application.listener;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import net.civeira.phylax.features.access.userverificationcode.domain.event.UserVerificationCodeGeneratedVerificationEvent;
+import net.civeira.phylax.features.access.userverificationcode.domain.event.UserVerificationCodeGenerateEvent;
 
 /**
  * Extension point for side-effects triggered by the generation of an email code. The event is
@@ -20,8 +20,7 @@ import net.civeira.phylax.features.access.userverificationcode.domain.event.User
 @ApplicationScoped
 public class NotifyRecover {
 
-  public void onPasswordRecoveryRequested(
-      @Observes UserVerificationCodeGeneratedVerificationEvent event) {
+  public void onPasswordRecoveryRequested(@Observes UserVerificationCodeGenerateEvent event) {
     // Extension point — no action by default.
   }
 }

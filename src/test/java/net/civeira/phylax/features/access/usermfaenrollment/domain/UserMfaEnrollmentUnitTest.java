@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.features.access.user.domain.UserReference;
-import net.civeira.phylax.features.access.usermfaenrollment.domain.valueobject.ExpiredAtVO;
+import net.civeira.phylax.features.access.usermfaenrollment.domain.valueobject.ExpiresAtVO;
 import net.civeira.phylax.features.access.usermfaenrollment.domain.valueobject.PendingSeedVO;
 import net.civeira.phylax.features.access.usermfaenrollment.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.usermfaenrollment.domain.valueobject.UserVO;
@@ -25,7 +25,7 @@ class UserMfaEnrollmentUnitTest {
     UserMfaEnrollment one = UserMfaEnrollment.builder().uidValue(UidVO.from("one"))
         .userValue(UserVO.from(UserReference.of("one")))
         .pendingSeedValue(PendingSeedVO.fromPlain("one"))
-        .expiredAtValue(ExpiredAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
+        .expiresAtValue(ExpiresAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .versionValue(VersionVO.from(1)).build();
     UserMfaEnrollment withOne = one.withVersionValue(VersionVO.from(1));

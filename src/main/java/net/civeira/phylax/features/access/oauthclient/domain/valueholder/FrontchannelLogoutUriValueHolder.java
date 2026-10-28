@@ -55,7 +55,7 @@ public class FrontchannelLogoutUriValueHolder<T> {
    * @return
    */
   public T frontchannelLogoutUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(FrontchannelLogoutUriVO.nullValue());
     return this.holder;
   }
 

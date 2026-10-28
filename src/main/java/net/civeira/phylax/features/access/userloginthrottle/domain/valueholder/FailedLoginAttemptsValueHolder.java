@@ -55,7 +55,7 @@ public class FailedLoginAttemptsValueHolder<T> {
    * @return
    */
   public T failedLoginAttemptsNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(FailedLoginAttemptsVO.nullValue());
     return this.holder;
   }
 

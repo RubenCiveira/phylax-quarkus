@@ -71,7 +71,7 @@ public class IpAddressValueHolder<T> {
    * @return
    */
   public T ipAddressNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(IpAddressVO.nullValue());
     return this.holder;
   }
 

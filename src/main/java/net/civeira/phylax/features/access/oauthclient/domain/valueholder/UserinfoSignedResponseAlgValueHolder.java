@@ -105,7 +105,7 @@ public class UserinfoSignedResponseAlgValueHolder<T> {
    * @return
    */
   public T userinfoSignedResponseAlgNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(UserinfoSignedResponseAlgVO.nullValue());
     return this.holder;
   }
 }

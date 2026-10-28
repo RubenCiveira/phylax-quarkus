@@ -104,7 +104,7 @@ public class WebsiteUrlValueHolder<T> {
    * @return
    */
   public T websiteUrlNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(WebsiteUrlVO.nullValue());
     return this.holder;
   }
 }

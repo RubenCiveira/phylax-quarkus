@@ -55,7 +55,7 @@ public class DefaultMaxAgeValueHolder<T> {
    * @return
    */
   public T defaultMaxAgeNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(DefaultMaxAgeVO.nullValue());
     return this.holder;
   }
 

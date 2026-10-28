@@ -72,7 +72,7 @@ public class LastFailedAtValueHolder<T> {
    * @return
    */
   public T lastFailedAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(LastFailedAtVO.nullValue());
     return this.holder;
   }
 

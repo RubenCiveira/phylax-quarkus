@@ -13,7 +13,7 @@ import net.civeira.phylax.features.access.userinvitation.domain.valueobject.Acce
 import net.civeira.phylax.features.access.userinvitation.domain.valueobject.AcceptedByVO;
 import net.civeira.phylax.features.access.userinvitation.domain.valueobject.CreatedAtVO;
 import net.civeira.phylax.features.access.userinvitation.domain.valueobject.EmailVO;
-import net.civeira.phylax.features.access.userinvitation.domain.valueobject.ExpiredAtVO;
+import net.civeira.phylax.features.access.userinvitation.domain.valueobject.ExpiresAtVO;
 import net.civeira.phylax.features.access.userinvitation.domain.valueobject.InvitedByVO;
 import net.civeira.phylax.features.access.userinvitation.domain.valueobject.MetadataJsonVO;
 import net.civeira.phylax.features.access.userinvitation.domain.valueobject.RolesVO;
@@ -38,7 +38,7 @@ class UserInvitationUnitTest {
         .statusValue(StatusVO.from(UserInvitationStatusOptions.PENDING))
         .createdAtValue(CreatedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
-        .expiredAtValue(ExpiredAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
+        .expiresAtValue(ExpiresAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .acceptedAtValue(AcceptedAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))

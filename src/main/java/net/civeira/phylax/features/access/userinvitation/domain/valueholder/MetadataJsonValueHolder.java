@@ -71,7 +71,7 @@ public class MetadataJsonValueHolder<T> {
    * @return
    */
   public T metadataJsonNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(MetadataJsonVO.nullValue());
     return this.holder;
   }
 

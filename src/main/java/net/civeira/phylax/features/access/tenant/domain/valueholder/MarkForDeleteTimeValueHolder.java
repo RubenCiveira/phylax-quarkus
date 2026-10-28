@@ -72,7 +72,7 @@ public class MarkForDeleteTimeValueHolder<T> {
    * @return
    */
   public T markForDeleteTimeNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(MarkForDeleteTimeVO.nullValue());
     return this.holder;
   }
 

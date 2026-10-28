@@ -55,7 +55,7 @@ public class AllowAllScopesValueHolder<T> {
    * @return
    */
   public T allowAllScopesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(AllowAllScopesVO.nullValue());
     return this.holder;
   }
 

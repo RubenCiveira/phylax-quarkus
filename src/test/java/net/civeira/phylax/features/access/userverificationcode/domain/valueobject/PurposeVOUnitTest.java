@@ -18,13 +18,10 @@ class PurposeVOUnitTest {
     Assertions.assertThrows(ConstraintException.class,
         () -> PurposeVO.tryFrom("_PASSWORD_RECOVERY_"));
     Assertions.assertEquals(UserVerificationCodePurposeOptions.PASSWORD_RECOVERY,
-        PurposeVO.tryFrom("PASSWORD_RECOVERY").getPurpose().orElse(null));
-    Assertions.assertFalse(PurposeVO.nullValue().getPurpose().isPresent(),
-        "A empty vo should have a null value");
-    Assertions.assertFalse(PurposeVO.tryFrom(null).getPurpose().isPresent(),
-        "With a null value, no present result");
-    Assertions.assertEquals(UserVerificationCodePurposeOptions.PASSWORD_RECOVERY, PurposeVO
-        .from(UserVerificationCodePurposeOptions.PASSWORD_RECOVERY).getPurpose().orElse(null));
+        PurposeVO.tryFrom("PASSWORD_RECOVERY").getPurpose());
+    Assertions.assertThrows(ConstraintException.class, () -> PurposeVO.tryFrom(null));
+    Assertions.assertEquals(UserVerificationCodePurposeOptions.PASSWORD_RECOVERY,
+        PurposeVO.from(UserVerificationCodePurposeOptions.PASSWORD_RECOVERY).getPurpose());
     Object falingInstance = new Object() {};
     Assertions.assertThrows(ConstraintException.class, () -> PurposeVO.tryFrom(falingInstance));
     Assertions.assertEquals("[" + UserVerificationCodePurposeOptions.PASSWORD_RECOVERY + "]",

@@ -104,7 +104,7 @@ public class WebauthnEnabledValueHolder<T> {
    * @return
    */
   public T webauthnEnabledNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(WebauthnEnabledVO.nullValue());
     return this.holder;
   }
 }

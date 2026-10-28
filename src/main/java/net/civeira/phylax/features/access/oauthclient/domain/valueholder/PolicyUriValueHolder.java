@@ -71,7 +71,7 @@ public class PolicyUriValueHolder<T> {
    * @return
    */
   public T policyUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PolicyUriVO.nullValue());
     return this.holder;
   }
 

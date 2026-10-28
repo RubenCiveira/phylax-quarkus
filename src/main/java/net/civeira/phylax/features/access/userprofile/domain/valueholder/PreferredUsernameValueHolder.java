@@ -71,7 +71,7 @@ public class PreferredUsernameValueHolder<T> {
    * @return
    */
   public T preferredUsernameNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PreferredUsernameVO.nullValue());
     return this.holder;
   }
 

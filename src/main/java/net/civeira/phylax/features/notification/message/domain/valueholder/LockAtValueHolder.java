@@ -72,7 +72,7 @@ public class LockAtValueHolder<T> {
    * @return
    */
   public T lockAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(LockAtVO.nullValue());
     return this.holder;
   }
 

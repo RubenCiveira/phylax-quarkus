@@ -55,7 +55,7 @@ public class ClientCredentialsScopesValueHolder<T> {
    * @return
    */
   public T clientCredentialsScopesNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(ClientCredentialsScopesVO.nullValue());
     return this.holder;
   }
 

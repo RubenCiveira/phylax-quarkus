@@ -23,7 +23,7 @@ import net.civeira.phylax.features.oauth.userinvitation.domain.gateway.UserInvit
 @RequiredArgsConstructor
 public class InvitationLookupAdapter implements UserInvitationLookupGateway {
 
-  static final String COLUMNS = "uid, tenant, email, status, expired_at";
+  static final String COLUMNS = "uid, tenant, email, status, expires_at";
 
   private final DataSource source;
   private final SecretDigester digester;
@@ -55,7 +55,7 @@ public class InvitationLookupAdapter implements UserInvitationLookupGateway {
   }
 
   static InvitationRecord read(ResultSet rs) throws SQLException {
-    java.sql.Timestamp expires = rs.getTimestamp("expired_at");
+    java.sql.Timestamp expires = rs.getTimestamp("expires_at");
     return new InvitationRecord(rs.getString("uid"), rs.getString("tenant"), rs.getString("email"),
         rs.getString("status"), expires == null ? null : expires.toInstant());
   }

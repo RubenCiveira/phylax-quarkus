@@ -55,7 +55,7 @@ public class GenderValueHolder<T> {
    * @return
    */
   public T genderNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(GenderVO.nullValue());
     return this.holder;
   }
 

@@ -55,7 +55,7 @@ public class EnabledUserEmailTemplateValueHolder<T> {
    * @return
    */
   public T enabledUserEmailTemplateNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(EnabledUserEmailTemplateVO.nullValue());
     return this.holder;
   }
 

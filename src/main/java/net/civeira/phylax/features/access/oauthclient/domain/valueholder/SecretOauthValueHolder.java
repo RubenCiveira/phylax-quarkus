@@ -75,7 +75,7 @@ public class SecretOauthValueHolder<T> {
    * @return
    */
   public T secretOauthNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SecretOauthVO.nullValue());
     return this.holder;
   }
 

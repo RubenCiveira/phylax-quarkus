@@ -82,7 +82,7 @@ public class SendAtValueHolder<T> {
    * @return
    */
   public T sendAtNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(SendAtVO.nullValue());
     return this.holder;
   }
 

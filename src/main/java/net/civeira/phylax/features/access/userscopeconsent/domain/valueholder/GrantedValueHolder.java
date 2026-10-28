@@ -71,7 +71,7 @@ public class GrantedValueHolder<T> {
    * @return
    */
   public T grantedNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(GrantedVO.nullValue());
     return this.holder;
   }
 

@@ -85,7 +85,7 @@ public class OauthClientValueHolder<T> {
    * @return
    */
   public T oauthClientNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(OauthClientVO.nullValue());
     return this.holder;
   }
 

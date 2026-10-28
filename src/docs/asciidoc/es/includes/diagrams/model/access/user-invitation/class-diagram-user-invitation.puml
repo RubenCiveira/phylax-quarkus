@@ -91,7 +91,7 @@ tokenHash:string
 metadataJson:blob
 status:UserInvitationStatusOptions
 createdAt:datetime
-expiredAt:datetime
+expiresAt:datetime
 acceptedAt:datetime
 version:integer
 list()

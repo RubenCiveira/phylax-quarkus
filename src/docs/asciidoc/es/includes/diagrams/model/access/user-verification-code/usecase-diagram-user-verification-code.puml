@@ -10,17 +10,17 @@ actor :Autorizado: as a0
 (Create) as creacion
 (Delete) as actualizacion
 (Delete) as borrado
-(Generated verification) as generatedVerification
+(Generate) as generate
 (Other use cases) as p0
-(Reset register verification) as resetRegisterVerification
+(Reset) as reset
 
 a0 --> listado
 a0 --> consulta
 a0 --> creacion
 a0 --> actualizacion
 a0 --> borrado
-p0 --> generatedVerification
-p0 --> resetRegisterVerification
+p0 --> generate
+p0 --> reset
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

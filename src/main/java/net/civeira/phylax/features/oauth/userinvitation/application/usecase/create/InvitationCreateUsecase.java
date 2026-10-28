@@ -55,7 +55,7 @@ public class InvitationCreateUsecase {
     change.tokenHashPlain(rawToken);
     change.status(UserInvitationStatusOptions.PENDING);
     change.createdAt(OffsetDateTime.now(ZoneOffset.UTC));
-    change.expiredAt(expiresAt);
+    change.expiresAt(expiresAt);
     if (params.getRoles() != null) {
       change.roles(params.getRoles());
     }

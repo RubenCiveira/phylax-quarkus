@@ -71,7 +71,7 @@ public class JwksUriValueHolder<T> {
    * @return
    */
   public T jwksUriNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(JwksUriVO.nullValue());
     return this.holder;
   }
 

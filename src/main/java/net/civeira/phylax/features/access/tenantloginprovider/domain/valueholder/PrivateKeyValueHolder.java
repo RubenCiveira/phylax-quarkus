@@ -71,7 +71,7 @@ public class PrivateKeyValueHolder<T> {
    * @return
    */
   public T privateKeyNull() {
-    this.value = Optional.empty();
+    this.value = Optional.of(PrivateKeyVO.nullValue());
     return this.holder;
   }
 
