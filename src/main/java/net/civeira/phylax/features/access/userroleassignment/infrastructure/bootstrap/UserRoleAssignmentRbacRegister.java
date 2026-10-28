@@ -47,10 +47,10 @@ public class UserRoleAssignmentRbacRegister {
         .description("El identificador de la aplicacion").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("user")
         .description("El user de user role assignment").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("relyingParty")
-        .description("El relying party de user role assignment").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("trustedClient")
-        .description("El trusted client de user role assignment").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("resourceServer")
+        .description("El resource server de user role assignment").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("oauthClient")
+        .description("El oauth client de user role assignment").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("roles")
         .description("El roles de user role assignment").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("version").description(

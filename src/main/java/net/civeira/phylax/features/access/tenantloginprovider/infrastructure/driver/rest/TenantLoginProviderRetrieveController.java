@@ -10,12 +10,12 @@ import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenantloginprovider.application.usecase.retrieve.TenantLoginProviderRetrieveProjection;
 import net.civeira.phylax.features.access.tenantloginprovider.application.usecase.retrieve.TenantLoginProviderRetrieveUsecase;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderAccountLinkPolicyOptions;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderProviderTypeOptions;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderReference;
-import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderSourceOptions;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantLoginProviderApiDto;
 import net.civeira.phylax.generated.openapi.model.TenantLoginProviderApiDto.AccountLinkPolicyEnum;
-import net.civeira.phylax.generated.openapi.model.TenantLoginProviderApiDto.SourceEnum;
+import net.civeira.phylax.generated.openapi.model.TenantLoginProviderApiDto.ProviderTypeEnum;
 
 @RequiredArgsConstructor
 @ApplicationScoped
@@ -75,20 +75,21 @@ public class TenantLoginProviderRetrieveController {
    * @param domainEnum
    * @return
    */
-  private SourceEnum sourceEnumToApi(TenantLoginProviderSourceOptions domainEnum) {
-    SourceEnum result;
-    if (domainEnum == TenantLoginProviderSourceOptions.GOOGLE) {
-      result = SourceEnum.GOOGLE;
-    } else if (domainEnum == TenantLoginProviderSourceOptions.GITHUB) {
-      result = SourceEnum.GITHUB;
-    } else if (domainEnum == TenantLoginProviderSourceOptions.MICROSOFT) {
-      result = SourceEnum.MICROSOFT;
-    } else if (domainEnum == TenantLoginProviderSourceOptions.APPLE) {
-      result = SourceEnum.APPLE;
-    } else if (domainEnum == TenantLoginProviderSourceOptions.SAML) {
-      result = SourceEnum.SAML;
-    } else if (domainEnum == TenantLoginProviderSourceOptions.OIDC) {
-      result = SourceEnum.OIDC;
+  private ProviderTypeEnum providerTypeEnumToApi(
+      TenantLoginProviderProviderTypeOptions domainEnum) {
+    ProviderTypeEnum result;
+    if (domainEnum == TenantLoginProviderProviderTypeOptions.GOOGLE) {
+      result = ProviderTypeEnum.GOOGLE;
+    } else if (domainEnum == TenantLoginProviderProviderTypeOptions.GITHUB) {
+      result = ProviderTypeEnum.GITHUB;
+    } else if (domainEnum == TenantLoginProviderProviderTypeOptions.MICROSOFT) {
+      result = ProviderTypeEnum.MICROSOFT;
+    } else if (domainEnum == TenantLoginProviderProviderTypeOptions.APPLE) {
+      result = ProviderTypeEnum.APPLE;
+    } else if (domainEnum == TenantLoginProviderProviderTypeOptions.SAML) {
+      result = ProviderTypeEnum.SAML;
+    } else if (domainEnum == TenantLoginProviderProviderTypeOptions.OIDC) {
+      result = ProviderTypeEnum.OIDC;
     } else {
       result = null;
     }
@@ -105,8 +106,8 @@ public class TenantLoginProviderRetrieveController {
     tenantLoginProviderApiDto.setUid(dto.getUid());
     tenantLoginProviderApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantLoginProviderApiDto.setName(dto.getName());
-    tenantLoginProviderApiDto.setSource(sourceEnumToApi(dto.getSource()));
-    tenantLoginProviderApiDto.setDisabled(dto.getDisabled());
+    tenantLoginProviderApiDto.setProviderType(providerTypeEnumToApi(dto.getProviderType()));
+    tenantLoginProviderApiDto.setEnabled(dto.getEnabled());
     tenantLoginProviderApiDto.setDirectAccess(dto.getDirectAccess());
     tenantLoginProviderApiDto.setPublicKey(dto.getPublicKey());
     tenantLoginProviderApiDto.setPrivateKey(dto.getPrivateKey());

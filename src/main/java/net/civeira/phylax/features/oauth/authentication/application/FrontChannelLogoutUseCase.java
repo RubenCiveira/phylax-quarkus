@@ -10,18 +10,18 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientFilter;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 
 /** Builds front-channel notifications only for visible RPs in the terminated browser session. */
 @ApplicationScoped
 @RequiredArgsConstructor
 public class FrontChannelLogoutUseCase {
-  private final TrustedClientQueryRepositoryGateway clients;
+  private final OauthClientQueryRepositoryGateway clients;
   private final TenantQueryRepositoryGateway tenants;
 
   public List<String> notificationUris(String tenant, String issuer, String sid,
@@ -32,21 +32,21 @@ public class FrontChannelLogoutUseCase {
         tenants.find(TenantFilter.builder().name(tenant).build()).map(Tenant::getUid);
     if (tenantUid.isEmpty())
       return List.of();
-    return clients.list(TrustedClientFilter.builder().build()).stream()
+    return clients.list(OauthClientFilter.builder().build()).stream()
         .filter(client -> participants.contains(client.getCode()))
         .filter(client -> client.getTenantUid().map(tenantUid.get()::equals).orElse(true))
         .map(client -> url(client, issuer, sid)).flatMap(Optional::stream).toList();
   }
 
-  private Optional<String> url(TrustedClient client, String issuer, String sid) {
-    return client.getFrontChannelLogoutUri().flatMap(raw -> {
+  private Optional<String> url(OauthClient client, String issuer, String sid) {
+    return client.getFrontchannelLogoutUri().flatMap(raw -> {
       try {
         URI uri = URI.create(raw);
         if (!("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme()))
             || uri.getHost() == null || uri.getRawUserInfo() != null
             || uri.getRawFragment() != null)
           return Optional.empty();
-        if (!Boolean.TRUE.equals(client.isFrontChannelLogoutSessionRequired()))
+        if (!Boolean.TRUE.equals(client.isFrontchannelLogoutSessionRequired()))
           return Optional.of(raw);
         if (sid == null || sid.isBlank())
           return Optional.empty();

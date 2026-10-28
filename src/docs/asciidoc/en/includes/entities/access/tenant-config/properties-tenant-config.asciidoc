@@ -3,7 +3,7 @@ Uid* (string)::
 A number to identify the db record
 Tenant* (xref:#entidad-tenant[Tenant])::
 The name to identify the account.
-Inner label (string)::
+Display name (string)::
 Tenant could use these field to label the application for the users
 Force mfa* (boolean)::
 El force mfa de tenant config
@@ -13,10 +13,10 @@ El dynamic registration policy de tenant configLos posibles valores que toma el 
  * token_required
  * disabled
 
-Allow register (boolean)::
-El allow register de tenant config
-Enable register users (boolean)::
-El enable register users de tenant config
+Self registration enabled (boolean)::
+El self registration enabled de tenant config
+Auto approve registered users (boolean)::
+El auto approve registered users de tenant config
 Magic link enabled (boolean)::
 El magic link enabled de tenant config
 Require email verification* (boolean)::
@@ -47,17 +47,17 @@ Webauthn rp id (string)::
 El webauthn rp id de tenant config
 Webauthn rp name (string)::
 El webauthn rp name de tenant config
-Welcome email (blob)::
+Welcome email template (blob)::
 Email send to the enabled user
-Registered email (blob)::
+Registered email template (blob)::
 Email send when a user register
-Disabled user email (blob)::
+Disabled user email template (blob)::
 Email send when a user is disabled
-Enabled user email (blob)::
+Enabled user email template (blob)::
 Email send when a user is enabled
-Allow recover pass (boolean)::
-El allow recover pass de tenant config
-Recover pass email (blob)::
+Password recovery enabled (boolean)::
+El password recovery enabled de tenant config
+Recover pass email template (blob)::
 Email send to the user to recover the password
 Version (integer)::
 Campo con el número de version de tenant config para controlar bloqueos optimistas

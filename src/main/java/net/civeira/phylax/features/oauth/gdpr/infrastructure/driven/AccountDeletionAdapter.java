@@ -16,7 +16,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.mail.EmailMessage;
 import net.civeira.phylax.common.infrastructure.mail.EmailService;
 import net.civeira.phylax.features.access.user.domain.User;
@@ -24,14 +23,12 @@ import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopes;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesCommandRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
+import net.civeira.phylax.features.access.userscopeconsent.domain.UserScopeConsent;
+import net.civeira.phylax.features.access.userscopeconsent.domain.gateway.UserScopeConsentCommandRepositoryGateway;
+import net.civeira.phylax.features.access.userscopeconsent.domain.gateway.UserScopeConsentFilter;
+import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCodePurposeOptions;
 import net.civeira.phylax.features.oauth.gdpr.domain.gateway.AccountDeletionGateway;
+import net.civeira.phylax.features.oauth.user.infrastructure.VerificationCodeService;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -41,11 +38,10 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
   private static final long TOKEN_TTL_HOURS = 24L;
 
   private final UserCommandRepositoryGateway userWrite;
-  private final UserAccessTemporalCodeCommandRepositoryGateway temporalCodeWrite;
-  private final UserConsentedScopesCommandRepositoryGateway consentWrite;
+  private final VerificationCodeService codes;
+  private final UserScopeConsentCommandRepositoryGateway consentWrite;
   private final DataSource dataSource;
   private final EmailService emailService;
-  private final SecretDigester secretDigester;
 
   @Override
   @Transactional
@@ -54,7 +50,8 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
     String deletionCode = UUID.randomUUID().toString();
     OffsetDateTime expiration = OffsetDateTime.now().plusHours(TOKEN_TTL_HOURS);
 
-    storeDeletionCode(userUid, deletionCode, expiration);
+    codes.issue(UserReference.of(userUid), UserVerificationCodePurposeOptions.ACCOUNT_DELETION,
+        deletionCode, confirmUrl, expiration);
 
     String link = confirmUrl + "?uid=" + userUid + "&code=" + deletionCode;
     sendDeletionEmail(email, username, tenant, link, expiration);
@@ -63,25 +60,9 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
   @Override
   @Transactional
   public boolean confirmDeletion(String userUid, String code, String tenant) {
-    Optional<UserAccessTemporalCode> temporalOpt = temporalCodeWrite.findForUpdate(
-        UserAccessTemporalCodeFilter.builder().user(UserReference.of(userUid)).build());
-
-    if (temporalOpt.isEmpty()) {
-      log.warn("No temporal code found for user {} during deletion confirmation", userUid);
-      return false;
-    }
-    UserAccessTemporalCode temporal = temporalOpt.get();
-
-    OffsetDateTime storedExpiration =
-        temporal.getRecoveryCodeExpiration().orElse(OffsetDateTime.MIN);
-
-    if (code == null || code.isBlank()
-        || !temporal.getRecoveryCodeValue().verify(secretDigester, code)) {
-      log.warn("Deletion confirmation code mismatch for user {}", userUid);
-      return false;
-    }
-    if (OffsetDateTime.now().isAfter(storedExpiration)) {
-      log.warn("Deletion confirmation code expired for user {}", userUid);
+    if (!codes.consume(UserReference.of(userUid),
+        UserVerificationCodePurposeOptions.ACCOUNT_DELETION, code)) {
+      log.warn("Deletion confirmation code missing, mismatched or expired for user {}", userUid);
       return false;
     }
 
@@ -89,25 +70,9 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
     revokeAllSessions(userUid);
     deleteAllConsents(userUid);
     anonymizeAuditLog(userUid);
-    clearDeletionCode(temporal);
 
     log.info("Account deletion completed for user {}", userUid);
     return true;
-  }
-
-  private void storeDeletionCode(String userUid, String code, OffsetDateTime expiration) {
-    Optional<UserAccessTemporalCode> existing = temporalCodeWrite.findForUpdate(
-        UserAccessTemporalCodeFilter.builder().user(UserReference.of(userUid)).build());
-
-    if (existing.isPresent()) {
-      UserAccessTemporalCode updated = existing.get().generatePasswordRecover("", code, expiration);
-      temporalCodeWrite.update(existing.get(), updated);
-    } else {
-      UserAccessTemporalCode created = UserAccessTemporalCode
-          .create(new UserAccessTemporalCodeChangeSet().newUid().user(UserReference.of(userUid)));
-      UserAccessTemporalCode withCode = created.generatePasswordRecover("", code, expiration);
-      temporalCodeWrite.update(temporalCodeWrite.create(created), withCode);
-    }
   }
 
   private void anonymizeUser(String userUid) {
@@ -141,9 +106,9 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
   }
 
   private void deleteAllConsents(String userUid) {
-    List<UserConsentedScopes> consents = consentWrite
-        .listForUpdate(UserConsentedScopesFilter.builder().user(UserReference.of(userUid)).build());
-    for (UserConsentedScopes consent : consents) {
+    List<UserScopeConsent> consents = consentWrite
+        .listForUpdate(UserScopeConsentFilter.builder().user(UserReference.of(userUid)).build());
+    for (UserScopeConsent consent : consents) {
       consentWrite.delete(consent.delete());
     }
     log.debug("Deleted {} consent records for user {}", consents.size(), userUid);
@@ -159,10 +124,6 @@ public class AccountDeletionAdapter implements AccountDeletionGateway {
     } catch (SQLException ex) {
       log.error("Failed to anonymize audit log for user {}: {}", userUid, ex.getMessage());
     }
-  }
-
-  private void clearDeletionCode(UserAccessTemporalCode temporal) {
-    temporalCodeWrite.update(temporal, temporal.resetPasswordRecover());
   }
 
   private void sendDeletionEmail(String email, String username, String tenant, String confirmLink,

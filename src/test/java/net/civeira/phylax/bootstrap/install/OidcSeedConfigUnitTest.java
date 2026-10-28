@@ -17,9 +17,8 @@ import net.civeira.phylax.common.infrastructure.config.IsolatedConfigLoaderTestS
 
 class OidcSeedConfigUnitTest {
   private static final String SEED = LocalSeed.PATH;
-  private static final List<String> SECRETS =
-      List.of("oidc.root.password", "oidc.relying-party.api-key", "oidc.trusted-client.secret",
-          "oidc.api-keys.collector", "oidc.api-keys.sync");
+  private static final List<String> SECRETS = List.of("oidc.root.password",
+      "oidc.relying-party.api-key", "oidc.api-keys.collector", "oidc.api-keys.sync");
 
   @TempDir
   Path external;

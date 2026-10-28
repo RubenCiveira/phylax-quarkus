@@ -10,23 +10,23 @@ import org.junit.jupiter.api.Test;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProvider;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderAccountLinkPolicyOptions;
-import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderSourceOptions;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderProviderTypeOptions;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.AccountLinkPolicyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.CertificateVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.DirectAccessVO;
-import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.DisabledVO;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.EnabledVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.MetadataVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.NameVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcClaimMappingVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcDiscoveryUrlVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.OidcScopesVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PrivateKeyVO;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.ProviderTypeVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.PublicKeyVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpCertVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpEntityIdVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpMetadataUrlVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SamlIdpSsoUrlVO;
-import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.SourceVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.valueobject.UsersEnabledByDefaultVO;
@@ -42,8 +42,8 @@ class TenantLoginProviderCachedUnitTest {
   void test_tenant_login_provider_cached_builder() {
     TenantLoginProvider one = TenantLoginProvider.builder().uidValue(UidVO.from("one"))
         .tenantValue(TenantVO.from(TenantReference.of("one"))).nameValue(NameVO.from("one"))
-        .sourceValue(SourceVO.from(TenantLoginProviderSourceOptions.GOOGLE))
-        .disabledValue(DisabledVO.from(true)).directAccessValue(DirectAccessVO.from(true))
+        .providerTypeValue(ProviderTypeVO.from(TenantLoginProviderProviderTypeOptions.GOOGLE))
+        .enabledValue(EnabledVO.from(true)).directAccessValue(DirectAccessVO.from(true))
         .publicKeyValue(PublicKeyVO.from("one")).privateKeyValue(PrivateKeyVO.from("one"))
         .certificateValue(CertificateVO.from("one")).metadataValue(MetadataVO.from("file_1"))
         .oidcScopesValue(OidcScopesVO.from("one"))

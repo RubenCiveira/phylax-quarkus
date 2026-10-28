@@ -9,8 +9,8 @@ import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.usergroupmembership.application.usecase.retrieve.UserGroupMembershipRetrieveProjection;
 import net.civeira.phylax.features.access.usergroupmembership.application.usecase.retrieve.UserGroupMembershipRetrieveUsecase;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembershipReference;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
-import net.civeira.phylax.generated.openapi.model.TrustedClientApiRef;
+import net.civeira.phylax.generated.openapi.model.OauthClientApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.UserApiRef;
 import net.civeira.phylax.generated.openapi.model.UserGroupMembershipApiDto;
 
@@ -52,9 +52,9 @@ public class UserGroupMembershipRetrieveController {
     userGroupMembershipApiDto.setUid(dto.getUid());
     userGroupMembershipApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
     userGroupMembershipApiDto
-        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     userGroupMembershipApiDto
-        .setTrustedClient(new TrustedClientApiRef().$ref(dto.getTrustedClientReference()));
+        .setOauthClient(new OauthClientApiRef().$ref(dto.getOauthClientReference()));
     userGroupMembershipApiDto.setGroups(dto.getGroups());
     userGroupMembershipApiDto.setVersion(dto.getVersion());
     return userGroupMembershipApiDto;

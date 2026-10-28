@@ -195,12 +195,12 @@ class SessionLogoutMariaDbTest {
 
   private void notificationClient(String code, String tenantUid, String uri) throws SQLException {
     try (Connection connection = dataSource.getConnection();
-        PreparedStatement stmt = connection.prepareStatement("INSERT INTO access_trusted_client"
-            + " (uid, version, code, tenant, back_channel_logout_uri, enabled, public_allow,"
+        PreparedStatement stmt = connection.prepareStatement("INSERT INTO access_oauth_client"
+            + " (uid, version, code, tenant, backchannel_logout_uri, enabled,"
             + " require_pkce, require_pushed_authorization_requests, dpop_bound_access_tokens,"
-            + " tls_client_certificate_bound_access_tokens, is_resource_server, m_2m_token_ttl_seconds,"
+            + " tls_client_certificate_bound_access_tokens, introspection_allowed, client_credentials_token_ttl_seconds,"
             + " subject_type, token_endpoint_auth_method)"
-            + " VALUES (?, 0, ?, ?, ?, 1, 0, 0, 0, 0, 0, 0, 300, 'PUBLIC', 'CLIENT_SECRET_BASIC')")) {
+            + " VALUES (?, 0, ?, ?, ?, 1, 0, 0, 0, 0, 0, 300, 'PUBLIC', 'CLIENT_SECRET_BASIC')")) {
       stmt.setString(1, UUID.randomUUID().toString());
       stmt.setString(2, code);
       stmt.setString(3, tenantUid);
@@ -228,8 +228,8 @@ class SessionLogoutMariaDbTest {
     notificationClient(code, tenantUid, "http://127.0.0.1:1/unreachable");
     try (Connection connection = dataSource.getConnection();
         PreparedStatement stmt = connection
-            .prepareStatement("UPDATE access_trusted_client SET back_channel_logout_uri = NULL, "
-                + "front_channel_logout_uri = ?, front_channel_logout_session_required = ? WHERE code = ?")) {
+            .prepareStatement("UPDATE access_oauth_client SET backchannel_logout_uri = NULL, "
+                + "frontchannel_logout_uri = ?, frontchannel_logout_session_required = ? WHERE code = ?")) {
       stmt.setString(1, uri);
       stmt.setBoolean(2, sidRequired);
       stmt.setString(3, code);
@@ -240,7 +240,7 @@ class SessionLogoutMariaDbTest {
   private void cleanupNotificationFixtures() throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
       try (PreparedStatement clients = connection
-          .prepareStatement("DELETE FROM access_trusted_client WHERE code IN (?, ?, ?, ?)")) {
+          .prepareStatement("DELETE FROM access_oauth_client WHERE code IN (?, ?, ?, ?)")) {
         clients.setString(1, OidcTestFixtures.CLIENT_ID);
         clients.setString(2, OidcTestFixtures.WEB_CLIENT_ID);
         clients.setString(3, OidcTestFixtures.SPA_CLIENT_ID);

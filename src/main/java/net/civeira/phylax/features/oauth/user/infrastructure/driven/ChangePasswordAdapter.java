@@ -16,17 +16,14 @@ import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.userverificationcode.domain.UserVerificationCodePurposeOptions;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.user.domain.RecoveryNotificationData;
 import net.civeira.phylax.features.oauth.user.domain.gateway.ChangePasswordGateway;
 import net.civeira.phylax.features.oauth.user.infrastructure.ActiveUserFindService;
 import net.civeira.phylax.features.oauth.user.infrastructure.UserLoginService;
+import net.civeira.phylax.features.oauth.user.infrastructure.VerificationCodeService;
 
 @Transactional
 @ApplicationScoped
@@ -36,9 +33,8 @@ public class ChangePasswordAdapter implements ChangePasswordGateway {
 
   private final ActiveUserFindService activeUser;
   private final UserCommandRepositoryGateway users;
-  private final UserAccessTemporalCodeCommandRepositoryGateway codes;
+  private final VerificationCodeService codes;
   private final UserLoginService loginUsecase;
-  private final SecretDigester secretDigester;
 
   @Override
   public boolean allowRecover(String tenant) {
@@ -73,20 +69,11 @@ public class ChangePasswordAdapter implements ChangePasswordGateway {
     return activeUser
         .findEnabledUserByNameOrEmail(request.getTenant(), email, request.getAudiences())
         .flatMap(user -> {
-          if (user.getProvider().isPresent()) {
+          if (user.getFederatedProvider().isPresent()) {
             return Optional.empty();
           }
-          Optional<UserAccessTemporalCode> find =
-              codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
-          if (!find.isPresent()) {
-            return Optional.empty();
-          }
-          UserAccessTemporalCode tempCode = find.get();
-          if (!"".equals(code) && tempCode.getRecoveryCodeValue().verify(secretDigester, code)) {
-            codes.update(tempCode, tempCode.resetPasswordRecover());
-            // codes.update(tempCode, tempCode.withNullRecoveryCode());
+          if (codes.consume(user, UserVerificationCodePurposeOptions.PASSWORD_RECOVERY, code)) {
             users.update(user, user.changePassword(newPassoword));
-            // users.update(user, user.withPlainPassword(newPassoword));
             return Optional.of(user.getName());
           } else {
             return Optional.empty();
@@ -97,21 +84,11 @@ public class ChangePasswordAdapter implements ChangePasswordGateway {
   private void recover(AuthRequest request, String email, String urlWithParams) {
     activeUser.findEnabledUserByNameOrEmail(request.getTenant(), email, request.getAudiences())
         .ifPresent(user -> {
-          if (user.getProvider().isPresent()) {
+          if (user.getFederatedProvider().isPresent()) {
             return;
           }
-          String code = generate();
-          Optional<UserAccessTemporalCode> find =
-              codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
-          UserAccessTemporalCode userCode;
-          if (find.isPresent()) {
-            userCode = find.get();
-          } else {
-            userCode = codes.create(
-                UserAccessTemporalCode.create(new UserAccessTemporalCodeChangeSet().newUid()));
-          }
-          codes.update(userCode, userCode.generatePasswordRecover(urlWithParams, code,
-              OffsetDateTime.now().plus(RECOVER_TIME)));
+          codes.issue(user, UserVerificationCodePurposeOptions.PASSWORD_RECOVERY, generate(),
+              urlWithParams, OffsetDateTime.now().plus(RECOVER_TIME));
         });
   }
 

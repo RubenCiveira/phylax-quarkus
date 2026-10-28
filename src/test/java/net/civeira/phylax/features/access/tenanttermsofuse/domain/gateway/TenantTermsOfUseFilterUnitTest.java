@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 class TenantTermsOfUseFilterUnitTest {
@@ -42,16 +42,16 @@ class TenantTermsOfUseFilterUnitTest {
     filter.setTenants(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getTenants(),
         "Tenants must be the same as the assigned");
-    Assertions.assertFalse(filter.getRelyingParty().isPresent(),
-        "RelyingParty must be empty if filter is build without it");
-    filter.setRelyingParty(RelyingPartyReference.of("$ref"));
-    Assertions.assertEquals(RelyingPartyReference.of("$ref"), filter.getRelyingParty().get(),
-        "RelyingParty must be the same as the assigned");
-    Assertions.assertTrue(filter.getRelyingParties().isEmpty(),
-        "RelyingParties must be empty if filter is build without it");
-    filter.setRelyingParties(List.of("one"));
-    Assertions.assertEquals(List.of("one"), filter.getRelyingParties(),
-        "RelyingParties must be the same as the assigned");
+    Assertions.assertFalse(filter.getResourceServer().isPresent(),
+        "ResourceServer must be empty if filter is build without it");
+    filter.setResourceServer(ResourceServerReference.of("$ref"));
+    Assertions.assertEquals(ResourceServerReference.of("$ref"), filter.getResourceServer().get(),
+        "ResourceServer must be the same as the assigned");
+    Assertions.assertTrue(filter.getResourceServers().isEmpty(),
+        "ResourceServers must be empty if filter is build without it");
+    filter.setResourceServers(List.of("one"));
+    Assertions.assertEquals(List.of("one"), filter.getResourceServers(),
+        "ResourceServers must be the same as the assigned");
     Assertions.assertFalse(filter.getTenantAccessible().isPresent(),
         "TenantAccessible must be empty if filter is build without it");
     filter.setTenantAccessible("one");

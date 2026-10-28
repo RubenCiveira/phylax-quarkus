@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProvider;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderAccountLinkPolicyOptions;
-import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderSourceOptions;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderProviderTypeOptions;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderFilter;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
@@ -110,9 +110,10 @@ public class DelegatedAccessAuthValidatorAdapter implements DelegatedAccessProvi
     if (existing.isPresent() && !mayJoin(existing.get(), loginProvider, tenant)) {
       return refuse(tenant, provider, "account_link_not_allowed");
     }
-    User account = existing.orElseGet(() -> usersWriter.create(
-        User.create(new UserChangeSet().newUid().name(email).email(email).emailVerified(true)
-            .passwordPlain(PendingDelegation.newSecret()).provider(loginProvider.getSource().name())
+    User account = existing
+        .orElseGet(() -> usersWriter.create(User.create(new UserChangeSet().newUid().name(email)
+            .email(email).emailVerified(true).passwordPlain(PendingDelegation.newSecret())
+            .federatedProvider(loginProvider.getProviderType().name())
             .enabled(loginProvider.isUsersEnabledByDefault()).tenant(tenant))));
     String winner = identities.link(loginProvider.getUid(), subject, account.getUid());
     if (!winner.equals(account.getUid())) {
@@ -150,14 +151,15 @@ public class DelegatedAccessAuthValidatorAdapter implements DelegatedAccessProvi
     if (identities.isLinkedTo(account.getUid(), provider.getUid())) {
       return true;
     }
-    return account.getProvider().filter(provider.getSource().name()::equals).isPresent()
-        && !identities.hasLinks(account.getUid())
-        && enabledProvidersOf(provider.getSource(), tenant) == 1;
+    return account.getFederatedProvider().filter(provider.getProviderType().name()::equals)
+        .isPresent() && !identities.hasLinks(account.getUid())
+        && enabledProvidersOf(provider.getProviderType(), tenant) == 1;
   }
 
-  private long enabledProvidersOf(TenantLoginProviderSourceOptions source, Tenant tenant) {
-    return listProviders(tenant).stream().filter(
-        provider -> !Boolean.TRUE.equals(provider.isDisabled()) && provider.getSource() == source)
+  private long enabledProvidersOf(TenantLoginProviderProviderTypeOptions source, Tenant tenant) {
+    return listProviders(tenant).stream()
+        .filter(provider -> Boolean.TRUE.equals(provider.isEnabled())
+            && provider.getProviderType() == source)
         .count();
   }
 
@@ -182,18 +184,17 @@ public class DelegatedAccessAuthValidatorAdapter implements DelegatedAccessProvi
 
   private Optional<TenantLoginProvider> provider(Tenant tenant, String name) {
     return listProviders(tenant).stream()
-        .filter(lp -> !Boolean.TRUE.equals(lp.isDisabled()) && name.equals(lp.getName()))
-        .findFirst();
+        .filter(lp -> Boolean.TRUE.equals(lp.isEnabled()) && name.equals(lp.getName())).findFirst();
   }
 
   private DelegatedAccessExternalProvider map(TenantLoginProvider provider) {
-    if (Boolean.TRUE.equals(provider.isDisabled())) {
+    if (!Boolean.TRUE.equals(provider.isEnabled())) {
       return null;
     }
-    if (provider.getSource() == TenantLoginProviderSourceOptions.GOOGLE) {
+    if (provider.getProviderType() == TenantLoginProviderProviderTypeOptions.GOOGLE) {
       return mapGoogle(provider);
     }
-    if (provider.getSource() == TenantLoginProviderSourceOptions.SAML) {
+    if (provider.getProviderType() == TenantLoginProviderProviderTypeOptions.SAML) {
       return mapSaml(provider);
     }
     return null;

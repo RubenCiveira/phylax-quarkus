@@ -3,8 +3,8 @@ Uid* (string)::
 A number to identify the db record
 User* (xref:#entidad-user[User])::
 El user de user accepted terms of use
-Conditions* (xref:#entidad-tenant-terms-of-use[TenantTermsOfUse])::
-El conditions de user accepted terms of use
+Terms of use* (xref:#entidad-tenant-terms-of-use[TenantTermsOfUse])::
+El terms of use de user accepted terms of use
 Accept date (datetime)::
 El accept date de user accepted terms of use
 Ip address (string)::

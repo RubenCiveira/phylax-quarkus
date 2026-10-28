@@ -10,12 +10,12 @@ email:string
 welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
-approve:UserApproveOptions
+approvalStatus:UserApprovalStatusOptions
 temporalPassword:boolean
 useSecondFactors:boolean
 secondFactorSeed:string
 blockedUntil:datetime
-provider:string
+federatedProvider:string
 version:integer
 list()
 retrieve()
@@ -37,8 +37,8 @@ verifyEmail()
 class access.TenantLoginProvider{
 uid:string
 name:string
-source:TenantLoginProviderSourceOptions
-disabled:boolean
+providerType:TenantLoginProviderProviderTypeOptions
+enabled:boolean
 directAccess:boolean
 publicKey:string
 privateKey:string

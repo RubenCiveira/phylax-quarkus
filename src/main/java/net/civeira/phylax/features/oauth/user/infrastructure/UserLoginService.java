@@ -18,23 +18,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
 import net.civeira.phylax.common.crypto.PasswordHasher;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyFilter;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyQueryRepositoryGateway;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientFilter;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientQueryRepositoryGateway;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServer;
+import net.civeira.phylax.features.access.resourceserver.domain.gateway.ResourceServerFilter;
+import net.civeira.phylax.features.access.resourceserver.domain.gateway.ResourceServerQueryRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipFilter;
 import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipQueryRepositoryGateway;
+import net.civeira.phylax.features.access.userloginthrottle.domain.UserLoginThrottle;
+import net.civeira.phylax.features.access.userloginthrottle.domain.UserLoginThrottleChangeSet;
+import net.civeira.phylax.features.access.userloginthrottle.domain.gateway.UserLoginThrottleCommandRepositoryGateway;
+import net.civeira.phylax.features.access.userloginthrottle.domain.gateway.UserLoginThrottleFilter;
 import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssignment;
 import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentFilter;
 import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentQueryRepositoryGateway;
@@ -44,7 +44,7 @@ import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationDat
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
-import net.civeira.phylax.features.oauth.client.infrastructure.driven.TrustedClientPolicy;
+import net.civeira.phylax.features.oauth.client.infrastructure.driven.OauthClientPolicy;
 import net.civeira.phylax.features.oauth.consent.application.ScopesConsentUsecase;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.infrastructure.RequiredConsentService;
@@ -67,11 +67,11 @@ public class UserLoginService {
 
   private final UserRoleAssignmentQueryRepositoryGateway userRoles;
 
-  private final UserAccessTemporalCodeCommandRepositoryGateway codes;
+  private final UserLoginThrottleCommandRepositoryGateway codes;
 
-  private final TrustedClientQueryRepositoryGateway clients;
+  private final OauthClientQueryRepositoryGateway clients;
 
-  private final RelyingPartyQueryRepositoryGateway parties;
+  private final ResourceServerQueryRepositoryGateway parties;
 
   private final PasswordHasher passwordHasher;
 
@@ -165,22 +165,22 @@ public class UserLoginService {
       List<String> audGroups = new ArrayList<>(forAllClient);
 
       // The client the tenant sees for that code: its own, else a global one (task 0.5).
-      Optional<TrustedClient> isClient = TrustedClientPolicy
-          .select(clients.list(TrustedClientFilter.builder().code(aud).build()), tenant.getUid());
+      Optional<OauthClient> isClient = OauthClientPolicy
+          .select(clients.list(OauthClientFilter.builder().code(aud).build()), tenant.getUid());
       if (isClient.isPresent()) {
-        audRoles.addAll(rolesFromIdentities(userRoles.list(
-            UserRoleAssignmentFilter.builder().user(user).trustedClient(isClient.get()).build()),
-            tenant));
-      }
-      Optional<RelyingParty> isParty = parties.find(RelyingPartyFilter.builder().code(aud).build());
-      if (isParty.isPresent()) {
-        audGroups.addAll(groupsFromIdentities(
-            userGroups.list(
-                UserGroupMembershipFilter.builder().user(user).relyingParty(isParty.get()).build()),
-            tenant));
         audRoles.addAll(rolesFromIdentities(
             userRoles.list(
-                UserRoleAssignmentFilter.builder().user(user).relyingParty(isParty.get()).build()),
+                UserRoleAssignmentFilter.builder().user(user).oauthClient(isClient.get()).build()),
+            tenant));
+      }
+      Optional<ResourceServer> isParty =
+          parties.find(ResourceServerFilter.builder().code(aud).build());
+      if (isParty.isPresent()) {
+        audGroups.addAll(groupsFromIdentities(userGroups.list(
+            UserGroupMembershipFilter.builder().user(user).resourceServer(isParty.get()).build()),
+            tenant));
+        audRoles.addAll(rolesFromIdentities(userRoles.list(
+            UserRoleAssignmentFilter.builder().user(user).resourceServer(isParty.get()).build()),
             tenant));
       }
       if (!audRoles.isEmpty()) {
@@ -271,14 +271,14 @@ public class UserLoginService {
   }
 
   private void markLoginFails(User user, boolean fail) {
-    UserAccessTemporalCodeFilter filter = UserAccessTemporalCodeFilter.builder().user(user).build();
-    Optional<UserAccessTemporalCode> find = codes.findForUpdate(filter);
-    UserAccessTemporalCode code;
+    UserLoginThrottleFilter filter = UserLoginThrottleFilter.builder().user(user).build();
+    Optional<UserLoginThrottle> find = codes.findForUpdate(filter);
+    UserLoginThrottle code;
     if (find.isPresent()) {
       code = find.get();
     } else {
-      code = codes.create(
-          UserAccessTemporalCode.create(new UserAccessTemporalCodeChangeSet().newUid().user(user)));
+      code = codes
+          .create(UserLoginThrottle.create(new UserLoginThrottleChangeSet().newUid().user(user)));
     }
     if (fail) {
       int val = code.getFailedLoginAttempts().orElse(Integer.valueOf(0)).intValue() + 1;

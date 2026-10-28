@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 
 class TenantTermsOfUseChangeSetUnitTest {
@@ -18,9 +18,9 @@ class TenantTermsOfUseChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_tenant_terms_of_use_change_set_builder() {
-    TenantTermsOfUseChangeSet one = new TenantTermsOfUseChangeSet()
-        .uid("one").tenant(TenantReference.of("one")).relyingParty(RelyingPartyReference.of("one"))
-        .text("one").enabled(true).attached("file_1").activationDate(LocalDateTime
+    TenantTermsOfUseChangeSet one = new TenantTermsOfUseChangeSet().uid("one")
+        .tenant(TenantReference.of("one")).resourceServer(ResourceServerReference.of("one"))
+        .text("one").enabled(true).document("file_1").activationDate(LocalDateTime
             .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
         .version(1).newUid();
     one.uid("two");
@@ -35,13 +35,13 @@ class TenantTermsOfUseChangeSetUnitTest {
     one.unset("tenant");
     Assertions.assertFalse(one.getTenant().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(RelyingPartyReference.of("one"), one.getRelyingParty().get(),
+    Assertions.assertEquals(ResourceServerReference.of("one"), one.getResourceServer().get(),
         "Value must equals to the intial value");
-    one.relyingParty(RelyingPartyReference.of("two"));
-    Assertions.assertEquals(RelyingPartyReference.of("two"), one.getRelyingParty().get(),
+    one.resourceServer(ResourceServerReference.of("two"));
+    Assertions.assertEquals(ResourceServerReference.of("two"), one.getResourceServer().get(),
         "Value must equals to the assigned value");
-    one.unset("relyingParty");
-    Assertions.assertFalse(one.getRelyingParty().isPresent(),
+    one.unset("resourceServer");
+    Assertions.assertFalse(one.getResourceServer().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getText().get(), "Value must equals to the intial value");
     one.text("two");
@@ -55,13 +55,13 @@ class TenantTermsOfUseChangeSetUnitTest {
     one.unset("enabled");
     Assertions.assertFalse(one.getEnabled().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("file_1", one.getAttached().get(),
+    Assertions.assertEquals("file_1", one.getDocument().get(),
         "Value must equals to the intial value");
-    one.attached("file_2");
-    Assertions.assertEquals("file_2", one.getAttached().get(),
+    one.document("file_2");
+    Assertions.assertEquals("file_2", one.getDocument().get(),
         "Value must equals to the assigned value");
-    one.unset("attached");
-    Assertions.assertFalse(one.getAttached().isPresent(),
+    one.unset("document");
+    Assertions.assertFalse(one.getDocument().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),

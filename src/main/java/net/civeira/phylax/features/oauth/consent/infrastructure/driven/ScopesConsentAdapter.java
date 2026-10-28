@@ -10,22 +10,22 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientFilter;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopes;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopesChangeSet;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesCommandRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesQueryRepositoryGateway;
+import net.civeira.phylax.features.access.userscopeconsent.domain.UserScopeConsent;
+import net.civeira.phylax.features.access.userscopeconsent.domain.UserScopeConsentChangeSet;
+import net.civeira.phylax.features.access.userscopeconsent.domain.gateway.UserScopeConsentCommandRepositoryGateway;
+import net.civeira.phylax.features.access.userscopeconsent.domain.gateway.UserScopeConsentFilter;
+import net.civeira.phylax.features.access.userscopeconsent.domain.gateway.UserScopeConsentQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationChallenge;
-import net.civeira.phylax.features.oauth.client.infrastructure.driven.TrustedClientPolicy;
+import net.civeira.phylax.features.oauth.client.infrastructure.driven.OauthClientPolicy;
 import net.civeira.phylax.features.oauth.consent.domain.ClientConsentSummary;
 import net.civeira.phylax.features.oauth.consent.domain.ScopePermission;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopeApprovalGateway;
@@ -34,9 +34,9 @@ import net.civeira.phylax.features.oauth.consent.domain.gateway.ScopesConsentGat
 /**
  * ACL adapter that bridges the OIDC scope consent protocol port to the Access bounded context.
  *
- * Resolves username → User UID and clientId → TrustedClient UID before operating on
- * UserConsentedScopes records. Also implements ScopeApprovalGateway so a single bean handles both
- * the persistence port and the OIDC step port.
+ * Resolves username → User UID and clientId → OauthClient UID before operating on UserScopeConsent
+ * records. Also implements ScopeApprovalGateway so a single bean handles both the persistence port
+ * and the OIDC step port.
  */
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -44,9 +44,9 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
 
   private final UserQueryRepositoryGateway users;
   private final TenantQueryRepositoryGateway tenants;
-  private final TrustedClientQueryRepositoryGateway clients;
-  private final UserConsentedScopesQueryRepositoryGateway consentRead;
-  private final UserConsentedScopesCommandRepositoryGateway consentWrite;
+  private final OauthClientQueryRepositoryGateway clients;
+  private final UserScopeConsentQueryRepositoryGateway consentRead;
+  private final UserScopeConsentCommandRepositoryGateway consentWrite;
 
   // -------------------------------------------------------------------------
   // ScopesConsentGateway
@@ -62,7 +62,7 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     if (user == null) {
       return toPermissions(scopes);
     }
-    TrustedClient client = client(tenant, clientId).orElse(null);
+    OauthClient client = client(tenant, clientId).orElse(null);
     if (client == null) {
       return toPermissions(scopes);
     }
@@ -80,7 +80,7 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     if (user == null) {
       return;
     }
-    TrustedClient client = client(tenant, clientId).orElse(null);
+    OauthClient client = client(tenant, clientId).orElse(null);
     if (client == null) {
       return;
     }
@@ -93,18 +93,18 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     if (user == null) {
       return List.of();
     }
-    List<UserConsentedScopes> consents =
-        consentRead.list(UserConsentedScopesFilter.builder().user(user).build()).stream()
+    List<UserScopeConsent> consents =
+        consentRead.list(UserScopeConsentFilter.builder().user(user).build()).stream()
             .filter(c -> Boolean.TRUE.equals(c.isGranted())).toList();
 
-    Map<String, List<UserConsentedScopes>> byClient =
-        consents.stream().collect(Collectors.groupingBy(UserConsentedScopes::getTrustedClientUid));
+    Map<String, List<UserScopeConsent>> byClient =
+        consents.stream().collect(Collectors.groupingBy(UserScopeConsent::getOauthClientUid));
 
     return byClient.entrySet().stream().map(entry -> {
       String clientUid = entry.getKey();
-      List<UserConsentedScopes> clientConsents = entry.getValue();
-      TrustedClient client =
-          clients.find(TrustedClientFilter.builder().uid(clientUid).build()).orElse(null);
+      List<UserScopeConsent> clientConsents = entry.getValue();
+      OauthClient client =
+          clients.find(OauthClientFilter.builder().uid(clientUid).build()).orElse(null);
       List<String> scopes = clientConsents.stream().map(c -> c.getScope().orElse(null))
           .filter(s -> s != null).sorted().toList();
       OffsetDateTime lastAt = clientConsents.stream().map(c -> c.getDecisionAt().orElse(null))
@@ -121,9 +121,9 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
     if (user == null) {
       return;
     }
-    List<UserConsentedScopes> consents = consentWrite.listForUpdate(UserConsentedScopesFilter
-        .builder().user(user).trustedClient(TrustedClientReference.of(clientUid)).build());
-    for (UserConsentedScopes consent : consents) {
+    List<UserScopeConsent> consents = consentWrite.listForUpdate(UserScopeConsentFilter.builder()
+        .user(user).oauthClient(OauthClientReference.of(clientUid)).build());
+    for (UserScopeConsent consent : consents) {
       consentWrite.delete(consent.delete());
     }
   }
@@ -135,8 +135,8 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
       return;
     }
     consentWrite
-        .listForUpdate(UserConsentedScopesFilter.builder().user(user)
-            .trustedClient(TrustedClientReference.of(clientUid)).build())
+        .listForUpdate(UserScopeConsentFilter.builder().user(user)
+            .oauthClient(OauthClientReference.of(clientUid)).build())
         .stream().filter(c -> scope.equals(c.getScope().orElse(null)))
         .forEach(c -> consentWrite.delete(c.delete()));
   }
@@ -163,13 +163,13 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
       return;
     }
     Optional<User> user = user(tenant, username);
-    Optional<TrustedClient> client = client(tenant, clientId);
+    Optional<OauthClient> client = client(tenant, clientId);
     if (user.isEmpty() || client.isEmpty()) {
       return;
     }
     consentWrite
-        .listForUpdate(UserConsentedScopesFilter.builder().user(user.get())
-            .trustedClient(client.get()).build())
+        .listForUpdate(
+            UserScopeConsentFilter.builder().user(user.get()).oauthClient(client.get()).build())
         .stream().filter(c -> scopes.contains(c.getScope().orElse(null)))
         .forEach(c -> consentWrite.delete(c.delete()));
   }
@@ -189,26 +189,24 @@ public class ScopesConsentAdapter implements ScopesConsentGateway, ScopeApproval
   /**
    * The client the tenant sees for a code: its own, else a global one (task 0.5).
    */
-  private Optional<TrustedClient> client(String tenant, String clientId) {
-    return tenants.find(TenantFilter.builder().name(tenant).build())
-        .flatMap(t -> TrustedClientPolicy.select(
-            clients.list(TrustedClientFilter.builder().code(clientId).build()), t.getUid()));
+  private Optional<OauthClient> client(String tenant, String clientId) {
+    return tenants.find(TenantFilter.builder().name(tenant).build()).flatMap(t -> OauthClientPolicy
+        .select(clients.list(OauthClientFilter.builder().code(clientId).build()), t.getUid()));
   }
 
-  private Set<String> loadGrantedScopes(User user, TrustedClient client) {
-    return consentRead
-        .list(UserConsentedScopesFilter.builder().user(user).trustedClient(client).build()).stream()
-        .filter(c -> Boolean.TRUE.equals(c.isGranted())).map(c -> c.getScope().orElse(null))
-        .filter(s -> s != null).collect(Collectors.toSet());
+  private Set<String> loadGrantedScopes(User user, OauthClient client) {
+    return consentRead.list(UserScopeConsentFilter.builder().user(user).oauthClient(client).build())
+        .stream().filter(c -> Boolean.TRUE.equals(c.isGranted()))
+        .map(c -> c.getScope().orElse(null)).filter(s -> s != null).collect(Collectors.toSet());
   }
 
-  private void persistScopes(User user, TrustedClient client, List<String> scopes) {
+  private void persistScopes(User user, OauthClient client, List<String> scopes) {
     Set<String> existing = loadGrantedScopes(user, client);
     for (String scope : scopes) {
       if (!existing.contains(scope)) {
-        UserConsentedScopes consent =
-            UserConsentedScopes.create(new UserConsentedScopesChangeSet().newUid().user(user)
-                .trustedClient(client).scope(scope).granted(true).decisionAt(OffsetDateTime.now()));
+        UserScopeConsent consent =
+            UserScopeConsent.create(new UserScopeConsentChangeSet().newUid().user(user)
+                .oauthClient(client).scope(scope).granted(true).decisionAt(OffsetDateTime.now()));
         consentWrite.create(consent);
       }
     }

@@ -340,10 +340,10 @@ public class ProfileHtmlController {
         .list(UserAcceptedTermsOfUseFilter.builder().user(UserReference.of(userUid)).build());
     return accepted.stream().map(a -> {
       Optional<TenantTermsOfUse> terms =
-          termsGateway.retrieve(a.getConditionsUid(), Optional.empty());
-      String text = terms.map(TenantTermsOfUse::getText).orElse(a.getConditionsUid());
+          termsGateway.retrieve(a.getTermsOfUseUid(), Optional.empty());
+      String text = terms.map(TenantTermsOfUse::getText).orElse(a.getTermsOfUseUid());
       boolean outdated = terms.map(t -> !Boolean.TRUE.equals(t.isEnabled())).orElse(false);
-      return new AcceptedTermsSummary(a.getConditionsUid(), text, a.getAcceptDate(), outdated);
+      return new AcceptedTermsSummary(a.getTermsOfUseUid(), text, a.getAcceptDate(), outdated);
     }).toList();
   }
 

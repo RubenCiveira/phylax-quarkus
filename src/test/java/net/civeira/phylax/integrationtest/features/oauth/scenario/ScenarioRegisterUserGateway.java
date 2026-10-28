@@ -20,7 +20,7 @@ import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtur
 @ApplicationScoped
 public class ScenarioRegisterUserGateway implements RegisterUserGateway {
 
-  private boolean allowRegister = true;
+  private boolean selfRegistrationEnabled = true;
   private Supplier<RegistrationResult> requestBehavior = () -> RegistrationResult.pending();
   private BiFunction<String, String, Optional<String>> verifyBehavior =
       (_, code) -> OidcTestFixtures.REGISTER_CODE.equals(code)
@@ -35,8 +35,8 @@ public class ScenarioRegisterUserGateway implements RegisterUserGateway {
   private String lastUrlBase;
   private String lastCode;
 
-  public void setAllowRegister(boolean allowRegister) {
-    this.allowRegister = allowRegister;
+  public void setSelfRegistrationEnabled(boolean selfRegistrationEnabled) {
+    this.selfRegistrationEnabled = selfRegistrationEnabled;
   }
 
   public void whenRequestRegister(Supplier<RegistrationResult> behavior) {
@@ -76,7 +76,7 @@ public class ScenarioRegisterUserGateway implements RegisterUserGateway {
   }
 
   public void reset() {
-    allowRegister = true;
+    selfRegistrationEnabled = true;
     requestBehavior = () -> RegistrationResult.pending();
     verifyBehavior = (_, code) -> OidcTestFixtures.REGISTER_CODE.equals(code)
         ? Optional.of(OidcTestFixtures.USERNAME)
@@ -91,8 +91,8 @@ public class ScenarioRegisterUserGateway implements RegisterUserGateway {
   }
 
   @Override
-  public boolean allowRegister(String tenant) {
-    return allowRegister;
+  public boolean selfRegistrationEnabled(String tenant) {
+    return selfRegistrationEnabled;
   }
 
   @Override

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 
 class RoleChangeSetUnitTest {
 
@@ -15,7 +15,7 @@ class RoleChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_role_change_set_builder() {
     RoleChangeSet one = new RoleChangeSet().uid("one").name("one")
-        .relyingParty(RelyingPartyReference.of("one")).version(1).newUid();
+        .resourceServer(ResourceServerReference.of("one")).version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -25,13 +25,13 @@ class RoleChangeSetUnitTest {
     Assertions.assertEquals("two", one.getName().get(), "Value must equals to the assigned value");
     one.unset("name");
     Assertions.assertFalse(one.getName().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(RelyingPartyReference.of("one"), one.getRelyingParty().get(),
+    Assertions.assertEquals(ResourceServerReference.of("one"), one.getResourceServer().get(),
         "Value must equals to the intial value");
-    one.relyingParty(RelyingPartyReference.of("two"));
-    Assertions.assertEquals(RelyingPartyReference.of("two"), one.getRelyingParty().get(),
+    one.resourceServer(ResourceServerReference.of("two"));
+    Assertions.assertEquals(ResourceServerReference.of("two"), one.getResourceServer().get(),
         "Value must equals to the assigned value");
-    one.unset("relyingParty");
-    Assertions.assertFalse(one.getRelyingParty().isPresent(),
+    one.unset("resourceServer");
+    Assertions.assertFalse(one.getResourceServer().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(0, one.getVersion().get(), "Value must equals to the intial value");
     one.version(2);

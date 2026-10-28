@@ -158,7 +158,7 @@ public class LoginStep implements OidcStep {
             + (recoverStep.allowRecover(request.getTenant()) ? "<form method=\"POST\">"
                 + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />" + "<p>"
                 + recoverText + "</p></form>" : "")
-            + (registrationStep.allowRegister(request.getTenant())
+            + (registrationStep.selfRegistrationEnabled(request.getTenant())
                 ? "<form method=\"POST\">"
                     + "<input type=\"hidden\" name=\"step\" value=\"show-register\" />" + "<p>"
                     + "<input class=\"inline\" type=\"submit\" value=\""

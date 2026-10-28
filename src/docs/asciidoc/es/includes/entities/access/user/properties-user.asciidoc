@@ -15,8 +15,8 @@ Email verified (boolean)::
 Indicates whether the user has confirmed ownership of their email address       by clicking the verification link sent at registration. Used by the OIDC flow to emit       the email_verified claim and optionally block login until confirmed.
 Enabled (boolean)::
 A disabled user cant login on the system. On his login attempts, he will receive a specific warn of his disabled account.
-Approve (UserApproveOptions)::
-El approve de userLos posibles valores que toma el campo son:
+Approval status (UserApprovalStatusOptions)::
+El approval status de userLos posibles valores que toma el campo son:
  * UNVERIFIED
  * PENDING
  * ACCEPTED
@@ -30,7 +30,7 @@ Second factor seed (string)::
 the seed used to the otp login
 Blocked until (datetime)::
 A blocked user cant login on the system, until these date. On his login attempts, the user will receive a generic not allowed message.
-Provider (string)::
+Federated provider (string)::
 Si se identificó con un proveedor, se marca con cual (aunque el provvedor cambie luego)
 Version (integer)::
 Campo con el número de version de user para controlar bloqueos optimistas

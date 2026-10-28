@@ -18,14 +18,14 @@ import com.auth0.jwt.JWT;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.features.access.oauthclient.domain.AllowedLoginRedirects;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientSubjectTypeOptions;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientFilter;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
@@ -45,7 +45,7 @@ public class BackChannelLogoutDispatcher {
 
   private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(5);
 
-  private final TrustedClientQueryRepositoryGateway clients;
+  private final OauthClientQueryRepositoryGateway clients;
   private final TenantQueryRepositoryGateway tenants;
   private final TokenSigner signer;
   private final SubjectResolver subjects;
@@ -71,10 +71,10 @@ public class BackChannelLogoutDispatcher {
       return;
     }
 
-    for (TrustedClient client : recipients(tenant)) {
+    for (OauthClient client : recipients(tenant)) {
       if (!participants.contains(client.getCode()))
         continue;
-      client.getBackChannelLogoutUri().filter(uri -> !uri.isBlank())
+      client.getBackchannelLogoutUri().filter(uri -> !uri.isBlank())
           .ifPresent(uri -> sendLogoutToken(tenant, issuer, subjectFor(client, userSub), sessionId,
               client.getCode(), uri));
     }
@@ -91,28 +91,29 @@ public class BackChannelLogoutDispatcher {
    * The {@code sub} the client knows: pairwise when it registered it (task 4.4). Without a pairwise
    * subject the token is sent with none of the user's identifiers, only the {@code sid}.
    */
-  private String subjectFor(TrustedClient client, String userSub) {
+  private String subjectFor(OauthClient client, String userSub) {
     try {
-      return subjects.subject(TrustedClientSubjectTypeOptions.PAIRWISE == client.getSubjectType(),
+      return subjects.subject(OauthClientSubjectTypeOptions.PAIRWISE == client.getSubjectType(),
           client.getSectorIdentifierUri().orElse(null),
-          client.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList(), userSub);
+          client.getAllowedLoginRedirects().stream().map(AllowedLoginRedirects::getUrl).toList(),
+          userSub);
     } catch (IllegalStateException ex) {
       log.warn("No pairwise subject for client {}: {}", client.getCode(), ex.getMessage());
       return null;
     }
   }
 
-  List<TrustedClient> recipients(String tenant) {
+  List<OauthClient> recipients(String tenant) {
     Optional<String> tenantUid =
         tenants.find(TenantFilter.builder().name(tenant).build()).map(Tenant::getUid);
     if (tenantUid.isEmpty()) {
       return List.of();
     }
-    // The generated withBackChannelUrl filter currently selects IS NULL; filter non-empty
+    // The generated withBackchannelLogoutUrl filter currently selects IS NULL; filter non-empty
     // registered URIs here so no RP is silently lost from a logout notification.
-    return clients.list(TrustedClientFilter.builder().build()).stream()
+    return clients.list(OauthClientFilter.builder().build()).stream()
         .filter(c -> c.getTenantUid().map(tenantUid.get()::equals).orElse(true))
-        .filter(c -> c.getBackChannelLogoutUri().filter(uri -> !uri.isBlank()).isPresent())
+        .filter(c -> c.getBackchannelLogoutUri().filter(uri -> !uri.isBlank()).isPresent())
         .toList();
   }
 

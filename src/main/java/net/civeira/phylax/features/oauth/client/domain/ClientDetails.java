@@ -73,7 +73,7 @@ public class ClientDetails {
    */
   @Builder.Default
   @NonNull
-  private final List<String> allowedScopesM2m = List.of();
+  private final List<String> clientCredentialsScopes = List.of();
 
   /**
    * Whether this client must start every authorization request with PAR (RFC 9126 §6).
@@ -148,13 +148,13 @@ public class ClientDetails {
   /**
    * Whether this client is allowed to call the token introspection endpoint.
    */
-  private final boolean isResourceServer;
+  private final boolean introspectionAllowed;
 
   /**
    * Access token TTL in seconds for machine-to-machine flows. Null means fall back to global
    * configuration.
    */
-  private final Integer m2mTokenTtlSeconds;
+  private final Integer clientCredentialsTokenTtlSeconds;
 
   /**
    * Algorithm of the client's {@code private_key_jwt} assertions (task 3.2). Null when not
@@ -320,12 +320,12 @@ public class ClientDetails {
    * @return the granted scopes, possibly empty
    */
   public List<String> m2mScopes(List<String> requested) {
-    boolean wildcard = allowedScopesM2m.contains(WILDCARD);
+    boolean wildcard = clientCredentialsScopes.contains(WILDCARD);
     if (requested.isEmpty()) {
-      return wildcard ? List.of() : List.copyOf(allowedScopesM2m);
+      return wildcard ? List.of() : List.copyOf(clientCredentialsScopes);
     }
     return wildcard ? List.copyOf(requested)
-        : requested.stream().filter(allowedScopesM2m::contains).toList();
+        : requested.stream().filter(clientCredentialsScopes::contains).toList();
   }
 
   private static Set<String> parts(String value) {

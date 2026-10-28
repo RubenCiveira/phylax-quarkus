@@ -51,7 +51,7 @@ public class DcrInitialAccessTokenSqlAdapter implements DcrInitialAccessTokenGat
           return Optional.empty();
         }
         return Optional.of(new DcrInitialAccessToken(rs.getString(1),
-            TrustedClientPolicy.parseList(rs.getString(2))));
+            OauthClientPolicy.parseList(rs.getString(2))));
       }
     } catch (SQLException ex) {
       throw new IllegalStateException(ex);

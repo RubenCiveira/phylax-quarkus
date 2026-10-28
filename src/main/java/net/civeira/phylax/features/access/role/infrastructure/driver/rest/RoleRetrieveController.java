@@ -9,7 +9,7 @@ import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.role.application.usecase.retrieve.RoleRetrieveProjection;
 import net.civeira.phylax.features.access.role.application.usecase.retrieve.RoleRetrieveUsecase;
 import net.civeira.phylax.features.access.role.domain.RoleReference;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.RoleApiDto;
 
 @RequiredArgsConstructor
@@ -49,7 +49,7 @@ public class RoleRetrieveController {
     RoleApiDto roleApiDto = new RoleApiDto();
     roleApiDto.setUid(dto.getUid());
     roleApiDto.setName(dto.getName());
-    roleApiDto.setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+    roleApiDto.setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     roleApiDto.setVersion(dto.getVersion());
     return roleApiDto;
   }

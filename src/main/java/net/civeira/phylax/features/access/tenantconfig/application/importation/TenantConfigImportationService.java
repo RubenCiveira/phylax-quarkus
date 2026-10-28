@@ -15,18 +15,18 @@ import net.civeira.phylax.features.access.tenantconfig.domain.TenantConfigChange
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigCommandRepositoryGateway;
 import net.civeira.phylax.features.access.tenantconfig.domain.gateway.TenantConfigFilter;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowPasswordGrantVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRecoverPassVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRegisterVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AutoApproveRegisteredUsersVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DynamicRegistrationPolicyVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnableRegisterUsersVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.ForceMfaVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.InvitationExpiryDaysVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkExpiryMinutesVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.PasswordRecoveryEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenMaxLifetimeSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequireEmailVerificationVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequirePushedAuthorizationRequestsVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SelfRegistrationEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SessionSsoTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnEnabledVO;
 
@@ -93,11 +93,11 @@ public class TenantConfigImportationService {
       final ConstraintFailList fails, final TenantConfigImportationRelatedResolver resolver) {
     TenantConfigChangeSet change = new TenantConfigChangeSet();
     change = readTenant(change, row, fails, resolver);
-    change = readInnerLabel(change, row, fails, resolver);
+    change = readDisplayName(change, row, fails, resolver);
     change = readForceMfa(change, row, fails, resolver);
     change = readDynamicRegistrationPolicy(change, row, fails, resolver);
-    change = readAllowRegister(change, row, fails, resolver);
-    change = readEnableRegisterUsers(change, row, fails, resolver);
+    change = readSelfRegistrationEnabled(change, row, fails, resolver);
+    change = readAutoApproveRegisteredUsers(change, row, fails, resolver);
     change = readMagicLinkEnabled(change, row, fails, resolver);
     change = readRequireEmailVerification(change, row, fails, resolver);
     change = readInvitationExpiryDays(change, row, fails, resolver);
@@ -113,12 +113,12 @@ public class TenantConfigImportationService {
     change = readWebauthnEnabled(change, row, fails, resolver);
     change = readWebauthnRpId(change, row, fails, resolver);
     change = readWebauthnRpName(change, row, fails, resolver);
-    change = readWelcomeEmail(change, row, fails, resolver);
-    change = readRegisteredEmail(change, row, fails, resolver);
-    change = readDisabledUserEmail(change, row, fails, resolver);
-    change = readEnabledUserEmail(change, row, fails, resolver);
-    change = readAllowRecoverPass(change, row, fails, resolver);
-    change = readRecoverPassEmail(change, row, fails, resolver);
+    change = readWelcomeEmailTemplate(change, row, fails, resolver);
+    change = readRegisteredEmailTemplate(change, row, fails, resolver);
+    change = readDisabledUserEmailTemplate(change, row, fails, resolver);
+    change = readEnabledUserEmailTemplate(change, row, fails, resolver);
+    change = readPasswordRecoveryEnabled(change, row, fails, resolver);
+    change = readRecoverPassEmailTemplate(change, row, fails, resolver);
     return change;
   }
 
@@ -169,33 +169,15 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readAllowRecoverPass(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readAutoApproveRegisteredUsers(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String allowRecoverPass = row.get("allowRecoverPass");
-    if (allowRecoverPass != null) {
-      return change.allowRecoverPass(AllowRecoverPassVO.tryFromString(allowRecoverPass, fails));
+    String autoApproveRegisteredUsers = row.get("autoApproveRegisteredUsers");
+    if (autoApproveRegisteredUsers != null) {
+      return change.autoApproveRegisteredUsers(
+          AutoApproveRegisteredUsersVO.tryFromString(autoApproveRegisteredUsers, fails));
     } else {
-      return change.unsetAllowRecoverPass();
-    }
-  }
-
-  /**
-   * @autogenerated VisibilityFilterGenerator
-   * @param change
-   * @param row
-   * @param fails
-   * @param resolver
-   * @return
-   */
-  private TenantConfigChangeSet readAllowRegister(final TenantConfigChangeSet change,
-      final Map<String, String> row, final ConstraintFailList fails,
-      final TenantConfigImportationRelatedResolver resolver) {
-    String allowRegister = row.get("allowRegister");
-    if (allowRegister != null) {
-      return change.allowRegister(AllowRegisterVO.tryFromString(allowRegister, fails));
-    } else {
-      return change.unsetAllowRegister();
+      return change.unsetAutoApproveRegisteredUsers();
     }
   }
 
@@ -245,14 +227,33 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readDisabledUserEmail(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readDisabledUserEmailTemplate(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String disabledUserEmail = row.get("disabledUserEmail");
-    if (disabledUserEmail != null) {
-      return change.disabledUserEmail(disabledUserEmail);
+    String disabledUserEmailTemplate = row.get("disabledUserEmailTemplate");
+    if (disabledUserEmailTemplate != null) {
+      return change.disabledUserEmailTemplate(disabledUserEmailTemplate);
     } else {
-      return change.unsetDisabledUserEmail();
+      return change.unsetDisabledUserEmailTemplate();
+    }
+  }
+
+  /**
+   * @autogenerated VisibilityFilterGenerator
+   * @param change
+   * @param row
+   * @param fails
+   * @param resolver
+   * @return
+   */
+  private TenantConfigChangeSet readDisplayName(final TenantConfigChangeSet change,
+      final Map<String, String> row, final ConstraintFailList fails,
+      final TenantConfigImportationRelatedResolver resolver) {
+    String displayName = row.get("displayName");
+    if (displayName != null) {
+      return change.displayName(displayName);
+    } else {
+      return change.unsetDisplayName();
     }
   }
 
@@ -284,34 +285,14 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readEnableRegisterUsers(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readEnabledUserEmailTemplate(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String enableRegisterUsers = row.get("enableRegisterUsers");
-    if (enableRegisterUsers != null) {
-      return change
-          .enableRegisterUsers(EnableRegisterUsersVO.tryFromString(enableRegisterUsers, fails));
+    String enabledUserEmailTemplate = row.get("enabledUserEmailTemplate");
+    if (enabledUserEmailTemplate != null) {
+      return change.enabledUserEmailTemplate(enabledUserEmailTemplate);
     } else {
-      return change.unsetEnableRegisterUsers();
-    }
-  }
-
-  /**
-   * @autogenerated VisibilityFilterGenerator
-   * @param change
-   * @param row
-   * @param fails
-   * @param resolver
-   * @return
-   */
-  private TenantConfigChangeSet readEnabledUserEmail(final TenantConfigChangeSet change,
-      final Map<String, String> row, final ConstraintFailList fails,
-      final TenantConfigImportationRelatedResolver resolver) {
-    String enabledUserEmail = row.get("enabledUserEmail");
-    if (enabledUserEmail != null) {
-      return change.enabledUserEmail(enabledUserEmail);
-    } else {
-      return change.unsetEnabledUserEmail();
+      return change.unsetEnabledUserEmailTemplate();
     }
   }
 
@@ -331,25 +312,6 @@ public class TenantConfigImportationService {
       return change.forceMfa(ForceMfaVO.tryFromString(forceMfa, fails));
     } else {
       return change.unsetForceMfa();
-    }
-  }
-
-  /**
-   * @autogenerated VisibilityFilterGenerator
-   * @param change
-   * @param row
-   * @param fails
-   * @param resolver
-   * @return
-   */
-  private TenantConfigChangeSet readInnerLabel(final TenantConfigChangeSet change,
-      final Map<String, String> row, final ConstraintFailList fails,
-      final TenantConfigImportationRelatedResolver resolver) {
-    String innerLabel = row.get("innerLabel");
-    if (innerLabel != null) {
-      return change.innerLabel(innerLabel);
-    } else {
-      return change.unsetInnerLabel();
     }
   }
 
@@ -420,14 +382,34 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readRecoverPassEmail(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readPasswordRecoveryEnabled(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String recoverPassEmail = row.get("recoverPassEmail");
-    if (recoverPassEmail != null) {
-      return change.recoverPassEmail(recoverPassEmail);
+    String passwordRecoveryEnabled = row.get("passwordRecoveryEnabled");
+    if (passwordRecoveryEnabled != null) {
+      return change.passwordRecoveryEnabled(
+          PasswordRecoveryEnabledVO.tryFromString(passwordRecoveryEnabled, fails));
     } else {
-      return change.unsetRecoverPassEmail();
+      return change.unsetPasswordRecoveryEnabled();
+    }
+  }
+
+  /**
+   * @autogenerated VisibilityFilterGenerator
+   * @param change
+   * @param row
+   * @param fails
+   * @param resolver
+   * @return
+   */
+  private TenantConfigChangeSet readRecoverPassEmailTemplate(final TenantConfigChangeSet change,
+      final Map<String, String> row, final ConstraintFailList fails,
+      final TenantConfigImportationRelatedResolver resolver) {
+    String recoverPassEmailTemplate = row.get("recoverPassEmailTemplate");
+    if (recoverPassEmailTemplate != null) {
+      return change.recoverPassEmailTemplate(recoverPassEmailTemplate);
+    } else {
+      return change.unsetRecoverPassEmailTemplate();
     }
   }
 
@@ -479,14 +461,14 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readRegisteredEmail(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readRegisteredEmailTemplate(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String registeredEmail = row.get("registeredEmail");
-    if (registeredEmail != null) {
-      return change.registeredEmail(registeredEmail);
+    String registeredEmailTemplate = row.get("registeredEmailTemplate");
+    if (registeredEmailTemplate != null) {
+      return change.registeredEmailTemplate(registeredEmailTemplate);
     } else {
-      return change.unsetRegisteredEmail();
+      return change.unsetRegisteredEmailTemplate();
     }
   }
 
@@ -527,6 +509,26 @@ public class TenantConfigImportationService {
           .tryFromString(requirePushedAuthorizationRequests, fails));
     } else {
       return change.unsetRequirePushedAuthorizationRequests();
+    }
+  }
+
+  /**
+   * @autogenerated VisibilityFilterGenerator
+   * @param change
+   * @param row
+   * @param fails
+   * @param resolver
+   * @return
+   */
+  private TenantConfigChangeSet readSelfRegistrationEnabled(final TenantConfigChangeSet change,
+      final Map<String, String> row, final ConstraintFailList fails,
+      final TenantConfigImportationRelatedResolver resolver) {
+    String selfRegistrationEnabled = row.get("selfRegistrationEnabled");
+    if (selfRegistrationEnabled != null) {
+      return change.selfRegistrationEnabled(
+          SelfRegistrationEnabledVO.tryFromString(selfRegistrationEnabled, fails));
+    } else {
+      return change.unsetSelfRegistrationEnabled();
     }
   }
 
@@ -646,14 +648,14 @@ public class TenantConfigImportationService {
    * @param resolver
    * @return
    */
-  private TenantConfigChangeSet readWelcomeEmail(final TenantConfigChangeSet change,
+  private TenantConfigChangeSet readWelcomeEmailTemplate(final TenantConfigChangeSet change,
       final Map<String, String> row, final ConstraintFailList fails,
       final TenantConfigImportationRelatedResolver resolver) {
-    String welcomeEmail = row.get("welcomeEmail");
-    if (welcomeEmail != null) {
-      return change.welcomeEmail(welcomeEmail);
+    String welcomeEmailTemplate = row.get("welcomeEmailTemplate");
+    if (welcomeEmailTemplate != null) {
+      return change.welcomeEmailTemplate(welcomeEmailTemplate);
     } else {
-      return change.unsetWelcomeEmail();
+      return change.unsetWelcomeEmailTemplate();
     }
   }
 }

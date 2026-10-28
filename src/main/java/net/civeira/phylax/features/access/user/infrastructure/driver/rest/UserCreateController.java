@@ -10,10 +10,10 @@ import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.user.application.usecase.create.UserCreateInput;
 import net.civeira.phylax.features.access.user.application.usecase.create.UserCreateProjection;
 import net.civeira.phylax.features.access.user.application.usecase.create.UserCreateUsecase;
-import net.civeira.phylax.features.access.user.domain.UserApproveOptions;
+import net.civeira.phylax.features.access.user.domain.UserApprovalStatusOptions;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.UserApiDto;
-import net.civeira.phylax.generated.openapi.model.UserApiDto.ApproveEnum;
+import net.civeira.phylax.generated.openapi.model.UserApiDto.ApprovalStatusEnum;
 
 @RequiredArgsConstructor
 @ApplicationScoped
@@ -46,16 +46,16 @@ public class UserCreateController {
    * @param domainEnum
    * @return
    */
-  private ApproveEnum approveEnumToApi(UserApproveOptions domainEnum) {
-    ApproveEnum result;
-    if (domainEnum == UserApproveOptions.UNVERIFIED) {
-      result = ApproveEnum.UNVERIFIED;
-    } else if (domainEnum == UserApproveOptions.PENDING) {
-      result = ApproveEnum.PENDING;
-    } else if (domainEnum == UserApproveOptions.ACCEPTED) {
-      result = ApproveEnum.ACCEPTED;
-    } else if (domainEnum == UserApproveOptions.REJECTED) {
-      result = ApproveEnum.REJECTED;
+  private ApprovalStatusEnum approvalStatusEnumToApi(UserApprovalStatusOptions domainEnum) {
+    ApprovalStatusEnum result;
+    if (domainEnum == UserApprovalStatusOptions.UNVERIFIED) {
+      result = ApprovalStatusEnum.UNVERIFIED;
+    } else if (domainEnum == UserApprovalStatusOptions.PENDING) {
+      result = ApprovalStatusEnum.PENDING;
+    } else if (domainEnum == UserApprovalStatusOptions.ACCEPTED) {
+      result = ApprovalStatusEnum.ACCEPTED;
+    } else if (domainEnum == UserApprovalStatusOptions.REJECTED) {
+      result = ApprovalStatusEnum.REJECTED;
     } else {
       result = null;
     }
@@ -67,16 +67,16 @@ public class UserCreateController {
    * @param apiEnum
    * @return
    */
-  private UserApproveOptions approveEnumToDomain(ApproveEnum apiEnum) {
-    UserApproveOptions result;
-    if (apiEnum == ApproveEnum.UNVERIFIED) {
-      result = UserApproveOptions.UNVERIFIED;
-    } else if (apiEnum == ApproveEnum.PENDING) {
-      result = UserApproveOptions.PENDING;
-    } else if (apiEnum == ApproveEnum.ACCEPTED) {
-      result = UserApproveOptions.ACCEPTED;
-    } else if (apiEnum == ApproveEnum.REJECTED) {
-      result = UserApproveOptions.REJECTED;
+  private UserApprovalStatusOptions approvalStatusEnumToDomain(ApprovalStatusEnum apiEnum) {
+    UserApprovalStatusOptions result;
+    if (apiEnum == ApprovalStatusEnum.UNVERIFIED) {
+      result = UserApprovalStatusOptions.UNVERIFIED;
+    } else if (apiEnum == ApprovalStatusEnum.PENDING) {
+      result = UserApprovalStatusOptions.PENDING;
+    } else if (apiEnum == ApprovalStatusEnum.ACCEPTED) {
+      result = UserApprovalStatusOptions.ACCEPTED;
+    } else if (apiEnum == ApprovalStatusEnum.REJECTED) {
+      result = UserApprovalStatusOptions.REJECTED;
     } else if (null == apiEnum) {
       result = null;
     } else {
@@ -100,12 +100,12 @@ public class UserCreateController {
     userApiDto.setWelcomeAt(dto.getWelcomeAt());
     userApiDto.setEmailVerified(dto.getEmailVerified());
     userApiDto.setEnabled(dto.getEnabled());
-    userApiDto.setApprove(approveEnumToApi(dto.getApprove()));
+    userApiDto.setApprovalStatus(approvalStatusEnumToApi(dto.getApprovalStatus()));
     userApiDto.setTemporalPassword(dto.getTemporalPassword());
     userApiDto.setUseSecondFactors(dto.getUseSecondFactors());
     userApiDto.setSecondFactorSeed("*****");
     userApiDto.setBlockedUntil(dto.getBlockedUntil());
-    userApiDto.setProvider(dto.getProvider());
+    userApiDto.setFederatedProvider(dto.getFederatedProvider());
     userApiDto.setVersion(dto.getVersion());
     return userApiDto;
   }
@@ -141,8 +141,8 @@ public class UserCreateController {
     if (null != userApiDto.getEnabled()) {
       dto.setEnabled(userApiDto.getEnabled());
     }
-    if (null != userApiDto.getApprove()) {
-      dto.setApprove(approveEnumToDomain(userApiDto.getApprove()));
+    if (null != userApiDto.getApprovalStatus()) {
+      dto.setApprovalStatus(approvalStatusEnumToDomain(userApiDto.getApprovalStatus()));
     }
     if (null != userApiDto.getTemporalPassword()) {
       dto.setTemporalPassword(userApiDto.getTemporalPassword());
@@ -157,8 +157,8 @@ public class UserCreateController {
     if (null != userApiDto.getBlockedUntil()) {
       dto.setBlockedUntil(userApiDto.getBlockedUntil());
     }
-    if (null != userApiDto.getProvider()) {
-      dto.setProvider(userApiDto.getProvider());
+    if (null != userApiDto.getFederatedProvider()) {
+      dto.setFederatedProvider(userApiDto.getFederatedProvider());
     }
     if (null != userApiDto.getVersion()) {
       dto.setVersion(userApiDto.getVersion());

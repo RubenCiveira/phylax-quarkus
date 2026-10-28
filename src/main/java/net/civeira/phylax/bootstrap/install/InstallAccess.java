@@ -16,23 +16,23 @@ import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClientChangeSet;
 import net.civeira.phylax.features.access.apikeyclient.domain.gateway.ApiKeyClientCommandRepositoryGateway;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyChangeSet;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyCommandRepositoryGateway;
+import net.civeira.phylax.features.access.oauthclient.domain.AllowedAudiences;
+import net.civeira.phylax.features.access.oauthclient.domain.AllowedLoginRedirects;
+import net.civeira.phylax.features.access.oauthclient.domain.AllowedLogoutRedirects;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientChangeSet;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientSubjectTypeOptions;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientTokenEndpointAuthMethodOptions;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientCommandRepositoryGateway;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServer;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerChangeSet;
+import net.civeira.phylax.features.access.resourceserver.domain.gateway.ResourceServerCommandRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.role.domain.RoleChangeSet;
 import net.civeira.phylax.features.access.role.domain.gateway.RoleCommandRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.TenantChangeSet;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantCommandRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.AllowedAudiences;
-import net.civeira.phylax.features.access.trustedclient.domain.AllowedLogoutRedirects;
-import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientChangeSet;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientSubjectTypeOptions;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.UserChangeSet;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
@@ -74,8 +74,8 @@ public class InstallAccess implements MigrationSeed {
   private final UserCommandRepositoryGateway users;
   private final RoleCommandRepositoryGateway roles;
   private final TenantCommandRepositoryGateway tenants;
-  private final TrustedClientCommandRepositoryGateway clients;
-  private final RelyingPartyCommandRepositoryGateway parties;
+  private final OauthClientCommandRepositoryGateway clients;
+  private final ResourceServerCommandRepositoryGateway parties;
   private final UserRoleAssignmentCommandRepositoryGateway rolesAssignment;
   private final UserGroupMembershipCommandRepositoryGateway groupsMembership;
   private final ApiKeyClientCommandRepositoryGateway apiKeys;
@@ -88,25 +88,25 @@ public class InstallAccess implements MigrationSeed {
     }
     Map<String, String> generated = new LinkedHashMap<>();
 
-    RelyingPartyChangeSet party = new RelyingPartyChangeSet().newUid()
+    ResourceServerChangeSet party = new ResourceServerChangeSet().newUid()
         .code(config.getRequiredConfig("oidc.relying-party.code"))
         .apiKey(secret(config, "oidc.relying-party.api-key", "", generated)).enabled(Boolean.TRUE);
 
-    AllowedRedirects localhost = AllowedRedirects.builder().newUid()
+    AllowedLoginRedirects localhost = AllowedLoginRedirects.builder().newUid()
         .url(config.getRequiredConfig("oidc.trusted-client.redirect")).build();
     AllowedLogoutRedirects localhostLogout = AllowedLogoutRedirects.builder().newUid()
         .url(config.getRequiredConfig("oidc.trusted-client.logout-redirect")).build();
     AllowedAudiences partyAudience = AllowedAudiences.builder().newUid()
         .audience(config.getRequiredConfig("oidc.relying-party.code")).build();
 
-    TrustedClientChangeSet client = new TrustedClientChangeSet().newUid()
+    OauthClientChangeSet client = new OauthClientChangeSet().newUid()
         .code(config.getRequiredConfig("oidc.trusted-client.code")).allowAllScopes(Boolean.TRUE)
-        .secretOauthPlain(secret(config, "oidc.trusted-client.secret", "", generated))
-        .publicAllow(Boolean.TRUE).isResourceServer(Boolean.FALSE).requirePkce(Boolean.TRUE)
-        .tokenEndpointAuthMethod(TrustedClientTokenEndpointAuthMethodOptions.CLIENT_SECRET_POST)
-        .m2mTokenTtlSeconds(3600).allowedRedirects(List.of(localhost))
+        // A browser SPA: public client (no secret) with PKCE.
+        .introspectionAllowed(Boolean.FALSE).requirePkce(Boolean.TRUE)
+        .tokenEndpointAuthMethod(OauthClientTokenEndpointAuthMethodOptions.NONE)
+        .clientCredentialsTokenTtlSeconds(3600).allowedLoginRedirects(List.of(localhost))
         .allowedLogoutRedirects(List.of(localhostLogout)).allowedAudiences(List.of(partyAudience))
-        .subjectType(TrustedClientSubjectTypeOptions.PUBLIC)
+        .subjectType(OauthClientSubjectTypeOptions.PUBLIC)
         .requirePushedAuthorizationRequests(Boolean.FALSE).dpopBoundAccessTokens(Boolean.FALSE)
         .tlsClientCertificateBoundAccessTokens(Boolean.FALSE).enabled(Boolean.TRUE);
 
@@ -126,8 +126,8 @@ public class InstallAccess implements MigrationSeed {
                 config.getConfig("oidc.root.temporal-password", Boolean.class).orElse(Boolean.TRUE))
             .tenant(tenant).enabled(true).useSecondFactors(false);
 
-    RelyingParty createdParty = parties.create(RelyingParty.create(party).enable());
-    TrustedClient createdClient = clients.create(TrustedClient.create(client).enable());
+    ResourceServer createdParty = parties.create(ResourceServer.create(party).enable());
+    OauthClient createdClient = clients.create(OauthClient.create(client).enable());
     Role createdAdminRole = roles.create(Role.create(adminRole));
     Role createdRootRole = roles.create(Role.create(rootRole));
     Role createdIamRole = roles.create(Role.create(iamRole));
@@ -135,11 +135,11 @@ public class InstallAccess implements MigrationSeed {
     User createdRoot = users.create(User.create(root).enable());
 
     UserGroupMembershipChangeSet userRelyGroups = new UserGroupMembershipChangeSet().newUid()
-        .user(createdRoot).relyingParty(createdParty).groups("root");
+        .user(createdRoot).resourceServer(createdParty).groups("root");
     groupsMembership.create(UserGroupMembership.create(userRelyGroups));
 
     UserGroupMembershipChangeSet userClientGroups = new UserGroupMembershipChangeSet().newUid()
-        .user(createdRoot).trustedClient(createdClient).groups("root");
+        .user(createdRoot).oauthClient(createdClient).groups("root");
     groupsMembership.create(UserGroupMembership.create(userClientGroups));
 
 

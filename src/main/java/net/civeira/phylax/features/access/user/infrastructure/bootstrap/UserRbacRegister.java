@@ -65,7 +65,7 @@ public class UserRbacRegister {
         .name("change-password").description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE,
         ScopeDescription.builder().kind(Kind.WRITE).name("verify-email").description(
-            "Marks the user's email address as verified. Called by the email verification endpoint after validating the register-code token from user-access-temporal-code.")
+            "Marks the user's email address as verified. Called by the email verification endpoint after validating the register-code token from user-credential-state.")
             .required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
         .description("A number to identify the db record").build());
@@ -86,8 +86,8 @@ public class UserRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled").description(
         "A disabled user cant login on the system. On his login attempts, he will receive a specific warn of his disabled account.")
         .build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("approve").description("El approve de user").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("approvalStatus")
+        .description("El approval status de user").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("temporalPassword")
         .description("El temporal password de user").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("useSecondFactors")
@@ -98,9 +98,10 @@ public class UserRbacRegister {
         FieldDescription.builder().name("blockedUntil").description(
             "A blocked user cant login on the system, until these date. On his login attempts, the user will receive a generic not allowed message.")
             .build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("provider").description(
-        "Si se identificó con un proveedor, se marca con cual (aunque el provvedor cambie luego)")
-        .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("federatedProvider").description(
+            "Si se identificó con un proveedor, se marca con cual (aunque el provvedor cambie luego)")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version")
             .description(

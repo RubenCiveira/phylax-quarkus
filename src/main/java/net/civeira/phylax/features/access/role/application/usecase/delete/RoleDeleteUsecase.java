@@ -107,11 +107,11 @@ public class RoleDeleteUsecase {
       Trace.addEvent("The policies for role dont allow to delete: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    RoleVisibilityFilter filterOnVisibles =
-        RoleVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .name(filter.getName().orElse(null)).relyingParty(filter.getRelyingParty().orElse(null))
-            .relyingParties(filter.getRelyingParties()).build();
+    RoleVisibilityFilter filterOnVisibles = RoleVisibilityFilter.builder()
+        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null)).name(filter.getName().orElse(null))
+        .resourceServer(filter.getResourceServer().orElse(null))
+        .resourceServers(filter.getResourceServers()).build();
     RoleDeleteAllInBatchCommand command =
         new RoleDeleteAllInBatchCommand(context, filterOnVisibles);
     return batch.start(context.getActor().getName(), Duration.ofHours(6), ExecutorPlan

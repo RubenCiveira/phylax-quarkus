@@ -61,11 +61,11 @@ public class RoleListUsecase {
       Trace.addEvent("The policies for role dont allow to list: " + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    RoleVisibilityFilter visibleFilter =
-        RoleVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .name(filter.getName().orElse(null)).relyingParty(filter.getRelyingParty().orElse(null))
-            .relyingParties(filter.getRelyingParties()).build();
+    RoleVisibilityFilter visibleFilter = RoleVisibilityFilter.builder()
+        .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null)).name(filter.getName().orElse(null))
+        .resourceServer(filter.getResourceServer().orElse(null))
+        .resourceServers(filter.getResourceServers()).build();
     RoleCursor gatewayCursor = RoleCursor.builder().limit(cursor.getLimit().orElse(null))
         .sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(RoleOrder::valueOf).toList())

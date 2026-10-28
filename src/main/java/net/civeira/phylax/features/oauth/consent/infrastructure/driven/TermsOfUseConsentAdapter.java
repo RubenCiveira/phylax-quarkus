@@ -55,7 +55,7 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
             .toList();
 
     return activeTerms.stream().filter(term -> acceptedTerms
-        .find(UserAcceptedTermsOfUseFilter.builder().conditions(term).user(user).build()).isEmpty())
+        .find(UserAcceptedTermsOfUseFilter.builder().termsOfUse(term).user(user).build()).isEmpty())
         .map(term -> new TermsOfUseAcceptance(term.getUid(), term.getText())).toList();
   }
 
@@ -74,14 +74,14 @@ public class TermsOfUseConsentAdapter implements TermsOfUseConsentGateway {
     }
     TenantTermsOfUse currentTerms = termsOpt.get();
     boolean alreadyAccepted = acceptedTerms
-        .find(UserAcceptedTermsOfUseFilter.builder().conditions(currentTerms).user(user).build())
+        .find(UserAcceptedTermsOfUseFilter.builder().termsOfUse(currentTerms).user(user).build())
         .isPresent();
     if (alreadyAccepted) {
       return;
     }
     UserAcceptedTermsOfUse entity =
         UserAcceptedTermsOfUse.create(new UserAcceptedTermsOfUseChangeSet().newUid().user(user)
-            .conditions(TenantTermsOfUseReference.of(consent.id()))
+            .termsOfUse(TenantTermsOfUseReference.of(consent.id()))
             .acceptDate(OffsetDateTime.now()));
     acceptedTermsWriter.create(entity);
   }

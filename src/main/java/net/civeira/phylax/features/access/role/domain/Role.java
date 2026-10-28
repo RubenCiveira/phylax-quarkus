@@ -22,7 +22,7 @@ import net.civeira.phylax.features.access.role.domain.event.RoleDeleteEvent;
 import net.civeira.phylax.features.access.role.domain.event.RoleEvent;
 import net.civeira.phylax.features.access.role.domain.event.RoleUpdateEvent;
 import net.civeira.phylax.features.access.role.domain.valueobject.NameVO;
-import net.civeira.phylax.features.access.role.domain.valueobject.RelyingPartyVO;
+import net.civeira.phylax.features.access.role.domain.valueobject.ResourceServerVO;
 import net.civeira.phylax.features.access.role.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.role.domain.valueobject.VersionVO;
 
@@ -75,7 +75,7 @@ public class Role implements RoleRef {
    */
   @Delegate
   @Builder.Default
-  private RelyingPartyVO relyingPartyValue = RelyingPartyVO.nullValue();
+  private ResourceServerVO resourceServerValue = ResourceServerVO.nullValue();
 
   /**
    * A uid string to identify the entity
@@ -105,7 +105,7 @@ public class Role implements RoleRef {
     ConstraintFailList list = new ConstraintFailList();
     this.uidValue = attribute.readUid(previous, list);
     this.nameValue = attribute.readName(previous, list);
-    this.relyingPartyValue = attribute.readRelyingParty(previous, list);
+    this.resourceServerValue = attribute.readResourceServer(previous, list);
     this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on Role", list);
@@ -133,7 +133,7 @@ public class Role implements RoleRef {
     Map<String, String> map = new HashMap<>(4);
     uidToMap(map);
     nameToMap(map);
-    relyingPartyToMap(map);
+    resourceServerToMap(map);
     versionToMap(map);
     return map;
   }

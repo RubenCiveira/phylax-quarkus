@@ -16,11 +16,12 @@ class TenantLoginProviderChangeSetUnitTest {
   void test_tenant_login_provider_change_set_builder() {
     TenantLoginProviderChangeSet one = new TenantLoginProviderChangeSet().uid("one")
         .tenant(TenantReference.of("one")).name("one")
-        .source(TenantLoginProviderSourceOptions.GOOGLE).disabled(true).directAccess(true)
-        .publicKey("one").privateKey("one").certificate("one").metadata("file_1").oidcScopes("one")
-        .oidcClaimMapping("one").accountLinkPolicy(TenantLoginProviderAccountLinkPolicyOptions.NONE)
-        .oidcDiscoveryUrl("one").samlIdpMetadataUrl("one").samlIdpEntityId("one")
-        .samlIdpSsoUrl("one").samlIdpCert("file_1").usersEnabledByDefault(true).version(1).newUid();
+        .providerType(TenantLoginProviderProviderTypeOptions.GOOGLE).enabled(true)
+        .directAccess(true).publicKey("one").privateKey("one").certificate("one").metadata("file_1")
+        .oidcScopes("one").oidcClaimMapping("one")
+        .accountLinkPolicy(TenantLoginProviderAccountLinkPolicyOptions.NONE).oidcDiscoveryUrl("one")
+        .samlIdpMetadataUrl("one").samlIdpEntityId("one").samlIdpSsoUrl("one").samlIdpCert("file_1")
+        .usersEnabledByDefault(true).version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -38,20 +39,20 @@ class TenantLoginProviderChangeSetUnitTest {
     Assertions.assertEquals("two", one.getName().get(), "Value must equals to the assigned value");
     one.unset("name");
     Assertions.assertFalse(one.getName().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(TenantLoginProviderSourceOptions.GOOGLE, one.getSource().get(),
-        "Value must equals to the intial value");
-    one.source(TenantLoginProviderSourceOptions.GITHUB);
-    Assertions.assertEquals(TenantLoginProviderSourceOptions.GITHUB, one.getSource().get(),
-        "Value must equals to the assigned value");
-    one.unset("source");
-    Assertions.assertFalse(one.getSource().isPresent(),
+    Assertions.assertEquals(TenantLoginProviderProviderTypeOptions.GOOGLE,
+        one.getProviderType().get(), "Value must equals to the intial value");
+    one.providerType(TenantLoginProviderProviderTypeOptions.GITHUB);
+    Assertions.assertEquals(TenantLoginProviderProviderTypeOptions.GITHUB,
+        one.getProviderType().get(), "Value must equals to the assigned value");
+    one.unset("providerType");
+    Assertions.assertFalse(one.getProviderType().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(true, one.getDisabled().get(), "Value must equals to the intial value");
-    one.disabled(false);
-    Assertions.assertEquals(false, one.getDisabled().get(),
+    Assertions.assertEquals(true, one.getEnabled().get(), "Value must equals to the intial value");
+    one.enabled(false);
+    Assertions.assertEquals(false, one.getEnabled().get(),
         "Value must equals to the assigned value");
-    one.unset("disabled");
-    Assertions.assertFalse(one.getDisabled().isPresent(),
+    one.unset("enabled");
+    Assertions.assertFalse(one.getEnabled().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getDirectAccess().get(),
         "Value must equals to the intial value");

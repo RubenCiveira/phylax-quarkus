@@ -10,12 +10,12 @@ email:string
 welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
-approve:UserApproveOptions
+approvalStatus:UserApprovalStatusOptions
 temporalPassword:boolean
 useSecondFactors:boolean
 secondFactorSeed:string
 blockedUntil:datetime
-provider:string
+federatedProvider:string
 version:integer
 list()
 retrieve()
@@ -34,7 +34,7 @@ setMfaSeed()
 changePassword()
 verifyEmail()
 }
-class access.RelyingParty{
+class access.ResourceServer{
 uid:string
 code:string
 apiKey:string
@@ -48,21 +48,20 @@ delete()
 enable()
 disable()
 }
-class access.TrustedClient{
+class access.OauthClient{
 uid:string
 code:string
 allowAllScopes:boolean
-publicAllow:boolean
-tokenEndpointAuthMethod:TrustedClientTokenEndpointAuthMethodOptions
+tokenEndpointAuthMethod:OauthClientTokenEndpointAuthMethodOptions
 tokenEndpointAuthSigningAlg:string
 dpopBoundAccessTokens:boolean
-idTokenSignedResponseAlg:TrustedClientIdTokenSignedResponseAlgOptions
+idTokenSignedResponseAlg:OauthClientIdTokenSignedResponseAlgOptions
 tlsClientAuthSubjectDn:string
 tlsClientCertificateBoundAccessTokens:boolean
 authorizationSignedResponseAlg:string
-backchannelTokenDeliveryMode:TrustedClientBackchannelTokenDeliveryModeOptions
+backchannelTokenDeliveryMode:OauthClientBackchannelTokenDeliveryModeOptions
 backchannelClientNotificationEndpoint:string
-subjectType:TrustedClientSubjectTypeOptions
+subjectType:OauthClientSubjectTypeOptions
 idTokenEncryptedResponseAlg:string
 idTokenEncryptedResponseEnc:string
 userinfoEncryptedResponseAlg:string
@@ -70,18 +69,18 @@ userinfoEncryptedResponseEnc:string
 authorizationDetailsTypes:blob
 userinfoSignedResponseAlg:string
 secretOauth:string
-registrationAccess:string
+registrationAccessToken:string
 defaultAcrValues:string
 defaultMaxAge:integer
 sectorIdentifierUri:string
 grantTypesJson:blob
-isResourceServer:boolean
+introspectionAllowed:boolean
 requirePushedAuthorizationRequests:boolean
 requirePkce:boolean
-backChannelLogoutUri:string
-backChannelLogoutSessionRequired:boolean
-frontChannelLogoutUri:string
-frontChannelLogoutSessionRequired:boolean
+backchannelLogoutUri:string
+backchannelLogoutSessionRequired:boolean
+frontchannelLogoutUri:string
+frontchannelLogoutSessionRequired:boolean
 enabled:boolean
 clientName:string
 logoUri:string
@@ -91,8 +90,8 @@ tosUri:string
 responseTypesJson:blob
 dynamicallyRegistered:boolean
 registeredAt:datetime
-allowedScopesM2m:blob
-m2mTokenTtlSeconds:integer
+clientCredentialsScopes:blob
+clientCredentialsTokenTtlSeconds:integer
 requestObjectSigningAlg:string
 jwksUri:blob
 jwksJson:blob
@@ -116,8 +115,8 @@ update()
 delete()
 }
 access.User "1"  o--  "N*" access.UserGroupMembership: user
-access.RelyingParty "1"  o--  "N*" access.UserGroupMembership: relyingParty
-access.TrustedClient "1"  o--  "N*" access.UserGroupMembership: trustedClient
+access.ResourceServer "1"  o--  "N*" access.UserGroupMembership: resourceServer
+access.OauthClient "1"  o--  "N*" access.UserGroupMembership: oauthClient
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

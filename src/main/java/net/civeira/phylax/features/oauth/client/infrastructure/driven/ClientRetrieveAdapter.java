@@ -11,27 +11,27 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.SecretDigester;
+import net.civeira.phylax.features.access.oauthclient.domain.AllowedLoginRedirects;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientTokenEndpointAuthMethodOptions;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientFilter;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientQueryRepositoryGateway;
+import net.civeira.phylax.features.access.oauthclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.AllowedRedirects;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientTokenEndpointAuthMethodOptions;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientFilter;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.valueobject.SecretOauthVO;
 import net.civeira.phylax.features.oauth.client.domain.ClientDetails;
 import net.civeira.phylax.features.oauth.client.domain.RedirectUriPolicy;
 import net.civeira.phylax.features.oauth.client.domain.gateway.ClientStoreGateway;
 
 /**
- * Loads OAuth clients from the {@link TrustedClient} masters.
+ * Loads OAuth clients from the {@link OauthClient} masters.
  *
  * <p>
  * Every lookup is scoped to an enabled tenant: the tenant's own client wins over a global one with
  * the same code, and a client of another tenant is never returned (task 0.5). The registered
  * grants, response types, scopes and auth method become the {@link ClientDetails} policy (task 0.4,
- * see {@link TrustedClientPolicy}).
+ * see {@link OauthClientPolicy}).
  */
 @Slf4j
 @Transactional
@@ -41,7 +41,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
 
   private final SecretDigester secretDigester;
   private final TenantQueryRepositoryGateway tenants;
-  private final TrustedClientQueryRepositoryGateway clients;
+  private final OauthClientQueryRepositoryGateway clients;
   private final PostLogoutRedirectSqlStore postLogoutRedirects;
   /**
    * Whether every confidential client must use PKCE, besides those that register it (task 1.11).
@@ -69,12 +69,14 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   @Override
   public Optional<ClientDetails> loadForAssertion(String tenant, String clientId) {
     return find(tenant, clientId).filter(app -> app
-        .getTokenEndpointAuthMethod() == TrustedClientTokenEndpointAuthMethodOptions.PRIVATE_KEY_JWT)
+        .getTokenEndpointAuthMethod() == OauthClientTokenEndpointAuthMethodOptions.PRIVATE_KEY_JWT)
         .map(app -> base(app).protectedWithSecret(true).requirePkce(requiresPkce(app))
-            .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
-            .m2mTokenTtlSeconds(app.getM2mTokenTtlSecondsValue() != null
-                ? app.getM2mTokenTtlSecondsValue().getM2mTokenTtlSeconds()
-                : null)
+            .introspectionAllowed(Boolean.TRUE.equals(app.isIntrospectionAllowed()))
+            .clientCredentialsTokenTtlSeconds(
+                app.getClientCredentialsTokenTtlSecondsValue() != null
+                    ? app.getClientCredentialsTokenTtlSecondsValue()
+                        .getClientCredentialsTokenTtlSeconds()
+                    : null)
             .build());
   }
 
@@ -87,13 +89,13 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   /**
    * The enabled client a tenant sees for a code: its own, else a global one.
    */
-  private Optional<TrustedClient> find(String tenant, String clientId) {
+  private Optional<OauthClient> find(String tenant, String clientId) {
     if (clientId == null || clientId.isBlank()) {
       return Optional.empty();
     }
     return tenant(tenant)
-        .flatMap(t -> TrustedClientPolicy
-            .select(clients.list(TrustedClientFilter.builder().code(clientId).build()), t.getUid()))
+        .flatMap(t -> OauthClientPolicy
+            .select(clients.list(OauthClientFilter.builder().code(clientId).build()), t.getUid()))
         .filter(this::clientEnabled);
   }
 
@@ -109,7 +111,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return enabled;
   }
 
-  private boolean clientEnabled(TrustedClient app) {
+  private boolean clientEnabled(OauthClient app) {
     boolean enabled = app.isEnabled();
     if (!enabled) {
       log.error("Trying to log with disabled client " + app.getCodeValue());
@@ -118,11 +120,10 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
   }
 
   /**
-   * Public access: the client allows it or registers {@code none} as its auth method.
+   * Public access: only a client that registers {@code none} as its auth method.
    */
-  private boolean publicAllowed(TrustedClient app) {
-    return Boolean.TRUE.equals(app.isPublicAllow())
-        || app.getTokenEndpointAuthMethod() == TrustedClientTokenEndpointAuthMethodOptions.NONE;
+  private boolean publicAllowed(OauthClient app) {
+    return app.getTokenEndpointAuthMethod() == OauthClientTokenEndpointAuthMethodOptions.NONE;
   }
 
   /**
@@ -130,7 +131,7 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
    * long as the redirect is registered. A confidential client authenticates later, at the token
    * endpoint; a public one must use PKCE.
    */
-  private Optional<ClientDetails> authorizingClient(TrustedClient app, String redirect) {
+  private Optional<ClientDetails> authorizingClient(OauthClient app, String redirect) {
     if (!redirectAllowed(app, redirect)) {
       return Optional.empty();
     }
@@ -139,9 +140,9 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
         .requirePkce(publicAccess || requiresPkce(app)).build());
   }
 
-  private boolean redirectAllowed(TrustedClient app, String redirect) {
+  private boolean redirectAllowed(OauthClient app, String redirect) {
     List<String> redirects =
-        app.getAllowedRedirects().stream().map(AllowedRedirects::getUrl).toList();
+        app.getAllowedLoginRedirects().stream().map(AllowedLoginRedirects::getUrl).toList();
     boolean allowed = RedirectUriPolicy.allows(redirects, redirect);
     if (!allowed) {
       log.warn("Redirect {} is not registered for client {}", redirect, app.getCodeValue());
@@ -149,26 +150,26 @@ public class ClientRetrieveAdapter implements ClientStoreGateway {
     return allowed;
   }
 
-  private Optional<ClientDetails> privateClient(TrustedClient app, String secret) {
+  private Optional<ClientDetails> privateClient(OauthClient app, String secret) {
     SecretOauthVO secretOauth = app.getSecretOauthValue();
     if (secret != null && secretOauth.verify(secretDigester, secret)) {
-      Integer m2mTtl = app.getM2mTokenTtlSecondsValue() != null
-          ? app.getM2mTokenTtlSecondsValue().getM2mTokenTtlSeconds()
+      Integer m2mTtl = app.getClientCredentialsTokenTtlSecondsValue() != null
+          ? app.getClientCredentialsTokenTtlSecondsValue().getClientCredentialsTokenTtlSeconds()
           : null;
       return Optional.of(base(app).protectedWithSecret(true).requirePkce(requiresPkce(app))
-          .isResourceServer(Boolean.TRUE.equals(app.isIsResourceServer()))
-          .m2mTokenTtlSeconds(m2mTtl).build());
+          .introspectionAllowed(Boolean.TRUE.equals(app.isIntrospectionAllowed()))
+          .clientCredentialsTokenTtlSeconds(m2mTtl).build());
     } else {
       return Optional.empty();
     }
   }
 
-  private boolean requiresPkce(TrustedClient app) {
+  private boolean requiresPkce(OauthClient app) {
     return pkceForConfidential || Boolean.TRUE.equals(app.isRequirePkce());
   }
 
-  private ClientDetails.ClientDetailsBuilder base(TrustedClient app) {
-    return TrustedClientPolicy.details(app, postLogoutRedirects.list(app.getUid()));
+  private ClientDetails.ClientDetailsBuilder base(OauthClient app) {
+    return OauthClientPolicy.details(app, postLogoutRedirects.list(app.getUid()));
   }
 
 }

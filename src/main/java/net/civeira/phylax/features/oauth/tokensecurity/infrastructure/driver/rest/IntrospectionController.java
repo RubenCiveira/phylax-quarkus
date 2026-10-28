@@ -63,7 +63,7 @@ public class IntrospectionController {
           .header("Cache-Control", "no-store").build();
     }
 
-    if (!clientOpt.get().isResourceServer()) {
+    if (!clientOpt.get().isIntrospectionAllowed()) {
       return Response.status(403).build();
     }
 

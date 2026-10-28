@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.role.domain.valueobject.NameVO;
-import net.civeira.phylax.features.access.role.domain.valueobject.RelyingPartyVO;
+import net.civeira.phylax.features.access.role.domain.valueobject.ResourceServerVO;
 import net.civeira.phylax.features.access.role.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.role.domain.valueobject.VersionVO;
 
@@ -19,7 +19,7 @@ class RoleUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_role_builder() {
     Role one = Role.builder().uidValue(UidVO.from("one")).nameValue(NameVO.from("one"))
-        .relyingPartyValue(RelyingPartyVO.from(RelyingPartyReference.of("one")))
+        .resourceServerValue(ResourceServerVO.from(ResourceServerReference.of("one")))
         .versionValue(VersionVO.from(1)).build();
     Role withOne = one.withVersionValue(VersionVO.from(1));
     Assertions.assertEquals(2, withOne.withNextVersion().getVersion().get());

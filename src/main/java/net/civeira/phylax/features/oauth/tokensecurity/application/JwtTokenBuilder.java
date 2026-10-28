@@ -246,9 +246,9 @@ public class JwtTokenBuilder {
    */
   public AutorizationToken buildClientCredentialsToken(String tenant, ClientDetails client,
       List<String> scopes, List<String> audiences) {
-    Duration expiration =
-        client.getM2mTokenTtlSeconds() != null ? Duration.ofSeconds(client.getM2mTokenTtlSeconds())
-            : claimsMapper.accessTokenTtl();
+    Duration expiration = client.getClientCredentialsTokenTtlSeconds() != null
+        ? Duration.ofSeconds(client.getClientCredentialsTokenTtlSeconds())
+        : claimsMapper.accessTokenTtl();
     Instant expires = Instant.now().plus(expiration);
 
     AuthenticationData data = new AuthenticationData();

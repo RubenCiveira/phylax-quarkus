@@ -73,21 +73,21 @@ public class UserGroupMembershipController implements UserGroupMembershipApi {
    * @param search
    * @param user
    * @param users
-   * @param relyingParty
-   * @param relyingParties
-   * @param trustedClient
-   * @param trustedClients
+   * @param resourceServer
+   * @param resourceServers
+   * @param oauthClient
+   * @param oauthClients
    * @param limit
    * @param sinceUid
    * @return
    */
   @Override
   public Response userGroupMembershipApiList(final List<String> uids, final String search,
-      final String user, final List<String> users, final String relyingParty,
-      final List<String> relyingParties, final String trustedClient,
-      final List<String> trustedClients, final Integer limit, final String sinceUid) {
-    return listController.userGroupMembershipApiList(uids, search, user, users, relyingParty,
-        relyingParties, trustedClient, trustedClients, limit, sinceUid);
+      final String user, final List<String> users, final String resourceServer,
+      final List<String> resourceServers, final String oauthClient, final List<String> oauthClients,
+      final Integer limit, final String sinceUid) {
+    return listController.userGroupMembershipApiList(uids, search, user, users, resourceServer,
+        resourceServers, oauthClient, oauthClients, limit, sinceUid);
   }
 
   /**

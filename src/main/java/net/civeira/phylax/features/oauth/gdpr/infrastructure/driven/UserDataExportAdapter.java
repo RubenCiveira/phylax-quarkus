@@ -24,9 +24,9 @@ import net.civeira.phylax.common.infrastructure.mail.EmailService;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.UserConsentedScopes;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesFilter;
-import net.civeira.phylax.features.access.userconsentedscopes.domain.gateway.UserConsentedScopesQueryRepositoryGateway;
+import net.civeira.phylax.features.access.userscopeconsent.domain.UserScopeConsent;
+import net.civeira.phylax.features.access.userscopeconsent.domain.gateway.UserScopeConsentFilter;
+import net.civeira.phylax.features.access.userscopeconsent.domain.gateway.UserScopeConsentQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.gdpr.domain.gateway.UserDataExportGateway;
 
 @ApplicationScoped
@@ -35,7 +35,7 @@ import net.civeira.phylax.features.oauth.gdpr.domain.gateway.UserDataExportGatew
 public class UserDataExportAdapter implements UserDataExportGateway {
 
   private final UserQueryRepositoryGateway userRead;
-  private final UserConsentedScopesQueryRepositoryGateway consentRead;
+  private final UserScopeConsentQueryRepositoryGateway consentRead;
   private final DataSource dataSource;
   private final EmailService emailService;
 
@@ -99,19 +99,18 @@ public class UserDataExportAdapter implements UserDataExportGateway {
       sb.append("[]");
       return;
     }
-    List<UserConsentedScopes> consents =
-        consentRead.list(UserConsentedScopesFilter.builder().user(userOpt.get()).build());
+    List<UserScopeConsent> consents =
+        consentRead.list(UserScopeConsentFilter.builder().user(userOpt.get()).build());
     sb.append("[");
     boolean first = true;
-    for (UserConsentedScopes c : consents) {
+    for (UserScopeConsent c : consents) {
       if (!first) {
         sb.append(", ");
       }
       first = false;
       sb.append("{\n");
       sb.append("    \"scope\": \"").append(escapeJson(c.getScope().orElse(""))).append("\",\n");
-      sb.append("    \"clientUid\": \"").append(escapeJson(c.getTrustedClientUid()))
-          .append("\",\n");
+      sb.append("    \"clientUid\": \"").append(escapeJson(c.getOauthClientUid())).append("\",\n");
       sb.append("    \"granted\": ").append(Boolean.TRUE.equals(c.isGranted())).append(",\n");
       sb.append("    \"decisionAt\": \"").append(c.getDecisionAt().map(Object::toString).orElse(""))
           .append("\"\n");

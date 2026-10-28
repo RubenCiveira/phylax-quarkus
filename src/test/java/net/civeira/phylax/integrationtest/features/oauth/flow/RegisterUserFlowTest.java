@@ -22,7 +22,7 @@ class RegisterUserFlowTest extends OidcIntegrationTestBase {
 
   @Test
   void showRegisterForm_allowRegister_showsForm() {
-    // registerGateway.allowRegister = true by default
+    // registerGateway.selfRegistrationEnabled = true by default
     Response response = client.showRegisterForm(OidcTestFixtures.TENANT);
 
     Assertions.assertEquals(200, response.statusCode());
@@ -115,7 +115,7 @@ class RegisterUserFlowTest extends OidcIntegrationTestBase {
 
   @Test
   void showLoginForm_allowRegister_false_hidesRegisterLink() {
-    registerGateway.setAllowRegister(false);
+    registerGateway.setSelfRegistrationEnabled(false);
 
     Response response = client.startAuthFlow(OidcTestFixtures.TENANT, OidcTestFixtures.CLIENT_ID,
         OidcTestFixtures.REDIRECT_URI, OidcTestFixtures.SCOPE);
@@ -123,7 +123,7 @@ class RegisterUserFlowTest extends OidcIntegrationTestBase {
     Assertions.assertEquals(200, response.statusCode());
     String body = response.getBody().asString();
     Assertions.assertFalse(body.contains("show-register"),
-        "Register link must not appear when allowRegister=false");
+        "Register link must not appear when selfRegistrationEnabled=false");
   }
 
   @Test

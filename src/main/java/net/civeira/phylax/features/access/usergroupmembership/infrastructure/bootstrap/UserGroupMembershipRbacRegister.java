@@ -47,10 +47,10 @@ public class UserGroupMembershipRbacRegister {
         .description("El identificador de la aplicacion").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("user")
         .description("El user de user group membership").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("relyingParty")
-        .description("El relying party de user group membership").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("trustedClient")
-        .description("El trusted client de user group membership").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("resourceServer")
+        .description("El resource server de user group membership").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("oauthClient")
+        .description("El oauth client de user group membership").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("groups")
         .description("El groups de user group membership").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("version").description(

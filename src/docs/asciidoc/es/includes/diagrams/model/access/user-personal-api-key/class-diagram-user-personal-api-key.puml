@@ -10,12 +10,12 @@ email:string
 welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
-approve:UserApproveOptions
+approvalStatus:UserApprovalStatusOptions
 temporalPassword:boolean
 useSecondFactors:boolean
 secondFactorSeed:string
 blockedUntil:datetime
-provider:string
+federatedProvider:string
 version:integer
 list()
 retrieve()

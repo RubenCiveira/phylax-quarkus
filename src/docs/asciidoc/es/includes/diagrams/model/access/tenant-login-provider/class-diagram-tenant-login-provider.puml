@@ -22,8 +22,8 @@ disable()
 class access.TenantLoginProvider{
 uid:string
 name:string
-source:TenantLoginProviderSourceOptions
-disabled:boolean
+providerType:TenantLoginProviderProviderTypeOptions
+enabled:boolean
 directAccess:boolean
 publicKey:string
 privateKey:string

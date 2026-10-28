@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.role.domain.RoleReference;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 
 class UserRoleAssignmentChangeSetUnitTest {
@@ -20,8 +20,8 @@ class UserRoleAssignmentChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_user_role_assignment_change_set_builder() {
     UserRoleAssignmentChangeSet one = new UserRoleAssignmentChangeSet().uid("one")
-        .user(UserReference.of("one")).relyingParty(RelyingPartyReference.of("one"))
-        .trustedClient(TrustedClientReference.of("one"))
+        .user(UserReference.of("one")).resourceServer(ResourceServerReference.of("one"))
+        .oauthClient(OauthClientReference.of("one"))
         .roles(List.of(Roles.builder().uid("one").role(RoleReference.of("one")).version(1).build()))
         .version(1).newUid();
     one.uid("two");
@@ -35,21 +35,21 @@ class UserRoleAssignmentChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("user");
     Assertions.assertFalse(one.getUser().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(RelyingPartyReference.of("one"), one.getRelyingParty().get(),
+    Assertions.assertEquals(ResourceServerReference.of("one"), one.getResourceServer().get(),
         "Value must equals to the intial value");
-    one.relyingParty(RelyingPartyReference.of("two"));
-    Assertions.assertEquals(RelyingPartyReference.of("two"), one.getRelyingParty().get(),
+    one.resourceServer(ResourceServerReference.of("two"));
+    Assertions.assertEquals(ResourceServerReference.of("two"), one.getResourceServer().get(),
         "Value must equals to the assigned value");
-    one.unset("relyingParty");
-    Assertions.assertFalse(one.getRelyingParty().isPresent(),
+    one.unset("resourceServer");
+    Assertions.assertFalse(one.getResourceServer().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(TrustedClientReference.of("one"), one.getTrustedClient().get(),
+    Assertions.assertEquals(OauthClientReference.of("one"), one.getOauthClient().get(),
         "Value must equals to the intial value");
-    one.trustedClient(TrustedClientReference.of("two"));
-    Assertions.assertEquals(TrustedClientReference.of("two"), one.getTrustedClient().get(),
+    one.oauthClient(OauthClientReference.of("two"));
+    Assertions.assertEquals(OauthClientReference.of("two"), one.getOauthClient().get(),
         "Value must equals to the assigned value");
-    one.unset("trustedClient");
-    Assertions.assertFalse(one.getTrustedClient().isPresent(),
+    one.unset("oauthClient");
+    Assertions.assertFalse(one.getOauthClient().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         List.of(Roles.builder().uid("one").role(RoleReference.of("one")).version(1).build()),

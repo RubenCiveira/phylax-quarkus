@@ -13,8 +13,8 @@ oidc:
     api-key: ${OIDC_RELYING_PARTY_API_KEY:}
   trusted-client:
     code: conformance-ui
-    secret: ${OIDC_TRUSTED_CLIENT_SECRET:}
     redirect: https://localhost.emobix.co.uk:8443/test/a/phylax/callback
+    logout-redirect: https://localhost.emobix.co.uk:8443/test/a/phylax/post_logout_redirect
   api-keys:
     collector: ${OIDC_API_KEYS_COLLECTOR:}
     sync: ${OIDC_API_KEYS_SYNC:}

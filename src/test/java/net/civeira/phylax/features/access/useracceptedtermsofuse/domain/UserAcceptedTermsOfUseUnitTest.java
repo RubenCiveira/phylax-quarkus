@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.valueobject.AcceptDateVO;
-import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.valueobject.ConditionsVO;
 import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.valueobject.IpAddressVO;
+import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.valueobject.TermsOfUseVO;
 import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.valueobject.UserAgentVO;
 import net.civeira.phylax.features.access.useracceptedtermsofuse.domain.valueobject.UserVO;
@@ -27,7 +27,7 @@ class UserAcceptedTermsOfUseUnitTest {
   void test_user_accepted_terms_of_use_builder() {
     UserAcceptedTermsOfUse one = UserAcceptedTermsOfUse.builder().uidValue(UidVO.from("one"))
         .userValue(UserVO.from(UserReference.of("one")))
-        .conditionsValue(ConditionsVO.from(TenantTermsOfUseReference.of("one")))
+        .termsOfUseValue(TermsOfUseVO.from(TenantTermsOfUseReference.of("one")))
         .acceptDateValue(AcceptDateVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .ipAddressValue(IpAddressVO.from("one")).userAgentValue(UserAgentVO.from("one"))

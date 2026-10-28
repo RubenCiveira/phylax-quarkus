@@ -132,12 +132,12 @@ public class TenantConfigListController {
     TenantConfigApiDto tenantConfigApiDto = new TenantConfigApiDto();
     tenantConfigApiDto.setUid(dto.getUid());
     tenantConfigApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
-    tenantConfigApiDto.setInnerLabel(dto.getInnerLabel());
+    tenantConfigApiDto.setDisplayName(dto.getDisplayName());
     tenantConfigApiDto.setForceMfa(dto.getForceMfa());
     tenantConfigApiDto.setDynamicRegistrationPolicy(
         dynamicRegistrationPolicyEnumToApi(dto.getDynamicRegistrationPolicy()));
-    tenantConfigApiDto.setAllowRegister(dto.getAllowRegister());
-    tenantConfigApiDto.setEnableRegisterUsers(dto.getEnableRegisterUsers());
+    tenantConfigApiDto.setSelfRegistrationEnabled(dto.getSelfRegistrationEnabled());
+    tenantConfigApiDto.setAutoApproveRegisteredUsers(dto.getAutoApproveRegisteredUsers());
     tenantConfigApiDto.setMagicLinkEnabled(dto.getMagicLinkEnabled());
     tenantConfigApiDto.setRequireEmailVerification(dto.getRequireEmailVerification());
     tenantConfigApiDto.setInvitationExpiryDays(dto.getInvitationExpiryDays());
@@ -154,12 +154,12 @@ public class TenantConfigListController {
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());
-    tenantConfigApiDto.setWelcomeEmail(dto.getWelcomeEmail());
-    tenantConfigApiDto.setRegisteredEmail(dto.getRegisteredEmail());
-    tenantConfigApiDto.setDisabledUserEmail(dto.getDisabledUserEmail());
-    tenantConfigApiDto.setEnabledUserEmail(dto.getEnabledUserEmail());
-    tenantConfigApiDto.setAllowRecoverPass(dto.getAllowRecoverPass());
-    tenantConfigApiDto.setRecoverPassEmail(dto.getRecoverPassEmail());
+    tenantConfigApiDto.setWelcomeEmailTemplate(dto.getWelcomeEmailTemplate());
+    tenantConfigApiDto.setRegisteredEmailTemplate(dto.getRegisteredEmailTemplate());
+    tenantConfigApiDto.setDisabledUserEmailTemplate(dto.getDisabledUserEmailTemplate());
+    tenantConfigApiDto.setEnabledUserEmailTemplate(dto.getEnabledUserEmailTemplate());
+    tenantConfigApiDto.setPasswordRecoveryEnabled(dto.getPasswordRecoveryEnabled());
+    tenantConfigApiDto.setRecoverPassEmailTemplate(dto.getRecoverPassEmailTemplate());
     tenantConfigApiDto.setVersion(dto.getVersion());
     return tenantConfigApiDto;
   }

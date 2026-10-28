@@ -21,7 +21,7 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.MagicLinkService;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.disable.TenantTermsOfUseDisableFilter;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.disable.TenantTermsOfUseDisableProjection;
@@ -36,7 +36,7 @@ import net.civeira.phylax.generated.openapi.model.BatchTaskDetail.DetailStatusEn
 import net.civeira.phylax.generated.openapi.model.BatchTaskLocator;
 import net.civeira.phylax.generated.openapi.model.ConstraintFail;
 import net.civeira.phylax.generated.openapi.model.MultipleErrorCodes;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
@@ -65,14 +65,14 @@ public class TenantTermsOfUseDisableController {
    * @param search
    * @param tenant
    * @param tenants
-   * @param relyingParty
-   * @param relyingParties
+   * @param resourceServer
+   * @param resourceServers
    * @return
    */
   @ApiObserved("Api to disable on massive entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDisable(final List<String> uids, final String search,
-      final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingParties) {
+      final String tenant, final List<String> tenants, final String resourceServer,
+      final List<String> resourceServers) {
     TenantTermsOfUseDisableFilter.TenantTermsOfUseDisableFilterBuilder filterBuilder =
         TenantTermsOfUseDisableFilter.builder();
     filterBuilder =
@@ -86,11 +86,11 @@ public class TenantTermsOfUseDisableController {
     }
     filterBuilder = filterBuilder.tenants(null == tenants ? null
         : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    if (null != relyingParty) {
-      filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
+    if (null != resourceServer) {
+      filterBuilder = filterBuilder.resourceServer(ResourceServerReference.of(resourceServer));
     }
-    filterBuilder = filterBuilder.relyingParties(null == relyingParties ? null
-        : relyingParties.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.resourceServers(null == resourceServers ? null
+        : resourceServers.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TenantTermsOfUseDisableFilter filter = filterBuilder.build();
     BatchIdentifier task = disable.batchDisable(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */
@@ -203,14 +203,14 @@ public class TenantTermsOfUseDisableController {
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantTermsOfUseApiDto
-        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
-    String attached = dto.getAttached();
-    if (null != attached) {
+    String document = dto.getDocument();
+    if (null != document) {
       String url = currentRequest.getPublicHost() + "/api/access/tenants-terms-of-use/"
-          + dto.getUidOrDefault("-") + "/attached";
-      tenantTermsOfUseApiDto.setAttached(magicLink.create(url, currentRequest.interaction()));
+          + dto.getUidOrDefault("-") + "/document";
+      tenantTermsOfUseApiDto.setDocument(magicLink.create(url, currentRequest.interaction()));
     }
     tenantTermsOfUseApiDto.setActivationDate(dto.getActivationDate());
     tenantTermsOfUseApiDto.setVersion(dto.getVersion());

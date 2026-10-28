@@ -6,11 +6,11 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.role.application.usecase.create.RoleCreateInput;
 import net.civeira.phylax.features.access.role.application.usecase.create.RoleCreateProjection;
 import net.civeira.phylax.features.access.role.application.usecase.create.RoleCreateUsecase;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.RoleApiDto;
 
 @RequiredArgsConstructor
@@ -48,7 +48,7 @@ public class RoleCreateController {
     RoleApiDto roleApiDto = new RoleApiDto();
     roleApiDto.setUid(dto.getUid());
     roleApiDto.setName(dto.getName());
-    roleApiDto.setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+    roleApiDto.setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     roleApiDto.setVersion(dto.getVersion());
     return roleApiDto;
   }
@@ -66,8 +66,8 @@ public class RoleCreateController {
     if (null != roleApiDto.getName()) {
       dto.setName(roleApiDto.getName());
     }
-    if (null != roleApiDto.getRelyingParty()) {
-      dto.setRelyingParty(RelyingPartyReference.of(roleApiDto.getRelyingParty().get$Ref()));
+    if (null != roleApiDto.getResourceServer()) {
+      dto.setResourceServer(ResourceServerReference.of(roleApiDto.getResourceServer().get$Ref()));
     }
     if (null != roleApiDto.getVersion()) {
       dto.setVersion(roleApiDto.getVersion());

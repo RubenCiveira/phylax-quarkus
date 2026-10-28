@@ -3,10 +3,12 @@ package net.civeira.phylax.features.oauth.user.application.listener;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.event.UserAccessTemporalCodeGeneratePasswordRecoverEvent;
+import net.civeira.phylax.features.access.userverificationcode.domain.event.UserVerificationCodeGeneratedVerificationEvent;
 
 /**
- * Extension point for side-effects triggered by password recovery code generation.
+ * Extension point for side-effects triggered by the generation of an email code. The event is
+ * raised for every purpose (password recovery, email verification, account deletion): check
+ * {@code event.getPayload().getPurpose()}.
  *
  * <p>
  * The recovery email is sent directly by
@@ -19,7 +21,7 @@ import net.civeira.phylax.features.access.useraccesstemporalcode.domain.event.Us
 public class NotifyRecover {
 
   public void onPasswordRecoveryRequested(
-      @Observes UserAccessTemporalCodeGeneratePasswordRecoverEvent event) {
+      @Observes UserVerificationCodeGeneratedVerificationEvent event) {
     // Extension point — no action by default.
   }
 }

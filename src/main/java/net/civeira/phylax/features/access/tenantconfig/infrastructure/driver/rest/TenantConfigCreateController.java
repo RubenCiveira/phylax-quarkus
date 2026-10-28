@@ -93,12 +93,12 @@ public class TenantConfigCreateController {
     TenantConfigApiDto tenantConfigApiDto = new TenantConfigApiDto();
     tenantConfigApiDto.setUid(dto.getUid());
     tenantConfigApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
-    tenantConfigApiDto.setInnerLabel(dto.getInnerLabel());
+    tenantConfigApiDto.setDisplayName(dto.getDisplayName());
     tenantConfigApiDto.setForceMfa(dto.getForceMfa());
     tenantConfigApiDto.setDynamicRegistrationPolicy(
         dynamicRegistrationPolicyEnumToApi(dto.getDynamicRegistrationPolicy()));
-    tenantConfigApiDto.setAllowRegister(dto.getAllowRegister());
-    tenantConfigApiDto.setEnableRegisterUsers(dto.getEnableRegisterUsers());
+    tenantConfigApiDto.setSelfRegistrationEnabled(dto.getSelfRegistrationEnabled());
+    tenantConfigApiDto.setAutoApproveRegisteredUsers(dto.getAutoApproveRegisteredUsers());
     tenantConfigApiDto.setMagicLinkEnabled(dto.getMagicLinkEnabled());
     tenantConfigApiDto.setRequireEmailVerification(dto.getRequireEmailVerification());
     tenantConfigApiDto.setInvitationExpiryDays(dto.getInvitationExpiryDays());
@@ -115,12 +115,12 @@ public class TenantConfigCreateController {
     tenantConfigApiDto.setWebauthnEnabled(dto.getWebauthnEnabled());
     tenantConfigApiDto.setWebauthnRpId(dto.getWebauthnRpId());
     tenantConfigApiDto.setWebauthnRpName(dto.getWebauthnRpName());
-    tenantConfigApiDto.setWelcomeEmail(dto.getWelcomeEmail());
-    tenantConfigApiDto.setRegisteredEmail(dto.getRegisteredEmail());
-    tenantConfigApiDto.setDisabledUserEmail(dto.getDisabledUserEmail());
-    tenantConfigApiDto.setEnabledUserEmail(dto.getEnabledUserEmail());
-    tenantConfigApiDto.setAllowRecoverPass(dto.getAllowRecoverPass());
-    tenantConfigApiDto.setRecoverPassEmail(dto.getRecoverPassEmail());
+    tenantConfigApiDto.setWelcomeEmailTemplate(dto.getWelcomeEmailTemplate());
+    tenantConfigApiDto.setRegisteredEmailTemplate(dto.getRegisteredEmailTemplate());
+    tenantConfigApiDto.setDisabledUserEmailTemplate(dto.getDisabledUserEmailTemplate());
+    tenantConfigApiDto.setEnabledUserEmailTemplate(dto.getEnabledUserEmailTemplate());
+    tenantConfigApiDto.setPasswordRecoveryEnabled(dto.getPasswordRecoveryEnabled());
+    tenantConfigApiDto.setRecoverPassEmailTemplate(dto.getRecoverPassEmailTemplate());
     tenantConfigApiDto.setVersion(dto.getVersion());
     return tenantConfigApiDto;
   }
@@ -138,8 +138,8 @@ public class TenantConfigCreateController {
     if (null != tenantConfigApiDto.getTenant()) {
       dto.setTenant(TenantReference.of(tenantConfigApiDto.getTenant().get$Ref()));
     }
-    if (null != tenantConfigApiDto.getInnerLabel()) {
-      dto.setInnerLabel(tenantConfigApiDto.getInnerLabel());
+    if (null != tenantConfigApiDto.getDisplayName()) {
+      dto.setDisplayName(tenantConfigApiDto.getDisplayName());
     }
     if (null != tenantConfigApiDto.getForceMfa()) {
       dto.setForceMfa(tenantConfigApiDto.getForceMfa());
@@ -148,11 +148,11 @@ public class TenantConfigCreateController {
       dto.setDynamicRegistrationPolicy(
           dynamicRegistrationPolicyEnumToDomain(tenantConfigApiDto.getDynamicRegistrationPolicy()));
     }
-    if (null != tenantConfigApiDto.getAllowRegister()) {
-      dto.setAllowRegister(tenantConfigApiDto.getAllowRegister());
+    if (null != tenantConfigApiDto.getSelfRegistrationEnabled()) {
+      dto.setSelfRegistrationEnabled(tenantConfigApiDto.getSelfRegistrationEnabled());
     }
-    if (null != tenantConfigApiDto.getEnableRegisterUsers()) {
-      dto.setEnableRegisterUsers(tenantConfigApiDto.getEnableRegisterUsers());
+    if (null != tenantConfigApiDto.getAutoApproveRegisteredUsers()) {
+      dto.setAutoApproveRegisteredUsers(tenantConfigApiDto.getAutoApproveRegisteredUsers());
     }
     if (null != tenantConfigApiDto.getMagicLinkEnabled()) {
       dto.setMagicLinkEnabled(tenantConfigApiDto.getMagicLinkEnabled());
@@ -200,23 +200,23 @@ public class TenantConfigCreateController {
     if (null != tenantConfigApiDto.getWebauthnRpName()) {
       dto.setWebauthnRpName(tenantConfigApiDto.getWebauthnRpName());
     }
-    if (null != tenantConfigApiDto.getWelcomeEmail()) {
-      dto.setWelcomeEmail(tenantConfigApiDto.getWelcomeEmail());
+    if (null != tenantConfigApiDto.getWelcomeEmailTemplate()) {
+      dto.setWelcomeEmailTemplate(tenantConfigApiDto.getWelcomeEmailTemplate());
     }
-    if (null != tenantConfigApiDto.getRegisteredEmail()) {
-      dto.setRegisteredEmail(tenantConfigApiDto.getRegisteredEmail());
+    if (null != tenantConfigApiDto.getRegisteredEmailTemplate()) {
+      dto.setRegisteredEmailTemplate(tenantConfigApiDto.getRegisteredEmailTemplate());
     }
-    if (null != tenantConfigApiDto.getDisabledUserEmail()) {
-      dto.setDisabledUserEmail(tenantConfigApiDto.getDisabledUserEmail());
+    if (null != tenantConfigApiDto.getDisabledUserEmailTemplate()) {
+      dto.setDisabledUserEmailTemplate(tenantConfigApiDto.getDisabledUserEmailTemplate());
     }
-    if (null != tenantConfigApiDto.getEnabledUserEmail()) {
-      dto.setEnabledUserEmail(tenantConfigApiDto.getEnabledUserEmail());
+    if (null != tenantConfigApiDto.getEnabledUserEmailTemplate()) {
+      dto.setEnabledUserEmailTemplate(tenantConfigApiDto.getEnabledUserEmailTemplate());
     }
-    if (null != tenantConfigApiDto.getAllowRecoverPass()) {
-      dto.setAllowRecoverPass(tenantConfigApiDto.getAllowRecoverPass());
+    if (null != tenantConfigApiDto.getPasswordRecoveryEnabled()) {
+      dto.setPasswordRecoveryEnabled(tenantConfigApiDto.getPasswordRecoveryEnabled());
     }
-    if (null != tenantConfigApiDto.getRecoverPassEmail()) {
-      dto.setRecoverPassEmail(tenantConfigApiDto.getRecoverPassEmail());
+    if (null != tenantConfigApiDto.getRecoverPassEmailTemplate()) {
+      dto.setRecoverPassEmailTemplate(tenantConfigApiDto.getRecoverPassEmailTemplate());
     }
     if (null != tenantConfigApiDto.getVersion()) {
       dto.setVersion(tenantConfigApiDto.getVersion());

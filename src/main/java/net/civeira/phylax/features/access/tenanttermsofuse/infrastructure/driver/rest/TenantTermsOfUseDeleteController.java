@@ -20,7 +20,7 @@ import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.delete.TenantTermsOfUseCheckBatchDeleteStatus;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.delete.TenantTermsOfUseDeleteFilter;
@@ -55,14 +55,14 @@ public class TenantTermsOfUseDeleteController {
    * @param search
    * @param tenant
    * @param tenants
-   * @param relyingParty
-   * @param relyingParties
+   * @param resourceServer
+   * @param resourceServers
    * @return
    */
   @ApiObserved("Api to delete on massive entity of tenant terms of use")
   public Response tenantTermsOfUseApiBatchDelete(final List<String> uids, final String search,
-      final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingParties) {
+      final String tenant, final List<String> tenants, final String resourceServer,
+      final List<String> resourceServers) {
     TenantTermsOfUseDeleteFilter.TenantTermsOfUseDeleteFilterBuilder filterBuilder =
         TenantTermsOfUseDeleteFilter.builder();
     filterBuilder =
@@ -76,11 +76,11 @@ public class TenantTermsOfUseDeleteController {
     }
     filterBuilder = filterBuilder.tenants(null == tenants ? null
         : tenants.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    if (null != relyingParty) {
-      filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
+    if (null != resourceServer) {
+      filterBuilder = filterBuilder.resourceServer(ResourceServerReference.of(resourceServer));
     }
-    filterBuilder = filterBuilder.relyingParties(null == relyingParties ? null
-        : relyingParties.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.resourceServers(null == resourceServers ? null
+        : resourceServers.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     TenantTermsOfUseDeleteFilter filter = filterBuilder.build();
     BatchIdentifier task = delete.batchDelete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */

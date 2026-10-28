@@ -34,7 +34,7 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.DynamicClientGate
 import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 
 /**
- * DCR clients over the {@code access_trusted_client} master (task 2.1).
+ * DCR clients over the {@code access_oauth_client} master (task 2.1).
  *
  * <p>
  * A client is stored in the tenant of the endpoint, enabled, dynamically registered and without
@@ -59,16 +59,16 @@ public class DynamicClientAdapter implements DynamicClientGateway {
           "id_token_encrypted_response_alg", "id_token_encrypted_response_enc",
           "userinfo_signed_response_alg", "userinfo_encrypted_response_alg",
           "userinfo_encrypted_response_enc", "authorization_signed_response_alg", "subject_type",
-          "back_channel_logout_session_required", "front_channel_logout_session_required",
+          "backchannel_logout_session_required", "frontchannel_logout_session_required",
           "dpop_bound_access_tokens", "require_pushed_authorization_requests");
   private static final String CLIENT_COLUMNS =
       "c.uid, c.token_endpoint_auth_method, c.client_name, c.logo_uri, c.client_uri, "
-          + "c.policy_uri, c.tos_uri, c.back_channel_logout_uri, c.front_channel_logout_uri, "
+          + "c.policy_uri, c.tos_uri, c.backchannel_logout_uri, c.frontchannel_logout_uri, "
           + "c.grant_types_json, c.response_types_json, c.registered_at, "
           + String.join(", ", EXTENSION_COLUMNS.stream().map(c -> "c." + c).toList());
-  private static final String OWNED_CLIENT = "FROM access_trusted_client c "
+  private static final String OWNED_CLIENT = "FROM access_oauth_client c "
       + "JOIN access_tenant t ON t.uid = c.tenant WHERE t.name = ? AND c.uid = ? "
-      + "AND c.dynamically_registered = ? AND c.registration_access = ?";
+      + "AND c.dynamically_registered = ? AND c.registration_access_token = ?";
 
   private final DataSource source;
   private final ObjectMapper mapper;
@@ -93,9 +93,9 @@ public class DynamicClientAdapter implements DynamicClientGateway {
         if (policy == null || policy.isBlank() || DISABLED.equalsIgnoreCase(policy.trim())) {
           return DcrRegistrationRules.disabled();
         }
-        List<String> grants = TrustedClientPolicy.parseList(rs.getString(2))
+        List<String> grants = OauthClientPolicy.parseList(rs.getString(2))
             .orElse(DcrRegistrationRules.DEFAULT_GRANT_TYPES);
-        List<String> methods = TrustedClientPolicy.parseList(rs.getString(3))
+        List<String> methods = OauthClientPolicy.parseList(rs.getString(3))
             .orElse(DcrRegistrationRules.VERIFIABLE_AUTH_METHODS);
         return new DcrRegistrationRules(true, Set.copyOf(grants), Set.copyOf(methods),
             rs.getBoolean(4), subjects.pairwiseAvailable());
@@ -110,14 +110,14 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       String registrationAccessToken, DynamicClientRequest request) {
     Instant now = Instant.now();
     boolean publicClient = NONE.equals(request.getTokenEndpointAuthMethod());
-    String sql = "INSERT INTO access_trusted_client (uid, version, code, tenant, enabled, "
-        + "dynamically_registered, registered_at, registration_access, secret_oauth, "
-        + "token_endpoint_auth_method, public_allow, require_pkce, allow_all_scopes, "
+    String sql = "INSERT INTO access_oauth_client (uid, version, code, tenant, enabled, "
+        + "dynamically_registered, registered_at, registration_access_token, secret_oauth, "
+        + "token_endpoint_auth_method, require_pkce, allow_all_scopes, "
         + "grant_types_json, response_types_json, client_name, logo_uri, client_uri, policy_uri, "
-        + "tos_uri, back_channel_logout_uri, front_channel_logout_uri, m_2m_token_ttl_seconds, "
-        + "is_resource_server, tls_client_certificate_bound_access_tokens, "
+        + "tos_uri, backchannel_logout_uri, frontchannel_logout_uri, client_credentials_token_ttl_seconds, "
+        + "introspection_allowed, tls_client_certificate_bound_access_tokens, "
         + String.join(", ", EXTENSION_COLUMNS) + ") "
-        + "SELECT ?, 0, ?, t.uid, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 3600, "
+        + "SELECT ?, 0, ?, t.uid, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 3600, "
         + "?, ?, " + placeholders() + " FROM access_tenant t WHERE t.name = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
@@ -131,7 +131,6 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       stat.setString(i++, secretDigester.digest(registrationAccessToken));
       stat.setString(i++, clientSecret.map(secretDigester::digest).orElse(null));
       stat.setString(i++, request.getTokenEndpointAuthMethod().toUpperCase(Locale.ROOT));
-      stat.setBoolean(i++, publicClient);
       stat.setBoolean(i++, publicClient);
       stat.setBoolean(i++, false);
       stat.setString(i++, mapper.writeValueAsString(request.getGrantTypes()));
@@ -188,12 +187,12 @@ public class DynamicClientAdapter implements DynamicClientGateway {
   @Override
   public Optional<DynamicClientData> update(String tenant, String clientId,
       String registrationAccessToken, DynamicClientRequest request) {
-    String sql = "UPDATE access_trusted_client SET client_name = ?, logo_uri = ?, client_uri = ?, "
+    String sql = "UPDATE access_oauth_client SET client_name = ?, logo_uri = ?, client_uri = ?, "
         + "policy_uri = ?, tos_uri = ?, grant_types_json = ?, response_types_json = ?, "
-        + "back_channel_logout_uri = ?, front_channel_logout_uri = ?, "
+        + "backchannel_logout_uri = ?, frontchannel_logout_uri = ?, "
         + String.join(", ", EXTENSION_COLUMNS.stream().map(c -> c + " = ?").toList())
         + ", version = version + 1 "
-        + "WHERE uid = ? AND dynamically_registered = ? AND registration_access = ? "
+        + "WHERE uid = ? AND dynamically_registered = ? AND registration_access_token = ? "
         + "AND tenant = (SELECT t.uid FROM access_tenant t WHERE t.name = ?)";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
@@ -235,8 +234,8 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       deleteRedirects(conn, clientId);
       postLogoutRedirects.deleteAll(conn, clientId);
       try (PreparedStatement stat = conn.prepareStatement(
-          "DELETE FROM access_trusted_client WHERE uid = ? AND dynamically_registered = ? "
-              + "AND registration_access = ?")) {
+          "DELETE FROM access_oauth_client WHERE uid = ? AND dynamically_registered = ? "
+              + "AND registration_access_token = ?")) {
         stat.setString(1, clientId);
         stat.setBoolean(2, true);
         stat.setString(3, secretDigester.digest(registrationAccessToken));
@@ -265,17 +264,17 @@ public class DynamicClientAdapter implements DynamicClientGateway {
     String uid = rs.getString("uid");
     Timestamp issuedAt = rs.getTimestamp("registered_at");
     return DynamicClientData.builder().clientId(uid).redirectUris(loadRedirects(conn, uid))
-        .grantTypes(TrustedClientPolicy.parseList(rs.getString("grant_types_json"))
+        .grantTypes(OauthClientPolicy.parseList(rs.getString("grant_types_json"))
             .orElse(List.of("authorization_code")))
         .responseTypes(
-            TrustedClientPolicy.parseList(rs.getString("response_types_json")).orElse(List.of()))
+            OauthClientPolicy.parseList(rs.getString("response_types_json")).orElse(List.of()))
         .tokenEndpointAuthMethod(
             rs.getString("token_endpoint_auth_method").toLowerCase(Locale.ROOT))
         .clientName(rs.getString("client_name")).logoUri(rs.getString("logo_uri"))
         .clientUri(rs.getString("client_uri")).policyUri(rs.getString("policy_uri"))
         .tosUri(rs.getString("tos_uri"))
-        .backchannelLogoutUri(rs.getString("back_channel_logout_uri"))
-        .frontchannelLogoutUri(rs.getString("front_channel_logout_uri"))
+        .backchannelLogoutUri(rs.getString("backchannel_logout_uri"))
+        .frontchannelLogoutUri(rs.getString("frontchannel_logout_uri"))
         .postLogoutRedirectUris(postLogoutRedirects.list(uid)).extensions(readExtensions(rs))
         .clientIdIssuedAt(issuedAt != null ? issuedAt.toInstant().getEpochSecond() : 0).build();
   }
@@ -327,8 +326,8 @@ public class DynamicClientAdapter implements DynamicClientGateway {
           .userinfoEncryptedResponseEnc(rs.getString("userinfo_encrypted_response_enc"))
           .authorizationSignedResponseAlg(rs.getString("authorization_signed_response_alg"))
           .subjectType(rs.getString("subject_type").toLowerCase(Locale.ROOT))
-          .backchannelLogoutSessionRequired(rs.getBoolean("back_channel_logout_session_required"))
-          .frontchannelLogoutSessionRequired(rs.getBoolean("front_channel_logout_session_required"))
+          .backchannelLogoutSessionRequired(rs.getBoolean("backchannel_logout_session_required"))
+          .frontchannelLogoutSessionRequired(rs.getBoolean("frontchannel_logout_session_required"))
           .dpopBoundAccessTokens(rs.getBoolean("dpop_bound_access_tokens"))
           .requirePushedAuthorizationRequests(
               rs.getBoolean("require_pushed_authorization_requests"))
@@ -339,7 +338,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
   }
 
   private List<String> loadRedirects(Connection conn, String clientId) throws SQLException {
-    String sql = "SELECT url FROM access_trusted_client_allowed_redirect WHERE client = ?";
+    String sql = "SELECT url FROM access_oauth_client_allowed_login_redirect WHERE client = ?";
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientId);
       try (ResultSet rs = stat.executeQuery()) {
@@ -362,7 +361,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
       return;
     }
     String sql =
-        "INSERT INTO access_trusted_client_allowed_redirect (uid, version, url, client) VALUES (?, ?, ?, ?)";
+        "INSERT INTO access_oauth_client_allowed_login_redirect (uid, version, url, client) VALUES (?, ?, ?, ?)";
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       for (String uri : redirectUris) {
         stat.setString(1, HexFormat.of().formatHex(UUID.randomUUID().toString().getBytes()));
@@ -376,7 +375,7 @@ public class DynamicClientAdapter implements DynamicClientGateway {
   }
 
   private void deleteRedirects(Connection conn, String clientId) throws SQLException {
-    String sql = "DELETE FROM access_trusted_client_allowed_redirect WHERE client = ?";
+    String sql = "DELETE FROM access_oauth_client_allowed_login_redirect WHERE client = ?";
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientId);
       stat.execute();

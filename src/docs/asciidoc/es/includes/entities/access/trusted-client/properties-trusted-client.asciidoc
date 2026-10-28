@@ -66,8 +66,8 @@ Default max age (integer)::
 El default max age de trusted client
 Sector identifier uri (string)::
 El sector identifier uri de trusted client
-Allowed redirects (xref:#entidad-trusted-client-allowed-redirect[TrustedClientAllowedRedirect])::
-El allowed redirects de trusted client
+Allowed login redirects (xref:#entidad-trusted-client-allowed-login-redirect[TrustedClientAllowedLoginRedirect])::
+El allowed login redirects de trusted client
 Allowed logout redirects (xref:#entidad-trusted-client-allowed-logout-redirect[TrustedClientAllowedLogoutRedirect])::
 El allowed logout redirects de trusted client
 Allowed audiences (xref:#entidad-trusted-client-allowed-audience[TrustedClientAllowedAudience])::

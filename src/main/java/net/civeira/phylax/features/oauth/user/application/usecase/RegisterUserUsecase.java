@@ -33,8 +33,8 @@ public class RegisterUserUsecase {
    * @param tenant tenant identifier
    * @return true when registration is allowed
    */
-  public boolean allowRegister(String tenant) {
-    return gateway.allowRegister(tenant);
+  public boolean selfRegistrationEnabled(String tenant) {
+    return gateway.selfRegistrationEnabled(tenant);
   }
 
   /**

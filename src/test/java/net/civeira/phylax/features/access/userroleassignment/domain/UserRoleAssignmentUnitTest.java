@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.role.domain.RoleReference;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
-import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.RelyingPartyVO;
+import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.OauthClientVO;
+import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.ResourceServerVO;
 import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.RolesVO;
-import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.TrustedClientVO;
 import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.UserVO;
 import net.civeira.phylax.features.access.userroleassignment.domain.valueobject.VersionVO;
@@ -27,8 +27,8 @@ class UserRoleAssignmentUnitTest {
   void test_user_role_assignment_builder() {
     UserRoleAssignment one = UserRoleAssignment.builder().uidValue(UidVO.from("one"))
         .userValue(UserVO.from(UserReference.of("one")))
-        .relyingPartyValue(RelyingPartyVO.from(RelyingPartyReference.of("one")))
-        .trustedClientValue(TrustedClientVO.from(TrustedClientReference.of("one")))
+        .resourceServerValue(ResourceServerVO.from(ResourceServerReference.of("one")))
+        .oauthClientValue(OauthClientVO.from(OauthClientReference.of("one")))
         .rolesValue(RolesVO.from(
             List.of(Roles.builder().uid("one").role(RoleReference.of("one")).version(1).build())))
         .versionValue(VersionVO.from(1)).build();

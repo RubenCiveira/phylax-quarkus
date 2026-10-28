@@ -72,8 +72,8 @@ public class RoleController implements RoleApi {
    * @param uids
    * @param search
    * @param name
-   * @param relyingParty
-   * @param relyingParties
+   * @param resourceServer
+   * @param resourceServers
    * @param limit
    * @param sinceUid
    * @param sinceName
@@ -82,9 +82,9 @@ public class RoleController implements RoleApi {
    */
   @Override
   public Response roleApiList(final List<String> uids, final String search, final String name,
-      final String relyingParty, final List<String> relyingParties, final Integer limit,
+      final String resourceServer, final List<String> resourceServers, final Integer limit,
       final String sinceUid, final String sinceName, final String order) {
-    return listController.roleApiList(uids, search, name, relyingParty, relyingParties, limit,
+    return listController.roleApiList(uids, search, name, resourceServer, resourceServers, limit,
         sinceUid, sinceName, order);
   }
 

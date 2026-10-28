@@ -19,10 +19,10 @@ import net.civeira.phylax.features.access.user.application.usecase.list.UserList
 import net.civeira.phylax.features.access.user.application.usecase.list.UserListOrder;
 import net.civeira.phylax.features.access.user.application.usecase.list.UserListProjection;
 import net.civeira.phylax.features.access.user.application.usecase.list.UserListUsecase;
-import net.civeira.phylax.features.access.user.domain.UserApproveOptions;
+import net.civeira.phylax.features.access.user.domain.UserApprovalStatusOptions;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.UserApiDto;
-import net.civeira.phylax.generated.openapi.model.UserApiDto.ApproveEnum;
+import net.civeira.phylax.generated.openapi.model.UserApiDto.ApprovalStatusEnum;
 import net.civeira.phylax.generated.openapi.model.UserApiDtoList;
 
 @RequiredArgsConstructor
@@ -123,16 +123,16 @@ public class UserListController {
    * @param domainEnum
    * @return
    */
-  private ApproveEnum approveEnumToApi(UserApproveOptions domainEnum) {
-    ApproveEnum result;
-    if (domainEnum == UserApproveOptions.UNVERIFIED) {
-      result = ApproveEnum.UNVERIFIED;
-    } else if (domainEnum == UserApproveOptions.PENDING) {
-      result = ApproveEnum.PENDING;
-    } else if (domainEnum == UserApproveOptions.ACCEPTED) {
-      result = ApproveEnum.ACCEPTED;
-    } else if (domainEnum == UserApproveOptions.REJECTED) {
-      result = ApproveEnum.REJECTED;
+  private ApprovalStatusEnum approvalStatusEnumToApi(UserApprovalStatusOptions domainEnum) {
+    ApprovalStatusEnum result;
+    if (domainEnum == UserApprovalStatusOptions.UNVERIFIED) {
+      result = ApprovalStatusEnum.UNVERIFIED;
+    } else if (domainEnum == UserApprovalStatusOptions.PENDING) {
+      result = ApprovalStatusEnum.PENDING;
+    } else if (domainEnum == UserApprovalStatusOptions.ACCEPTED) {
+      result = ApprovalStatusEnum.ACCEPTED;
+    } else if (domainEnum == UserApprovalStatusOptions.REJECTED) {
+      result = ApprovalStatusEnum.REJECTED;
     } else {
       result = null;
     }
@@ -171,12 +171,12 @@ public class UserListController {
     userApiDto.setWelcomeAt(dto.getWelcomeAt());
     userApiDto.setEmailVerified(dto.getEmailVerified());
     userApiDto.setEnabled(dto.getEnabled());
-    userApiDto.setApprove(approveEnumToApi(dto.getApprove()));
+    userApiDto.setApprovalStatus(approvalStatusEnumToApi(dto.getApprovalStatus()));
     userApiDto.setTemporalPassword(dto.getTemporalPassword());
     userApiDto.setUseSecondFactors(dto.getUseSecondFactors());
     userApiDto.setSecondFactorSeed("*****");
     userApiDto.setBlockedUntil(dto.getBlockedUntil());
-    userApiDto.setProvider(dto.getProvider());
+    userApiDto.setFederatedProvider(dto.getFederatedProvider());
     userApiDto.setVersion(dto.getVersion());
     return userApiDto;
   }

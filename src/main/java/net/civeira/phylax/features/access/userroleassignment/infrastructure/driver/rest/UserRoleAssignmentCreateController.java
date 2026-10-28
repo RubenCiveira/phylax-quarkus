@@ -6,19 +6,19 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.role.domain.RoleReference;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userroleassignment.application.usecase.create.UserRoleAssignmentCreateInput;
 import net.civeira.phylax.features.access.userroleassignment.application.usecase.create.UserRoleAssignmentCreateProjection;
 import net.civeira.phylax.features.access.userroleassignment.application.usecase.create.UserRoleAssignmentCreateUsecase;
 import net.civeira.phylax.features.access.userroleassignment.domain.Roles;
 import net.civeira.phylax.features.access.userroleassignment.domain.Roles.RolesBuilder;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
+import net.civeira.phylax.generated.openapi.model.OauthClientApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.RoleApiRef;
 import net.civeira.phylax.generated.openapi.model.RolesApiDto;
-import net.civeira.phylax.generated.openapi.model.TrustedClientApiRef;
 import net.civeira.phylax.generated.openapi.model.UserApiRef;
 import net.civeira.phylax.generated.openapi.model.UserRoleAssignmentApiDto;
 
@@ -59,9 +59,9 @@ public class UserRoleAssignmentCreateController {
     userRoleAssignmentApiDto.setUid(dto.getUid());
     userRoleAssignmentApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
     userRoleAssignmentApiDto
-        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     userRoleAssignmentApiDto
-        .setTrustedClient(new TrustedClientApiRef().$ref(dto.getTrustedClientReference()));
+        .setOauthClient(new OauthClientApiRef().$ref(dto.getOauthClientReference()));
     userRoleAssignmentApiDto.setRoles(dto.getRoles().stream().map(this::toApiModelRoles).toList());
     userRoleAssignmentApiDto.setVersion(dto.getVersion());
     return userRoleAssignmentApiDto;
@@ -94,13 +94,13 @@ public class UserRoleAssignmentCreateController {
     if (null != userRoleAssignmentApiDto.getUser()) {
       dto.setUser(UserReference.of(userRoleAssignmentApiDto.getUser().get$Ref()));
     }
-    if (null != userRoleAssignmentApiDto.getRelyingParty()) {
-      dto.setRelyingParty(
-          RelyingPartyReference.of(userRoleAssignmentApiDto.getRelyingParty().get$Ref()));
+    if (null != userRoleAssignmentApiDto.getResourceServer()) {
+      dto.setResourceServer(
+          ResourceServerReference.of(userRoleAssignmentApiDto.getResourceServer().get$Ref()));
     }
-    if (null != userRoleAssignmentApiDto.getTrustedClient()) {
-      dto.setTrustedClient(
-          TrustedClientReference.of(userRoleAssignmentApiDto.getTrustedClient().get$Ref()));
+    if (null != userRoleAssignmentApiDto.getOauthClient()) {
+      dto.setOauthClient(
+          OauthClientReference.of(userRoleAssignmentApiDto.getOauthClient().get$Ref()));
     }
     if (null != userRoleAssignmentApiDto.getRoles()) {
       dto.setRoles(

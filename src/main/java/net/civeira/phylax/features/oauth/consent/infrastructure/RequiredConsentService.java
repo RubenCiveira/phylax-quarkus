@@ -34,14 +34,14 @@ public class RequiredConsentService {
         .filter(term -> term.getActivationDate().map(d -> d.isBefore(OffsetDateTime.now()))
             .orElse(false))
         .filter(term -> userTerms
-            .find(UserAcceptedTermsOfUseFilter.builder().conditions(term).user(user).build())
+            .find(UserAcceptedTermsOfUseFilter.builder().termsOfUse(term).user(user).build())
             .isEmpty())
         .max(Comparator.comparing(t -> t.getActivationDate().orElse(OffsetDateTime.MIN)));
   }
 
   public void acceptPendingTerms(User user, String conditionsUid) {
     userTermsWriter.create(UserAcceptedTermsOfUse.create(new UserAcceptedTermsOfUseChangeSet()
-        .newUid().user(user).conditions(TenantTermsOfUseReference.of(conditionsUid))
+        .newUid().user(user).termsOfUse(TenantTermsOfUseReference.of(conditionsUid))
         .acceptDate(OffsetDateTime.now())));
   }
 }

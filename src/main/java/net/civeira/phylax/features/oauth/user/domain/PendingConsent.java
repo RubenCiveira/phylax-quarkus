@@ -18,7 +18,7 @@ public class PendingConsent {
   /**
    * Relying party identifier requiring consent.
    */
-  private final String relyingParty;
+  private final String resourceServer;
   /**
    * Consent text to display for approval.
    */
@@ -29,12 +29,12 @@ public class PendingConsent {
    *
    * Used to build a simple immutable consent payload. Returns a new instance with provided values.
    *
-   * @param relyingParty relying party identifier
+   * @param resourceServer resource server identifier
    * @param consentText consent text
    * @return pending consent instance
    */
-  public static PendingConsent of(String relyingParty, String consentText) {
-    return new PendingConsent(relyingParty, consentText);
+  public static PendingConsent of(String resourceServer, String consentText) {
+    return new PendingConsent(resourceServer, consentText);
   }
 
   /**
@@ -42,11 +42,11 @@ public class PendingConsent {
    *
    * Private constructor ensures use of factory method. Stores relying party and consent text.
    *
-   * @param relyingParty relying party identifier
+   * @param resourceServer resource server identifier
    * @param consentText consent text
    */
-  private PendingConsent(String relyingParty, String consentText) {
-    this.relyingParty = relyingParty;
+  private PendingConsent(String resourceServer, String consentText) {
+    this.resourceServer = resourceServer;
     this.consentText = consentText;
   }
 }

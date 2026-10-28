@@ -48,23 +48,23 @@ public class TenantTermsOfUseRbacRegister {
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
         .name("disable").description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE,
-        ScopeDescription.builder().kind(Kind.READ).name("retrieve-upload-attached")
-            .description("El attached de tenant terms of use").required(List.of()).build());
+        ScopeDescription.builder().kind(Kind.READ).name("retrieve-upload-document")
+            .description("El document de tenant terms of use").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE,
-        ScopeDescription.builder().kind(Kind.WRITE).name("temp-upload-attached")
-            .description("El attached de tenant terms of use").required(List.of()).build());
+        ScopeDescription.builder().kind(Kind.WRITE).name("temp-upload-document")
+            .description("El document de tenant terms of use").required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
         .description("A number to identify the db record").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
         .description("La cuenta a la que pertenece").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("relyingParty")
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("resourceServer")
         .description("La applicación a tener en cuenta").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("text")
         .description("El text de tenant terms of use").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
         .description("The indicator to allow the account be used without deleting it").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("attached")
-        .description("El attached de tenant terms of use").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("document")
+        .description("El document de tenant terms of use").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("activationDate")
         .description("El activation date de tenant terms of use").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("version").description(

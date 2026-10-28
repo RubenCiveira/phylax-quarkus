@@ -55,6 +55,14 @@ tags:
     description: Audit operations for changes on user group membership
   - name: user-group-membership-acl
     description: Access control for user group membership
+  - name: oauth-client
+    description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
+  - name: oauth-client-batch
+    description: Massive operations for oauth client
+  - name: oauth-client-audit
+    description: Audit operations for changes on oauth client
+  - name: oauth-client-acl
+    description: Access control for oauth client
   - name: theme-version
     description: theme-version
   - name: theme-version-batch
@@ -63,14 +71,6 @@ tags:
     description: Audit operations for changes on theme version
   - name: theme-version-acl
     description: Access control for theme version
-  - name: relying-party
-    description: relying-party
-  - name: relying-party-batch
-    description: Massive operations for relying party
-  - name: relying-party-audit
-    description: Audit operations for changes on relying party
-  - name: relying-party-acl
-    description: Access control for relying party
   - name: snippet-version
     description: snippet-version
   - name: snippet-version-batch
@@ -159,14 +159,6 @@ tags:
     description: Audit operations for changes on message
   - name: message-acl
     description: Access control for message
-  - name: trusted-client
-    description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
-  - name: trusted-client-batch
-    description: Massive operations for trusted client
-  - name: trusted-client-audit
-    description: Audit operations for changes on trusted client
-  - name: trusted-client-acl
-    description: Access control for trusted client
   - name: theme-asset
     description: theme-asset
   - name: theme-asset-batch
@@ -215,6 +207,14 @@ tags:
     description: Audit operations for changes on tenant login provider
   - name: tenant-login-provider-acl
     description: Access control for tenant login provider
+  - name: resource-server
+    description: resource-server
+  - name: resource-server-batch
+    description: Massive operations for resource server
+  - name: resource-server-audit
+    description: Audit operations for changes on resource server
+  - name: resource-server-acl
+    description: Access control for resource server
   - name: tenant-terms-of-use
     description: tenant-terms-of-use
   - name: tenant-terms-of-use-batch
@@ -1362,15 +1362,15 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -1455,15 +1455,15 @@ paths:
           required: false
           schema:
             type: string
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -1702,15 +1702,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -1718,15 +1718,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: trusted-client
+        - name: oauth-client
           in: query
-          description: trusted client
+          description: oauth client
           required: false
           schema:
             type: string
-        - name: trusted-clients
+        - name: oauth-clients
           in: query
-          description: trusted clients
+          description: oauth clients
           required: false
           schema:
             type: array
@@ -1809,15 +1809,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -1825,15 +1825,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: trusted-client
+        - name: oauth-client
           in: query
-          description: trusted client
+          description: oauth client
           required: false
           schema:
             type: string
-        - name: trusted-clients
+        - name: oauth-clients
           in: query
-          description: trusted clients
+          description: oauth clients
           required: false
           schema:
             type: array
@@ -2031,6 +2031,576 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserGroupMembershipSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients:
+    get:
+      tags:
+        - oauth-client
+      summary: List of oauth client
+      operationId: oauth-client-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: with-backchannel-logout-url
+          in: query
+          description: with backchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: with-frontchannel-logout-url
+          in: query
+          description: with frontchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientApiDtoList'
+    post:
+      tags:
+        - oauth-client
+      summary: Create a new oauth client
+      operationId: oauth-client-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OauthClientApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientApiDto'
+    delete:
+      tags:
+        - oauth-client-batch
+      summary: Delete a collection of oauth client by filter
+      operationId: oauth-client-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: with-backchannel-logout-url
+          in: query
+          description: with backchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: with-frontchannel-logout-url
+          in: query
+          description: with frontchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/oauth-clients/{uid}:
+    get:
+      tags:
+        - oauth-client
+      summary: Retrieve on  oauth client by their uid
+      operationId: oauth-client-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - oauth-client
+      summary: Update a oauth client by their uid
+      operationId: oauth-client-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OauthClientApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - oauth-client
+      summary: Delete a  oauth client by their uid
+      operationId: oauth-client-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients/~/delete-status/{uid}:
+    get:
+      tags:
+        - oauth-client-batch
+      summary: Query the result of an massive delete
+      operationId: oauth-client-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients/-/audit/entity/{uid}:
+    get:
+      tags:
+        - oauth-client-audit
+      summary: Update a oauth client by their uid
+      operationId: oauth-client-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - oauth-client-audit
+      summary: Update a oauth client by their uid
+      operationId: oauth-client-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients/{uid}/enable:
+    patch:
+      tags:
+        - oauth-client
+      summary: Update a oauth client by their uid
+      operationId: oauth-client-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientApiDto'
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients/{uid}/disable:
+    patch:
+      tags:
+        - oauth-client
+      summary: Update a oauth client by their uid
+      operationId: oauth-client-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/oauth-clients:
+    get:
+      tags:
+        - oauth-client-acl
+      summary: Check for allow permissions for the current user on oauth client
+      operationId: oauth-client-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientGenericAcl'
+  /api/me/acl/access/oauth-clients/{uid}:
+    get:
+      tags:
+        - oauth-client-acl
+      summary: Check for allow permissions for the current user on oauth client by their uid
+      operationId: oauth-client-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OauthClientSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients/~/enable:
+    patch:
+      tags:
+        - oauth-client-batch
+      summary: enable a collection of oauth client by filter
+      operationId: oauth-client-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: with-backchannel-logout-url
+          in: query
+          description: with backchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: with-frontchannel-logout-url
+          in: query
+          description: with frontchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/oauth-clients/~/enable-status/{uid}:
+    get:
+      tags:
+        - oauth-client-batch
+      summary: Query the result of an massive delete
+      operationId: oauth-client-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/oauth-clients/~/disable:
+    patch:
+      tags:
+        - oauth-client-batch
+      summary: disable a collection of oauth client by filter
+      operationId: oauth-client-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: with-backchannel-logout-url
+          in: query
+          description: with backchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: with-frontchannel-logout-url
+          in: query
+          description: with frontchannel logout url
+          required: false
+          schema:
+            type: boolean
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/oauth-clients/~/disable-status/{uid}:
+    get:
+      tags:
+        - oauth-client-batch
+      summary: Query the result of an massive delete
+      operationId: oauth-client-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
   /api/document/theme-versions:
@@ -2337,488 +2907,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ThemeVersionSpecificAcl'
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties:
-    get:
-      tags:
-        - relying-party
-      summary: List of relying party
-      operationId: relying-party-api-list
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: api-key
-          in: query
-          description: api key
-          required: false
-          schema:
-            type: string
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-        - name: limit
-          in: query
-          description: The maximum number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximum number of results
-          required: false
-          schema:
-            type: string
-        - name: since-code
-          in: query
-          description: Order by code asc
-          required: false
-          schema:
-            type: string
-        - name: order
-          in: query
-          description: The result order information
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartyApiDtoList'
-    post:
-      tags:
-        - relying-party
-      summary: Create a new relying party
-      operationId: relying-party-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RelyingPartyApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartyApiDto'
-    delete:
-      tags:
-        - relying-party-batch
-      summary: Delete a collection of relying party by filter
-      operationId: relying-party-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: api-key
-          in: query
-          description: api key
-          required: false
-          schema:
-            type: string
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/access/relying-parties/{uid}:
-    get:
-      tags:
-        - relying-party
-      summary: Retrieve on  relying party by their uid
-      operationId: relying-party-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartyApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - relying-party
-      summary: Update a relying party by their uid
-      operationId: relying-party-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RelyingPartyApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartyApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - relying-party
-      summary: Delete a  relying party by their uid
-      operationId: relying-party-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties/~/delete-status/{uid}:
-    get:
-      tags:
-        - relying-party-batch
-      summary: Query the result of an massive delete
-      operationId: relying-party-api-batch-delete-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties/-/audit/entity/{uid}:
-    get:
-      tags:
-        - relying-party-audit
-      summary: Update a relying party by their uid
-      operationId: relying-party-api-entity-audit
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties/-/audit/actor/{actor}/{from}/{to}:
-    get:
-      tags:
-        - relying-party-audit
-      summary: Update a relying party by their uid
-      operationId: relying-party-api-actor-audit
-      parameters:
-        - name: actor
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-        - name: from
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties/{uid}/enable:
-    patch:
-      tags:
-        - relying-party
-      summary: Update a relying party by their uid
-      operationId: relying-party-api-enable
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartyApiDto'
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties/{uid}/disable:
-    patch:
-      tags:
-        - relying-party
-      summary: Update a relying party by their uid
-      operationId: relying-party-api-disable
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartyApiDto'
-        '404':
-          description: The item dont exists
-  /api/me/acl/access/relying-parties:
-    get:
-      tags:
-        - relying-party-acl
-      summary: Check for allow permissions for the current user on relying party
-      operationId: relying-party-api-generic-acl
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartyGenericAcl'
-  /api/me/acl/access/relying-parties/{uid}:
-    get:
-      tags:
-        - relying-party-acl
-      summary: Check for allow permissions for the current user on relying party by their uid
-      operationId: relying-party-api-contextual-acl
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelyingPartySpecificAcl'
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties/~/enable:
-    patch:
-      tags:
-        - relying-party-batch
-      summary: enable a collection of relying party by filter
-      operationId: relying-party-api-batch-enable
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: api-key
-          in: query
-          description: api key
-          required: false
-          schema:
-            type: string
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/access/relying-parties/~/enable-status/{uid}:
-    get:
-      tags:
-        - relying-party-batch
-      summary: Query the result of an massive delete
-      operationId: relying-party-api-batch-enable-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/relying-parties/~/disable:
-    patch:
-      tags:
-        - relying-party-batch
-      summary: disable a collection of relying party by filter
-      operationId: relying-party-api-batch-disable
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: api-key
-          in: query
-          description: api key
-          required: false
-          schema:
-            type: string
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/access/relying-parties/~/disable-status/{uid}:
-    get:
-      tags:
-        - relying-party-batch
-      summary: Query the result of an massive delete
-      operationId: relying-party-api-batch-disable-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
   /api/document/snippet-versions:
@@ -7749,576 +7837,6 @@ paths:
                 $ref: '#/components/schemas/MessageSpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/trusted-clients:
-    get:
-      tags:
-        - trusted-client
-      summary: List of trusted client
-      operationId: trusted-client-api-list
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: with-back-channel-url
-          in: query
-          description: with back channel url
-          required: false
-          schema:
-            type: boolean
-        - name: with-front-channel-url
-          in: query
-          description: with front channel url
-          required: false
-          schema:
-            type: boolean
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          description: tenant
-          required: false
-          schema:
-            type: string
-        - name: tenants
-          in: query
-          description: tenants
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-        - name: limit
-          in: query
-          description: The maximum number of results
-          required: false
-          schema:
-            type: integer
-        - name: since-uid
-          in: query
-          description: The maximum number of results
-          required: false
-          schema:
-            type: string
-        - name: since-code
-          in: query
-          description: Order by code asc
-          required: false
-          schema:
-            type: string
-        - name: order
-          in: query
-          description: The result order information
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientApiDtoList'
-    post:
-      tags:
-        - trusted-client
-      summary: Create a new trusted client
-      operationId: trusted-client-api-create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TrustedClientApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientApiDto'
-    delete:
-      tags:
-        - trusted-client-batch
-      summary: Delete a collection of trusted client by filter
-      operationId: trusted-client-api-batch-delete
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: with-back-channel-url
-          in: query
-          description: with back channel url
-          required: false
-          schema:
-            type: boolean
-        - name: with-front-channel-url
-          in: query
-          description: with front channel url
-          required: false
-          schema:
-            type: boolean
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          description: tenant
-          required: false
-          schema:
-            type: string
-        - name: tenants
-          in: query
-          description: tenants
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/access/trusted-clients/{uid}:
-    get:
-      tags:
-        - trusted-client
-      summary: Retrieve on  trusted client by their uid
-      operationId: trusted-client-api-retrieve
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientApiDto'
-        '404':
-          description: The item dont exists
-    put:
-      tags:
-        - trusted-client
-      summary: Update a trusted client by their uid
-      operationId: trusted-client-api-update
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TrustedClientApiDto'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientApiDto'
-        '404':
-          description: The item dont exists
-    delete:
-      tags:
-        - trusted-client
-      summary: Delete a  trusted client by their uid
-      operationId: trusted-client-api-delete
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: OK
-        '404':
-          description: The item dont exists
-  /api/access/trusted-clients/~/delete-status/{uid}:
-    get:
-      tags:
-        - trusted-client-batch
-      summary: Query the result of an massive delete
-      operationId: trusted-client-api-batch-delete-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/trusted-clients/-/audit/entity/{uid}:
-    get:
-      tags:
-        - trusted-client-audit
-      summary: Update a trusted client by their uid
-      operationId: trusted-client-api-entity-audit
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/trusted-clients/-/audit/actor/{actor}/{from}/{to}:
-    get:
-      tags:
-        - trusted-client-audit
-      summary: Update a trusted client by their uid
-      operationId: trusted-client-api-actor-audit
-      parameters:
-        - name: actor
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-        - name: from
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: to
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-            format: date
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditEventDto'
-        '404':
-          description: The item dont exists
-  /api/access/trusted-clients/{uid}/enable:
-    patch:
-      tags:
-        - trusted-client
-      summary: Update a trusted client by their uid
-      operationId: trusted-client-api-enable
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientApiDto'
-        '404':
-          description: The item dont exists
-  /api/access/trusted-clients/{uid}/disable:
-    patch:
-      tags:
-        - trusted-client
-      summary: Update a trusted client by their uid
-      operationId: trusted-client-api-disable
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientApiDto'
-        '404':
-          description: The item dont exists
-  /api/me/acl/access/trusted-clients:
-    get:
-      tags:
-        - trusted-client-acl
-      summary: Check for allow permissions for the current user on trusted client
-      operationId: trusted-client-api-generic-acl
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientGenericAcl'
-  /api/me/acl/access/trusted-clients/{uid}:
-    get:
-      tags:
-        - trusted-client-acl
-      summary: Check for allow permissions for the current user on trusted client by their uid
-      operationId: trusted-client-api-contextual-acl
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustedClientSpecificAcl'
-        '404':
-          description: The item dont exists
-  /api/access/trusted-clients/~/enable:
-    patch:
-      tags:
-        - trusted-client-batch
-      summary: enable a collection of trusted client by filter
-      operationId: trusted-client-api-batch-enable
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: with-back-channel-url
-          in: query
-          description: with back channel url
-          required: false
-          schema:
-            type: boolean
-        - name: with-front-channel-url
-          in: query
-          description: with front channel url
-          required: false
-          schema:
-            type: boolean
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          description: tenant
-          required: false
-          schema:
-            type: string
-        - name: tenants
-          in: query
-          description: tenants
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/access/trusted-clients/~/enable-status/{uid}:
-    get:
-      tags:
-        - trusted-client-batch
-      summary: Query the result of an massive delete
-      operationId: trusted-client-api-batch-enable-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/access/trusted-clients/~/disable:
-    patch:
-      tags:
-        - trusted-client-batch
-      summary: disable a collection of trusted client by filter
-      operationId: trusted-client-api-batch-disable
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: with-back-channel-url
-          in: query
-          description: with back channel url
-          required: false
-          schema:
-            type: boolean
-        - name: with-front-channel-url
-          in: query
-          description: with front channel url
-          required: false
-          schema:
-            type: boolean
-        - name: code
-          in: query
-          description: code
-          required: false
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          description: tenant
-          required: false
-          schema:
-            type: string
-        - name: tenants
-          in: query
-          description: tenants
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/access/trusted-clients/~/disable-status/{uid}:
-    get:
-      tags:
-        - trusted-client-batch
-      summary: Query the result of an massive delete
-      operationId: trusted-client-api-batch-disable-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
   /api/document/theme-asset:
     get:
       tags:
@@ -9260,15 +8778,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -9276,15 +8794,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: trusted-client
+        - name: oauth-client
           in: query
-          description: trusted client
+          description: oauth client
           required: false
           schema:
             type: string
-        - name: trusted-clients
+        - name: oauth-clients
           in: query
-          description: trusted clients
+          description: oauth clients
           required: false
           schema:
             type: array
@@ -9367,15 +8885,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -9383,15 +8901,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: trusted-client
+        - name: oauth-client
           in: query
-          description: trusted client
+          description: oauth client
           required: false
           schema:
             type: string
-        - name: trusted-clients
+        - name: oauth-clients
           in: query
-          description: trusted clients
+          description: oauth clients
           required: false
           schema:
             type: array
@@ -10885,6 +10403,488 @@ paths:
                 $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
+  /api/access/resource-servers:
+    get:
+      tags:
+        - resource-server
+      summary: List of resource server
+      operationId: resource-server-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: api-key
+          in: query
+          description: api key
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerApiDtoList'
+    post:
+      tags:
+        - resource-server
+      summary: Create a new resource server
+      operationId: resource-server-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceServerApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerApiDto'
+    delete:
+      tags:
+        - resource-server-batch
+      summary: Delete a collection of resource server by filter
+      operationId: resource-server-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: api-key
+          in: query
+          description: api key
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/resource-servers/{uid}:
+    get:
+      tags:
+        - resource-server
+      summary: Retrieve on  resource server by their uid
+      operationId: resource-server-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - resource-server
+      summary: Update a resource server by their uid
+      operationId: resource-server-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceServerApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - resource-server
+      summary: Delete a  resource server by their uid
+      operationId: resource-server-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/access/resource-servers/~/delete-status/{uid}:
+    get:
+      tags:
+        - resource-server-batch
+      summary: Query the result of an massive delete
+      operationId: resource-server-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/resource-servers/-/audit/entity/{uid}:
+    get:
+      tags:
+        - resource-server-audit
+      summary: Update a resource server by their uid
+      operationId: resource-server-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/resource-servers/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - resource-server-audit
+      summary: Update a resource server by their uid
+      operationId: resource-server-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/access/resource-servers/{uid}/enable:
+    patch:
+      tags:
+        - resource-server
+      summary: Update a resource server by their uid
+      operationId: resource-server-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerApiDto'
+        '404':
+          description: The item dont exists
+  /api/access/resource-servers/{uid}/disable:
+    patch:
+      tags:
+        - resource-server
+      summary: Update a resource server by their uid
+      operationId: resource-server-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/access/resource-servers:
+    get:
+      tags:
+        - resource-server-acl
+      summary: Check for allow permissions for the current user on resource server
+      operationId: resource-server-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerGenericAcl'
+  /api/me/acl/access/resource-servers/{uid}:
+    get:
+      tags:
+        - resource-server-acl
+      summary: Check for allow permissions for the current user on resource server by their uid
+      operationId: resource-server-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceServerSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/access/resource-servers/~/enable:
+    patch:
+      tags:
+        - resource-server-batch
+      summary: enable a collection of resource server by filter
+      operationId: resource-server-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: api-key
+          in: query
+          description: api key
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/resource-servers/~/enable-status/{uid}:
+    get:
+      tags:
+        - resource-server-batch
+      summary: Query the result of an massive delete
+      operationId: resource-server-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/access/resource-servers/~/disable:
+    patch:
+      tags:
+        - resource-server-batch
+      summary: disable a collection of resource server by filter
+      operationId: resource-server-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: api-key
+          in: query
+          description: api key
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/access/resource-servers/~/disable-status/{uid}:
+    get:
+      tags:
+        - resource-server-batch
+      summary: Query the result of an massive delete
+      operationId: resource-server-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
   /api/access/tenants-terms-of-use:
     get:
       tags:
@@ -10924,15 +10924,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -11015,15 +11015,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -11267,12 +11267,12 @@ paths:
                 $ref: '#/components/schemas/TenantTermsOfUseSpecificAcl'
         '404':
           description: The item dont exists
-  /api/access/tenants-terms-of-use/{uid}/attached:
+  /api/access/tenants-terms-of-use/{uid}/document:
     get:
       tags:
         - tenant-terms-of-use
-      summary: Retrieve binary content for attached of tenant terms of use
-      operationId: tenant-terms-of-use-api-retrieve-attached
+      summary: Retrieve binary content for document of tenant terms of use
+      operationId: tenant-terms-of-use-api-retrieve-document
       parameters:
         - name: uid
           in: path
@@ -11288,12 +11288,12 @@ paths:
               schema:
                 type: string
                 format: binary
-  /api/access/tenants-terms-of-use/-/temp-attached:
+  /api/access/tenants-terms-of-use/-/temp-document:
     get:
       tags:
         - tenant-terms-of-use
-      summary: Retrieve binary content of a temporal upload for attached of tenant terms of use
-      operationId: tenant-terms-of-use-api-retrieve-temp-upload-attached
+      summary: Retrieve binary content of a temporal upload for document of tenant terms of use
+      operationId: tenant-terms-of-use-api-retrieve-temp-upload-document
       parameters:
         - name: temp
           in: query
@@ -11312,8 +11312,8 @@ paths:
     post:
       tags:
         - tenant-terms-of-use
-      summary: Retrieve binary content of a temporal upload for attached of tenant terms of use
-      operationId: tenant-terms-of-use-api-upload-temp-upload-attached
+      summary: Retrieve binary content of a temporal upload for document of tenant terms of use
+      operationId: tenant-terms-of-use-api-upload-temp-upload-document
       requestBody:
         content:
           multipart/form-data:
@@ -11380,15 +11380,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -11464,15 +11464,15 @@ paths:
               type: string
           style: form
           explode: false
-        - name: relying-party
+        - name: resource-server
           in: query
-          description: relying party
+          description: resource server
           required: false
           schema:
             type: string
-        - name: relying-parties
+        - name: resource-servers
           in: query
-          description: relying parties
+          description: resource servers
           required: false
           schema:
             type: array
@@ -13055,13 +13055,13 @@ components:
           type: array
           items:
             type: string
-    RelyingPartyApiRef:
+    ResourceServerApiRef:
       type: object
       properties:
         $ref:
           type: string
           x-relationship:
-            url: "/api/access/relying-parties"
+            url: "/api/access/resource-servers"
             method: "GET"
             reference: "uid"
             batch-query-param: "uids"
@@ -13078,8 +13078,8 @@ components:
         name:
           description: The user name to identify on the login screen
           type: string
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
+        resourceServer:
+          $ref: '#/components/schemas/ResourceServerApiRef'
         version:
           description: Campo con el número de version de role para controlar bloqueos optimistas
           type: integer
@@ -13170,13 +13170,13 @@ components:
       required:
         - uid
         - user
-    TrustedClientApiRef:
+    OauthClientApiRef:
       type: object
       properties:
         $ref:
           type: string
           x-relationship:
-            url: "/api/access/trusted-clients"
+            url: "/api/access/oauth-clients"
             method: "GET"
             reference: "uid"
             batch-query-param: "uids"
@@ -13192,10 +13192,10 @@ components:
           type: string
         user:
           $ref: '#/components/schemas/UserApiRef'
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        trustedClient:
-          $ref: '#/components/schemas/TrustedClientApiRef'
+        resourceServer:
+          $ref: '#/components/schemas/ResourceServerApiRef'
+        oauthClient:
+          $ref: '#/components/schemas/OauthClientApiRef'
         groups:
           description: El groups de user group membership
           type: string
@@ -13266,6 +13266,303 @@ components:
         - update
         - delete
     UserGroupMembershipAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    AllowedLoginRedirectsApiDto:
+      type: object
+      description: oauth-client-allowed-login-redirect
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        url:
+          description: El url de oauth client allowed login redirect
+          type: string
+        version:
+          description: Campo con el número de version de oauth client allowed login redirect para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    AllowedLogoutRedirectsApiDto:
+      type: object
+      description: oauth-client-allowed-logout-redirect
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        url:
+          description: El url de oauth client allowed logout redirect
+          type: string
+        version:
+          description: Campo con el número de version de oauth client allowed logout redirect para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    AllowedAudiencesApiDto:
+      type: object
+      description: oauth-client-allowed-audience
+      properties:
+        uid:
+          description: El uid de oauth client allowed audience
+          type: string
+        audience:
+          description: Code of a oauth-client resource server or resource-server, or an absolute resource URI (RFC 8707).
+          type: string
+        version:
+          description: Campo con el número de version de oauth client allowed audience para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    OauthClientApiDto:
+      type: object
+      description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        code:
+          description: El código identificativo de la aplicación
+          type: string
+        tenant:
+          $ref: '#/components/schemas/TenantApiRef'
+        allowAllScopes:
+          description: El allow all scopes de oauth client
+          type: boolean
+        tokenEndpointAuthMethod:
+          description: El token endpoint auth method de oauth client
+          type: string
+          enum: [client-secret-basic,client-secret-post,private-key-jwt,none]
+        tokenEndpointAuthSigningAlg:
+          description: El token endpoint auth signing alg de oauth client
+          type: string
+        dpopBoundAccessTokens:
+          description: El dpop bound access tokens de oauth client
+          type: boolean
+        idTokenSignedResponseAlg:
+          description: El id token signed response alg de oauth client
+          type: string
+          enum: [rs256,es256,eddsa]
+        tlsClientAuthSubjectDn:
+          description: El tls client auth subject dn de oauth client
+          type: string
+        tlsClientCertificateBoundAccessTokens:
+          description: El tls client certificate bound access tokens de oauth client
+          type: boolean
+        authorizationSignedResponseAlg:
+          description: El authorization signed response alg de oauth client
+          type: string
+        backchannelTokenDeliveryMode:
+          description: El backchannel token delivery mode de oauth client
+          type: string
+          enum: [poll,ping]
+        backchannelClientNotificationEndpoint:
+          description: El backchannel client notification endpoint de oauth client
+          type: string
+        subjectType:
+          description: El subject type de oauth client
+          type: string
+          enum: [public,pairwise]
+        idTokenEncryptedResponseAlg:
+          description: El id token encrypted response alg de oauth client
+          type: string
+        idTokenEncryptedResponseEnc:
+          description: El id token encrypted response enc de oauth client
+          type: string
+        userinfoEncryptedResponseAlg:
+          description: El userinfo encrypted response alg de oauth client
+          type: string
+        userinfoEncryptedResponseEnc:
+          description: El userinfo encrypted response enc de oauth client
+          type: string
+        authorizationDetailsTypes:
+          description: El authorization details types de oauth client
+          type: string
+        userinfoSignedResponseAlg:
+          description: El userinfo signed response alg de oauth client
+          type: string
+        secretOauth:
+          description: El secret oauth de oauth client
+          type: string
+        registrationAccessToken:
+          description: El registration access token de oauth client
+          type: string
+        defaultAcrValues:
+          description: El default acr values de oauth client
+          type: string
+        defaultMaxAge:
+          description: El default max age de oauth client
+          type: integer
+          format: int32
+        sectorIdentifierUri:
+          description: El sector identifier uri de oauth client
+          type: string
+        allowedLoginRedirects:
+          description: El allowed login redirects de oauth client
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedLoginRedirectsApiDto'
+        allowedLogoutRedirects:
+          description: El allowed logout redirects de oauth client
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedLogoutRedirectsApiDto'
+        allowedAudiences:
+          description: El allowed audiences de oauth client
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedAudiencesApiDto'
+        grantTypesJson:
+          description: El grant types json de oauth client
+          type: string
+        introspectionAllowed:
+          description: If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.
+          type: boolean
+        requirePushedAuthorizationRequests:
+          description: El require pushed authorization requests de oauth client
+          type: boolean
+        requirePkce:
+          description: If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.
+          type: boolean
+        backchannelLogoutUri:
+          description: El backchannel logout uri de oauth client
+          type: string
+        backchannelLogoutSessionRequired:
+          description: El backchannel logout session required de oauth client
+          type: boolean
+        frontchannelLogoutUri:
+          description: El frontchannel logout uri de oauth client
+          type: string
+        frontchannelLogoutSessionRequired:
+          description: El frontchannel logout session required de oauth client
+          type: boolean
+        enabled:
+          description: The indicator to allow the account be used without deleting it
+          type: boolean
+        clientName:
+          description: El client name de oauth client
+          type: string
+        logoUri:
+          description: El logo uri de oauth client
+          type: string
+        clientUri:
+          description: El client uri de oauth client
+          type: string
+        policyUri:
+          description: El policy uri de oauth client
+          type: string
+        tosUri:
+          description: El tos uri de oauth client
+          type: string
+        responseTypesJson:
+          description: El response types json de oauth client
+          type: string
+        dynamicallyRegistered:
+          description: El dynamically registered de oauth client
+          type: boolean
+        registeredAt:
+          description: El registered at de oauth client
+          type: string
+          format: date-time
+        clientCredentialsScopes:
+          description: El client credentials scopes de oauth client
+          type: string
+        clientCredentialsTokenTtlSeconds:
+          description: El client credentials token ttl seconds de oauth client
+          type: integer
+          format: int32
+        requestObjectSigningAlg:
+          description: El request object signing alg de oauth client
+          type: string
+        jwksUri:
+          description: El jwks uri de oauth client
+          type: string
+        jwksJson:
+          description: El jwks json de oauth client
+          type: string
+        version:
+          description: Campo con el número de version de oauth client para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    OauthClientApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OauthClientApiDto'
+    OauthClientGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/OauthClientAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/OauthClientAclFields'
+    OauthClientSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/OauthClientAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/OauthClientAclFields'
+    OauthClientAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    OauthClientAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    OauthClientAclFields:
       type: object
       properties:
         noEditables:
@@ -13378,111 +13675,6 @@ components:
         - update
         - delete
     ThemeVersionAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
-    RelyingPartyApiDto:
-      type: object
-      description: relying-party
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        code:
-          description: El código identificativo de la aplicación
-          type: string
-        apiKey:
-          description: An identifier for the application
-          type: string
-        enabled:
-          description: Una marca que permite quitar el acceso a una cuenta sin borrarla
-          type: boolean
-        version:
-          description: Campo con el número de version de relying party para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    RelyingPartyApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/RelyingPartyApiDto'
-    RelyingPartyGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/RelyingPartyAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/RelyingPartyAclFields'
-    RelyingPartySpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/RelyingPartyAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/RelyingPartyAclFields'
-    RelyingPartyAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        enable:
-          $ref: '#/components/schemas/CommonAllow'
-        disable:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - enable
-        - disable
-        - list
-    RelyingPartyAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        enable:
-          $ref: '#/components/schemas/CommonAllow'
-        disable:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - enable
-        - disable
-    RelyingPartyAclFields:
       type: object
       properties:
         noEditables:
@@ -14719,306 +14911,6 @@ components:
           type: array
           items:
             type: string
-    AllowedRedirectsApiDto:
-      type: object
-      description: trusted-client-allowed-redirect
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        url:
-          description: El url de trusted client allowed redirect
-          type: string
-        version:
-          description: Campo con el número de version de trusted client allowed redirect para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    AllowedLogoutRedirectsApiDto:
-      type: object
-      description: trusted-client-allowed-logout-redirect
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        url:
-          description: El url de trusted client allowed logout redirect
-          type: string
-        version:
-          description: Campo con el número de version de trusted client allowed logout redirect para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    AllowedAudiencesApiDto:
-      type: object
-      description: trusted-client-allowed-audience
-      properties:
-        uid:
-          description: El uid de trusted client allowed audience
-          type: string
-        audience:
-          description: Code of a trusted-client resource server or relying-party, or an absolute resource URI (RFC 8707).
-          type: string
-        version:
-          description: Campo con el número de version de trusted client allowed audience para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    TrustedClientApiDto:
-      type: object
-      description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
-      properties:
-        uid:
-          description: El identificador de la aplicacion
-          type: string
-        code:
-          description: El código identificativo de la aplicación
-          type: string
-        tenant:
-          $ref: '#/components/schemas/TenantApiRef'
-        allowAllScopes:
-          description: El allow all scopes de trusted client
-          type: boolean
-        publicAllow:
-          description: If true, users can use these client to access with public code flow
-          type: boolean
-        tokenEndpointAuthMethod:
-          description: El token endpoint auth method de trusted client
-          type: string
-          enum: [client-secret-basic,client-secret-post,private-key-jwt,none]
-        tokenEndpointAuthSigningAlg:
-          description: El token endpoint auth signing alg de trusted client
-          type: string
-        dpopBoundAccessTokens:
-          description: El dpop bound access tokens de trusted client
-          type: boolean
-        idTokenSignedResponseAlg:
-          description: El id token signed response alg de trusted client
-          type: string
-          enum: [rs256,es256,eddsa]
-        tlsClientAuthSubjectDn:
-          description: El tls client auth subject dn de trusted client
-          type: string
-        tlsClientCertificateBoundAccessTokens:
-          description: El tls client certificate bound access tokens de trusted client
-          type: boolean
-        authorizationSignedResponseAlg:
-          description: El authorization signed response alg de trusted client
-          type: string
-        backchannelTokenDeliveryMode:
-          description: El backchannel token delivery mode de trusted client
-          type: string
-          enum: [poll,ping]
-        backchannelClientNotificationEndpoint:
-          description: El backchannel client notification endpoint de trusted client
-          type: string
-        subjectType:
-          description: El subject type de trusted client
-          type: string
-          enum: [public,pairwise]
-        idTokenEncryptedResponseAlg:
-          description: El id token encrypted response alg de trusted client
-          type: string
-        idTokenEncryptedResponseEnc:
-          description: El id token encrypted response enc de trusted client
-          type: string
-        userinfoEncryptedResponseAlg:
-          description: El userinfo encrypted response alg de trusted client
-          type: string
-        userinfoEncryptedResponseEnc:
-          description: El userinfo encrypted response enc de trusted client
-          type: string
-        authorizationDetailsTypes:
-          description: El authorization details types de trusted client
-          type: string
-        userinfoSignedResponseAlg:
-          description: El userinfo signed response alg de trusted client
-          type: string
-        secretOauth:
-          description: El secret oauth de trusted client
-          type: string
-        registrationAccess:
-          description: El registration access de trusted client
-          type: string
-        defaultAcrValues:
-          description: El default acr values de trusted client
-          type: string
-        defaultMaxAge:
-          description: El default max age de trusted client
-          type: integer
-          format: int32
-        sectorIdentifierUri:
-          description: El sector identifier uri de trusted client
-          type: string
-        allowedRedirects:
-          description: El allowed redirects de trusted client
-          type: array
-          items:
-            $ref: '#/components/schemas/AllowedRedirectsApiDto'
-        allowedLogoutRedirects:
-          description: El allowed logout redirects de trusted client
-          type: array
-          items:
-            $ref: '#/components/schemas/AllowedLogoutRedirectsApiDto'
-        allowedAudiences:
-          description: El allowed audiences de trusted client
-          type: array
-          items:
-            $ref: '#/components/schemas/AllowedAudiencesApiDto'
-        grantTypesJson:
-          description: El grant types json de trusted client
-          type: string
-        isResourceServer:
-          description: If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.
-          type: boolean
-        requirePushedAuthorizationRequests:
-          description: El require pushed authorization requests de trusted client
-          type: boolean
-        requirePkce:
-          description: If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.
-          type: boolean
-        backChannelLogoutUri:
-          description: El back channel logout uri de trusted client
-          type: string
-        backChannelLogoutSessionRequired:
-          description: El back channel logout session required de trusted client
-          type: boolean
-        frontChannelLogoutUri:
-          description: El front channel logout uri de trusted client
-          type: string
-        frontChannelLogoutSessionRequired:
-          description: El front channel logout session required de trusted client
-          type: boolean
-        enabled:
-          description: The indicator to allow the account be used without deleting it
-          type: boolean
-        clientName:
-          description: El client name de trusted client
-          type: string
-        logoUri:
-          description: El logo uri de trusted client
-          type: string
-        clientUri:
-          description: El client uri de trusted client
-          type: string
-        policyUri:
-          description: El policy uri de trusted client
-          type: string
-        tosUri:
-          description: El tos uri de trusted client
-          type: string
-        responseTypesJson:
-          description: El response types json de trusted client
-          type: string
-        dynamicallyRegistered:
-          description: El dynamically registered de trusted client
-          type: boolean
-        registeredAt:
-          description: El registered at de trusted client
-          type: string
-          format: date-time
-        allowedScopesM2m:
-          description: El allowed scopes m 2m de trusted client
-          type: string
-        m2mTokenTtlSeconds:
-          description: El m 2m token ttl seconds de trusted client
-          type: integer
-          format: int32
-        requestObjectSigningAlg:
-          description: El request object signing alg de trusted client
-          type: string
-        jwksUri:
-          description: El jwks uri de trusted client
-          type: string
-        jwksJson:
-          description: El jwks json de trusted client
-          type: string
-        version:
-          description: Campo con el número de version de trusted client para controlar bloqueos optimistas
-          type: integer
-          format: int32
-    TrustedClientApiDtoList:
-      type: object
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        next:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/TrustedClientApiDto'
-    TrustedClientGenericAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/TrustedClientAclGenericAllows'
-        fields:
-          $ref: '#/components/schemas/TrustedClientAclFields'
-    TrustedClientSpecificAcl:
-      type: object
-      properties:
-        allows:
-          $ref: '#/components/schemas/TrustedClientAclSpecificAllows'
-        fields:
-          $ref: '#/components/schemas/TrustedClientAclFields'
-    TrustedClientAclGenericAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        enable:
-          $ref: '#/components/schemas/CommonAllow'
-        disable:
-          $ref: '#/components/schemas/CommonAllow'
-        list:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - enable
-        - disable
-        - list
-    TrustedClientAclSpecificAllows:
-      type: object
-      properties:
-        retrieve:
-          $ref: '#/components/schemas/CommonAllow'
-        create:
-          $ref: '#/components/schemas/CommonAllow'
-        update:
-          $ref: '#/components/schemas/CommonAllow'
-        delete:
-          $ref: '#/components/schemas/CommonAllow'
-        enable:
-          $ref: '#/components/schemas/CommonAllow'
-        disable:
-          $ref: '#/components/schemas/CommonAllow'
-      required:
-        - retrieve
-        - create
-        - update
-        - delete
-        - enable
-        - disable
-    TrustedClientAclFields:
-      type: object
-      properties:
-        noEditables:
-          type: array
-          items:
-            type: string
-        noVisibles:
-          type: array
-          items:
-            type: string
     ThemeAssetApiDto:
       type: object
       description: theme-asset
@@ -15141,7 +15033,7 @@ components:
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
-        innerLabel:
+        displayName:
           description: Tenant could use these field to label the application for the users
           type: string
         forceMfa:
@@ -15151,11 +15043,11 @@ components:
           description: El dynamic registration policy de tenant config
           type: string
           enum: [open,token-required,disabled]
-        allowRegister:
-          description: El allow register de tenant config
+        selfRegistrationEnabled:
+          description: El self registration enabled de tenant config
           type: boolean
-        enableRegisterUsers:
-          description: El enable register users de tenant config
+        autoApproveRegisteredUsers:
+          description: El auto approve registered users de tenant config
           type: boolean
         magicLinkEnabled:
           description: El magic link enabled de tenant config
@@ -15207,22 +15099,22 @@ components:
         webauthnRpName:
           description: El webauthn rp name de tenant config
           type: string
-        welcomeEmail:
+        welcomeEmailTemplate:
           description: Email send to the enabled user
           type: string
-        registeredEmail:
+        registeredEmailTemplate:
           description: Email send when a user register
           type: string
-        disabledUserEmail:
+        disabledUserEmailTemplate:
           description: Email send when a user is disabled
           type: string
-        enabledUserEmail:
+        enabledUserEmailTemplate:
           description: Email send when a user is enabled
           type: string
-        allowRecoverPass:
-          description: El allow recover pass de tenant config
+        passwordRecoveryEnabled:
+          description: El password recovery enabled de tenant config
           type: boolean
-        recoverPassEmail:
+        recoverPassEmailTemplate:
           description: Email send to the user to recover the password
           type: string
         version:
@@ -15337,10 +15229,10 @@ components:
           type: string
         user:
           $ref: '#/components/schemas/UserApiRef'
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
-        trustedClient:
-          $ref: '#/components/schemas/TrustedClientApiRef'
+        resourceServer:
+          $ref: '#/components/schemas/ResourceServerApiRef'
+        oauthClient:
+          $ref: '#/components/schemas/OauthClientApiRef'
         roles:
           description: El roles de user role assignment
           type: array
@@ -15662,11 +15554,11 @@ components:
         name:
           description: A name that identifies this login provider within the tenant.
           type: string
-        source:
+        providerType:
           description: The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAML).
           type: string
           enum: [google,github,microsoft,apple,saml,oidc]
-        disabled:
+        enabled:
           description: Indicates if this provider is currently disabled.
           type: boolean
         directAccess:
@@ -15807,6 +15699,111 @@ components:
           type: array
           items:
             type: string
+    ResourceServerApiDto:
+      type: object
+      description: resource-server
+      properties:
+        uid:
+          description: El identificador de la aplicacion
+          type: string
+        code:
+          description: El código identificativo de la aplicación
+          type: string
+        apiKey:
+          description: An identifier for the application
+          type: string
+        enabled:
+          description: Una marca que permite quitar el acceso a una cuenta sin borrarla
+          type: boolean
+        version:
+          description: Campo con el número de version de resource server para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ResourceServerApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceServerApiDto'
+    ResourceServerGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ResourceServerAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ResourceServerAclFields'
+    ResourceServerSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ResourceServerAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ResourceServerAclFields'
+    ResourceServerAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    ResourceServerAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    ResourceServerAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
     TenantTermsOfUseApiDto:
       type: object
       description: tenant-terms-of-use
@@ -15816,16 +15813,16 @@ components:
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
-        relyingParty:
-          $ref: '#/components/schemas/RelyingPartyApiRef'
+        resourceServer:
+          $ref: '#/components/schemas/ResourceServerApiRef'
         text:
           description: El text de tenant terms of use
           type: string
         enabled:
           description: The indicator to allow the account be used without deleting it
           type: boolean
-        attached:
-          description: El attached de tenant terms of use
+        document:
+          description: El document de tenant terms of use
           type: string
         activationDate:
           description: El activation date de tenant terms of use
@@ -15879,7 +15876,7 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         list:
           $ref: '#/components/schemas/CommonAllow'
-        uploadAttached:
+        uploadDocument:
           $ref: '#/components/schemas/CommonAllow'
       required:
         - retrieve
@@ -15889,7 +15886,7 @@ components:
         - enable
         - disable
         - list
-        - uploadAttached
+        - uploadDocument
     TenantTermsOfUseAclSpecificAllows:
       type: object
       properties:
@@ -16062,8 +16059,8 @@ components:
         enabled:
           description: A disabled user cant login on the system. On his login attempts, he will receive a specific warn of his disabled account.
           type: boolean
-        approve:
-          description: El approve de user
+        approvalStatus:
+          description: El approval status de user
           type: string
           enum: [unverified,pending,accepted,rejected]
         temporalPassword:
@@ -16079,7 +16076,7 @@ components:
           description: A blocked user cant login on the system, until these date. On his login attempts, the user will receive a generic not allowed message.
           type: string
           format: date-time
-        provider:
+        federatedProvider:
           description: Si se identificó con un proveedor, se marca con cual (aunque el provvedor cambie luego)
           type: string
         version:

@@ -10,13 +10,13 @@ import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.security.MagicLinkService;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.update.TenantTermsOfUseUpdateInput;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.update.TenantTermsOfUseUpdateProjection;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.update.TenantTermsOfUseUpdateUsecase;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
@@ -65,14 +65,14 @@ public class TenantTermsOfUseUpdateController {
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantTermsOfUseApiDto
-        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
-    String attached = dto.getAttached();
-    if (null != attached) {
+    String document = dto.getDocument();
+    if (null != document) {
       String url = currentRequest.getPublicHost() + "/api/access/tenants-terms-of-use/"
-          + dto.getUidOrDefault("-") + "/attached";
-      tenantTermsOfUseApiDto.setAttached(magicLink.create(url, currentRequest.interaction()));
+          + dto.getUidOrDefault("-") + "/document";
+      tenantTermsOfUseApiDto.setDocument(magicLink.create(url, currentRequest.interaction()));
     }
     tenantTermsOfUseApiDto.setActivationDate(dto.getActivationDate());
     tenantTermsOfUseApiDto.setVersion(dto.getVersion());
@@ -92,9 +92,9 @@ public class TenantTermsOfUseUpdateController {
     if (null != tenantTermsOfUseApiDto.getTenant()) {
       dto.setTenant(TenantReference.of(tenantTermsOfUseApiDto.getTenant().get$Ref()));
     }
-    if (null != tenantTermsOfUseApiDto.getRelyingParty()) {
-      dto.setRelyingParty(
-          RelyingPartyReference.of(tenantTermsOfUseApiDto.getRelyingParty().get$Ref()));
+    if (null != tenantTermsOfUseApiDto.getResourceServer()) {
+      dto.setResourceServer(
+          ResourceServerReference.of(tenantTermsOfUseApiDto.getResourceServer().get$Ref()));
     }
     if (null != tenantTermsOfUseApiDto.getText()) {
       dto.setText(tenantTermsOfUseApiDto.getText());
@@ -102,15 +102,15 @@ public class TenantTermsOfUseUpdateController {
     if (null != tenantTermsOfUseApiDto.getEnabled()) {
       dto.setEnabled(tenantTermsOfUseApiDto.getEnabled());
     }
-    if (!StringUtils.isBlank(tenantTermsOfUseApiDto.getAttached())) {
-      String url = tenantTermsOfUseApiDto.getAttached();
-      if (tenantTermsOfUseApiDto.getAttached().startsWith(currentRequest.getPublicHost()
-          + "/api/access/tenants-terms-of-use/-/temp-attached?temp=")) {
-        dto.setAttached("temp://" + (url.substring((currentRequest.getPublicHost()
-            + "/api/access/tenants-terms-of-use/-/temp-attached?temp=").length())));
+    if (!StringUtils.isBlank(tenantTermsOfUseApiDto.getDocument())) {
+      String url = tenantTermsOfUseApiDto.getDocument();
+      if (tenantTermsOfUseApiDto.getDocument().startsWith(currentRequest.getPublicHost()
+          + "/api/access/tenants-terms-of-use/-/temp-document?temp=")) {
+        dto.setDocument("temp://" + (url.substring((currentRequest.getPublicHost()
+            + "/api/access/tenants-terms-of-use/-/temp-document?temp=").length())));
       } else if (!(url.equals(currentRequest.getPublicHost() + "/api/access/tenants-terms-of-use/"
-          + tenantTermsOfUseApiDto.getUid() + "/attached"))) {
-        dto.setAttached(tenantTermsOfUseApiDto.getAttached());
+          + tenantTermsOfUseApiDto.getUid() + "/document"))) {
+        dto.setDocument(tenantTermsOfUseApiDto.getDocument());
       }
     }
     if (null != tenantTermsOfUseApiDto.getActivationDate()) {

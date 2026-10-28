@@ -66,7 +66,7 @@ public class RegistrationStep implements OidcStep {
 
   @Override
   public Optional<Response> paintInitial(StepInput input, String error) {
-    if (!allowRegister(input.tenant())) {
+    if (!selfRegistrationEnabled(input.tenant())) {
       return Optional.empty();
     }
     return Optional.of(doPaintRegisterForm(input, null));
@@ -82,7 +82,7 @@ public class RegistrationStep implements OidcStep {
     if (!"do_register".equals(input.step())) {
       return Optional.empty();
     }
-    if (!registerUserUsecase.allowRegister(input.getRequest().getTenant())) {
+    if (!registerUserUsecase.selfRegistrationEnabled(input.getRequest().getTenant())) {
       return Optional.of(new StepOutcome.Render(doPaintRegisterForm(input, AuthorizeHtml
           .i18n(input.locale(), "register.error-format", "Registration not allowed"))));
     }
@@ -111,8 +111,8 @@ public class RegistrationStep implements OidcStep {
   /**
    * Returns whether registration is allowed for the given tenant.
    */
-  public boolean allowRegister(String tenant) {
-    return registerUserUsecase.allowRegister(tenant);
+  public boolean selfRegistrationEnabled(String tenant) {
+    return registerUserUsecase.selfRegistrationEnabled(tenant);
   }
 
   /**

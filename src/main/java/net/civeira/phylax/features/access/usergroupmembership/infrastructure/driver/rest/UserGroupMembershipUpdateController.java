@@ -7,15 +7,15 @@ import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.usergroupmembership.application.usecase.update.UserGroupMembershipUpdateInput;
 import net.civeira.phylax.features.access.usergroupmembership.application.usecase.update.UserGroupMembershipUpdateProjection;
 import net.civeira.phylax.features.access.usergroupmembership.application.usecase.update.UserGroupMembershipUpdateUsecase;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembershipReference;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
-import net.civeira.phylax.generated.openapi.model.TrustedClientApiRef;
+import net.civeira.phylax.generated.openapi.model.OauthClientApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.UserApiRef;
 import net.civeira.phylax.generated.openapi.model.UserGroupMembershipApiDto;
 
@@ -59,9 +59,9 @@ public class UserGroupMembershipUpdateController {
     userGroupMembershipApiDto.setUid(dto.getUid());
     userGroupMembershipApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
     userGroupMembershipApiDto
-        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     userGroupMembershipApiDto
-        .setTrustedClient(new TrustedClientApiRef().$ref(dto.getTrustedClientReference()));
+        .setOauthClient(new OauthClientApiRef().$ref(dto.getOauthClientReference()));
     userGroupMembershipApiDto.setGroups(dto.getGroups());
     userGroupMembershipApiDto.setVersion(dto.getVersion());
     return userGroupMembershipApiDto;
@@ -81,13 +81,13 @@ public class UserGroupMembershipUpdateController {
     if (null != userGroupMembershipApiDto.getUser()) {
       dto.setUser(UserReference.of(userGroupMembershipApiDto.getUser().get$Ref()));
     }
-    if (null != userGroupMembershipApiDto.getRelyingParty()) {
-      dto.setRelyingParty(
-          RelyingPartyReference.of(userGroupMembershipApiDto.getRelyingParty().get$Ref()));
+    if (null != userGroupMembershipApiDto.getResourceServer()) {
+      dto.setResourceServer(
+          ResourceServerReference.of(userGroupMembershipApiDto.getResourceServer().get$Ref()));
     }
-    if (null != userGroupMembershipApiDto.getTrustedClient()) {
-      dto.setTrustedClient(
-          TrustedClientReference.of(userGroupMembershipApiDto.getTrustedClient().get$Ref()));
+    if (null != userGroupMembershipApiDto.getOauthClient()) {
+      dto.setOauthClient(
+          OauthClientReference.of(userGroupMembershipApiDto.getOauthClient().get$Ref()));
     }
     if (null != userGroupMembershipApiDto.getGroups()) {
       dto.setGroups(userGroupMembershipApiDto.getGroups());

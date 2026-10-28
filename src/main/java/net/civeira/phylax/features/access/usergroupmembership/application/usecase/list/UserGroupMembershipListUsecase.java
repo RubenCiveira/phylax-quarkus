@@ -61,16 +61,15 @@ public class UserGroupMembershipListUsecase {
           + permission.getDescription());
       throw new NotAllowedException(permission.getDescription());
     }
-    UserGroupMembershipVisibilityFilter visibleFilter =
-        UserGroupMembershipVisibilityFilter.builder().uid(filter.getUid().orElse(null))
-            .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
-            .forAllAudiences(filter.getForAllAudiences().orElse(null))
-            .user(filter.getUser().orElse(null)).users(filter.getUsers())
-            .relyingParty(filter.getRelyingParty().orElse(null))
-            .relyingParties(filter.getRelyingParties())
-            .trustedClient(filter.getTrustedClient().orElse(null))
-            .trustedClients(filter.getTrustedClients())
-            .userTenantAccessible(filter.getUserTenantAccessible().orElse(null)).build();
+    UserGroupMembershipVisibilityFilter visibleFilter = UserGroupMembershipVisibilityFilter
+        .builder().uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
+        .search(filter.getSearch().orElse(null))
+        .forAllAudiences(filter.getForAllAudiences().orElse(null))
+        .user(filter.getUser().orElse(null)).users(filter.getUsers())
+        .resourceServer(filter.getResourceServer().orElse(null))
+        .resourceServers(filter.getResourceServers())
+        .oauthClient(filter.getOauthClient().orElse(null)).oauthClients(filter.getOauthClients())
+        .userTenantAccessible(filter.getUserTenantAccessible().orElse(null)).build();
     UserGroupMembershipCursor gatewayCursor = UserGroupMembershipCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();
     UserGroupMembershipCached values =

@@ -98,7 +98,7 @@ class ClientDetailsUnitTest {
   void test_m2m_scopes() {
     ClientDetails client = ClientDetails.builder().clientId("c").allowedScopes(List.of("*"))
         .allowedGrants(List.of("client_credentials"))
-        .allowedScopesM2m(List.of("orders:read", "orders:write")).build();
+        .clientCredentialsScopes(List.of("orders:read", "orders:write")).build();
     Assertions.assertEquals(List.of("orders:read", "orders:write"), client.m2mScopes(List.of()));
     Assertions.assertEquals(List.of("orders:read"),
         client.m2mScopes(List.of("orders:read", "admin")));

@@ -20,11 +20,11 @@ import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepos
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserFilter;
 import net.civeira.phylax.features.access.user.domain.gateway.UserQueryRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentpurposes.domain.UserConsentPurposes;
-import net.civeira.phylax.features.access.userconsentpurposes.domain.UserConsentPurposesChangeSet;
-import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesCommandRepositoryGateway;
-import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesFilter;
-import net.civeira.phylax.features.access.userconsentpurposes.domain.gateway.UserConsentPurposesQueryRepositoryGateway;
+import net.civeira.phylax.features.access.userpurposeconsent.domain.UserPurposeConsent;
+import net.civeira.phylax.features.access.userpurposeconsent.domain.UserPurposeConsentChangeSet;
+import net.civeira.phylax.features.access.userpurposeconsent.domain.gateway.UserPurposeConsentCommandRepositoryGateway;
+import net.civeira.phylax.features.access.userpurposeconsent.domain.gateway.UserPurposeConsentFilter;
+import net.civeira.phylax.features.access.userpurposeconsent.domain.gateway.UserPurposeConsentQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.consent.domain.GdprConsentPurposeItem;
 import net.civeira.phylax.features.oauth.consent.domain.gateway.GdprConsentGateway;
 
@@ -36,8 +36,8 @@ public class GdprConsentAdapter implements GdprConsentGateway {
   private final TenantQueryRepositoryGateway tenants;
   private final UserQueryRepositoryGateway users;
   private final ConsentPurposeQueryRepositoryGateway purposes;
-  private final UserConsentPurposesQueryRepositoryGateway userPurposes;
-  private final UserConsentPurposesCommandRepositoryGateway userPurposesWriter;
+  private final UserPurposeConsentQueryRepositoryGateway userPurposes;
+  private final UserPurposeConsentCommandRepositoryGateway userPurposesWriter;
 
   @Override
   public List<GdprConsentPurposeItem> pendingPurposes(String tenant, String username) {
@@ -50,7 +50,7 @@ public class GdprConsentAdapter implements GdprConsentGateway {
         .filter(purpose -> purpose.getActivationDate().isBefore(OffsetDateTime.now()))
         .sorted(Comparator.comparing(ConsentPurpose::getActivationDate))
         .filter(purpose -> userPurposes
-            .find(UserConsentPurposesFilter.builder().consentPurpose(purpose).user(user).build())
+            .find(UserPurposeConsentFilter.builder().consentPurpose(purpose).user(user).build())
             .isEmpty())
         .map(purpose -> new GdprConsentPurposeItem(purpose.getUid(), purpose.getKey().toString(),
             purpose.getTitle(), purpose.getDescription(), purpose.isRequired()))
@@ -74,13 +74,13 @@ public class GdprConsentAdapter implements GdprConsentGateway {
       }
       ConsentPurpose purpose = purposeOpt.get();
       boolean exists = userPurposes
-          .find(UserConsentPurposesFilter.builder().consentPurpose(purpose).user(user).build())
+          .find(UserPurposeConsentFilter.builder().consentPurpose(purpose).user(user).build())
           .isPresent();
       if (exists) {
         continue;
       }
-      UserConsentPurposesChangeSet changeSet = new UserConsentPurposesChangeSet().newUid()
-          .user(user).consentPurpose(ConsentPurposeReference.of(purposeUid))
+      UserPurposeConsentChangeSet changeSet = new UserPurposeConsentChangeSet().newUid().user(user)
+          .consentPurpose(ConsentPurposeReference.of(purposeUid))
           .granted(Boolean.TRUE.equals(entry.getValue())).decisionAt(OffsetDateTime.now());
       if (ipAddress != null && !ipAddress.isBlank()) {
         changeSet.ipAddress(ipAddress);
@@ -88,7 +88,7 @@ public class GdprConsentAdapter implements GdprConsentGateway {
       if (userAgent != null && !userAgent.isBlank()) {
         changeSet.userAgent(userAgent);
       }
-      UserConsentPurposes entity = UserConsentPurposes.create(changeSet);
+      UserPurposeConsent entity = UserPurposeConsent.create(changeSet);
       userPurposesWriter.create(entity);
     }
   }

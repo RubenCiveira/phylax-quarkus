@@ -20,8 +20,8 @@ import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.userroleassignment.application.usecase.delete.UserRoleAssignmentCheckBatchDeleteStatus;
 import net.civeira.phylax.features.access.userroleassignment.application.usecase.delete.UserRoleAssignmentDeleteFilter;
@@ -56,17 +56,17 @@ public class UserRoleAssignmentDeleteController {
    * @param search
    * @param user
    * @param users
-   * @param relyingParty
-   * @param relyingParties
-   * @param trustedClient
-   * @param trustedClients
+   * @param resourceServer
+   * @param resourceServers
+   * @param oauthClient
+   * @param oauthClients
    * @return
    */
   @ApiObserved("Api to delete on massive entity of user role assignment")
   public Response userRoleAssignmentApiBatchDelete(final List<String> uids, final String search,
-      final String user, final List<String> users, final String relyingParty,
-      final List<String> relyingParties, final String trustedClient,
-      final List<String> trustedClients) {
+      final String user, final List<String> users, final String resourceServer,
+      final List<String> resourceServers, final String oauthClient,
+      final List<String> oauthClients) {
     UserRoleAssignmentDeleteFilter.UserRoleAssignmentDeleteFilterBuilder filterBuilder =
         UserRoleAssignmentDeleteFilter.builder();
     filterBuilder =
@@ -80,16 +80,16 @@ public class UserRoleAssignmentDeleteController {
     }
     filterBuilder = filterBuilder.users(
         null == users ? null : users.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    if (null != relyingParty) {
-      filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
+    if (null != resourceServer) {
+      filterBuilder = filterBuilder.resourceServer(ResourceServerReference.of(resourceServer));
     }
-    filterBuilder = filterBuilder.relyingParties(null == relyingParties ? null
-        : relyingParties.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    if (null != trustedClient) {
-      filterBuilder = filterBuilder.trustedClient(TrustedClientReference.of(trustedClient));
+    filterBuilder = filterBuilder.resourceServers(null == resourceServers ? null
+        : resourceServers.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    if (null != oauthClient) {
+      filterBuilder = filterBuilder.oauthClient(OauthClientReference.of(oauthClient));
     }
-    filterBuilder = filterBuilder.trustedClients(null == trustedClients ? null
-        : trustedClients.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.oauthClients(null == oauthClients ? null
+        : oauthClients.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     UserRoleAssignmentDeleteFilter filter = filterBuilder.build();
     BatchIdentifier task = delete.batchDelete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */

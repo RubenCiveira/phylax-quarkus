@@ -24,19 +24,19 @@ public class UserRoleAssignmentBatchController implements UserRoleAssignmentBatc
    * @param search
    * @param user
    * @param users
-   * @param relyingParty
-   * @param relyingParties
-   * @param trustedClient
-   * @param trustedClients
+   * @param resourceServer
+   * @param resourceServers
+   * @param oauthClient
+   * @param oauthClients
    * @return
    */
   @Override
   public Response userRoleAssignmentApiBatchDelete(final List<String> uids, final String search,
-      final String user, final List<String> users, final String relyingParty,
-      final List<String> relyingParties, final String trustedClient,
-      final List<String> trustedClients) {
+      final String user, final List<String> users, final String resourceServer,
+      final List<String> resourceServers, final String oauthClient,
+      final List<String> oauthClients) {
     return deleteController.userRoleAssignmentApiBatchDelete(uids, search, user, users,
-        relyingParty, relyingParties, trustedClient, trustedClients);
+        resourceServer, resourceServers, oauthClient, oauthClients);
   }
 
   /**

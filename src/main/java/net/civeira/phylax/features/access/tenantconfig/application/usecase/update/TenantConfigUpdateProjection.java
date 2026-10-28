@@ -11,25 +11,25 @@ import net.civeira.phylax.features.access.tenantconfig.domain.TenantConfig;
 import net.civeira.phylax.features.access.tenantconfig.domain.TenantConfigDynamicRegistrationPolicyOptions;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AcrValuesSupportedVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowPasswordGrantVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRecoverPassVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRegisterVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AutoApproveRegisteredUsersVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DcrAllowedAuthMethodsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DcrAllowedGrantTypesVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DisabledUserEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DisabledUserEmailTemplateVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DisplayNameVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DynamicRegistrationPolicyVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnableRegisterUsersVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnabledUserEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnabledUserEmailTemplateVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.ForceMfaVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.InnerLabelVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.InvitationExpiryDaysVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkExpiryMinutesVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RecoverPassEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.PasswordRecoveryEnabledVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RecoverPassEmailTemplateVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenMaxLifetimeSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenTtlSecondsVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisteredEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisteredEmailTemplateVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequireEmailVerificationVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequirePushedAuthorizationRequestsVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SelfRegistrationEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SessionSsoTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.UidVO;
@@ -37,7 +37,7 @@ import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.Versio
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnRpIdVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnRpNameVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WelcomeEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WelcomeEmailTemplateVO;
 
 /**
  * A dto transfer to hold tenant config attribute values
@@ -57,11 +57,11 @@ public class TenantConfigUpdateProjection {
     TenantConfigUpdateProjection instance = new TenantConfigUpdateProjection();
     instance.uidValue = visible.getUid();
     instance.tenantValue = visible.getTenant();
-    instance.innerLabelValue = visible.getInnerLabel();
+    instance.displayNameValue = visible.getDisplayName();
     instance.forceMfaValue = visible.getForceMfa();
     instance.dynamicRegistrationPolicyValue = visible.getDynamicRegistrationPolicy();
-    instance.allowRegisterValue = visible.getAllowRegister();
-    instance.enableRegisterUsersValue = visible.getEnableRegisterUsers();
+    instance.selfRegistrationEnabledValue = visible.getSelfRegistrationEnabled();
+    instance.autoApproveRegisteredUsersValue = visible.getAutoApproveRegisteredUsers();
     instance.magicLinkEnabledValue = visible.getMagicLinkEnabled();
     instance.requireEmailVerificationValue = visible.getRequireEmailVerification();
     instance.invitationExpiryDaysValue = visible.getInvitationExpiryDays();
@@ -78,12 +78,12 @@ public class TenantConfigUpdateProjection {
     instance.webauthnEnabledValue = visible.getWebauthnEnabled();
     instance.webauthnRpIdValue = visible.getWebauthnRpId();
     instance.webauthnRpNameValue = visible.getWebauthnRpName();
-    instance.welcomeEmailValue = visible.getWelcomeEmail();
-    instance.registeredEmailValue = visible.getRegisteredEmail();
-    instance.disabledUserEmailValue = visible.getDisabledUserEmail();
-    instance.enabledUserEmailValue = visible.getEnabledUserEmail();
-    instance.allowRecoverPassValue = visible.getAllowRecoverPass();
-    instance.recoverPassEmailValue = visible.getRecoverPassEmail();
+    instance.welcomeEmailTemplateValue = visible.getWelcomeEmailTemplate();
+    instance.registeredEmailTemplateValue = visible.getRegisteredEmailTemplate();
+    instance.disabledUserEmailTemplateValue = visible.getDisabledUserEmailTemplate();
+    instance.enabledUserEmailTemplateValue = visible.getEnabledUserEmailTemplate();
+    instance.passwordRecoveryEnabledValue = visible.getPasswordRecoveryEnabled();
+    instance.recoverPassEmailTemplateValue = visible.getRecoverPassEmailTemplate();
     instance.versionValue = visible.getVersion();
     return instance;
   }
@@ -104,18 +104,11 @@ public class TenantConfigUpdateProjection {
   private Optional<AllowPasswordGrantVO> allowPasswordGrantValue;
 
   /**
-   * El allow recover pass de tenant config
+   * El auto approve registered users de tenant config
    *
    * @autogenerated UpdateProjectionGenerator
    */
-  private Optional<AllowRecoverPassVO> allowRecoverPassValue;
-
-  /**
-   * El allow register de tenant config
-   *
-   * @autogenerated UpdateProjectionGenerator
-   */
-  private Optional<AllowRegisterVO> allowRegisterValue;
+  private Optional<AutoApproveRegisteredUsersVO> autoApproveRegisteredUsersValue;
 
   /**
    * El dcr allowed auth methods de tenant config
@@ -136,7 +129,14 @@ public class TenantConfigUpdateProjection {
    *
    * @autogenerated UpdateProjectionGenerator
    */
-  private Optional<DisabledUserEmailVO> disabledUserEmailValue;
+  private Optional<DisabledUserEmailTemplateVO> disabledUserEmailTemplateValue;
+
+  /**
+   * Tenant could use these field to label the application for the users
+   *
+   * @autogenerated UpdateProjectionGenerator
+   */
+  private Optional<DisplayNameVO> displayNameValue;
 
   /**
    * El dynamic registration policy de tenant config
@@ -146,18 +146,11 @@ public class TenantConfigUpdateProjection {
   private Optional<DynamicRegistrationPolicyVO> dynamicRegistrationPolicyValue;
 
   /**
-   * El enable register users de tenant config
-   *
-   * @autogenerated UpdateProjectionGenerator
-   */
-  private Optional<EnableRegisterUsersVO> enableRegisterUsersValue;
-
-  /**
    * Email send when a user is enabled
    *
    * @autogenerated UpdateProjectionGenerator
    */
-  private Optional<EnabledUserEmailVO> enabledUserEmailValue;
+  private Optional<EnabledUserEmailTemplateVO> enabledUserEmailTemplateValue;
 
   /**
    * El force mfa de tenant config
@@ -165,13 +158,6 @@ public class TenantConfigUpdateProjection {
    * @autogenerated UpdateProjectionGenerator
    */
   private Optional<ForceMfaVO> forceMfaValue;
-
-  /**
-   * Tenant could use these field to label the application for the users
-   *
-   * @autogenerated UpdateProjectionGenerator
-   */
-  private Optional<InnerLabelVO> innerLabelValue;
 
   /**
    * Number of days before an unused user invitation token expires. Currently hardcoded to 7 days in
@@ -197,11 +183,18 @@ public class TenantConfigUpdateProjection {
   private Optional<MagicLinkExpiryMinutesVO> magicLinkExpiryMinutesValue;
 
   /**
+   * El password recovery enabled de tenant config
+   *
+   * @autogenerated UpdateProjectionGenerator
+   */
+  private Optional<PasswordRecoveryEnabledVO> passwordRecoveryEnabledValue;
+
+  /**
    * Email send to the user to recover the password
    *
    * @autogenerated UpdateProjectionGenerator
    */
-  private Optional<RecoverPassEmailVO> recoverPassEmailValue;
+  private Optional<RecoverPassEmailTemplateVO> recoverPassEmailTemplateValue;
 
   /**
    * Absolute lifetime of a refresh token family; rotation never extends it.
@@ -223,7 +216,7 @@ public class TenantConfigUpdateProjection {
    *
    * @autogenerated UpdateProjectionGenerator
    */
-  private Optional<RegisteredEmailVO> registeredEmailValue;
+  private Optional<RegisteredEmailTemplateVO> registeredEmailTemplateValue;
 
   /**
    * If true, users must confirm their email address via the verification link before they can
@@ -240,6 +233,13 @@ public class TenantConfigUpdateProjection {
    * @autogenerated UpdateProjectionGenerator
    */
   private Optional<RequirePushedAuthorizationRequestsVO> requirePushedAuthorizationRequestsValue;
+
+  /**
+   * El self registration enabled de tenant config
+   *
+   * @autogenerated UpdateProjectionGenerator
+   */
+  private Optional<SelfRegistrationEnabledVO> selfRegistrationEnabledValue;
 
   /**
    * Lifetime in seconds of the cross-client SSO session cookie. After this duration the user must
@@ -297,7 +297,7 @@ public class TenantConfigUpdateProjection {
    *
    * @autogenerated UpdateProjectionGenerator
    */
-  private Optional<WelcomeEmailVO> welcomeEmailValue;
+  private Optional<WelcomeEmailTemplateVO> welcomeEmailTemplateValue;
 
   /**
    * Create a dto instance with all the values of an entity
@@ -308,11 +308,11 @@ public class TenantConfigUpdateProjection {
   public TenantConfigUpdateProjection(final TenantConfig entity) {
     uidValue = Optional.of(entity.getUidValue());
     tenantValue = Optional.of(entity.getTenantValue());
-    innerLabelValue = Optional.of(entity.getInnerLabelValue());
+    displayNameValue = Optional.of(entity.getDisplayNameValue());
     forceMfaValue = Optional.of(entity.getForceMfaValue());
     dynamicRegistrationPolicyValue = Optional.of(entity.getDynamicRegistrationPolicyValue());
-    allowRegisterValue = Optional.of(entity.getAllowRegisterValue());
-    enableRegisterUsersValue = Optional.of(entity.getEnableRegisterUsersValue());
+    selfRegistrationEnabledValue = Optional.of(entity.getSelfRegistrationEnabledValue());
+    autoApproveRegisteredUsersValue = Optional.of(entity.getAutoApproveRegisteredUsersValue());
     magicLinkEnabledValue = Optional.of(entity.getMagicLinkEnabledValue());
     requireEmailVerificationValue = Optional.of(entity.getRequireEmailVerificationValue());
     invitationExpiryDaysValue = Optional.of(entity.getInvitationExpiryDaysValue());
@@ -330,12 +330,12 @@ public class TenantConfigUpdateProjection {
     webauthnEnabledValue = Optional.of(entity.getWebauthnEnabledValue());
     webauthnRpIdValue = Optional.of(entity.getWebauthnRpIdValue());
     webauthnRpNameValue = Optional.of(entity.getWebauthnRpNameValue());
-    welcomeEmailValue = Optional.of(entity.getWelcomeEmailValue());
-    registeredEmailValue = Optional.of(entity.getRegisteredEmailValue());
-    disabledUserEmailValue = Optional.of(entity.getDisabledUserEmailValue());
-    enabledUserEmailValue = Optional.of(entity.getEnabledUserEmailValue());
-    allowRecoverPassValue = Optional.of(entity.getAllowRecoverPassValue());
-    recoverPassEmailValue = Optional.of(entity.getRecoverPassEmailValue());
+    welcomeEmailTemplateValue = Optional.of(entity.getWelcomeEmailTemplateValue());
+    registeredEmailTemplateValue = Optional.of(entity.getRegisteredEmailTemplateValue());
+    disabledUserEmailTemplateValue = Optional.of(entity.getDisabledUserEmailTemplateValue());
+    enabledUserEmailTemplateValue = Optional.of(entity.getEnabledUserEmailTemplateValue());
+    passwordRecoveryEnabledValue = Optional.of(entity.getPasswordRecoveryEnabledValue());
+    recoverPassEmailTemplateValue = Optional.of(entity.getRecoverPassEmailTemplateValue());
     versionValue = Optional.of(entity.getVersionValue());
   }
 
@@ -388,49 +388,27 @@ public class TenantConfigUpdateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in AllowRecoverPass
+   * Inform for a possible change propolsal in AutoApproveRegisteredUsers
    *
    * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for AllowRecoverPass, otherwise the value for
-   *         AllowRecoverPass
+   * @return empty if there is no change proposal for AutoApproveRegisteredUsers, otherwise the
+   *         value for AutoApproveRegisteredUsers
    */
-  public Boolean getAllowRecoverPass() {
-    return getAllowRecoverPassOrDefault(null);
+  public Boolean getAutoApproveRegisteredUsers() {
+    return getAutoApproveRegisteredUsersOrDefault(null);
   }
 
   /**
-   * Inform for a possible change propolsal in AllowRecoverPass
+   * Inform for a possible change propolsal in AutoApproveRegisteredUsers
    *
    * @autogenerated UpdateProjectionGenerator
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for AllowRecoverPass, otherwise the value for
-   *         AllowRecoverPass
+   * @return empty if there is no change proposal for AutoApproveRegisteredUsers, otherwise the
+   *         value for AutoApproveRegisteredUsers
    */
-  public Boolean getAllowRecoverPassOrDefault(final Boolean orDefault) {
-    return allowRecoverPassValue.map(AllowRecoverPassVO::isAllowRecoverPass).orElse(orDefault);
-  }
-
-  /**
-   * Inform for a possible change propolsal in AllowRegister
-   *
-   * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for AllowRegister, otherwise the value for
-   *         AllowRegister
-   */
-  public Boolean getAllowRegister() {
-    return getAllowRegisterOrDefault(null);
-  }
-
-  /**
-   * Inform for a possible change propolsal in AllowRegister
-   *
-   * @autogenerated UpdateProjectionGenerator
-   * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for AllowRegister, otherwise the value for
-   *         AllowRegister
-   */
-  public Boolean getAllowRegisterOrDefault(final Boolean orDefault) {
-    return allowRegisterValue.map(AllowRegisterVO::isAllowRegister).orElse(orDefault);
+  public Boolean getAutoApproveRegisteredUsersOrDefault(final Boolean orDefault) {
+    return autoApproveRegisteredUsersValue
+        .map(AutoApproveRegisteredUsersVO::isAutoApproveRegisteredUsers).orElse(orDefault);
   }
 
   /**
@@ -482,27 +460,50 @@ public class TenantConfigUpdateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in DisabledUserEmail
+   * Inform for a possible change propolsal in DisabledUserEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for DisabledUserEmail, otherwise the value for
-   *         DisabledUserEmail
+   * @return empty if there is no change proposal for DisabledUserEmailTemplate, otherwise the value
+   *         for DisabledUserEmailTemplate
    */
-  public String getDisabledUserEmail() {
-    return getDisabledUserEmailOrDefault(null);
+  public String getDisabledUserEmailTemplate() {
+    return getDisabledUserEmailTemplateOrDefault(null);
   }
 
   /**
-   * Inform for a possible change propolsal in DisabledUserEmail
+   * Inform for a possible change propolsal in DisabledUserEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for DisabledUserEmail, otherwise the value for
-   *         DisabledUserEmail
+   * @return empty if there is no change proposal for DisabledUserEmailTemplate, otherwise the value
+   *         for DisabledUserEmailTemplate
    */
-  public String getDisabledUserEmailOrDefault(final String orDefault) {
-    return disabledUserEmailValue.flatMap(DisabledUserEmailVO::getDisabledUserEmail)
-        .orElse(orDefault);
+  public String getDisabledUserEmailTemplateOrDefault(final String orDefault) {
+    return disabledUserEmailTemplateValue
+        .flatMap(DisabledUserEmailTemplateVO::getDisabledUserEmailTemplate).orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DisplayName
+   *
+   * @autogenerated UpdateProjectionGenerator
+   * @return empty if there is no change proposal for DisplayName, otherwise the value for
+   *         DisplayName
+   */
+  public String getDisplayName() {
+    return getDisplayNameOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in DisplayName
+   *
+   * @autogenerated UpdateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for DisplayName, otherwise the value for
+   *         DisplayName
+   */
+  public String getDisplayNameOrDefault(final String orDefault) {
+    return displayNameValue.flatMap(DisplayNameVO::getDisplayName).orElse(orDefault);
   }
 
   /**
@@ -531,50 +532,27 @@ public class TenantConfigUpdateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in EnableRegisterUsers
+   * Inform for a possible change propolsal in EnabledUserEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for EnableRegisterUsers, otherwise the value for
-   *         EnableRegisterUsers
+   * @return empty if there is no change proposal for EnabledUserEmailTemplate, otherwise the value
+   *         for EnabledUserEmailTemplate
    */
-  public Boolean getEnableRegisterUsers() {
-    return getEnableRegisterUsersOrDefault(null);
+  public String getEnabledUserEmailTemplate() {
+    return getEnabledUserEmailTemplateOrDefault(null);
   }
 
   /**
-   * Inform for a possible change propolsal in EnableRegisterUsers
+   * Inform for a possible change propolsal in EnabledUserEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for EnableRegisterUsers, otherwise the value for
-   *         EnableRegisterUsers
+   * @return empty if there is no change proposal for EnabledUserEmailTemplate, otherwise the value
+   *         for EnabledUserEmailTemplate
    */
-  public Boolean getEnableRegisterUsersOrDefault(final Boolean orDefault) {
-    return enableRegisterUsersValue.map(EnableRegisterUsersVO::isEnableRegisterUsers)
-        .orElse(orDefault);
-  }
-
-  /**
-   * Inform for a possible change propolsal in EnabledUserEmail
-   *
-   * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for EnabledUserEmail, otherwise the value for
-   *         EnabledUserEmail
-   */
-  public String getEnabledUserEmail() {
-    return getEnabledUserEmailOrDefault(null);
-  }
-
-  /**
-   * Inform for a possible change propolsal in EnabledUserEmail
-   *
-   * @autogenerated UpdateProjectionGenerator
-   * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for EnabledUserEmail, otherwise the value for
-   *         EnabledUserEmail
-   */
-  public String getEnabledUserEmailOrDefault(final String orDefault) {
-    return enabledUserEmailValue.flatMap(EnabledUserEmailVO::getEnabledUserEmail).orElse(orDefault);
+  public String getEnabledUserEmailTemplateOrDefault(final String orDefault) {
+    return enabledUserEmailTemplateValue
+        .flatMap(EnabledUserEmailTemplateVO::getEnabledUserEmailTemplate).orElse(orDefault);
   }
 
   /**
@@ -596,27 +574,6 @@ public class TenantConfigUpdateProjection {
    */
   public Boolean getForceMfaOrDefault(final Boolean orDefault) {
     return forceMfaValue.map(ForceMfaVO::isForceMfa).orElse(orDefault);
-  }
-
-  /**
-   * Inform for a possible change propolsal in InnerLabel
-   *
-   * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for InnerLabel, otherwise the value for InnerLabel
-   */
-  public String getInnerLabel() {
-    return getInnerLabelOrDefault(null);
-  }
-
-  /**
-   * Inform for a possible change propolsal in InnerLabel
-   *
-   * @autogenerated UpdateProjectionGenerator
-   * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for InnerLabel, otherwise the value for InnerLabel
-   */
-  public String getInnerLabelOrDefault(final String orDefault) {
-    return innerLabelValue.flatMap(InnerLabelVO::getInnerLabel).orElse(orDefault);
   }
 
   /**
@@ -691,26 +648,51 @@ public class TenantConfigUpdateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in RecoverPassEmail
+   * Inform for a possible change propolsal in PasswordRecoveryEnabled
    *
    * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for RecoverPassEmail, otherwise the value for
-   *         RecoverPassEmail
+   * @return empty if there is no change proposal for PasswordRecoveryEnabled, otherwise the value
+   *         for PasswordRecoveryEnabled
    */
-  public String getRecoverPassEmail() {
-    return getRecoverPassEmailOrDefault(null);
+  public Boolean getPasswordRecoveryEnabled() {
+    return getPasswordRecoveryEnabledOrDefault(null);
   }
 
   /**
-   * Inform for a possible change propolsal in RecoverPassEmail
+   * Inform for a possible change propolsal in PasswordRecoveryEnabled
    *
    * @autogenerated UpdateProjectionGenerator
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for RecoverPassEmail, otherwise the value for
-   *         RecoverPassEmail
+   * @return empty if there is no change proposal for PasswordRecoveryEnabled, otherwise the value
+   *         for PasswordRecoveryEnabled
    */
-  public String getRecoverPassEmailOrDefault(final String orDefault) {
-    return recoverPassEmailValue.flatMap(RecoverPassEmailVO::getRecoverPassEmail).orElse(orDefault);
+  public Boolean getPasswordRecoveryEnabledOrDefault(final Boolean orDefault) {
+    return passwordRecoveryEnabledValue.map(PasswordRecoveryEnabledVO::isPasswordRecoveryEnabled)
+        .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RecoverPassEmailTemplate
+   *
+   * @autogenerated UpdateProjectionGenerator
+   * @return empty if there is no change proposal for RecoverPassEmailTemplate, otherwise the value
+   *         for RecoverPassEmailTemplate
+   */
+  public String getRecoverPassEmailTemplate() {
+    return getRecoverPassEmailTemplateOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in RecoverPassEmailTemplate
+   *
+   * @autogenerated UpdateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for RecoverPassEmailTemplate, otherwise the value
+   *         for RecoverPassEmailTemplate
+   */
+  public String getRecoverPassEmailTemplateOrDefault(final String orDefault) {
+    return recoverPassEmailTemplateValue
+        .flatMap(RecoverPassEmailTemplateVO::getRecoverPassEmailTemplate).orElse(orDefault);
   }
 
   /**
@@ -762,26 +744,27 @@ public class TenantConfigUpdateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in RegisteredEmail
+   * Inform for a possible change propolsal in RegisteredEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for RegisteredEmail, otherwise the value for
-   *         RegisteredEmail
+   * @return empty if there is no change proposal for RegisteredEmailTemplate, otherwise the value
+   *         for RegisteredEmailTemplate
    */
-  public String getRegisteredEmail() {
-    return getRegisteredEmailOrDefault(null);
+  public String getRegisteredEmailTemplate() {
+    return getRegisteredEmailTemplateOrDefault(null);
   }
 
   /**
-   * Inform for a possible change propolsal in RegisteredEmail
+   * Inform for a possible change propolsal in RegisteredEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for RegisteredEmail, otherwise the value for
-   *         RegisteredEmail
+   * @return empty if there is no change proposal for RegisteredEmailTemplate, otherwise the value
+   *         for RegisteredEmailTemplate
    */
-  public String getRegisteredEmailOrDefault(final String orDefault) {
-    return registeredEmailValue.flatMap(RegisteredEmailVO::getRegisteredEmail).orElse(orDefault);
+  public String getRegisteredEmailTemplateOrDefault(final String orDefault) {
+    return registeredEmailTemplateValue
+        .flatMap(RegisteredEmailTemplateVO::getRegisteredEmailTemplate).orElse(orDefault);
   }
 
   /**
@@ -830,6 +813,30 @@ public class TenantConfigUpdateProjection {
   public Boolean getRequirePushedAuthorizationRequestsOrDefault(final Boolean orDefault) {
     return requirePushedAuthorizationRequestsValue
         .map(RequirePushedAuthorizationRequestsVO::isRequirePushedAuthorizationRequests)
+        .orElse(orDefault);
+  }
+
+  /**
+   * Inform for a possible change propolsal in SelfRegistrationEnabled
+   *
+   * @autogenerated UpdateProjectionGenerator
+   * @return empty if there is no change proposal for SelfRegistrationEnabled, otherwise the value
+   *         for SelfRegistrationEnabled
+   */
+  public Boolean getSelfRegistrationEnabled() {
+    return getSelfRegistrationEnabledOrDefault(null);
+  }
+
+  /**
+   * Inform for a possible change propolsal in SelfRegistrationEnabled
+   *
+   * @autogenerated UpdateProjectionGenerator
+   * @param orDefault Default value if is null
+   * @return empty if there is no change proposal for SelfRegistrationEnabled, otherwise the value
+   *         for SelfRegistrationEnabled
+   */
+  public Boolean getSelfRegistrationEnabledOrDefault(final Boolean orDefault) {
+    return selfRegistrationEnabledValue.map(SelfRegistrationEnabledVO::isSelfRegistrationEnabled)
         .orElse(orDefault);
   }
 
@@ -1000,25 +1007,26 @@ public class TenantConfigUpdateProjection {
   }
 
   /**
-   * Inform for a possible change propolsal in WelcomeEmail
+   * Inform for a possible change propolsal in WelcomeEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
-   * @return empty if there is no change proposal for WelcomeEmail, otherwise the value for
-   *         WelcomeEmail
+   * @return empty if there is no change proposal for WelcomeEmailTemplate, otherwise the value for
+   *         WelcomeEmailTemplate
    */
-  public String getWelcomeEmail() {
-    return getWelcomeEmailOrDefault(null);
+  public String getWelcomeEmailTemplate() {
+    return getWelcomeEmailTemplateOrDefault(null);
   }
 
   /**
-   * Inform for a possible change propolsal in WelcomeEmail
+   * Inform for a possible change propolsal in WelcomeEmailTemplate
    *
    * @autogenerated UpdateProjectionGenerator
    * @param orDefault Default value if is null
-   * @return empty if there is no change proposal for WelcomeEmail, otherwise the value for
-   *         WelcomeEmail
+   * @return empty if there is no change proposal for WelcomeEmailTemplate, otherwise the value for
+   *         WelcomeEmailTemplate
    */
-  public String getWelcomeEmailOrDefault(final String orDefault) {
-    return welcomeEmailValue.flatMap(WelcomeEmailVO::getWelcomeEmail).orElse(orDefault);
+  public String getWelcomeEmailTemplateOrDefault(final String orDefault) {
+    return welcomeEmailTemplateValue.flatMap(WelcomeEmailTemplateVO::getWelcomeEmailTemplate)
+        .orElse(orDefault);
   }
 }

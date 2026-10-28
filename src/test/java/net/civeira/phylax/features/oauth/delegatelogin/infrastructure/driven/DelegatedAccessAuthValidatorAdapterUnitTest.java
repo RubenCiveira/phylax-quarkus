@@ -16,7 +16,7 @@ import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProvider;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderAccountLinkPolicyOptions;
-import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderSourceOptions;
+import net.civeira.phylax.features.access.tenantloginprovider.domain.TenantLoginProviderProviderTypeOptions;
 import net.civeira.phylax.features.access.tenantloginprovider.domain.gateway.TenantLoginProviderQueryRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
@@ -50,8 +50,9 @@ class DelegatedAccessAuthValidatorAdapterUnitTest {
     Mockito.when(actives.checkEnabled(ArgumentMatchers.any())).thenReturn(true);
     Mockito.when(loginProvider.getUid()).thenReturn(PROVIDER_UID);
     Mockito.when(loginProvider.getName()).thenReturn(PROVIDER);
-    Mockito.when(loginProvider.isDisabled()).thenReturn(false);
-    Mockito.when(loginProvider.getSource()).thenReturn(TenantLoginProviderSourceOptions.SAML);
+    Mockito.when(loginProvider.isEnabled()).thenReturn(true);
+    Mockito.when(loginProvider.getProviderType())
+        .thenReturn(TenantLoginProviderProviderTypeOptions.SAML);
     Mockito.when(loginProvider.isUsersEnabledByDefault()).thenReturn(true);
     policy(TenantLoginProviderAccountLinkPolicyOptions.VERIFIED_EMAIL);
     Mockito.when(providers.list(ArgumentMatchers.any())).thenReturn(List.of(loginProvider));
@@ -68,7 +69,7 @@ class DelegatedAccessAuthValidatorAdapterUnitTest {
     Mockito.when(user.getUid()).thenReturn(uid);
     Mockito.when(user.getName()).thenReturn(name);
     Mockito.when(user.getTenant()).thenReturn(TenantReference.of(tenantUid));
-    Mockito.when(user.getProvider()).thenReturn(Optional.empty());
+    Mockito.when(user.getFederatedProvider()).thenReturn(Optional.empty());
     Mockito.when(users.retrieveForUpdate(ArgumentMatchers.eq(uid), ArgumentMatchers.any()))
         .thenReturn(Optional.of(user));
     return user;
@@ -168,7 +169,7 @@ class DelegatedAccessAuthValidatorAdapterUnitTest {
   void test_unknown_provider() {
     Assertions.assertTrue(
         adapter.resolveAccount(request, "other", identity("alice@example.com", true)).isEmpty());
-    Mockito.when(loginProvider.isDisabled()).thenReturn(true);
+    Mockito.when(loginProvider.isEnabled()).thenReturn(false);
     Assertions.assertTrue(
         adapter.resolveAccount(request, PROVIDER, identity("alice@example.com", true)).isEmpty());
   }

@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 
 class UserGroupMembershipChangeSetUnitTest {
@@ -17,8 +17,8 @@ class UserGroupMembershipChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_user_group_membership_change_set_builder() {
     UserGroupMembershipChangeSet one = new UserGroupMembershipChangeSet().uid("one")
-        .user(UserReference.of("one")).relyingParty(RelyingPartyReference.of("one"))
-        .trustedClient(TrustedClientReference.of("one")).groups("one").version(1).newUid();
+        .user(UserReference.of("one")).resourceServer(ResourceServerReference.of("one"))
+        .oauthClient(OauthClientReference.of("one")).groups("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -30,21 +30,21 @@ class UserGroupMembershipChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("user");
     Assertions.assertFalse(one.getUser().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(RelyingPartyReference.of("one"), one.getRelyingParty().get(),
+    Assertions.assertEquals(ResourceServerReference.of("one"), one.getResourceServer().get(),
         "Value must equals to the intial value");
-    one.relyingParty(RelyingPartyReference.of("two"));
-    Assertions.assertEquals(RelyingPartyReference.of("two"), one.getRelyingParty().get(),
+    one.resourceServer(ResourceServerReference.of("two"));
+    Assertions.assertEquals(ResourceServerReference.of("two"), one.getResourceServer().get(),
         "Value must equals to the assigned value");
-    one.unset("relyingParty");
-    Assertions.assertFalse(one.getRelyingParty().isPresent(),
+    one.unset("resourceServer");
+    Assertions.assertFalse(one.getResourceServer().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(TrustedClientReference.of("one"), one.getTrustedClient().get(),
+    Assertions.assertEquals(OauthClientReference.of("one"), one.getOauthClient().get(),
         "Value must equals to the intial value");
-    one.trustedClient(TrustedClientReference.of("two"));
-    Assertions.assertEquals(TrustedClientReference.of("two"), one.getTrustedClient().get(),
+    one.oauthClient(OauthClientReference.of("two"));
+    Assertions.assertEquals(OauthClientReference.of("two"), one.getOauthClient().get(),
         "Value must equals to the assigned value");
-    one.unset("trustedClient");
-    Assertions.assertFalse(one.getTrustedClient().isPresent(),
+    one.unset("oauthClient");
+    Assertions.assertFalse(one.getOauthClient().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getGroups().get(), "Value must equals to the intial value");
     one.groups("two");

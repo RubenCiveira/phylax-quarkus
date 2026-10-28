@@ -11,7 +11,7 @@ import net.civeira.phylax.features.oauth.client.domain.gateway.ClientScopeConsen
  * Interactor for OAuth client scope authorization. Returns all requested scopes as pending until a
  * real persistence layer is integrated.
  *
- * TODO: integrate with TrustedClient / UserScopeConsent persistence.
+ * TODO: integrate with OauthClient / UserScopeConsent persistence.
  */
 @Transactional
 @ApplicationScoped

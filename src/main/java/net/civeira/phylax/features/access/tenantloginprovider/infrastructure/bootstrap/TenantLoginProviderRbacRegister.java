@@ -75,10 +75,10 @@ public class TenantLoginProviderRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("name")
         .description("A name that identifies this login provider within the tenant.").build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("source").description(
+        FieldDescription.builder().name("providerType").description(
             "The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAML).")
             .build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("disabled")
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
         .description("Indicates if this provider is currently disabled.").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("directAccess").description(

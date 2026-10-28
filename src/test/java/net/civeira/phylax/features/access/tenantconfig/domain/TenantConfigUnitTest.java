@@ -7,25 +7,25 @@ import org.junit.jupiter.api.Test;
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AcrValuesSupportedVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowPasswordGrantVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRecoverPassVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AllowRegisterVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.AutoApproveRegisteredUsersVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DcrAllowedAuthMethodsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DcrAllowedGrantTypesVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DisabledUserEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DisabledUserEmailTemplateVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DisplayNameVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.DynamicRegistrationPolicyVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnableRegisterUsersVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnabledUserEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.EnabledUserEmailTemplateVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.ForceMfaVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.InnerLabelVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.InvitationExpiryDaysVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.MagicLinkExpiryMinutesVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RecoverPassEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.PasswordRecoveryEnabledVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RecoverPassEmailTemplateVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenMaxLifetimeSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RefreshTokenTtlSecondsVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisteredEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RegisteredEmailTemplateVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequireEmailVerificationVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.RequirePushedAuthorizationRequestsVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SelfRegistrationEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.SessionSsoTtlSecondsVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.TenantVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.UidVO;
@@ -33,7 +33,7 @@ import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.Versio
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnEnabledVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnRpIdVO;
 import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WebauthnRpNameVO;
-import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WelcomeEmailVO;
+import net.civeira.phylax.features.access.tenantconfig.domain.valueobject.WelcomeEmailTemplateVO;
 
 class TenantConfigUnitTest {
 
@@ -45,11 +45,11 @@ class TenantConfigUnitTest {
   void test_tenant_config_builder() {
     TenantConfig one = TenantConfig.builder().uidValue(UidVO.from("one"))
         .tenantValue(TenantVO.from(TenantReference.of("one")))
-        .innerLabelValue(InnerLabelVO.from("one")).forceMfaValue(ForceMfaVO.from(true))
+        .displayNameValue(DisplayNameVO.from("one")).forceMfaValue(ForceMfaVO.from(true))
         .dynamicRegistrationPolicyValue(
             DynamicRegistrationPolicyVO.from(TenantConfigDynamicRegistrationPolicyOptions.OPEN))
-        .allowRegisterValue(AllowRegisterVO.from(true))
-        .enableRegisterUsersValue(EnableRegisterUsersVO.from(true))
+        .selfRegistrationEnabledValue(SelfRegistrationEnabledVO.from(true))
+        .autoApproveRegisteredUsersValue(AutoApproveRegisteredUsersVO.from(true))
         .magicLinkEnabledValue(MagicLinkEnabledVO.from(true))
         .requireEmailVerificationValue(RequireEmailVerificationVO.from(true))
         .invitationExpiryDaysValue(InvitationExpiryDaysVO.from(1))
@@ -65,13 +65,13 @@ class TenantConfigUnitTest {
         .webauthnEnabledValue(WebauthnEnabledVO.from(true))
         .webauthnRpIdValue(WebauthnRpIdVO.from("one"))
         .webauthnRpNameValue(WebauthnRpNameVO.from("one"))
-        .welcomeEmailValue(WelcomeEmailVO.from("one"))
-        .registeredEmailValue(RegisteredEmailVO.from("one"))
-        .disabledUserEmailValue(DisabledUserEmailVO.from("one"))
-        .enabledUserEmailValue(EnabledUserEmailVO.from("one"))
-        .allowRecoverPassValue(AllowRecoverPassVO.from(true))
-        .recoverPassEmailValue(RecoverPassEmailVO.from("one")).versionValue(VersionVO.from(1))
-        .build();
+        .welcomeEmailTemplateValue(WelcomeEmailTemplateVO.from("one"))
+        .registeredEmailTemplateValue(RegisteredEmailTemplateVO.from("one"))
+        .disabledUserEmailTemplateValue(DisabledUserEmailTemplateVO.from("one"))
+        .enabledUserEmailTemplateValue(EnabledUserEmailTemplateVO.from("one"))
+        .passwordRecoveryEnabledValue(PasswordRecoveryEnabledVO.from(true))
+        .recoverPassEmailTemplateValue(RecoverPassEmailTemplateVO.from("one"))
+        .versionValue(VersionVO.from(1)).build();
     TenantConfig withOne = one.withVersionValue(VersionVO.from(1));
     Assertions.assertEquals(2, withOne.withNextVersion().getVersion().get());
     TenantConfig deleted = one.delete();

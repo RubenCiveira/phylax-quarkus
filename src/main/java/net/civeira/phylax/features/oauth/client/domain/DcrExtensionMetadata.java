@@ -11,8 +11,8 @@ import lombok.Getter;
  * Registration §2, RFC 9449 §5.2, RFC 9126 §6; task V.3).
  *
  * <p>
- * Every value maps to a column the runtime already reads through {@code TrustedClientPolicy}; a
- * null value or false means not registered. {@link DcrMetadataPolicy} validates them against the
+ * Every value maps to a column the runtime already reads through {@code OauthClientPolicy}; a null
+ * value or false means not registered. {@link DcrMetadataPolicy} validates them against the
  * algorithms the server announces.
  */
 @Builder(toBuilder = true)

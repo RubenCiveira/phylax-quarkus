@@ -20,7 +20,7 @@ class UserAcceptedTermsOfUseChangeSetUnitTest {
   void test_user_accepted_terms_of_use_change_set_builder() {
     UserAcceptedTermsOfUseChangeSet one =
         new UserAcceptedTermsOfUseChangeSet().uid("one").user(UserReference.of("one"))
-            .conditions(TenantTermsOfUseReference.of("one")).acceptDate(LocalDateTime
+            .termsOfUse(TenantTermsOfUseReference.of("one")).acceptDate(LocalDateTime
                 .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
             .ipAddress("one").userAgent("one").version(1).newUid();
     one.uid("two");
@@ -34,13 +34,13 @@ class UserAcceptedTermsOfUseChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("user");
     Assertions.assertFalse(one.getUser().isPresent(), "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(TenantTermsOfUseReference.of("one"), one.getConditions().get(),
+    Assertions.assertEquals(TenantTermsOfUseReference.of("one"), one.getTermsOfUse().get(),
         "Value must equals to the intial value");
-    one.conditions(TenantTermsOfUseReference.of("two"));
-    Assertions.assertEquals(TenantTermsOfUseReference.of("two"), one.getConditions().get(),
+    one.termsOfUse(TenantTermsOfUseReference.of("two"));
+    Assertions.assertEquals(TenantTermsOfUseReference.of("two"), one.getTermsOfUse().get(),
         "Value must equals to the assigned value");
-    one.unset("conditions");
-    Assertions.assertFalse(one.getConditions().isPresent(),
+    one.unset("termsOfUse");
+    Assertions.assertFalse(one.getTermsOfUse().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),

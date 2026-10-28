@@ -90,7 +90,7 @@ public class InvitationAcceptAdapter implements InvitationAcceptGateway {
     }
     String userUid = UUID.randomUUID().toString();
     try (PreparedStatement stat = conn.prepareStatement("INSERT INTO access_user (uid, version,"
-        + " approve, email, email_verified, enabled, name, password, temporal_password,"
+        + " approval_status, email, email_verified, enabled, name, password, temporal_password,"
         + " use_second_factors, tenant) VALUES (?, 0, 'ACCEPTED', ?, 1, 1, ?, ?, 0, 0, ?)")) {
       stat.setString(1, userUid);
       stat.setString(2, invitation.email());

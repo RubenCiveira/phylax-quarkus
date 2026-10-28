@@ -90,7 +90,7 @@ class ClientPolicyFlowTest extends OidcIntegrationTestBase {
 
   @Test
   void clientCredentials_getsItsM2mScopes() {
-    clientStoreGateway.setAllowedScopesM2m(List.of("orders:read", "orders:write"));
+    clientStoreGateway.setClientCredentialsScopes(List.of("orders:read", "orders:write"));
 
     Response all =
         client.token(OidcTestFixtures.TENANT, BASIC, Map.of("grant_type", "client_credentials"));

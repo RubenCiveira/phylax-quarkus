@@ -64,8 +64,8 @@ public class TenantTermsOfUseListUsecase {
     TenantTermsOfUseVisibilityFilter visibleFilter = TenantTermsOfUseVisibilityFilter.builder()
         .uid(filter.getUid().orElse(null)).uids(filter.getUids().stream().toList())
         .search(filter.getSearch().orElse(null)).tenant(filter.getTenant().orElse(null))
-        .tenants(filter.getTenants()).relyingParty(filter.getRelyingParty().orElse(null))
-        .relyingParties(filter.getRelyingParties())
+        .tenants(filter.getTenants()).resourceServer(filter.getResourceServer().orElse(null))
+        .resourceServers(filter.getResourceServers())
         .tenantAccessible(filter.getTenantAccessible().orElse(null)).build();
     TenantTermsOfUseCursor gatewayCursor = TenantTermsOfUseCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null)).build();

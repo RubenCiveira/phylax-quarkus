@@ -10,7 +10,7 @@ import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.retrieve.TenantTermsOfUseRetrieveProjection;
 import net.civeira.phylax.features.access.tenanttermsofuse.application.usecase.retrieve.TenantTermsOfUseRetrieveUsecase;
 import net.civeira.phylax.features.access.tenanttermsofuse.domain.TenantTermsOfUseReference;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantApiRef;
 import net.civeira.phylax.generated.openapi.model.TenantTermsOfUseApiDto;
 
@@ -57,14 +57,14 @@ public class TenantTermsOfUseRetrieveController {
     tenantTermsOfUseApiDto.setUid(dto.getUid());
     tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
     tenantTermsOfUseApiDto
-        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
-    String attached = dto.getAttached();
-    if (null != attached) {
+    String document = dto.getDocument();
+    if (null != document) {
       String url = currentRequest.getPublicHost() + "/api/access/tenants-terms-of-use/"
-          + dto.getUidOrDefault("-") + "/attached";
-      tenantTermsOfUseApiDto.setAttached(magicLink.create(url, currentRequest.interaction()));
+          + dto.getUidOrDefault("-") + "/document";
+      tenantTermsOfUseApiDto.setDocument(magicLink.create(url, currentRequest.interaction()));
     }
     tenantTermsOfUseApiDto.setActivationDate(dto.getActivationDate());
     tenantTermsOfUseApiDto.setVersion(dto.getVersion());

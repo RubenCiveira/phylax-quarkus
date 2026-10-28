@@ -38,16 +38,16 @@ public class TenantTermsOfUseBatchController implements TenantTermsOfUseBatchApi
    * @param search
    * @param tenant
    * @param tenants
-   * @param relyingParty
-   * @param relyingParties
+   * @param resourceServer
+   * @param resourceServers
    * @return
    */
   @Override
   public Response tenantTermsOfUseApiBatchDelete(final List<String> uids, final String search,
-      final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingParties) {
+      final String tenant, final List<String> tenants, final String resourceServer,
+      final List<String> resourceServers) {
     return deleteController.tenantTermsOfUseApiBatchDelete(uids, search, tenant, tenants,
-        relyingParty, relyingParties);
+        resourceServer, resourceServers);
   }
 
   /**
@@ -66,16 +66,16 @@ public class TenantTermsOfUseBatchController implements TenantTermsOfUseBatchApi
    * @param search
    * @param tenant
    * @param tenants
-   * @param relyingParty
-   * @param relyingParties
+   * @param resourceServer
+   * @param resourceServers
    * @return
    */
   @Override
   public Response tenantTermsOfUseApiBatchDisable(final List<String> uids, final String search,
-      final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingParties) {
+      final String tenant, final List<String> tenants, final String resourceServer,
+      final List<String> resourceServers) {
     return disableController.tenantTermsOfUseApiBatchDisable(uids, search, tenant, tenants,
-        relyingParty, relyingParties);
+        resourceServer, resourceServers);
   }
 
   /**
@@ -94,16 +94,16 @@ public class TenantTermsOfUseBatchController implements TenantTermsOfUseBatchApi
    * @param search
    * @param tenant
    * @param tenants
-   * @param relyingParty
-   * @param relyingParties
+   * @param resourceServer
+   * @param resourceServers
    * @return
    */
   @Override
   public Response tenantTermsOfUseApiBatchEnable(final List<String> uids, final String search,
-      final String tenant, final List<String> tenants, final String relyingParty,
-      final List<String> relyingParties) {
+      final String tenant, final List<String> tenants, final String resourceServer,
+      final List<String> resourceServers) {
     return enableController.tenantTermsOfUseApiBatchEnable(uids, search, tenant, tenants,
-        relyingParty, relyingParties);
+        resourceServer, resourceServers);
   }
 
   /**

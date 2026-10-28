@@ -21,11 +21,11 @@ class UserChangeSetUnitTest {
         .passwordPlain("one").email("one")
         .welcomeAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
             .toOffsetDateTime())
-        .emailVerified(true).enabled(true).approve(UserApproveOptions.UNVERIFIED)
+        .emailVerified(true).enabled(true).approvalStatus(UserApprovalStatusOptions.UNVERIFIED)
         .temporalPassword(true).useSecondFactors(true).secondFactorSeedPlain("one")
         .blockedUntil(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
             .toOffsetDateTime())
-        .provider("one").version(1).newUid();
+        .federatedProvider("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -74,13 +74,13 @@ class UserChangeSetUnitTest {
     one.unset("enabled");
     Assertions.assertFalse(one.getEnabled().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(UserApproveOptions.UNVERIFIED, one.getApprove().get(),
+    Assertions.assertEquals(UserApprovalStatusOptions.UNVERIFIED, one.getApprovalStatus().get(),
         "Value must equals to the intial value");
-    one.approve(UserApproveOptions.PENDING);
-    Assertions.assertEquals(UserApproveOptions.PENDING, one.getApprove().get(),
+    one.approvalStatus(UserApprovalStatusOptions.PENDING);
+    Assertions.assertEquals(UserApprovalStatusOptions.PENDING, one.getApprovalStatus().get(),
         "Value must equals to the assigned value");
-    one.unset("approve");
-    Assertions.assertFalse(one.getApprove().isPresent(),
+    one.unset("approvalStatus");
+    Assertions.assertFalse(one.getApprovalStatus().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getTemporalPassword().get(),
         "Value must equals to the intial value");
@@ -109,13 +109,13 @@ class UserChangeSetUnitTest {
     one.unset("blockedUntil");
     Assertions.assertFalse(one.getBlockedUntil().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getProvider().get(),
+    Assertions.assertEquals("one", one.getFederatedProvider().get(),
         "Value must equals to the intial value");
-    one.provider("two");
-    Assertions.assertEquals("two", one.getProvider().get(),
+    one.federatedProvider("two");
+    Assertions.assertEquals("two", one.getFederatedProvider().get(),
         "Value must equals to the assigned value");
-    one.unset("provider");
-    Assertions.assertFalse(one.getProvider().isPresent(),
+    one.unset("federatedProvider");
+    Assertions.assertFalse(one.getFederatedProvider().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(0, one.getVersion().get(), "Value must equals to the intial value");
     one.version(2);

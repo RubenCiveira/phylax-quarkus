@@ -15,16 +15,17 @@ class TenantConfigChangeSetUnitTest {
   @DisplayName("Test a entity reference contruction")
   void test_tenant_config_change_set_builder() {
     TenantConfigChangeSet one = new TenantConfigChangeSet().uid("one")
-        .tenant(TenantReference.of("one")).innerLabel("one").forceMfa(true)
+        .tenant(TenantReference.of("one")).displayName("one").forceMfa(true)
         .dynamicRegistrationPolicy(TenantConfigDynamicRegistrationPolicyOptions.OPEN)
-        .allowRegister(true).enableRegisterUsers(true).magicLinkEnabled(true)
+        .selfRegistrationEnabled(true).autoApproveRegisteredUsers(true).magicLinkEnabled(true)
         .requireEmailVerification(true).invitationExpiryDays(1).magicLinkExpiryMinutes(1)
         .sessionSsoTtlSeconds(1).refreshTokenTtlSeconds(1).refreshTokenMaxLifetimeSeconds(1)
         .dcrAllowedGrantTypes("one").dcrAllowedAuthMethods("one").allowPasswordGrant(true)
         .requirePushedAuthorizationRequests(true).acrValuesSupported("one").webauthnEnabled(true)
-        .webauthnRpId("one").webauthnRpName("one").welcomeEmail("one").registeredEmail("one")
-        .disabledUserEmail("one").enabledUserEmail("one").allowRecoverPass(true)
-        .recoverPassEmail("one").version(1).newUid();
+        .webauthnRpId("one").webauthnRpName("one").welcomeEmailTemplate("one")
+        .registeredEmailTemplate("one").disabledUserEmailTemplate("one")
+        .enabledUserEmailTemplate("one").passwordRecoveryEnabled(true)
+        .recoverPassEmailTemplate("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -37,13 +38,13 @@ class TenantConfigChangeSetUnitTest {
     one.unset("tenant");
     Assertions.assertFalse(one.getTenant().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getInnerLabel().get(),
+    Assertions.assertEquals("one", one.getDisplayName().get(),
         "Value must equals to the intial value");
-    one.innerLabel("two");
-    Assertions.assertEquals("two", one.getInnerLabel().get(),
+    one.displayName("two");
+    Assertions.assertEquals("two", one.getDisplayName().get(),
         "Value must equals to the assigned value");
-    one.unset("innerLabel");
-    Assertions.assertFalse(one.getInnerLabel().isPresent(),
+    one.unset("displayName");
+    Assertions.assertFalse(one.getDisplayName().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getForceMfa().get(), "Value must equals to the intial value");
     one.forceMfa(false);
@@ -60,21 +61,21 @@ class TenantConfigChangeSetUnitTest {
     one.unset("dynamicRegistrationPolicy");
     Assertions.assertFalse(one.getDynamicRegistrationPolicy().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(true, one.getAllowRegister().get(),
+    Assertions.assertEquals(true, one.getSelfRegistrationEnabled().get(),
         "Value must equals to the intial value");
-    one.allowRegister(false);
-    Assertions.assertEquals(false, one.getAllowRegister().get(),
+    one.selfRegistrationEnabled(false);
+    Assertions.assertEquals(false, one.getSelfRegistrationEnabled().get(),
         "Value must equals to the assigned value");
-    one.unset("allowRegister");
-    Assertions.assertFalse(one.getAllowRegister().isPresent(),
+    one.unset("selfRegistrationEnabled");
+    Assertions.assertFalse(one.getSelfRegistrationEnabled().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(true, one.getEnableRegisterUsers().get(),
+    Assertions.assertEquals(true, one.getAutoApproveRegisteredUsers().get(),
         "Value must equals to the intial value");
-    one.enableRegisterUsers(false);
-    Assertions.assertEquals(false, one.getEnableRegisterUsers().get(),
+    one.autoApproveRegisteredUsers(false);
+    Assertions.assertEquals(false, one.getAutoApproveRegisteredUsers().get(),
         "Value must equals to the assigned value");
-    one.unset("enableRegisterUsers");
-    Assertions.assertFalse(one.getEnableRegisterUsers().isPresent(),
+    one.unset("autoApproveRegisteredUsers");
+    Assertions.assertFalse(one.getAutoApproveRegisteredUsers().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getMagicLinkEnabled().get(),
         "Value must equals to the intial value");
@@ -196,53 +197,53 @@ class TenantConfigChangeSetUnitTest {
     one.unset("webauthnRpName");
     Assertions.assertFalse(one.getWebauthnRpName().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getWelcomeEmail().get(),
+    Assertions.assertEquals("one", one.getWelcomeEmailTemplate().get(),
         "Value must equals to the intial value");
-    one.welcomeEmail("two");
-    Assertions.assertEquals("two", one.getWelcomeEmail().get(),
+    one.welcomeEmailTemplate("two");
+    Assertions.assertEquals("two", one.getWelcomeEmailTemplate().get(),
         "Value must equals to the assigned value");
-    one.unset("welcomeEmail");
-    Assertions.assertFalse(one.getWelcomeEmail().isPresent(),
+    one.unset("welcomeEmailTemplate");
+    Assertions.assertFalse(one.getWelcomeEmailTemplate().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getRegisteredEmail().get(),
+    Assertions.assertEquals("one", one.getRegisteredEmailTemplate().get(),
         "Value must equals to the intial value");
-    one.registeredEmail("two");
-    Assertions.assertEquals("two", one.getRegisteredEmail().get(),
+    one.registeredEmailTemplate("two");
+    Assertions.assertEquals("two", one.getRegisteredEmailTemplate().get(),
         "Value must equals to the assigned value");
-    one.unset("registeredEmail");
-    Assertions.assertFalse(one.getRegisteredEmail().isPresent(),
+    one.unset("registeredEmailTemplate");
+    Assertions.assertFalse(one.getRegisteredEmailTemplate().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getDisabledUserEmail().get(),
+    Assertions.assertEquals("one", one.getDisabledUserEmailTemplate().get(),
         "Value must equals to the intial value");
-    one.disabledUserEmail("two");
-    Assertions.assertEquals("two", one.getDisabledUserEmail().get(),
+    one.disabledUserEmailTemplate("two");
+    Assertions.assertEquals("two", one.getDisabledUserEmailTemplate().get(),
         "Value must equals to the assigned value");
-    one.unset("disabledUserEmail");
-    Assertions.assertFalse(one.getDisabledUserEmail().isPresent(),
+    one.unset("disabledUserEmailTemplate");
+    Assertions.assertFalse(one.getDisabledUserEmailTemplate().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getEnabledUserEmail().get(),
+    Assertions.assertEquals("one", one.getEnabledUserEmailTemplate().get(),
         "Value must equals to the intial value");
-    one.enabledUserEmail("two");
-    Assertions.assertEquals("two", one.getEnabledUserEmail().get(),
+    one.enabledUserEmailTemplate("two");
+    Assertions.assertEquals("two", one.getEnabledUserEmailTemplate().get(),
         "Value must equals to the assigned value");
-    one.unset("enabledUserEmail");
-    Assertions.assertFalse(one.getEnabledUserEmail().isPresent(),
+    one.unset("enabledUserEmailTemplate");
+    Assertions.assertFalse(one.getEnabledUserEmailTemplate().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals(true, one.getAllowRecoverPass().get(),
+    Assertions.assertEquals(true, one.getPasswordRecoveryEnabled().get(),
         "Value must equals to the intial value");
-    one.allowRecoverPass(false);
-    Assertions.assertEquals(false, one.getAllowRecoverPass().get(),
+    one.passwordRecoveryEnabled(false);
+    Assertions.assertEquals(false, one.getPasswordRecoveryEnabled().get(),
         "Value must equals to the assigned value");
-    one.unset("allowRecoverPass");
-    Assertions.assertFalse(one.getAllowRecoverPass().isPresent(),
+    one.unset("passwordRecoveryEnabled");
+    Assertions.assertFalse(one.getPasswordRecoveryEnabled().isPresent(),
         "After unset, the valeue must be dissapear");
-    Assertions.assertEquals("one", one.getRecoverPassEmail().get(),
+    Assertions.assertEquals("one", one.getRecoverPassEmailTemplate().get(),
         "Value must equals to the intial value");
-    one.recoverPassEmail("two");
-    Assertions.assertEquals("two", one.getRecoverPassEmail().get(),
+    one.recoverPassEmailTemplate("two");
+    Assertions.assertEquals("two", one.getRecoverPassEmailTemplate().get(),
         "Value must equals to the assigned value");
-    one.unset("recoverPassEmail");
-    Assertions.assertFalse(one.getRecoverPassEmail().isPresent(),
+    one.unset("recoverPassEmailTemplate");
+    Assertions.assertFalse(one.getRecoverPassEmailTemplate().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(0, one.getVersion().get(), "Value must equals to the intial value");
     one.version(2);

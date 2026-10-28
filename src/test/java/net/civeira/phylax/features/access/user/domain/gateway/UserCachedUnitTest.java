@@ -11,15 +11,15 @@ import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.features.access.tenant.domain.TenantReference;
 import net.civeira.phylax.features.access.user.domain.User;
-import net.civeira.phylax.features.access.user.domain.UserApproveOptions;
-import net.civeira.phylax.features.access.user.domain.valueobject.ApproveVO;
+import net.civeira.phylax.features.access.user.domain.UserApprovalStatusOptions;
+import net.civeira.phylax.features.access.user.domain.valueobject.ApprovalStatusVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.BlockedUntilVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.EmailVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.EmailVerifiedVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.EnabledVO;
+import net.civeira.phylax.features.access.user.domain.valueobject.FederatedProviderVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.NameVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.PasswordVO;
-import net.civeira.phylax.features.access.user.domain.valueobject.ProviderVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.SecondFactorSeedVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.TemporalPasswordVO;
 import net.civeira.phylax.features.access.user.domain.valueobject.TenantVO;
@@ -42,13 +42,14 @@ class UserCachedUnitTest {
         .welcomeAtValue(WelcomeAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .emailVerifiedValue(EmailVerifiedVO.from(true)).enabledValue(EnabledVO.from(true))
-        .approveValue(ApproveVO.from(UserApproveOptions.UNVERIFIED))
+        .approvalStatusValue(ApprovalStatusVO.from(UserApprovalStatusOptions.UNVERIFIED))
         .temporalPasswordValue(TemporalPasswordVO.from(true))
         .useSecondFactorsValue(UseSecondFactorsVO.from(true))
         .secondFactorSeedValue(SecondFactorSeedVO.fromPlain("one"))
         .blockedUntilValue(BlockedUntilVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
-        .providerValue(ProviderVO.from("one")).versionValue(VersionVO.from(1)).build();
+        .federatedProviderValue(FederatedProviderVO.from("one")).versionValue(VersionVO.from(1))
+        .build();
     OffsetDateTime now = OffsetDateTime.now();
     List<User> empty = List.of();
     List<User> some = List.of(one);

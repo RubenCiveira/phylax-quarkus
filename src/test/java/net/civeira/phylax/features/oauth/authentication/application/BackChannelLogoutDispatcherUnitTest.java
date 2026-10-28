@@ -9,10 +9,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientQueryRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantQueryRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientQueryRepositoryGateway;
 import net.civeira.phylax.features.oauth.tokensecurity.application.SubjectResolver;
 import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
 
@@ -21,11 +21,11 @@ import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigne
  */
 class BackChannelLogoutDispatcherUnitTest {
 
-  private static TrustedClient client(String code, String tenantUid) {
-    TrustedClient client = Mockito.mock(TrustedClient.class);
+  private static OauthClient client(String code, String tenantUid) {
+    OauthClient client = Mockito.mock(OauthClient.class);
     Mockito.when(client.getCode()).thenReturn(code);
     Mockito.when(client.getTenantUid()).thenReturn(Optional.ofNullable(tenantUid));
-    Mockito.when(client.getBackChannelLogoutUri())
+    Mockito.when(client.getBackchannelLogoutUri())
         .thenReturn(Optional.of("https://example.invalid/back-channel"));
     return client;
   }
@@ -37,9 +37,9 @@ class BackChannelLogoutDispatcherUnitTest {
     Tenant tenantA = Mockito.mock(Tenant.class);
     Mockito.when(tenantA.getUid()).thenReturn("uid-a");
     Mockito.when(tenants.find(Mockito.any())).thenReturn(Optional.of(tenantA));
-    TrustedClientQueryRepositoryGateway clients =
-        Mockito.mock(TrustedClientQueryRepositoryGateway.class);
-    List<TrustedClient> all =
+    OauthClientQueryRepositoryGateway clients =
+        Mockito.mock(OauthClientQueryRepositoryGateway.class);
+    List<OauthClient> all =
         List.of(client("of-a", "uid-a"), client("of-b", "uid-b"), client("global", null));
     Mockito.when(clients.list(Mockito.any())).thenReturn(all);
 
@@ -47,7 +47,7 @@ class BackChannelLogoutDispatcherUnitTest {
         Mockito.mock(TokenSigner.class), new SubjectResolver(java.util.Optional.empty()));
 
     Assertions.assertEquals(List.of("of-a", "global"),
-        dispatcher.recipients("tenant-a").stream().map(TrustedClient::getCode).toList());
+        dispatcher.recipients("tenant-a").stream().map(OauthClient::getCode).toList());
   }
 
   @Test
@@ -56,7 +56,7 @@ class BackChannelLogoutDispatcherUnitTest {
     TenantQueryRepositoryGateway tenants = Mockito.mock(TenantQueryRepositoryGateway.class);
     Mockito.when(tenants.find(Mockito.any())).thenReturn(Optional.empty());
     BackChannelLogoutDispatcher dispatcher = new BackChannelLogoutDispatcher(
-        Mockito.mock(TrustedClientQueryRepositoryGateway.class), tenants,
+        Mockito.mock(OauthClientQueryRepositoryGateway.class), tenants,
         Mockito.mock(TokenSigner.class), new SubjectResolver(java.util.Optional.empty()));
 
     Assertions.assertTrue(dispatcher.recipients("ghost").isEmpty());

@@ -41,7 +41,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
   private final AtomicReference<List<String>> allowedRedirects = new AtomicReference<>(REDIRECTS);
   private final AtomicReference<List<String>> allowedScopes = new AtomicReference<>();
   private final AtomicReference<List<String>> allowedGrants = new AtomicReference<>();
-  private final AtomicReference<List<String>> allowedScopesM2m = new AtomicReference<>();
+  private final AtomicReference<List<String>> clientCredentialsScopes = new AtomicReference<>();
   private final AtomicReference<List<String>> allowedResponseTypes = new AtomicReference<>();
   private volatile boolean requirePar;
   private volatile String jwksJson;
@@ -62,8 +62,8 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     allowedGrants.set(List.copyOf(grants));
   }
 
-  public void setAllowedScopesM2m(List<String> scopes) {
-    allowedScopesM2m.set(List.copyOf(scopes));
+  public void setClientCredentialsScopes(List<String> scopes) {
+    clientCredentialsScopes.set(List.copyOf(scopes));
   }
 
   public void setAllowedResponseTypes(List<String> types) {
@@ -98,7 +98,7 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
     allowedGrants.set(List.of("authorization_code", "password", "refresh_token", "form",
         "client_credentials", "mfa", "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange"));
-    allowedScopesM2m.set(List.of("orders:read", "orders:write"));
+    clientCredentialsScopes.set(List.of("orders:read", "orders:write"));
     allowedResponseTypes.set(List.of("code"));
     allowedRedirects.set(REDIRECTS);
     requirePar = false;
@@ -171,12 +171,12 @@ public class FixedClientStoreGateway implements ClientStoreGateway {
         : isSpa(clientId) ? ClientAuthMethod.NONE
             : isJwt(clientId) ? ClientAuthMethod.PRIVATE_KEY_JWT : null;
     return customizer.apply(ClientDetails.builder().clientId(clientId)
-        .allowedScopes(allowedScopes.get()).allowedScopesM2m(allowedScopesM2m.get())
+        .allowedScopes(allowedScopes.get()).clientCredentialsScopes(clientCredentialsScopes.get())
         .allowedResponseTypes(allowedResponseTypes.get()).allowedGrants(allowedGrants.get())
         .requirePar(requirePar).jwksJson(jwksJson).protectedWithSecret(confidential)
         .tokenEndpointAuthMethod(registered).requirePkce(isSpa(clientId))
         .allowedAudiences(List.of(OidcTestFixtures.API_AUDIENCE, OidcTestFixtures.RESOURCE_URI))
-        .isResourceServer(OidcTestFixtures.CLIENT_ID.equals(clientId))
+        .introspectionAllowed(OidcTestFixtures.CLIENT_ID.equals(clientId))
         .allowedRedirectUris(allowedRedirects.get()).pairwiseSubject(pairwise)
         .postLogoutRedirectUris(List.of(OidcTestFixtures.POST_LOGOUT_URI))).build();
   }

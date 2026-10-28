@@ -17,10 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.crypto.KeyRingSecretStorage;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCode;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.UserAccessTemporalCodeChangeSet;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeCommandRepositoryGateway;
-import net.civeira.phylax.features.access.useraccesstemporalcode.domain.gateway.UserAccessTemporalCodeFilter;
+import net.civeira.phylax.features.access.usermfaenrollment.domain.UserMfaEnrollment;
+import net.civeira.phylax.features.access.usermfaenrollment.domain.UserMfaEnrollmentChangeSet;
+import net.civeira.phylax.features.access.usermfaenrollment.domain.gateway.UserMfaEnrollmentCommandRepositoryGateway;
+import net.civeira.phylax.features.access.usermfaenrollment.domain.gateway.UserMfaEnrollmentFilter;
 import net.civeira.phylax.features.oauth.authentication.domain.AuthRequest;
 import net.civeira.phylax.features.oauth.mfa.domain.PublicLoginMfaBuildResponse;
 import net.civeira.phylax.features.oauth.mfa.domain.gateway.UserMfaGateway;
@@ -38,7 +38,7 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
   private final OtpMfaService otp;
   private final ActiveUserFindService finder;
   private final UserCommandRepositoryGateway users;
-  private final UserAccessTemporalCodeCommandRepositoryGateway codes;
+  private final UserMfaEnrollmentCommandRepositoryGateway codes;
   private final KeyRingSecretStorage secretStorage;
 
   @Override
@@ -72,13 +72,11 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
   private Optional<DataSource> configQr(String tenant, String username, List<String> audiences,
       Locale locale) {
     return finder.findEnabledUser(tenant, username, audiences).map(user -> {
-      Optional<UserAccessTemporalCode> find =
-          codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
-      Optional<String> prev = find
-          .filter(code -> code.getTempSecondFactorSeedExpiration()
-              .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(code -> code.getTempSecondFactorSeedValue().plainValueWith(secretStorage,
-              code.getUid()));
+      Optional<UserMfaEnrollment> find =
+          codes.findForUpdate(UserMfaEnrollmentFilter.builder().user(user).build());
+      Optional<String> prev = find.filter(
+          code -> code.getExpiredAt().map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
+          .flatMap(code -> code.getPendingSeedValue().plainValueWith(secretStorage, code.getUid()));
       if (prev.isPresent()) {
         return otp.getQr(
             ApplicationInfo.builder().label(user.getName() + " at ").issuer("no").build(),
@@ -87,12 +85,12 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
         return otp.getQr(
             ApplicationInfo.builder().label(user.getName() + " at ").issuer("no").build(),
             secret -> {
-              UserAccessTemporalCode code;
+              UserMfaEnrollment code;
               if (find.isPresent()) {
                 code = find.get();
               } else {
-                code = codes.create(UserAccessTemporalCode
-                    .create(new UserAccessTemporalCodeChangeSet().newUid().user(user)));
+                code = codes.create(
+                    UserMfaEnrollment.create(new UserMfaEnrollmentChangeSet().newUid().user(user)));
               }
               codes.update(code,
                   code.generateMfaTemporalCode(secret, OffsetDateTime.now().plus(EXPIRATION_TIME)));
@@ -104,19 +102,19 @@ public class UserMfaConfigAdapter implements UserMfaGateway {
   private boolean validateOtpConfig(String tenant, String username, List<String> audiences,
       String code) {
     return finder.findEnabledUser(tenant, username, audiences).map(user -> {
-      Optional<UserAccessTemporalCode> find =
-          codes.findForUpdate(UserAccessTemporalCodeFilter.builder().user(user).build());
+      Optional<UserMfaEnrollment> find =
+          codes.findForUpdate(UserMfaEnrollmentFilter.builder().user(user).build());
       Optional<String> prev = find
-          .filter(temps -> temps.getTempSecondFactorSeedExpiration()
-              .map(date -> date.isAfter(OffsetDateTime.now())).orElse(false))
-          .flatMap(second -> second.getTempSecondFactorSeedValue().plainValueWith(secretStorage,
+          .filter(temps -> temps.getExpiredAt().map(date -> date.isAfter(OffsetDateTime.now()))
+              .orElse(false))
+          .flatMap(second -> second.getPendingSeedValue().plainValueWith(secretStorage,
               second.getUid()));
       if (prev.isPresent()) {
         String seed = prev.get();
         boolean valid = otp.validateOtp(code, seed);
         if (valid) {
           if (find.isPresent()) {
-            UserAccessTemporalCode temps = find.get();
+            UserMfaEnrollment temps = find.get();
             codes.update(temps, temps.resetMfaTemporalCode());
             users.update(user, user.setMfaSeed(seed));
           } else {

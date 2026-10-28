@@ -56,7 +56,7 @@ public class LegacyCredentialMigration {
    */
   public int migrate() {
     try (Connection conn = source.getConnection()) {
-      int secrets = migrate(conn, "access_trusted_client", "secret_oauth",
+      int secrets = migrate(conn, "access_oauth_client", "secret_oauth",
           "secret_oauth NOT LIKE '" + SecretDigester.PREFIX + "%'", digester::digest);
       int passwords = migrate(conn, "access_user", "password",
           "password <> '' AND password NOT LIKE '$argon2id$%'", hasher::hash);

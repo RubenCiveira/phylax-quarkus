@@ -24,14 +24,14 @@ import net.civeira.phylax.common.infrastructure.config.IsolatedConfigLoaderTestS
 import net.civeira.phylax.common.security.SecureTokenService;
 import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
 import net.civeira.phylax.features.access.apikeyclient.domain.gateway.ApiKeyClientCommandRepositoryGateway;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingParty;
-import net.civeira.phylax.features.access.relyingparty.domain.gateway.RelyingPartyCommandRepositoryGateway;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientCommandRepositoryGateway;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServer;
+import net.civeira.phylax.features.access.resourceserver.domain.gateway.ResourceServerCommandRepositoryGateway;
 import net.civeira.phylax.features.access.role.domain.Role;
 import net.civeira.phylax.features.access.role.domain.gateway.RoleCommandRepositoryGateway;
 import net.civeira.phylax.features.access.tenant.domain.Tenant;
 import net.civeira.phylax.features.access.tenant.domain.gateway.TenantCommandRepositoryGateway;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClient;
-import net.civeira.phylax.features.access.trustedclient.domain.gateway.TrustedClientCommandRepositoryGateway;
 import net.civeira.phylax.features.access.user.domain.User;
 import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
@@ -45,8 +45,8 @@ class InstallAccessUnitTest {
 
   private final SecretDigester digester = new SecretDigester("t0:test-pepper", "t0");
   private UserCommandRepositoryGateway users;
-  private RelyingPartyCommandRepositoryGateway parties;
-  private TrustedClientCommandRepositoryGateway clients;
+  private ResourceServerCommandRepositoryGateway parties;
+  private OauthClientCommandRepositoryGateway clients;
   private ApiKeyClientCommandRepositoryGateway apiKeys;
 
   @TempDir
@@ -55,12 +55,12 @@ class InstallAccessUnitTest {
   @BeforeEach
   void setUp() {
     users = mock(UserCommandRepositoryGateway.class);
-    parties = mock(RelyingPartyCommandRepositoryGateway.class);
-    clients = mock(TrustedClientCommandRepositoryGateway.class);
+    parties = mock(ResourceServerCommandRepositoryGateway.class);
+    clients = mock(OauthClientCommandRepositoryGateway.class);
     apiKeys = mock(ApiKeyClientCommandRepositoryGateway.class);
     when(users.create(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-    when(parties.create(any(RelyingParty.class))).thenAnswer(inv -> inv.getArgument(0));
-    when(clients.create(any(TrustedClient.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(parties.create(any(ResourceServer.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(clients.create(any(OauthClient.class))).thenAnswer(inv -> inv.getArgument(0));
   }
 
   @Test
@@ -81,9 +81,9 @@ class InstallAccessUnitTest {
   void testRegisterTheLocalLogoutRedirectApartFromTheLoginOne() {
     seed(List.of("prod"), Map.of()).run();
 
-    TrustedClient client = created(clients, TrustedClient.class);
+    OauthClient client = created(clients, OauthClient.class);
     assertEquals(List.of("http://localhost:4200/*"),
-        client.getAllowedRedirects().stream().map(r -> r.getUrl()).toList());
+        client.getAllowedLoginRedirects().stream().map(r -> r.getUrl()).toList());
     assertEquals(List.of("http://localhost:4200/*"),
         client.getAllowedLogoutRedirects().stream().map(r -> r.getUrl()).toList());
   }
@@ -95,8 +95,8 @@ class InstallAccessUnitTest {
 
     User root = created(users, User.class);
     assertEquals(Boolean.FALSE, root.isTemporalPassword());
-    assertEquals("civi-acme-api", created(parties, RelyingParty.class).getCode());
-    assertEquals("civi-acme-ui", created(clients, TrustedClient.class).getCode());
+    assertEquals("civi-acme-api", created(parties, ResourceServer.class).getCode());
+    assertEquals("civi-acme-ui", created(clients, OauthClient.class).getCode());
     assertEquals(digester.digest(LOCAL_COLLECTOR_KEY), storedKey(createdKeys().get(0)));
   }
 
@@ -147,10 +147,10 @@ class InstallAccessUnitTest {
     ArgumentCaptor<T> captor = ArgumentCaptor.forClass(type);
     if (gateway instanceof UserCommandRepositoryGateway g) {
       verify(g).create((User) captor.capture());
-    } else if (gateway instanceof RelyingPartyCommandRepositoryGateway g) {
-      verify(g).create((RelyingParty) captor.capture());
-    } else if (gateway instanceof TrustedClientCommandRepositoryGateway g) {
-      verify(g).create((TrustedClient) captor.capture());
+    } else if (gateway instanceof ResourceServerCommandRepositoryGateway g) {
+      verify(g).create((ResourceServer) captor.capture());
+    } else if (gateway instanceof OauthClientCommandRepositoryGateway g) {
+      verify(g).create((OauthClient) captor.capture());
     }
     return captor.getValue();
   }

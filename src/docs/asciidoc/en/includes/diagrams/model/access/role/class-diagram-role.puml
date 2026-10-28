@@ -2,7 +2,7 @@
 @startuml
 left to right direction
 title Clases para role
-class access.RelyingParty{
+class access.ResourceServer{
 uid:string
 code:string
 apiKey:string
@@ -26,7 +26,7 @@ create()
 update()
 delete()
 }
-access.RelyingParty "1"  o--  "N*" access.Role: relyingParty
+access.ResourceServer "1"  o--  "N*" access.Role: resourceServer
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

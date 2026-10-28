@@ -47,7 +47,7 @@ public class RoleRbacRegister {
         .description("A uid string to identify the entity").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("name")
         .description("The user name to identify on the login screen").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("relyingParty")
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("resourceServer")
         .description("Domains without a tenant could be used only for admins").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version")

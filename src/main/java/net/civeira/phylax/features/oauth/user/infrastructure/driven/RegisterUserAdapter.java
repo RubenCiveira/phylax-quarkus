@@ -9,17 +9,18 @@ import net.civeira.phylax.features.oauth.user.domain.RegistrationResult;
 import net.civeira.phylax.features.oauth.user.domain.gateway.RegisterUserGateway;
 
 /**
- * Interactor for user self-registration. Disabled (allowRegister=false) until real persistence is
- * integrated with TenantConfig.enableRegisterUsers and the temporal code system.
+ * Interactor for user self-registration. Disabled (selfRegistrationEnabled=false) until real
+ * persistence is integrated with TenantConfig.autoApproveRegisteredUsers and the temporal code
+ * system.
  *
- * TODO: integrate with UserApproveOptions, TenantConfig and temporal auth codes.
+ * TODO: integrate with UserApprovalStatusOptions, TenantConfig and temporal auth codes.
  */
 @Transactional
 @ApplicationScoped
 public class RegisterUserAdapter implements RegisterUserGateway {
 
   @Override
-  public boolean allowRegister(String tenant) {
+  public boolean selfRegistrationEnabled(String tenant) {
     return true;
   }
 

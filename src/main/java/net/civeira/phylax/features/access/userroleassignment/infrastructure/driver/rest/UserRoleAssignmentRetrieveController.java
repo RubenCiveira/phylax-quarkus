@@ -10,10 +10,10 @@ import net.civeira.phylax.features.access.userroleassignment.application.usecase
 import net.civeira.phylax.features.access.userroleassignment.application.usecase.retrieve.UserRoleAssignmentRetrieveUsecase;
 import net.civeira.phylax.features.access.userroleassignment.domain.Roles;
 import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssignmentReference;
-import net.civeira.phylax.generated.openapi.model.RelyingPartyApiRef;
+import net.civeira.phylax.generated.openapi.model.OauthClientApiRef;
+import net.civeira.phylax.generated.openapi.model.ResourceServerApiRef;
 import net.civeira.phylax.generated.openapi.model.RoleApiRef;
 import net.civeira.phylax.generated.openapi.model.RolesApiDto;
-import net.civeira.phylax.generated.openapi.model.TrustedClientApiRef;
 import net.civeira.phylax.generated.openapi.model.UserApiRef;
 import net.civeira.phylax.generated.openapi.model.UserRoleAssignmentApiDto;
 
@@ -55,9 +55,9 @@ public class UserRoleAssignmentRetrieveController {
     userRoleAssignmentApiDto.setUid(dto.getUid());
     userRoleAssignmentApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
     userRoleAssignmentApiDto
-        .setRelyingParty(new RelyingPartyApiRef().$ref(dto.getRelyingPartyReference()));
+        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     userRoleAssignmentApiDto
-        .setTrustedClient(new TrustedClientApiRef().$ref(dto.getTrustedClientReference()));
+        .setOauthClient(new OauthClientApiRef().$ref(dto.getOauthClientReference()));
     userRoleAssignmentApiDto.setRoles(dto.getRoles().stream().map(this::toApiModelRoles).toList());
     userRoleAssignmentApiDto.setVersion(dto.getVersion());
     return userRoleAssignmentApiDto;

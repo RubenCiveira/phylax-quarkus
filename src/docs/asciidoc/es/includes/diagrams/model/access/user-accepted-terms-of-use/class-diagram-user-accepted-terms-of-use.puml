@@ -10,12 +10,12 @@ email:string
 welcomeAt:datetime
 emailVerified:boolean
 enabled:boolean
-approve:UserApproveOptions
+approvalStatus:UserApprovalStatusOptions
 temporalPassword:boolean
 useSecondFactors:boolean
 secondFactorSeed:string
 blockedUntil:datetime
-provider:string
+federatedProvider:string
 version:integer
 list()
 retrieve()
@@ -38,7 +38,7 @@ class access.TenantTermsOfUse{
 uid:string
 text:blob
 enabled:boolean
-attached:binary
+document:binary
 activationDate:datetime
 version:integer
 list()
@@ -62,7 +62,7 @@ update()
 delete()
 }
 access.User "1"  o--  "N*" access.UserAcceptedTermsOfUse: user
-access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: conditions
+access.TenantTermsOfUse "1"  o--  "N*" access.UserAcceptedTermsOfUse: termsOfUse
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

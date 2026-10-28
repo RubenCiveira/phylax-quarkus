@@ -5,7 +5,7 @@ Tenant* (xref:#entidad-tenant[Tenant])::
 The tenant this login provider is configured for.
 Name* (string)::
 A name that identifies this login provider within the tenant.
-Source* (TenantLoginProviderSourceOptions)::
+Provider type* (TenantLoginProviderProviderTypeOptions)::
 The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAML).Los posibles valores que toma el campo son:
  * GOOGLE
  * GITHUB
@@ -14,7 +14,7 @@ The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAM
  * SAML
  * OIDC
 
-Disabled (boolean)::
+Enabled (boolean)::
 Indicates if this provider is currently disabled.
 Direct access (boolean)::
 If true, the system will default to this login method without requiring selection.

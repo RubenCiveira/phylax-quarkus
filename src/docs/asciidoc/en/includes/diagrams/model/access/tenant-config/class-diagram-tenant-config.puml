@@ -21,11 +21,11 @@ disable()
 }
 class access.TenantConfig{
 uid:string
-innerLabel:string
+displayName:string
 forceMfa:boolean
 dynamicRegistrationPolicy:TenantConfigDynamicRegistrationPolicyOptions
-allowRegister:boolean
-enableRegisterUsers:boolean
+selfRegistrationEnabled:boolean
+autoApproveRegisteredUsers:boolean
 magicLinkEnabled:boolean
 requireEmailVerification:boolean
 invitationExpiryDays:integer
@@ -41,12 +41,12 @@ acrValuesSupported:blob
 webauthnEnabled:boolean
 webauthnRpId:string
 webauthnRpName:string
-welcomeEmail:blob
-registeredEmail:blob
-disabledUserEmail:blob
-enabledUserEmail:blob
-allowRecoverPass:boolean
-recoverPassEmail:blob
+welcomeEmailTemplate:blob
+registeredEmailTemplate:blob
+disabledUserEmailTemplate:blob
+enabledUserEmailTemplate:blob
+passwordRecoveryEnabled:boolean
+recoverPassEmailTemplate:blob
 version:integer
 list()
 retrieve()

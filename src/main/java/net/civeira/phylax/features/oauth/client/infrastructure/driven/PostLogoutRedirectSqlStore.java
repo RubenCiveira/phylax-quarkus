@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * Post-logout redirect URIs of a client, kept apart from its login redirects (task 2.4).
  *
  * <p>
- * Table {@code access_trusted_client_allowed_logout_redirect}, of the
+ * Table {@code access_oauth_client_allowed_logout_redirect}, of the
  * {@code allowed-logout-redirects} composition generated from
  * {@code docs/TODO-OIDC/done/cambios-modelo-J02-J05.md}. Before the migration is applied, reads
  * fail closed (no URI is registered) and writes fail rather than reporting an unregistered URI as
@@ -40,7 +40,7 @@ public class PostLogoutRedirectSqlStore {
    * @return the URIs, empty when none or when the table is missing
    */
   public List<String> list(String clientUid) {
-    String sql = "SELECT url FROM access_trusted_client_allowed_logout_redirect WHERE client = ?";
+    String sql = "SELECT url FROM access_oauth_client_allowed_logout_redirect WHERE client = ?";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientUid);
@@ -74,7 +74,7 @@ public class PostLogoutRedirectSqlStore {
       return;
     }
     String sql =
-        "INSERT INTO access_trusted_client_allowed_logout_redirect (uid, version, url, client) VALUES (?, ?, ?, ?)";
+        "INSERT INTO access_oauth_client_allowed_logout_redirect (uid, version, url, client) VALUES (?, ?, ?, ?)";
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       for (String uri : uris) {
         stat.setString(1, HexFormat.of().formatHex(UUID.randomUUID().toString().getBytes()));
@@ -98,7 +98,7 @@ public class PostLogoutRedirectSqlStore {
   }
 
   private static void delete(Connection conn, String clientUid) throws SQLException {
-    String sql = "DELETE FROM access_trusted_client_allowed_logout_redirect WHERE client = ?";
+    String sql = "DELETE FROM access_oauth_client_allowed_logout_redirect WHERE client = ?";
     try (PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setString(1, clientUid);
       stat.execute();

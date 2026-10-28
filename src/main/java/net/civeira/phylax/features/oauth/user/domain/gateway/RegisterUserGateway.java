@@ -23,7 +23,7 @@ public interface RegisterUserGateway {
    * @param tenant tenant identifier
    * @return true when registration is allowed
    */
-  boolean allowRegister(String tenant);
+  boolean selfRegistrationEnabled(String tenant);
 
   /**
    * Returns the registration consent text for the tenant.

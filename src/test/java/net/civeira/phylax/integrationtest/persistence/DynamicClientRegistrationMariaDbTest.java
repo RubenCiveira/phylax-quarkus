@@ -68,9 +68,9 @@ class DynamicClientRegistrationMariaDbTest {
     delete = new DeleteDynamicClientUsecase(clients);
     update = new UpdateDynamicClientUsecase(clients);
     try (Connection c = dataSource.getConnection()) {
-      c.createStatement().execute("DELETE FROM access_trusted_client_allowed_logout_redirect");
-      c.createStatement().execute("DELETE FROM access_trusted_client_allowed_redirect");
-      c.createStatement().execute("DELETE FROM access_trusted_client");
+      c.createStatement().execute("DELETE FROM access_oauth_client_allowed_logout_redirect");
+      c.createStatement().execute("DELETE FROM access_oauth_client_allowed_login_redirect");
+      c.createStatement().execute("DELETE FROM access_oauth_client");
       c.createStatement().execute("DELETE FROM access_dcr_initial_access_token");
       c.createStatement().execute("DELETE FROM access_tenant_config");
       c.createStatement().execute("DELETE FROM access_tenant");
@@ -147,15 +147,14 @@ class DynamicClientRegistrationMariaDbTest {
 
     RegisterClientResult result = registerIn(TENANT_A, "iat-secret");
 
-    Assertions.assertEquals("uid-a",
-        column("access_trusted_client", "tenant", result.getClientId()));
-    String storedSecret = column("access_trusted_client", "secret_oauth", result.getClientId());
+    Assertions.assertEquals("uid-a", column("access_oauth_client", "tenant", result.getClientId()));
+    String storedSecret = column("access_oauth_client", "secret_oauth", result.getClientId());
     Assertions.assertTrue(storedSecret.startsWith(SecretDigester.PREFIX));
     Assertions.assertTrue(digester.verify(result.getClientSecret(), storedSecret));
     Assertions.assertNotEquals(result.getRegistrationAccessToken(),
-        column("access_trusted_client", "registration_access", result.getClientId()));
+        column("access_oauth_client", "registration_access_token", result.getClientId()));
     Assertions.assertEquals("CLIENT_SECRET_BASIC",
-        column("access_trusted_client", "token_endpoint_auth_method", result.getClientId()));
+        column("access_oauth_client", "token_endpoint_auth_method", result.getClientId()));
     Assertions.assertEquals("1", column("access_dcr_initial_access_token", "uses", "iat"));
     Assertions.assertEquals(List.of("https://app.example/bye"),
         read.read(TENANT_A, ISSUER, result.getClientId(), result.getRegistrationAccessToken())
@@ -212,7 +211,7 @@ class DynamicClientRegistrationMariaDbTest {
     Assertions.assertThrows(DynamicClientException.class,
         () -> delete.delete(TENANT_B, result.getClientId(), token));
     delete.delete(TENANT_A, result.getClientId(), token);
-    Assertions.assertNull(column("access_trusted_client", "uid", result.getClientId()));
+    Assertions.assertNull(column("access_oauth_client", "uid", result.getClientId()));
   }
 
   @Test
@@ -249,20 +248,19 @@ class DynamicClientRegistrationMariaDbTest {
     String id = result.getClientId();
 
     Assertions.assertNull(result.getClientSecret());
-    Assertions.assertNull(column("access_trusted_client", "secret_oauth", id));
+    Assertions.assertNull(column("access_oauth_client", "secret_oauth", id));
     Assertions.assertEquals("PRIVATE_KEY_JWT",
-        column("access_trusted_client", "token_endpoint_auth_method", id));
+        column("access_oauth_client", "token_endpoint_auth_method", id));
     Assertions.assertEquals(jwks, MariaDbSchema.mapper()
-        .readValue(column("access_trusted_client", "jwks_json", id), Map.class));
+        .readValue(column("access_oauth_client", "jwks_json", id), Map.class));
     Assertions.assertEquals("ES256",
-        column("access_trusted_client", "request_object_signing_alg", id));
+        column("access_oauth_client", "request_object_signing_alg", id));
     Assertions.assertEquals("RSA-OAEP-256",
-        column("access_trusted_client", "id_token_encrypted_response_alg", id));
-    Assertions.assertEquals("PAIRWISE", column("access_trusted_client", "subject_type", id));
+        column("access_oauth_client", "id_token_encrypted_response_alg", id));
+    Assertions.assertEquals("PAIRWISE", column("access_oauth_client", "subject_type", id));
+    Assertions.assertEquals("true", column("access_oauth_client", "dpop_bound_access_tokens", id));
     Assertions.assertEquals("true",
-        column("access_trusted_client", "dpop_bound_access_tokens", id));
-    Assertions.assertEquals("true",
-        column("access_trusted_client", "require_pushed_authorization_requests", id));
+        column("access_oauth_client", "require_pushed_authorization_requests", id));
 
     DcrExtensionMetadata read =
         this.read.read(TENANT_A, ISSUER, id, result.getRegistrationAccessToken()).getExtensions();
@@ -278,9 +276,8 @@ class DynamicClientRegistrationMariaDbTest {
             .build());
     Assertions.assertNull(updated.getExtensions().getJwks());
     Assertions.assertEquals("https://app.example/jwks", updated.getExtensions().getJwksUri());
-    Assertions.assertEquals("PUBLIC", column("access_trusted_client", "subject_type", id));
-    Assertions.assertEquals("false",
-        column("access_trusted_client", "dpop_bound_access_tokens", id));
+    Assertions.assertEquals("PUBLIC", column("access_oauth_client", "subject_type", id));
+    Assertions.assertEquals("false", column("access_oauth_client", "dpop_bound_access_tokens", id));
   }
 
   @Test

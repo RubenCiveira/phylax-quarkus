@@ -48,7 +48,7 @@ public class TenantConfigRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
         .description("The name to identify the account.").build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("innerLabel")
+        FieldDescription.builder().name("displayName")
             .description("Tenant could use these field to label the application for the users")
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("forceMfa")
@@ -56,10 +56,11 @@ public class TenantConfigRbacRegister {
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("dynamicRegistrationPolicy")
             .description("El dynamic registration policy de tenant config").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowRegister")
-        .description("El allow register de tenant config").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enableRegisterUsers")
-        .description("El enable register users de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("selfRegistrationEnabled")
+        .description("El self registration enabled de tenant config").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("autoApproveRegisteredUsers")
+            .description("El auto approve registered users de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("magicLinkEnabled")
         .description("El magic link enabled de tenant config").build());
     rbac.registerResourceField(RESOURCE,
@@ -105,17 +106,18 @@ public class TenantConfigRbacRegister {
         .description("El webauthn rp id de tenant config").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("webauthnRpName")
         .description("El webauthn rp name de tenant config").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("welcomeEmail")
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("welcomeEmailTemplate")
         .description("Email send to the enabled user").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registeredEmail")
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registeredEmailTemplate")
         .description("Email send when a user register").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("disabledUserEmail")
-        .description("Email send when a user is disabled").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabledUserEmail")
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("disabledUserEmailTemplate")
+            .description("Email send when a user is disabled").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabledUserEmailTemplate")
         .description("Email send when a user is enabled").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowRecoverPass")
-        .description("El allow recover pass de tenant config").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("recoverPassEmail")
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("passwordRecoveryEnabled")
+        .description("El password recovery enabled de tenant config").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("recoverPassEmailTemplate")
         .description("Email send to the user to recover the password").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version").description(

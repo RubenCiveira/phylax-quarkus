@@ -20,7 +20,7 @@ import net.civeira.phylax.common.batch.BatchStepProgress.Status;
 import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.common.telemetry.ApiObserved;
 import net.civeira.phylax.common.telemetry.Trace;
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.role.application.usecase.delete.RoleCheckBatchDeleteStatus;
 import net.civeira.phylax.features.access.role.application.usecase.delete.RoleDeleteFilter;
 import net.civeira.phylax.features.access.role.application.usecase.delete.RoleDeleteUsecase;
@@ -53,13 +53,13 @@ public class RoleDeleteController {
    * @param uids
    * @param search
    * @param name
-   * @param relyingParty
-   * @param relyingParties
+   * @param resourceServer
+   * @param resourceServers
    * @return
    */
   @ApiObserved("Api to delete on massive entity of role")
   public Response roleApiBatchDelete(final List<String> uids, final String search,
-      final String name, final String relyingParty, final List<String> relyingParties) {
+      final String name, final String resourceServer, final List<String> resourceServers) {
     RoleDeleteFilter.RoleDeleteFilterBuilder filterBuilder = RoleDeleteFilter.builder();
     filterBuilder =
         filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
@@ -68,11 +68,11 @@ public class RoleDeleteController {
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.name(name);
-    if (null != relyingParty) {
-      filterBuilder = filterBuilder.relyingParty(RelyingPartyReference.of(relyingParty));
+    if (null != resourceServer) {
+      filterBuilder = filterBuilder.resourceServer(ResourceServerReference.of(resourceServer));
     }
-    filterBuilder = filterBuilder.relyingParties(null == relyingParties ? null
-        : relyingParties.stream().flatMap(part -> Stream.of(part.split(","))).toList());
+    filterBuilder = filterBuilder.resourceServers(null == resourceServers ? null
+        : resourceServers.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     RoleDeleteFilter filter = filterBuilder.build();
     BatchIdentifier task = delete.batchDelete(currentRequest.interaction(), filter);
     /* .header("Last-Modified", value.getSince().format(DateTimeFormatter.RFC_1123_DATE_TIME)) */

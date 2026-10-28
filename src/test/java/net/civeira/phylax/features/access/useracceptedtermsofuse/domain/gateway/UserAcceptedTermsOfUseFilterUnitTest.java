@@ -42,16 +42,16 @@ class UserAcceptedTermsOfUseFilterUnitTest {
     filter.setUsers(List.of("one"));
     Assertions.assertEquals(List.of("one"), filter.getUsers(),
         "Users must be the same as the assigned");
-    Assertions.assertFalse(filter.getConditions().isPresent(),
-        "Conditions must be empty if filter is build without it");
-    filter.setConditions(TenantTermsOfUseReference.of("$ref"));
-    Assertions.assertEquals(TenantTermsOfUseReference.of("$ref"), filter.getConditions().get(),
-        "Conditions must be the same as the assigned");
-    Assertions.assertTrue(filter.getConditionss().isEmpty(),
-        "Conditionss must be empty if filter is build without it");
-    filter.setConditionss(List.of("one"));
-    Assertions.assertEquals(List.of("one"), filter.getConditionss(),
-        "Conditionss must be the same as the assigned");
+    Assertions.assertFalse(filter.getTermsOfUse().isPresent(),
+        "TermsOfUse must be empty if filter is build without it");
+    filter.setTermsOfUse(TenantTermsOfUseReference.of("$ref"));
+    Assertions.assertEquals(TenantTermsOfUseReference.of("$ref"), filter.getTermsOfUse().get(),
+        "TermsOfUse must be the same as the assigned");
+    Assertions.assertTrue(filter.getTermsOfUses().isEmpty(),
+        "TermsOfUses must be empty if filter is build without it");
+    filter.setTermsOfUses(List.of("one"));
+    Assertions.assertEquals(List.of("one"), filter.getTermsOfUses(),
+        "TermsOfUses must be the same as the assigned");
     Assertions.assertFalse(filter.getUserTenantAccessible().isPresent(),
         "UserTenantAccessible must be empty if filter is build without it");
     filter.setUserTenantAccessible("one");

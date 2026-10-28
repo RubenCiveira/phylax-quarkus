@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.civeira.phylax.features.access.relyingparty.domain.RelyingPartyReference;
-import net.civeira.phylax.features.access.trustedclient.domain.TrustedClientReference;
+import net.civeira.phylax.features.access.oauthclient.domain.OauthClientReference;
+import net.civeira.phylax.features.access.resourceserver.domain.ResourceServerReference;
 import net.civeira.phylax.features.access.user.domain.UserReference;
 import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
 import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.GroupsVO;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.RelyingPartyVO;
-import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.TrustedClientVO;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.OauthClientVO;
+import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.ResourceServerVO;
 import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.UidVO;
 import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.UserVO;
 import net.civeira.phylax.features.access.usergroupmembership.domain.valueobject.VersionVO;
@@ -28,8 +28,8 @@ class UserGroupMembershipCachedUnitTest {
   void test_user_group_membership_cached_builder() {
     UserGroupMembership one = UserGroupMembership.builder().uidValue(UidVO.from("one"))
         .userValue(UserVO.from(UserReference.of("one")))
-        .relyingPartyValue(RelyingPartyVO.from(RelyingPartyReference.of("one")))
-        .trustedClientValue(TrustedClientVO.from(TrustedClientReference.of("one")))
+        .resourceServerValue(ResourceServerVO.from(ResourceServerReference.of("one")))
+        .oauthClientValue(OauthClientVO.from(OauthClientReference.of("one")))
         .groupsValue(GroupsVO.from("one")).versionValue(VersionVO.from(1)).build();
     OffsetDateTime now = OffsetDateTime.now();
     List<UserGroupMembership> empty = List.of();
