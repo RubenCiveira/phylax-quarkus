@@ -57,9 +57,8 @@ graph TD
 Gran parte de `features/oauth` se genera con las plantillas Quarkus de `civi-generator` a partir del modelo `multitenant-oidc.xml`, y `features/access` sale íntegramente del modelo.
 
 - Un cambio de esquema se hace en el modelo y se regenera; no se editan a mano las clases generadas de `access` ni las migraciones.
-- Los cambios hechos a mano en `features/oauth` deben llevarse a la plantilla con `binary/sync-oidc-template.py --apply` (y `--include-new` para clases nuevas) antes de regenerar, o se pierden. `--check` comprueba que no haya diferencias.
+- Los cambios hechos a mano en `features/oauth` deben llevarse a la plantilla con `.make/binary/sync-oidc-template.py --apply` (y `--include-new` para clases nuevas) antes de regenerar, o se pierden. `--check` comprueba que no haya diferencias.
 - El mismo modelo alimenta la plantilla PHP (lughauth-api); los renombrados del modelo hay que trasladarlos también allí.
-- Cómo se incorpora el módulo a otra aplicación: [Integración como trait](09-integracion-como-trait.md).
 
 ## Principios de diseño
 

@@ -70,4 +70,4 @@ Un token revocado sigue pareciendo válido hasta su `exp` (5 minutos por defecto
 
 ## Si la API es la de la aplicación anfitriona
 
-La propia aplicación valida los tokens sin código adicional, pero su configuración debe apuntar a su servidor de recursos: `mp.jwt.verify.audiences` y `mp.jwt.audiences` con el mismo código (ver [Integración como trait](../tecnica/09-integracion-como-trait.md#qué-debe-ajustar-cada-aplicación)). Ojo: la aplicación junta los roles de **todas** las audiencias del token al comprobar permisos.
+La propia aplicación valida los tokens sin código adicional, pero su configuración debe apuntar a su servidor de recursos: `mp.jwt.verify.audiences` y `mp.jwt.audiences` con el mismo código (ver [Instalación](../../operations/oauth/01-instalacion.md#ajustes-de-la-aplicación)). Ojo: la aplicación junta los roles de **todas** las audiencias del token al comprobar permisos.

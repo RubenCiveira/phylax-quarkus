@@ -1,18 +1,14 @@
 # Límites y pendientes
 
-Qué no hace el gestor de identidades, por decisión o porque está pendiente. El detalle de cada punto está en [docs/TODO-OIDC](../../../../../docs/TODO-OIDC/README.md).
+Qué no hace el gestor de identidades, por decisión o porque está pendiente. Lo que está pospuesto, con su motivo y cuándo se reabriría, está en la [hoja de ruta](../../../ROADMAP.md).
 
 ## Validación pendiente
 
-| Tarea | Estado |
-|---|---|
-| **OpenID Conformance Suite** (V.2): perfiles *Basic OP*, *Config OP*, *RP-Initiated Logout* y *Back-Channel Logout* | Arnés preparado en `conformance/`, **nunca ejecutado**. Hasta entonces no se declara conformidad |
-| **Fixtures compartidos con PHP** (V.1) | Pruebas HTTP + MariaDB en todas las áreas; faltan login y clientes reales en esa capa, reloj y claves compartidos con PHP, y ver el CI en verde |
-| **DCR en la suite** (V.3) | *Dynamic OP* bloqueado: la suite registra clientes sin initial access token y el servidor lo exige siempre. Falta decidir cómo tratarlo |
-
-Riesgo conocido para la suite: el login cifra la contraseña y firma el formulario con JavaScript; si el navegador automatizado no lo ejecuta, el login fallará.
+Ninguna capacidad de esta documentación está certificada: la **OpenID Conformance Suite** no se ha ejecutado nunca (el arnés está en `src/test/conformance/`), así que no se declara conformidad. Lo documentado está cubierto por las pruebas automáticas del repositorio, salvo donde se indica lo contrario. Tampoco se ha probado contra sistemas reales (IdP SAML y Google, RP con `jwks_uri`, servidores de recursos que validen DPoP). Ver [Pruebas](../../technical/contexts/oauth/08-pruebas.md).
 
 ## Descartado o pospuesto
+
+Lo pospuesto se retoma según las condiciones de la [hoja de ruta](../../../ROADMAP.md).
 
 | Capacidad | Decisión |
 |---|---|
@@ -28,6 +24,10 @@ Riesgo conocido para la suite: el login cifra la contraseña y firma el formular
 | Rich Authorization Requests (RAR) | Pospuesto |
 | Selector de cuentas | No existe: `select_account` equivale a `prompt=login` |
 | `claims_locales` | No se ofrece |
+| Verificación de email | Pendiente: `require-email-verification` no tiene efecto y ningún paso del login la exige |
+| Registro de auditoría | Pendiente: la tabla `_oauth_audit_log` existe, pero ningún código escribe en ella |
+| Webhooks de eventos de autenticación | Pendiente, después del registro de auditoría |
+| API keys personales (`user-personal-api-key`) | Pendiente: hay CRUD de administración, pero ni autoservicio ni autenticación con ellas |
 
 ## Opciones del modelo sin efecto
 
@@ -69,10 +69,4 @@ El modelo ofrece campos que la administración deja rellenar pero que el código
 
 ## Antes de desplegar
 
-- Configurar `SECURITY_DIGEST_PEPPERS`/`SECURITY_DIGEST_CURRENT` y `SECURITY_SECRETS_KEYS`/`SECURITY_SECRETS_CURRENT` (sin valor por defecto fuera de dev/test).
-- Configurar `OIDC_PAIRWISE_SALT` si algún cliente será pairwise, y no rotarla.
-- Retirar las claves de firma generadas antes de la corrección de la pre-sesión (estuvieron expuestas) y dejar que el job genere otras.
-- Revisar los clientes: redirects exactos, URIs post-logout, audiencias registradas, grants y scopes explícitos.
-- Proveedores SAML: rellenar `saml-idp-entity-id`, `saml-idp-sso-url` y `saml-idp-cert`, y registrar en el IdP el ACS `/oauth/openid/-/delegated/authorization/{nombre}`.
-- Activar `oidc.jwt.access-token.rfc9068` solo cuando los consumidores acepten `scope` como cadena.
-- El esquema está consolidado en una única migración (`20261028223849-model.changelog.mysql.sql`) con los nombres nuevos del modelo (`oauth-client`, `resource-server`…). Una base creada con migraciones anteriores no se actualiza sola: hay que recrearla o migrar los datos a mano.
+Los secretos, ajustes y comprobaciones previos al despliegue están en la guía de [Instalación](../../operations/oauth/01-instalacion.md).

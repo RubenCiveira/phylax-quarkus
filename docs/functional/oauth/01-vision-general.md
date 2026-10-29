@@ -2,7 +2,7 @@
 
 El gestor de identidades es un proveedor de identidad: autentica a los usuarios y emite tokens para que las aplicaciones (clientes) accedan a sus propias APIs o a las de terceros (servidores de recursos). Implementa OAuth 2.0 y OpenID Connect y atiende a varios tenants desde la misma instalación.
 
-No es una aplicación cerrada: es un módulo que se incorpora a cualquier aplicación generada con civi-generator (un inventario de equipos de red, una herramienta de facturación…) para darle su propio gestor de usuarios. Esta documentación llama **aplicación anfitriona** a la que lo incorpora; el repositorio actual es la aplicación de referencia donde se desarrolla. Ver [Integración como trait](../tecnica/09-integracion-como-trait.md).
+No es una aplicación cerrada: es un módulo que se incorpora a cualquier aplicación generada con civi-generator (un inventario de equipos de red, una herramienta de facturación…) para darle su propio gestor de usuarios. Esta documentación llama **aplicación anfitriona** a la que lo incorpora; el repositorio actual es la aplicación de referencia donde se desarrolla.
 
 ## Conceptos
 
@@ -19,7 +19,7 @@ No es una aplicación cerrada: es un módulo que se incorpora a cualquier aplica
 - Todas las rutas del protocolo cuelgan de `/oauth/openid/{tenant}/…`.
 - El emisor de un tenant es `{host público}/oauth/openid/{tenant}`. El host público sale de `oidc.base-url` o, detrás de un proxy, de las cabeceras `X-Forwarded-*`.
 - Los tokens de un tenant no sirven en otro: el verificador exige el emisor y el tenant de la ruta.
-- Todos los tenants firman con el **mismo juego de claves**, publicado también en `/oauth/jwks`, para que los microservicios validen con un único JWKS. El aislamiento lo da el emisor, no la clave (la firma por tenant está pospuesta, ficha 2.11).
+- Todos los tenants firman con el **mismo juego de claves**, publicado también en `/oauth/jwks`, para que los microservicios validen con un único JWKS. El aislamiento lo da el emisor, no la clave (la firma por tenant está pospuesta; ver la [hoja de ruta](../../../ROADMAP.md)).
 - Un cliente es de un tenant o global. Desde un tenant se ve su propio cliente o, si no tiene uno con ese código, el global; un cliente de otro tenant no existe para él.
 
 ## Qué ofrece

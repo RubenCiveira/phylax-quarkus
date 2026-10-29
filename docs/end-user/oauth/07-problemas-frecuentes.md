@@ -35,7 +35,7 @@ El motivo del rechazo queda en el log del servidor: `Delegated login refused for
 | Síntoma | Causa | Solución |
 |---|---|---|
 | La API responde 401 `invalid_token` | El token no lleva su audiencia, es de otro tenant, caducó o fue revocado | Que el cliente pida `audience={código}`; revisar `iss` y `exp` |
-| La API de la aplicación anfitriona rechaza todos los tokens | `mp.jwt.verify.audiences` o `mp.jwt.audiences` no coinciden con el código de su servidor de recursos | Ver [Integración como trait](../tecnica/09-integracion-como-trait.md#qué-debe-ajustar-cada-aplicación) |
+| La API de la aplicación anfitriona rechaza todos los tokens | `mp.jwt.verify.audiences` o `mp.jwt.audiences` no coinciden con el código de su servidor de recursos | Fijar las dos con ese código (ver [Instalación](../../operations/oauth/01-instalacion.md#ajustes-de-la-aplicación)) |
 | El token no trae los roles esperados | El rol está asignado a otro servidor o cliente, o el token no lleva esa audiencia | Revisar la asignación (ver [Roles](06-usuarios-roles-e-invitaciones.md#roles)); los cambios se ven al renovar el token |
 | La API externa no valida la firma | Caché de claves antigua | Volver a descargar `/oauth/jwks` cuando aparezca un `kid` desconocido |
 | `invalid_client` en `/token` | Secreto erróneo, método distinto del registrado, o credenciales enviadas a la vez en cabecera y cuerpo | Usar un solo método, el registrado; si se perdió el secreto, poner uno nuevo |

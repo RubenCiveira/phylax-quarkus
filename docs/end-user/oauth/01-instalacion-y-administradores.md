@@ -12,13 +12,13 @@ Con la base de datos vacía, la aplicación crea una sola vez los datos mínimos
 | Servidor de recursos | `civi-acme-api` | La API de la aplicación |
 | Cliente OAuth | `civi-acme-ui`: global, público con PKCE, todos los scopes, audiencia `civi-acme-api`, redirect y logout `http://localhost:4200/*` | El frontal de administración en local |
 | Grupos | `root` para `ROOT` en el servidor de recursos y en el cliente | Claim `groups` |
-| API keys | `collector` y `sync` | Integraciones máquina (hoy sin validación, ver [Límites](../funcional/09-limites-y-pendientes.md#opciones-del-modelo-sin-efecto)) |
+| API keys | `collector` y `sync` | Integraciones máquina (hoy sin validación, ver [Límites](../../functional/oauth/09-limites-y-pendientes.md#opciones-del-modelo-sin-efecto)) |
 
 Cada aplicación debe ajustar esos nombres en su `oidc-seed.yaml` antes de la primera instalación (por ejemplo `net-inventory-api` y `net-inventory-ui`, con las URLs reales del frontal).
 
 La contraseña de `ROOT` se da con la variable `OIDC_ROOT_PASSWORD`. Si falta, se genera una aleatoria y **se muestra una sola vez en el log** del arranque: hay que copiarla en ese momento.
 
-Antes de la primera instalación en un entorno real, quien despliega debe fijar los secretos del servidor (`SECURITY_DIGEST_PEPPERS`, `SECURITY_SECRETS_KEYS`…). Si se cambian después, los secretos de clientes y tokens ya guardados dejan de validar. Ver [Configuración](../tecnica/07-configuracion.md).
+Antes de la primera instalación en un entorno real, quien despliega debe fijar los secretos del servidor y ajustar el *seed* a la aplicación. Ver la guía de [Instalación](../../operations/oauth/01-instalacion.md).
 
 ## Tipos de administrador
 

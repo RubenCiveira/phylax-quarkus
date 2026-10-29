@@ -54,9 +54,9 @@ El usuario también puede entrar con el email en lugar del nombre.
 | *unlock* | Quita el bloqueo por intentos fallidos |
 | *accept* / *reject* | Cambian `approval-status`, que **hoy no se comprueba** en el login |
 
-**Bloqueo por intentos.** Por un fallo conocido, tras varios intentos fallidos la cuenta puede quedar rechazada **sin plazo**: si un usuario con la contraseña correcta no consigue entrar y su ficha tiene `blocked-until` relleno, usar *unlock*. Ver [Límites](../funcional/09-limites-y-pendientes.md#límites-conocidos).
+**Bloqueo por intentos.** Por un fallo conocido, tras varios intentos fallidos la cuenta puede quedar rechazada **sin plazo**: si un usuario con la contraseña correcta no consigue entrar y su ficha tiene `blocked-until` relleno, usar *unlock*. Ver [Límites](../../functional/oauth/09-limites-y-pendientes.md#límites-conocidos).
 
-El usuario gestiona por sí mismo su perfil, contraseña, segundo factor, passkeys y sesiones en `/oauth/openid/{tenant}/me` (ver [Cuenta del usuario](../funcional/08-cuenta-de-usuario.md)).
+El usuario gestiona por sí mismo su perfil, contraseña, segundo factor, passkeys y sesiones en `/oauth/openid/{tenant}/me` (ver [Cuenta del usuario](../../functional/oauth/08-cuenta-de-usuario.md)).
 
 ## Roles
 

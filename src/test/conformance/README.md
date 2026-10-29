@@ -1,6 +1,6 @@
 # OpenID Conformance Suite — phylax-api (V.2, V.3)
 
-**Estado (27-10-2026): arnés preparado, nunca ejecutado.** Nada de esta carpeta acredita conformidad mientras no haya resultados en `out/` revisados. Ficha: [V.2](../docs/TODO-OIDC/issue-V.2-openid-conformance-suite.md).
+**Estado (27-10-2026): arnés preparado, nunca ejecutado.** Nada de esta carpeta acredita conformidad mientras no haya resultados en `out/` revisados. Pendiente en la hoja de ruta del proyecto (`ROADMAP.md`, apartado OIDC).
 
 ## Qué ejecuta
 

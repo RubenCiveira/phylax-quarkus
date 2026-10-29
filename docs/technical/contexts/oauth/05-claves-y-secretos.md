@@ -49,4 +49,4 @@ Es idempotente y no escribe valores en el log. Lo que no puede descifrar se deja
 
 ## Exposición previa de claves
 
-Hasta la corrección de la pre-sesión (ficha 0.7), la cookie `PRE_SESSION_ID` llevaba la clave privada de firma en el `kid`. Las claves de esa época deben retirarse antes de usarse fuera de desarrollo: vaciar el anillo global de `_oauth_keys_storer` con la aplicación parada y dejar que el job las regenere.
+Hasta la corrección de la pre-sesión, la cookie `PRE_SESSION_ID` llevaba la clave privada de firma en el `kid`. Las claves de esa época deben retirarse antes de usarse fuera de desarrollo: vaciar el anillo global de `_oauth_keys_storer` con la aplicación parada y dejar que el job las regenere.

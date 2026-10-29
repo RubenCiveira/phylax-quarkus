@@ -60,13 +60,13 @@ Campos de `tenant-config` que lee el módulo OIDC:
 | `dcr-allowed-grant-types`, `dcr-allowed-auth-methods` | Lo que se puede registrar por DCR | `DynamicClientAdapter` |
 | `invitation-expiry-days` | Caducidad de las invitaciones | `InvitationCreateUsecase`, `InvitationResendUsecase` |
 
-**Sin efecto** (ningún código los lee, o el adaptador de producción devuelve un valor fijo): `display-name`, `force-mfa`, `password-recovery-enabled` (`ChangePasswordAdapter.allowRecover` → `true`), `self-registration-enabled` y `auto-approve-registered-users` (`RegisterUserAdapter` muestra el enlace y cancela el alta), `require-email-verification`, `magic-link-enabled` (`MagicLinkEnabledAdapter` → `false`), `webauthn-enabled`, `acr-values-supported`, `require-pushed-authorization-requests` y las `*-email-template`. La lista funcional está en [Límites](../funcional/09-limites-y-pendientes.md#opciones-del-modelo-sin-efecto).
+**Sin efecto** (ningún código los lee, o el adaptador de producción devuelve un valor fijo): `display-name`, `force-mfa`, `password-recovery-enabled` (`ChangePasswordAdapter.allowRecover` → `true`), `self-registration-enabled` y `auto-approve-registered-users` (`RegisterUserAdapter` muestra el enlace y cancela el alta), `require-email-verification`, `magic-link-enabled` (`MagicLinkEnabledAdapter` → `false`), `webauthn-enabled`, `acr-values-supported`, `require-pushed-authorization-requests` y las `*-email-template`. La lista funcional está en [Límites](../../../functional/oauth/09-limites-y-pendientes.md#opciones-del-modelo-sin-efecto).
 
-Otras entidades por tenant: `tenant-terms-of-use` (términos), `tenant-login-provider` (proveedores federados; `DelegatedAccessAuthValidatorAdapter` solo construye `GOOGLE`, con `public-key`/`private-key` como client ID y secreto, y `SAML`, con `saml-idp-entity-id`, `saml-idp-sso-url`, `saml-idp-cert` y el entity ID del SP en el `entity_id` del JSON de `metadata` o, si falta, el nombre del proveedor) y `consent-purpose` (propósitos RGPD). La guía para rellenarlas está en el [manual de administración](../user-manual/README.md).
+Otras entidades por tenant: `tenant-terms-of-use` (términos), `tenant-login-provider` (proveedores federados; `DelegatedAccessAuthValidatorAdapter` solo construye `GOOGLE`, con `public-key`/`private-key` como client ID y secreto, y `SAML`, con `saml-idp-entity-id`, `saml-idp-sso-url`, `saml-idp-cert` y el entity ID del SP en el `entity_id` del JSON de `metadata` o, si falta, el nombre del proveedor) y `consent-purpose` (propósitos RGPD). La guía para rellenarlas está en el [manual de administración](../../../end-user/oauth/02-tenants.md).
 
 ## Cliente
 
-Campos de `oauth-client` que aplica `OauthClientPolicy` al construir `ClientDetails`. La descripción funcional está en [Clientes](../funcional/02-clientes.md#configuración-que-se-aplica).
+Campos de `oauth-client` que aplica `OauthClientPolicy` al construir `ClientDetails`. La descripción funcional está en [Clientes](../../../functional/oauth/02-clientes.md#configuración-que-se-aplica).
 
 | Grupo | Campos |
 |---|---|
