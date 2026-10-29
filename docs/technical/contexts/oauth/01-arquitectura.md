@@ -54,15 +54,45 @@ graph TD
 
 ## Eventos
 
-`OidcEventDispatcher` (`authentication/infrastructure/event`) emite por CDI `LoginSucceededEvent` (tenant, usuario, modo, hora) tras cada autenticación correcta y `LoginFailedEvent` (tenant, usuario, motivo) tras cada fallo. Observadores en `user/application/listener`:
+La feature publica eventos de autenticación para que otros módulos reaccionen sin tocar su código (avisos, alertas, auditoría). Se entregan con `Event.fire` de CDI: **síncronos**, en el mismo hilo y transacción. Una excepción en un observador interrumpe el login o el canje, así que un observador debe capturar sus errores, como hace `NotifyLogin`, o usar `@ObservesAsync`.
 
-| Listener | Evento | Qué hace |
+### Emitidos
+
+`OidcEventDispatcher` (`authentication/infrastructure/event`) emite subclases de `OidcEvent` (`authentication/domain/event`):
+
+| Evento | Datos | Cuándo |
 |---|---|---|
-| `NotifyLogin` | `LoginSucceededEvent` | Encola el correo `user.login` a una dirección fija (fallo conocido); traga los errores |
-| `NotifyCreate` | `UserCreateEvent` | Nada: punto de extensión. El correo de verificación del registro lo envía `RegisterUserUsecase` |
-| `NotifyRecover` | `UserVerificationCodeGenerateEvent` | Nada: punto de extensión. El correo de recuperación lo envía `ChangePasswordUsecase` |
+| `LoginSucceededEvent` | `tenant`, `username`, `mode` (`AuthenticationMode`), `time` | La evaluación del usuario termina sin retos pendientes |
+| `LoginFailedEvent` | `tenant`, `username`, `reason` (mensaje de la excepción) | La evaluación termina con un error **o con un reto pendiente** |
 
-`LoginFailedEvent` no tiene observadores. `UserLocked` y `UserUnlocked` están definidos pero no se emiten.
+Los dos salen de cada evaluación completa del usuario (`UserLoginAdapter`, alrededor de `UserLoginService`) y de la reutilización de la sesión SSO (`AuthorizeHtml`):
+
+| Camino | `mode` | Observaciones |
+|---|---|---|
+| Formulario de login (`/authorize`) | `PASSWORD` | Si queda un reto (segundo factor, términos, scopes…), se emite `LoginFailedEvent` con el motivo del reto |
+| Cada paso posterior del login, también el federado (`StepOutcomeHandler`) | `MFA` si se superó el segundo factor; si no, `SESSION` | Un login con segundo factor produce uno o más `LoginFailedEvent` y, al final, un `LoginSucceededEvent` |
+| Sesión SSO reutilizada, con o sin `prompt=none` | `SESSION` | Solo éxito |
+| `/token` con `authorization_code` | `CODE_EXCHANGE` | Un login por navegador emite otro éxito al canjear el code |
+| `/token` con `refresh_token` | `REFRESH` | Uno por rotación |
+| `/token` con `password` | `PASSWORD` | — |
+| `/token` con el grant `mfa` | `MFA` | Un OTP erróneo se rechaza **sin** evento |
+
+No emiten eventos el enlace mágico (`VerifyMagicLinkUsecase` crea la sesión por su cuenta), las passkeys, el device flow, `client_credentials` ni token exchange.
+
+Para contar inicios de sesión reales hay que filtrar por `mode` (`PASSWORD`, `MFA`) y descartar los `LoginFailedEvent` que solo anuncian un reto. Aun así, un login federado aparece como `SESSION`.
+
+`UserLocked` y `UserUnlocked` están definidos, pero no se emiten: el bloqueo por intentos (`UserLoginService.markLoginFails`) no publica nada.
+
+### Observados
+
+| Observador | Evento | Origen | Qué hace |
+|---|---|---|---|
+| `NotifyLogin` (`user/application/listener`) | `LoginSucceededEvent` | `oauth` | Encola el correo urgente `user.login` a una dirección fija en el código, para **cualquier** `mode` (también refresh y canje del code). Fallo conocido. Captura sus errores |
+| `NotifyCreate` | `UserCreateEvent` | `access` (generado) | Nada: punto de extensión. El correo de verificación del registro lo envía `RegisterUserUsecase` |
+| `NotifyRecover` | `UserVerificationCodeGenerateEvent` | `access` (generado) | Nada: punto de extensión para todos los propósitos del código (recuperación, verificación de email, borrado de cuenta). El correo lo envía `ChangePasswordUsecase` |
+| `FederatedIdentityWithinOneTenant` (`delegatelogin/application/listener`) | `UserFederatedIdentityCreateCheck`, `…UpdateCheck` | `access` (generado) | Validación previa a la escritura: rechaza con `ConstraintException` un enlace cuyo usuario y proveedor son de tenants distintos |
+
+`LoginFailedEvent` no tiene observadores. Los eventos de alta, cambio y baja de cada entidad de `access` son código generado y no se documentan aquí.
 
 ## Generación y plantillas
 

@@ -117,4 +117,4 @@ No hay federación OIDC genérica ni Microsoft, Apple o GitHub (descartado; ver 
 
 El login, las invitaciones y la recuperación envían correos por la cola de notificaciones. Los campos `*-email-template` del tenant **no se consultan**.
 
-**Aviso de login (fallo conocido)**: tras cada login correcto se encola un correo urgente con la plantilla `user.login` (usuario y fecha). No va al usuario ni a un administrador configurable, sino a una dirección fija en el código (`NotifyLogin`). Un fallo al encolarlo no interrumpe el login.
+**Aviso de login (fallo conocido)**: tras cada autenticación correcta (login, reutilización de la sesión, canje del code y cada refresh) se encola un correo urgente con la plantilla `user.login` (usuario y fecha). No va al usuario ni a un administrador configurable, sino a una dirección fija en el código (`NotifyLogin`). Un fallo al encolarlo no interrumpe el login.
