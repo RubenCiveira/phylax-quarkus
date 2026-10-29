@@ -3,7 +3,7 @@
 - **Fase:** 0 · **Esfuerzo:** S · **Estado:** hecha (25-10-2026), [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md).
 - **Implementación:** codificar `state` al redirigir en authorize y logout; excluir `client_secret` de los parámetros persistidos en PAR.
 - **Cierre:** `state` con caracteres reservados vuelve intacto; el secreto no aparece en el registro de PAR.
-- **Fuente:** [§5, 0.11](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.11](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
 
 ## Resultado
 

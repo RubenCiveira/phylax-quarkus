@@ -6,4 +6,4 @@
 - **Cierre:** access token de otro resource server/tenant o revocado no es aceptado.
 - **Dependencias:** amplía [0.8](issue-0.8-verificacion-bearer-apis.md).
 - **Pruebas:** `ApiBearerTenantFlowTest` (ruta, issuer, audiencia y revocación tras éxito), `BearerContractMariaDbTest` (tenant, JTI y revocación reales).
-- **Fuente:** [§5, 0.15](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.15](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).

@@ -3,7 +3,7 @@
 - **Fase:** 0 · **Esfuerzo:** S · **Estado:** hecha (25-10-2026), [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md).
 - **Implementación:** quitar `withKeyId(privateKey)` de `signKeypass` y verificar pre-sesiones mediante `scope=challenge`.
 - **Cierre:** `kid` solo identifica clave pública y los tokens de otros propósitos no pasan como pre-sesión.
-- **Fuente:** [§5, 0.7](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.7](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
 
 ## Qué se corrigió
 

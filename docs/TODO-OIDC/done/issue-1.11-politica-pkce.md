@@ -3,7 +3,7 @@
 - **Fase:** 1 · **Esfuerzo:** S · **Estado:** hecha (25-10-2026), [J-05](../epicas/done/ep-J-05-solicitudes-authorize-par-jar.md).
 - **Implementación:** admitir solo `S256`, exigir PKCE a públicos y decidir política para confidenciales.
 - **Cierre:** ausencia de challenge, método `plain` y verifier incorrecto rechazados; confidenciales siguen la política declarada.
-- **Fuente:** [§5, 1.11](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).
+- **Fuente:** [§5, 1.11](../CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).
 
 ## Qué hace (funcional)
 

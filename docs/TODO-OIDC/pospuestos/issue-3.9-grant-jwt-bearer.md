@@ -5,4 +5,4 @@
 - **Diseño previsto:** emisores de confianza por tenant, reglas de claims con roles y `sub` del sistema, y anti-replay por emisor sobre el almacén de 3.2.
 - **Cierre:** assertion autorizada aceptada; emisor o JTI no confiable y replay rechazados.
 - **Plan PHP:** [069](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/TODD/pospuestos/069-grant-jwt-bearer.md).
-- **Fuente:** [§5, 3.9](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-3--extensiones-de-un-idp-moderno).
+- **Fuente:** [§5, 3.9](../CAPACIDADES_OIDC.md#fase-3--extensiones-de-un-idp-moderno).

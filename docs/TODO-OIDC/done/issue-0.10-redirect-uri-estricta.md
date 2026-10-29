@@ -3,7 +3,7 @@
 - **Fase:** 0 · **Esfuerzo:** S · **Estado:** hecha (24-10-2026), adelantada desde [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md) para cerrar [1.10](issue-1.10-tests-negativos-seguridad.md).
 - **Implementación:** eliminar `*` y prefijos `/*`; limitar cualquier excepción explícita al puerto loopback permitido.
 - **Cierre:** coincidencia exacta registrada aceptada; prefijos y destinos no registrados rechazados.
-- **Fuente:** [§5, 0.10](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.10](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
 
 ## Qué hace (funcional)
 

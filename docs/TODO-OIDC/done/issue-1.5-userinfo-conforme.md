@@ -5,4 +5,4 @@
 - **Cierre:** mismos claims y `sub` en GET/POST, scopes respetados, bearer inválido o revocado rechazado.
 - **Dependencias:** [0.15](issue-0.15-audiencia-tenant-revocacion-bearer.md).
 - **Pruebas:** `TokenIntrospectionTest`, `BearerContractMariaDbTest` (GET/POST, email persistido y revocación).
-- **Fuente:** [§5, 1.5](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).
+- **Fuente:** [§5, 1.5](../CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).

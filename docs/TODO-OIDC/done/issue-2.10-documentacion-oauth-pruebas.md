@@ -12,7 +12,7 @@
 | [docs/oauth/overview.md](../../oauth/overview.md) | Reescrito: catálogo de las rutas que existen, con su controlador y las pruebas HTTP que las verifican; las que no tienen prueba HTTP lo dicen (enlace mágico, WebAuthn, invitaciones, perfil, JWKS); de dónde sale cada valor del discovery; reglas de DCR. Aviso explícito de que no se declara conformidad |
 | [docs/oauth/tests.md](../../oauth/tests.md) | Reescrito: las tres capas (unitaria, flujo HTTP con dobles, MariaDB), cómo se ejecutan, qué garantiza cada prueba MariaDB y qué falta. Sustituye un catálogo de 62 pruebas de un paquete que ya no existe |
 | `docs/oauth/architecture.md`, `controller-parts.md`, `flows.md` | Marcados como **históricos**: describen `FrontAcessController`, `ControllerPart` y `features/access/oauth`, que ya no existen. No se han borrado |
-| [src/docs/oidc/CAPACIDADES_OIDC.md](../../../src/docs/oidc/CAPACIDADES_OIDC.md) | Nota de vigencia: es la foto del 20-10-2026 y el origen de las fichas, no el estado actual |
+| [src/docs/oidc/CAPACIDADES_OIDC.md](../CAPACIDADES_OIDC.md) | Nota de vigencia: es la foto del 20-10-2026 y el origen de las fichas, no el estado actual |
 | `client/package-info.java` | Rutas reales de DCR (`/connect`), `JwtAlgorithms`, `DcrExtensionMetadata` y el mecanismo de autenticación de DCR |
 
 ## Pendiente

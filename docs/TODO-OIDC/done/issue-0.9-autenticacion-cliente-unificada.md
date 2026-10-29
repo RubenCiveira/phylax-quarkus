@@ -3,7 +3,7 @@
 - **Fase:** 0 · **Esfuerzo:** M · **Estado:** hecha (24-10-2026).
 - **Implementación:** servicio común Basic/post para token, device, PAR, introspect y revocation; comparación temporalmente segura.
 - **Cierre:** métodos permitidos aplicados por cliente, secreto incorrecto rechazado sin 500 y respuestas OAuth apropiadas en todos los endpoints.
-- **Fuente:** [§5, 0.9](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.9](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
 
 ## Qué hace (funcional)
 

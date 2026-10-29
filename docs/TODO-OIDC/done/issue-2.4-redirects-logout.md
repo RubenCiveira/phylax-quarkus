@@ -3,7 +3,7 @@
 - **Fase:** 2 · **Esfuerzo:** S · **Estado:** hecha e integrada con modelo regenerado (26-10-2026), [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md).
 - **Implementación:** separar `post_logout_redirect_uris` de `allowedRedirects` del login.
 - **Cierre:** URI registrado para logout aceptado; URI registrado solo para login y destino externo rechazados.
-- **Fuente:** [§5, 2.4](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-2--completar-lo-que-ya-está-a-medias).
+- **Fuente:** [§5, 2.4](../CAPACIDADES_OIDC.md#fase-2--completar-lo-que-ya-está-a-medias).
 
 ## Qué hace (funcional)
 

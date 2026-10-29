@@ -5,4 +5,4 @@
 - **Cierre:** un cliente no participante y otro tenant no reciben notificación; los participantes sí.
 - **Dependencias:** [0.5](issue-0.5-aislamiento-clientes-tenant.md); coordinar `sid` con [1.14](issue-1.14-hint-sid-logout.md).
 - **Pruebas:** `SessionLogoutMariaDbTest` (dos participantes, tercero y otro tenant excluidos, revocación de una sola sesión).
-- **Fuente:** [§5, 0.6](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.6](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).

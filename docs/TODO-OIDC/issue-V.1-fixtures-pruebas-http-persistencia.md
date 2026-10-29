@@ -3,7 +3,7 @@
 - **Fase:** validación transversal · **Estado:** en curso (27-10-2026): arnés HTTP + MariaDB aplicado a code, refresh, revocación, bearer/UserInfo, logout, device, PAR y DCR, y CI con MariaDB de servicio; faltan login y clientes reales, reloj y claves compartidas con PHP y verificar el CI.
 - **Implementación:** compartir escenarios semánticos con PHP: dos tenants, clientes público/confidencial, redirects válidos e inválidos, sesiones, claves y reloj controlado.
 - **Cierre:** pruebas de code/refresh concurrentes, grants, device, PAR, bearer/UserInfo, revocación y logout observables por HTTP y almacenamiento.
-- **Fuente:** [§5, validación](../../src/docs/oidc/CAPACIDADES_OIDC.md#validación).
+- **Fuente:** [§5, validación](CAPACIDADES_OIDC.md#validación).
 
 ## Qué hay (funcional)
 

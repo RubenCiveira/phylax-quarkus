@@ -3,7 +3,7 @@
 - **Fase:** 0 · **Esfuerzo:** M · **Estado:** hecha (25-10-2026), [J-02](../epicas/done/ep-J-02-clientes-tenant-secretos.md).
 - **Implementación:** aplicar `grantTypesJson`, `responseTypesJson`, `allowAllScopes`, `allowedScopesM2m` y `tokenEndpointAuthMethod` de `TrustedClient`; quitar `password` por defecto.
 - **Cierre:** tests con dos clientes de políticas distintas para grants, response types, scopes y método de autenticación.
-- **Fuente:** [§5, 0.4](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.4](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
 
 ## Qué hace (funcional)
 

@@ -6,4 +6,4 @@
 - **Cierre:** combinaciones anunciadas probadas individualmente; los tipos implicit puros se rechazan y no se anuncian.
 - **Plan PHP:** [EP-08](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/TODD/done/EP-08-autorizacion-respuesta.md), [033](/opt/homebrew/var/www/dev/LughAuth/lughauth-api/docs/TODD/done/033-hybrid-y-response-types.md).
 - **Pruebas:** `AuthorizeResponseContractTest` (combinaciones hybrid, hashes y tipos implicit rechazados; discovery).
-- **Fuente:** [§5, 1.7](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).
+- **Fuente:** [§5, 1.7](../CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).

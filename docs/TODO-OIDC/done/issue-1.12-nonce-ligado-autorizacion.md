@@ -5,4 +5,4 @@
 - **Cierre:** nonce correcto propagado, ausente omitido en code y omisión/discordancia rechazadas en implicit/hybrid si siguen disponibles.
 - **Dependencias:** decisión [1.7](issue-1.7-politica-implicit-hybrid.md).
 - **Pruebas:** `AuthorizeResponseContractTest`, `IdTokenClaimsFlowTest` (nonce en hybrid y code; ausencia y error).
-- **Fuente:** [§5, 1.12](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).
+- **Fuente:** [§5, 1.12](../CAPACIDADES_OIDC.md#fase-1--conformidad-oidc-core-y-discovery-honesto).

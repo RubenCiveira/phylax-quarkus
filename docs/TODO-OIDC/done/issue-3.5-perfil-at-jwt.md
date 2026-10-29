@@ -3,7 +3,7 @@
 - **Fase:** 3 (según necesidad) · **Estado:** hecha (25-10-2026), [J-03](../epicas/done/ep-J-03-emision-claims-proposito.md), **desactivada por defecto** · **Referencia:** RFC 9068.
 - **Implementación:** emitir `typ: at+jwt` en cabecera y claims de access token según perfil.
 - **Cierre:** resource server acepta access token de audiencia propia y rechaza propósito/audiencia incorrectos.
-- **Fuente:** [§5, 3.5](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-3--extensiones-de-un-idp-moderno).
+- **Fuente:** [§5, 3.5](../CAPACIDADES_OIDC.md#fase-3--extensiones-de-un-idp-moderno).
 
 ## Qué hace (funcional)
 

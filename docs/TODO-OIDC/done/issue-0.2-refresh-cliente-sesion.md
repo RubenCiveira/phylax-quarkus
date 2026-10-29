@@ -5,7 +5,7 @@
 - **Cierre:** refresh robado, sesión cerrada, scope/audiencia ampliados, familia vencida y dos canjes concurrentes rechazados según corresponda; un único vencedor y replay revoca la familia. No revocar tokens de otros usuarios o tenants.
 - **Plan PHP:** `done/019-refresh-cliente-y-sesion.md` y `done/020-rotar-refresh-y-detectar-replay.md` sirven de contrato, no de implementación Java.
 - **Dependencias:** [0.9](issue-0.9-autenticacion-cliente-unificada.md) y [0.5](issue-0.5-aislamiento-clientes-tenant.md).
-- **Fuente:** [§5, 0.2](../../../src/docs/oidc/CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
+- **Fuente:** [§5, 0.2](../CAPACIDADES_OIDC.md#fase-0--seguridad-bloqueante).
 
 ## Implementación Java (23-10-2026)
 
