@@ -1,0 +1,76 @@
+# Persistencia
+
+El esquema está en una única migración consolidada, `src/main/resources/migration/mysql/000.001.001/20261028223849-model.changelog.mysql.sql`, referenciada desde `migration/mysql/changelog.txt`. Se genera desde el modelo: no se edita a mano.
+
+## Estado del protocolo (`_oauth_*`)
+
+Tablas propias del módulo `oauth`, con adaptadores SQL escritos a mano.
+
+| Tabla | Contenido | Adaptador | Notas |
+|---|---|---|---|
+| `_oauth_keys_storer` | Pares RSA de firma (`keyid`, `private`, `public`, `since`, `expiration`, `tenant`) | `JoseTokenSigner` / `TokenStoreGateway` | Anillo global `_global` |
+| `_oauth_temporal_keys` | Clave simétrica actual y anterior de los formularios | `TemporalKeysSqlAdapter` | Rota cada hora |
+| `_oauth_temporal_codes` | Codes de autorización (`code_data` JSON, reto PKCE) | `TemporalKeysSqlAdapter` | 3 min; consumo atómico; purga a las 3:00 |
+| `_oauth_session` | Sesiones SSO: usuario, cliente, emisor, `auth_data` (incluye `sid` público), `csid`, `auth_time`, IP, agente, `sso_clients_json` (clientes participantes) | `SessionStoreSqlAdapter` | La columna `sid` existe pero el `sid` vive en `auth_data` |
+| `_oauth_session_grant` | Concesiones de una sesión por cliente (grant, scope, audiencias) | `SessionStoreSqlAdapter` | Se revocan en el logout |
+| `_oauth_session_token` | JTI de access y refresh emitidos por sesión | `SessionStoreSqlAdapter` / `TokenIssuer` | Sesión viva del refresh |
+| `_oauth_revoked_jti` | JTI revocados o consumidos (`access` / `refresh`), familias revocadas | `TokenRevocationSqlAdapter` | `INSERT IGNORE` sobre la PK = consumo atómico |
+| `_oauth_replay_jti` | JTI de un solo uso de JWT de cliente (`request_object`, `client_assertion`) | `JwtReplaySqlAdapter` | PK compuesta `(jti, tenant_id, client_id, purpose)`; sin la tabla, todo request object falla |
+| `_oauth_par_request` | Solicitudes PAR (`params_json`, sin secretos), `used_at` | `ParRequestGateway` | `request_uri` de 77 caracteres (columna de 100) |
+| `_oauth_device_codes` | Device flow: códigos, cliente, scope, audiencias, estado, `auth_data`, último sondeo | `DeviceAuthorizationService` | Aprobar/denegar solo desde `PENDING`; canje con comprobación de filas |
+| `_oauth_delegated_state` | Logins federados pendientes, bajo el SHA-256 del `state` | `DelegateRepositoryJdbcAdapter` | 10 min; consumo atómico |
+| `_oauth_magic_link` | Enlaces mágicos (`token_hash`, redirect, nonce, scope, state) | `magiclink` | Un uso |
+| `_oauth_webauthn_challenge` | Retos WebAuthn de registro y autenticación | `webauthn` | — |
+| `_oauth_audit_log` | Eventos de autenticación (tipo, usuario, cliente, sesión, JTI, grant, IP, motivo de fallo) | — | **Ningún código escribe en ella** hoy; solo la leen la exportación RGPD, la anonimiza el borrado de cuenta y la purga la limpieza |
+
+Limpieza: `OAuthCleanupScheduler` borra caducados cada hora (`oauth.cleanup.expired.cron`) y el registro de auditoría a las 4:00 (`oauth.cleanup.audit-log.cron`).
+
+## Maestros de `access` que usa el módulo
+
+Entidades generadas desde el modelo; los adaptadores de `features/oauth` las usan a través de sus repositorios.
+
+| Entidad (tabla `access_*`) | Uso en OIDC |
+|---|---|
+| `tenant` | Existencia, habilitado, `root` |
+| `tenant-config` | Configuración OIDC del tenant (ver [Configuración](07-configuracion.md#tenant)) |
+| `tenant-terms-of-use` | Términos de uso por tenant o servidor de recursos |
+| `tenant-login-provider` | Proveedores federados: tipo (`GOOGLE`, `SAML`…), habilitado, política de enlace, datos SAML |
+| `oauth-client` (+ `allowed-login-redirect`, `allowed-logout-redirect`, `allowed-audience`) | Clientes y su configuración |
+| `resource-server` | APIs protegidas; su código es la audiencia y agrupa roles |
+| `role`, `user-role-assignment`, `user-group-membership` | Roles y grupos del usuario por cliente o servidor de recursos |
+| `user` | Cuenta: contraseña Argon2id, estado de aprobación, bloqueo (`blocked_until`), semilla TOTP cifrada, contraseña temporal, email verificado |
+| `user-profile` | Claims de perfil de UserInfo |
+| `user-login-throttle` | Intentos fallidos de login |
+| `user-mfa-enrollment` | Semilla TOTP pendiente de confirmar durante el alta |
+| `user-mfa-recovery-code` | Códigos de recuperación del segundo factor (digest, `used_at`) |
+| `user-verification-code` | Códigos de recuperación de contraseña, registro y borrado de cuenta (`purpose`, digest, caducidad); se vacían al consumirse |
+| `user-webauthn-credential` | Passkeys |
+| `user-federated-identity` | Enlaces `(proveedor, subject)` → usuario, únicos |
+| `user-accepted-terms-of-use`, `consent-purpose`, `user-purpose-consent` | Términos aceptados y decisiones RGPD |
+| `user-scope-consent` | Scopes concedidos por usuario y cliente |
+| `user-invitation` | Invitaciones (digest del token, estado, caducidad) |
+| `dcr-initial-access-token` | Initial access tokens de DCR (digest, usos, caducidad, grants permitidos) |
+| `api-key-client`, `user-personal-api-key` | API keys de cliente y personales |
+
+## Nombres del modelo
+
+El modelo se renombró el 28-10-2026 para que los nombres no choquen con el vocabulario OIDC. Equivalencias con la documentación y el código anteriores:
+
+| Antes | Ahora |
+|---|---|
+| `trusted-client` | `oauth-client` |
+| `relying-party` | `resource-server` |
+| `trusted-client.is-resource-server` | `oauth-client.introspection-allowed` |
+| `trusted-client.public-allow` | Eliminado: público = `token_endpoint_auth_method = none` |
+| `allowed_scopes_m2m`, `m2m_token_ttl_seconds` | `client-credentials-scopes`, `client-credentials-token-ttl-seconds` |
+| `back-channel-*`, `front-channel-*` | `backchannel-*`, `frontchannel-*` |
+| `registration-access` | `registration-access-token` |
+| `tenant-config.inner-label` | `display-name` |
+| `allow-register`, `enable-register-users`, `allow-recover-pass` | `self-registration-enabled`, `auto-approve-registered-users`, `password-recovery-enabled` |
+| `*-email` | `*-email-template` |
+| `user.approve`, `user.provider` | `approval-status`, `federated-provider` |
+| `user-access-temporal-code` | Separado en `user-login-throttle`, `user-mfa-enrollment` y `user-verification-code` |
+| `user-consented-scopes`, `user-consent-purposes` | `user-scope-consent`, `user-purpose-consent` |
+| `tenant-login-provider.source`, `disabled` | `provider-type`, `enabled` |
+
+Las claves de configuración del *seed* (`oidc.relying-party.*`, `oidc.trusted-client.*`) conservan los nombres antiguos para no romper los ficheros de los despliegues.

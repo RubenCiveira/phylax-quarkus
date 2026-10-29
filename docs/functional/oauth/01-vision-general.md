@@ -1,0 +1,48 @@
+# Visión general
+
+El gestor de identidades es un proveedor de identidad: autentica a los usuarios y emite tokens para que las aplicaciones (clientes) accedan a sus propias APIs o a las de terceros (servidores de recursos). Implementa OAuth 2.0 y OpenID Connect y atiende a varios tenants desde la misma instalación.
+
+No es una aplicación cerrada: es un módulo que se incorpora a cualquier aplicación generada con civi-generator (un inventario de equipos de red, una herramienta de facturación…) para darle su propio gestor de usuarios. Esta documentación llama **aplicación anfitriona** a la que lo incorpora; el repositorio actual es la aplicación de referencia donde se desarrolla. Ver [Integración como trait](../tecnica/09-integracion-como-trait.md).
+
+## Conceptos
+
+| Concepto | Qué es | Dónde se configura |
+|---|---|---|
+| **Tenant** | Organización aislada: tiene sus usuarios, su configuración de login y su emisor (`iss`). Un tenant deshabilitado no autentica | Entidades `tenant` y `tenant-config` |
+| **Cliente OAuth** | Aplicación que pide tokens: una SPA, una web con backend, una app nativa, un servicio. Puede ser de un tenant o global | Entidad `oauth-client` (antes `trusted-client`) |
+| **Servidor de recursos** | API protegida que consume los tokens. Su código es la audiencia (`aud`) de los tokens y de él cuelgan los roles | Entidad `resource-server` (antes `relying-party`) |
+| **Usuario** | Persona con cuenta en un tenant: contraseña, segundo factor, passkeys, identidades federadas | Entidad `user` y relacionadas |
+| **Sesión SSO** | Sesión del navegador en el servidor. Mientras vive, otra aplicación del mismo tenant obtiene tokens sin volver a pedir la contraseña | Cookie `AUTH_SESSION_ID`, tabla `_oauth_session` |
+
+## Multi-tenant
+
+- Todas las rutas del protocolo cuelgan de `/oauth/openid/{tenant}/…`.
+- El emisor de un tenant es `{host público}/oauth/openid/{tenant}`. El host público sale de `oidc.base-url` o, detrás de un proxy, de las cabeceras `X-Forwarded-*`.
+- Los tokens de un tenant no sirven en otro: el verificador exige el emisor y el tenant de la ruta.
+- Todos los tenants firman con el **mismo juego de claves**, publicado también en `/oauth/jwks`, para que los microservicios validen con un único JWKS. El aislamiento lo da el emisor, no la clave (la firma por tenant está pospuesta, ficha 2.11).
+- Un cliente es de un tenant o global. Desde un tenant se ve su propio cliente o, si no tiene uno con ese código, el global; un cliente de otro tenant no existe para él.
+
+## Qué ofrece
+
+| Área | Capacidades |
+|---|---|
+| Autorización | Authorization Code con PKCE (S256), hybrid (`code id_token`, `code token`, `code id_token token`), PAR, request objects firmados (JAR), `form_post`, JARM, parámetro `claims`, resource indicators |
+| Tokens | `authorization_code`, `refresh_token` con rotación y detección de reutilización, `client_credentials`, `password` (solo si se habilita), device flow, token exchange; DPoP; perfil `at+jwt` opcional; `sub` pairwise |
+| Autenticación de clientes | `client_secret_basic`, `client_secret_post`, `private_key_jwt`, `none` (públicos) |
+| Login | Contraseña, TOTP, códigos de recuperación de MFA, passkeys (WebAuthn), Google y SAML 2 (el enlace mágico existe pero está desactivado), step-up por ACR, `prompt`, `max_age`, `login_hint`, `id_token_hint`, `ui_locales` |
+| Consentimiento | Términos de uso, propósitos RGPD y consentimiento de scopes por cliente |
+| Consumo | UserInfo (JSON, firmado o cifrado), introspección, revocación, validación de bearer en las APIs internas |
+| Sesión | SSO por tenant, RP-initiated logout, back-channel y front-channel logout, iframe de Session Management |
+| Administración | Registro dinámico de clientes (RFC 7591/7592), invitaciones, sesiones de usuario, autoservicio del usuario en `/me` |
+
+## Descubrimiento
+
+`GET /oauth/openid/{tenant}/.well-known/openid-configuration` publica las capacidades del tenant. Cada valor sale de la misma constante que usa la lógica, de modo que el documento no anuncia nada que no funcione. Por ejemplo:
+
+- `token_endpoint_auth_methods_supported`: `client_secret_basic`, `client_secret_post`, `private_key_jwt`, `none`.
+- `response_types_supported`: `code` y los tres hybrid; el implicit puro no se anuncia.
+- `subject_types_supported`: `public`, y `pairwise` solo si está configurada la sal.
+- `acr_values_supported`: los dos niveles de autenticación (ver [Sesión y logout](07-sesion-y-logout.md#nivel-de-autenticación-acr)).
+- `require_pushed_authorization_requests: false`: PAR solo es obligatorio por cliente.
+
+No se anuncian mTLS, CIBA, `client_secret_jwt` ni `claims_locales`, que no existen.

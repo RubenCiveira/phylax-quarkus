@@ -1,0 +1,144 @@
+# Clientes OAuth
+
+Un cliente OAuth es una **aplicación que pide tokens**: una SPA, una web con servidor, un servicio, una app de televisor o de línea de comandos. Lo que tiene registrado es lo único que puede hacer.
+
+Los da de alta un administrador root (`/api/access/oauth-clients`). Un administrador de tenant puede registrar clientes por [registro dinámico](#registro-dinámico).
+
+## Elegir el tipo
+
+| La aplicación… | Tipo | Receta |
+|---|---|---|
+| Corre entera en el navegador (Angular, React…) | Público | [SPA](#spa) |
+| Tiene un servidor que guarda secretos | Confidencial | [Web con servidor](#web-con-servidor) |
+| Es un proceso sin usuario (sincronización, *cron*) | Confidencial | [Servicio](#servicio-sin-usuario) |
+| Corre en un dispositivo sin navegador cómodo (TV, CLI) | Público | [Dispositivo](#dispositivo) |
+| Es una API que necesita comprobar tokens en el momento | Confidencial | [API con introspección](#api-con-introspección) |
+
+Si una aplicación necesita dos comportamientos (por ejemplo, la SPA y su servidor), son **dos clientes**.
+
+## Campos básicos
+
+| Campo | Qué poner |
+|---|---|
+| **Código** (`code`) | El `client_id`: `net-inventory-ui`. Único dentro del tenant. No cambiarlo una vez desplegado |
+| **Tenant** | El tenant de la aplicación. Vacío: cliente **global**, válido en todos los tenants. Si un tenant tiene un cliente con el mismo código que uno global, se usa el del tenant |
+| `client-name` | Nombre legible |
+| `token-endpoint-auth-method` | `none` para públicos; `client_secret_basic` (recomendado) o `client_secret_post` para confidenciales con secreto; `private_key_jwt` para confidenciales con clave propia |
+| `secret-oauth` | Solo con `client_secret_*`: el secreto, generado aparte (32 bytes aleatorios o más). Solo se guarda su huella: **copiarlo antes de guardar**. Para rotarlo, editar el cliente con uno nuevo; el anterior deja de valer en ese momento |
+| `grant-types-json` | Lista JSON de grants (ver cada receta). Vacía: `["authorization_code","refresh_token"]` |
+| `allowed-login-redirects` | URLs a las que puede volver tras el login. Ver [Redirecciones](#redirecciones) |
+| `allowed-logout-redirects` | URLs a las que puede volver tras el logout |
+| `allowed-audiences` | Códigos de los [servidores de recursos](04-servidores-de-recursos.md) a los que puede llamar |
+
+El cliente nace **deshabilitado**; se activa con la acción *enable*. Un cliente deshabilitado no puede iniciar logins ni obtener tokens.
+
+Las listas (`grant-types-json`, `response-types-json`, `client-credentials-scopes`) se escriben como JSON (`["a","b"]`) o separadas por espacios o comas. Un JSON mal formado se trata como vacío.
+
+## Redirecciones
+
+La URL de retorno debe coincidir **exactamente**: esquema, host, puerto, ruta y query. No hay comodines.
+
+- Registrar cada URL completa: `https://inventory.acme.com/auth/callback`.
+- Si la aplicación tiene varios entornos, una entrada por entorno.
+- Solo para desarrollo local, una URL de loopback acabada en `/*` admite cualquier ruta por debajo: `http://localhost:4200/*`. No vale con hosts que no sean `localhost`, `127.0.0.1` o `[::1]`.
+
+## SPA
+
+Aplicación de navegador sin secreto.
+
+| Campo | Valor |
+|---|---|
+| `code` | `net-inventory-ui` |
+| `token-endpoint-auth-method` | `none` |
+| `grant-types-json` | `["authorization_code","refresh_token"]` |
+| `allowed-login-redirects` | `https://inventory.acme.com/auth/callback` (y `http://localhost:4200/*` si se desarrolla en local) |
+| `allowed-logout-redirects` | `https://inventory.acme.com/` |
+| `allowed-audiences` | `net-inventory-api` |
+
+PKCE es obligatorio para los clientes públicos aunque no se marque `require-pkce`. La aplicación inicia el login con `/oauth/openid/{tenant}/authorize?response_type=code&client_id=net-inventory-ui&audience=net-inventory-api&scope=openid profile&code_challenge=…&code_challenge_method=S256&redirect_uri=…`.
+
+## Web con servidor
+
+Aplicación con un servidor propio que canjea el code.
+
+| Campo | Valor |
+|---|---|
+| `token-endpoint-auth-method` | `client_secret_basic` |
+| `secret-oauth` | El secreto generado |
+| `grant-types-json` | `["authorization_code","refresh_token"]` |
+| Redirecciones y audiencias | Como en la SPA |
+| `require-pkce` | Recomendado marcarlo |
+| `backchannel-logout-uri` | Opcional: URL del servidor que recibirá un aviso cuando el usuario cierre sesión (por ejemplo `https://inventory.acme.com/auth/backchannel-logout`). Marcar `backchannel-logout-session-required` si la aplicación necesita el `sid` |
+
+## Servicio sin usuario
+
+Proceso que llama a una API en su propio nombre (`client_credentials`).
+
+| Campo | Valor |
+|---|---|
+| `code` | `net-inventory-sync` |
+| `token-endpoint-auth-method` | `client_secret_basic` o `private_key_jwt` |
+| `grant-types-json` | `["client_credentials"]` |
+| `client-credentials-scopes` | Scopes que puede obtener: `inventory:read inventory:write`. **Sin scopes, el grant da `invalid_scope`** |
+| `client-credentials-token-ttl-seconds` | Vida del token, en segundos. Por defecto `3600` |
+| `allowed-audiences` | `net-inventory-api` |
+
+No necesita redirecciones. El servicio pide el token con `POST /oauth/openid/{tenant}/token`, `grant_type=client_credentials` y, opcionalmente, `scope` y `audience`.
+
+## Dispositivo
+
+Televisor, consola o CLI: el usuario aprueba el acceso desde otro dispositivo con un código.
+
+| Campo | Valor |
+|---|---|
+| `token-endpoint-auth-method` | `none` (o uno confidencial si el dispositivo guarda secretos) |
+| `grant-types-json` | `["urn:ietf:params:oauth:grant-type:device_code","refresh_token"]` |
+| `allowed-audiences` | Las APIs que use |
+
+## API con introspección
+
+Para una API que quiere preguntar al servidor si un token sigue activo (por ejemplo, para enterarse al momento de una revocación).
+
+| Campo | Valor |
+|---|---|
+| `code` | `net-inventory-api-introspect` |
+| `token-endpoint-auth-method` | `client_secret_basic` |
+| `introspection-allowed` | Marcado |
+| `grant-types-json` | `["client_credentials"]`, sin `client-credentials-scopes`: así no puede obtener tokens |
+
+## Opciones avanzadas
+
+| Campo | Cuándo usarlo |
+|---|---|
+| `allow-all-scopes` | La aplicación pide scopes propios (no solo `openid profile email address phone offline_access`). Sin marcarlo, un scope no estándar da error |
+| `require-pkce` | Exigir PKCE a un confidencial |
+| `require-pushed-authorization-requests` | Exigir que la solicitud de login llegue por PAR |
+| `dpop-bound-access-tokens` | Exigir tokens ligados a una clave del cliente (DPoP) |
+| `subject-type` | `pairwise` si el cliente no debe poder correlacionar usuarios con otros clientes: recibe un `sub` distinto por usuario. Requiere que la instalación tenga configurada la sal pairwise, y sus tokens **no sirven** para la API de administración |
+| `jwks-json` / `jwks-uri` | Claves públicas del cliente, para `private_key_jwt`, request objects o cifrado. Uno u otro |
+| `token-endpoint-auth-signing-alg` | Algoritmo de `private_key_jwt`: `RS256` o `ES256` |
+| `id-token-signed-response-alg`, `userinfo-signed-response-alg`, `authorization-signed-response-alg` | Firma de ID token, UserInfo o respuestas JARM. Dejar el valor por defecto salvo que la aplicación lo pida |
+| `*-encrypted-response-alg/enc` | Cifrado de ID token o UserInfo con la clave del cliente |
+| `frontchannel-logout-uri` | Página que el navegador carga en un iframe al cerrar sesión |
+| `response-types-json` | Solo si la aplicación usa flujos *hybrid* (`code id_token`…). Vacío: `code` |
+| `client-uri`, `logo-uri`, `policy-uri`, `tos-uri` | Datos informativos de la aplicación |
+
+**No rellenar** (sin efecto o reservados): `tls-client-auth-subject-dn`, `tls-client-certificate-bound-access-tokens`, `backchannel-token-delivery-mode`, `backchannel-client-notification-endpoint`, `authorization-details-types`, `default-acr-values`, `default-max-age`, `sector-identifier-uri`, `registration-access-token`, `dynamically-registered`, `registered-at`.
+
+**No usar** el grant `password` salvo para migrar una aplicación antigua: la aplicación recibe la contraseña del usuario.
+
+## Registro dinámico
+
+Si el tenant tiene DCR activo (ver [Tenants](02-tenants.md#registro-dinámico-de-clientes-dcr)), una aplicación se registra sola:
+
+1. Un administrador del tenant crea un *initial access token* y se lo entrega al responsable de la aplicación.
+2. La aplicación llama a `POST /oauth/openid/{tenant}/connect` con `Authorization: Bearer {initial access token}` y sus metadatos (`redirect_uris`, `grant_types`, `token_endpoint_auth_method`…).
+3. Recibe su `client_id`, su `client_secret` (si es confidencial) y un `registration_access_token` para consultar, modificar o borrar su registro. **Ninguno se puede recuperar después.**
+
+El cliente queda en el tenant, habilitado, sin `allow-all-scopes` y sin audiencias. Si necesita llamar a una API, un administrador root debe añadirle la audiencia.
+
+## Comprobar que funciona
+
+- `GET /oauth/openid/{tenant}/.well-known/openid-configuration` debe responder: es la URL de descubrimiento que se configura en la librería OIDC de la aplicación.
+- Un login completo debe volver a la redirect con `code`. Si muestra una página de error en lugar de volver, la redirect no coincide.
+- Para los errores habituales, ver [Problemas frecuentes](07-problemas-frecuentes.md).
