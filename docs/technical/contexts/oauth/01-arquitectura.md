@@ -52,6 +52,18 @@ graph TD
 - Los adaptadores de clientes, usuarios, consentimientos, proveedores federados, etc. leen y escriben las entidades de `features/access` (código generado: `oauth-client`, `resource-server`, `tenant-config`, `user`…) a través de sus repositorios.
 - El estado propio del protocolo (sesiones, codes, claves, revocaciones, PAR, device, anti-replay) vive en tablas `_oauth_*` con adaptadores SQL escritos a mano. Ver [Persistencia](06-persistencia.md).
 
+## Eventos
+
+`OidcEventDispatcher` (`authentication/infrastructure/event`) emite por CDI `LoginSucceededEvent` (tenant, usuario, modo, hora) tras cada autenticación correcta y `LoginFailedEvent` (tenant, usuario, motivo) tras cada fallo. Observadores en `user/application/listener`:
+
+| Listener | Evento | Qué hace |
+|---|---|---|
+| `NotifyLogin` | `LoginSucceededEvent` | Encola el correo `user.login` a una dirección fija (fallo conocido); traga los errores |
+| `NotifyCreate` | `UserCreateEvent` | Nada: punto de extensión. El correo de verificación del registro lo envía `RegisterUserUsecase` |
+| `NotifyRecover` | `UserVerificationCodeGenerateEvent` | Nada: punto de extensión. El correo de recuperación lo envía `ChangePasswordUsecase` |
+
+`LoginFailedEvent` no tiene observadores. `UserLocked` y `UserUnlocked` están definidos pero no se emiten.
+
 ## Generación y plantillas
 
 Gran parte de `features/oauth` se genera con las plantillas Quarkus de `civi-generator` a partir del modelo `multitenant-oidc.xml`, y `features/access` sale íntegramente del modelo.

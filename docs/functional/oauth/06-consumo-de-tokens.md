@@ -70,4 +70,4 @@ No confundir con `POST /oauth/openid/{tenant}/revoke`, que solo abandona un logi
 
 ## Validación en servidores de recursos externos
 
-Un servicio externo valida los tokens con el JWKS (`/oauth/jwks` es común a todos los tenants) y comprobando, como mínimo, `iss` del tenant esperado, `aud` con su propio código de servidor de recursos y `exp`. Para conocer las revocaciones debe usar la introspección. Si acepta tokens DPoP, debe validar la prueba él mismo.
+Un servicio externo valida los tokens con el JWKS (`/oauth/jwks` es común a todos los tenants) y comprobando, como mínimo, `iss` del tenant esperado, `aud` con su propio código de servidor de recursos y `exp`. Para conocer las revocaciones debe usar la introspección. Si acepta tokens DPoP, debe validar la prueba él mismo. El JWKS se sirve con `Cache-Control: max-age=3600` y `ETag`; las claves se publican antes de usarse, así que esa caché basta, pero ante un `kid` desconocido conviene volver a descargarlo.

@@ -51,7 +51,7 @@ Para usuarios con contraseña temporal (por ejemplo, creados por un administrado
 ### Segundo factor (TOTP)
 
 - **Verificación**: código de 6 dígitos de una app compatible con Google Authenticator.
-- **Alta**: muestra un QR con la semilla y pide el primer código para confirmarla.
+- **Alta**: muestra un QR con la semilla y pide el primer código para confirmarla. La app del usuario muestra la cuenta como `{usuario} at ` con emisor `no`: no aparece el nombre del tenant ni de la aplicación (`display-name` no se usa).
 - **Códigos de recuperación**: si el usuario perdió el dispositivo, puede entrar con uno de sus códigos de recuperación (cada uno vale una vez). Se generan desde el perfil.
 - Las passkeys (WebAuthn) se gestionan desde el perfil y tienen sus ceremonias de registro y autenticación propias.
 
@@ -116,3 +116,5 @@ No hay federación OIDC genérica ni Microsoft, Apple o GitHub (descartado; ver 
 ## Correos
 
 El login, las invitaciones y la recuperación envían correos por la cola de notificaciones. Los campos `*-email-template` del tenant **no se consultan**.
+
+**Aviso de login (fallo conocido)**: tras cada login correcto se encola un correo urgente con la plantilla `user.login` (usuario y fecha). No va al usuario ni a un administrador configurable, sino a una dirección fija en el código (`NotifyLogin`). Un fallo al encolarlo no interrumpe el login.

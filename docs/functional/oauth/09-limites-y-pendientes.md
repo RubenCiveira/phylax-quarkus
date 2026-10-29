@@ -52,6 +52,8 @@ El modelo ofrece campos que la administración deja rellenar pero que el código
 ## Límites conocidos
 
 - **Bloqueo por intentos** (fallo): se activa en el cuarto fallo y su comprobación está invertida; tras vencer, la cuenta queda rechazada hasta un *unlock* manual. Ver [Inicio de sesión](03-inicio-de-sesion.md#bloqueo-por-intentos).
+- **Aviso de login** (fallo): cada login correcto envía un correo a una dirección fija en el código, no configurable. Ver [Inicio de sesión](03-inicio-de-sesion.md#correos).
+- **QR del TOTP**: la cuenta aparece como `{usuario} at ` con emisor `no`, sin el nombre del tenant.
 - **Revocación**: no comprueba que el token sea del cliente, por eso exige cliente confidencial. Revocar un refresh no revoca su familia.
 - **Reutilización de un code**: el segundo canje falla, pero los tokens del primero no se revocan.
 - **`amr`** vacío en login federado y por enlace mágico (cuenta como un factor).

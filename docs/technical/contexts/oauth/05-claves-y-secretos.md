@@ -12,6 +12,7 @@
 | Claves futuras | `oidc.jwt.authorization.key-futures` (3 por defecto; 5 en `config/oidc.yaml`) |
 | Rotación | `SigningKeyRotationJob` al arrancar (tras las migraciones) y cada 15 minutos (`oidc.jwt.authorization.rotation-cron`). Firmar y publicar el JWKS solo leen claves guardadas: ninguna petición genera claves. Si el job falla, lo registra y reintenta |
 | `kid` | Identificador público publicado en el JWKS; nunca material de clave |
+| Publicación | `JwksController`: `Cache-Control: max-age=3600` y `ETag` (SHA-256 del JSON del JWKS); responde 304 a un `If-None-Match` que coincida. Las claves futuras ya están publicadas cuando empiezan a firmar |
 
 Varias instancias rotando a la vez pueden añadir claves de más; se publican y caducan como las demás.
 
