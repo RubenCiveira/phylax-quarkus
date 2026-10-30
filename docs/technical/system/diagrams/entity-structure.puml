@@ -1,0 +1,23 @@
+@startwbs Estructura de una entidad
+
+title Paquetes de una entidad (features/<contexto>/<entidad>)
+
+* <entidad>
+** domain
+*** <Entidad>:\n agregado, ChangeSet, Ref
+*** event:\n Create, Update, Delete
+*** gateway:\n puertos de repositorio,\n caché y auditoría
+*** valueobject / valueholder
+** application
+*** usecase/<op>:\n Usecase, Input, Check, Enrich,\n AuthorizationDecision, Filter,\n Projection, batch
+*** visibility:\n filtros por actor, campos\n fijos y ocultos
+*** policy:\n observadores escritos a mano
+*** importation
+** infrastructure
+*** driver/rest:\n un controlador por caso de uso
+*** driven:\n adaptadores de los gateways
+*** repository:\n JdbcDao, Slider
+*** event:\n EventDispatcher
+*** bootstrap:\n registro RBAC, descriptores
+
+@endwbs

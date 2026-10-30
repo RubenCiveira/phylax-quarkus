@@ -1,0 +1,12 @@
+= Requisitos
+
+* Cliente de Git.
+* JDK 25 (`java.version` en el `pom.xml`). Se recomienda SDKMAN para gestionar las versiones.
+* Maven: se usa el wrapper `./mvnw`, no hace falta instalarlo.
+* MariaDB con una base de datos en UTF-8 y un usuario con permisos para crear tablas.
+* Servidor SMTP para los correos (verificación, recuperación, invitaciones). En local basta con un servidor de pruebas.
+* Docker, para construir las imágenes y ejecutar la OpenID Conformance Suite.
+* GraalVM (opcional), para compilar la imagen nativa fuera de Docker.
+* IDE con soporte de Lombok y el formateador de Google Java Style importado. `make format` aplica el mismo formato desde la línea de comandos.
+
+NOTE: `README.md` y `CONTRIBUTING.md` todavía piden Java 17+. Manda el `pom.xml`.

@@ -1,0 +1,50 @@
+= Seguridad
+
+== Actor y contexto de la operación
+
+Toda operación recibe un `OperationContext` con el *actor* (`Actor`): quién llama, en qué tenant y con qué scopes y roles. `CurrentRequest` lo construye a partir del token de la petición.
+
+* Las peticiones a `/api/...` se autentican con un JWT del proveedor de identidad. `mp.jwt` verifica la firma y la audiencia, y los roles salen del claim `roles`.
+ifdef::module-oauth[]
+En {project-name}, el proveedor es el propio servidor OIDC del módulo oauth.
+endif::[]
+* El scope `platform:global_access` identifica a los actores de plataforma (root). Las políticas de tenant los excluyen; ver <<multi-tenancy>>.
+
+== Autorización
+
+La autorización se decide en dos niveles, con los eventos del caso de uso (ver <<anatomía-de-una-entidad>>):
+
+. *RBAC*. `RbacAuthorizationDecisionListener` observa cada `AuthorizationDecision` y consulta `Rbac.checkAllow(actor, recurso, acción)`. `Rbac` pregunta a todos los `RbacStore` activos (`Phylax`, `Keycloak`; se elige con `mp.rbac.model`) y concede si alguno concede. Cada entidad registra sus recursos y acciones al arrancar (`infrastructure/bootstrap/*RbacRegister`).
+. *Políticas*. Observadores en `application/policy` que pueden denegar o restringir, por ejemplo por tenant.
+
+El mismo mecanismo decide los *campos*: `PropertiesProposal` recoge los campos inaccesibles del RBAC y la visibilidad los elimina de la respuesta.
+
+[WARNING]
+====
+Estado actual, pendiente de corregir:
+
+* El caso de uso parte de `Permission.allow` y `app.security.rbac.default-allow` vale `true` en `config/security.yaml`. Sin un `RbacStore` activo (`mp.rbac.model` está comentado), *todo se permite* (link:{docs-root}/plan/TODO/issue-A0.1-rbac-fail-closed.md[A0.1]). En el código, el valor por defecto es `false`.
+* Las rutas `/api/...` no exigen autenticación: una petición anónima llega al caso de uso (link:{docs-root}/plan/TODO/issue-A0.2-autenticacion-obligatoria-api.md[A0.2], link:{docs-root}/plan/TODO/issue-A0.5-visibilidad-actor-anonimo.md[A0.5]).
+* Las contraseñas de usuario se cifran de forma reversible en lugar de guardar un hash (link:{docs-root}/plan/TODO/issue-A0.6-hash-contrasenas-usuario.md[A0.6]).
+====
+
+== Secretos
+
+[cols="1,3",options="header"]
+|===
+|Mecanismo |Uso
+|Digest con _pepper_ (`security.digest.*`) |HMAC-SHA256 de los secretos que solo se comparan: API keys, secretos de cliente, tokens de DCR, invitaciones y códigos. Solo se guarda la huella.
+|Cifrado AES-GCM (`security.secrets.*`) |Secretos que hay que recuperar: semillas TOTP y credenciales SMTP.
+|===
+
+Los dos son anillos de claves con formato `id:secreto,id2:secreto2` y un id `current`. Lo nuevo se protege con la clave actual, y las demás solo sirven para leer y rotar. Fuera de `dev` y `test` no tienen valor por defecto, y sin ellos el arranque falla.
+
+ifdef::module-oauth[]
+Las claves de firma de los tokens, su rotación y JWKS se describen en xref:{docs-root}/technical/contexts/oauth/05-claves-y-secretos.adoc[Claves, firma y secretos].
+endif::[]
+
+== Protección de la entrada
+
+* *Límite de peticiones por IP* (`bootstrap/rate`, Bucket4j): cubo de `app.rate-limit.bucket-capacity` peticiones que se recarga con `app.rate-limit.refill-tokens` cada `app.rate-limit.refill-period-seconds`. `app.rate-limit.trust-forwarded-for` indica si la IP se toma de `X-Forwarded-For`.
+* *Análisis de riesgo* (`bootstrap/security`): `SecurityFilter` puntúa las peticiones con los analizadores de inyección y bloquea a partir de `app.security.risk-block-threshold`. Hoy está *desactivado* (sin `@Provider`); su destino está pendiente de decidir (link:{docs-root}/plan/TODO/issue-A4.1-security-filter-decision.md[A4.1]).
+* CORS abierto a cualquier origen (`quarkus.http.cors` en `config/security.yaml`). Hay que restringirlo por entorno.

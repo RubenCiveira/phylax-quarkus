@@ -1,0 +1,13 @@
+= Decisiones y pendientes
+
+== Decisiones de arquitectura (ADR)
+
+Las decisiones que condicionan este manual se registran en `docs/adr/`, una por fichero. El registro completo, con la plantilla, el ciclo de vida y las decisiones que aún faltan por registrar, está en el xref:{adr-root}/index.adoc[registro de decisiones].
+
+include::../../../adr/_index-table.partial.asciidoc[]
+
+== Pendientes de diseño
+
+Los defectos y mejoras conocidos del diseño se siguen en el link:{docs-root}/plan/TODO/README.md[backlog de diseño], con una ficha por tarea. Este manual los cita donde afectan al comportamiento descrito.
+
+Las extensiones previstas (ABAC, organizaciones, _feature flags_, SDK de cliente, eventos por SSE) están en `docs/plan/extensions`.

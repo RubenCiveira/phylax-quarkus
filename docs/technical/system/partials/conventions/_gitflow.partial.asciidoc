@@ -1,0 +1,73 @@
+= Gitflow
+
+La decisión de usar Gitflow, SemVer y Conventional Commits, y las alternativas descartadas, están en xref:{adr-root}/0003-flujo-de-versionado-y-publicacion.adoc[ADR-0003]. Este capítulo explica cómo se aplica.
+
+El proyecto sigue una versión simplificada del https://nvie.com/posts/a-successful-git-branching-model/[modelo de ramas de Vincent Driessen].
+Los comandos de `make` (`start-feature-*`, `finish-feature-*`, `start-hotfix-*`, `start-rc`) automatizan los pasos habituales, pero conviene entender el modelo y poder seguirlo con Git a mano.
+
+Hay dos ramas permanentes, donde se prueba el código:
+
+* *`main`*: el código en producción.
+* *`develop`*: el código estable desarrollado.
+
+Y tres tipos de ramas de trabajo, que se borran al cerrarse:
+
+* *`feature/<nombre>`*: una funcionalidad.
+* *`hotfix/<nombre>`*: una corrección de un defecto de producción.
+* *`release/<versión>`*: una versión que se está validando antes de pasar a producción.
+
+Los nombres de las ramas permanentes se configuran en `.make/properties.env` (`MAIN_BRANCH`, `DEVELOP_BRANCH`).
+
+== Rama main
+
+Contiene exactamente lo que está desplegado en producción. Con su código se puede volver a generar en cualquier momento un artefacto idéntico al desplegado, y trabajar sobre él si aparece un problema.
+
+Nunca se hace commit directo sobre `main`: solo recibe merges de `release/*` y `hotfix/*`, y cada merge se etiqueta con su versión.
+
+== Rama develop
+
+Contiene todo lo desarrollado que está pendiente de pasar a producción. Tiene que ser estable: alguien que llegue nuevo al equipo debe poder crear una rama desde `develop` y empezar a trabajar sin problemas.
+
+No se mezcla en `develop` ningún desarrollo a medias ni sin probar. *El objetivo es poder sacar una versión de producción desde `develop` en cualquier momento.*
+
+== Ramas de feature (develop → develop)
+
+Para cada funcionalidad se crea `feature/<nombre>` desde `develop` (`make start-feature-<nombre>`).
+
+Cuando la funcionalidad está terminada y probada:
+
+. Se trae lo último de `develop` a la feature. Si hay conflictos, se resuelven y se vuelve a probar.
+. Se mezcla la feature en `develop` con `git merge --no-ff` (`make finish-feature-<nombre>`), o se abre un pull request si `develop` está protegida (`DEVELOP_BRANCH_PROTECTED`).
+. Se valida `develop` y se borra la rama.
+
+== Ramas de release (develop → main)
+
+Cada paso a producción se hace a través de una rama `release/<major>.<minor>.<patch>-rc.<n>`:
+
+* `release/` es un prefijo fijo.
+* `<major>.<minor>.<patch>` es la versión objetivo en producción.
+* `-rc.<n>` indica que es una _release candidate_ y su número de secuencia, por si una versión necesita más de una.
+
+`make start-rc` crea la rama y calcula la versión (ver <<publicación-de-una-versión>>). La rama se despliega en un entorno de pruebas para que la valide quien corresponda.
+
+TIP: Si aparece un defecto durante la validación, se corrige en la propia rama de release.
+
+Cuando se aprueba el paso a producción:
+
+. Si `main` tiene cambios que la release no tiene, se traen a la release y se vuelve a validar.
+. Se mezcla la release en `main` mediante pull request.
+. Se etiqueta `main` con la versión y se despliega desde esa etiqueta.
+. Se mezcla la release en `develop` y se borra la rama.
+
+Si la release se descarta, se mezcla en `develop` lo que se haya corregido en ella y se borra la rama.
+
+== Ramas de hotfix (main → main)
+
+Para corregir un defecto de producción se crea `hotfix/<nombre>` desde `main` (`make start-hotfix-<nombre>`). Se prueba que la corrección resuelve el problema y que el resto sigue estable. Después:
+
+. Si `main` ha cambiado, se trae a la rama de hotfix y se vuelve a validar.
+. Se mezcla en `main`, se sube la versión de parche y se etiqueta.
+. Se despliega desde la etiqueta.
+. Se mezcla en `develop` y se borra la rama.
+
+NOTE: Hoy el repositorio no tiene rama `develop`: el trabajo se integra directamente en `main` desde ramas `feat/*`. Hay que crear `develop` o ajustar este convenio.

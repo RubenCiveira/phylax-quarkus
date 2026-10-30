@@ -2,7 +2,7 @@
 @startuml class diagram for Classes para user personal api key
 left to right direction
 title Clases para user personal api key
-class access.User{
+class identity.User{
 uid:string
 name:string
 password:string
@@ -52,7 +52,7 @@ delete()
 touch()
 revoke()
 }
-access.User "1"  o--  "N*" access.UserPersonalApiKey: user
+identity.User "1"  o--  "N*" access.UserPersonalApiKey: user
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

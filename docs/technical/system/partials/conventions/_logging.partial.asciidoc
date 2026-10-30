@@ -1,0 +1,42 @@
+= Logging
+
+El log sirve para entender qué pasó cuando algo falla, sin guardar datos sensibles ni saturar el almacenamiento. Lo lee quien tenga que depurar el problema, a menudo quien escribió el código: hay que escribirlo pensando en esa persona.
+
+== Niveles
+
+[cols="1,4",options="header"]
+|===
+|Nivel |Cuándo
+|`ERROR` |Falló una parte del flujo por algo que no se ha contemplado o que no debería ocurrir. Debe generar una alerta.
+|`WARN` |El flujo no falló porque la situación está controlada, pero el comportamiento es inesperado y hay que revisarlo cada cierto tiempo.
+|`INFO` |Los hitos principales del flujo, para que quien lo lea entienda qué se estaba ejecutando.
+|`DEBUG` |Como `INFO`, con más detalle: valores, estructuras de datos.
+|===
+
+Las excepciones de negocio esperadas (validación, no encontrado, conflicto de versión) no son `ERROR`: los mappers de errores las registran como `INFO`, con la traza completa solo si `DEBUG` está activo. Las denegaciones de acceso se registran como `WARN`.
+
+== Nada sensible
+
+Nunca se escriben en el log contraseñas, secretos de cliente, tokens, códigos de verificación, semillas TOTP, claves ni datos personales que no hagan falta para depurar. Si hay que identificar un token, se usa su `jti` o un prefijo de su huella.
+
+Hay excepciones documentadas, como las credenciales iniciales del primer arranque, que se muestran una sola vez.
+
+== Frugalidad
+
+Volcar objetos enteros parece útil en desarrollo, pero en producción, con muchas peticiones en paralelo, no lo es:
+
+* Un objeto enorme en el log es difícil de leer.
+* Suele estar ahí porque era más fácil volcarlo todo que pensar qué atributos importan.
+* Cuesta dinero: los servicios de logs cobran por volumen ingerido, y un JSON grande en cada petición se multiplica rápidamente.
+
+En su lugar:
+
+* Elegir los atributos que ayudan de verdad a seguir el flujo (identificadores, estado, decisión tomada).
+* Si solo importa si un objeto está vacío o no, registrar eso y no el objeto.
+* El contexto de la petición ya va en la traza: con `Trace.setAttribute` y `Trace.addEvent` no hace falta repetirlo en cada mensaje (ver <<observabilidad-y-auditoría>>).
+
+== Mensajes únicos
+
+Cada mensaje debe ser único en el sistema. Si el mismo texto aparece en varios flujos, el log deja de servir para saber dónde se produjo.
+
+La categoría del logger (la clase, con `@Slf4j`) ya identifica el origen. El mensaje debe describir el paso concreto dentro del método, y los valores van como parámetros (`log.info("Rotated signing key {}", kid)`), no concatenados.

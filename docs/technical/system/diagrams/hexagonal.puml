@@ -1,0 +1,53 @@
+@startuml hexagonal architecture
+
+left to right direction
+skinparam defaultTextAlignment center
+
+title Arquitectura hexagonal de una entidad
+
+hexagon "infrastructure" as infr #lightcoral {
+  cloud "driver/rest\n*Controller" as crt {
+  }
+  cloud "Observadores CDI\n(otros contextos)" as obs {
+  }
+  hexagon "application" as app #lightgreen {
+    portin i1 $layout
+    portin i2 $layout
+    portin usecase
+    portin i4 $layout
+    portin i5 $layout
+
+    hexagon "domain" as dom #lightyellow {
+        [Agregado\nValue objects\nEventos]
+    }
+    component "usecase/<op>\n*Usecase" as uc {
+    }
+    portout o1 $layout
+    portout o2 $layout
+    portout gateway
+    portout o3 $layout
+    portout o4 $layout
+
+    uc --|> usecase
+    uc --o gateway
+    uc -o dom
+  }
+
+  component "driven\n*Adapter" as adp {
+  }
+
+  database "repository\n*JdbcDao" as rps {
+  }
+  cloud "Caché / auditoría\nclientes externos" as clt {
+  }
+
+  crt -down-> usecase
+  obs -down-> usecase
+  adp <|-up- gateway
+  adp -left-o rps
+  adp -right-o clt
+}
+
+hide  $layout
+
+@enduml

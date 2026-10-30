@@ -1,0 +1,24 @@
+= Eventos
+
+El sistema usa eventos CDI (`jakarta.enterprise.event.Event`) para dos propósitos distintos.
+
+== Eventos de extensión del caso de uso
+
+`<Op>AuthorizationDecision`, `<Op>Check`, `<Op>Enrich` y las propuestas de visibilidad se disparan *antes* de escribir, para que las políticas decidan, validen o completen. Son síncronos y forman parte del caso de uso: si un observador lanza una excepción, la operación falla. Se describen en <<anatomía-de-una-entidad>>.
+
+== Eventos de dominio
+
+Cada agregado registra lo que le ha pasado (`<Entidad>CreateEvent`, `<Entidad>UpdateEvent`, `<Entidad>DeleteEvent`, en `domain/event`). Al guardar, el `<Entidad>CommandRepositoryAdapter` entrega los eventos registrados con `<Entidad>EventDispatcher`.
+
+Otros contextos reaccionan con observadores sin tocar el código de la entidad.
+ifdef::module-oauth[]
+Por ejemplo, `features/oauth` emite sus propios eventos de login (`LoginSucceededEvent`, `LoginFailedEvent`); ver xref:{docs-root}/technical/contexts/oauth/01-arquitectura.adoc#eventos[eventos del servidor OIDC].
+endif::[]
+
+Reglas para los observadores:
+
+* La entrega es *síncrona*, en el mismo hilo y en la misma transacción. Una excepción en un observador deshace la operación.
+* Un observador que haga algo prescindible (notificar, contar) debe capturar sus errores o usar `@ObservesAsync`.
+* Los efectos externos (correo, llamadas a otros sistemas) se producen aunque la transacción se deshaga después.
+
+WARNING: Los eventos se entregan dentro de la transacción y antes del commit, y `@Transactional` está en el controlador REST, no en el caso de uso. Por eso un caso de uso invocado fuera de REST (batch, importación u otros contextos) tiene otros límites transaccionales. La decisión (eventos internos síncronos frente a `AFTER_SUCCESS` u outbox) está pendiente (link:{docs-root}/plan/TODO/issue-A2.1-eventos-after-success.md[A2.1]).

@@ -1,0 +1,42 @@
+= Conventional Commits
+
+La decisión de usar Gitflow, SemVer y Conventional Commits, y las alternativas descartadas, están en xref:{adr-root}/0003-flujo-de-versionado-y-publicacion.adoc[ADR-0003]. Este capítulo explica cómo se aplica.
+
+Los mensajes de commit siguen https://www.conventionalcommits.org/es/v1.0.0/[Conventional Commits]. El hook `commit-msg` que instala `make init` lo valida. Con estos mensajes se calcula la versión siguiente y se genera el `CHANGELOG.md`.
+
+----
+<tipo>[(ámbito)][!]: <descripción>
+
+[cuerpo]
+
+[pie]
+----
+
+Tipos permitidos:
+
+[cols="1,4",options="header"]
+|===
+|Tipo |Uso
+|`feat` |Una funcionalidad nueva
+|`fix` |Una corrección de un defecto
+|`perf` |Un cambio que mejora el rendimiento
+|`refactor` |Un cambio que no corrige un defecto ni añade una funcionalidad
+|`style` |Cambios que no afectan al significado del código (espacios, formato)
+|`test` |Añade o corrige pruebas
+|`docs` |Solo documentación
+|`build` |Sistema de construcción o dependencias externas
+|`ci` |Scripts y configuración de integración continua o despliegue
+|`chore` |Tareas de mantenimiento, como publicar una versión (`chore(release): x.y.z`)
+|`revert` |Revierte un commit anterior. El cuerpo identifica el commit: `This reverts commit <hash>`
+|`remove` |Elimina una funcionalidad
+|===
+
+Reglas:
+
+* El ámbito indica la parte del código afectada cuando el cambio es localizado, por ejemplo `feat(api): ...`.
+* La descripción va en imperativo y sin punto final.
+* El cuerpo y el pie se separan del asunto con una línea en blanco.
+* Un cambio incompatible se marca con `!` antes de los dos puntos (`feat!: ...`) y se explica en el pie con `BREAKING CHANGE: <descripción>`, que puede ocupar varias líneas.
+* El pie también indica las incidencias que cierra (`Closes #12`) y los coautores (`Co-Authored-By: ...`).
+
+IMPORTANT: `make start-rc` solo lee el asunto de los commits y compara literalmente `feat:` y `fix:`. Por eso un `feat(api):` con ámbito no sube la versión menor y un `BREAKING CHANGE` que solo esté en el pie no sube la mayor. Mientras no se corrija el script, usa `!` en el asunto para los cambios incompatibles.

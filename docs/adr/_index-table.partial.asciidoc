@@ -1,0 +1,33 @@
+// Índice de ADR. Lo incluyen adr/index.adoc y el manual técnico; cada uno define {adr-root}
+// con la ruta a docs/adr. Una fila por ADR, con el resumen (Y-statement) del propio ADR.
+// Las decisiones de un módulo opcional van dentro de su ifdef::module-<nombre>[].
+[cols="1,3,1,1,7",options="header"]
+|===
+|ADR |Decisión |Estado |Fecha |Resumen
+
+|xref:{adr-root}/0002-monolito-modular-con-arquitectura-hexagonal.adoc[0002]
+|Monolito modular con arquitectura hexagonal por entidad
+|Propuesta
+|2026-10-30
+|*En el contexto de* backends REST con muchas entidades generadas a partir de un modelo, *ante* la necesidad de probar las reglas sin infraestructura, sustituir adaptadores y mantener una estructura uniforme, *decidimos* un monolito modular (`bootstrap`, `common`, `features`) con arquitectura hexagonal por entidad, *y descartamos* las capas técnicas clásicas, los _vertical slices_ y los microservicios, *para conseguir* un núcleo independiente del framework, adaptadores intercambiables y código generable, *aceptando* muchas clases por entidad y un único despliegue.
+
+|xref:{adr-root}/0003-flujo-de-versionado-y-publicacion.adoc[0003]
+|Gitflow, SemVer y Conventional Commits
+|Propuesta
+|2026-10-30
+|*En el contexto de* aplicaciones que se validan antes de llegar a producción, *ante* la necesidad de saber qué hay desplegado, desarrollar en paralelo y comunicar el alcance de cada versión, *decidimos* Gitflow simplificado, SemVer 2.0 y Conventional Commits, con versión y changelog calculados a partir de los commits, *y descartamos* trunk-based development, GitHub flow, CalVer y los mensajes libres, *para conseguir* producción reproducible y versiones con significado, *aceptando* más ramas y merges y disciplina en los mensajes.
+
+|xref:{adr-root}/0004-respuestas-indistinguibles-ante-enumeracion.adoc[0004]
+|Respuestas indistinguibles ante la enumeración
+|Propuesta
+|2026-10-30
+|*En el contexto de* los endpoints que reciben un identificador de cuenta o de recurso, *ante* el riesgo de inventariar cuentas o recursos comparando respuestas, *decidimos* una respuesta idéntica exista o no lo consultado, con tiempo comparable y el motivo real solo en el log, *y descartamos* los mensajes específicos, *para conseguir* que la API no revele qué existe, *aceptando* mensajes menos útiles y un diagnóstico que depende del log.
+
+ifdef::module-oauth[]
+|xref:{adr-root}/0001-consentimiento-secuencial-por-relying-party.adoc[0001]
+|Consentimiento secuencial por relying party (módulo oauth)
+|Aceptada
+|2026-02
+|*En el contexto de* una solicitud de token con varias audiencias, *ante* relying parties con sus propios términos de uso, *decidimos* pedir el consentimiento de una en una, *y descartamos* un formulario único y un consentimiento global, *para conseguir* un puerto simple y trazabilidad por relying party, *aceptando* varios formularios seguidos.
+endif::[]
+|===

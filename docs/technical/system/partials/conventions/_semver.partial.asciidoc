@@ -1,0 +1,44 @@
+= Versionado semántico
+
+La decisión de usar Gitflow, SemVer y Conventional Commits, y las alternativas descartadas, están en xref:{adr-root}/0003-flujo-de-versionado-y-publicacion.adoc[ADR-0003]. Este capítulo explica cómo se aplica.
+
+El proyecto sigue https://semver.org/lang/es/[Semantic Versioning 2.0.0], propuesto por Tom Preston-Werner para que el número de versión diga qué ha cambiado. Una versión tiene tres números, `mayor.menor.parche`, y opcionalmente un sufijo:
+
+* *Mayor*: sube con un cambio *incompatible*. Pasar de la 2.3.15 a la 4.1.7 no se hace a la ligera: probablemente obliga a cambiar la forma de usar la aplicación.
+* *Menor*: sube al añadir funcionalidades *compatibles*. Entre la 2.4.8 y la 2.11.9 se han añadido muchas funciones, pero lo que funcionaba sigue funcionando.
+* *Parche*: sube con correcciones. Entre la 1.5.1 y la 1.5.22 la aplicación es la misma, con más correcciones.
+* *`-rc.<n>`*: _release candidate_. Código pendiente de validación.
+* *`-SNAPSHOT`*: versión en desarrollo (`develop`, features). No se etiqueta.
+
+La versión mayor es `0` hasta el primer paso a producción, y en esa fase la API puede cambiar sin aviso. El proyecto está hoy en la `0.1.1`.
+
+== Parche
+
+Corrige sin cambiar nada más: optimizaciones, defectos menores o defectos graves, como cálculos incorrectos o datos expuestos sin autorización.
+
+Entre dos versiones que solo cambian el parche, los requisitos, los manuales y las integraciones son idénticos. Se puede cambiar a un parche superior o inferior sin perder funcionalidad, aunque alguna operación concreta puede tener el defecto que se corrigió.
+
+== Versión menor
+
+Añade funcionalidades a una versión en producción *sin romper la compatibilidad*. Al subir de versión menor, todo lo que funcionaba sigue funcionando igual y la documentación existente sigue siendo válida.
+
+Bajar de versión menor también es seguro: dejan de estar disponibles las funciones nuevas, pero la estructura de los datos y la API se mantienen.
+
+== Versión mayor
+
+Introduce un cambio *incompatible* en la API pública, la configuración o los datos. Quien se integra con la aplicación tendrá que adaptarse. Algunos ejemplos:
+
+* Cambiar el contrato de un recurso REST: que el campo `email` pase a ser una lista de correos obliga a reescribir todos los clientes que lo usan.
+* Cambiar el esquema de datos de forma que la versión anterior ya no pueda trabajar con él: separar los datos de contacto en otra tabla o cambiar un tipo `fecha` por `timestamp con zona horaria`. Volver atrás puede no ser posible.
+* Convertir en obligatoria una configuración que antes tenía un valor por defecto: las instalaciones que no la declaren dejarán de arrancar.
+
+Un cambio mayor no tiene por qué afectar a toda la aplicación, pero obliga a revisar todas las instalaciones e integraciones. Hay que pensarlo con cuidado y documentarlo en el `CHANGELOG.md`. Puede incluir también funciones nuevas y correcciones.
+
+En este proyecto, además, cambia la versión mayor:
+
+* un cambio incompatible en el contrato OpenAPI;
+ifdef::module-oauth[]
+* un cambio incompatible en el protocolo OIDC (claims, endpoints, errores);
+endif::[]
+* una migración de esquema que no admite volver a la versión anterior;
+* una rotación obligatoria de secretos o claves.

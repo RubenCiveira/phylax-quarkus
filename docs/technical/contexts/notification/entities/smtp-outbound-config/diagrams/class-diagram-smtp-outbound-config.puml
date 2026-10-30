@@ -2,7 +2,7 @@
 @startuml class diagram for Classes para smtp outbound config
 left to right direction
 title Clases para smtp outbound config
-class access.Tenant{
+class identity.Tenant{
 uid:string
 name:string
 root:boolean
@@ -39,7 +39,7 @@ create()
 update()
 delete()
 }
-access.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant
+identity.Tenant "1"  o--  "N*" notification.SmtpOutboundConfig: tenant
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

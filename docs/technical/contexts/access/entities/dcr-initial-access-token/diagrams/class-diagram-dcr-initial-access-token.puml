@@ -2,7 +2,7 @@
 @startuml class diagram for Classes para dcr initial access token
 left to right direction
 title Clases para dcr initial access token
-class access.Tenant{
+class identity.Tenant{
 uid:string
 name:string
 root:boolean
@@ -35,7 +35,7 @@ create()
 update()
 delete()
 }
-access.Tenant "1"  o--  "N*" access.DcrInitialAccessToken: tenant
+identity.Tenant "1"  o--  "N*" access.DcrInitialAccessToken: tenant
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

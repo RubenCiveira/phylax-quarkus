@@ -1,0 +1,117 @@
+= ADR-0004: Respuestas indistinguibles ante la enumeración de cuentas y recursos
+include::../site-attrs.adoc[]
+:adr-number: 0004
+:adr-status: Propuesta
+:adr-date: 2026-10-30
+:adr-deciders: {team-leads}
+:adr-scope: común
+
+[horizontal]
+Estado:: {adr-status}
+Fecha:: {adr-date}
+Decisores:: {adr-deciders}
+Ámbito:: {adr-scope}
+
+== Resumen
+
+*En el contexto de* los endpoints que reciben un identificador de cuenta o de recurso, *ante* el riesgo de que un atacante descubra qué cuentas o recursos existen comparando las respuestas, *decidimos* que la respuesta pública sea idéntica exista o no lo consultado (mismo código, mismo mensaje y tiempo comparable) y que el motivo real quede solo en el log, la auditoría y los eventos, *y descartamos* los mensajes de error específicos, *para conseguir* que la API no sirva para inventariar usuarios ni recursos, *aceptando* mensajes menos útiles para el usuario y que el diagnóstico dependa del log.
+
+== Contexto
+
+* La enumeración consiste en distinguir "no existe" de "existe, pero…" a partir de cualquier diferencia observable: código HTTP, texto del mensaje, redirección, cabeceras o tiempo de respuesta.
+* Con una lista de cuentas válidas, un atacante concentra los ataques de diccionario y de _credential stuffing_, prepara phishing dirigido o averigua que alguien es cliente, lo que ya es un dato personal.
+* Las mismas operaciones aparecen en cualquier aplicación con cuentas: inicio de sesión, recuperación de contraseña, registro, enlaces mágicos, verificación de correo e invitaciones.
+* En la API autenticada, un actor puede preguntar por recursos de otros tenants o que no puede ver. Distinguir 403 de 404 le revelaría que existen.
+* OWASP lo identifica como vulnerabilidad (_Authentication Cheat Sheet_, ASVS V2), y las especificaciones OAuth lo resuelven igual: la introspección responde `active: false` sin explicar por qué (RFC 7662).
+
+== Factores de decisión
+
+. No revelar la existencia de cuentas ni de recursos a quien no puede verlos.
+. Que soporte y desarrollo puedan saber por qué falló una operación.
+. Experiencia de usuario.
+. Coste de implementación y de mantenimiento.
+
+== Opciones consideradas
+
+=== Opción 1: mensajes específicos
+
+"Usuario inexistente", "contraseña incorrecta", "cuenta deshabilitada", "este correo ya está registrado".
+
+* A favor: el usuario sabe exactamente qué ocurre, y el soporte es más sencillo.
+* En contra: permite enumerar cuentas con una petición por candidato.
+
+=== Opción 2: respuesta uniforme y motivo en el log
+
+La misma respuesta en todos los casos, y el motivo real en el log, la auditoría y los eventos internos.
+
+* A favor: cierra la enumeración por el contenido de la respuesta, y el diagnóstico sigue siendo posible.
+* En contra: mensajes más vagos para el usuario legítimo. El tiempo de respuesta todavía puede delatar la diferencia.
+
+=== Opción 3: opción 2 con tiempo igualado y límite de intentos
+
+* A favor: también cierra la enumeración por tiempos y encarece los ataques automatizados.
+* En contra: más trabajo. Hay que ejecutar el trabajo costoso (el hash de la contraseña) aunque la cuenta no exista.
+
+=== Opción 4: solo CAPTCHA o límite de peticiones
+
+* A favor: no cambia los mensajes.
+* En contra: solo ralentiza la enumeración, no la impide.
+
+== Decisión
+
+Se adopta la *opción 3*, con estas reglas:
+
+. *Autenticación*: usuario inexistente, contraseña incorrecta, cuenta deshabilitada y cuenta bloqueada producen la misma respuesta ("credenciales incorrectas").
+. *Mensajes específicos solo con la credencial demostrada*: un mensaje que dependa del estado de la cuenta (contraseña temporal, segundo factor, verificación pendiente, términos por aceptar) solo se muestra después de que el usuario haya presentado una credencial válida.
+. *Operaciones que envían correo* (recuperación de contraseña, enlace mágico, reenvío de verificación, registro): siempre la misma respuesta, del tipo "si la cuenta existe, hemos enviado un correo". Si alguien se registra con un correo que ya existe, no se da un error: se envía un aviso al titular de esa cuenta.
+. *API autenticada*: 404 tanto si el recurso no existe como si el actor no puede verlo. El 403 queda para cuando el actor puede ver el recurso pero no ejecutar la acción. Las comprobaciones de unicidad solo pueden fallar con un mensaje específico dentro del ámbito que el actor ya puede listar (por ejemplo, su tenant).
+. *Validación de tokens y códigos*: un token o código inexistente, caducado, revocado o ya usado produce la misma respuesta.
+. *Tiempo*: los caminos de "no existe" y "existe, pero falla" hacen un trabajo comparable. Por ejemplo, se verifica la contraseña contra un hash ficticio cuando la cuenta no existe.
+. *Límite de intentos*: límite de peticiones por IP y bloqueo temporal por cuenta, que no se anuncia de forma distinta al fallo normal.
+. *Motivo real*: se registra en el log (`INFO`, o `WARN` si parece un ataque), en la auditoría y en los eventos internos, nunca en la respuesta. Sin contraseñas ni secretos (ver xref:../technical/system/manual.adoc#logging[Logging]).
+
+== Consecuencias
+
+=== Positivas
+
+* La API no sirve para comprobar si una cuenta o un recurso existe.
+* El diagnóstico sigue siendo posible con el log y la auditoría.
+* Una regla común para todos los proyectos, en lugar de decisiones por endpoint.
+
+=== Negativas
+
+* El usuario legítimo recibe mensajes menos precisos: no sabe si se equivocó de usuario o de contraseña, ni si su correo ya estaba registrado.
+* El soporte necesita acceso al log o a la auditoría para resolver incidencias.
+* Igualar los tiempos añade trabajo en los caminos de error.
+* Hay que revisar cada endpoint nuevo que reciba un identificador: el riesgo reaparece con cualquier mensaje o código nuevo.
+
+=== Seguimiento
+
+* Incluir esta revisión en la lista de comprobación de los pull requests que añaden o cambian endpoints públicos.
+* Pruebas que comparen las respuestas (código, cuerpo y cabeceras) para una cuenta existente y otra inexistente.
+
+ifdef::module-oauth[]
+==== Estado en el módulo oauth
+
+Ya se cumple:
+
+* El login responde `login.wrong-credentials` tanto para un usuario desconocido (`UnknownUserException`) como para una contraseña incorrecta (`WrongCredentialsException`). Una cuenta deshabilitada se trata como inexistente (`ActiveUserFindService`).
+* La recuperación de contraseña no informa si el usuario existe (`ChangePasswordUsecase`), y el enlace mágico responde "If the account exists, we sent a sign-in link".
+* La introspección responde 200 aunque el token no exista o no sea válido.
+* En el login federado, el motivo del rechazo solo queda en el log.
+
+Pendiente:
+
+* *Tiempo*: con un usuario desconocido no se verifica ninguna contraseña, así que la respuesta es más rápida que con una contraseña incorrecta.
+* *Registro*: hoy `RegisterUserAdapter` es un esqueleto que siempre cancela. Al implementarlo hay que aplicar la regla 3.
+* Una contraseña incorrecta se registra como `ERROR` (`UserLoginService.checkPassword`); según la convención de logging debería ser `INFO`.
+* La descripción del campo `enabled` en el modelo dice que el usuario deshabilitado recibe un aviso específico. Hay que alinearla con esta decisión.
+* Revisar invitaciones y verificación de correo con las reglas 3 y 5.
+endif::[]
+
+== Referencias
+
+* OWASP, https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#authentication-and-error-messages[Authentication Cheat Sheet: Authentication and Error Messages].
+* OWASP, https://owasp.org/www-project-application-security-verification-standard/[ASVS], capítulo V2 (autenticación).
+* https://www.rfc-editor.org/rfc/rfc7662[RFC 7662]: OAuth 2.0 Token Introspection.
+* Manual técnico: xref:../technical/system/manual.adoc#modelo-de-errores[Modelo de errores].

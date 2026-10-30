@@ -1,0 +1,42 @@
+= Estrategia de pruebas
+
+[cols="1,2,2,2",options="header"]
+|===
+|Nivel |Qué prueba |Herramientas |Cómo se ejecuta
+|Unitaria |Un método público de un caso de uso, una política o un value object, con las dependencias simuladas |JUnit 5, Mockito |`./mvnw test`
+|Integración HTTP |El recorrido completo de una petición: controlador, caso de uso y adaptadores |`@QuarkusTest`, REST Assured |`./mvnw test`
+ifdef::module-oauth[]
+|Flujos OIDC (`@Tag("oidc-flow")`) |Flujos del protocolo de extremo a extremo |`@QuarkusTest`, REST Assured |`./mvnw test`
+endif::[]
+|Persistencia (`@Tag("mariadb")`) |Los adaptadores SQL contra MariaDB real, en un esquema desechable `phylax_v1_*` |`*MariaDbTest` |`make test-mariadb` (lee la conexión del `.env`)
+ifdef::module-oauth[]
+|Conformidad |Certificación OpenID (Basic, Config, logout) |OpenID Conformance Suite en Docker |`src/test/conformance/run.sh`
+endif::[]
+|===
+
+Las utilidades comunes de los tests están en `src/test/java/.../testing` (por ejemplo, `LoggerChecker` para comprobar los mensajes de log).
+
+== Criterios
+
+* Cada caso de uso tiene pruebas de los caminos permitido y denegado. Un test de denegación es la única garantía de que una política sigue aplicándose después de regenerar (link:{docs-root}/plan/TODO/issue-A0.7-tests-denegacion-maestros.md[A0.7]).
+* Las pruebas no dependen del orden de ejecución ni de datos que haya dejado otra prueba.
+* Las pruebas contra MariaDB nunca usan la base de datos del `.env`, solo esquemas desechables.
+
+== Cobertura y mutación
+
+* *Cobertura* (perfil `coverage`, JaCoCo): `./mvnw verify -Pcoverage` deja el informe en `target/site/jacoco`.
+* *Mutación* (perfil `mutation`, PIT): `./mvnw verify -Pmutation`. Comprueba que las pruebas detectan cambios en el código, no solo que lo ejecutan. Un mutante que sobrevive señala una aserción que falta.
+
+La cobertura por sí sola no es un objetivo: una línea ejecutada sin aserciones cuenta como cubierta.
+
+== Pruebas de arquitectura
+
+Las reglas de capas de <<arquitectura-del-código>> se comprobarán con ArchUnit cuando se cumplan (link:{docs-root}/plan/TODO/issue-A3.1-archunit-reglas-arquitectura.md[A3.1]).
+
+ifdef::module-oauth[]
+== Pruebas propias de un contexto
+
+El detalle de las pruebas del servidor OIDC está en xref:{docs-root}/technical/contexts/oauth/08-pruebas.adoc[Pruebas de OAuth].
+
+WARNING: El arnés de la Conformance Suite está preparado, pero todavía no se ha ejecutado: no acredita conformidad mientras no haya resultados revisados.
+endif::[]

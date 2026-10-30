@@ -1,0 +1,20 @@
+= Trabajos batch
+
+Las operaciones masivas (borrar o revocar todo lo que cumple un filtro) se ejecutan en segundo plano para no bloquear la petición.
+
+* El controlador `<Entidad>BatchController` arranca el trabajo y responde con su identificador.
+* `BatchService` (`common/batch`) ejecuta los pasos en un ejecutor en segundo plano y guarda el progreso entre pasos, para que el cliente pueda consultarlo (`<Entidad>CheckBatch<Op>Status`). Al terminar, el resultado se conserva un tiempo y después caduca.
+* Cada operación define su `ExecutorPlan` con uno de los ejecutores de `common/batch`:
+** `ExecutorByRun`: una sola función por paso.
+** `ExecutorBySteps`: lectura, transformación y escritura de los elementos.
+** `ExecutorByDeferSteps`: las mismas fases, con componentes que se resuelven por CDI al ejecutar el paso.
+* Cada elemento se procesa con el mismo caso de uso que la operación individual (`<Entidad><Op>InBatchExecutor`), así que pasa por las mismas autorizaciones, validaciones y eventos.
+
+`BatchService` es `@ApplicationScoped` porque el trabajo sobrevive a la petición que lo inició. Por eso no puede depender de beans `@RequestScoped`.
+
+Las tareas periódicas usan `quarkus-scheduler`.
+ifdef::module-oauth[]
+En el módulo oauth, por ejemplo, la rotación de claves de firma y la limpieza de sesiones.
+endif::[]
+
+NOTE: Los `*InBatchExecutor` crean _spans_ a mano en lugar de usar `@Observed` (link:{docs-root}/plan/TODO/issue-A2.6-batch-executors-observed.md[A2.6]).

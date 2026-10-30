@@ -1,0 +1,21 @@
+= Paginación y consultas
+
+Los listados usan *paginación por cursor* (keyset), no por número de página. La consulta no se degrada con el tamaño de la tabla y no salta ni repite filas cuando se insertan datos entre dos páginas.
+
+El cursor de un listado (`<Entidad>ListCursor`) contiene:
+
+* `limit`: número máximo de elementos.
+* `order`: lista de criterios (`NAME_ASC`, `NAME_DESC`…), definidos por el modelo para cada entidad.
+* `since<Campo>` y `sinceUid`: los valores del último elemento de la página anterior. El `uid` desempata cuando el campo de orden se repite.
+
+La página siguiente se pide con los valores del último elemento recibido. El repositorio los traduce a un `WHERE` sobre las columnas de orden (`<Entidad>JdbcDao`).
+
+Como la visibilidad puede descartar filas después de leerlas, `<Entidad>Slider` (sobre `common/algorithms/Slider`) pide más datos al repositorio hasta completar el `limit` o agotar la tabla, sin cargarla entera en memoria.
+
+Los filtros (`<Entidad>ListFilter`) son los que declara el modelo, más `search` (texto libre sobre los campos marcados como buscables) y los que añade la visibilidad, como el tenant.
+
+[WARNING]
+====
+* En orden descendente, el DAO usa `>` en lugar de `<`: la página siguiente devuelve filas anteriores o ninguna (link:{docs-root}/plan/TODO/issue-A1.1-orden-descendente-lt.md[A1.1]).
+* El `Slider` no construye el cursor completo a partir del último elemento leído (link:{docs-root}/plan/TODO/issue-A1.2-slider-cursor-completo.md[A1.2]).
+====

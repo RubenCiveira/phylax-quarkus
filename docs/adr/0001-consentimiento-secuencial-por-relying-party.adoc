@@ -1,0 +1,78 @@
+= ADR-0001: Consentimiento secuencial por relying party
+include::../site-attrs.adoc[]
+:adr-number: 0001
+:adr-status: Aceptada
+:adr-date: 2026-02
+:adr-deciders: {team-leads}
+:adr-scope: módulo oauth
+
+[horizontal]
+Estado:: {adr-status}
+Fecha:: {adr-date}
+Decisores:: {adr-deciders}
+Ámbito:: {adr-scope}
+
+== Resumen
+
+*En el contexto de* una solicitud de token con varias audiencias, *ante* relying parties que exigen cada una sus propios términos de uso, *decidimos* pedir el consentimiento de forma secuencial, de una en una, *y descartamos* un formulario único con todas y un consentimiento global, *para conseguir* una interfaz y un puerto simples con trazabilidad por relying party, *aceptando* que el usuario puede ver varios formularios seguidos.
+
+== Contexto
+
+Cuando una aplicación cliente pide un token con varios valores de `audience` (otras relying parties además del `client_id` principal), cada relying party puede definir sus propios términos de uso, que el usuario debe aceptar antes de acceder a ella.
+
+El método `ConsentGateway.getPendingConsent()` del puerto debe indicar qué relying party necesita todavía el consentimiento del usuario, si la hay. `storeAcceptedConsent()` debe registrar la aceptación para esa relying party concreta.
+
+== Factores de decisión
+
+* Trazabilidad del consentimiento por relying party, para poder revocarlo de forma individual.
+* Simplicidad del puerto y de su implementación.
+* Simplicidad de la interfaz de usuario.
+
+== Opciones consideradas
+
+=== Opción 1: un formulario con todas las relying parties
+
+Una casilla por relying party en un único formulario.
+
+* A favor: el usuario resuelve todo en una pantalla.
+* En contra: la interfaz es más compleja, y el puerto es más difícil de implementar porque debe devolver a la vez una lista de textos e identificadores.
+
+=== Opción 2: consentimiento único para todas las audiencias
+
+* A favor: es lo más sencillo.
+* En contra: se pierde granularidad. Un usuario que revoca el consentimiento de una relying party lo perdería para todas.
+
+=== Opción 3: consentimiento secuencial, de una en una
+
+* A favor: el puerto devuelve un único consentimiento pendiente, y cada aceptación queda registrada para su relying party.
+* En contra: con varias relying parties pendientes, el usuario ve varios formularios seguidos.
+
+== Decisión
+
+El consentimiento se gestiona *de forma secuencial, una relying party cada vez* (opción 3):
+
+. Una vez aceptadas las credenciales, `revolve()` llama a `getPendingConsent(tenant, user, audiences, locale)`.
+. El gateway devuelve la *primera* relying party pendiente en un `PendingConsent(relyingParty, consentText)`.
+. `ConsentControllerPart` muestra un formulario con el texto de consentimiento de esa relying party y un campo oculto `relying_party` con su identificador.
+. Al enviarlo, `storeAcceptedConsent(tenant, user, relyingParty)` registra la aceptación para esa relying party.
+. `revolve()` vuelve a evaluar: si queda otra relying party pendiente, se muestra el formulario para la siguiente. El ciclo termina cuando `getPendingConsent()` devuelve `Optional.empty()`.
+
+== Consecuencias
+
+=== Positivas
+
+* El ciclo de `revolve()` gestiona varias relying parties de forma transparente: `ConsentControllerPart` no sabe cuántas quedan.
+* Cada aceptación queda registrada para su relying party, lo que permite la auditoría y la revocación individual.
+
+=== Negativas
+
+* `ConsentGateway` devuelve `Optional<PendingConsent>`, no una lista. La implementación del gateway decide en qué orden se devuelven las relying parties pendientes.
+* Con varias relying parties pendientes, el usuario pasa por varios formularios.
+
+=== Seguimiento
+
+* `UserConsentInteractor` delega en `PendingConsentUsecase`, que todavía no tiene granularidad completa por relying party en la persistencia: usa la primera audiencia como valor de `relyingParty`. La persistencia completa por relying party queda pendiente.
+
+== Referencias
+
+* xref:../functional/oauth/03-inicio-de-sesion.adoc#términos-de-uso-y-rgpd[Inicio de sesión: términos de uso y RGPD]

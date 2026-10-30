@@ -1,0 +1,52 @@
+= Configuración
+
+La configuración está en YAML. `application.yaml` declara el puerto y carga los ficheros de `src/main/resources/config/`, uno por tema:
+
+[cols="1,3",options="header"]
+|===
+|Fichero |Contenido
+|`database.yaml` |Datasources primario y `replica`, y conexión de las migraciones (`app.migration`)
+|`security.yaml` |Verificación de JWT, RBAC, anillos de claves de digest y cifrado, CORS
+ifdef::module-oauth[]
+|`oidc.yaml` |Servidor OIDC: almacén de claves de firma, duración de los tokens, caché de los recursos estáticos
+endif::[]
+|`cache.yaml` |Caché Caffeine y ventana de escrituras pendientes
+|`telemetry.yaml` |Logs (consola y JSON) y trazas
+|`mail.yaml` |Servidor SMTP
+|===
+
+Los valores de cada entorno se dan con variables de entorno, que Quarkus traduce a propiedades (`DATASOURCE_HOST` → `datasource.host`). En local se leen del `.env` de la raíz, que no se versiona. `src/main/docker/env.local/.env` es la plantilla para ejecutar el contenedor.
+
+== Variables principales
+
+[cols="2,3",options="header"]
+|===
+|Variable |Uso
+|`APP_HOST`, `APP_PORT` |Interfaz y puerto HTTP (por defecto `0.0.0.0:8090`)
+|`MANAGEMENT_HOST`, `MANAGEMENT_PORT` |Interfaz de gestión: salud y métricas
+|`DATASOURCE_HOST`, `DATASOURCE_PORT`, `DATASOURCE_PATH`, `DATASOURCE_USER`, `DATASOURCE_PASS` |Conexión a MariaDB (`DATASOURCE_PATH` es el nombre de la base de datos)
+|`MAILER_HOST`, `MAILER_PORT`, `MAILER_START_TLS`, `MAILER_AUTH_METHODS`, `MAILER_FROM_EMAIL`, `MAILER_USERNAME`, `MAILER_PASSWORD` |Servidor SMTP
+|`SECURITY_DIGEST_PEPPERS`, `SECURITY_DIGEST_CURRENT` |Anillo de _peppers_ HMAC. Obligatorio fuera de `dev` y `test`
+|`SECURITY_SECRETS_KEYS`, `SECURITY_SECRETS_CURRENT` |Anillo de claves AES-GCM. Obligatorio fuera de `dev` y `test`
+ifdef::module-oauth[]
+|`OIDC_PAIRWISE_SALT` |Sal de los `sub` pairwise. No se rota
+endif::[]
+|`PENDING_WRITES_WINDOW` |Ventana de lectura del primario tras una escritura (por defecto `60S`)
+|`QUARKUS_HTTP_PROXY_*` |Cabeceras `+X-Forwarded-*+` cuando la aplicación está detrás de un proxy
+|===
+
+== Ajustes con impacto en la seguridad
+
+[cols="2,1,3",options="header"]
+|===
+|Propiedad |Valor actual |Comentario
+|`app.security.rbac.default-allow` |`true` |Sin un `RbacStore` activo permite todo. Debe ser `false` en producción (ver <<seguridad>>)
+|`mp.rbac.model` |comentado |Elige el `RbacStore` (`phylax` o `keycloak`)
+|`app.security.encryption.key` |`eventual` |Clave global heredada del cifrado de contraseñas. Debe darse por entorno mientras exista
+|`quarkus.http.cors.origins` |`/.*/` |Cualquier origen. Hay que restringirlo
+|`app.rate-limit.*` |— |Límite de peticiones por IP
+|===
+
+ifdef::module-oauth[]
+La configuración propia del servidor OIDC (tenant, clientes, claves, duración de los tokens) está en xref:{docs-root}/technical/contexts/oauth/07-configuracion.adoc[Configuración de OAuth], y los pasos de instalación en xref:{docs-root}/operations/oauth/01-instalacion.adoc[Instalación].
+endif::[]

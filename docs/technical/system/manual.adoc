@@ -1,0 +1,126 @@
+= Manual técnico de {project-name}
+:doctype: book
+:toc: left
+:toclevels: 3
+:sectnums:
+:sectnumlevels: 3
+:icons: font
+:source-highlighter: coderay
+:chapter-signifier: Capítulo
+:idprefix:
+:idseparator: -
+:pdf-themesdir: ./themes/book
+:docs-root: ../..
+:repo-root: ../../..
+:adr-root: {docs-root}/adr
+// Atributos comunes del sitio; sus líneas en blanco cierran la cabecera, por eso van al final.
+include::../../site-attrs.adoc[]
+
+[preface]
+== Cómo leer este manual
+
+Este manual describe lo que es común a todo el sistema: arquitectura, conceptos transversales, calidad, operación y convenios.
+Lo propio de cada contexto (entidades, casos de uso, flujos) está en `docs/technical/contexts/<contexto>`.
+ifdef::module-oauth[]
+El servidor OIDC tiene xref:../contexts/oauth/oauth.adoc[su propia documentación técnica].
+endif::[]
+
+Toda aplicación tiene los paquetes `bootstrap`, `common` y `features`, y este manual describe lo que comparten. Lo que pertenece a un módulo opcional (como `oauth`) solo aparece si el módulo está declarado en `docs/site-attrs.adoc`.
+
+El *TL;DR* resume lo imprescindible para empezar a trabajar; el resto de capítulos lo desarrollan.
+
+= TL;DR
+
+:leveloffset: +1
+
+include::partials/tldr/_onboarding.partial.asciidoc[]
+
+include::partials/tldr/_requirements.partial.asciidoc[]
+
+include::partials/tldr/_conventions.partial.asciidoc[]
+
+:leveloffset: -1
+
+= Arquitectura
+
+:leveloffset: +1
+
+include::c4-model.asciidoc[]
+
+include::partials/architecture/_architecture.partial.asciidoc[]
+
+include::partials/architecture/_entity-anatomy.partial.asciidoc[]
+
+include::partials/architecture/_code-generation.partial.asciidoc[]
+
+:leveloffset: -1
+
+= Conceptos transversales
+
+:leveloffset: +1
+
+include::partials/concepts/_security.partial.asciidoc[]
+
+include::partials/concepts/_multitenancy.partial.asciidoc[]
+
+include::partials/concepts/_errors.partial.asciidoc[]
+
+include::partials/concepts/_pagination.partial.asciidoc[]
+
+include::partials/concepts/_events.partial.asciidoc[]
+
+include::partials/concepts/_persistence.partial.asciidoc[]
+
+include::partials/concepts/_cache-consistency.partial.asciidoc[]
+
+include::partials/concepts/_batch.partial.asciidoc[]
+
+include::partials/concepts/_observability.partial.asciidoc[]
+
+:leveloffset: -1
+
+= Calidad
+
+:leveloffset: +1
+
+include::partials/quality/_testing.partial.asciidoc[]
+
+include::partials/quality/_code-qa.partial.asciidoc[]
+
+:leveloffset: -1
+
+= Operación
+
+:leveloffset: +1
+
+include::partials/operations/_environments.partial.asciidoc[]
+
+include::partials/operations/_configuration.partial.asciidoc[]
+
+include::partials/operations/_deployments.partial.asciidoc[]
+
+:leveloffset: -1
+
+= Convenios de desarrollo
+
+:leveloffset: +1
+
+include::partials/conventions/_gitflow.partial.asciidoc[]
+
+include::partials/conventions/_semver.partial.asciidoc[]
+
+include::partials/conventions/_conventional-commits.partial.asciidoc[]
+
+include::partials/conventions/_logging.partial.asciidoc[]
+
+:leveloffset: -1
+
+= Referencias
+
+:leveloffset: +1
+
+include::partials/_decisions.partial.asciidoc[]
+
+include::partials/_glossary.partial.asciidoc[]
+
+:leveloffset: -1

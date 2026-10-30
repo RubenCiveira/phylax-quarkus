@@ -1,0 +1,24 @@
+= Caché y consistencia de lecturas
+
+== Caché
+
+Cada entidad tiene una caché con nombre propio (`<Entidad>CacheAdapter`, `@CacheName("<entidad>")`) sobre la caché de Quarkus con Caffeine. Los valores por defecto (`config/cache.yaml`) son 100 elementos y 10 minutos desde la escritura, con métricas activas.
+
+Los casos de uso actualizan o invalidan la caché después de guardar.
+
+== Escrituras pendientes
+
+Como las lecturas van a la réplica, una lectura justo después de una escritura podría devolver el valor anterior. `PendingWritesRegistry` (`common/infrastructure/consistency`) lo evita:
+
+* Cada escritura abre para esa entidad una *ventana* de `phylax.consistency.pending-writes.window` (60 s por defecto). Si la escritura está en una transacción, la ventana se abre de nuevo en el commit.
+* Mientras la ventana está abierta, las lecturas de esa entidad van al primario y no se cachean.
+* Las marcas viven en la caché `pending-writes`. Si la caché de Quarkus está desactivada, se guardan en un mapa local que se purga cada `phylax.consistency.pending-writes.purge`.
+
+La ventana debe ser mayor que el retraso máximo de la réplica.
+
+[WARNING]
+====
+* Caffeine es local a cada instancia: con más de una réplica de la aplicación, una invalidación no llega a las demás.
+* `retrieve` no consulta las escrituras pendientes y puede guardar un _miss_ en la caché (link:{docs-root}/plan/TODO/issue-A1.4-cache-lecturas-consistentes.md[A1.4]).
+* Las escrituras que no pasan por un caso de uso no actualizan la caché ni la auditoría (link:{docs-root}/plan/TODO/issue-A1.3-auditoria-cache-en-adaptador.md[A1.3]).
+====

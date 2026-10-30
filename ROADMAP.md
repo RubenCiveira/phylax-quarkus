@@ -28,7 +28,7 @@ Si quieres proponer una nueva línea de trabajo, abre una issue describiendo el 
 
 ## 🔐 Gestor de identidades (OIDC)
 
-Líneas pospuestas o pendientes del servidor OAuth 2.0 / OpenID Connect. Lo que ya funciona está en la [documentación funcional](./docs/functional/oauth/01-vision-general.md) y sus límites actuales en [Límites y pendientes](./docs/functional/oauth/09-limites-y-pendientes.md).
+Líneas pospuestas o pendientes del servidor OAuth 2.0 / OpenID Connect. Lo que ya funciona está en la [documentación funcional](./docs/functional/oauth/01-vision-general.adoc) y sus límites actuales en [Límites y pendientes](./docs/functional/oauth/09-limites-y-pendientes.adoc).
 
 ### Validación
 

@@ -1,0 +1,33 @@
+= Observabilidad y auditoría
+
+== Logs
+
+Configuración en `config/telemetry.yaml`:
+
+* Consola en texto, nivel `INFO`, formato `HH:mm:ss NIVEL [categoría] mensaje`.
+* Fichero JSON Lines en `logs/log.jsonl`, nivel `INFO`, con rotación cada 30 MB y 5 copias.
+
+En producción se recoge el fichero JSON. Los criterios para escribir logs están en <<logging>>.
+
+== Trazas
+
+OpenTelemetry está activo (`quarkus.otel.enabled`).
+
+* Los métodos de los casos de uso llevan `@Observed("...")`, que abre un _span_, y añaden atributos y eventos con `Trace.setAttribute` y `Trace.addEvent`, por ejemplo la referencia de la entidad o si la operación estaba permitida.
+* Las trazas se escriben en `logs/traces.jsonl` (rotación de 30 MB, 5 copias) con el exportador propio de `bootstrap/telemetry/exporter`.
+* La aplicación expone un colector OTLP en JSON, `/v1/traces` y `/v1/logs` (`bootstrap/telemetry/collector`). Otros componentes, como los frontales, pueden enviar ahí su telemetría, que pasa a los mismos exportadores.
+
+WARNING: El colector no exige credencial: cualquiera puede enviar telemetría (link:{docs-root}/plan/TODO/issue-A4.2-colector-otlp-autenticado.md[A4.2]).
+
+== Métricas y salud
+
+* Métricas Micrometer en formato Prometheus, incluidas las de la caché y el contador `request.security.risk`.
+* Comprobaciones de salud de SmallRye Health.
+* Las dos se publican en la interfaz de gestión (`quarkus.management`), en `MANAGEMENT_HOST:MANAGEMENT_PORT` (por defecto, el mismo puerto `8090` que la aplicación).
+
+== Auditoría
+
+Las escrituras de los casos de uso quedan registradas: quién, qué operación, sobre qué entidad, y los valores anterior y nuevo.
+
+* `<Entidad>AuditAdapter` envía el registro a `AuditWriteService` (`common/infrastructure/audit`), que lo guarda en la tabla de auditoría en modo de solo añadir.
+* `<Entidad>AuditController` permite consultar el historial de una entidad.

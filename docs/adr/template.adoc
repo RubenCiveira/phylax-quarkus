@@ -1,0 +1,78 @@
+// Plantilla de ADR. Para registrar una decisión:
+// 1. Copiar este fichero como NNNN-titulo-en-minusculas.adoc, con el siguiente número libre.
+// 2. Rellenar los atributos y las secciones; borrar los comentarios de ayuda.
+// 3. Añadir la fila al índice (_index-table.partial.asciidoc) con el mismo resumen.
+// Una decisión aceptada no se edita: si cambia, se escribe otro ADR que la sustituye y en este
+// solo se actualizan el estado y "Sustituida por".
+= ADR-NNNN: Título en forma de decisión
+include::../site-attrs.adoc[]
+:adr-number: NNNN
+// Propuesta | Aceptada | Rechazada | Obsoleta | Sustituida
+:adr-status: Propuesta
+:adr-date: AAAA-MM-DD
+:adr-deciders: {team-leads}
+// Módulo al que pertenece la decisión: común (bootstrap, common, features) o un módulo opcional.
+:adr-scope: común
+
+[horizontal]
+Estado:: {adr-status}
+Fecha:: {adr-date}
+Decisores:: {adr-deciders}
+Ámbito:: {adr-scope}
+// Solo si aplica:
+// Sustituye a:: xref:NNNN-titulo.adoc[ADR-NNNN]
+// Sustituida por:: xref:NNNN-titulo.adoc[ADR-NNNN]
+
+== Resumen
+
+// Y-statement: la decisión completa en una frase. Se copia tal cual al índice.
+*En el contexto de* <situación>, *ante* <problema o necesidad>, *decidimos* <opción elegida> *y descartamos* <alternativas>, *para conseguir* <beneficio>, *aceptando* <coste>.
+
+== Contexto
+
+// Qué situación obliga a decidir: fuerzas técnicas, de negocio, del equipo o normativas.
+// Hechos, no opiniones. Debe entenderse sin conocer la decisión.
+
+== Factores de decisión
+
+// Criterios con los que se comparan las opciones, de más a menos importante.
+* ...
+
+== Opciones consideradas
+
+// Una subsección por opción, con sus pros y contras frente a los factores.
+=== Opción 1: ...
+
+* A favor: ...
+* En contra: ...
+
+=== Opción 2: ...
+
+* A favor: ...
+* En contra: ...
+
+== Decisión
+
+// La opción elegida, en presente y de forma que se pueda verificar ("las rutas /api exigen...").
+// Si la decisión tiene reglas, enumerarlas.
+
+== Consecuencias
+
+=== Positivas
+
+* ...
+
+=== Negativas
+
+// Los costes aceptados. Un ADR sin consecuencias negativas suele estar incompleto.
+* ...
+
+=== Seguimiento
+
+// Tareas que la decisión deja abiertas y cómo comprobar que se cumple.
+* ...
+
+== Referencias
+
+// Estándares, artículos, ADR relacionados y capítulos del manual que la desarrollan.
+* ...

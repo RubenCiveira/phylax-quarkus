@@ -1,0 +1,20 @@
+= Persistencia
+
+* *Base de datos*: MariaDB. El acceso es JDBC directo (`<Entidad>JdbcDao`, con las utilidades de `common/infrastructure/sql`), sin ORM.
+* *Lectura y escritura separadas*: los `*CommandRepositoryAdapter` usan el datasource por defecto (primario), y los `*QueryRepositoryAdapter` el datasource `replica`, configurado con `transactions: disabled` para que no entre en la transacción JTA. Hoy los dos apuntan a la misma base de datos.
+* *Bloqueo optimista*: cada entidad tiene un campo `version`. Una actualización con una versión antigua falla con `OptimistLockException` (412).
+* *Datos sensibles*: lo que solo se compara se guarda como huella y lo que hay que recuperar se cifra (ver <<seguridad>>).
+
+== Migraciones
+
+Las aplica la propia aplicación al arrancar (`bootstrap/sql/MigrationsManager`, sobre `common/infrastructure/migration`), con la conexión `app.migration` de `config/database.yaml`.
+
+* `src/main/resources/migration/mysql/changelog.txt` enumera los scripts en orden. Cada versión de esquema tiene su carpeta (`000.001.001/`).
+* El esquema está consolidado en una única migración generada desde el modelo (`…-model.changelog.mysql.sql`). *No se editan a mano*: un cambio de esquema se hace en el modelo y se regenera (ver <<generación-de-código>>).
+* `migration/seed/` contiene los datos iniciales que se cargan con la base vacía.
+* El gestor tiene dialectos para H2, MySQL/MariaDB, PostgreSQL, Oracle y SQL Server, pero solo se mantienen los scripts de MariaDB.
+
+Las tablas de cada entidad llevan el prefijo de su contexto (por ejemplo, `access_*`).
+ifdef::module-oauth[]
+Las tablas propias del protocolo OIDC (`_oauth_*`) se describen en xref:{docs-root}/technical/contexts/oauth/06-persistencia.adoc[Persistencia de OAuth].
+endif::[]

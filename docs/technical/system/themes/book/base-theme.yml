@@ -1,0 +1,18 @@
+extends: default
+header:
+  height: 0.75in
+  line-height: 1
+  recto:
+    right:
+      content: ''
+  verso:
+    left:
+      content: '{document-title}'
+      
+footer:
+  recto:
+    right:
+      content: '{section-or-chapter-title} | {page-number} of {page-count}'
+  verso:
+    left:
+      content: '{page-number} of {page-count} |*{chapter-title}*'

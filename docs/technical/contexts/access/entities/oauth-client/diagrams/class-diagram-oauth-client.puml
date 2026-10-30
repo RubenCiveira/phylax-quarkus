@@ -2,7 +2,7 @@
 @startuml class diagram for Classes para oauth client
 left to right direction
 title Clases para oauth client
-class access.Tenant{
+class identity.Tenant{
 uid:string
 name:string
 root:boolean
@@ -90,7 +90,7 @@ delete()
 enable()
 disable()
 }
-access.Tenant "1"  o--  "N*" access.OauthClient: tenant
+identity.Tenant "1"  o--  "N*" access.OauthClient: tenant
 access.OauthClientAllowedLoginRedirect "N*"  o--  "1" access.OauthClient: allowedLoginRedirects
 access.OauthClientAllowedLogoutRedirect "N*"  o--  "1" access.OauthClient: allowedLogoutRedirects
 access.OauthClientAllowedAudience "N*"  o--  "1" access.OauthClient: allowedAudiences

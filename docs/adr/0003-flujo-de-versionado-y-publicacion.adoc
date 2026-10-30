@@ -1,0 +1,139 @@
+= ADR-0003: Flujo de versionado y publicación: Gitflow, SemVer y Conventional Commits
+include::../site-attrs.adoc[]
+:adr-number: 0003
+:adr-status: Propuesta
+:adr-date: 2026-10-30
+:adr-deciders: {team-leads}
+:adr-scope: común
+
+[horizontal]
+Estado:: {adr-status}
+Fecha:: {adr-date}
+Decisores:: {adr-deciders}
+Ámbito:: {adr-scope}
+
+== Resumen
+
+*En el contexto de* aplicaciones que se publican por versiones y se validan antes de llegar a producción, *ante* la necesidad de saber qué hay desplegado, desarrollar en paralelo y comunicar el alcance de cada versión, *decidimos* combinar Gitflow simplificado, SemVer 2.0 y Conventional Commits, con la versión y el changelog calculados a partir de los commits, *y descartamos* trunk-based development, GitHub flow, CalVer y los mensajes libres, *para conseguir* producción reproducible desde una etiqueta, releases validadas y versiones con significado, *aceptando* más ramas y merges y la disciplina de escribir cada mensaje de commit con el formato acordado.
+
+== Contexto
+
+* Cada versión se valida en un entorno de pruebas antes de pasar a producción, y puede haber que corregir producción mientras se desarrolla la siguiente.
+* En cualquier momento hay que poder recuperar el código exacto que está en producción y generar de nuevo el mismo artefacto.
+* Quien integra con la aplicación (frontales, otras APIs) necesita saber si una versión nueva le obliga a cambiar algo.
+* Escribir el changelog y elegir el número de versión a mano es lento y da lugar a errores.
+* Las tres decisiones dependen unas de otras: el tipo de los commits determina la versión, y la versión da nombre a la rama de release y a la etiqueta.
+
+== Factores de decisión
+
+. Reproducir producción desde el repositorio.
+. Validar cada versión antes de publicarla, sin bloquear el desarrollo.
+. Que el número de versión diga si hay cambios incompatibles.
+. Automatizar el cálculo de la versión y el changelog.
+. Coste para el equipo: número de ramas, merges y reglas que recordar.
+
+== Opciones consideradas
+
+=== Modelo de ramas
+
+Gitflow simplificado::
+`main` (producción), `develop` (desarrollo estable), `feature/*`, `hotfix/*` y `release/*`.
+* A favor: `main` es siempre lo desplegado, y las releases se validan en su rama mientras `develop` sigue avanzando.
+* En contra: más ramas, merges dobles en hotfix y release, e integración más lenta.
+
+GitHub flow::
+Solo `main` y ramas cortas que se despliegan al mezclarse.
+* A favor: sencillo.
+* En contra: no tiene un lugar para validar una versión antes de publicarla.
+
+Trunk-based development::
+Integración continua en `main`, con _feature flags_.
+* A favor: integración más rápida y menos conflictos.
+* En contra: exige despliegue continuo, _feature flags_ y una batería de pruebas muy fiable, que todavía no existen.
+
+=== Esquema de versiones
+
+SemVer 2.0::
+`mayor.menor.parche`, con sufijos de prerelease.
+* A favor: el número dice si hay incompatibilidades, y es el estándar de las librerías y las APIs.
+* En contra: hay que definir qué es un cambio incompatible en cada proyecto.
+
+CalVer::
+Versiones por fecha.
+* A favor: dice cuándo se publicó.
+* En contra: no dice nada sobre la compatibilidad.
+
+Número incremental::
+* A favor: trivial.
+* En contra: no aporta ninguna información.
+
+=== Mensajes de commit
+
+Conventional Commits::
+* A favor: permite calcular la versión y generar el changelog, y se valida con un hook.
+* En contra: obliga a clasificar cada cambio.
+
+Mensajes libres::
+* A favor: no hay reglas que aprender.
+* En contra: la versión y el changelog quedan a mano.
+
+=== Integración de las features
+
+Squash (un commit por feature)::
+* A favor: un historial limpio, con un solo mensaje por funcionalidad en el changelog.
+* En contra: se pierde el detalle de los commits, y el mensaje del squash debe escribirse a mano con el formato acordado.
+
+Merge `--no-ff`::
+* A favor: conserva los commits de la rama y deja marcado dónde se integró cada feature.
+* En contra: cada commit aparece en el changelog, así que todos tienen que ser significativos.
+
+== Decisión
+
+Ramas::
+Gitflow simplificado. `main` contiene lo desplegado en producción y solo recibe merges de `release/*` y `hotfix/*`. `develop` es siempre estable: *se debe poder sacar una versión de producción desde `develop` en cualquier momento*. Las features salen de `develop` y vuelven a `develop` con `merge --no-ff`. Las releases se llaman `release/x.y.z-rc.n`, se validan en un entorno de pruebas, se corrigen en su propia rama y se cierran con pull request contra `main` y `develop`. Los hotfix salen de `main` y vuelven a `main` y a `develop`.
+
+Versiones::
+SemVer 2.0. La versión mayor es `0` hasta el primer paso a producción. `-rc.n` marca las release candidates y `-SNAPSHOT` las versiones en desarrollo. Cada versión publicada se etiqueta en `main` como `vX.Y.Z`, y producción se despliega siempre desde una etiqueta.
++
+Además de los cambios incompatibles de la API, sube la versión mayor:
++
+* un cambio incompatible en un contrato publicado (OpenAPI, eventos, protocolos);
+* una migración de esquema que no permite volver a la versión anterior;
+* una configuración que pasa a ser obligatoria, o una rotación obligatoria de secretos.
+
+Mensajes de commit::
+Conventional Commits con los tipos `feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`, `revert` y `remove`. Un cambio incompatible se marca con `!` en el asunto y se explica en el pie con `BREAKING CHANGE:`. El hook `commit-msg` valida el formato.
+
+Automatización::
+La versión siguiente se calcula a partir de los commits entre `main` y `develop`: mayor si hay un cambio incompatible, menor si hay `feat` y parche si hay `fix`. El changelog se genera a partir de los mismos mensajes (`make start-rc`, `make generate-changelog`).
+
+== Consecuencias
+
+=== Positivas
+
+* La etiqueta de `main` reproduce exactamente lo desplegado, y un hotfix parte de ese código.
+* La validación de una versión no bloquea el desarrollo de la siguiente.
+* El número de versión y el changelog se obtienen de los commits, sin trabajo manual.
+* Quien integra con la aplicación sabe por la versión mayor si tiene que adaptarse.
+
+=== Negativas
+
+* Más ramas y más merges que con trunk-based development, y una integración más lenta.
+* Los hotfix y las releases se mezclan dos veces (`main` y `develop`), con riesgo de olvidar uno de los dos.
+* Todos los commits llegan al changelog, por lo que cada mensaje tiene que ser significativo y del tipo correcto.
+* Si los mensajes son incorrectos, la versión calculada también lo es.
+
+=== Seguimiento
+
+* En {project-name}: crear la rama `develop`, que hoy no existe (el trabajo se integra en `main` desde ramas `feat/*`), y usar el prefijo `feature/`.
+* Que el cálculo de la versión reconozca los commits con ámbito (`feat(api):`) y el `BREAKING CHANGE` del pie, no solo el asunto literal.
+* Completar el tooling con `start-release` y `finish-hotfix-*`, o quitarlos de la guía de contribución.
+* Proteger `main` y `develop` en la forja, para que solo se pueda mezclar mediante pull request.
+* Revisar esta decisión cuando haya despliegue continuo y _feature flags_: entonces trunk-based development pasa a ser viable.
+
+== Referencias
+
+* Vincent Driessen, https://nvie.com/posts/a-successful-git-branching-model/[A successful Git branching model].
+* https://semver.org/lang/es/[Semantic Versioning 2.0.0].
+* https://www.conventionalcommits.org/es/v1.0.0/[Conventional Commits 1.0.0].
+* Manual técnico: xref:../technical/system/manual.adoc#gitflow[Gitflow], xref:../technical/system/manual.adoc#versionado-semántico[Versionado semántico] y xref:../technical/system/manual.adoc#conventional-commits[Conventional Commits].

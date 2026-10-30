@@ -1,0 +1,112 @@
+= ADR-0002: Monolito modular con arquitectura hexagonal por entidad
+include::../site-attrs.adoc[]
+:adr-number: 0002
+:adr-status: Propuesta
+:adr-date: 2026-10-30
+:adr-deciders: {team-leads}
+:adr-scope: común
+
+[horizontal]
+Estado:: {adr-status}
+Fecha:: {adr-date}
+Decisores:: {adr-deciders}
+Ámbito:: {adr-scope}
+
+== Resumen
+
+*En el contexto de* backends REST con muchas entidades generadas a partir de un modelo, *ante* la necesidad de probar las reglas sin infraestructura, sustituir adaptadores y mantener una estructura uniforme, *decidimos* un monolito modular (`bootstrap`, `common`, `features`) en el que cada entidad sigue una arquitectura hexagonal, *y descartamos* las capas técnicas clásicas, los _vertical slices_ y los microservicios, *para conseguir* dominio y casos de uso independientes del framework, adaptadores intercambiables y código generable, *aceptando* muchas clases por entidad, solo asumibles con el generador, y un único despliegue.
+
+== Contexto
+
+* Las aplicaciones exponen una API REST sobre un conjunto amplio de entidades (decenas por contexto) con operaciones parecidas: alta, consulta, listado, modificación, borrado y acciones propias.
+* La mayor parte del código se genera a partir de un modelo (ver xref:../technical/system/manual.adoc#generación-de-código[Generación de código]). La estructura tiene que ser regular para que las plantillas la produzcan, y extensible para añadir reglas sin editar lo generado.
+* Las reglas de negocio (autorización, validaciones, multi-tenancy) deben poder probarse con pruebas unitarias, sin base de datos ni servidor.
+* Algunos adaptadores tienen alternativas reales: el almacén de RBAC, el primario y la réplica de la base de datos, la caché local o distribuida.
+* Los equipos son pequeños: un único artefacto desplegable es más barato de operar que varios servicios.
+
+== Factores de decisión
+
+. Probar dominio y casos de uso sin infraestructura.
+. Estructura uniforme y predecible, que se pueda generar.
+. Extensión sin modificar el código generado.
+. Coste de operación y de despliegue.
+. Posibilidad de separar un contexto en un servicio propio más adelante.
+
+== Opciones consideradas
+
+=== Opción 1: capas técnicas (controller, service, repository)
+
+Paquetes globales por tipo técnico, compartidos por todas las entidades.
+
+* A favor: es conocida por cualquier desarrollador y tiene pocas clases.
+* En contra: los servicios dependen de la persistencia y del framework, y las pruebas necesitan infraestructura o muchos mocks. Las entidades se mezclan en los mismos paquetes y la estructura se degrada al crecer.
+
+=== Opción 2: monolito modular con arquitectura hexagonal por entidad
+
+Paquetes de primer nivel transversales (`bootstrap`, `common`) y contextos funcionales (`features/<contexto>`). Dentro de cada contexto, cada entidad con sus capas `domain`, `application` e `infrastructure`.
+
+* A favor: el dominio y los casos de uso no dependen de la infraestructura. Los adaptadores se sustituyen sin tocar el núcleo. La estructura es idéntica en todas las entidades y se puede generar.
+* En contra: muchas clases por entidad y más indirección para quien llega nuevo.
+
+=== Opción 3: _vertical slices_
+
+Un paquete por operación, con todo lo que necesita y sin capas.
+
+* A favor: cada operación se entiende de forma aislada.
+* En contra: la lógica se duplica entre operaciones de la misma entidad y no hay un modelo de dominio común. Encaja peor con las políticas transversales (autorización, tenant, auditoría).
+
+=== Opción 4: microservicios por contexto
+
+* A favor: despliegue y escalado independientes por contexto.
+* En contra: red, consistencia distribuida, despliegue y observabilidad mucho más complejos para equipos pequeños. Las fronteras de los contextos aún no son estables.
+
+== Decisión
+
+Se adopta la *opción 2*. La aplicación es un único artefacto con tres paquetes de primer nivel bajo el paquete base:
+
+`bootstrap`::
+La clase de arranque está por encima de los contextos. En `bootstrap` va lo que se ejecuta al arrancar o envuelve cada petición: migraciones, datos iniciales, filtros, límite de peticiones y telemetría. No contiene reglas de negocio.
+
+`common`::
+Utilidades genéricas sin dominio que comparten todos los contextos: modelo de seguridad, excepciones, mapeo de errores, auditoría, consistencia, batch, paginación, criptografía. No depende de ningún contexto.
+
+`features/<contexto>`::
+Contextos funcionales con alta cohesión. Cada entidad tiene su propio diseño hexagonal:
++
+* `domain`: el agregado, sus value objects y sus eventos, y los puertos de salida (`domain/gateway`). No depende de Quarkus ni de las otras capas.
+* `application`: un paquete por caso de uso (`usecase/<op>`), las reglas de visibilidad y las políticas. Los casos de uso son los puertos de entrada.
+* `infrastructure`: los controladores, los adaptadores de los puertos de salida, los repositorios y el despacho de eventos.
+
+Reglas:
+
+. Las dependencias van `infrastructure` → `application` → `domain`, nunca al revés.
+. `common` no depende de `features` ni de `bootstrap`.
+. Un contexto solo usa otro a través de sus casos de uso o de sus eventos, nunca de sus repositorios ni de sus clases de infraestructura.
+. Las reglas de negocio se añaden como observadores CDI de los eventos del caso de uso (`AuthorizationDecision`, `Check`, `Enrich`), en `application/policy`, sin modificar el código generado.
+
+== Consecuencias
+
+=== Positivas
+
+* Los casos de uso y las políticas se prueban con pruebas unitarias y mocks de los gateways.
+* Los adaptadores se sustituyen por configuración: almacenes de RBAC distintos, lectura en una réplica, otra caché.
+* Todas las entidades tienen la misma forma: conocer una permite leer cualquiera, y el generador las produce.
+* Un contexto con fronteras estables se puede extraer a un servicio propio, porque ya solo se comunica por casos de uso y eventos.
+* Un único despliegue y una única base de datos.
+
+=== Negativas
+
+* Muchas clases por entidad: unas 80 para una entidad sencilla como `role`. Solo es viable con generación de código.
+* Más indirección: seguir una petición obliga a pasar por controlador, caso de uso, eventos, visibilidad, gateway y adaptador.
+* Todos los contextos escalan juntos y comparten la base de datos.
+* Las reglas de dependencia no se comprueban solas: sin un test de arquitectura se pueden romper sin que nadie lo note.
+
+=== Seguimiento
+
+* Añadir un test de ArchUnit con las reglas de esta decisión y ejecutarlo en cada build.
+* Documentar en cada contexto qué casos de uso y eventos ofrece a los demás.
+
+== Referencias
+
+* Alistair Cockburn, https://alistair.cockburn.us/hexagonal-architecture/[Hexagonal Architecture].
+* Manual técnico: xref:../technical/system/manual.adoc#arquitectura-del-código[Arquitectura del código] y xref:../technical/system/manual.adoc#anatomía-de-una-entidad[Anatomía de una entidad].
