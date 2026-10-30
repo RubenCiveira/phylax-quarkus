@@ -22,22 +22,22 @@ import org.mockito.ArgumentCaptor;
 import net.civeira.phylax.common.crypto.SecretDigester;
 import net.civeira.phylax.common.infrastructure.config.IsolatedConfigLoaderTestSupport;
 import net.civeira.phylax.common.security.SecureTokenService;
-import net.civeira.phylax.features.access.apikeyclient.domain.ApiKeyClient;
-import net.civeira.phylax.features.access.apikeyclient.domain.gateway.ApiKeyClientCommandRepositoryGateway;
-import net.civeira.phylax.features.access.oauthclient.domain.OauthClient;
-import net.civeira.phylax.features.access.oauthclient.domain.gateway.OauthClientCommandRepositoryGateway;
-import net.civeira.phylax.features.access.resourceserver.domain.ResourceServer;
-import net.civeira.phylax.features.access.resourceserver.domain.gateway.ResourceServerCommandRepositoryGateway;
-import net.civeira.phylax.features.access.role.domain.Role;
-import net.civeira.phylax.features.access.role.domain.gateway.RoleCommandRepositoryGateway;
-import net.civeira.phylax.features.access.tenant.domain.Tenant;
-import net.civeira.phylax.features.access.tenant.domain.gateway.TenantCommandRepositoryGateway;
-import net.civeira.phylax.features.access.user.domain.User;
-import net.civeira.phylax.features.access.user.domain.gateway.UserCommandRepositoryGateway;
-import net.civeira.phylax.features.access.usergroupmembership.domain.UserGroupMembership;
-import net.civeira.phylax.features.access.usergroupmembership.domain.gateway.UserGroupMembershipCommandRepositoryGateway;
-import net.civeira.phylax.features.access.userroleassignment.domain.UserRoleAssignment;
-import net.civeira.phylax.features.access.userroleassignment.domain.gateway.UserRoleAssignmentCommandRepositoryGateway;
+import net.civeira.phylax.feature.access.apikeyclient.domain.ApiKeyClient;
+import net.civeira.phylax.feature.access.apikeyclient.domain.gateway.ApiKeyClientCommandRepositoryGateway;
+import net.civeira.phylax.feature.access.oauthclient.domain.OauthClient;
+import net.civeira.phylax.feature.access.oauthclient.domain.gateway.OauthClientCommandRepositoryGateway;
+import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServer;
+import net.civeira.phylax.feature.access.resourceserver.domain.gateway.ResourceServerCommandRepositoryGateway;
+import net.civeira.phylax.feature.access.role.domain.Role;
+import net.civeira.phylax.feature.access.role.domain.gateway.RoleCommandRepositoryGateway;
+import net.civeira.phylax.feature.access.usergroupmembership.domain.UserGroupMembership;
+import net.civeira.phylax.feature.access.usergroupmembership.domain.gateway.UserGroupMembershipCommandRepositoryGateway;
+import net.civeira.phylax.feature.access.userroleassignment.domain.UserRoleAssignment;
+import net.civeira.phylax.feature.access.userroleassignment.domain.gateway.UserRoleAssignmentCommandRepositoryGateway;
+import net.civeira.phylax.feature.identity.tenant.domain.Tenant;
+import net.civeira.phylax.feature.identity.tenant.domain.gateway.TenantCommandRepositoryGateway;
+import net.civeira.phylax.feature.identity.user.domain.User;
+import net.civeira.phylax.feature.identity.user.domain.gateway.UserCommandRepositoryGateway;
 
 class InstallAccessUnitTest {
   private static final String LOCAL_COLLECTOR_KEY =

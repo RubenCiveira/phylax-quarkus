@@ -2,7 +2,7 @@
 @startuml class diagram for Classes para user role assignment
 left to right direction
 title Clases para user role assignment
-class access.User{
+class identity.User{
 uid:string
 name:string
 password:string
@@ -117,7 +117,7 @@ create()
 update()
 delete()
 }
-access.User "1"  o--  "N*" access.UserRoleAssignment: user
+identity.User "1"  o--  "N*" access.UserRoleAssignment: user
 access.ResourceServer "1"  o--  "N*" access.UserRoleAssignment: resourceServer
 access.OauthClient "1"  o--  "N*" access.UserRoleAssignment: oauthClient
 access.UserRoleAssignmentRole "N*"  o--  "1" access.UserRoleAssignment: roles

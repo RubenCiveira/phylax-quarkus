@@ -70,5 +70,5 @@ Para aplicaciones que comprueban periódicamente si la sesión sigue viva:
 ## Gestión de sesiones
 
 - El usuario ve y cierra sus sesiones en `/oauth/openid/{tenant}/me/sessions`.
-- Un administrador las gestiona en `/api/{tenant}/access/users/{userUid}/sessions`.
+- Un administrador las gestiona en `/api/{tenant}/identity/users/{userUid}/sessions`.
 - Un proceso programado borra sesiones, codes y registros caducados.

@@ -34,7 +34,7 @@ El autorregistro desde la pantalla de login **no funciona** en esta versión, au
 
 ### Alta directa
 
-Menú de usuarios (`/api/access/users`):
+Menú de usuarios (`/api/identity/users`):
 
 | Campo | Qué poner |
 |---|---|

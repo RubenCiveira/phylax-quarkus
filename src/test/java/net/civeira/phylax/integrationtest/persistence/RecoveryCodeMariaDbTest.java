@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import net.civeira.phylax.features.oauth.mfa.infrastructure.driven.RecoveryCodeConsumptionSqlAdapter;
+import net.civeira.phylax.feature.oauth.mfa.infrastructure.driven.RecoveryCodeConsumptionSqlAdapter;
 
 /**
  * MFA recovery codes against MariaDB (PHP 039 regression for J-08): of concurrent uses of one code
@@ -34,14 +34,15 @@ class RecoveryCodeMariaDbTest {
     try (Connection c = dataSource.getConnection()) {
       c.createStatement().execute("DELETE FROM access_user_mfa_recovery_code");
       c.createStatement().execute("DELETE FROM access_user_invitation");
-      c.createStatement().execute("DELETE FROM access_user");
-      c.createStatement().execute("DELETE FROM access_tenant_config");
-      c.createStatement().execute("DELETE FROM access_tenant");
-      c.createStatement().execute("INSERT INTO access_tenant (uid, version, domain, enabled,"
+      c.createStatement().execute("DELETE FROM identity_user");
+      c.createStatement().execute("DELETE FROM identity_tenant_config");
+      c.createStatement().execute("DELETE FROM identity_tenant");
+      c.createStatement().execute("INSERT INTO identity_tenant (uid, version, domain, enabled,"
           + " mark_for_delete, name, root) VALUES ('t', 0, 't.example', 1, 0, 't', 0)");
       for (String user : List.of("alice", "bob")) {
-        c.createStatement().execute("INSERT INTO access_user (uid, version, name, password, tenant,"
-            + " enabled) VALUES ('" + user + "', 0, '" + user + "', 'x', 't', 1)");
+        c.createStatement()
+            .execute("INSERT INTO identity_user (uid, version, name, password, tenant,"
+                + " enabled) VALUES ('" + user + "', 0, '" + user + "', 'x', 't', 1)");
       }
       try (PreparedStatement ps = c.prepareStatement("INSERT INTO access_user_mfa_recovery_code"
           + " (uid, version, code_hash, created_at, user) VALUES ('code-1', 0, 'h', ?, 'alice')")) {

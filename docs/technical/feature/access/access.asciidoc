@@ -14,7 +14,16 @@ include::entities/dcr-initial-access-token/entity-dcr-initial-access-token.ascii
 include::entities/oauth-client/entity-oauth-client.asciidoc[]
 include::entities/resource-server/entity-resource-server.asciidoc[]
 include::entities/role/entity-role.asciidoc[]
+include::entities/user-group-membership/entity-user-group-membership.asciidoc[]
+include::entities/user-invitation/entity-user-invitation.asciidoc[]
+include::entities/user-login-throttle/entity-user-login-throttle.asciidoc[]
+include::entities/user-mfa-enrollment/entity-user-mfa-enrollment.asciidoc[]
+include::entities/user-mfa-recovery-code/entity-user-mfa-recovery-code.asciidoc[]
 include::entities/user-personal-api-key/entity-user-personal-api-key.asciidoc[]
+include::entities/user-role-assignment/entity-user-role-assignment.asciidoc[]
+include::entities/user-scope-consent/entity-user-scope-consent.asciidoc[]
+include::entities/user-verification-code/entity-user-verification-code.asciidoc[]
+include::entities/user-webauthn-credential/entity-user-webauthn-credential.asciidoc[]
 
 :leveloffset: -2
 

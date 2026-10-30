@@ -23,10 +23,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.civeira.phylax.common.crypto.PasswordHasher;
 import net.civeira.phylax.common.crypto.SecretDigester;
-import net.civeira.phylax.features.oauth.userinvitation.domain.InvitationRecord;
-import net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven.InvitationAcceptAdapter;
-import net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven.InvitationLookupAdapter;
-import net.civeira.phylax.features.oauth.userinvitation.infrastructure.driven.InvitationStoreAdapter;
+import net.civeira.phylax.feature.oauth.userinvitation.domain.InvitationRecord;
+import net.civeira.phylax.feature.oauth.userinvitation.infrastructure.driven.InvitationAcceptAdapter;
+import net.civeira.phylax.feature.oauth.userinvitation.infrastructure.driven.InvitationLookupAdapter;
+import net.civeira.phylax.feature.oauth.userinvitation.infrastructure.driven.InvitationStoreAdapter;
 
 /**
  * Invitations against MariaDB (task 2.2): a link is found by the digest of its token only in its
@@ -55,13 +55,14 @@ class InvitationMariaDbTest {
     accept = new InvitationAcceptAdapter(dataSource, new PasswordHasher());
     try (Connection c = dataSource.getConnection()) {
       c.createStatement().execute("DELETE FROM access_user_invitation");
-      c.createStatement().execute("DELETE FROM access_user");
-      c.createStatement().execute("DELETE FROM access_tenant_config");
-      c.createStatement().execute("DELETE FROM access_tenant");
+      c.createStatement().execute("DELETE FROM identity_user");
+      c.createStatement().execute("DELETE FROM identity_tenant_config");
+      c.createStatement().execute("DELETE FROM identity_tenant");
       tenant(c, TENANT_A, "tenant-a");
       tenant(c, TENANT_B, "tenant-b");
-      try (PreparedStatement ps = c.prepareStatement("INSERT INTO access_user (uid, version, email,"
-          + " name, password, tenant, enabled) VALUES (?, 0, ?, ?, 'x', ?, 1)")) {
+      try (PreparedStatement ps =
+          c.prepareStatement("INSERT INTO identity_user (uid, version, email,"
+              + " name, password, tenant, enabled) VALUES (?, 0, ?, ?, 'x', ?, 1)")) {
         ps.setString(1, ADMIN);
         ps.setString(2, "admin@a.example");
         ps.setString(3, "admin@a.example");
@@ -72,7 +73,7 @@ class InvitationMariaDbTest {
   }
 
   private static void tenant(Connection c, String uid, String name) throws SQLException {
-    try (PreparedStatement ps = c.prepareStatement("INSERT INTO access_tenant"
+    try (PreparedStatement ps = c.prepareStatement("INSERT INTO identity_tenant"
         + " (uid, version, domain, enabled, mark_for_delete, name, root)"
         + " VALUES (?, 0, ?, 1, 0, ?, 0)")) {
       ps.setString(1, uid);
@@ -113,8 +114,8 @@ class InvitationMariaDbTest {
 
   private int users(String email) throws SQLException {
     try (Connection c = dataSource.getConnection();
-        PreparedStatement ps =
-            c.prepareStatement("SELECT COUNT(*) FROM access_user WHERE name = ? AND tenant = ?")) {
+        PreparedStatement ps = c
+            .prepareStatement("SELECT COUNT(*) FROM identity_user WHERE name = ? AND tenant = ?")) {
       ps.setString(1, email);
       ps.setString(2, TENANT_A);
       try (ResultSet rs = ps.executeQuery()) {

@@ -25,14 +25,14 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jakarta.inject.Inject;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationData;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationMode;
-import net.civeira.phylax.features.oauth.authentication.domain.AuthenticationResult;
-import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
-import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
-import net.civeira.phylax.integrationtest.features.oauth.client.OidcFlowClient;
-import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
-import net.civeira.phylax.integrationtest.features.oauth.scenario.ScenarioLoginGateway;
+import net.civeira.phylax.feature.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.feature.oauth.authentication.domain.AuthenticationMode;
+import net.civeira.phylax.feature.oauth.authentication.domain.AuthenticationResult;
+import net.civeira.phylax.feature.oauth.tokensecurity.domain.gateway.TokenRevocationGateway;
+import net.civeira.phylax.feature.oauth.tokensecurity.domain.gateway.TokenSigner;
+import net.civeira.phylax.integrationtest.feature.oauth.client.OidcFlowClient;
+import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixtures;
+import net.civeira.phylax.integrationtest.feature.oauth.scenario.ScenarioLoginGateway;
 
 /** J-04: the actual HTTP bearer consumers share the MariaDB JTI and revocation state. */
 @Tag("mariadb")
@@ -174,19 +174,19 @@ class BearerContractMariaDbTest {
     boolean verified = true;
     try (Connection connection = dataSource.getConnection();
         PreparedStatement stmt =
-            connection.prepareStatement("SELECT uid FROM access_tenant LIMIT 1");
+            connection.prepareStatement("SELECT uid FROM identity_tenant LIMIT 1");
         ResultSet row = stmt.executeQuery()) {
       Assertions.assertTrue(row.next());
       String protectedPassword;
       try (
           PreparedStatement existing =
-              connection.prepareStatement("SELECT password FROM access_user LIMIT 1");
+              connection.prepareStatement("SELECT password FROM identity_user LIMIT 1");
           ResultSet passwords = existing.executeQuery()) {
         Assertions.assertTrue(passwords.next());
         protectedPassword = passwords.getString(1);
       }
       try (PreparedStatement insert = connection.prepareStatement(
-          "INSERT INTO access_user (uid, version, tenant, name, password, email, email_verified)"
+          "INSERT INTO identity_user (uid, version, tenant, name, password, email, email_verified)"
               + " VALUES (?, 0, ?, ?, ?, ?, 1)")) {
         insert.setString(1, uid);
         insert.setString(2, row.getString(1));

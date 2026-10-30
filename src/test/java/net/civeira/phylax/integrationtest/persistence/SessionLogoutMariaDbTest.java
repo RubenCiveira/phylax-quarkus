@@ -32,9 +32,9 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import jakarta.inject.Inject;
-import net.civeira.phylax.features.oauth.tokensecurity.domain.gateway.TokenSigner;
-import net.civeira.phylax.integrationtest.features.oauth.client.OidcFlowClient;
-import net.civeira.phylax.integrationtest.features.oauth.fixtures.OidcTestFixtures;
+import net.civeira.phylax.feature.oauth.tokensecurity.domain.gateway.TokenSigner;
+import net.civeira.phylax.integrationtest.feature.oauth.client.OidcFlowClient;
+import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixtures;
 
 /** J-07: participants and revocations of a rotated browser session against MariaDB. */
 @Tag("mariadb")
@@ -212,7 +212,7 @@ class SessionLogoutMariaDbTest {
   private String tenant(String name) throws SQLException {
     String uid = UUID.randomUUID().toString();
     try (Connection connection = dataSource.getConnection();
-        PreparedStatement stmt = connection.prepareStatement("INSERT INTO access_tenant"
+        PreparedStatement stmt = connection.prepareStatement("INSERT INTO identity_tenant"
             + " (uid, version, domain, enabled, mark_for_delete, name, root)"
             + " VALUES (?, 0, ?, 1, 0, ?, 0)")) {
       stmt.setString(1, uid);
@@ -248,7 +248,7 @@ class SessionLogoutMariaDbTest {
         clients.executeUpdate();
       }
       try (PreparedStatement tenants =
-          connection.prepareStatement("DELETE FROM access_tenant WHERE name IN (?, ?)")) {
+          connection.prepareStatement("DELETE FROM identity_tenant WHERE name IN (?, ?)")) {
         tenants.setString(1, TENANT);
         tenants.setString(2, OidcTestFixtures.OTHER_TENANT);
         tenants.executeUpdate();

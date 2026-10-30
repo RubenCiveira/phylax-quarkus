@@ -5,10 +5,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.infrastructure.migration.MigrationSeed;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfig;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.SmtpOutboundConfigChangeSet;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigCommandRepositoryGateway;
-import net.civeira.phylax.features.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigFilter;
+import net.civeira.phylax.feature.notification.smtpoutboundconfig.domain.SmtpOutboundConfig;
+import net.civeira.phylax.feature.notification.smtpoutboundconfig.domain.SmtpOutboundConfigChangeSet;
+import net.civeira.phylax.feature.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigCommandRepositoryGateway;
+import net.civeira.phylax.feature.notification.smtpoutboundconfig.domain.gateway.SmtpOutboundConfigFilter;
 
 @ApplicationScoped
 @RequiredArgsConstructor

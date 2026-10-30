@@ -56,19 +56,19 @@ jq -e .issuer "$OUT/discovery.json" > /dev/null
 IAT="$(openssl rand -hex 32)"
 IAT_HASH="hmac-sha256:c0:$(printf '%s' "$IAT" | openssl dgst -sha256 -hmac "$PEPPER" -r | cut -d' ' -f1)"
 "${OP_COMPOSE[@]}" exec -T mariadb mariadb -uroot -pconformance phylax <<SQL
-INSERT INTO access_tenant_config (uid, version, tenant, dynamic_registration_policy,
+INSERT INTO identity_tenant_config (uid, version, tenant, dynamic_registration_policy,
   allow_password_grant, force_mfa, invitation_expiry_days, magic_link_expiry_minutes,
   refresh_token_max_lifetime_seconds, refresh_token_ttl_seconds, require_email_verification,
   require_pushed_authorization_requests, session_sso_ttl_seconds)
 SELECT UUID(), 0, t.uid, 'token-required', 0, 0, 7, 15, 86400, 3600, 0, 0, 3600
-FROM access_tenant t WHERE t.name = '$TENANT'
-  AND NOT EXISTS (SELECT 1 FROM access_tenant_config c WHERE c.tenant = t.uid);
-UPDATE access_tenant_config SET dynamic_registration_policy = 'token-required'
-WHERE tenant = (SELECT uid FROM access_tenant WHERE name = '$TENANT');
+FROM identity_tenant t WHERE t.name = '$TENANT'
+  AND NOT EXISTS (SELECT 1 FROM identity_tenant_config c WHERE c.tenant = t.uid);
+UPDATE identity_tenant_config SET dynamic_registration_policy = 'token-required'
+WHERE tenant = (SELECT uid FROM identity_tenant WHERE name = '$TENANT');
 INSERT INTO access_dcr_initial_access_token (uid, version, tenant, token_hash, max_uses, uses,
   expires_at)
 SELECT UUID(), 0, t.uid, '$IAT_HASH', 10, 0, NOW() + INTERVAL 1 DAY
-FROM access_tenant t WHERE t.name = '$TENANT';
+FROM identity_tenant t WHERE t.name = '$TENANT';
 SQL
 
 # ── 4. Clientes estáticos de los planes, registrados por DCR ───────────────

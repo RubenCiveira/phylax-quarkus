@@ -58,7 +58,7 @@ public class LegacyCredentialMigration {
     try (Connection conn = source.getConnection()) {
       int secrets = migrate(conn, "access_oauth_client", "secret_oauth",
           "secret_oauth NOT LIKE '" + SecretDigester.PREFIX + "%'", digester::digest);
-      int passwords = migrate(conn, "access_user", "password",
+      int passwords = migrate(conn, "identity_user", "password",
           "password <> '' AND password NOT LIKE '$argon2id$%'", hasher::hash);
       if (secrets + passwords > 0) {
         log.info("Migrated {} client secrets and {} passwords to non-reversible verifiers", secrets,

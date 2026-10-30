@@ -5,7 +5,7 @@ Un tenant es una organización aislada: sus usuarios, su configuración de login
 
 ## Crear el tenant
 
-Menú de tenants (API `POST /api/access/tenants`).
+Menú de tenants (API `POST /api/identity/tenants`).
 
 | Campo | Qué poner | Notas |
 |---|---|---|
@@ -13,13 +13,13 @@ Menú de tenants (API `POST /api/access/tenants`).
 | **Dominio** (`domain`) | Sufijo de dominio de la organización: `acme.com` | Obligatorio y único. Hoy no lo usa el login |
 | **Raíz** (`root`) | Desmarcado | Solo el tenant raíz de la instalación. Sus usuarios reciben `platform:global_access` |
 
-El tenant nace **deshabilitado**. Mientras lo esté, nadie puede iniciar sesión en él. Para habilitarlo o deshabilitarlo se usan las acciones *enable* / *disable* (`POST /api/access/tenants/{uid}/enable`).
+El tenant nace **deshabilitado**. Mientras lo esté, nadie puede iniciar sesión en él. Para habilitarlo o deshabilitarlo se usan las acciones *enable* / *disable* (`POST /api/identity/tenants/{uid}/enable`).
 
 Desde la ficha del tenant cuelgan tres apartados: **configuración**, **condiciones** (términos de uso) y **proveedores** (solo visible para root).
 
 ## Configuración del tenant
 
-Un registro de `tenant-config` por tenant (subformulario *config* o `/api/access/tenants-config`). La columna «Por defecto» es el valor con el que nace el registro; si el tenant no tiene configuración, se indica aparte. **Conviene crearla siempre**: sin ella, los refresh tokens duran lo mismo que el access token.
+Un registro de `tenant-config` por tenant (subformulario *config* o `/api/identity/tenants-config`). La columna «Por defecto» es el valor con el que nace el registro; si el tenant no tiene configuración, se indica aparte. **Conviene crearla siempre**: sin ella, los refresh tokens duran lo mismo que el access token.
 
 ### Sesión y tokens
 
@@ -70,7 +70,7 @@ Los siguientes campos se pueden rellenar, pero **la versión actual no los usa**
 
 ## Términos de uso
 
-Apartado *condiciones* (`/api/access/tenants-terms-of-use`). Cada registro es una versión de los términos que el usuario debe aceptar en su siguiente login.
+Apartado *condiciones* (`/api/identity/tenants-terms-of-use`). Cada registro es una versión de los términos que el usuario debe aceptar en su siguiente login.
 
 | Campo | Qué poner |
 |---|---|
@@ -83,7 +83,7 @@ Hay que habilitar el registro con la acción *enable*. Para publicar una versió
 
 ## Propósitos RGPD
 
-`/api/access/consent-purposes`. Usos de datos que el usuario acepta o rechaza uno a uno durante el login.
+`/api/identity/consent-purposes`. Usos de datos que el usuario acepta o rechaza uno a uno durante el login.
 
 | Campo | Qué poner |
 |---|---|
