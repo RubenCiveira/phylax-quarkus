@@ -20,7 +20,7 @@ async function encrypt(value, password) {
     const key = await window.crypto.subtle.deriveKey({
             name: "PBKDF2",
             salt: salt,
-            iterations: 100000,
+            iterations: 600000,
             hash: "SHA-256"
         },
         keyMaterial, {
@@ -97,3 +97,32 @@ async function signToken(secret) {
         utf8: secret
     });
 }
+
+function showLoading(form) {
+    // Hide the form and show the theme spinner while the request is in flight
+    var box = form && form.closest('.form-content');
+    if (!box) {
+        return;
+    }
+    if (!box.querySelector('.loading')) {
+        box.insertAdjacentHTML('afterbegin', '<div class="loading"></div>');
+    }
+    box.classList.remove('slide-in');
+    box.classList.add('slide-out');
+}
+
+// Capture phase: runs before the field encryption handlers start their work
+document.addEventListener('submit', function (event) {
+    if (!event.target.hasAttribute('data-no-loading')) {
+        showLoading(event.target);
+    }
+}, true);
+
+// Restore the form when the page comes back from the bfcache (browser back button)
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        document.querySelectorAll('.form-content.slide-out').forEach(function (box) {
+            box.classList.remove('slide-out');
+        });
+    }
+});

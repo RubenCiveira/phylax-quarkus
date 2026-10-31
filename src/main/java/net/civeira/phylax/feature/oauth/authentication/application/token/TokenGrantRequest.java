@@ -29,4 +29,3 @@ public record TokenGrantRequest(String tenant, String grantType, Map<String, Lis
     return TokenParams.first(params, name);
   }
 }
-

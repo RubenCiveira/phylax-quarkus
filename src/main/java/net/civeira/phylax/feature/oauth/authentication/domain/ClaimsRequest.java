@@ -127,4 +127,3 @@ public record ClaimsRequest(Map<String, Boolean> idToken, Map<String, Boolean> u
         .findFirst();
   }
 }
-

@@ -206,11 +206,13 @@ public class SecureHtmlBuilder {
    */
   private Snipped addSign(String name, boolean send, String form) {
     String secret = adapter.currentKey();
-    return new Snipped(
-        "" + "  const token = await signToken('" + secret + "');\r\n"
-            + "  document.getElementById(\"" + name + "\").value = token;"
-            + (send ? "document.getElementById(\"" + form + "\").submit();" : "") + "" + "",
-        "jsrsasign-jwths-min.js", "oauth.min.js");
+    return new Snipped("" + "  const token = await signToken('" + secret + "');\r\n"
+        + "  document.getElementById(\"" + name + "\").value = token;"
+        + (send
+            ? "showLoading(document.getElementById(\"" + form + "\"));"
+                + "document.getElementById(\"" + form + "\").submit();"
+            : "")
+        + "" + "", "jsrsasign-jwths-min.js", "oauth.min.js");
   }
 
   /**

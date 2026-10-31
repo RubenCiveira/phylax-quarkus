@@ -146,4 +146,3 @@ public record ClientCredentials(String bodyClientId, String basicId, String basi
         : values.get(0);
   }
 }
-

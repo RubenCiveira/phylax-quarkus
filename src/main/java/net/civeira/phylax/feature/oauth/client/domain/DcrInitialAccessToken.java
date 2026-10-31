@@ -13,4 +13,3 @@ import java.util.Optional;
  */
 public record DcrInitialAccessToken(String uid, Optional<List<String>> allowedGrantTypes) {
 }
-

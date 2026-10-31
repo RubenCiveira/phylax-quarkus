@@ -1,8 +1,0 @@
-extends: default
-footer:
-  recto:
-    right:
-      content: '{page-number} of {page-count}'
-  verso:
-    left:
-      content: '{page-number} of {page-count}'

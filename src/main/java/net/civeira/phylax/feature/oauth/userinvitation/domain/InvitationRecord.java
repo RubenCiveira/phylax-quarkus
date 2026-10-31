@@ -27,4 +27,3 @@ public record InvitationRecord(String uid, String tenantUid, String email, Strin
     return PENDING.equals(status) && expiresAt != null && expiresAt.isAfter(now);
   }
 }
-
