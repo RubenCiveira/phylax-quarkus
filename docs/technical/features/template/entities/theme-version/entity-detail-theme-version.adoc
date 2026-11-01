@@ -20,6 +20,6 @@ include::partial/properties-theme-version.adoc[]
 .Diagrama de casos de uso para theme version
 [plantuml]
 ....
-include::diagrams/usecase-diagram-theme-version.puml[]
+include::../diagrams/usecase-diagram-theme-version.puml[]
 ....
 include:partial/usecase-theme-version.adoc[leveloffset=+1]

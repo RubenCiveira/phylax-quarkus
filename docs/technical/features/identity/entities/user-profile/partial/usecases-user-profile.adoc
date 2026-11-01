@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user profile
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-profile.puml[]
+include::../diagrams/usecase-diagram-user-profile.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-profile.adoc[]

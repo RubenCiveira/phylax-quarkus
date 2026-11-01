@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para theme
 [plantuml]
 ....
-include::diagrams/usecase-diagram-theme.puml[]
+include::../diagrams/usecase-diagram-theme.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-theme.adoc[]

@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para api key client
 [plantuml]
 ....
-include::diagrams/usecase-diagram-api-key-client.puml[]
+include::../diagrams/usecase-diagram-api-key-client.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-api-key-client.adoc[]

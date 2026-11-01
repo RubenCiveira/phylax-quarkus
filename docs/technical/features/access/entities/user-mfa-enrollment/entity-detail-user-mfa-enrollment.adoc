@@ -20,6 +20,6 @@ include::partial/properties-user-mfa-enrollment.adoc[]
 .Diagrama de casos de uso para user mfa enrollment
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-mfa-enrollment.puml[]
+include::../diagrams/usecase-diagram-user-mfa-enrollment.puml[]
 ....
 include:partial/usecase-user-mfa-enrollment.adoc[leveloffset=+1]

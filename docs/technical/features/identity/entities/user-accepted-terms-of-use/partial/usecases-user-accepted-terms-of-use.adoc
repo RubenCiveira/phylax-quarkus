@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user accepted terms of use
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-accepted-terms-of-use.puml[]
+include::../diagrams/usecase-diagram-user-accepted-terms-of-use.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-accepted-terms-of-use.adoc[]

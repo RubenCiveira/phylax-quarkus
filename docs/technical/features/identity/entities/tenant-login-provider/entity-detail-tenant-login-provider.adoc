@@ -23,7 +23,7 @@ include::partial/properties-tenant-login-provider.adoc[]
 .Diagrama de casos de uso para tenant login provider
 [plantuml]
 ....
-include::diagrams/usecase-diagram-tenant-login-provider.puml[]
+include::../diagrams/usecase-diagram-tenant-login-provider.puml[]
 ....
 include:partial/usecase-tenant-login-provider.adoc[leveloffset=+1]
 .Eventos

@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para consent purpose
 [plantuml]
 ....
-include::diagrams/usecase-diagram-consent-purpose.puml[]
+include::../diagrams/usecase-diagram-consent-purpose.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-consent-purpose.adoc[]

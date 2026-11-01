@@ -23,6 +23,6 @@ include::partial/properties-user-profile.adoc[]
 .Diagrama de casos de uso para user profile
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-profile.puml[]
+include::../diagrams/usecase-diagram-user-profile.puml[]
 ....
 

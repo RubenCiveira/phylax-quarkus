@@ -20,6 +20,6 @@ include::partial/properties-snippet-asset.adoc[]
 .Diagrama de casos de uso para snippet asset
 [plantuml]
 ....
-include::diagrams/usecase-diagram-snippet-asset.puml[]
+include::../diagrams/usecase-diagram-snippet-asset.puml[]
 ....
 include:partial/usecase-snippet-asset.adoc[leveloffset=+1]

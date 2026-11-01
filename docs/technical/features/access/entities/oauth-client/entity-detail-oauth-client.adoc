@@ -23,7 +23,7 @@ include::partial/properties-oauth-client.adoc[]
 .Diagrama de casos de uso para oauth client
 [plantuml]
 ....
-include::diagrams/usecase-diagram-oauth-client.puml[]
+include::../diagrams/usecase-diagram-oauth-client.puml[]
 ....
 include:partial/usecase-oauth-client.adoc[leveloffset=+1]
 .Eventos

@@ -26,7 +26,7 @@ include::partial/properties-tenant-login-provider.adoc[]
 .Diagrama de casos de uso para tenant login provider
 [plantuml]
 ....
-include::diagrams/usecase-diagram-tenant-login-provider.puml[]
+include::../diagrams/usecase-diagram-tenant-login-provider.puml[]
 ....
 
 .Eventos

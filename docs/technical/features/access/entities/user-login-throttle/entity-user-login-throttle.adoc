@@ -23,6 +23,6 @@ include::partial/properties-user-login-throttle.adoc[]
 .Diagrama de casos de uso para user login throttle
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-login-throttle.puml[]
+include::../diagrams/usecase-diagram-user-login-throttle.puml[]
 ....
 

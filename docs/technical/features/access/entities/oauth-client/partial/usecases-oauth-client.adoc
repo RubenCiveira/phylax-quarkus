@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para oauth client
 [plantuml]
 ....
-include::diagrams/usecase-diagram-oauth-client.puml[]
+include::../diagrams/usecase-diagram-oauth-client.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-oauth-client.adoc[]

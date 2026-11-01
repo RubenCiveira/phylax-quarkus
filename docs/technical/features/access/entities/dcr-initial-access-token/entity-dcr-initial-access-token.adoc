@@ -23,7 +23,7 @@ include::partial/properties-dcr-initial-access-token.adoc[]
 .Diagrama de casos de uso para dcr initial access token
 [plantuml]
 ....
-include::diagrams/usecase-diagram-dcr-initial-access-token.puml[]
+include::../diagrams/usecase-diagram-dcr-initial-access-token.puml[]
 ....
 
 .Eventos

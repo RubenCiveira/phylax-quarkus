@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para snippet asset
 [plantuml]
 ....
-include::diagrams/usecase-diagram-snippet-asset.puml[]
+include::../diagrams/usecase-diagram-snippet-asset.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-snippet-asset.adoc[]

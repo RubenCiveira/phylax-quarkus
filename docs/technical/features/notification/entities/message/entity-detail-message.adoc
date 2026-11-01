@@ -20,7 +20,7 @@ include::partial/properties-message.adoc[]
 .Diagrama de casos de uso para message
 [plantuml]
 ....
-include::diagrams/usecase-diagram-message.puml[]
+include::../diagrams/usecase-diagram-message.puml[]
 ....
 include:partial/usecase-message.adoc[leveloffset=+1]
 .Eventos

@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user scope consent
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-scope-consent.puml[]
+include::../diagrams/usecase-diagram-user-scope-consent.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-scope-consent.adoc[]

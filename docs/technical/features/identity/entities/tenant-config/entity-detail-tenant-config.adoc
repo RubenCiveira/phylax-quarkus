@@ -20,7 +20,7 @@ include::partial/properties-tenant-config.adoc[]
 .Diagrama de casos de uso para tenant config
 [plantuml]
 ....
-include::diagrams/usecase-diagram-tenant-config.puml[]
+include::../diagrams/usecase-diagram-tenant-config.puml[]
 ....
 include:partial/usecase-tenant-config.adoc[leveloffset=+1]
 .Eventos

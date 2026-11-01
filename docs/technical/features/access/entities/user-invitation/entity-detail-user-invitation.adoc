@@ -20,7 +20,7 @@ include::partial/properties-user-invitation.adoc[]
 .Diagrama de casos de uso para user invitation
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-invitation.puml[]
+include::../diagrams/usecase-diagram-user-invitation.puml[]
 ....
 include:partial/usecase-user-invitation.adoc[leveloffset=+1]
 .Eventos

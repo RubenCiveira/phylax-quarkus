@@ -20,6 +20,6 @@ include::partial/properties-user-purpose-consent.adoc[]
 .Diagrama de casos de uso para user purpose consent
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-purpose-consent.puml[]
+include::../diagrams/usecase-diagram-user-purpose-consent.puml[]
 ....
 include:partial/usecase-user-purpose-consent.adoc[leveloffset=+1]

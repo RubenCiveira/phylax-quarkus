@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user mfa enrollment
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-mfa-enrollment.puml[]
+include::../diagrams/usecase-diagram-user-mfa-enrollment.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-mfa-enrollment.adoc[]

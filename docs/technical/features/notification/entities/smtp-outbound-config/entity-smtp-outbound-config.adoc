@@ -23,7 +23,7 @@ include::partial/properties-smtp-outbound-config.adoc[]
 .Diagrama de casos de uso para smtp outbound config
 [plantuml]
 ....
-include::diagrams/usecase-diagram-smtp-outbound-config.puml[]
+include::../diagrams/usecase-diagram-smtp-outbound-config.puml[]
 ....
 
 .Eventos

@@ -22,6 +22,6 @@ include::partial/properties-role.adoc[]
 .Diagrama de casos de uso para role
 [plantuml]
 ....
-include::diagrams/usecase-diagram-role.puml[]
+include::../diagrams/usecase-diagram-role.puml[]
 ....
 

@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para template variable
 [plantuml]
 ....
-include::diagrams/usecase-diagram-template-variable.puml[]
+include::../diagrams/usecase-diagram-template-variable.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-template-variable.adoc[]

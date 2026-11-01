@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para template asset
 [plantuml]
 ....
-include::diagrams/usecase-diagram-template-asset.puml[]
+include::../diagrams/usecase-diagram-template-asset.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-template-asset.adoc[]

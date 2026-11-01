@@ -23,6 +23,6 @@ include::partial/properties-user-mfa-recovery-code.adoc[]
 .Diagrama de casos de uso para user mfa recovery code
 [plantuml]
 ....
-include::diagrams/usecase-diagram-user-mfa-recovery-code.puml[]
+include::../diagrams/usecase-diagram-user-mfa-recovery-code.puml[]
 ....
 include:partial/usecase-user-mfa-recovery-code.adoc[leveloffset=+1]
