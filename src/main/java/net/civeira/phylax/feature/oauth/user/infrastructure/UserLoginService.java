@@ -56,6 +56,7 @@ import net.civeira.phylax.feature.oauth.tokensecurity.application.AcrPolicy;
 public class UserLoginService {
   private static final int LIMIT = 3;
   private static final TemporalAmount BLOCK_TIME = Duration.ofHours(6);
+  private static final String GLOBAL_ACCESS_SCOPE = "platform:global_access";
 
   private final RequiredConsentService terms;
 
@@ -136,7 +137,7 @@ public class UserLoginService {
     List<Supplier<Optional<AuthenticationResult>>> calls =
         List.of(() -> checkPassword(request, user, password), () -> checkFirstPass(request, user),
             () -> checkMfa(request, user, mode), () -> checkTerms(request, user),
-            () -> checkScopesConsent(request, user));
+            () -> checkScopesConsent(request, user, tenant));
     for (Supplier<Optional<AuthenticationResult>> call : calls) {
       Optional<AuthenticationResult> value = call.get();
       if (value.isPresent()) {
@@ -190,9 +191,7 @@ public class UserLoginService {
         ud.addGroupsTo(aud, audGroups);
       }
     });
-    if (tenant.isRoot()) {
-      ud.setScopes(List.of("platform:global_access"));
-    }
+    ud.setScopes(loginScopes(tenant));
     return AuthenticationResult.right(ud);
   }
 
@@ -244,9 +243,22 @@ public class UserLoginService {
         .map(_ -> AuthenticationResult.consentRequired(request.getTenant(), user.getName()));
   }
 
-  private Optional<AuthenticationResult> checkScopesConsent(AuthRequest request, User user) {
+  /**
+   * Scopes the login grants by itself, without asking the client or the user: global access for the
+   * users of the root tenant.
+   */
+  private List<String> loginScopes(Tenant tenant) {
+    return tenant.isRoot() ? List.of(GLOBAL_ACCESS_SCOPE) : List.of();
+  }
+
+  private Optional<AuthenticationResult> checkScopesConsent(AuthRequest request, User user,
+      Tenant tenant) {
     String clientId = request.getClientId().orElse("");
-    String scopeString = request.getScope().orElse("");
+    // The scopes the login grants by itself need no consent: a refresh asks again for them.
+    List<String> granted = loginScopes(tenant);
+    String scopeString = Arrays.stream(request.getScope().orElse("").split("\\s+"))
+        .filter(scope -> !scope.isBlank() && !granted.contains(scope))
+        .collect(Collectors.joining(" "));
     List<ScopePermission> pending =
         scopesConsent.pendingScopes(request.getTenant(), user.getName(), clientId, scopeString);
     if (pending.isEmpty()) {

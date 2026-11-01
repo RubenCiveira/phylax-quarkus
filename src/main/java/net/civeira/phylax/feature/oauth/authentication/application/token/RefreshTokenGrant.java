@@ -3,8 +3,10 @@ package net.civeira.phylax.feature.oauth.authentication.application.token;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -100,7 +102,10 @@ public class RefreshTokenGrant {
     if (!auth.isRight()) {
       throw OAuthTokenException.invalidGrant("The user can not be authenticated");
     }
-    auth.getData().setScopes(scopes);
+    // The login grants its own scopes again (root tenant): the narrowing does not drop them.
+    Set<String> granted = new LinkedHashSet<>(scopes);
+    granted.addAll(auth.getData().getScopes());
+    auth.getData().setScopes(new ArrayList<>(granted));
     auth.getData().setGrantAudiences(new ArrayList<>(info.getAudiences()));
     // The rotated tokens keep the facts of the original login, not those of this refresh.
     auth.getData().setSid(info.getSid());
