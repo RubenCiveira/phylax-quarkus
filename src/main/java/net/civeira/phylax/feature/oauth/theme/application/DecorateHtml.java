@@ -57,7 +57,9 @@ public class DecorateHtml implements DecoratePageGateway {
       final Locale locale, final String template) {
 
     String templateCode = "page." + template;
-    Optional<Tenant> tenantOpt = tenants.find(TenantFilter.builder().name(tenantName).build());
+    // A null name would build an unfiltered query that matches every tenant.
+    Optional<Tenant> tenantOpt = tenantName == null ? Optional.empty()
+        : tenants.find(TenantFilter.builder().name(tenantName).build());
     Optional<Theme> themeOpt = tenantOpt.flatMap(this::resolveTheme).or(this::resolveGlobalTheme);
     String themeName = themeOpt.map(Theme::getName).orElse(DEFAULT_THEME);
     String themeAssetsPath = "/oauth/themes/" + themeName;

@@ -406,7 +406,7 @@ public class AuthorizeHtml {
     NewCookie csrfCookie =
         new NewCookie.Builder(LOGOUT_CSRF).value(csrf).path("/oauth/openid/" + tenant).secure(true)
             .httpOnly(true).sameSite(NewCookie.SameSite.LAX).build();
-    return Response.ok(decorator.getGenericFullPage("Sign out", form.toString(), Locale.ENGLISH))
+    return Response.ok(decorator.getFullPage(tenant, "Sign out", form.toString(), Locale.ENGLISH))
         .type(TEXT_HTML).cookie(csrfCookie).header("Cache-Control", "no-store").build();
   }
 
@@ -526,7 +526,7 @@ public class AuthorizeHtml {
 
     Locale locale = headers.getAcceptableLanguages().stream().findFirst().orElse(Locale.ENGLISH);
     return Response
-        .ok(decorator.getGenericFullPage("Logged out",
+        .ok(decorator.getFullPage(tenant, "Logged out",
             "<h1>You have been logged out</h1>"
                 + "<p><a href=\"javascript:window.close()\">Close this window</a></p>",
             locale))
