@@ -10,7 +10,7 @@ template-version
 include::diagrams/class-diagram-template-version.puml[]
 ....
 
-include::partial/visibility-template-version.partial.adoc[]
+include::partial/visibility-template-version.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-template-version.adoc[]
 .Diagrama de casos de uso para template version
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-template-version.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-template-version.adoc[leveloffset=+1]
+include::partial/usecases-template-version.adoc[leveloffset=+1]

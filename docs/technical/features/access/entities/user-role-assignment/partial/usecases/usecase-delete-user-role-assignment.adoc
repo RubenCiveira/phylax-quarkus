@@ -3,5 +3,9 @@
 
 La operacion de delete esta habilitada a cualquier usuario autenticado.
 
-Delete
+.Borrado de user role assignment
+[plantuml]
+....
+include::../../diagrams/sequence-delete-user-role-assignment.puml[]
+....
 

@@ -2,7 +2,7 @@
 // Estructura de paquetes y reglas de dependencia. La decisión está en el ADR-0002.
 == Arquitectura del código
 
-La aplicación es un monolito modular: un único artefacto con tres paquetes de primer nivel bajo `net.civeira.phylax` (xref:{adr-root}/0002-monolito-modular-con-arquitectura-hexagonal.adoc[ADR-0002]).
+La aplicación es un monolito modular: un único artefacto con tres paquetes de primer nivel bajo `{{base}}` (xref:{adr-root}/0002-monolito-modular-con-arquitectura-hexagonal.adoc[ADR-0002]).
 
 [cols="1,4",options="header"]
 |===

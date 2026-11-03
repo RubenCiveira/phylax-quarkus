@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de smtp outbound config
+[plantuml]
+....
+include::../../diagrams/sequence-list-smtp-outbound-config.puml[]
+....
 

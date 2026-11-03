@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de smtp outbound config
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-smtp-outbound-config.puml[]
+....
 

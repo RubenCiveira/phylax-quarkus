@@ -3,5 +3,9 @@
 
 La operacion de delete esta habilitada a cualquier usuario autenticado.
 
-Delete
+.Borrado de user accepted terms of use
+[plantuml]
+....
+include::../../diagrams/sequence-delete-user-accepted-terms-of-use.puml[]
+....
 

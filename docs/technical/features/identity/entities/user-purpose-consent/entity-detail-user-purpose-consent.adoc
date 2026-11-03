@@ -10,7 +10,7 @@ user-purpose-consent
 include::diagrams/class-diagram-user-purpose-consent.puml[]
 ....
 
-include::partial/visibility-user-purpose-consent.partial.adoc[]
+include::partial/visibility-user-purpose-consent.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-user-purpose-consent.adoc[]
 .Diagrama de casos de uso para user purpose consent
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-purpose-consent.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-user-purpose-consent.adoc[leveloffset=+1]
+include::partial/usecases-user-purpose-consent.adoc[leveloffset=+1]

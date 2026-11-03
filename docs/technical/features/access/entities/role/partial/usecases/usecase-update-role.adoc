@@ -3,5 +3,9 @@
 
 La operacion de update esta habilitada a cualquier usuario autenticado.
 
-Update 
+.Modificación de role
+[plantuml]
+....
+include::../../diagrams/sequence-update-role.puml[]
+....
 

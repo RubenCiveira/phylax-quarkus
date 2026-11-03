@@ -3,5 +3,9 @@
 
 La operacion de create esta habilitada a cualquier usuario autenticado.
 
-Create
+.Creación de user mfa enrollment
+[plantuml]
+....
+include::../../diagrams/sequence-create-user-mfa-enrollment.puml[]
+....
 

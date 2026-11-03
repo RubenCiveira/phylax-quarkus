@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user mfa recovery code
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-mfa-recovery-code.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-mfa-recovery-code.adoc[]

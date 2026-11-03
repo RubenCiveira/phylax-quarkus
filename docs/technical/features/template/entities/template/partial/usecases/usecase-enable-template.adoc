@@ -3,5 +3,9 @@
 
 La operacion de enable esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Enable de template
+[plantuml]
+....
+include::../../diagrams/sequence-enable-template.puml[]
+....
 

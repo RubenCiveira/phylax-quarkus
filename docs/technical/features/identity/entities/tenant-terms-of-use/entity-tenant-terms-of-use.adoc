@@ -23,7 +23,7 @@ include::partial/properties-tenant-terms-of-use.adoc[]
 .Diagrama de casos de uso para tenant terms of use
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-tenant-terms-of-use.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 
 .Eventos

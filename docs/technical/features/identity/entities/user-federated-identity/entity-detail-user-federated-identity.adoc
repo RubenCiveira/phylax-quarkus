@@ -10,7 +10,7 @@ user-federated-identity
 include::diagrams/class-diagram-user-federated-identity.puml[]
 ....
 
-include::partial/visibility-user-federated-identity.partial.adoc[]
+include::partial/visibility-user-federated-identity.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-user-federated-identity.adoc[]
 .Diagrama de casos de uso para user federated identity
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-federated-identity.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-user-federated-identity.adoc[leveloffset=+1]
+include::partial/usecases-user-federated-identity.adoc[leveloffset=+1]

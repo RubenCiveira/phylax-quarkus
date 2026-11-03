@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de dcr initial access token
+[plantuml]
+....
+include::../../diagrams/sequence-list-dcr-initial-access-token.puml[]
+....
 

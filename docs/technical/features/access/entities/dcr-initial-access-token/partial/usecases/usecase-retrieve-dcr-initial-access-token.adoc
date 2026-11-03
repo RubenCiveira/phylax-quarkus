@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de dcr initial access token
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-dcr-initial-access-token.puml[]
+....
 

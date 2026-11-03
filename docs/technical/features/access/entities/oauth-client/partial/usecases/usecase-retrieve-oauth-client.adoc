@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de oauth client
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-oauth-client.puml[]
+....
 

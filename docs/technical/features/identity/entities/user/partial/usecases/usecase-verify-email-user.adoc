@@ -3,5 +3,9 @@
 
 La operacion de verify-email esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Verify email de user
+[plantuml]
+....
+include::../../diagrams/sequence-verify-email-user.puml[]
+....
 

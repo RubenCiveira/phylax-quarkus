@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de template variable
+[plantuml]
+....
+include::../../diagrams/sequence-list-template-variable.puml[]
+....
 

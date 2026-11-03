@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para tenant terms of use
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-tenant-terms-of-use.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-tenant-terms-of-use.adoc[]

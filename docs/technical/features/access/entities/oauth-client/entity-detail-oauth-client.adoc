@@ -13,7 +13,7 @@ Las diferentes aplicaciones que pueden usar el sistema de
 include::diagrams/class-diagram-oauth-client.puml[]
 ....
 
-include::partial/visibility-oauth-client.partial.adoc[]
+include::partial/visibility-oauth-client.adoc[]
 
 .Propiedades
 
@@ -23,9 +23,9 @@ include::partial/properties-oauth-client.adoc[]
 .Diagrama de casos de uso para oauth client
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-oauth-client.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-oauth-client.adoc[leveloffset=+1]
+include::partial/usecases-oauth-client.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

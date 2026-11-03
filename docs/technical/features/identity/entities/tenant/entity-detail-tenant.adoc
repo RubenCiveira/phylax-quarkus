@@ -10,7 +10,7 @@ tenant
 include::diagrams/class-diagram-tenant.puml[]
 ....
 
-include::partial/visibility-tenant.partial.adoc[]
+include::partial/visibility-tenant.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-tenant.adoc[]
 .Diagrama de casos de uso para tenant
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-tenant.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-tenant.adoc[leveloffset=+1]
+include::partial/usecases-tenant.adoc[leveloffset=+1]

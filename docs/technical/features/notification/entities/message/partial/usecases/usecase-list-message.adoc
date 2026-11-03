@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de message
+[plantuml]
+....
+include::../../diagrams/sequence-list-message.puml[]
+....
 

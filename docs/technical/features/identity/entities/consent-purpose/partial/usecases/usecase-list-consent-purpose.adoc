@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de consent purpose
+[plantuml]
+....
+include::../../diagrams/sequence-list-consent-purpose.puml[]
+....
 

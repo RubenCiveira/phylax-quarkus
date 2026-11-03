@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de tenant login provider
+[plantuml]
+....
+include::../../diagrams/sequence-list-tenant-login-provider.puml[]
+....
 

@@ -3,5 +3,9 @@
 
 La operacion de unlock esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Unlock de user
+[plantuml]
+....
+include::../../diagrams/sequence-unlock-user.puml[]
+....
 

@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para message
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-message.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-message.adoc[]

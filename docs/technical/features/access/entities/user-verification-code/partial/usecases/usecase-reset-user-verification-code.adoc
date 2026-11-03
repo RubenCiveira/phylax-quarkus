@@ -3,5 +3,9 @@
 
 La operacion de reset esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Reset de user verification code
+[plantuml]
+....
+include::../../diagrams/sequence-reset-user-verification-code.puml[]
+....
 

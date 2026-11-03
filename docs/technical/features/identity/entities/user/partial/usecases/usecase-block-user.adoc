@@ -3,5 +3,9 @@
 
 La operacion de block esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Block de user
+[plantuml]
+....
+include::../../diagrams/sequence-block-user.puml[]
+....
 

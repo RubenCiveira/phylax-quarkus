@@ -3,5 +3,9 @@
 
 La operacion de retrieve-document esta habilitada a cualquier usuario autenticado.
 
-Binary for document
+.Descarga de document de tenant terms of use
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-document-tenant-terms-of-use.puml[]
+....
 

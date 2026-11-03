@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para tenant config
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-tenant-config.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-tenant-config.adoc[]

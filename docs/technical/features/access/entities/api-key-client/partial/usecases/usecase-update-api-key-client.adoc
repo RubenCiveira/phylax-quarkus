@@ -3,5 +3,9 @@
 
 La operacion de update esta habilitada a cualquier usuario autenticado.
 
-Update 
+.Modificación de api key client
+[plantuml]
+....
+include::../../diagrams/sequence-update-api-key-client.puml[]
+....
 

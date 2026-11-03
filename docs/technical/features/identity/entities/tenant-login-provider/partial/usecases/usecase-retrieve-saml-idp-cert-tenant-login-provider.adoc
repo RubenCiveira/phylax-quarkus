@@ -3,5 +3,9 @@
 
 La operacion de retrieve-saml-idp-cert esta habilitada a cualquier usuario autenticado.
 
-Binary for saml-idp-cert
+.Descarga de saml idp cert de tenant login provider
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-saml-idp-cert-tenant-login-provider.puml[]
+....
 

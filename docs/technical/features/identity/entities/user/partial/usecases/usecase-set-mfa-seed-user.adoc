@@ -3,5 +3,9 @@
 
 La operacion de set-mfa-seed esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Set mfa seed de user
+[plantuml]
+....
+include::../../diagrams/sequence-set-mfa-seed-user.puml[]
+....
 

@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de user group membership
+[plantuml]
+....
+include::../../diagrams/sequence-list-user-group-membership.puml[]
+....
 

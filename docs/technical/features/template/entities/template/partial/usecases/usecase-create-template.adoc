@@ -3,5 +3,9 @@
 
 La operacion de create esta habilitada a cualquier usuario autenticado.
 
-Create
+.Creación de template
+[plantuml]
+....
+include::../../diagrams/sequence-create-template.puml[]
+....
 

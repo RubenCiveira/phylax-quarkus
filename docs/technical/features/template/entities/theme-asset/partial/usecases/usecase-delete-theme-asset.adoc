@@ -3,5 +3,9 @@
 
 La operacion de delete esta habilitada a cualquier usuario autenticado.
 
-Delete
+.Borrado de theme asset
+[plantuml]
+....
+include::../../diagrams/sequence-delete-theme-asset.puml[]
+....
 

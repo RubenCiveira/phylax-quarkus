@@ -10,7 +10,7 @@ theme
 include::diagrams/class-diagram-theme.puml[]
 ....
 
-include::partial/visibility-theme.partial.adoc[]
+include::partial/visibility-theme.adoc[]
 
 .Propiedades
 
@@ -20,9 +20,9 @@ include::partial/properties-theme.adoc[]
 .Diagrama de casos de uso para theme
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-theme.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-theme.adoc[leveloffset=+1]
+include::partial/usecases-theme.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

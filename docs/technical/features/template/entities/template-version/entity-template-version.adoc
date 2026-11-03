@@ -23,6 +23,6 @@ include::partial/properties-template-version.adoc[]
 .Diagrama de casos de uso para template version
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-template-version.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 

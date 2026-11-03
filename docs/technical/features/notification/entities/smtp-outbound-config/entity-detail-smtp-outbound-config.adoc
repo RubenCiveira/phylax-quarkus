@@ -10,7 +10,7 @@ smtp-outbound-config
 include::diagrams/class-diagram-smtp-outbound-config.puml[]
 ....
 
-include::partial/visibility-smtp-outbound-config.partial.adoc[]
+include::partial/visibility-smtp-outbound-config.adoc[]
 
 .Propiedades
 
@@ -20,9 +20,9 @@ include::partial/properties-smtp-outbound-config.adoc[]
 .Diagrama de casos de uso para smtp outbound config
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-smtp-outbound-config.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-smtp-outbound-config.adoc[leveloffset=+1]
+include::partial/usecases-smtp-outbound-config.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

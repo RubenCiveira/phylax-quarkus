@@ -23,7 +23,7 @@ include::partial/properties-template-asset.adoc[]
 .Diagrama de casos de uso para template asset
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-template-asset.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 
 .Eventos

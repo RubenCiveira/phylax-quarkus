@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de consent purpose
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-consent-purpose.puml[]
+....
 

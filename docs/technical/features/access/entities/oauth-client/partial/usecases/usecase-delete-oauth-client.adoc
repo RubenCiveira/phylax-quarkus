@@ -3,5 +3,9 @@
 
 La operacion de delete esta habilitada a cualquier usuario autenticado.
 
-Delete
+.Borrado de oauth client
+[plantuml]
+....
+include::../../diagrams/sequence-delete-oauth-client.puml[]
+....
 

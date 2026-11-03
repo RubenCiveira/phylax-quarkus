@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user login throttle
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-login-throttle.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-login-throttle.adoc[]

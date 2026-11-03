@@ -3,5 +3,9 @@
 
 La operacion de retrieve-content esta habilitada a cualquier usuario autenticado.
 
-Binary for content
+.Descarga de content de template asset
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-content-template-asset.puml[]
+....
 

@@ -3,5 +3,9 @@
 
 La operacion de create esta habilitada a cualquier usuario autenticado.
 
-Create
+.Creación de tenant
+[plantuml]
+....
+include::../../diagrams/sequence-create-tenant.puml[]
+....
 

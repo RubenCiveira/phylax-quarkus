@@ -13,7 +13,7 @@ Represents a login identity provider (e.g., Google,
 include::diagrams/class-diagram-tenant-login-provider.puml[]
 ....
 
-include::partial/visibility-tenant-login-provider.partial.adoc[]
+include::partial/visibility-tenant-login-provider.adoc[]
 
 .Propiedades
 
@@ -23,9 +23,9 @@ include::partial/properties-tenant-login-provider.adoc[]
 .Diagrama de casos de uso para tenant login provider
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-tenant-login-provider.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-tenant-login-provider.adoc[leveloffset=+1]
+include::partial/usecases-tenant-login-provider.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

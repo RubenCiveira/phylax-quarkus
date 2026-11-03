@@ -3,5 +3,9 @@
 
 La operacion de accept esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Accept de user
+[plantuml]
+....
+include::../../diagrams/sequence-accept-user.puml[]
+....
 

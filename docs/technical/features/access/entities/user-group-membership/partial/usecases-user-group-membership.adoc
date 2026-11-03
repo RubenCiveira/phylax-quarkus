@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user group membership
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-group-membership.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-group-membership.adoc[]

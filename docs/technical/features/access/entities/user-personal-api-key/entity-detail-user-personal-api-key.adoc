@@ -12,7 +12,7 @@ A personal API key (PAT) scoped to a specific user. The raw key is shown to the 
 include::diagrams/class-diagram-user-personal-api-key.puml[]
 ....
 
-include::partial/visibility-user-personal-api-key.partial.adoc[]
+include::partial/visibility-user-personal-api-key.adoc[]
 
 .Propiedades
 
@@ -22,9 +22,9 @@ include::partial/properties-user-personal-api-key.adoc[]
 .Diagrama de casos de uso para user personal api key
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-personal-api-key.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-user-personal-api-key.adoc[leveloffset=+1]
+include::partial/usecases-user-personal-api-key.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-user.adoc[]
 

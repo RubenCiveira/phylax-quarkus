@@ -3,5 +3,9 @@
 
 La operacion de delete esta habilitada a cualquier usuario autenticado.
 
-Delete
+.Borrado de user personal api key
+[plantuml]
+....
+include::../../diagrams/sequence-delete-user-personal-api-key.puml[]
+....
 

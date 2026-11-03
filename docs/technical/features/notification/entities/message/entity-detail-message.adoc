@@ -10,7 +10,7 @@ message
 include::diagrams/class-diagram-message.puml[]
 ....
 
-include::partial/visibility-message.partial.adoc[]
+include::partial/visibility-message.adoc[]
 
 .Propiedades
 
@@ -20,9 +20,9 @@ include::partial/properties-message.adoc[]
 .Diagrama de casos de uso para message
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-message.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-message.adoc[leveloffset=+1]
+include::partial/usecases-message.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

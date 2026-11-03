@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para snippet version
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-snippet-version.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-snippet-version.adoc[]

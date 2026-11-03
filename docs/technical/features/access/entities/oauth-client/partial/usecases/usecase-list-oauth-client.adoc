@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de oauth client
+[plantuml]
+....
+include::../../diagrams/sequence-list-oauth-client.puml[]
+....
 

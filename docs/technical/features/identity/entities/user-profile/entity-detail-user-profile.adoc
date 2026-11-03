@@ -10,7 +10,7 @@ user-profile
 include::diagrams/class-diagram-user-profile.puml[]
 ....
 
-include::partial/visibility-user-profile.partial.adoc[]
+include::partial/visibility-user-profile.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-user-profile.adoc[]
 .Diagrama de casos de uso para user profile
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-profile.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-user-profile.adoc[leveloffset=+1]
+include::partial/usecases-user-profile.adoc[leveloffset=+1]

@@ -3,5 +3,9 @@
 
 La operacion de create esta habilitada a cualquier usuario autenticado.
 
-Create
+.Creación de user mfa recovery code
+[plantuml]
+....
+include::../../diagrams/sequence-create-user-mfa-recovery-code.puml[]
+....
 

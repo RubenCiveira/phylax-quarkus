@@ -3,5 +3,9 @@
 
 La operacion de update esta habilitada a cualquier usuario autenticado.
 
-Update 
+.Modificación de resource server
+[plantuml]
+....
+include::../../diagrams/sequence-update-resource-server.puml[]
+....
 

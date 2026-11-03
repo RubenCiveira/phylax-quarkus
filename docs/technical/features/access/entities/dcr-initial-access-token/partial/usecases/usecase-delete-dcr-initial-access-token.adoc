@@ -3,5 +3,9 @@
 
 La operacion de delete esta habilitada a cualquier usuario autenticado.
 
-Delete
+.Borrado de dcr initial access token
+[plantuml]
+....
+include::../../diagrams/sequence-delete-dcr-initial-access-token.puml[]
+....
 

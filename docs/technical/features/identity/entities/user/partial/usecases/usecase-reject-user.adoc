@@ -3,5 +3,9 @@
 
 La operacion de reject esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Reject de user
+[plantuml]
+....
+include::../../diagrams/sequence-reject-user.puml[]
+....
 

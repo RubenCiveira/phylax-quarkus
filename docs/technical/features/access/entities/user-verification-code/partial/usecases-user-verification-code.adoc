@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user verification code
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-verification-code.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-verification-code.adoc[]

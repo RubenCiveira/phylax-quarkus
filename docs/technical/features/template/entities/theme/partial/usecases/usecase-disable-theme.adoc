@@ -3,5 +3,9 @@
 
 La operacion de disable esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Disable de theme
+[plantuml]
+....
+include::../../diagrams/sequence-disable-theme.puml[]
+....
 

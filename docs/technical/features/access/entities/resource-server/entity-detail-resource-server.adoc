@@ -19,6 +19,6 @@ include::partial/properties-resource-server.adoc[]
 .Diagrama de casos de uso para resource server
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-resource-server.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-resource-server.adoc[leveloffset=+1]
+include::partial/usecases-resource-server.adoc[leveloffset=+1]

@@ -3,5 +3,9 @@
 
 La operacion de disable esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Disable de user
+[plantuml]
+....
+include::../../diagrams/sequence-disable-user.puml[]
+....
 

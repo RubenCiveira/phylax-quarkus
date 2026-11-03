@@ -19,6 +19,6 @@ include::partial/properties-role.adoc[]
 .Diagrama de casos de uso para role
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-role.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-role.adoc[leveloffset=+1]
+include::partial/usecases-role.adoc[leveloffset=+1]

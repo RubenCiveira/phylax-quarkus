@@ -3,5 +3,9 @@
 
 La operacion de update esta habilitada a cualquier usuario autenticado.
 
-Update 
+.Modificación de user group membership
+[plantuml]
+....
+include::../../diagrams/sequence-update-user-group-membership.puml[]
+....
 

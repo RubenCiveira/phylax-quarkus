@@ -3,5 +3,9 @@
 
 La operacion de update esta habilitada a cualquier usuario autenticado.
 
-Update 
+.Modificación de tenant terms of use
+[plantuml]
+....
+include::../../diagrams/sequence-update-tenant-terms-of-use.puml[]
+....
 

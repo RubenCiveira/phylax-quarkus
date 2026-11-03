@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de template version
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-template-version.puml[]
+....
 

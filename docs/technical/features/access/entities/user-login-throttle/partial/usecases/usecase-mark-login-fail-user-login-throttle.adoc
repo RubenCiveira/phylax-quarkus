@@ -3,5 +3,9 @@
 
 La operacion de mark-login-fail esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Mark login fail de user login throttle
+[plantuml]
+....
+include::../../diagrams/sequence-mark-login-fail-user-login-throttle.puml[]
+....
 

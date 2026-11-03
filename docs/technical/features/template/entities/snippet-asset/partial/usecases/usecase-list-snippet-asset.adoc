@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de snippet asset
+[plantuml]
+....
+include::../../diagrams/sequence-list-snippet-asset.puml[]
+....
 

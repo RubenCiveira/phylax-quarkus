@@ -23,6 +23,6 @@ include::partial/properties-user-group-membership.adoc[]
 .Diagrama de casos de uso para user group membership
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-group-membership.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 

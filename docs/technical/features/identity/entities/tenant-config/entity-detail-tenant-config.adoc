@@ -10,7 +10,7 @@ tenant-config
 include::diagrams/class-diagram-tenant-config.puml[]
 ....
 
-include::partial/visibility-tenant-config.partial.adoc[]
+include::partial/visibility-tenant-config.adoc[]
 
 .Propiedades
 
@@ -20,9 +20,9 @@ include::partial/properties-tenant-config.adoc[]
 .Diagrama de casos de uso para tenant config
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-tenant-config.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-tenant-config.adoc[leveloffset=+1]
+include::partial/usecases-tenant-config.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

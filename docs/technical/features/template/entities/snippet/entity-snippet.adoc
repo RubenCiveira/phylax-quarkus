@@ -23,7 +23,7 @@ include::partial/properties-snippet.adoc[]
 .Diagrama de casos de uso para snippet
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-snippet.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 
 .Eventos

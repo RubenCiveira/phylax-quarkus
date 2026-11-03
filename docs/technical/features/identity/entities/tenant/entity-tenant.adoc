@@ -23,6 +23,6 @@ include::partial/properties-tenant.adoc[]
 .Diagrama de casos de uso para tenant
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-tenant.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 

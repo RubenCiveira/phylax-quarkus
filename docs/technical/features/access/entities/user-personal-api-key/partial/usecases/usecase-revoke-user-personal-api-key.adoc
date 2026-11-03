@@ -3,5 +3,9 @@
 
 La operacion de revoke esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Revoke de user personal api key
+[plantuml]
+....
+include::../../diagrams/sequence-revoke-user-personal-api-key.puml[]
+....
 

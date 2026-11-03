@@ -3,5 +3,9 @@
 
 La operacion de disable esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Disable de api key client
+[plantuml]
+....
+include::../../diagrams/sequence-disable-api-key-client.puml[]
+....
 

@@ -10,7 +10,7 @@ user-login-throttle
 include::diagrams/class-diagram-user-login-throttle.puml[]
 ....
 
-include::partial/visibility-user-login-throttle.partial.adoc[]
+include::partial/visibility-user-login-throttle.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-user-login-throttle.adoc[]
 .Diagrama de casos de uso para user login throttle
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-login-throttle.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-user-login-throttle.adoc[leveloffset=+1]
+include::partial/usecases-user-login-throttle.adoc[leveloffset=+1]

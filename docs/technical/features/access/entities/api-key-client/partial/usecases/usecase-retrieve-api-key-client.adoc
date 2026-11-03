@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de api key client
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-api-key-client.puml[]
+....
 

@@ -3,5 +3,9 @@
 
 La operacion de disable esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Disable de template asset
+[plantuml]
+....
+include::../../diagrams/sequence-disable-template-asset.puml[]
+....
 

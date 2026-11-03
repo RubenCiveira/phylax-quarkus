@@ -3,5 +3,9 @@
 
 La operacion de create esta habilitada a cualquier usuario autenticado.
 
-Create
+.Creación de snippet version
+[plantuml]
+....
+include::../../diagrams/sequence-create-snippet-version.puml[]
+....
 

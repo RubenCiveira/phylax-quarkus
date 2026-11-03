@@ -10,7 +10,7 @@ snippet-version
 include::diagrams/class-diagram-snippet-version.puml[]
 ....
 
-include::partial/visibility-snippet-version.partial.adoc[]
+include::partial/visibility-snippet-version.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-snippet-version.adoc[]
 .Diagrama de casos de uso para snippet version
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-snippet-version.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-snippet-version.adoc[leveloffset=+1]
+include::partial/usecases-snippet-version.adoc[leveloffset=+1]

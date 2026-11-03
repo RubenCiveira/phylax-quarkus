@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de user invitation
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-user-invitation.puml[]
+....
 

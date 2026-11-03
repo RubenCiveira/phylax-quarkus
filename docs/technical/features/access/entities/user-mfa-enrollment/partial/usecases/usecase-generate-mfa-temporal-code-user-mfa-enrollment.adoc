@@ -3,5 +3,9 @@
 
 La operacion de generate-mfa-temporal-code esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Generate mfa temporal code de user mfa enrollment
+[plantuml]
+....
+include::../../diagrams/sequence-generate-mfa-temporal-code-user-mfa-enrollment.puml[]
+....
 

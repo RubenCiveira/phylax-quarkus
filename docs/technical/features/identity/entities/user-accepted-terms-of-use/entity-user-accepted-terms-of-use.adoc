@@ -23,6 +23,6 @@ include::partial/properties-user-accepted-terms-of-use.adoc[]
 .Diagrama de casos de uso para user accepted terms of use
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-accepted-terms-of-use.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 

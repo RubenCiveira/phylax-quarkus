@@ -3,5 +3,9 @@
 
 La operacion de retrieve-metadata esta habilitada a cualquier usuario autenticado.
 
-Binary for metadata
+.Descarga de metadata de tenant login provider
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-metadata-tenant-login-provider.puml[]
+....
 

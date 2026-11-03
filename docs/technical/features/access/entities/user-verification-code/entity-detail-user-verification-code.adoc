@@ -10,7 +10,7 @@ user-verification-code
 include::diagrams/class-diagram-user-verification-code.puml[]
 ....
 
-include::partial/visibility-user-verification-code.partial.adoc[]
+include::partial/visibility-user-verification-code.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-user-verification-code.adoc[]
 .Diagrama de casos de uso para user verification code
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-verification-code.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-user-verification-code.adoc[leveloffset=+1]
+include::partial/usecases-user-verification-code.adoc[leveloffset=+1]

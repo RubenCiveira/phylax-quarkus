@@ -10,7 +10,7 @@ template-asset
 include::diagrams/class-diagram-template-asset.puml[]
 ....
 
-include::partial/visibility-template-asset.partial.adoc[]
+include::partial/visibility-template-asset.adoc[]
 
 .Propiedades
 
@@ -20,9 +20,9 @@ include::partial/properties-template-asset.adoc[]
 .Diagrama de casos de uso para template asset
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-template-asset.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-template-asset.adoc[leveloffset=+1]
+include::partial/usecases-template-asset.adoc[leveloffset=+1]
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

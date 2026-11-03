@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para user federated identity
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-federated-identity.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-user-federated-identity.adoc[]

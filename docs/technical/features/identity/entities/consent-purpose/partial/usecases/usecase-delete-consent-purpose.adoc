@@ -3,5 +3,9 @@
 
 La operacion de delete esta habilitada a cualquier usuario autenticado.
 
-Delete
+.Borrado de consent purpose
+[plantuml]
+....
+include::../../diagrams/sequence-delete-consent-purpose.puml[]
+....
 

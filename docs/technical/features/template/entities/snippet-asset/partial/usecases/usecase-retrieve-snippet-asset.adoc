@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de snippet asset
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-snippet-asset.puml[]
+....
 

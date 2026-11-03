@@ -25,7 +25,7 @@ include::partial/properties-user-personal-api-key.adoc[]
 .Diagrama de casos de uso para user personal api key
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-personal-api-key.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 
 .Eventos

@@ -3,5 +3,9 @@
 
 La operacion de generate esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Generate de user verification code
+[plantuml]
+....
+include::../../diagrams/sequence-generate-user-verification-code.puml[]
+....
 

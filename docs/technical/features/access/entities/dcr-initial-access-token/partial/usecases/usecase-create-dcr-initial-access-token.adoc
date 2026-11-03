@@ -3,5 +3,9 @@
 
 La operacion de create esta habilitada a cualquier usuario autenticado.
 
-Create
+.Creación de dcr initial access token
+[plantuml]
+....
+include::../../diagrams/sequence-create-dcr-initial-access-token.puml[]
+....
 

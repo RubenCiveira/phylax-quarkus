@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de user mfa enrollment
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-user-mfa-enrollment.puml[]
+....
 

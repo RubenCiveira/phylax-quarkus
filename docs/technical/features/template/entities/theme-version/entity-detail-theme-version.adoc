@@ -10,7 +10,7 @@ theme-version
 include::diagrams/class-diagram-theme-version.puml[]
 ....
 
-include::partial/visibility-theme-version.partial.adoc[]
+include::partial/visibility-theme-version.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-theme-version.adoc[]
 .Diagrama de casos de uso para theme version
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-theme-version.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-theme-version.adoc[leveloffset=+1]
+include::partial/usecases-theme-version.adoc[leveloffset=+1]

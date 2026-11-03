@@ -23,7 +23,7 @@ include::partial/properties-user.adoc[]
 .Diagrama de casos de uso para user
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 
 .Eventos

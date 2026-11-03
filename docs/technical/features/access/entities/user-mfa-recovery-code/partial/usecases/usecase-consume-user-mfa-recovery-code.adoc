@@ -3,5 +3,9 @@
 
 La operacion de consume esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Consume de user mfa recovery code
+[plantuml]
+....
+include::../../diagrams/sequence-consume-user-mfa-recovery-code.puml[]
+....
 

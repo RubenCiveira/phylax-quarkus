@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de api key client
+[plantuml]
+....
+include::../../diagrams/sequence-list-api-key-client.puml[]
+....
 

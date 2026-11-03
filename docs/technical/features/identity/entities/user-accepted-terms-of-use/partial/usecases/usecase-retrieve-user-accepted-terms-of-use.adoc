@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de user accepted terms of use
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-user-accepted-terms-of-use.puml[]
+....
 

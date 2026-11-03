@@ -3,5 +3,9 @@
 
 La operacion de retrieve esta habilitada a cualquier usuario autenticado.
 
-Retrieve
+.Consulta de user login throttle
+[plantuml]
+....
+include::../../diagrams/sequence-retrieve-user-login-throttle.puml[]
+....
 

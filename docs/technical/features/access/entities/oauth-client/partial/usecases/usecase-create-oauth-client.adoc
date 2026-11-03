@@ -3,5 +3,9 @@
 
 La operacion de create esta habilitada a cualquier usuario autenticado.
 
-Create
+.Creación de oauth client
+[plantuml]
+....
+include::../../diagrams/sequence-create-oauth-client.puml[]
+....
 

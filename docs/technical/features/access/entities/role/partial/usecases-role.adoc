@@ -5,7 +5,7 @@
 .Diagrama de casos de uso para role
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-role.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
 :leveloffset: +1
 include::usecases/usecase-list-role.adoc[]

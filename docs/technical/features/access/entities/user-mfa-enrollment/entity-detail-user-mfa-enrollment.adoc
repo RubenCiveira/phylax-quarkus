@@ -10,7 +10,7 @@ user-mfa-enrollment
 include::diagrams/class-diagram-user-mfa-enrollment.puml[]
 ....
 
-include::partial/visibility-user-mfa-enrollment.partial.adoc[]
+include::partial/visibility-user-mfa-enrollment.adoc[]
 
 .Propiedades
 
@@ -20,6 +20,6 @@ include::partial/properties-user-mfa-enrollment.adoc[]
 .Diagrama de casos de uso para user mfa enrollment
 [plantuml]
 ....
-include::../diagrams/usecase-diagram-user-mfa-enrollment.puml[]
+include::diagrams/usecase-diagram-user.puml[]
 ....
-include:partial/usecase-user-mfa-enrollment.adoc[leveloffset=+1]
+include::partial/usecases-user-mfa-enrollment.adoc[leveloffset=+1]

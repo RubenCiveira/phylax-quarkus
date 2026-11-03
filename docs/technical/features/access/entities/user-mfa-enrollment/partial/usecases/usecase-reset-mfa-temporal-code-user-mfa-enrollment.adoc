@@ -3,5 +3,9 @@
 
 La operacion de reset-mfa-temporal-code esta habilitada a cualquier usuario autenticado.
 
-Action tecnical
+.Reset mfa temporal code de user mfa enrollment
+[plantuml]
+....
+include::../../diagrams/sequence-reset-mfa-temporal-code-user-mfa-enrollment.puml[]
+....
 

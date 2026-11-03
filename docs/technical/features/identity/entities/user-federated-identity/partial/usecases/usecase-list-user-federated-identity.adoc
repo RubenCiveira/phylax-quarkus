@@ -3,5 +3,9 @@
 
 La operacion de list esta habilitada a cualquier usuario autenticado.
 
-List
+.Listado de user federated identity
+[plantuml]
+....
+include::../../diagrams/sequence-list-user-federated-identity.puml[]
+....
 
