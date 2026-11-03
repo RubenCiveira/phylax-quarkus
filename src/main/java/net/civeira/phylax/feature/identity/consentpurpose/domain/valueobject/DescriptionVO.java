@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el description de consent purpose of consentPurpose.
+ * Value Object representing explanation shown to the user of what the data is used for. of
+ * consentPurpose.
  * <p>
  * This class ensures that the description is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

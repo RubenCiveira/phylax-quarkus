@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing overrides tenant-config.dcr-allowed-grant-types when set of
+ * Value Object representing overrides tenant-config.dcr-allowed-grant-types when set. of
  * dcrInitialAccessToken.
  * <p>
  * This class ensures that the allowed grant types is a {@code String} and encapsulates its

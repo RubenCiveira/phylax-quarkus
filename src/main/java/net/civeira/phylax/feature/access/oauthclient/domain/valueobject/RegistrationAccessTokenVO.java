@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el registration access token de oauth client of oauthClient.
+ * Value Object representing token the client uses to manage its own registration (RFC 7592); only
+ * its digest is stored. of oauthClient.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el backchannel logout session required de oauth client of oauthClient.
+ * Value Object representing includes the session identifier (sid) in the back-channel logout token.
+ * of oauthClient.
  * <p>
  * This class ensures that the backchannel logout session required is a {@code String} and
  * encapsulates its validation and formatting logic. It is immutable and compliant with DDD

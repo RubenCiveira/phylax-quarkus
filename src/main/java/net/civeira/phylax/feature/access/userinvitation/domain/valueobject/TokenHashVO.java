@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el token hash de user invitation of userInvitation.
+ * Value Object representing digest of the invitation token sent by email; the raw value is never
+ * stored. of userInvitation.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

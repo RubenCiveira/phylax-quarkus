@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the amount login attempts failed since the last right login. of
+ * Value Object representing number of failed sign-in attempts since the last successful one. of
  * userLoginThrottle.
  * <p>
  * This class ensures that the failed login attempts is a {@code String} and encapsulates its

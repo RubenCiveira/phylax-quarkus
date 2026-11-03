@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el force mfa de tenant config of tenantConfig.
+ * Value Object representing requires every user of the tenant to sign in with a second factor. of
+ * tenantConfig.
  * <p>
  * This class ensures that the force mfa is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el content text de template version of templateVersion.
+ * Value Object representing plain-text body, used by email clients that do not show HTML and by the
+ * SMS channel. of templateVersion.
  * <p>
  * This class ensures that the content text is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

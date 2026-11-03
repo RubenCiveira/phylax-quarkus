@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.identity.user.domain.UserRef;
 import net.civeira.phylax.feature.identity.user.domain.UserReference;
 
 /**
- * Value Object representing el usuario para el que se tienen estos datos of userMfaEnrollment.
+ * Value Object representing user who is enrolling the second factor. of userMfaEnrollment.
  * <p>
  * This class ensures that the user is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

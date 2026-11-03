@@ -10,8 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing nombre de resolución desde template.theme: full-window, index-page...
- * of theme.
+ * Value Object representing name templates use to select the theme (template.theme), e.g.
+ * full-window or index-page. of theme.
  * <p>
  * This class ensures that the name is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing sTRING, NUMBER, DATE, URL... of templateVariable.
+ * Value Object representing kind of value the variable holds, e.g. STRING, NUMBER, DATE or URL. of
+ * templateVariable.
  * <p>
  * This class ensures that the type is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

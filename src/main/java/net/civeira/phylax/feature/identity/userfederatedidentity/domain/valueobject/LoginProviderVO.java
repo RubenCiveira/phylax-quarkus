@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.identity.tenantloginprovider.domain.TenantLogi
 import net.civeira.phylax.feature.identity.tenantloginprovider.domain.TenantLoginProviderReference;
 
 /**
- * Value Object representing el login provider de user federated identity of userFederatedIdentity.
+ * Value Object representing identity provider of the external account. of userFederatedIdentity.
  * <p>
  * This class ensures that the login provider is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

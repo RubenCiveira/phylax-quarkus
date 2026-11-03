@@ -2,7 +2,7 @@
 [#entidad-snippet]
 = Snippet
 
-snippet
+Reusable fragment (legal footer, privacy notice, company address) that templates include by code. A tenant-specific snippet overrides the global one with the same code.
 
 .Diagrama de clases para snippet
 [plantuml]

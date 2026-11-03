@@ -2,7 +2,7 @@
 [#entidad-user-verification-code]
 = User verification code
 
-user-verification-code
+Single-use code sent to a user by email to verify an action: password recovery, email verification or account deletion.
 
 .Diagrama de clases para user verification code
 [plantuml]

@@ -2,7 +2,7 @@
 [#entidad-message]
 = Message
 
-message
+Outbox entry for an outgoing notification (currently an email): the rendered content waits here until the dispatcher sends it, retrying on failure.
 
 .Diagrama de clases para message
 [plantuml]

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el self registration enabled de tenant config of tenantConfig.
+ * Value Object representing lets users create their own account from the sign-in screen. of
+ * tenantConfig.
  * <p>
  * This class ensures that the self registration enabled is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

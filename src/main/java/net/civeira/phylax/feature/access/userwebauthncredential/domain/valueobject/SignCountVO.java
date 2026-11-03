@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el sign count de user webauthn credential of userWebauthnCredential.
+ * Value Object representing signature counter reported by the authenticator; a counter that goes
+ * back reveals a cloned key. of userWebauthnCredential.
  * <p>
  * This class ensures that the sign count is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

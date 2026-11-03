@@ -13,7 +13,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.userinvitation.domain.UserInvitationStatusOptions;
 
 /**
- * Value Object representing el status de user invitation of userInvitation.
+ * Value Object representing state of the invitation: pending, accepted, cancelled or expired. of
+ * userInvitation.
  * <p>
  * This class ensures that the status is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

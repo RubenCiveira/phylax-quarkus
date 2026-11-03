@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing email send to the user to recover the password of tenantConfig.
+ * Value Object representing email sent to the user to recover the password. of tenantConfig.
  * <p>
  * This class ensures that the recover pass email template is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

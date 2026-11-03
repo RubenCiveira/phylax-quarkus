@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a coma separated scopes for the api key of apiKeyClient.
+ * Value Object representing comma-separated scopes granted to the API key. of apiKeyClient.
  * <p>
  * This class ensures that the scopes is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

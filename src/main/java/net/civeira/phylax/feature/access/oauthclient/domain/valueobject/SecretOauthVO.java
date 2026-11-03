@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el secret oauth de oauth client of oauthClient.
+ * Value Object representing client secret; only its digest is stored. of oauthClient.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

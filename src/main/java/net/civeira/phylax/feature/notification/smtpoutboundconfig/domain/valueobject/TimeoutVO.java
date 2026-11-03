@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el timeout de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing connection and write timeout against the SMTP server, in seconds. of
+ * smtpOutboundConfig.
  * <p>
  * This class ensures that the timeout is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -23,7 +23,7 @@ public class OauthClientRbacRegister {
   private static final ResourceDescription RESOURCE = ResourceDescription.builder()
       .name("oauth-client")
       .description(
-          "Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto")
+          "Application that signs users in or requests tokens through OAuth 2.0 / OpenID Connect. The client is sent in every authorization request, so the tenant is resolved from it.")
       .build();
 
   /**
@@ -51,123 +51,180 @@ public class OauthClientRbacRegister {
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
         .name("disable").description("").required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
-        .description("El identificador de la aplicacion").build());
+        .description("Unique identifier of the client.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
-        .description("El código identificativo de la aplicación").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
-        .description("Owner tenant. Null means a global client, manageable only by root.").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowAllScopes")
-        .description("El allow all scopes de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tokenEndpointAuthMethod")
-        .description("El token endpoint auth method de oauth client").build());
+        .description("Client identifier (client_id) used in the OAuth requests.").build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("tokenEndpointAuthSigningAlg")
-            .description("El token endpoint auth signing alg de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("dpopBoundAccessTokens")
-        .description("El dpop bound access tokens de oauth client").build());
+        FieldDescription.builder().name("tenant")
+            .description(
+                "Owner tenant. Empty for a global client, manageable only by the root tenant.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("allowAllScopes").description(
+            "Lets the client request any scope instead of only the standard OpenID Connect ones.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("tokenEndpointAuthMethod").description(
+            "How the client authenticates at the token endpoint client secret in the Authorization header or in the body, a signed JWT (private_key_jwt), or none for public clients.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("tokenEndpointAuthSigningAlg").description(
+            "Algorithm the client uses to sign the JWT with which it authenticates at the token endpoint.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("dpopBoundAccessTokens")
+            .description(
+                "Requires the access tokens of this client to be bound to a DPoP key (RFC 9449).")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("idTokenSignedResponseAlg")
-        .description("El id token signed response alg de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tlsClientAuthSubjectDn")
-        .description("El tls client auth subject dn de oauth client").build());
+        .description("Algorithm used to sign the ID tokens issued to this client.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("tlsClientAuthSubjectDn").description(
+            "Expected subject DN of the client certificate for mutual-TLS client authentication (RFC 8705).")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("tlsClientCertificateBoundAccessTokens")
-            .description("El tls client certificate bound access tokens de oauth client").build());
+            .description(
+                "Binds the access tokens of this client to its TLS client certificate (RFC 8705).")
+            .build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("authorizationSignedResponseAlg")
-            .description("El authorization signed response alg de oauth client").build());
+        FieldDescription.builder().name("authorizationSignedResponseAlg").description(
+            "Algorithm used to sign JWT-secured authorization responses (JARM) for this client.")
+            .build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("backchannelTokenDeliveryMode")
-            .description("El backchannel token delivery mode de oauth client").build());
+        FieldDescription.builder().name("backchannelTokenDeliveryMode").description(
+            "How tokens are delivered in the CIBA flow the client polls the token endpoint, or receives a ping.")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("backchannelClientNotificationEndpoint")
-            .description("El backchannel client notification endpoint de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("subjectType")
-        .description("El subject type de oauth client").build());
+            .description("Endpoint of the client that receives the CIBA ping notifications.")
+            .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("subjectType").description(
+        "Subject identifier sent to the client the same for every client (public) or a different one per sector (pairwise).")
+        .build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("idTokenEncryptedResponseAlg")
-            .description("El id token encrypted response alg de oauth client").build());
+        FieldDescription.builder().name("idTokenEncryptedResponseAlg").description(
+            "Key management algorithm used to encrypt the ID tokens of this client; empty sends them unencrypted.")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("idTokenEncryptedResponseEnc")
-            .description("El id token encrypted response enc de oauth client").build());
+            .description(
+                "Content encryption algorithm used to encrypt the ID tokens of this client.")
+            .build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("userinfoEncryptedResponseAlg")
-            .description("El userinfo encrypted response alg de oauth client").build());
+        FieldDescription.builder().name("userinfoEncryptedResponseAlg").description(
+            "Key management algorithm used to encrypt the userinfo responses of this client; empty sends them unencrypted.")
+            .build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("userinfoEncryptedResponseEnc")
-            .description("El userinfo encrypted response enc de oauth client").build());
+        FieldDescription.builder().name("userinfoEncryptedResponseEnc").description(
+            "Content encryption algorithm used to encrypt the userinfo responses of this client.")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("authorizationDetailsTypes")
-            .description("El authorization details types de oauth client").build());
+            .description(
+                "JSON list of the authorization_details types the client can request (RFC 9396).")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("userinfoSignedResponseAlg")
-            .description("El userinfo signed response alg de oauth client").build());
+            .description(
+                "Algorithm used to sign the userinfo responses; empty returns them as plain JSON.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("secretOauth")
-        .description("El secret oauth de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registrationAccessToken")
-        .description("El registration access token de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("defaultAcrValues")
-        .description("El default acr values de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("defaultMaxAge")
-        .description("El default max age de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("sectorIdentifierUri")
-        .description("El sector identifier uri de oauth client").build());
+        .description("Client secret; only its digest is stored.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("registrationAccessToken").description(
+            "Token the client uses to manage its own registration (RFC 7592); only its digest is stored.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("defaultAcrValues").description(
+            "Authentication context class (ACR) values requested by default when the client does not send acr_values.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("defaultMaxAge").description(
+            "Maximum authentication age, in seconds, applied when the client does not send max_age.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("sectorIdentifierUri").description(
+            "URL listing the redirect URIs of the clients that share pairwise subject identifiers.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedLoginRedirects")
-        .description("El allowed login redirects de oauth client").build());
+        .description("Redirect URIs the client may use after sign-in.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedLogoutRedirects")
-        .description("El allowed logout redirects de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("allowedAudiences")
-        .description("El allowed audiences de oauth client").build());
+        .description("Redirect URIs the client may use after sign-out.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("allowedAudiences")
+            .description(
+                "Audiences (resource servers or resource URIs) the client may request tokens for.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("grantTypesJson")
-        .description("El grant types json de oauth client").build());
+        .description("JSON list of the grant types the client may use.").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("introspectionAllowed").description(
             "If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.")
             .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("requirePushedAuthorizationRequests")
-            .description("El require pushed authorization requests de oauth client").build());
+            .description(
+                "Requires the client to send its authorization requests through PAR (RFC 9126).")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("requirePkce").description(
         "If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.")
         .build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("backchannelLogoutUri")
-        .description("El backchannel logout uri de oauth client").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("backchannelLogoutUri")
+            .description("Endpoint of the client that receives back-channel logout notifications.")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("backchannelLogoutSessionRequired")
-            .description("El backchannel logout session required de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("frontchannelLogoutUri")
-        .description("El frontchannel logout uri de oauth client").build());
+            .description("Includes the session identifier (sid) in the back-channel logout token.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("frontchannelLogoutUri").description(
+            "URL of the client loaded in the browser to sign the user out (front-channel logout).")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("frontchannelLogoutSessionRequired")
-            .description("El frontchannel logout session required de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
-        .description("The indicator to allow the account be used without deleting it").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("clientName")
-        .description("El client name de oauth client").build());
+            .description("Adds the issuer and session identifier to the front-channel logout URL.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("enabled")
+            .description(
+                "A disabled client cannot sign in users or obtain tokens, without deleting it.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("clientName")
+            .description("Name of the client shown to users, for example on the consent screen.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("logoUri")
-        .description("El logo uri de oauth client").build());
+        .description("URL of the client logo shown to users.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("clientUri")
-        .description("El client uri de oauth client").build());
+        .description("URL of the home page of the client.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("policyUri")
-        .description("El policy uri de oauth client").build());
+        .description("URL of the privacy policy of the client.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tosUri")
-        .description("El tos uri de oauth client").build());
+        .description("URL of the terms of service of the client.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("responseTypesJson")
-        .description("El response types json de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("dynamicallyRegistered")
-        .description("El dynamically registered de oauth client").build());
+        .description("JSON list of the response types the client may request.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("dynamicallyRegistered")
+            .description("The client was created through dynamic client registration (RFC 7591).")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("registeredAt")
-        .description("El registered at de oauth client").build());
+        .description("When the client was registered.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("clientCredentialsScopes")
-        .description("El client credentials scopes de oauth client").build());
+        .description("Scopes granted to the client in the client credentials flow.").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("clientCredentialsTokenTtlSeconds")
-            .description("El client credentials token ttl seconds de oauth client").build());
+            .description(
+                "Lifetime, in seconds, of the access tokens issued in the client credentials flow.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("requestObjectSigningAlg")
-        .description("El request object signing alg de oauth client").build());
+        .description("Algorithm the client must use to sign request objects.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("jwksUri")
-        .description("El jwks uri de oauth client").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("jwksJson")
-        .description("El jwks json de oauth client").build());
+        .description("URL of the JSON Web Key Set with the public keys of the client.").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("jwksJson").description(
+        "JSON Web Key Set with the public keys of the client, when it does not publish a jwks-uri.")
+        .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version")
             .description(

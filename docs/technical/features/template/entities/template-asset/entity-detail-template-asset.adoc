@@ -2,7 +2,7 @@
 [#entidad-template-asset]
 = Template asset
 
-template-asset
+File (image, stylesheet, font) used by a template, which a tenant can override (e.g. a different logo per tenant in a global template).
 
 .Diagrama de clases para template asset
 [plantuml]

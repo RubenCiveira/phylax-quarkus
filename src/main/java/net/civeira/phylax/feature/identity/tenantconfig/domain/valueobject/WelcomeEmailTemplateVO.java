@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing email send to the enabled user of tenantConfig.
+ * Value Object representing email sent to a user when the account is enabled for the first time. of
+ * tenantConfig.
  * <p>
  * This class ensures that the welcome email template is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

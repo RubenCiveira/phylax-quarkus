@@ -2,7 +2,7 @@
 [#entidad-tenant-terms-of-use]
 = Tenant terms of use
 
-tenant-terms-of-use
+Version of the terms of use of a tenant that users must accept, optionally for a single resource server.
 
 .Diagrama de clases para tenant terms of use
 [plantuml]

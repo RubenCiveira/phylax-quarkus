@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a domain suffix to identify the account of tenant.
+ * Value Object representing domain that identifies the tenant. of tenant.
  * <p>
  * This class ensures that the domain is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

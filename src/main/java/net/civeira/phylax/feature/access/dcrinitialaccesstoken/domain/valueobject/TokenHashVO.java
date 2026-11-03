@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el token hash de dcr initial access token of dcrInitialAccessToken.
+ * Value Object representing digest of the token; the raw value is shown only when it is created. of
+ * dcrInitialAccessToken.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

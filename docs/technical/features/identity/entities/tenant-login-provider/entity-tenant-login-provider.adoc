@@ -2,10 +2,7 @@
 [#entidad-tenant-login-provider]
 = Tenant login provider
 
-Represents a login identity provider (e.g., Google,
-			GitHub, SAML) configured
-			for a tenant. Enables federated
-			authentication integration.
+Represents a login identity provider (e.g., Google, GitHub, SAML) configured for a tenant. Enables federated authentication integration.
 
 .Diagrama de clases para tenant login provider
 [plantuml]

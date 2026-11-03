@@ -2,7 +2,7 @@
 [#entidad-template-variable]
 = Template variable
 
-template-variable
+Default value of a variable available to the templates of a tenant; the caller can override it when rendering.
 
 .Diagrama de clases para template variable
 [plantuml]

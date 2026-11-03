@@ -14,7 +14,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the date when a welcome email is sent of user.
+ * Value Object representing when the welcome email was sent. of user.
  * <p>
  * This class ensures that the welcome at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

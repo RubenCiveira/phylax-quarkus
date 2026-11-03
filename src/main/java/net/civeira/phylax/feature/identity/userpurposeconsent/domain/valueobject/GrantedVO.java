@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el granted de user purpose consent of userPurposeConsent.
+ * Value Object representing whether the user consented. of userPurposeConsent.
  * <p>
  * This class ensures that the granted is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

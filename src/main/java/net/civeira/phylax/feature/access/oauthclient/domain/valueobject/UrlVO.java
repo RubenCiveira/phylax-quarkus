@@ -10,8 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el url de oauth client allowed logout redirect of
- * oauthClientAllowedLogoutRedirect.
+ * Value Object representing allowed post-logout redirect URI. of oauthClientAllowedLogoutRedirect.
  * <p>
  * This class ensures that the url is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

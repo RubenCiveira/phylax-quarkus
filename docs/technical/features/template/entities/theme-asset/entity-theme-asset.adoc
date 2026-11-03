@@ -2,7 +2,7 @@
 [#entidad-theme-asset]
 = Theme asset
 
-theme-asset
+File (image, stylesheet, font) of a theme, served under {{theme_assets_path}}.
 
 .Diagrama de clases para theme asset
 [plantuml]

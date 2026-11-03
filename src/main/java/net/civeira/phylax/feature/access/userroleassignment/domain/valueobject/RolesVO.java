@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.userroleassignment.domain.Roles;
 
 /**
- * Value Object representing el roles de user role assignment of userRoleAssignment.
+ * Value Object representing roles granted by the assignment. of userRoleAssignment.
  * <p>
  * This class ensures that the roles is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing bCP 47: es, en, fr... null = versión por defecto of themeVersion.
+ * Value Object representing bCP 47 locale of the layout (es, en, fr...). Empty for the default
+ * version. of themeVersion.
  * <p>
  * This class ensures that the locale is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

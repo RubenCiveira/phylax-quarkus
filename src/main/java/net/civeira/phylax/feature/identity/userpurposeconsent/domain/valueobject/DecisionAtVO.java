@@ -14,7 +14,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el decision at de user purpose consent of userPurposeConsent.
+ * Value Object representing when the user decided. of userPurposeConsent.
  * <p>
  * This class ensures that the decision at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

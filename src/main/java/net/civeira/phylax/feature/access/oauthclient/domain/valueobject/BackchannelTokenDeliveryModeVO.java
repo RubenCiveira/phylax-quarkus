@@ -13,7 +13,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientBackchannelTokenDeliveryModeOptions;
 
 /**
- * Value Object representing el backchannel token delivery mode de oauth client of oauthClient.
+ * Value Object representing how tokens are delivered in the CIBA flow: the client polls the token
+ * endpoint, or receives a ping. of oauthClient.
  * <p>
  * This class ensures that the backchannel token delivery mode is a {@code String} and encapsulates
  * its validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven

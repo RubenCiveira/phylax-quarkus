@@ -12,8 +12,7 @@ import net.civeira.phylax.feature.identity.tenanttermsofuse.domain.TenantTermsOf
 import net.civeira.phylax.feature.identity.tenanttermsofuse.domain.TenantTermsOfUseReference;
 
 /**
- * Value Object representing el terms of use de user accepted terms of use of
- * userAcceptedTermsOfUse.
+ * Value Object representing terms of use accepted. of userAcceptedTermsOfUse.
  * <p>
  * This class ensures that the terms of use is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

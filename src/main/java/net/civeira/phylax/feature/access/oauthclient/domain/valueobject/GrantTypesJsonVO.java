@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el grant types json de oauth client of oauthClient.
+ * Value Object representing jSON list of the grant types the client may use. of oauthClient.
  * <p>
  * This class ensures that the grant types json is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

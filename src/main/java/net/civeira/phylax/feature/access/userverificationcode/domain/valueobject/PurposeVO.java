@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.userverificationcode.domain.UserVerificationCodePurposeOptions;
 
 /**
- * Value Object representing el purpose de user verification code of userVerificationCode.
+ * Value Object representing action the code verifies. of userVerificationCode.
  * <p>
  * This class ensures that the purpose is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

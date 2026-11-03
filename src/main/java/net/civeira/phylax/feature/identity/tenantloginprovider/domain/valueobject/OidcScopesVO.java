@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el oidc scopes de tenant login provider of tenantLoginProvider.
+ * Value Object representing scopes requested from the OIDC identity provider. of
+ * tenantLoginProvider.
  * <p>
  * This class ensures that the oidc scopes is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -2,7 +2,7 @@
 [#entidad-user-scope-consent]
 = User scope consent
 
-user-scope-consent
+Decision of a user to grant or deny a client access to a scope, so the consent screen is not shown again.
 
 .Diagrama de clases para user scope consent
 [plantuml]

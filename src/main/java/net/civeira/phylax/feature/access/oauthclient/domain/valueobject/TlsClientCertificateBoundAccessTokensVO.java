@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el tls client certificate bound access tokens de oauth client of
- * oauthClient.
+ * Value Object representing binds the access tokens of this client to its TLS client certificate
+ * (RFC 8705). of oauthClient.
  * <p>
  * This class ensures that the tls client certificate bound access tokens is a non-null
  * {@code String} and encapsulates its validation and formatting logic. It is immutable and

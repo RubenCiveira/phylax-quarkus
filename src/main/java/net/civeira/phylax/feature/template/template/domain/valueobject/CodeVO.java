@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing lOGIN_MAGIC_LINK, RESET_PASSWORD, page.profile... of template.
+ * Value Object representing code the application uses to request the template, e.g.
+ * LOGIN_MAGIC_LINK, RESET_PASSWORD or page.profile. of template.
  * <p>
  * This class ensures that the code is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

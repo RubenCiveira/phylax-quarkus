@@ -2,7 +2,7 @@
 [#entidad-user-login-throttle]
 = User login throttle
 
-user-login-throttle
+Failed sign-in attempts of a user, used to slow down password guessing and block the account.
 
 .Diagrama de clases para user login throttle
 [plantuml]

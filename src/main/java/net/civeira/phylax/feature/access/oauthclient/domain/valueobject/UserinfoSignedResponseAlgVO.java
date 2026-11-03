@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el userinfo signed response alg de oauth client of oauthClient.
+ * Value Object representing algorithm used to sign the userinfo responses; empty returns them as
+ * plain JSON. of oauthClient.
  * <p>
  * This class ensures that the userinfo signed response alg is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

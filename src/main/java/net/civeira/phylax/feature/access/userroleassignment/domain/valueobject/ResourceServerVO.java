@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerRef
 import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerReference;
 
 /**
- * Value Object representing el resource server de user role assignment of userRoleAssignment.
+ * Value Object representing resource server the roles apply to. Empty for any resource server. of
+ * userRoleAssignment.
  * <p>
  * This class ensures that the resource server is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

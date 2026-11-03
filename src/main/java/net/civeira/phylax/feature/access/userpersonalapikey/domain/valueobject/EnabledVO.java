@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el enabled de user personal api key of userPersonalApiKey.
+ * Value Object representing a disabled key is rejected, without deleting it. of userPersonalApiKey.
  * <p>
  * This class ensures that the enabled is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

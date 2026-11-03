@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el transports json de user webauthn credential of
- * userWebauthnCredential.
+ * Value Object representing jSON list of the transports the authenticator supports (usb, nfc, ble,
+ * internal, hybrid). of userWebauthnCredential.
  * <p>
  * This class ensures that the transports json is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el frontchannel logout uri de oauth client of oauthClient.
+ * Value Object representing uRL of the client loaded in the browser to sign the user out
+ * (front-channel logout). of oauthClient.
  * <p>
  * This class ensures that the frontchannel logout uri is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

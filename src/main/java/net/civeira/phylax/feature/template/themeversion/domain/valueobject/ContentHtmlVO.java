@@ -10,8 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing layout Handlebars con slot {{{slot_content}}}, {{title}}, {{locale}},
- * {{theme_assets_path}}, {{tenant_name}} of themeVersion.
+ * Value Object representing handlebars layout; the template is placed in {{{slot_content}}}, and
+ * {{title}}, {{locale}}, {{theme_assets_path}} and {{tenant_name}} are available. of themeVersion.
  * <p>
  * This class ensures that the content html is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

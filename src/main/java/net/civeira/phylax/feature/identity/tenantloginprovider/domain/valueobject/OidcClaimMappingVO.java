@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el oidc claim mapping de tenant login provider of tenantLoginProvider.
+ * Value Object representing jSON map from the claims of the identity provider to the user
+ * attributes. of tenantLoginProvider.
  * <p>
  * This class ensures that the oidc claim mapping is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

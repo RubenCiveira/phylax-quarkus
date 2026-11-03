@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.access.role.domain.RoleRef;
 import net.civeira.phylax.feature.access.role.domain.RoleReference;
 
 /**
- * Value Object representing la cuenta a la que pertenece of userRoleAssignmentRole.
+ * Value Object representing role granted. of userRoleAssignmentRole.
  * <p>
  * This class ensures that the role is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.oauthclient.domain.AllowedAudiences;
 
 /**
- * Value Object representing el allowed audiences de oauth client of oauthClient.
+ * Value Object representing audiences (resource servers or resource URIs) the client may request
+ * tokens for. of oauthClient.
  * <p>
  * This class ensures that the allowed audiences is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

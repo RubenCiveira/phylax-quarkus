@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing icon, separator... of snippetAsset.
+ * Value Object representing name the snippet uses to reference the asset, e.g. icon or separator.
+ * of snippetAsset.
  * <p>
  * This class ensures that the code is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

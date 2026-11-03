@@ -14,7 +14,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el send at de message of message.
+ * Value Object representing earliest time to send the message; empty sends it in the next dispatch
+ * cycle. of message.
  * <p>
  * This class ensures that the send at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

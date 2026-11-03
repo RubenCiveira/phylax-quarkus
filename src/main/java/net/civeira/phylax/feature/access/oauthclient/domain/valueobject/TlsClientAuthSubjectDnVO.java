@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el tls client auth subject dn de oauth client of oauthClient.
+ * Value Object representing expected subject DN of the client certificate for mutual-TLS client
+ * authentication (RFC 8705). of oauthClient.
  * <p>
  * This class ensures that the tls client auth subject dn is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

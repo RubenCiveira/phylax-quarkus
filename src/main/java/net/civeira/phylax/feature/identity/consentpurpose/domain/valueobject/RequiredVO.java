@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el required de consent purpose of consentPurpose.
+ * Value Object representing the user must consent to this purpose to use the service. of
+ * consentPurpose.
  * <p>
  * This class ensures that the required is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

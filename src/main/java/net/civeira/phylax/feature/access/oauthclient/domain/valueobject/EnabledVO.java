@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the indicator to allow the account be used without deleting it of
- * oauthClient.
+ * Value Object representing a disabled client cannot sign in users or obtain tokens, without
+ * deleting it. of oauthClient.
  * <p>
  * This class ensures that the enabled is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

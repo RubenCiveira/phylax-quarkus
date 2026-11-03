@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing if the user is not delegated, the phrase to identify of user.
+ * Value Object representing password of the user when the sign-in is not delegated to an identity
+ * provider; only its hash is stored. of user.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

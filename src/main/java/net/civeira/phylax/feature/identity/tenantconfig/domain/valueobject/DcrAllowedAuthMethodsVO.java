@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el dcr allowed auth methods de tenant config of tenantConfig.
+ * Value Object representing jSON list of the token endpoint authentication methods a dynamically
+ * registered client may use. of tenantConfig.
  * <p>
  * This class ensures that the dcr allowed auth methods is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

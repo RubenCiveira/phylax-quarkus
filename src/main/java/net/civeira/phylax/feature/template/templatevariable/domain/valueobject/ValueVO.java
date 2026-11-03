@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el value de template variable of templateVariable.
+ * Value Object representing default value used when the caller does not provide one. of
+ * templateVariable.
  * <p>
  * This class ensures that the value is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

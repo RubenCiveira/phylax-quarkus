@@ -14,7 +14,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing la caducidad del código de recuperacion of userMfaEnrollment.
+ * Value Object representing when the enrollment expires if the user does not confirm it. of
+ * userMfaEnrollment.
  * <p>
  * This class ensures that the expires at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

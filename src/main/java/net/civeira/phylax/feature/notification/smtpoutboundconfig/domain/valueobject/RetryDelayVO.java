@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el retry delay de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing seconds to wait before retrying a failed delivery. of
+ * smtpOutboundConfig.
  * <p>
  * This class ensures that the retry delay is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el authenticator de user webauthn credential of userWebauthnCredential.
+ * Value Object representing credential ID assigned by the authenticator. of userWebauthnCredential.
  * <p>
  * This class ensures that the authenticator is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

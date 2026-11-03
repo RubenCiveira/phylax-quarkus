@@ -13,7 +13,7 @@ import net.civeira.phylax.feature.identity.user.domain.UserRef;
 import net.civeira.phylax.feature.identity.user.domain.UserReference;
 
 /**
- * Value Object representing el accepted by de user invitation of userInvitation.
+ * Value Object representing user who accepted the invitation. of userInvitation.
  * <p>
  * This class ensures that the accepted by is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

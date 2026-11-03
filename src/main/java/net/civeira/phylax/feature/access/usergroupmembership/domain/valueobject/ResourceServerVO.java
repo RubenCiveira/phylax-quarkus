@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerRef
 import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerReference;
 
 /**
- * Value Object representing el resource server de user group membership of userGroupMembership.
+ * Value Object representing resource server the groups apply to. Empty for any resource server. of
+ * userGroupMembership.
  * <p>
  * This class ensures that the resource server is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

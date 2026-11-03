@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el código identificativo de la aplicación of oauthClient.
+ * Value Object representing client identifier (client_id) used in the OAuth requests. of
+ * oauthClient.
  * <p>
  * This class ensures that the code is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

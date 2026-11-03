@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el authorization details types de oauth client of oauthClient.
+ * Value Object representing jSON list of the authorization_details types the client can request
+ * (RFC 9396). of oauthClient.
  * <p>
  * This class ensures that the authorization details types is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

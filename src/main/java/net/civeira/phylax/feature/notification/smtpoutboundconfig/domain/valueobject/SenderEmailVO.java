@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el sender email de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing address used as the sender (From) of the emails. of smtpOutboundConfig.
  * <p>
  * This class ensures that the sender email is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

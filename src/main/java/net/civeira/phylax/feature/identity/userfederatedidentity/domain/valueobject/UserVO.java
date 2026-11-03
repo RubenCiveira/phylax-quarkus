@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.identity.user.domain.UserRef;
 import net.civeira.phylax.feature.identity.user.domain.UserReference;
 
 /**
- * Value Object representing el user de user federated identity of userFederatedIdentity.
+ * Value Object representing user linked to the external account. of userFederatedIdentity.
  * <p>
  * This class ensures that the user is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

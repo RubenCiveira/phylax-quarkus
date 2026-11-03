@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.template.template.domain.TemplateChannelOptions;
 
 /**
- * Value Object representing el channel de template of template.
+ * Value Object representing channel the template is rendered for: MAIL, SMS or HTML page. of
+ * template.
  * <p>
  * This class ensures that the channel is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

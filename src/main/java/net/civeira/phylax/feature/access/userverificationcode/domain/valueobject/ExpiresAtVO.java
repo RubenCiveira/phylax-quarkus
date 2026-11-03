@@ -14,8 +14,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el codigo de registro para verificar enviado por email of
- * userVerificationCode.
+ * Value Object representing when the code stops being valid. of userVerificationCode.
  * <p>
  * This class ensures that the expires at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

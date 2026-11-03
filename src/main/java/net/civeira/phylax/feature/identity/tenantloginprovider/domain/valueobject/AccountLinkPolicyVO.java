@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.identity.tenantloginprovider.domain.TenantLoginProviderAccountLinkPolicyOptions;
 
 /**
- * Value Object representing el account link policy de tenant login provider of tenantLoginProvider.
+ * Value Object representing how a federated sign-in is linked to an existing user: never, when the
+ * email matches and is verified, or only manually. of tenantLoginProvider.
  * <p>
  * This class ensures that the account link policy is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

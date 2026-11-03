@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el saml idp cert de tenant login provider of tenantLoginProvider.
+ * Value Object representing certificate of the SAML identity provider, used to verify its signed
+ * assertions. of tenantLoginProvider.
  * <p>
  * This class ensures that the saml idp cert is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

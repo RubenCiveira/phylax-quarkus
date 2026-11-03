@@ -2,7 +2,7 @@
 [#entidad-user-invitation]
 = User invitation
 
-user-invitation
+Invitation sent by email for someone to join a tenant; accepting it creates or links the user.
 
 .Diagrama de clases para user invitation
 [plantuml]

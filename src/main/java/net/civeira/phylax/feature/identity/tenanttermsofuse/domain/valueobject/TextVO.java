@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el text de tenant terms of use of tenantTermsOfUse.
+ * Value Object representing text of the terms of use shown to the user. of tenantTermsOfUse.
  * <p>
  * This class ensures that the text is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

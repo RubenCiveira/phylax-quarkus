@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el token endpoint auth signing alg de oauth client of oauthClient.
+ * Value Object representing algorithm the client uses to sign the JWT with which it authenticates
+ * at the token endpoint. of oauthClient.
  * <p>
  * This class ensures that the token endpoint auth signing alg is a {@code String} and encapsulates
  * its validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven

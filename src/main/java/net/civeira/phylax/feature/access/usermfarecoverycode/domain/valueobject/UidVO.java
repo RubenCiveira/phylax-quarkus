@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a uid string to identify the entity of userMfaRecoveryCode.
+ * Value Object representing unique identifier of the recovery code. of userMfaRecoveryCode.
  * <p>
  * This class ensures that the uid is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -22,7 +22,8 @@ public class ApiKeyClientRbacRegister {
    */
   private static final ResourceDescription RESOURCE =
       ResourceDescription.builder().name("api-key-client")
-          .description("Las diferentes aplicaciones que pueden usar el sistema a través de un api.")
+          .description(
+              "Application that accesses the APIs with an API key instead of OAuth tokens.")
           .build();
 
   /**
@@ -50,15 +51,15 @@ public class ApiKeyClientRbacRegister {
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
         .name("disable").description("").required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
-        .description("El identificador de la aplicacion").build());
+        .description("Unique identifier of the API key client.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("code")
-        .description("El código identificativo de la aplicación").build());
+        .description("Code that identifies the application.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("key")
-        .description("The key for the api (only its digest is stored)").build());
+        .description("API key of the application; only its digest is stored.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
-        .description("The indicator to allow the account be used without deleting it").build());
+        .description("A disabled API key is rejected, without deleting it.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("scopes")
-        .description("A coma separated scopes for the api key").build());
+        .description("Comma-separated scopes granted to the API key.").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version").description(
             "Campo con el número de version de api key client para controlar bloqueos optimistas")

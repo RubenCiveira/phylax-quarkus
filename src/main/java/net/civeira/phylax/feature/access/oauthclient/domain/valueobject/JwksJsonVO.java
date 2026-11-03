@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el jwks json de oauth client of oauthClient.
+ * Value Object representing jSON Web Key Set with the public keys of the client, when it does not
+ * publish a jwks-uri. of oauthClient.
  * <p>
  * This class ensures that the jwks json is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

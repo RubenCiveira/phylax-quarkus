@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing email send when a user register of tenantConfig.
+ * Value Object representing email sent when a user registers. of tenantConfig.
  * <p>
  * This class ensures that the registered email template is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el magic link enabled de tenant config of tenantConfig.
+ * Value Object representing lets users sign in with a link sent by email, without password. of
+ * tenantConfig.
  * <p>
  * This class ensures that the magic link enabled is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

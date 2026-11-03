@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.identity.user.domain.UserRef;
 import net.civeira.phylax.feature.identity.user.domain.UserReference;
 
 /**
- * Value Object representing el usuario para el que se tienen estos datos of userLoginThrottle.
+ * Value Object representing user whose attempts are counted. of userLoginThrottle.
  * <p>
  * This class ensures that the user is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

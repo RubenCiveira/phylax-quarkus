@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el sector identifier uri de oauth client of oauthClient.
+ * Value Object representing uRL listing the redirect URIs of the clients that share pairwise
+ * subject identifiers. of oauthClient.
  * <p>
  * This class ensures that the sector identifier uri is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

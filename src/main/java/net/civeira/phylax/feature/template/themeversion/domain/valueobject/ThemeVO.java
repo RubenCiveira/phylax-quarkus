@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.template.theme.domain.ThemeRef;
 import net.civeira.phylax.feature.template.theme.domain.ThemeReference;
 
 /**
- * Value Object representing el theme de theme version of themeVersion.
+ * Value Object representing theme this version belongs to. of themeVersion.
  * <p>
  * This class ensures that the theme is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

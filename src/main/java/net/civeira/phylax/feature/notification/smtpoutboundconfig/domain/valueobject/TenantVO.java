@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.identity.tenant.domain.TenantRef;
 import net.civeira.phylax.feature.identity.tenant.domain.TenantReference;
 
 /**
- * Value Object representing null = global, valor = override of smtpOutboundConfig.
+ * Value Object representing tenant that uses this configuration. Empty for the global
+ * configuration, used by tenants without their own. of smtpOutboundConfig.
  * <p>
  * This class ensures that the tenant is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

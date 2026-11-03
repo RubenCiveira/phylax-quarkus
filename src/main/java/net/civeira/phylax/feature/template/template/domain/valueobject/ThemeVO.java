@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing nombre del theme layout (full-window, index-page...). Resuelto contra
- * el tenant activo en render time. of template.
+ * Value Object representing name of the theme layout the template is rendered into (full-window,
+ * index-page...), resolved against the active tenant at render time. of template.
  * <p>
  * This class ensures that the theme is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -2,7 +2,7 @@
 [#entidad-theme-version]
 = Theme version
 
-theme-version
+Layout of a theme for a channel and a locale, chosen by BCP 47 negotiation like template versions.
 
 .Diagrama de clases para theme version
 [plantuml]

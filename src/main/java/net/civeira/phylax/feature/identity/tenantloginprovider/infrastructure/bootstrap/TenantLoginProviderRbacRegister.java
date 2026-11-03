@@ -64,12 +64,16 @@ public class TenantLoginProviderRbacRegister {
             .required(List.of()).build());
     rbac.registerResourceAction(RESOURCE,
         ScopeDescription.builder().kind(Kind.READ).name("retrieve-upload-saml-idp-cert")
-            .description("El saml idp cert de tenant login provider").required(List.of()).build());
+            .description(
+                "Certificate of the SAML identity provider, used to verify its signed assertions.")
+            .required(List.of()).build());
     rbac.registerResourceAction(RESOURCE,
         ScopeDescription.builder().kind(Kind.WRITE).name("temp-upload-saml-idp-cert")
-            .description("El saml idp cert de tenant login provider").required(List.of()).build());
+            .description(
+                "Certificate of the SAML identity provider, used to verify its signed assertions.")
+            .required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
-        .description("A uid string to identify the entity").build());
+        .description("Unique identifier of the login provider.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")
         .description("The tenant this login provider is configured for.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("name")
@@ -79,20 +83,19 @@ public class TenantLoginProviderRbacRegister {
             "The source protocol or system used for authentication (e.g., GOOGLE, GITHUB, SAML).")
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
-        .description("Indicates if this provider is currently disabled.").build());
+        .description("Only enabled providers are offered on the sign-in screen.").build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("directAccess").description(
             "If true, the system will default to this login method without requiring selection.")
             .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("publicKey")
-            .description("A public key shared with users to interact with the identity provider.")
-            .build());
-    rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("privateKey")
             .description(
-                "Private key used internally to validate codes returned by the identity provider.")
+                "Client identifier registered with the identity provider (the OIDC client_id).")
             .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("privateKey").description(
+        "Secret registered with the identity provider (the OIDC client_secret), used to exchange the codes it returns.")
+        .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("certificate")
             .description("The provider certificate used for signature verification, if required.")
@@ -102,23 +105,31 @@ public class TenantLoginProviderRbacRegister {
             "A metadata file required by some providers for configuration (e.g., SAML descriptor).")
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("oidcScopes")
-        .description("El oidc scopes de tenant login provider").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("oidcClaimMapping")
-        .description("El oidc claim mapping de tenant login provider").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("accountLinkPolicy")
-        .description("El account link policy de tenant login provider").build());
+        .description("Scopes requested from the OIDC identity provider.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("oidcClaimMapping")
+            .description(
+                "JSON map from the claims of the identity provider to the user attributes.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("accountLinkPolicy").description(
+            "How a federated sign-in is linked to an existing user never, when the email matches and is verified, or only manually.")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("oidcDiscoveryUrl").description(
             "For source=OIDC the /.well-known/openid-configuration URL of the external OIDC identity provider. The system will fetch authorization_endpoint, token_endpoint, and jwks_uri from this document at startup. public-key holds the OIDC client_id; private-key holds the OIDC client_secret.")
             .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpMetadataUrl")
-        .description("El saml idp metadata url de tenant login provider").build());
+        .description("URL of the SAML metadata of the identity provider.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpEntityId")
-        .description("El saml idp entity id de tenant login provider").build());
+        .description("Entity ID of the SAML identity provider.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpSsoUrl")
-        .description("El saml idp sso url de tenant login provider").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("samlIdpCert")
-        .description("El saml idp cert de tenant login provider").build());
+        .description("Single sign-on URL of the SAML identity provider.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("samlIdpCert")
+            .description(
+                "Certificate of the SAML identity provider, used to verify its signed assertions.")
+            .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("usersEnabledByDefault")
             .description(

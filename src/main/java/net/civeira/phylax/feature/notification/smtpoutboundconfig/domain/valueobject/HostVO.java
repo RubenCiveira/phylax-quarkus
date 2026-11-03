@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el host de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing host name or IP address of the SMTP server. of smtpOutboundConfig.
  * <p>
  * This class ensures that the host is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

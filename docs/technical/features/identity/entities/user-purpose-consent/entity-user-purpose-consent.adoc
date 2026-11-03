@@ -2,7 +2,7 @@
 [#entidad-user-purpose-consent]
 = User purpose consent
 
-user-purpose-consent
+Decision of a user to grant or deny a consent purpose, kept as evidence.
 
 .Diagrama de clases para user purpose consent
 [plantuml]

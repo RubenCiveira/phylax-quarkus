@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing usado cuando el snippet se incrusta en canal MAIL. of snippetVersion.
+ * Value Object representing subject used when the snippet is embedded in the MAIL channel. of
+ * snippetVersion.
  * <p>
  * This class ensures that the subject is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

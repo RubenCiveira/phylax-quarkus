@@ -2,7 +2,7 @@
 [#entidad-snippet-asset]
 = Snippet asset
 
-snippet-asset
+File (image, stylesheet, font) used by a snippet.
 
 .Diagrama de clases para snippet asset
 [plantuml]

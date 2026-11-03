@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el aaguid de user webauthn credential of userWebauthnCredential.
+ * Value Object representing identifier of the authenticator model (AAGUID). of
+ * userWebauthnCredential.
  * <p>
  * This class ensures that the aaguid is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el response types json de oauth client of oauthClient.
+ * Value Object representing jSON list of the response types the client may request. of oauthClient.
  * <p>
  * This class ensures that the response types json is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

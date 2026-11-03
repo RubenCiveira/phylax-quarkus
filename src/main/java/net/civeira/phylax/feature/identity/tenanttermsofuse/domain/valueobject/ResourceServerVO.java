@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerRef
 import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerReference;
 
 /**
- * Value Object representing la applicación a tener en cuenta of tenantTermsOfUse.
+ * Value Object representing resource server the terms apply to. Empty for terms that apply to the
+ * whole tenant. of tenantTermsOfUse.
  * <p>
  * This class ensures that the resource server is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

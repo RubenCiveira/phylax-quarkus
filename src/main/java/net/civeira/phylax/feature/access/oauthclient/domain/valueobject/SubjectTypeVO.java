@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientSubjectTypeOptions;
 
 /**
- * Value Object representing el subject type de oauth client of oauthClient.
+ * Value Object representing subject identifier sent to the client: the same for every client
+ * (public) or a different one per sector (pairwise). of oauthClient.
  * <p>
  * This class ensures that the subject type is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

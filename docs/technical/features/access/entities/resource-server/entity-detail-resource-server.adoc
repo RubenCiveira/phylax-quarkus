@@ -2,7 +2,7 @@
 [#entidad-resource-server]
 = Resource server
 
-resource-server
+API protected by the authorization server. Clients request access tokens with this resource server as audience, and roles can be defined per resource server.
 
 .Diagrama de clases para resource server
 [plantuml]

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el roles de user invitation of userInvitation.
+ * Value Object representing roles granted to the user when the invitation is accepted. of
+ * userInvitation.
  * <p>
  * This class ensures that the roles is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

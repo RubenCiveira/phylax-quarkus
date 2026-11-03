@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing private key used internally to validate codes returned by the identity
- * provider. of tenantLoginProvider.
+ * Value Object representing secret registered with the identity provider (the OIDC client_secret),
+ * used to exchange the codes it returns. of tenantLoginProvider.
  * <p>
  * This class ensures that the private key is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

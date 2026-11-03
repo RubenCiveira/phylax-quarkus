@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el zoneinfo de user profile of userProfile.
+ * Value Object representing time zone of the user, e.g. Europe/Madrid (zoneinfo claim). of
+ * userProfile.
  * <p>
  * This class ensures that the zoneinfo is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

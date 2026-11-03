@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el user agent de user accepted terms of use of userAcceptedTermsOfUse.
+ * Value Object representing browser the terms were accepted from. of userAcceptedTermsOfUse.
  * <p>
  * This class ensures that the user agent is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

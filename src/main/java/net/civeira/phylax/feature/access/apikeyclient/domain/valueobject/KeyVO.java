@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the key for the api (only its digest is stored) of apiKeyClient.
+ * Value Object representing aPI key of the application; only its digest is stored. of apiKeyClient.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

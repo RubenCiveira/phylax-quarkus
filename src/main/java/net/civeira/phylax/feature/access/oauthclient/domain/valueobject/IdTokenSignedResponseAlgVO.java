@@ -13,7 +13,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientIdTokenSignedResponseAlgOptions;
 
 /**
- * Value Object representing el id token signed response alg de oauth client of oauthClient.
+ * Value Object representing algorithm used to sign the ID tokens issued to this client. of
+ * oauthClient.
  * <p>
  * This class ensures that the id token signed response alg is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

@@ -2,7 +2,7 @@
 [#entidad-user-profile]
 = User profile
 
-user-profile
+Profile of a user, published as the standard OpenID Connect claims of the profile, email, phone and address scopes.
 
 .Diagrama de clases para user profile
 [plantuml]

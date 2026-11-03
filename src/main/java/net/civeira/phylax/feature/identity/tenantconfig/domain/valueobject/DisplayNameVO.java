@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing tenant could use these field to label the application for the users of
- * tenantConfig.
+ * Value Object representing name shown to the users of the tenant, for example on the sign-in
+ * screen. of tenantConfig.
  * <p>
  * This class ensures that the display name is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

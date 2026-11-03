@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el backchannel client notification endpoint de oauth client of
+ * Value Object representing endpoint of the client that receives the CIBA ping notifications. of
  * oauthClient.
  * <p>
  * This class ensures that the backchannel client notification endpoint is a {@code String} and

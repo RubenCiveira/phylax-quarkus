@@ -2,7 +2,7 @@
 [#entidad-user-role-assignment]
 = User role assignment
 
-user-role-assignment
+Roles a user holds, globally or for a specific resource server or client.
 
 .Diagrama de clases para user role assignment
 [plantuml]

@@ -2,7 +2,7 @@
 [#entidad-template-version]
 = Template version
 
-template-version
+Content of a template for a locale. When rendering, the version is chosen by BCP 47 negotiation: exact locale, then language, then the default version.
 
 .Diagrama de clases para template version
 [plantuml]

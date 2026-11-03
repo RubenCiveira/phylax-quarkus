@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a tenant mark for deleted will be of tenant.
+ * Value Object representing the tenant has been requested to be deleted and will be removed. of
+ * tenant.
  * <p>
  * This class ensures that the mark for delete is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

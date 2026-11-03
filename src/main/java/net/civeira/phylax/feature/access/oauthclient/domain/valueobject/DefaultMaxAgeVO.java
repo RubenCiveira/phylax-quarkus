@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el default max age de oauth client of oauthClient.
+ * Value Object representing maximum authentication age, in seconds, applied when the client does
+ * not send max_age. of oauthClient.
  * <p>
  * This class ensures that the default max age is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

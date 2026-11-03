@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el frontchannel logout session required de oauth client of oauthClient.
+ * Value Object representing adds the issuer and session identifier to the front-channel logout URL.
+ * of oauthClient.
  * <p>
  * This class ensures that the frontchannel logout session required is a {@code String} and
  * encapsulates its validation and formatting logic. It is immutable and compliant with DDD

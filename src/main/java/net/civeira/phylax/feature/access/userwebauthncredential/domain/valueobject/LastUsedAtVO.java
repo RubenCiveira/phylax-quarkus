@@ -14,7 +14,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el last used at de user webauthn credential of userWebauthnCredential.
+ * Value Object representing when the credential was last used to sign in. of
+ * userWebauthnCredential.
  * <p>
  * This class ensures that the last used at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

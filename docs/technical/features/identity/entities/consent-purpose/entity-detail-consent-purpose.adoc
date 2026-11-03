@@ -2,7 +2,7 @@
 [#entidad-consent-purpose]
 = Consent purpose
 
-consent-purpose
+Purpose of data processing a tenant asks its users to consent to (marketing, analytics...), as required by the GDPR.
 
 .Diagrama de clases para consent purpose
 [plantuml]

@@ -13,7 +13,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el expires at de user invitation of userInvitation.
+ * Value Object representing when the invitation expires if it is not accepted. of userInvitation.
  * <p>
  * This class ensures that the expires at is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

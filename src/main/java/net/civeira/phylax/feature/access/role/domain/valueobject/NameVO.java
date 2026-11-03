@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the user name to identify on the login screen of role.
+ * Value Object representing name of the role, sent in the tokens of the users that hold it. of
+ * role.
  * <p>
  * This class ensures that the name is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

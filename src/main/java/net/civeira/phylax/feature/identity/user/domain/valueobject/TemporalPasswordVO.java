@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el temporal password de user of user.
+ * Value Object representing the password is temporary: the user must set a new one at the next
+ * sign-in. of user.
  * <p>
  * This class ensures that the temporal password is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -2,7 +2,7 @@
 [#entidad-user]
 = User
 
-user
+Person who signs in to a tenant, with a password, a federated identity provider, passkeys or a second factor.
 
 .Diagrama de clases para user
 [plantuml]

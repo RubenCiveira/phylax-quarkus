@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el retries de message of message.
+ * Value Object representing failed delivery attempts so far; the message is abandoned once it
+ * reaches the max-retries of the SMTP configuration. of message.
  * <p>
  * This class ensures that the retries is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

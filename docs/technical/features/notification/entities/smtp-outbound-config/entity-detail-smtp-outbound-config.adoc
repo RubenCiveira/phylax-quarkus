@@ -2,7 +2,7 @@
 [#entidad-smtp-outbound-config]
 = Smtp outbound config
 
-smtp-outbound-config
+SMTP server used to send notifications. A tenant can have its own configuration; otherwise the global one (without tenant) is used.
 
 .Diagrama de clases para smtp outbound config
 [plantuml]

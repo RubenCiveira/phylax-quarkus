@@ -2,7 +2,7 @@
 [#entidad-template]
 = Template
 
-template
+Document the system renders for a channel (an email, an SMS or an HTML page), identified by its code. A tenant-specific template overrides the global one with the same code; the content lives in its versions, one per locale.
 
 .Diagrama de clases para template
 [plantuml]

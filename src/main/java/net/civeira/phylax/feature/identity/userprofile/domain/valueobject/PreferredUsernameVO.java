@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el preferred username de user profile of userProfile.
+ * Value Object representing name the user prefers to be called by (preferred_username claim). of
+ * userProfile.
  * <p>
  * This class ensures that the preferred username is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

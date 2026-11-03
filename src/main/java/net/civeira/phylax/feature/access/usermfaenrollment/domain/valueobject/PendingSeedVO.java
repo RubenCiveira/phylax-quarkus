@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the seed used to the otp login of userMfaEnrollment.
+ * Value Object representing seed of the one-time password generator pending confirmation; stored
+ * encrypted. of userMfaEnrollment.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

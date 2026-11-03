@@ -2,7 +2,7 @@
 [#entidad-theme]
 = Theme
 
-theme
+Layout shared by several templates (header, footer, styles), identified by name. A tenant-specific theme overrides the global one with the same name.
 
 .Diagrama de clases para theme
 [plantuml]

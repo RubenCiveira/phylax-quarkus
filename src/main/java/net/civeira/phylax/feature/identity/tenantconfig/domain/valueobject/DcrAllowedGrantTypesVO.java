@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el dcr allowed grant types de tenant config of tenantConfig.
+ * Value Object representing jSON list of the grant types a dynamically registered client may
+ * request. of tenantConfig.
  * <p>
  * This class ensures that the dcr allowed grant types is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

@@ -2,7 +2,7 @@
 [#entidad-tenant]
 = Tenant
 
-tenant
+Organization with its own users, clients and configuration, isolated from the other tenants. The root tenant manages the global resources.
 
 .Diagrama de clases para tenant
 [plantuml]

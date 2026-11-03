@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el saml idp sso url de tenant login provider of tenantLoginProvider.
+ * Value Object representing single sign-on URL of the SAML identity provider. of
+ * tenantLoginProvider.
  * <p>
  * This class ensures that the saml idp sso url is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

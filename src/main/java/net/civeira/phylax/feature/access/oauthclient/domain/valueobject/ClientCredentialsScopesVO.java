@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el client credentials scopes de oauth client of oauthClient.
+ * Value Object representing scopes granted to the client in the client credentials flow. of
+ * oauthClient.
  * <p>
  * This class ensures that the client credentials scopes is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

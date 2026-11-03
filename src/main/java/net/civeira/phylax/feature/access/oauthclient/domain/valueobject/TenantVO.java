@@ -13,8 +13,8 @@ import net.civeira.phylax.feature.identity.tenant.domain.TenantRef;
 import net.civeira.phylax.feature.identity.tenant.domain.TenantReference;
 
 /**
- * Value Object representing owner tenant. Null means a global client, manageable only by root. of
- * oauthClient.
+ * Value Object representing owner tenant. Empty for a global client, manageable only by the root
+ * tenant. of oauthClient.
  * <p>
  * This class ensures that the tenant is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

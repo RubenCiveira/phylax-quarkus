@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing a public key shared with users to interact with the identity provider.
- * of tenantLoginProvider.
+ * Value Object representing client identifier registered with the identity provider (the OIDC
+ * client_id). of tenantLoginProvider.
  * <p>
  * This class ensures that the public key is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.identity.tenant.domain.TenantRef;
 import net.civeira.phylax.feature.identity.tenant.domain.TenantReference;
 
 /**
- * Value Object representing null = theme global fallback, valor = override por tenant of theme.
+ * Value Object representing tenant that overrides the theme. Empty for the global theme, used as
+ * fallback. of theme.
  * <p>
  * This class ensures that the tenant is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing if is true, the user has a otp to force mfa on login of user.
+ * Value Object representing the user signs in with a one-time password (TOTP) as second factor. of
+ * user.
  * <p>
  * This class ensures that the use second factors is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

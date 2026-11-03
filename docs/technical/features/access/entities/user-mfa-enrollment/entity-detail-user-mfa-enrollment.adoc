@@ -2,7 +2,7 @@
 [#entidad-user-mfa-enrollment]
 = User mfa enrollment
 
-user-mfa-enrollment
+Second-factor (TOTP) enrollment in progress: the seed waits here until the user confirms it with a first valid code.
 
 .Diagrama de clases para user mfa enrollment
 [plantuml]

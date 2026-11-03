@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientRef;
 import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientReference;
 
 /**
- * Value Object representing el oauth client de user group membership of userGroupMembership.
+ * Value Object representing client the groups apply to. Empty for any client. of
+ * userGroupMembership.
  * <p>
  * This class ensures that the oauth client is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el codigo de registro para verificar enviado por email of
+ * Value Object representing digest of the code sent by email; the raw value is never stored. of
  * userVerificationCode.
  */
 @RequiredArgsConstructor

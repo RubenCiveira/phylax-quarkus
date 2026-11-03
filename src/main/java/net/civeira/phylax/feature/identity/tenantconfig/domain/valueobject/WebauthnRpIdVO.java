@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el webauthn rp id de tenant config of tenantConfig.
+ * Value Object representing webAuthn relying party identifier: the domain the passkeys are bound
+ * to. of tenantConfig.
  * <p>
  * This class ensures that the webauthn rp id is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

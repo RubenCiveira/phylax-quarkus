@@ -13,7 +13,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.identity.tenantconfig.domain.TenantConfigDynamicRegistrationPolicyOptions;
 
 /**
- * Value Object representing el dynamic registration policy de tenant config of tenantConfig.
+ * Value Object representing who can register clients dynamically: anyone (open), only with an
+ * initial access token (token_required) or nobody (disabled). of tenantConfig.
  * <p>
  * This class ensures that the dynamic registration policy is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

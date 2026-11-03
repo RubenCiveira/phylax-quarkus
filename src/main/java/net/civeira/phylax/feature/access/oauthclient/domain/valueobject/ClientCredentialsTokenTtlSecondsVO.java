@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el client credentials token ttl seconds de oauth client of oauthClient.
+ * Value Object representing lifetime, in seconds, of the access tokens issued in the client
+ * credentials flow. of oauthClient.
  * <p>
  * This class ensures that the client credentials token ttl seconds is a non-null {@code String} and
  * encapsulates its validation and formatting logic. It is immutable and compliant with DDD

@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el saml idp metadata url de tenant login provider of
+ * Value Object representing uRL of the SAML metadata of the identity provider. of
  * tenantLoginProvider.
  * <p>
  * This class ensures that the saml idp metadata url is a {@code String} and encapsulates its

@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.template.themeversion.domain.ThemeVersionChannelOptions;
 
 /**
- * Value Object representing el channel de theme version of themeVersion.
+ * Value Object representing channel the layout is for: MAIL or HTML page. of themeVersion.
  * <p>
  * This class ensures that the channel is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

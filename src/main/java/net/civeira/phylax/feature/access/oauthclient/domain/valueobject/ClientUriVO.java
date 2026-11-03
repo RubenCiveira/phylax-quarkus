@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el client uri de oauth client of oauthClient.
+ * Value Object representing uRL of the home page of the client. of oauthClient.
  * <p>
  * This class ensures that the client uri is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

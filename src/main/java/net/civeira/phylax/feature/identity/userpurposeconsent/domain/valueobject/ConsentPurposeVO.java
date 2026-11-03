@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.identity.consentpurpose.domain.ConsentPurposeR
 import net.civeira.phylax.feature.identity.consentpurpose.domain.ConsentPurposeReference;
 
 /**
- * Value Object representing el consent purpose de user purpose consent of userPurposeConsent.
+ * Value Object representing purpose the decision is about. of userPurposeConsent.
  * <p>
  * This class ensures that the consent purpose is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

@@ -2,7 +2,7 @@
 [#entidad-api-key-client]
 = Api key client
 
-Las diferentes aplicaciones que pueden usar el sistema a través de un api.
+Application that accesses the APIs with an API key instead of OAuth tokens.
 
 .Diagrama de clases para api key client
 [plantuml]

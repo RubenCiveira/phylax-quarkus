@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing iMAGE, CSS, FONT... of templateAsset.
+ * Value Object representing kind of file, e.g. IMAGE, CSS or FONT. of templateAsset.
  * <p>
  * This class ensures that the type is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

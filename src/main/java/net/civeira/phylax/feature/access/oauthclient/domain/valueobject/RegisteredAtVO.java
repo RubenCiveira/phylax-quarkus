@@ -14,7 +14,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el registered at de oauth client of oauthClient.
+ * Value Object representing when the client was registered. of oauthClient.
  * <p>
  * This class ensures that the registered at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

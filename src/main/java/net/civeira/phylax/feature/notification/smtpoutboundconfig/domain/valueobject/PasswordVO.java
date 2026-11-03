@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el password de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing password to authenticate against the SMTP server; stored encrypted. of
+ * smtpOutboundConfig.
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode

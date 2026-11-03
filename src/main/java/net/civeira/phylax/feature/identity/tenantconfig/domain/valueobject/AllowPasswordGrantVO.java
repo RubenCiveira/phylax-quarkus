@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el allow password grant de tenant config of tenantConfig.
+ * Value Object representing allows the resource owner password grant, in which the client receives
+ * the user credentials directly. of tenantConfig.
  * <p>
  * This class ensures that the allow password grant is a non-null {@code String} and encapsulates
  * its validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven

@@ -10,7 +10,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el identificador de la aplicacion of apiKeyClient.
+ * Value Object representing unique identifier of the API key client. of apiKeyClient.
  * <p>
  * This class ensures that the uid is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

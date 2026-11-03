@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerRef
 import net.civeira.phylax.feature.access.resourceserver.domain.ResourceServerReference;
 
 /**
- * Value Object representing domains without a tenant could be used only for admins of role.
+ * Value Object representing resource server the role belongs to. Empty for global roles, usable
+ * only by administrators. of role.
  * <p>
  * This class ensures that the resource server is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

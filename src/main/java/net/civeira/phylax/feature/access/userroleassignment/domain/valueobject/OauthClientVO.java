@@ -13,7 +13,7 @@ import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientRef;
 import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientReference;
 
 /**
- * Value Object representing el oauth client de user role assignment of userRoleAssignment.
+ * Value Object representing client the roles apply to. Empty for any client. of userRoleAssignment.
  * <p>
  * This class ensures that the oauth client is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

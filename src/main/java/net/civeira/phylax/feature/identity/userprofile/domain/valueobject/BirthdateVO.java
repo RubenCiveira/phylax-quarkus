@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el birthdate de user profile of userProfile.
+ * Value Object representing birth date as YYYY-MM-DD, or YYYY when only the year is shared
+ * (birthdate claim). of userProfile.
  * <p>
  * This class ensures that the birthdate is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

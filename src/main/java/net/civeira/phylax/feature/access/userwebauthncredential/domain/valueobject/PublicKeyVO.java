@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el public key de user webauthn credential of userWebauthnCredential.
+ * Value Object representing public key of the credential, used to verify the sign-in assertions. of
+ * userWebauthnCredential.
  * <p>
  * This class ensures that the public key is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

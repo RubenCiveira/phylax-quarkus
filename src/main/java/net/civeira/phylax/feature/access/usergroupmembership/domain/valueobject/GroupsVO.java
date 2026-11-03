@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el groups de user group membership of userGroupMembership.
+ * Value Object representing groups of the user, as a JSON list. of userGroupMembership.
  * <p>
  * This class ensures that the groups is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

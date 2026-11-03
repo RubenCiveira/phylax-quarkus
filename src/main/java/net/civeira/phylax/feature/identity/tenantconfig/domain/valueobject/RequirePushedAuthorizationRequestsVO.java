@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el require pushed authorization requests de tenant config of
- * tenantConfig.
+ * Value Object representing requires every client of the tenant to send its authorization requests
+ * through PAR (RFC 9126). of tenantConfig.
  * <p>
  * This class ensures that the require pushed authorization requests is a non-null {@code String}
  * and encapsulates its validation and formatting logic. It is immutable and compliant with DDD

@@ -2,7 +2,7 @@
 [#entidad-user-accepted-terms-of-use]
 = User accepted terms of use
 
-user-accepted-terms-of-use
+Evidence that a user accepted a version of the terms of use.
 
 .Diagrama de clases para user accepted terms of use
 [plantuml]

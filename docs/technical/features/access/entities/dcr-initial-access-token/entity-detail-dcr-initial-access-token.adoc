@@ -2,7 +2,7 @@
 [#entidad-dcr-initial-access-token]
 = Dcr initial access token
 
-dcr-initial-access-token
+Initial access token that authorizes dynamic client registration in a tenant whose policy is token_required (RFC 7591).
 
 .Diagrama de clases para dcr initial access token
 [plantuml]

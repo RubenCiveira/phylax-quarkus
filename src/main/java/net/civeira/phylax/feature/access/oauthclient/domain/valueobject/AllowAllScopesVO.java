@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el allow all scopes de oauth client of oauthClient.
+ * Value Object representing lets the client request any scope instead of only the standard OpenID
+ * Connect ones. of oauthClient.
  * <p>
  * This class ensures that the allow all scopes is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

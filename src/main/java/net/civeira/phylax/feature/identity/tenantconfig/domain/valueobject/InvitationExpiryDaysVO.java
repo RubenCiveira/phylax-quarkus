@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing number of days before an unused user invitation token expires.
- * Currently hardcoded to 7 days in InvitationCreateUsecase. of tenantConfig.
+ * Value Object representing number of days before an unused user invitation expires. of
+ * tenantConfig.
  * <p>
  * This class ensures that the invitation expiry days is a non-null {@code String} and encapsulates
  * its validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven

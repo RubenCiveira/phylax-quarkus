@@ -13,7 +13,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.identity.user.domain.UserApprovalStatusOptions;
 
 /**
- * Value Object representing el approval status de user of user.
+ * Value Object representing approval state of the account: email not verified yet, pending approval
+ * by an administrator, accepted or rejected. of user.
  * <p>
  * This class ensures that the approval status is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

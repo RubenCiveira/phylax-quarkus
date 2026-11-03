@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el root de tenant of tenant.
+ * Value Object representing marks the root tenant, which manages the global resources and the other
+ * tenants. of tenant.
  * <p>
  * This class ensures that the root is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

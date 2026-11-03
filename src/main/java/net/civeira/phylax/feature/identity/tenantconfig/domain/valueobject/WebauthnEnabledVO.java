@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el webauthn enabled de tenant config of tenantConfig.
+ * Value Object representing lets users sign in with passkeys and security keys (WebAuthn). of
+ * tenantConfig.
  * <p>
  * This class ensures that the webauthn enabled is a {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

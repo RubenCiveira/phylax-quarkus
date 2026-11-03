@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.template.snippet.domain.SnippetRef;
 import net.civeira.phylax.feature.template.snippet.domain.SnippetReference;
 
 /**
- * Value Object representing el snippet de snippet version of snippetVersion.
+ * Value Object representing snippet this version belongs to. of snippetVersion.
  * <p>
  * This class ensures that the snippet is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

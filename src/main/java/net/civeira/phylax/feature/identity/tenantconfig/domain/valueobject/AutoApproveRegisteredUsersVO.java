@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el auto approve registered users de tenant config of tenantConfig.
+ * Value Object representing self-registered users can sign in right away; otherwise they wait for
+ * an administrator to approve them. of tenantConfig.
  * <p>
  * This class ensures that the auto approve registered users is a {@code String} and encapsulates
  * its validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven

@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing la url de retorno para verificar el codigo de registro of
+ * Value Object representing uRL the user returns to once the code is verified. of
  * userVerificationCode.
  * <p>
  * This class ensures that the return url is a {@code String} and encapsulates its validation and

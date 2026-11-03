@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el id token encrypted response alg de oauth client of oauthClient.
+ * Value Object representing key management algorithm used to encrypt the ID tokens of this client;
+ * empty sends them unencrypted. of oauthClient.
  * <p>
  * This class ensures that the id token encrypted response alg is a {@code String} and encapsulates
  * its validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven

@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el rate limit de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing maximum number of emails sent per dispatch cycle with this
+ * configuration. of smtpOutboundConfig.
  * <p>
  * This class ensures that the rate limit is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

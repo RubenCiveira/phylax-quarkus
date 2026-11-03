@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.template.template.domain.TemplateRef;
 import net.civeira.phylax.feature.template.template.domain.TemplateReference;
 
 /**
- * Value Object representing el template de template asset of templateAsset.
+ * Value Object representing template that uses the asset. of templateAsset.
  * <p>
  * This class ensures that the template is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

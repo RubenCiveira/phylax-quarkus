@@ -2,7 +2,7 @@
 [#entidad-role]
 = Role
 
-role
+Role that can be assigned to users, optionally limited to a resource server.
 
 .Diagrama de clases para role
 [plantuml]

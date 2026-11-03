@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el port de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing port of the SMTP server (usually 587 with STARTTLS or 465 with implicit
+ * TLS). of smtpOutboundConfig.
  * <p>
  * This class ensures that the port is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

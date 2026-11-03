@@ -14,7 +14,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el lock at de message of message.
+ * Value Object representing when a dispatcher took the message to send it; a lock older than two
+ * minutes is considered abandoned and the message becomes eligible again. of message.
  * <p>
  * This class ensures that the lock at is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

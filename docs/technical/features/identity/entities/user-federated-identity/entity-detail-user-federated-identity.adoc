@@ -2,7 +2,7 @@
 [#entidad-user-federated-identity]
 = User federated identity
 
-user-federated-identity
+Link between a user and their account in an external identity provider, so that signing in with that provider resolves to the user.
 
 .Diagrama de clases para user federated identity
 [plantuml]

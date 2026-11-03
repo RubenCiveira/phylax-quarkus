@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el saml idp entity id de tenant login provider of tenantLoginProvider.
+ * Value Object representing entity ID of the SAML identity provider. of tenantLoginProvider.
  * <p>
  * This class ensures that the saml idp entity id is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

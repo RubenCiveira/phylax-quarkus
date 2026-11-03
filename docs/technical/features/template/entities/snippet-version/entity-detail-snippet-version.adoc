@@ -2,7 +2,7 @@
 [#entidad-snippet-version]
 = Snippet version
 
-snippet-version
+Content of a snippet for a locale, chosen by BCP 47 negotiation like template versions.
 
 .Diagrama de clases para snippet version
 [plantuml]

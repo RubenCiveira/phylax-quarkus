@@ -11,8 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing una marca que permite quitar el acceso a una cuenta sin borrarla of
- * resourceServer.
+ * Value Object representing a disabled resource server is not accepted as audience, without
+ * deleting it. of resourceServer.
  * <p>
  * This class ensures that the enabled is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

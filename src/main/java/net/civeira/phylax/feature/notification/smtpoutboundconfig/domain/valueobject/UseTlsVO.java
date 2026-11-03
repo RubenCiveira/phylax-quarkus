@@ -11,7 +11,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el use tls de smtp outbound config of smtpOutboundConfig.
+ * Value Object representing encrypts the connection to the SMTP server with TLS. of
+ * smtpOutboundConfig.
  * <p>
  * This class ensures that the use tls is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

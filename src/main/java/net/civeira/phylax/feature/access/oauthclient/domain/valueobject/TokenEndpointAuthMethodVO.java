@@ -12,7 +12,9 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.oauthclient.domain.OauthClientTokenEndpointAuthMethodOptions;
 
 /**
- * Value Object representing el token endpoint auth method de oauth client of oauthClient.
+ * Value Object representing how the client authenticates at the token endpoint: client secret in
+ * the Authorization header or in the body, a signed JWT (private_key_jwt), or none for public
+ * clients. of oauthClient.
  * <p>
  * This class ensures that the token endpoint auth method is a non-null {@code String} and
  * encapsulates its validation and formatting logic. It is immutable and compliant with DDD

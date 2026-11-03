@@ -12,7 +12,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.oauthclient.domain.AllowedLoginRedirects;
 
 /**
- * Value Object representing el allowed login redirects de oauth client of oauthClient.
+ * Value Object representing redirect URIs the client may use after sign-in. of oauthClient.
  * <p>
  * This class ensures that the allowed login redirects is a non-null {@code String} and encapsulates
  * its validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven

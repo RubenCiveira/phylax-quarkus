@@ -12,7 +12,7 @@ import net.civeira.phylax.feature.identity.tenant.domain.TenantRef;
 import net.civeira.phylax.feature.identity.tenant.domain.TenantReference;
 
 /**
- * Value Object representing el tenant de user invitation of userInvitation.
+ * Value Object representing tenant the invitation is for. of userInvitation.
  * <p>
  * This class ensures that the tenant is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

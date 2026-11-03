@@ -55,9 +55,11 @@ public class UserPersonalApiKeyRbacRegister {
             .description("Disables the key without deleting it, preserving the audit trail.")
             .required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
-        .description("El uid de user personal api key").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("user")
-        .description("El user de user personal api key").build());
+        .description("Unique identifier of the key.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("user")
+            .description("User who owns the key; requests made with it act on behalf of this user.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("name")
         .description("A label to identify the key (e.g. 'CI pipeline', 'local dev').").build());
     rbac.registerResourceField(RESOURCE,
@@ -71,9 +73,9 @@ public class UserPersonalApiKeyRbacRegister {
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("expiresAt")
         .description("Optional expiry. Null means the key does not expire.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("createdAt")
-        .description("El created at de user personal api key").build());
+        .description("When the key was created.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("enabled")
-        .description("El enabled de user personal api key").build());
+        .description("A disabled key is rejected, without deleting it.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("version").description(
         "Campo con el número de version de user personal api key para controlar bloqueos optimistas")
         .build());

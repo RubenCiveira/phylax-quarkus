@@ -2,7 +2,7 @@
 [#entidad-tenant-config]
 = Tenant config
 
-tenant-config
+Settings of a tenant: sign-up, sign-in, MFA, token lifetimes, dynamic client registration and notification emails.
 
 .Diagrama de clases para tenant config
 [plantuml]

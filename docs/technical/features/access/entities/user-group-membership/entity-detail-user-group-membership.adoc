@@ -2,7 +2,7 @@
 [#entidad-user-group-membership]
 = User group membership
 
-user-group-membership
+Groups a user belongs to, globally or for a specific resource server or client; published in the tokens.
 
 .Diagrama de clases para user group membership
 [plantuml]

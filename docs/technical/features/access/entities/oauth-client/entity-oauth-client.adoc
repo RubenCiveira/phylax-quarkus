@@ -2,10 +2,7 @@
 [#entidad-oauth-client]
 = Oauth client
 
-Las diferentes aplicaciones que pueden usar el sistema de
-			acceso.
-			Dado qua la app va en la petición de login, podemos obtener la
-			cuenta asociado a traves del proyecto
+Application that signs users in or requests tokens through OAuth 2.0 / OpenID Connect. The client is sent in every authorization request, so the tenant is resolved from it.
 
 .Diagrama de clases para oauth client
 [plantuml]

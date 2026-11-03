@@ -24,7 +24,7 @@ security:
   - BearerAuth: [] # Aplica el esquema de seguridad por defecto a toda la API
 tags:
   - name: template
-    description: template
+    description: Document the system renders for a channel (an email, an SMS or an HTML page), identified by its code. A tenant-specific template overrides the global one with the same code; the content lives in its versions, one per locale.
   - name: template-batch
     description: Massive operations for template
   - name: template-audit
@@ -32,7 +32,7 @@ tags:
   - name: template-acl
     description: Access control for template
   - name: snippet
-    description: snippet
+    description: Reusable fragment (legal footer, privacy notice, company address) that templates include by code. A tenant-specific snippet overrides the global one with the same code.
   - name: snippet-batch
     description: Massive operations for snippet
   - name: snippet-audit
@@ -40,7 +40,7 @@ tags:
   - name: snippet-acl
     description: Access control for snippet
   - name: role
-    description: role
+    description: Role that can be assigned to users, optionally limited to a resource server.
   - name: role-batch
     description: Massive operations for role
   - name: role-audit
@@ -48,7 +48,7 @@ tags:
   - name: role-acl
     description: Access control for role
   - name: user-group-membership
-    description: user-group-membership
+    description: Groups a user belongs to, globally or for a specific resource server or client; published in the tokens.
   - name: user-group-membership-batch
     description: Massive operations for user group membership
   - name: user-group-membership-audit
@@ -56,7 +56,7 @@ tags:
   - name: user-group-membership-acl
     description: Access control for user group membership
   - name: oauth-client
-    description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
+    description: Application that signs users in or requests tokens through OAuth 2.0 / OpenID Connect. The client is sent in every authorization request, so the tenant is resolved from it.
   - name: oauth-client-batch
     description: Massive operations for oauth client
   - name: oauth-client-audit
@@ -64,7 +64,7 @@ tags:
   - name: oauth-client-acl
     description: Access control for oauth client
   - name: theme-version
-    description: theme-version
+    description: Layout of a theme for a channel and a locale, chosen by BCP 47 negotiation like template versions.
   - name: theme-version-batch
     description: Massive operations for theme version
   - name: theme-version-audit
@@ -72,7 +72,7 @@ tags:
   - name: theme-version-acl
     description: Access control for theme version
   - name: snippet-version
-    description: snippet-version
+    description: Content of a snippet for a locale, chosen by BCP 47 negotiation like template versions.
   - name: snippet-version-batch
     description: Massive operations for snippet version
   - name: snippet-version-audit
@@ -80,7 +80,7 @@ tags:
   - name: snippet-version-acl
     description: Access control for snippet version
   - name: template-version
-    description: template-version
+    description: Content of a template for a locale. When rendering, the version is chosen by BCP 47 negotiation exact locale, then language, then the default version.
   - name: template-version-batch
     description: Massive operations for template version
   - name: template-version-audit
@@ -88,7 +88,7 @@ tags:
   - name: template-version-acl
     description: Access control for template version
   - name: snippet-asset
-    description: snippet-asset
+    description: File (image, stylesheet, font) used by a snippet.
   - name: snippet-asset-batch
     description: Massive operations for snippet asset
   - name: snippet-asset-audit
@@ -96,7 +96,7 @@ tags:
   - name: snippet-asset-acl
     description: Access control for snippet asset
   - name: api-key-client
-    description: Las diferentes aplicaciones que pueden usar el sistema a través de un api.
+    description: Application that accesses the APIs with an API key instead of OAuth tokens.
   - name: api-key-client-batch
     description: Massive operations for api key client
   - name: api-key-client-audit
@@ -112,7 +112,7 @@ tags:
   - name: user-personal-api-key-acl
     description: Access control for user personal api key
   - name: template-variable
-    description: template-variable
+    description: Default value of a variable available to the templates of a tenant; the caller can override it when rendering.
   - name: template-variable-batch
     description: Massive operations for template variable
   - name: template-variable-audit
@@ -120,7 +120,7 @@ tags:
   - name: template-variable-acl
     description: Access control for template variable
   - name: theme
-    description: theme
+    description: Layout shared by several templates (header, footer, styles), identified by name. A tenant-specific theme overrides the global one with the same name.
   - name: theme-batch
     description: Massive operations for theme
   - name: theme-audit
@@ -128,7 +128,7 @@ tags:
   - name: theme-acl
     description: Access control for theme
   - name: template-asset
-    description: template-asset
+    description: File (image, stylesheet, font) used by a template, which a tenant can override (e.g. a different logo per tenant in a global template).
   - name: template-asset-batch
     description: Massive operations for template asset
   - name: template-asset-audit
@@ -136,7 +136,7 @@ tags:
   - name: template-asset-acl
     description: Access control for template asset
   - name: tenant
-    description: tenant
+    description: Organization with its own users, clients and configuration, isolated from the other tenants. The root tenant manages the global resources.
   - name: tenant-batch
     description: Massive operations for tenant
   - name: tenant-audit
@@ -144,7 +144,7 @@ tags:
   - name: tenant-acl
     description: Access control for tenant
   - name: user-federated-identity
-    description: user-federated-identity
+    description: Link between a user and their account in an external identity provider, so that signing in with that provider resolves to the user.
   - name: user-federated-identity-batch
     description: Massive operations for user federated identity
   - name: user-federated-identity-audit
@@ -152,7 +152,7 @@ tags:
   - name: user-federated-identity-acl
     description: Access control for user federated identity
   - name: message
-    description: message
+    description: Outbox entry for an outgoing notification (currently an email) the rendered content waits here until the dispatcher sends it, retrying on failure.
   - name: message-batch
     description: Massive operations for message
   - name: message-audit
@@ -160,7 +160,7 @@ tags:
   - name: message-acl
     description: Access control for message
   - name: theme-asset
-    description: theme-asset
+    description: File (image, stylesheet, font) of a theme, served under {{theme_assets_path}}.
   - name: theme-asset-batch
     description: Massive operations for theme asset
   - name: theme-asset-audit
@@ -168,7 +168,7 @@ tags:
   - name: theme-asset-acl
     description: Access control for theme asset
   - name: tenant-config
-    description: tenant-config
+    description: Settings of a tenant sign-up, sign-in, MFA, token lifetimes, dynamic client registration and notification emails.
   - name: tenant-config-batch
     description: Massive operations for tenant config
   - name: tenant-config-audit
@@ -176,7 +176,7 @@ tags:
   - name: tenant-config-acl
     description: Access control for tenant config
   - name: user-role-assignment
-    description: user-role-assignment
+    description: Roles a user holds, globally or for a specific resource server or client.
   - name: user-role-assignment-batch
     description: Massive operations for user role assignment
   - name: user-role-assignment-audit
@@ -184,7 +184,7 @@ tags:
   - name: user-role-assignment-acl
     description: Access control for user role assignment
   - name: consent-purpose
-    description: consent-purpose
+    description: Purpose of data processing a tenant asks its users to consent to (marketing, analytics...), as required by the GDPR.
   - name: consent-purpose-batch
     description: Massive operations for consent purpose
   - name: consent-purpose-audit
@@ -192,7 +192,7 @@ tags:
   - name: consent-purpose-acl
     description: Access control for consent purpose
   - name: smtp-outbound-config
-    description: smtp-outbound-config
+    description: SMTP server used to send notifications. A tenant can have its own configuration; otherwise the global one (without tenant) is used.
   - name: smtp-outbound-config-batch
     description: Massive operations for smtp outbound config
   - name: smtp-outbound-config-audit
@@ -208,7 +208,7 @@ tags:
   - name: tenant-login-provider-acl
     description: Access control for tenant login provider
   - name: resource-server
-    description: resource-server
+    description: API protected by the authorization server. Clients request access tokens with this resource server as audience, and roles can be defined per resource server.
   - name: resource-server-batch
     description: Massive operations for resource server
   - name: resource-server-audit
@@ -216,7 +216,7 @@ tags:
   - name: resource-server-acl
     description: Access control for resource server
   - name: tenant-terms-of-use
-    description: tenant-terms-of-use
+    description: Version of the terms of use of a tenant that users must accept, optionally for a single resource server.
   - name: tenant-terms-of-use-batch
     description: Massive operations for tenant terms of use
   - name: tenant-terms-of-use-audit
@@ -224,7 +224,7 @@ tags:
   - name: tenant-terms-of-use-acl
     description: Access control for tenant terms of use
   - name: dcr-initial-access-token
-    description: dcr-initial-access-token
+    description: Initial access token that authorizes dynamic client registration in a tenant whose policy is token_required (RFC 7591).
   - name: dcr-initial-access-token-batch
     description: Massive operations for dcr initial access token
   - name: dcr-initial-access-token-audit
@@ -232,7 +232,7 @@ tags:
   - name: dcr-initial-access-token-acl
     description: Access control for dcr initial access token
   - name: user
-    description: user
+    description: Person who signs in to a tenant, with a password, a federated identity provider, passkeys or a second factor.
   - name: user-batch
     description: Massive operations for user
   - name: user-audit
@@ -12847,25 +12847,25 @@ components:
         - code
     TemplateApiDto:
       type: object
-      description: template
+      description: Document the system renders for a channel (an email, an SMS or an HTML page), identified by its code. A tenant-specific template overrides the global one with the same code; the content lives in its versions, one per locale.
       properties:
         uid:
-          description: El uid de template
+          description: Unique identifier of the template.
           type: string
         code:
-          description: LOGIN_MAGIC_LINK, RESET_PASSWORD, page.profile...
+          description: Code the application uses to request the template, e.g. LOGIN_MAGIC_LINK, RESET_PASSWORD or page.profile.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         theme:
-          description: Nombre del theme layout (full-window, index-page...). Resuelto contra el tenant activo en render time.
+          description: Name of the theme layout the template is rendered into (full-window, index-page...), resolved against the active tenant at render time.
           type: string
         channel:
-          description: El channel de template
+          description: Channel the template is rendered for MAIL, SMS or HTML page.
           type: string
           enum: [mail,sms,html]
         enabled:
-          description: El enabled de template
+          description: Disabled templates are not used when rendering.
           type: boolean
         version:
           description: Campo con el número de version de template para controlar bloqueos optimistas
@@ -12965,18 +12965,18 @@ components:
             type: string
     SnippetApiDto:
       type: object
-      description: snippet
+      description: Reusable fragment (legal footer, privacy notice, company address) that templates include by code. A tenant-specific snippet overrides the global one with the same code.
       properties:
         uid:
-          description: El uid de snippet
+          description: Unique identifier of the snippet.
           type: string
         code:
-          description: legal.footer, gdpr.notice, company.address...
+          description: Code templates use to include the snippet, e.g. legal.footer, gdpr.notice or company.address.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         enabled:
-          description: El enabled de snippet
+          description: Disabled snippets are not included.
           type: boolean
         version:
           description: Campo con el número de version de snippet para controlar bloqueos optimistas
@@ -13082,13 +13082,13 @@ components:
         - name
     RoleApiDto:
       type: object
-      description: role
+      description: Role that can be assigned to users, optionally limited to a resource server.
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: Unique identifier of the role.
           type: string
         name:
-          description: The user name to identify on the login screen
+          description: Name of the role, sent in the tokens of the users that hold it.
           type: string
         resourceServer:
           $ref: '#/components/schemas/ResourceServerApiRef'
@@ -13197,10 +13197,10 @@ components:
         - user
     UserGroupMembershipApiDto:
       type: object
-      description: user-group-membership
+      description: Groups a user belongs to, globally or for a specific resource server or client; published in the tokens.
       properties:
         uid:
-          description: El identificador de la aplicacion
+          description: Unique identifier of the membership.
           type: string
         user:
           $ref: '#/components/schemas/UserApiRef'
@@ -13209,7 +13209,7 @@ components:
         oauthClient:
           $ref: '#/components/schemas/OauthClientApiRef'
         groups:
-          description: El groups de user group membership
+          description: Groups of the user, as a JSON list.
           type: string
         version:
           description: Campo con el número de version de user group membership para controlar bloqueos optimistas
@@ -13290,13 +13290,13 @@ components:
             type: string
     AllowedLoginRedirectsApiDto:
       type: object
-      description: oauth-client-allowed-login-redirect
+      description: Redirect URI a client may use after sign-in; any other is rejected.
       properties:
         uid:
-          description: El identificador de la aplicacion
+          description: Unique identifier of the redirect.
           type: string
         url:
-          description: El url de oauth client allowed login redirect
+          description: Allowed redirect URI.
           type: string
         version:
           description: Campo con el número de version de oauth client allowed login redirect para controlar bloqueos optimistas
@@ -13304,13 +13304,13 @@ components:
           format: int32
     AllowedLogoutRedirectsApiDto:
       type: object
-      description: oauth-client-allowed-logout-redirect
+      description: Redirect URI a client may use after sign-out; any other is rejected.
       properties:
         uid:
-          description: El identificador de la aplicacion
+          description: Unique identifier of the redirect.
           type: string
         url:
-          description: El url de oauth client allowed logout redirect
+          description: Allowed post-logout redirect URI.
           type: string
         version:
           description: Campo con el número de version de oauth client allowed logout redirect para controlar bloqueos optimistas
@@ -13318,10 +13318,10 @@ components:
           format: int32
     AllowedAudiencesApiDto:
       type: object
-      description: oauth-client-allowed-audience
+      description: Audience a client may request tokens for (RFC 8707 resource indicators).
       properties:
         uid:
-          description: El uid de oauth client allowed audience
+          description: Unique identifier of the allowed audience.
           type: string
         audience:
           description: Code of a oauth-client resource server or resource-server, or an absolute resource URI (RFC 8707).
@@ -13332,169 +13332,169 @@ components:
           format: int32
     OauthClientApiDto:
       type: object
-      description: Las diferentes aplicaciones que pueden usar el sistema de acceso. Dado qua la app va en la petición de login, podemos obtener la cuenta asociado a traves del proyecto
+      description: Application that signs users in or requests tokens through OAuth 2.0 / OpenID Connect. The client is sent in every authorization request, so the tenant is resolved from it.
       properties:
         uid:
-          description: El identificador de la aplicacion
+          description: Unique identifier of the client.
           type: string
         code:
-          description: El código identificativo de la aplicación
+          description: Client identifier (client_id) used in the OAuth requests.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         allowAllScopes:
-          description: El allow all scopes de oauth client
+          description: Lets the client request any scope instead of only the standard OpenID Connect ones.
           type: boolean
         tokenEndpointAuthMethod:
-          description: El token endpoint auth method de oauth client
+          description: How the client authenticates at the token endpoint client secret in the Authorization header or in the body, a signed JWT (private_key_jwt), or none for public clients.
           type: string
           enum: [client-secret-basic,client-secret-post,private-key-jwt,none]
         tokenEndpointAuthSigningAlg:
-          description: El token endpoint auth signing alg de oauth client
+          description: Algorithm the client uses to sign the JWT with which it authenticates at the token endpoint.
           type: string
         dpopBoundAccessTokens:
-          description: El dpop bound access tokens de oauth client
+          description: Requires the access tokens of this client to be bound to a DPoP key (RFC 9449).
           type: boolean
         idTokenSignedResponseAlg:
-          description: El id token signed response alg de oauth client
+          description: Algorithm used to sign the ID tokens issued to this client.
           type: string
           enum: [rs256,es256,eddsa]
         tlsClientAuthSubjectDn:
-          description: El tls client auth subject dn de oauth client
+          description: Expected subject DN of the client certificate for mutual-TLS client authentication (RFC 8705).
           type: string
         tlsClientCertificateBoundAccessTokens:
-          description: El tls client certificate bound access tokens de oauth client
+          description: Binds the access tokens of this client to its TLS client certificate (RFC 8705).
           type: boolean
         authorizationSignedResponseAlg:
-          description: El authorization signed response alg de oauth client
+          description: Algorithm used to sign JWT-secured authorization responses (JARM) for this client.
           type: string
         backchannelTokenDeliveryMode:
-          description: El backchannel token delivery mode de oauth client
+          description: How tokens are delivered in the CIBA flow the client polls the token endpoint, or receives a ping.
           type: string
           enum: [poll,ping]
         backchannelClientNotificationEndpoint:
-          description: El backchannel client notification endpoint de oauth client
+          description: Endpoint of the client that receives the CIBA ping notifications.
           type: string
         subjectType:
-          description: El subject type de oauth client
+          description: Subject identifier sent to the client the same for every client (public) or a different one per sector (pairwise).
           type: string
           enum: [public,pairwise]
         idTokenEncryptedResponseAlg:
-          description: El id token encrypted response alg de oauth client
+          description: Key management algorithm used to encrypt the ID tokens of this client; empty sends them unencrypted.
           type: string
         idTokenEncryptedResponseEnc:
-          description: El id token encrypted response enc de oauth client
+          description: Content encryption algorithm used to encrypt the ID tokens of this client.
           type: string
         userinfoEncryptedResponseAlg:
-          description: El userinfo encrypted response alg de oauth client
+          description: Key management algorithm used to encrypt the userinfo responses of this client; empty sends them unencrypted.
           type: string
         userinfoEncryptedResponseEnc:
-          description: El userinfo encrypted response enc de oauth client
+          description: Content encryption algorithm used to encrypt the userinfo responses of this client.
           type: string
         authorizationDetailsTypes:
-          description: El authorization details types de oauth client
+          description: JSON list of the authorization_details types the client can request (RFC 9396).
           type: string
         userinfoSignedResponseAlg:
-          description: El userinfo signed response alg de oauth client
+          description: Algorithm used to sign the userinfo responses; empty returns them as plain JSON.
           type: string
         secretOauth:
-          description: El secret oauth de oauth client
+          description: Client secret; only its digest is stored.
           type: string
         registrationAccessToken:
-          description: El registration access token de oauth client
+          description: Token the client uses to manage its own registration (RFC 7592); only its digest is stored.
           type: string
         defaultAcrValues:
-          description: El default acr values de oauth client
+          description: Authentication context class (ACR) values requested by default when the client does not send acr_values.
           type: string
         defaultMaxAge:
-          description: El default max age de oauth client
+          description: Maximum authentication age, in seconds, applied when the client does not send max_age.
           type: integer
           format: int32
         sectorIdentifierUri:
-          description: El sector identifier uri de oauth client
+          description: URL listing the redirect URIs of the clients that share pairwise subject identifiers.
           type: string
         allowedLoginRedirects:
-          description: El allowed login redirects de oauth client
+          description: Redirect URIs the client may use after sign-in.
           type: array
           items:
             $ref: '#/components/schemas/AllowedLoginRedirectsApiDto'
         allowedLogoutRedirects:
-          description: El allowed logout redirects de oauth client
+          description: Redirect URIs the client may use after sign-out.
           type: array
           items:
             $ref: '#/components/schemas/AllowedLogoutRedirectsApiDto'
         allowedAudiences:
-          description: El allowed audiences de oauth client
+          description: Audiences (resource servers or resource URIs) the client may request tokens for.
           type: array
           items:
             $ref: '#/components/schemas/AllowedAudiencesApiDto'
         grantTypesJson:
-          description: El grant types json de oauth client
+          description: JSON list of the grant types the client may use.
           type: string
         introspectionAllowed:
           description: If true, this client is allowed to call the token introspection endpoint (POST /introspect) to validate access tokens. Resource servers must authenticate at the introspection endpoint using their client credentials.
           type: boolean
         requirePushedAuthorizationRequests:
-          description: El require pushed authorization requests de oauth client
+          description: Requires the client to send its authorization requests through PAR (RFC 9126).
           type: boolean
         requirePkce:
           description: If true, every authorization code request from this client must include code_challenge and code_challenge_method=S256. For clients with public-allow=true, PKCE is always required regardless of this flag.
           type: boolean
         backchannelLogoutUri:
-          description: El backchannel logout uri de oauth client
+          description: Endpoint of the client that receives back-channel logout notifications.
           type: string
         backchannelLogoutSessionRequired:
-          description: El backchannel logout session required de oauth client
+          description: Includes the session identifier (sid) in the back-channel logout token.
           type: boolean
         frontchannelLogoutUri:
-          description: El frontchannel logout uri de oauth client
+          description: URL of the client loaded in the browser to sign the user out (front-channel logout).
           type: string
         frontchannelLogoutSessionRequired:
-          description: El frontchannel logout session required de oauth client
+          description: Adds the issuer and session identifier to the front-channel logout URL.
           type: boolean
         enabled:
-          description: The indicator to allow the account be used without deleting it
+          description: A disabled client cannot sign in users or obtain tokens, without deleting it.
           type: boolean
         clientName:
-          description: El client name de oauth client
+          description: Name of the client shown to users, for example on the consent screen.
           type: string
         logoUri:
-          description: El logo uri de oauth client
+          description: URL of the client logo shown to users.
           type: string
         clientUri:
-          description: El client uri de oauth client
+          description: URL of the home page of the client.
           type: string
         policyUri:
-          description: El policy uri de oauth client
+          description: URL of the privacy policy of the client.
           type: string
         tosUri:
-          description: El tos uri de oauth client
+          description: URL of the terms of service of the client.
           type: string
         responseTypesJson:
-          description: El response types json de oauth client
+          description: JSON list of the response types the client may request.
           type: string
         dynamicallyRegistered:
-          description: El dynamically registered de oauth client
+          description: The client was created through dynamic client registration (RFC 7591).
           type: boolean
         registeredAt:
-          description: El registered at de oauth client
+          description: When the client was registered.
           type: string
           format: date-time
         clientCredentialsScopes:
-          description: El client credentials scopes de oauth client
+          description: Scopes granted to the client in the client credentials flow.
           type: string
         clientCredentialsTokenTtlSeconds:
-          description: El client credentials token ttl seconds de oauth client
+          description: Lifetime, in seconds, of the access tokens issued in the client credentials flow.
           type: integer
           format: int32
         requestObjectSigningAlg:
-          description: El request object signing alg de oauth client
+          description: Algorithm the client must use to sign request objects.
           type: string
         jwksUri:
-          description: El jwks uri de oauth client
+          description: URL of the JSON Web Key Set with the public keys of the client.
           type: string
         jwksJson:
-          description: El jwks json de oauth client
+          description: JSON Web Key Set with the public keys of the client, when it does not publish a jwks-uri.
           type: string
         version:
           description: Campo con el número de version de oauth client para controlar bloqueos optimistas
@@ -13600,25 +13600,25 @@ components:
         - theme
     ThemeVersionApiDto:
       type: object
-      description: theme-version
+      description: Layout of a theme for a channel and a locale, chosen by BCP 47 negotiation like template versions.
       properties:
         uid:
-          description: El uid de theme version
+          description: Unique identifier of the version.
           type: string
         theme:
           $ref: '#/components/schemas/ThemeApiRef'
         channel:
-          description: El channel de theme version
+          description: Channel the layout is for MAIL or HTML page.
           type: string
           enum: [mail,html]
         locale:
-          description: BCP 47 es, en, fr... null = versión por defecto
+          description: BCP 47 locale of the layout (es, en, fr...). Empty for the default version.
           type: string
         contentHtml:
-          description: Layout Handlebars con slot {{{slot_content}}}, {{title}}, {{locale}}, {{theme_assets_path}}, {{tenant_name}}
+          description: Handlebars layout; the template is placed in {{{slot_content}}}, and {{title}}, {{locale}}, {{theme_assets_path}} and {{tenant_name}} are available.
           type: string
         contentText:
-          description: El content text de theme version
+          description: Plain-text layout for email clients that do not show HTML.
           type: string
         version:
           description: Campo con el número de version de theme version para controlar bloqueos optimistas
@@ -13712,24 +13712,24 @@ components:
         - snippet
     SnippetVersionApiDto:
       type: object
-      description: snippet-version
+      description: Content of a snippet for a locale, chosen by BCP 47 negotiation like template versions.
       properties:
         uid:
-          description: El uid de snippet version
+          description: Unique identifier of the version.
           type: string
         snippet:
           $ref: '#/components/schemas/SnippetApiRef'
         locale:
-          description: BCP 47 es, en, fr... null = versión por defecto
+          description: BCP 47 locale of the content (es, en, fr...). Empty for the default version.
           type: string
         subject:
-          description: Usado cuando el snippet se incrusta en canal MAIL.
+          description: Subject used when the snippet is embedded in the MAIL channel.
           type: string
         contentHtml:
-          description: El content html de snippet version
+          description: HTML of the fragment, in Handlebars syntax.
           type: string
         contentText:
-          description: El content text de snippet version
+          description: Plain-text version of the fragment.
           type: string
         version:
           description: Campo con el número de version de snippet version para controlar bloqueos optimistas
@@ -13823,24 +13823,24 @@ components:
         - template
     TemplateVersionApiDto:
       type: object
-      description: template-version
+      description: Content of a template for a locale. When rendering, the version is chosen by BCP 47 negotiation exact locale, then language, then the default version.
       properties:
         uid:
-          description: El uid de template version
+          description: Unique identifier of the version.
           type: string
         template:
           $ref: '#/components/schemas/TemplateApiRef'
         locale:
-          description: BCP 47 es, en, fr... null = versión por defecto
+          description: BCP 47 locale of the content (es, en, fr...). Empty for the default version.
           type: string
         subject:
-          description: Asunto del email. Ignorado en canal HTML/SMS.
+          description: Subject of the email; ignored in the HTML and SMS channels.
           type: string
         contentHtml:
-          description: El content html de template version
+          description: HTML body of the document, in Handlebars syntax.
           type: string
         contentText:
-          description: El content text de template version
+          description: Plain-text body, used by email clients that do not show HTML and by the SMS channel.
           type: string
         version:
           description: Campo con el número de version de template version para controlar bloqueos optimistas
@@ -13921,24 +13921,24 @@ components:
             type: string
     SnippetAssetApiDto:
       type: object
-      description: snippet-asset
+      description: File (image, stylesheet, font) used by a snippet.
       properties:
         uid:
-          description: El uid de snippet asset
+          description: Unique identifier of the asset.
           type: string
         snippet:
           $ref: '#/components/schemas/SnippetApiRef'
         code:
-          description: icon, separator...
+          description: Name the snippet uses to reference the asset, e.g. icon or separator.
           type: string
         type:
-          description: IMAGE, CSS, FONT...
+          description: Kind of file, e.g. IMAGE, CSS or FONT.
           type: string
         content:
-          description: El content de snippet asset
+          description: The file itself.
           type: string
         enabled:
-          description: El enabled de snippet asset
+          description: Disabled assets are not served.
           type: boolean
         version:
           description: Campo con el número de version de snippet asset para controlar bloqueos optimistas
@@ -14034,22 +14034,22 @@ components:
             type: string
     ApiKeyClientApiDto:
       type: object
-      description: Las diferentes aplicaciones que pueden usar el sistema a través de un api.
+      description: Application that accesses the APIs with an API key instead of OAuth tokens.
       properties:
         uid:
-          description: El identificador de la aplicacion
+          description: Unique identifier of the API key client.
           type: string
         code:
-          description: El código identificativo de la aplicación
+          description: Code that identifies the application.
           type: string
         key:
-          description: The key for the api (only its digest is stored)
+          description: API key of the application; only its digest is stored.
           type: string
         enabled:
-          description: The indicator to allow the account be used without deleting it
+          description: A disabled API key is rejected, without deleting it.
           type: boolean
         scopes:
-          description: A coma separated scopes for the api key
+          description: Comma-separated scopes granted to the API key.
           type: string
         version:
           description: Campo con el número de version de api key client para controlar bloqueos optimistas
@@ -14145,7 +14145,7 @@ components:
       description: A personal API key (PAT) scoped to a specific user. The raw key is shown to the user only at creation time and is never stored. Subsequent authentication searches by its digest (HMAC with pepper) and compares it in constant time.
       properties:
         uid:
-          description: El uid de user personal api key
+          description: Unique identifier of the key.
           type: string
         user:
           $ref: '#/components/schemas/UserApiRef'
@@ -14167,11 +14167,11 @@ components:
           type: string
           format: date-time
         createdAt:
-          description: El created at de user personal api key
+          description: When the key was created.
           type: string
           format: date-time
         enabled:
-          description: El enabled de user personal api key
+          description: A disabled key is rejected, without deleting it.
           type: boolean
         version:
           description: Campo con el número de version de user personal api key para controlar bloqueos optimistas
@@ -14258,24 +14258,24 @@ components:
             type: string
     TemplateVariableApiDto:
       type: object
-      description: template-variable
+      description: Default value of a variable available to the templates of a tenant; the caller can override it when rendering.
       properties:
         uid:
-          description: El uid de template variable
+          description: Unique identifier of the variable.
           type: string
         code:
-          description: user.name, login.link...
+          description: Name of the variable inside the templates, e.g. user.name or login.link.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         type:
-          description: STRING, NUMBER, DATE, URL...
+          description: Kind of value the variable holds, e.g. STRING, NUMBER, DATE or URL.
           type: string
         value:
-          description: El value de template variable
+          description: Default value used when the caller does not provide one.
           type: string
         enabled:
-          description: El enabled de template variable
+          description: Disabled variables are not offered to the templates.
           type: boolean
         version:
           description: Campo con el número de version de template variable para controlar bloqueos optimistas
@@ -14368,21 +14368,21 @@ components:
             type: string
     ThemeApiDto:
       type: object
-      description: theme
+      description: Layout shared by several templates (header, footer, styles), identified by name. A tenant-specific theme overrides the global one with the same name.
       properties:
         uid:
-          description: El uid de theme
+          description: Unique identifier of the theme.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         name:
-          description: Nombre de resolución desde template.theme full-window, index-page...
+          description: Name templates use to select the theme (template.theme), e.g. full-window or index-page.
           type: string
         isDefault:
-          description: El is default de theme
+          description: Theme used by templates that do not name one.
           type: boolean
         enabled:
-          description: El enabled de theme
+          description: Disabled themes are not used when rendering.
           type: boolean
         version:
           description: Campo con el número de version de theme para controlar bloqueos optimistas
@@ -14475,26 +14475,26 @@ components:
             type: string
     TemplateAssetApiDto:
       type: object
-      description: template-asset
+      description: File (image, stylesheet, font) used by a template, which a tenant can override (e.g. a different logo per tenant in a global template).
       properties:
         uid:
-          description: El uid de template asset
+          description: Unique identifier of the asset.
           type: string
         template:
           $ref: '#/components/schemas/TemplateApiRef'
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         code:
-          description: logo, background, corporate.css...
+          description: Name the template uses to reference the asset, e.g. logo, background or corporate.css.
           type: string
         type:
-          description: IMAGE, CSS, FONT...
+          description: Kind of file, e.g. IMAGE, CSS or FONT.
           type: string
         content:
-          description: El content de template asset
+          description: The file itself.
           type: string
         enabled:
-          description: El enabled de template asset
+          description: Disabled assets are not served.
           type: boolean
         version:
           description: Campo con el número de version de template asset para controlar bloqueos optimistas
@@ -14590,28 +14590,28 @@ components:
             type: string
     TenantApiDto:
       type: object
-      description: tenant
+      description: Organization with its own users, clients and configuration, isolated from the other tenants. The root tenant manages the global resources.
       properties:
         uid:
-          description: A number to identify the db record
+          description: Unique identifier of the tenant.
           type: string
         name:
-          description: The name to identify the account.
+          description: Name that identifies the tenant; used in the URLs of its OpenID Connect endpoints.
           type: string
         root:
-          description: El root de tenant
+          description: Marks the root tenant, which manages the global resources and the other tenants.
           type: boolean
         domain:
-          description: A domain suffix to identify the account
+          description: Domain that identifies the tenant.
           type: string
         enabled:
-          description: The indicator to allow the account be used without deleting it
+          description: A disabled tenant cannot be used, without deleting it.
           type: boolean
         markForDelete:
-          description: a tenant mark for deleted will be
+          description: The tenant has been requested to be deleted and will be removed.
           type: boolean
         markForDeleteTime:
-          description: A tenant mark for deleted will be deleted soon
+          description: When the tenant was marked for deletion.
           type: string
           format: date-time
         version:
@@ -14719,20 +14719,20 @@ components:
         - loginProvider
     UserFederatedIdentityApiDto:
       type: object
-      description: user-federated-identity
+      description: Link between a user and their account in an external identity provider, so that signing in with that provider resolves to the user.
       properties:
         uid:
-          description: El uid de user federated identity
+          description: Unique identifier of the link.
           type: string
         user:
           $ref: '#/components/schemas/UserApiRef'
         loginProvider:
           $ref: '#/components/schemas/TenantLoginProviderApiRef'
         subject:
-          description: El subject de user federated identity
+          description: Identifier of the user in the identity provider (its sub claim).
           type: string
         createdAt:
-          description: El created at de user federated identity
+          description: When the link was created.
           type: string
           format: date-time
         version:
@@ -14814,36 +14814,36 @@ components:
             type: string
     MessageApiDto:
       type: object
-      description: message
+      description: Outbox entry for an outgoing notification (currently an email) the rendered content waits here until the dispatcher sends it, retrying on failure.
       properties:
         uid:
-          description: El uid de message
+          description: Unique identifier of the message.
           type: string
         target:
-          description: name
+          description: Recipient address of the notification (the destination email).
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         urgent:
-          description: El urgent de message
+          description: Sends the message right away instead of waiting for the next dispatch cycle.
           type: boolean
         content:
-          description: El content de message
+          description: Rendered content to send, as JSON with subject, html and text; when it is not valid JSON it is sent as raw HTML.
           type: string
         retries:
-          description: El retries de message
+          description: Failed delivery attempts so far; the message is abandoned once it reaches the max-retries of the SMTP configuration.
           type: integer
           format: int32
         createdAt:
-          description: El created at de message
+          description: When the message was queued.
           type: string
           format: date-time
         sendAt:
-          description: El send at de message
+          description: Earliest time to send the message; empty sends it in the next dispatch cycle.
           type: string
           format: date-time
         lockAt:
-          description: El lock at de message
+          description: When a dispatcher took the message to send it; a lock older than two minutes is considered abandoned and the message becomes eligible again.
           type: string
           format: date-time
         version:
@@ -14925,24 +14925,24 @@ components:
             type: string
     ThemeAssetApiDto:
       type: object
-      description: theme-asset
+      description: File (image, stylesheet, font) of a theme, served under {{theme_assets_path}}.
       properties:
         uid:
-          description: El uid de theme asset
+          description: Unique identifier of the asset.
           type: string
         theme:
           $ref: '#/components/schemas/ThemeApiRef'
         code:
-          description: logo, corporate.css, banner...
+          description: File name under the theme assets path, e.g. logo, corporate.css or banner.
           type: string
         type:
-          description: IMAGE, CSS, FONT...
+          description: Kind of file, e.g. IMAGE, CSS or FONT.
           type: string
         content:
-          description: El content de theme asset
+          description: The file itself.
           type: string
         enabled:
-          description: El enabled de theme asset
+          description: Disabled assets are not served.
           type: boolean
         version:
           description: Campo con el número de version de theme asset para controlar bloqueos optimistas
@@ -15038,37 +15038,37 @@ components:
             type: string
     TenantConfigApiDto:
       type: object
-      description: tenant-config
+      description: Settings of a tenant sign-up, sign-in, MFA, token lifetimes, dynamic client registration and notification emails.
       properties:
         uid:
-          description: A number to identify the db record
+          description: Unique identifier of the configuration.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         displayName:
-          description: Tenant could use these field to label the application for the users
+          description: Name shown to the users of the tenant, for example on the sign-in screen.
           type: string
         forceMfa:
-          description: El force mfa de tenant config
+          description: Requires every user of the tenant to sign in with a second factor.
           type: boolean
         dynamicRegistrationPolicy:
-          description: El dynamic registration policy de tenant config
+          description: Who can register clients dynamically anyone (open), only with an initial access token (token_required) or nobody (disabled).
           type: string
           enum: [open,token-required,disabled]
         selfRegistrationEnabled:
-          description: El self registration enabled de tenant config
+          description: Lets users create their own account from the sign-in screen.
           type: boolean
         autoApproveRegisteredUsers:
-          description: El auto approve registered users de tenant config
+          description: Self-registered users can sign in right away; otherwise they wait for an administrator to approve them.
           type: boolean
         magicLinkEnabled:
-          description: El magic link enabled de tenant config
+          description: Lets users sign in with a link sent by email, without password.
           type: boolean
         requireEmailVerification:
           description: If true, users must confirm their email address via the verification link before they can complete their first login. The OIDC flow will hold the user at a verification-pending challenge until the link is clicked.
           type: boolean
         invitationExpiryDays:
-          description: Number of days before an unused user invitation token expires. Currently hardcoded to 7 days in InvitationCreateUsecase.
+          description: Number of days before an unused user invitation expires.
           type: integer
           format: int32
         magicLinkExpiryMinutes:
@@ -15088,46 +15088,46 @@ components:
           type: integer
           format: int32
         dcrAllowedGrantTypes:
-          description: El dcr allowed grant types de tenant config
+          description: JSON list of the grant types a dynamically registered client may request.
           type: string
         dcrAllowedAuthMethods:
-          description: El dcr allowed auth methods de tenant config
+          description: JSON list of the token endpoint authentication methods a dynamically registered client may use.
           type: string
         allowPasswordGrant:
-          description: El allow password grant de tenant config
+          description: Allows the resource owner password grant, in which the client receives the user credentials directly.
           type: boolean
         requirePushedAuthorizationRequests:
-          description: El require pushed authorization requests de tenant config
+          description: Requires every client of the tenant to send its authorization requests through PAR (RFC 9126).
           type: boolean
         acrValuesSupported:
           description: JSON map of published ACR values to session level, e.g. {"urn:lugh:acr:pwd":1,"urn:lugh:acr:mfa":2}
           type: string
         webauthnEnabled:
-          description: El webauthn enabled de tenant config
+          description: Lets users sign in with passkeys and security keys (WebAuthn).
           type: boolean
         webauthnRpId:
-          description: El webauthn rp id de tenant config
+          description: WebAuthn relying party identifier the domain the passkeys are bound to.
           type: string
         webauthnRpName:
-          description: El webauthn rp name de tenant config
+          description: Name of the relying party shown by the browser when creating a passkey.
           type: string
         welcomeEmailTemplate:
-          description: Email send to the enabled user
+          description: Email sent to a user when the account is enabled for the first time.
           type: string
         registeredEmailTemplate:
-          description: Email send when a user register
+          description: Email sent when a user registers.
           type: string
         disabledUserEmailTemplate:
-          description: Email send when a user is disabled
+          description: Email sent when a user is disabled.
           type: string
         enabledUserEmailTemplate:
-          description: Email send when a user is enabled
+          description: Email sent when a user is enabled.
           type: string
         passwordRecoveryEnabled:
-          description: El password recovery enabled de tenant config
+          description: Lets users reset a forgotten password by email.
           type: boolean
         recoverPassEmailTemplate:
-          description: Email send to the user to recover the password
+          description: Email sent to the user to recover the password.
           type: string
         version:
           description: Campo con el número de version de tenant config para controlar bloqueos optimistas
@@ -15221,10 +15221,10 @@ components:
         - role
     RolesApiDto:
       type: object
-      description: user-role-assignment-role
+      description: Role included in a user role assignment.
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: Unique identifier of the record.
           type: string
         role:
           $ref: '#/components/schemas/RoleApiRef'
@@ -15234,10 +15234,10 @@ components:
           format: int32
     UserRoleAssignmentApiDto:
       type: object
-      description: user-role-assignment
+      description: Roles a user holds, globally or for a specific resource server or client.
       properties:
         uid:
-          description: El identificador de la aplicacion
+          description: Unique identifier of the assignment.
           type: string
         user:
           $ref: '#/components/schemas/UserApiRef'
@@ -15246,7 +15246,7 @@ components:
         oauthClient:
           $ref: '#/components/schemas/OauthClientApiRef'
         roles:
-          description: El roles de user role assignment
+          description: Roles granted by the assignment.
           type: array
           items:
             $ref: '#/components/schemas/RolesApiDto'
@@ -15329,28 +15329,28 @@ components:
             type: string
     ConsentPurposeApiDto:
       type: object
-      description: consent-purpose
+      description: Purpose of data processing a tenant asks its users to consent to (marketing, analytics...), as required by the GDPR.
       properties:
         uid:
-          description: A number to identify the db record
+          description: Unique identifier of the purpose.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         key:
-          description: El key de consent purpose
+          description: Kind of purpose marketing, analytics, third-party sharing or personalization.
           type: string
           enum: [marketing,analytics,third-party,personalization]
         title:
-          description: El title de consent purpose
+          description: Title of the purpose shown to the user.
           type: string
         description:
-          description: El description de consent purpose
+          description: Explanation shown to the user of what the data is used for.
           type: string
         required:
-          description: El required de consent purpose
+          description: The user must consent to this purpose to use the service.
           type: boolean
         activationDate:
-          description: El activation date de consent purpose
+          description: From when the consent is asked.
           type: string
           format: date-time
         version:
@@ -15432,49 +15432,49 @@ components:
             type: string
     SmtpOutboundConfigApiDto:
       type: object
-      description: smtp-outbound-config
+      description: SMTP server used to send notifications. A tenant can have its own configuration; otherwise the global one (without tenant) is used.
       properties:
         uid:
-          description: El uid de smtp outbound config
+          description: Unique identifier of the configuration.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         host:
-          description: El host de smtp outbound config
+          description: Host name or IP address of the SMTP server.
           type: string
         port:
-          description: El port de smtp outbound config
+          description: Port of the SMTP server (usually 587 with STARTTLS or 465 with implicit TLS).
           type: integer
           format: int32
         login:
-          description: El login de smtp outbound config
+          description: User name to authenticate against the SMTP server.
           type: string
         password:
-          description: El password de smtp outbound config
+          description: Password to authenticate against the SMTP server; stored encrypted.
           type: string
         senderName:
-          description: El sender name de smtp outbound config
+          description: Display name shown as the sender of the emails.
           type: string
         senderEmail:
-          description: El sender email de smtp outbound config
+          description: Address used as the sender (From) of the emails.
           type: string
         timeout:
-          description: El timeout de smtp outbound config
+          description: Connection and write timeout against the SMTP server, in seconds.
           type: integer
           format: int32
         useTls:
-          description: El use tls de smtp outbound config
+          description: Encrypts the connection to the SMTP server with TLS.
           type: boolean
         maxRetries:
-          description: El max retries de smtp outbound config
+          description: Delivery attempts before a message is abandoned.
           type: integer
           format: int32
         retryDelay:
-          description: El retry delay de smtp outbound config
+          description: Seconds to wait before retrying a failed delivery.
           type: integer
           format: int32
         rateLimit:
-          description: El rate limit de smtp outbound config
+          description: Maximum number of emails sent per dispatch cycle with this configuration.
           type: integer
           format: int32
         version:
@@ -15559,7 +15559,7 @@ components:
       description: Represents a login identity provider (e.g., Google, GitHub, SAML) configured for a tenant. Enables federated authentication integration.
       properties:
         uid:
-          description: A uid string to identify the entity
+          description: Unique identifier of the login provider.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
@@ -15571,16 +15571,16 @@ components:
           type: string
           enum: [google,github,microsoft,apple,saml,oidc]
         enabled:
-          description: Indicates if this provider is currently disabled.
+          description: Only enabled providers are offered on the sign-in screen.
           type: boolean
         directAccess:
           description: If true, the system will default to this login method without requiring selection.
           type: boolean
         publicKey:
-          description: A public key shared with users to interact with the identity provider.
+          description: Client identifier registered with the identity provider (the OIDC client_id).
           type: string
         privateKey:
-          description: Private key used internally to validate codes returned by the identity provider.
+          description: Secret registered with the identity provider (the OIDC client_secret), used to exchange the codes it returns.
           type: string
         certificate:
           description: The provider certificate used for signature verification, if required.
@@ -15589,29 +15589,29 @@ components:
           description: A metadata file required by some providers for configuration (e.g., SAML descriptor).
           type: string
         oidcScopes:
-          description: El oidc scopes de tenant login provider
+          description: Scopes requested from the OIDC identity provider.
           type: string
         oidcClaimMapping:
-          description: El oidc claim mapping de tenant login provider
+          description: JSON map from the claims of the identity provider to the user attributes.
           type: string
         accountLinkPolicy:
-          description: El account link policy de tenant login provider
+          description: How a federated sign-in is linked to an existing user never, when the email matches and is verified, or only manually.
           type: string
           enum: [none,verified-email,manual]
         oidcDiscoveryUrl:
           description: For source=OIDC the /.well-known/openid-configuration URL of the external OIDC identity provider. The system will fetch authorization_endpoint, token_endpoint, and jwks_uri from this document at startup. public-key holds the OIDC client_id; private-key holds the OIDC client_secret.
           type: string
         samlIdpMetadataUrl:
-          description: El saml idp metadata url de tenant login provider
+          description: URL of the SAML metadata of the identity provider.
           type: string
         samlIdpEntityId:
-          description: El saml idp entity id de tenant login provider
+          description: Entity ID of the SAML identity provider.
           type: string
         samlIdpSsoUrl:
-          description: El saml idp sso url de tenant login provider
+          description: Single sign-on URL of the SAML identity provider.
           type: string
         samlIdpCert:
-          description: El saml idp cert de tenant login provider
+          description: Certificate of the SAML identity provider, used to verify its signed assertions.
           type: string
         usersEnabledByDefault:
           description: Defines whether the users created with this provider are enabled by default.
@@ -15713,19 +15713,19 @@ components:
             type: string
     ResourceServerApiDto:
       type: object
-      description: resource-server
+      description: API protected by the authorization server. Clients request access tokens with this resource server as audience, and roles can be defined per resource server.
       properties:
         uid:
-          description: El identificador de la aplicacion
+          description: Unique identifier of the resource server.
           type: string
         code:
-          description: El código identificativo de la aplicación
+          description: Code that identifies the resource server; used as audience of the access tokens issued for it.
           type: string
         apiKey:
-          description: An identifier for the application
+          description: Key the resource server uses to identify itself to the authorization server.
           type: string
         enabled:
-          description: Una marca que permite quitar el acceso a una cuenta sin borrarla
+          description: A disabled resource server is not accepted as audience, without deleting it.
           type: boolean
         version:
           description: Campo con el número de version de resource server para controlar bloqueos optimistas
@@ -15818,26 +15818,26 @@ components:
             type: string
     TenantTermsOfUseApiDto:
       type: object
-      description: tenant-terms-of-use
+      description: Version of the terms of use of a tenant that users must accept, optionally for a single resource server.
       properties:
         uid:
-          description: A number to identify the db record
+          description: Unique identifier of the terms of use.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         resourceServer:
           $ref: '#/components/schemas/ResourceServerApiRef'
         text:
-          description: El text de tenant terms of use
+          description: Text of the terms of use shown to the user.
           type: string
         enabled:
-          description: The indicator to allow the account be used without deleting it
+          description: Disabled terms are not requested to users.
           type: boolean
         document:
-          description: El document de tenant terms of use
+          description: Document with the full terms of use (e.g. a PDF).
           type: string
         activationDate:
-          description: El activation date de tenant terms of use
+          description: From when the terms must be accepted.
           type: string
           format: date-time
         version:
@@ -15934,36 +15934,36 @@ components:
             type: string
     DcrInitialAccessTokenApiDto:
       type: object
-      description: dcr-initial-access-token
+      description: Initial access token that authorizes dynamic client registration in a tenant whose policy is token_required (RFC 7591).
       properties:
         uid:
-          description: El uid de dcr initial access token
+          description: Unique identifier of the token.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         description:
-          description: El description de dcr initial access token
+          description: Note that explains what the token was issued for.
           type: string
         tokenHash:
-          description: El token hash de dcr initial access token
+          description: Digest of the token; the raw value is shown only when it is created.
           type: string
         expiresAt:
-          description: El expires at de dcr initial access token
+          description: When the token stops being valid.
           type: string
           format: date-time
         maxUses:
-          description: El max uses de dcr initial access token
+          description: Number of clients that can be registered with the token.
           type: integer
           format: int32
         uses:
-          description: El uses de dcr initial access token
+          description: Number of clients already registered with the token.
           type: integer
           format: int32
         allowedGrantTypes:
-          description: Overrides tenant-config.dcr-allowed-grant-types when set
+          description: Overrides tenant-config.dcr-allowed-grant-types when set.
           type: string
         revokedAt:
-          description: El revoked at de dcr initial access token
+          description: When the token was revoked; empty while it is valid.
           type: string
           format: date-time
         version:
@@ -16045,51 +16045,51 @@ components:
             type: string
     UserApiDto:
       type: object
-      description: user
+      description: Person who signs in to a tenant, with a password, a federated identity provider, passkeys or a second factor.
       properties:
         uid:
-          description: A number to identify the db record
+          description: Unique identifier of the user.
           type: string
         tenant:
           $ref: '#/components/schemas/TenantApiRef'
         name:
-          description: The user name to identify on the login screen
+          description: User name entered on the sign-in screen.
           type: string
         password:
-          description: If the user is not delegated, the phrase to identify
+          description: Password of the user when the sign-in is not delegated to an identity provider; only its hash is stored.
           type: string
         email:
-          description: An optional email used to send notifications to the user
+          description: Email used to send notifications to the user.
           type: string
         welcomeAt:
-          description: The date when a welcome email is sent
+          description: When the welcome email was sent.
           type: string
           format: date-time
         emailVerified:
           description: Indicates whether the user has confirmed ownership of their email address by clicking the verification link sent at registration. Used by the OIDC flow to emit the email_verified claim and optionally block login until confirmed.
           type: boolean
         enabled:
-          description: A disabled user cant login on the system. On his login attempts, he will receive a specific warn of his disabled account.
+          description: A disabled user cannot sign in; on each attempt the user is told that the account is disabled.
           type: boolean
         approvalStatus:
-          description: El approval status de user
+          description: Approval state of the account email not verified yet, pending approval by an administrator, accepted or rejected.
           type: string
           enum: [unverified,pending,accepted,rejected]
         temporalPassword:
-          description: El temporal password de user
+          description: The password is temporary the user must set a new one at the next sign-in.
           type: boolean
         useSecondFactors:
-          description: If is true, the user has a otp to force mfa on login
+          description: The user signs in with a one-time password (TOTP) as second factor.
           type: boolean
         secondFactorSeed:
-          description: the seed used to the otp login
+          description: Secret seed of the one-time password generator; stored encrypted.
           type: string
         blockedUntil:
-          description: A blocked user cant login on the system, until these date. On his login attempts, the user will receive a generic not allowed message.
+          description: A blocked user cannot sign in until this date; on each attempt the user gets a generic not-allowed message.
           type: string
           format: date-time
         federatedProvider:
-          description: Si se identificó con un proveedor, se marca con cual (aunque el provvedor cambie luego)
+          description: Identity provider the user signed up with, kept even if the provider changes later.
           type: string
         version:
           description: Campo con el número de version de user para controlar bloqueos optimistas

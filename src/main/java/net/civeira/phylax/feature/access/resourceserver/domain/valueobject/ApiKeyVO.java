@@ -10,7 +10,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing an identifier for the application of resourceServer.
+ * Value Object representing key the resource server uses to identify itself to the authorization
+ * server. of resourceServer.
  * <p>
  * This class ensures that the api key is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

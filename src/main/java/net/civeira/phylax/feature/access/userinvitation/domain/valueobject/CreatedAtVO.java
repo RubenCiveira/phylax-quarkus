@@ -13,7 +13,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el created at de user invitation of userInvitation.
+ * Value Object representing when the invitation was sent. of userInvitation.
  * <p>
  * This class ensures that the created at is a non-null {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)

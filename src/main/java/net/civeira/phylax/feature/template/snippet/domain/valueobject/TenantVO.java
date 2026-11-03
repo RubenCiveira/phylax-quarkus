@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.identity.tenant.domain.TenantRef;
 import net.civeira.phylax.feature.identity.tenant.domain.TenantReference;
 
 /**
- * Value Object representing null = global, valor = override por tenant of snippet.
+ * Value Object representing tenant that overrides the snippet. Empty for the global snippet, used
+ * by tenants without their own. of snippet.
  * <p>
  * This class ensures that the tenant is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

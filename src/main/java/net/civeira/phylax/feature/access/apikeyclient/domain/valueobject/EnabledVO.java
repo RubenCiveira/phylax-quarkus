@@ -11,8 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing the indicator to allow the account be used without deleting it of
- * apiKeyClient.
+ * Value Object representing a disabled API key is rejected, without deleting it. of apiKeyClient.
  * <p>
  * This class ensures that the enabled is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -12,7 +12,8 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.identity.consentpurpose.domain.ConsentPurposeKeyOptions;
 
 /**
- * Value Object representing el key de consent purpose of consentPurpose.
+ * Value Object representing kind of purpose: marketing, analytics, third-party sharing or
+ * personalization. of consentPurpose.
  * <p>
  * This class ensures that the key is a non-null {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

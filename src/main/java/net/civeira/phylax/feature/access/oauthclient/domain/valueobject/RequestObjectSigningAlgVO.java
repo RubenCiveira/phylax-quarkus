@@ -11,7 +11,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing el request object signing alg de oauth client of oauthClient.
+ * Value Object representing algorithm the client must use to sign request objects. of oauthClient.
  * <p>
  * This class ensures that the request object signing alg is a {@code String} and encapsulates its
  * validation and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design)
