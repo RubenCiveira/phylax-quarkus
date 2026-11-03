@@ -190,10 +190,8 @@ public class OauthClientsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     OauthClientFixedPropertiesProposal proposal =
-        new OauthClientFixedPropertiesProposal(prev, fields);
+        new OauthClientFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -205,10 +203,8 @@ public class OauthClientsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, OauthClientRef oauthClient) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, oauthClient));
-    fields.addAll(CALCULATED_FIELDS);
     OauthClientFixedPropertiesProposal proposal =
-        new OauthClientFixedPropertiesProposal(prev, oauthClient, fields);
+        new OauthClientFixedPropertiesProposal(prev, oauthClient, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

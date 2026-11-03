@@ -192,10 +192,8 @@ public class SnippetVersionsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     SnippetVersionFixedPropertiesProposal proposal =
-        new SnippetVersionFixedPropertiesProposal(prev, fields);
+        new SnippetVersionFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -207,10 +205,8 @@ public class SnippetVersionsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, SnippetVersionRef snippetVersion) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, snippetVersion));
-    fields.addAll(CALCULATED_FIELDS);
     SnippetVersionFixedPropertiesProposal proposal =
-        new SnippetVersionFixedPropertiesProposal(prev, snippetVersion, fields);
+        new SnippetVersionFixedPropertiesProposal(prev, snippetVersion, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

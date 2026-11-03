@@ -188,9 +188,8 @@ public class TemplatesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
-    TemplateFixedPropertiesProposal proposal = new TemplateFixedPropertiesProposal(prev, fields);
+    TemplateFixedPropertiesProposal proposal =
+        new TemplateFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -202,10 +201,8 @@ public class TemplatesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, TemplateRef template) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, template));
-    fields.addAll(CALCULATED_FIELDS);
     TemplateFixedPropertiesProposal proposal =
-        new TemplateFixedPropertiesProposal(prev, template, fields);
+        new TemplateFixedPropertiesProposal(prev, template, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

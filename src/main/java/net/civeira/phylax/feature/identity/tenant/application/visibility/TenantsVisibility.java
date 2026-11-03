@@ -177,9 +177,8 @@ public class TenantsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
-    TenantFixedPropertiesProposal proposal = new TenantFixedPropertiesProposal(prev, fields);
+    TenantFixedPropertiesProposal proposal =
+        new TenantFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -191,10 +190,8 @@ public class TenantsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, TenantRef tenant) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, tenant));
-    fields.addAll(CALCULATED_FIELDS);
     TenantFixedPropertiesProposal proposal =
-        new TenantFixedPropertiesProposal(prev, tenant, fields);
+        new TenantFixedPropertiesProposal(prev, tenant, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

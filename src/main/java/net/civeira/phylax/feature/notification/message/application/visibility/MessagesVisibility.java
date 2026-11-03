@@ -187,9 +187,8 @@ public class MessagesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
-    MessageFixedPropertiesProposal proposal = new MessageFixedPropertiesProposal(prev, fields);
+    MessageFixedPropertiesProposal proposal =
+        new MessageFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -201,10 +200,8 @@ public class MessagesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, MessageRef message) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, message));
-    fields.addAll(CALCULATED_FIELDS);
     MessageFixedPropertiesProposal proposal =
-        new MessageFixedPropertiesProposal(prev, message, fields);
+        new MessageFixedPropertiesProposal(prev, message, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

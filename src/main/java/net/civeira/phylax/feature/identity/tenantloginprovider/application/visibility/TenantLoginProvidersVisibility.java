@@ -193,10 +193,8 @@ public class TenantLoginProvidersVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     TenantLoginProviderFixedPropertiesProposal proposal =
-        new TenantLoginProviderFixedPropertiesProposal(prev, fields);
+        new TenantLoginProviderFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -209,10 +207,9 @@ public class TenantLoginProvidersVisibility {
    */
   public Set<String> fieldsToFix(OperationContext prev,
       TenantLoginProviderRef tenantLoginProvider) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, tenantLoginProvider));
-    fields.addAll(CALCULATED_FIELDS);
     TenantLoginProviderFixedPropertiesProposal proposal =
-        new TenantLoginProviderFixedPropertiesProposal(prev, tenantLoginProvider, fields);
+        new TenantLoginProviderFixedPropertiesProposal(prev, tenantLoginProvider,
+            CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

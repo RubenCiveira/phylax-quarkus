@@ -200,10 +200,8 @@ public class TenantTermsOfUsesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     TenantTermsOfUseFixedPropertiesProposal proposal =
-        new TenantTermsOfUseFixedPropertiesProposal(prev, fields);
+        new TenantTermsOfUseFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -215,10 +213,8 @@ public class TenantTermsOfUsesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, TenantTermsOfUseRef tenantTermsOfUse) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, tenantTermsOfUse));
-    fields.addAll(CALCULATED_FIELDS);
     TenantTermsOfUseFixedPropertiesProposal proposal =
-        new TenantTermsOfUseFixedPropertiesProposal(prev, tenantTermsOfUse, fields);
+        new TenantTermsOfUseFixedPropertiesProposal(prev, tenantTermsOfUse, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

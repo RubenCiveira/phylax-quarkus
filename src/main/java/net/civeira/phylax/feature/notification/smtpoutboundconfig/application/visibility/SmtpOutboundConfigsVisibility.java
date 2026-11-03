@@ -193,10 +193,8 @@ public class SmtpOutboundConfigsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     SmtpOutboundConfigFixedPropertiesProposal proposal =
-        new SmtpOutboundConfigFixedPropertiesProposal(prev, fields);
+        new SmtpOutboundConfigFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -208,10 +206,8 @@ public class SmtpOutboundConfigsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, SmtpOutboundConfigRef smtpOutboundConfig) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, smtpOutboundConfig));
-    fields.addAll(CALCULATED_FIELDS);
     SmtpOutboundConfigFixedPropertiesProposal proposal =
-        new SmtpOutboundConfigFixedPropertiesProposal(prev, smtpOutboundConfig, fields);
+        new SmtpOutboundConfigFixedPropertiesProposal(prev, smtpOutboundConfig, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

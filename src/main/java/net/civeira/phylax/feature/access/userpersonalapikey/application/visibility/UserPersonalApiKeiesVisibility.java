@@ -193,10 +193,8 @@ public class UserPersonalApiKeiesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     UserPersonalApiKeyFixedPropertiesProposal proposal =
-        new UserPersonalApiKeyFixedPropertiesProposal(prev, fields);
+        new UserPersonalApiKeyFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -208,10 +206,8 @@ public class UserPersonalApiKeiesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, UserPersonalApiKeyRef userPersonalApiKey) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, userPersonalApiKey));
-    fields.addAll(CALCULATED_FIELDS);
     UserPersonalApiKeyFixedPropertiesProposal proposal =
-        new UserPersonalApiKeyFixedPropertiesProposal(prev, userPersonalApiKey, fields);
+        new UserPersonalApiKeyFixedPropertiesProposal(prev, userPersonalApiKey, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

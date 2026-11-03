@@ -192,10 +192,8 @@ public class ConsentPurposesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     ConsentPurposeFixedPropertiesProposal proposal =
-        new ConsentPurposeFixedPropertiesProposal(prev, fields);
+        new ConsentPurposeFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -207,10 +205,8 @@ public class ConsentPurposesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, ConsentPurposeRef consentPurpose) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, consentPurpose));
-    fields.addAll(CALCULATED_FIELDS);
     ConsentPurposeFixedPropertiesProposal proposal =
-        new ConsentPurposeFixedPropertiesProposal(prev, consentPurpose, fields);
+        new ConsentPurposeFixedPropertiesProposal(prev, consentPurpose, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

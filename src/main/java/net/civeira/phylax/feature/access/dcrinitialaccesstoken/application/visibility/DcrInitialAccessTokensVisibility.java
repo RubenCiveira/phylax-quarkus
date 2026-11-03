@@ -194,10 +194,8 @@ public class DcrInitialAccessTokensVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     DcrInitialAccessTokenFixedPropertiesProposal proposal =
-        new DcrInitialAccessTokenFixedPropertiesProposal(prev, fields);
+        new DcrInitialAccessTokenFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -210,10 +208,9 @@ public class DcrInitialAccessTokensVisibility {
    */
   public Set<String> fieldsToFix(OperationContext prev,
       DcrInitialAccessTokenRef dcrInitialAccessToken) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, dcrInitialAccessToken));
-    fields.addAll(CALCULATED_FIELDS);
     DcrInitialAccessTokenFixedPropertiesProposal proposal =
-        new DcrInitialAccessTokenFixedPropertiesProposal(prev, dcrInitialAccessToken, fields);
+        new DcrInitialAccessTokenFixedPropertiesProposal(prev, dcrInitialAccessToken,
+            CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

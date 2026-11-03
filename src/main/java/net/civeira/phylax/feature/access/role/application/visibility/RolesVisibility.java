@@ -185,9 +185,7 @@ public class RolesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
-    RoleFixedPropertiesProposal proposal = new RoleFixedPropertiesProposal(prev, fields);
+    RoleFixedPropertiesProposal proposal = new RoleFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -199,9 +197,8 @@ public class RolesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, RoleRef role) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, role));
-    fields.addAll(CALCULATED_FIELDS);
-    RoleFixedPropertiesProposal proposal = new RoleFixedPropertiesProposal(prev, role, fields);
+    RoleFixedPropertiesProposal proposal =
+        new RoleFixedPropertiesProposal(prev, role, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

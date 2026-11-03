@@ -181,10 +181,8 @@ public class ResourceServersVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     ResourceServerFixedPropertiesProposal proposal =
-        new ResourceServerFixedPropertiesProposal(prev, fields);
+        new ResourceServerFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -196,10 +194,8 @@ public class ResourceServersVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, ResourceServerRef resourceServer) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, resourceServer));
-    fields.addAll(CALCULATED_FIELDS);
     ResourceServerFixedPropertiesProposal proposal =
-        new ResourceServerFixedPropertiesProposal(prev, resourceServer, fields);
+        new ResourceServerFixedPropertiesProposal(prev, resourceServer, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

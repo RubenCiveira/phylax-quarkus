@@ -189,10 +189,8 @@ public class ThemeAssetsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     ThemeAssetFixedPropertiesProposal proposal =
-        new ThemeAssetFixedPropertiesProposal(prev, fields);
+        new ThemeAssetFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -204,10 +202,8 @@ public class ThemeAssetsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, ThemeAssetRef themeAsset) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, themeAsset));
-    fields.addAll(CALCULATED_FIELDS);
     ThemeAssetFixedPropertiesProposal proposal =
-        new ThemeAssetFixedPropertiesProposal(prev, themeAsset, fields);
+        new ThemeAssetFixedPropertiesProposal(prev, themeAsset, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

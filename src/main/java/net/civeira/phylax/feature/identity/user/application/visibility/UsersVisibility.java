@@ -186,9 +186,7 @@ public class UsersVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
-    UserFixedPropertiesProposal proposal = new UserFixedPropertiesProposal(prev, fields);
+    UserFixedPropertiesProposal proposal = new UserFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -200,9 +198,8 @@ public class UsersVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, UserRef user) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, user));
-    fields.addAll(CALCULATED_FIELDS);
-    UserFixedPropertiesProposal proposal = new UserFixedPropertiesProposal(prev, user, fields);
+    UserFixedPropertiesProposal proposal =
+        new UserFixedPropertiesProposal(prev, user, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

@@ -180,10 +180,8 @@ public class ApiKeyClientsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     ApiKeyClientFixedPropertiesProposal proposal =
-        new ApiKeyClientFixedPropertiesProposal(prev, fields);
+        new ApiKeyClientFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -195,10 +193,8 @@ public class ApiKeyClientsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, ApiKeyClientRef apiKeyClient) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, apiKeyClient));
-    fields.addAll(CALCULATED_FIELDS);
     ApiKeyClientFixedPropertiesProposal proposal =
-        new ApiKeyClientFixedPropertiesProposal(prev, apiKeyClient, fields);
+        new ApiKeyClientFixedPropertiesProposal(prev, apiKeyClient, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

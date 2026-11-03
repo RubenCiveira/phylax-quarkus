@@ -23,7 +23,7 @@ public abstract class PropertiesProposal {
 
   public PropertiesProposal(OperationContext context, Set<String> fields) {
     super();
-    this.fields = fields;
+    this.fields = new HashSet<>(fields);
     this.context = context;
   }
 
@@ -44,10 +44,6 @@ public abstract class PropertiesProposal {
   }
 
   public void add(List<String> newfields) {
-    try {
-      fields.addAll(newfields);
-    } catch (UnsupportedOperationException ex) {
-      fields = new HashSet<>(newfields);
-    }
+    fields.addAll(newfields);
   }
 }

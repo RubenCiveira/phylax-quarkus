@@ -186,9 +186,8 @@ public class ThemesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
-    ThemeFixedPropertiesProposal proposal = new ThemeFixedPropertiesProposal(prev, fields);
+    ThemeFixedPropertiesProposal proposal =
+        new ThemeFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -200,9 +199,8 @@ public class ThemesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev, ThemeRef theme) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, theme));
-    fields.addAll(CALCULATED_FIELDS);
-    ThemeFixedPropertiesProposal proposal = new ThemeFixedPropertiesProposal(prev, theme, fields);
+    ThemeFixedPropertiesProposal proposal =
+        new ThemeFixedPropertiesProposal(prev, theme, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

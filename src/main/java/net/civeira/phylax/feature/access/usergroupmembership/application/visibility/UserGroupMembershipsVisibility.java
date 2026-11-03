@@ -207,10 +207,8 @@ public class UserGroupMembershipsVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     UserGroupMembershipFixedPropertiesProposal proposal =
-        new UserGroupMembershipFixedPropertiesProposal(prev, fields);
+        new UserGroupMembershipFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -223,10 +221,9 @@ public class UserGroupMembershipsVisibility {
    */
   public Set<String> fieldsToFix(OperationContext prev,
       UserGroupMembershipRef userGroupMembership) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, userGroupMembership));
-    fields.addAll(CALCULATED_FIELDS);
     UserGroupMembershipFixedPropertiesProposal proposal =
-        new UserGroupMembershipFixedPropertiesProposal(prev, userGroupMembership, fields);
+        new UserGroupMembershipFixedPropertiesProposal(prev, userGroupMembership,
+            CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }

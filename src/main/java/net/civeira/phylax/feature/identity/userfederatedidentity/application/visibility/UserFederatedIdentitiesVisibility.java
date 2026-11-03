@@ -201,10 +201,8 @@ public class UserFederatedIdentitiesVisibility {
    * @return initialsFixFields
    */
   public Set<String> fieldsToFix(OperationContext prev) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev));
-    fields.addAll(CALCULATED_FIELDS);
     UserFederatedIdentityFixedPropertiesProposal proposal =
-        new UserFederatedIdentityFixedPropertiesProposal(prev, fields);
+        new UserFederatedIdentityFixedPropertiesProposal(prev, CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
@@ -217,10 +215,9 @@ public class UserFederatedIdentitiesVisibility {
    */
   public Set<String> fieldsToFix(OperationContext prev,
       UserFederatedIdentityRef userFederatedIdentity) {
-    Set<String> fields = new HashSet<>(fieldsToHide(prev, userFederatedIdentity));
-    fields.addAll(CALCULATED_FIELDS);
     UserFederatedIdentityFixedPropertiesProposal proposal =
-        new UserFederatedIdentityFixedPropertiesProposal(prev, userFederatedIdentity, fields);
+        new UserFederatedIdentityFixedPropertiesProposal(prev, userFederatedIdentity,
+            CALCULATED_FIELDS);
     fixedFieldsEmitter.fire(proposal);
     return proposal.getFields();
   }
