@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import net.civeira.phylax.feature.oauth.authentication.domain.AuthenticationResult;
 import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixtures;
@@ -20,6 +21,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.scenario.ScenarioDelegat
 
 @Tag("oidc-flow")
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class DelegatedLoginFlowTest extends OidcIntegrationTestBase {
 
   private static final String PROVIDER = ScenarioDelegateGateway.PROVIDER_ID;

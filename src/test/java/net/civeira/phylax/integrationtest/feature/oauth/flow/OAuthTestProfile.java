@@ -7,6 +7,6 @@ public class OAuthTestProfile implements QuarkusTestProfile {
 
   @Override
   public String getConfigProfile() {
-    return "oauth";
+    return "test,oauth";
   }
 }

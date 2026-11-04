@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -21,6 +22,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
  * token for another client, an actor token or an unregistered grant are refused.
  */
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class TokenExchangeFlowTest extends OidcIntegrationTestBase {
 
   private static final String TOKEN = "/oauth/openid/" + OidcTestFixtures.TENANT + "/token";

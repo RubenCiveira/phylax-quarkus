@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -21,6 +22,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
  * returns {@code access_denied}.
  */
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class PromptConsentFlowTest extends OidcIntegrationTestBase {
 
   private static final String AUTH = "/oauth/openid/" + OidcTestFixtures.TENANT + "/auth";

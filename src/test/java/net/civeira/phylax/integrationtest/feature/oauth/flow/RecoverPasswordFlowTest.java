@@ -8,11 +8,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixtures;
 
 @Tag("oidc-flow")
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class RecoverPasswordFlowTest extends OidcIntegrationTestBase {
 
   @Test

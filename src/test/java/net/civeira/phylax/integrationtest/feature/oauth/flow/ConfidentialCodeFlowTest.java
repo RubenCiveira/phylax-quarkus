@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import net.civeira.phylax.integrationtest.feature.oauth.client.OidcFlowClient;
 import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixtures;
@@ -18,6 +19,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
  */
 @Tag("oidc-flow")
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class ConfidentialCodeFlowTest extends OidcIntegrationTestBase {
 
   private static final String WEB_BASIC =

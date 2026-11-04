@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import com.auth0.jwt.JWT;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jakarta.ws.rs.GET;
@@ -23,6 +24,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
 /** J-04 resource API: pre-authentication and route-specific validation must agree. */
 @Tag("oidc-flow")
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class ApiBearerTenantFlowTest extends OidcIntegrationTestBase {
   @Path("api/{tenant}/bearer-contract")
   public static class Resource {

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import net.civeira.phylax.feature.oauth.client.domain.ClientCredentials;
@@ -23,6 +24,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
  * lifetime, a replay, a request object used as assertion, or a secret for that client fail.
  */
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class ClientAssertionFlowTest extends OidcIntegrationTestBase {
 
   private static final String BASE = "/oauth/openid/" + OidcTestFixtures.TENANT;

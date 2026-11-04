@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import net.civeira.phylax.feature.oauth.tokensecurity.domain.TokenIntrospectionResult;
@@ -19,6 +20,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
  * public client keeps the username.
  */
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class PairwiseSubjectFlowTest extends OidcIntegrationTestBase {
 
   private static final String USERINFO = "/oauth/openid/" + OidcTestFixtures.TENANT + "/userinfo";

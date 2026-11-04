@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.civeira.phylax.feature.oauth.authentication.domain.AuthenticationResult;
@@ -15,6 +16,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
 
 @Tag("oidc-flow")
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class PasswordGrantTest extends OidcIntegrationTestBase {
 
   @Test

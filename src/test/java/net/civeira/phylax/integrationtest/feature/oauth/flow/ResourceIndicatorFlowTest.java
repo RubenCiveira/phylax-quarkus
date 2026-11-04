@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -20,6 +21,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
  * resources of the grant, and the rotated refresh keeps the whole grant.
  */
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class ResourceIndicatorFlowTest extends OidcIntegrationTestBase {
 
   private static final String TOKEN = "/oauth/openid/" + OidcTestFixtures.TENANT + "/token";

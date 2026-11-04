@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -24,6 +25,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.fixtures.OidcTestFixture
 /** J-06: authorization responses, not just request parsing, through the HTTP boundary. */
 @Tag("oidc-flow")
 @QuarkusTest
+@TestProfile(OAuthTestProfile.class)
 class AuthorizeResponseContractTest extends OidcIntegrationTestBase {
 
   private static final String STATE = "s & = / é";
