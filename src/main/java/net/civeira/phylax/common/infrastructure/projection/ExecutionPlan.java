@@ -161,24 +161,23 @@ public class ExecutionPlan {
     List<String> props = new ArrayList<>(new HashSet<>(vals.getAgregation().keySet()));
     List<String> codes = new ArrayList<>(new HashSet<>(vals.getCodes()));
 
+    // Every chunk is indexed first: merging chunk by chunk would drop the references of the
+    // chunks not answered yet and revisit the rows already resolved.
+    Map<String, List<Map<String, Object>>> indexed = new HashMap<>();
     client.send(splitList(codes, 20).map(list -> {
       String target =
           relation.getUrl() + "?" + relation.getBatchParam() + "=" + String.join(",", list);
       return client.get(target).processor(Map.class, response -> {
         List<Map<String, Object>> partials = (List<Map<String, Object>>) response.get("items");
-        Map<String, List<Map<String, Object>>> indexed = new HashMap<>();
-        for (Map<String, Object> with : partials) {
-          String defref = (String) with.get(relation.getReferenceField());
-          if (!indexed.containsKey(defref)) {
-            indexed.put(defref, new ArrayList<>());
+        synchronized (indexed) {
+          for (Map<String, Object> with : partials) {
+            String defref = (String) with.get(relation.getReferenceField());
+            indexed.computeIfAbsent(defref, _ -> new ArrayList<>()).add(with);
           }
-          indexed.get(defref).add(with);
-        }
-        synchronized (responseData) {
-          processResponseData(responseData, props, indexed, relation, vals);
         }
       });
     }));
+    processResponseData(responseData, props, indexed, relation, vals);
   }
 
   @SuppressWarnings("unchecked")

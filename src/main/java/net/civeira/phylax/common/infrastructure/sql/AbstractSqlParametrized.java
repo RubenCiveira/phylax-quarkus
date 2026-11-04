@@ -297,10 +297,15 @@ public abstract class AbstractSqlParametrized<T extends AbstractSqlParametrized<
   private String parseSql(String sql, Map<String, List<Integer>> parameterIndexMap) {
     StringBuilder parsedSql = new StringBuilder();
     int index = 1;
+    boolean literal = false;
 
     for (int i = 0; i < sql.length(); i++) {
       char c = sql.charAt(i);
-      if (c == ':' && i + 1 < sql.length()
+      if (c == '\'') {
+        // A quoted literal (escaped quotes toggle twice) never holds named params.
+        literal = !literal;
+        parsedSql.append(c);
+      } else if (!literal && c == ':' && i + 1 < sql.length()
           && (Character.isLetter(sql.charAt(i + 1)) || sql.charAt(i + 1) == '_')) {
         int j = i + 1;
         while (j < sql.length()

@@ -239,10 +239,8 @@ public class Migrations implements AutoCloseable {
     }
 
     for (String file : toExecute) {
-      InputStream resourceAsStream =
-          Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
-
-      if (resourceAsStream != null) {
+      // Only sql files are executed by runMigrations, so only they are previewed.
+      if (file.endsWith(".sql")) {
         List<String> lines = readFile(file);
         List<String> filtered =
             lines.stream().filter(line -> !line.trim().startsWith("--")).toList();
@@ -313,7 +311,7 @@ public class Migrations implements AutoCloseable {
       Map<String, Object> result) throws SQLException {
     try {
       List<String> lines = readFile(file);
-      List<String> filtered = lines.stream().filter(line -> !line.startsWith("--")).toList();
+      List<String> filtered = lines.stream().filter(line -> !line.trim().startsWith("--")).toList();
       String sql = String.join("\n", filtered);
       String[] statements = sql.split(";");
       for (String statement : statements) {

@@ -203,7 +203,7 @@ public class Phylax implements RbacStore {
   }
 
   private synchronized List<PhylaxGrants> cachedCallCheckScopes() {
-    if (scopesExpiration.isBefore(OffsetDateTime.now())) {
+    if (null == readScopes || scopesExpiration.isBefore(OffsetDateTime.now())) {
       scopesExpiration = OffsetDateTime.now().plus(15, ChronoUnit.MINUTES);
       readScopes = callCheckScopes();
     }

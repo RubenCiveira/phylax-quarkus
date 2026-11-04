@@ -3,6 +3,7 @@ package net.civeira.phylax.common.infrastructure.audit;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -22,6 +23,12 @@ import lombok.RequiredArgsConstructor;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class AuditActuator {
+
+  /**
+   * The entity names the audit table, which is concatenated into the query: only plain SQL
+   * identifiers are accepted.
+   */
+  private static final Pattern AUDIT_TABLE = Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,127}");
 
   private final AuditReadService auditReadService;
 
@@ -43,6 +50,10 @@ public class AuditActuator {
   private void handleAuditRequest(RoutingContext ctx) {
     try {
       String entity = ctx.queryParam("entity").stream().findFirst().orElse(null);
+      if (null == entity || !AUDIT_TABLE.matcher(entity).matches()) {
+        ctx.response().setStatusCode(400).end("A valid audit entity is required");
+        return;
+      }
       String entityId = ctx.queryParam("id").stream().findFirst().orElse(null);
       String user = ctx.queryParam("user").stream().findFirst().orElse(null);
       String op = ctx.queryParam("op").stream().findFirst().orElse(null);
@@ -52,7 +63,7 @@ public class AuditActuator {
       String fromStr = ctx.queryParam("from").stream().findFirst().orElse(null);
       ZonedDateTime from = fromStr != null ? ZonedDateTime.parse(fromStr) : null;
       String toStr = ctx.queryParam("to").stream().findFirst().orElse(null);
-      ZonedDateTime to = fromStr != null ? ZonedDateTime.parse(toStr) : null;
+      ZonedDateTime to = toStr != null ? ZonedDateTime.parse(toStr) : null;
 
       List<AuditEvent> results = auditReadService.findByFilters(entity, entity, AuditQueryFilter
           .builder().entityId(entityId).performedBy(user).operation(op).from(from).to(to).build(),

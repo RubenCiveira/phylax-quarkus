@@ -66,12 +66,12 @@ public final class SqlSchematicQuery<T> extends AbstractSqlQuery<T, SqlSchematic
   }
 
   public SqlSchematicQuery<T> addOrderAsc(String field) {
-    this.query.orderAsc(field);
+    this.query.addOrderAsc(field);
     return this;
   }
 
   public SqlSchematicQuery<T> addOrderDesc(String field) {
-    this.query.orderDesc(field);
+    this.query.addOrderDesc(field);
     return this;
   }
 
