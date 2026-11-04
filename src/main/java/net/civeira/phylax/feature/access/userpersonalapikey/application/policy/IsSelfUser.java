@@ -1,5 +1,7 @@
 package net.civeira.phylax.feature.access.userpersonalapikey.application.policy;
 
+import java.util.Objects;
+
 import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.security.Actor;
@@ -77,7 +79,7 @@ public class IsSelfUser {
   private void checkAllow(AuthorizationDecision allowDecision, Actor actor,
       UserPersonalApiKeyRef reference) {
     UserPersonalApiKey instance = gateway.resolve(reference);
-    if (!instance.getUser().getUid().equals(actor.getUid())) {
+    if (!Objects.equals(instance.getUser().getUid(), actor.getUid())) {
       allowDecision.deny("Revoke is self user");
     }
   }
