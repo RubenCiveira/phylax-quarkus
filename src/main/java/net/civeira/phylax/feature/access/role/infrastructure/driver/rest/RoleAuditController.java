@@ -38,10 +38,10 @@ public class RoleAuditController implements RoleAuditApi {
   @Override
   public Response roleApiActorAudit(final String actor, final LocalDate from, final LocalDate to) {
     String self = currentRequest.getActor().getName();
-    List<AuditEvent> events = reader.findByFilters("access_role_audit", "role",
+    List<AuditEvent> events = reader.findByFilters("_audit_access_role", "role",
         AuditQueryFilter.builder().performedBy(self).from(from.atStartOfDay(ZoneId.systemDefault()))
             .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
-        tenant(), 0, 1000);
+        tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -53,8 +53,8 @@ public class RoleAuditController implements RoleAuditApi {
   @Override
   public Response roleApiEntityAudit(final String uid) {
     String self = currentRequest.getActor().getName();
-    List<AuditEvent> events = reader.findByFilters("access_role_audit", "role",
-        AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("_audit_access_role", "role",
+        AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 

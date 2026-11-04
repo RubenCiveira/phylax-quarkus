@@ -40,11 +40,11 @@ public class UserGroupMembershipAuditController implements UserGroupMembershipAu
       final LocalDate to) {
     String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
-        reader.findByFilters("access_user_group_membership_audit", "userGroupMembership",
+        reader.findByFilters("_audit_access_user_group_membership", "userGroupMembership",
             AuditQueryFilter.builder().performedBy(self)
                 .from(from.atStartOfDay(ZoneId.systemDefault()))
                 .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
-            tenant(), 0, 1000);
+            tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -57,8 +57,8 @@ public class UserGroupMembershipAuditController implements UserGroupMembershipAu
   public Response userGroupMembershipApiEntityAudit(final String uid) {
     String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
-        reader.findByFilters("access_user_group_membership_audit", "userGroupMembership",
-            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
+        reader.findByFilters("_audit_access_user_group_membership", "userGroupMembership",
+            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 

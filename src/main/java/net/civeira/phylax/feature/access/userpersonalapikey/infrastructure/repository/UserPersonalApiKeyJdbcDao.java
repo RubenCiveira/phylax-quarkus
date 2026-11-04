@@ -704,7 +704,7 @@ public class UserPersonalApiKeyJdbcDao {
         cursor.getSinceUid()
             .ifPresent(since -> sq.where(UID, SqlOperator.GT, SqlParameterValue.of(since)));
       }
-      sq.orderAsc("uid");
+      sq.addOrderAsc("uid");
       return sq.query(converter()).limit(cursor.getLimit()).iterator();
     }
   }
@@ -725,7 +725,7 @@ public class UserPersonalApiKeyJdbcDao {
         cursor.getSinceUid()
             .ifPresent(since -> sq.where(UID, SqlOperator.GT, SqlParameterValue.of(since)));
       }
-      sq.orderAsc("uid");
+      sq.addOrderAsc("uid");
       return sq.forUpdate().query(converter()).limit(cursor.getLimit()).iterator();
     }
   }

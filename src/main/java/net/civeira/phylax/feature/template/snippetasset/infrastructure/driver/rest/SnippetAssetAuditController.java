@@ -39,10 +39,10 @@ public class SnippetAssetAuditController implements SnippetAssetAuditApi {
   public Response snippetAssetApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
     String self = currentRequest.getActor().getName();
-    List<AuditEvent> events = reader.findByFilters("template_snippet_asset_audit", "snippetAsset",
+    List<AuditEvent> events = reader.findByFilters("_audit_template_snippet_asset", "snippetAsset",
         AuditQueryFilter.builder().performedBy(self).from(from.atStartOfDay(ZoneId.systemDefault()))
             .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
-        tenant(), 0, 1000);
+        tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -54,8 +54,8 @@ public class SnippetAssetAuditController implements SnippetAssetAuditApi {
   @Override
   public Response snippetAssetApiEntityAudit(final String uid) {
     String self = currentRequest.getActor().getName();
-    List<AuditEvent> events = reader.findByFilters("template_snippet_asset_audit", "snippetAsset",
-        AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
+    List<AuditEvent> events = reader.findByFilters("_audit_template_snippet_asset", "snippetAsset",
+        AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 

@@ -40,11 +40,11 @@ public class UserRoleAssignmentAuditController implements UserRoleAssignmentAudi
       final LocalDate to) {
     String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
-        reader.findByFilters("access_user_role_assignment_audit", "userRoleAssignment",
+        reader.findByFilters("_audit_access_user_role_assignment", "userRoleAssignment",
             AuditQueryFilter.builder().performedBy(self)
                 .from(from.atStartOfDay(ZoneId.systemDefault()))
                 .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
-            tenant(), 0, 1000);
+            tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -57,8 +57,8 @@ public class UserRoleAssignmentAuditController implements UserRoleAssignmentAudi
   public Response userRoleAssignmentApiEntityAudit(final String uid) {
     String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
-        reader.findByFilters("access_user_role_assignment_audit", "userRoleAssignment",
-            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
+        reader.findByFilters("_audit_access_user_role_assignment", "userRoleAssignment",
+            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 

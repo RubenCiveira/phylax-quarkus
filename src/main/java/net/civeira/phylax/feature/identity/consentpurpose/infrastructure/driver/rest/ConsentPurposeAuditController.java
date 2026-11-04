@@ -40,11 +40,11 @@ public class ConsentPurposeAuditController implements ConsentPurposeAuditApi {
       final LocalDate to) {
     String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
-        reader.findByFilters("identity_consent_purpose_audit", "consentPurpose",
+        reader.findByFilters("_audit_identity_consent_purpose", "consentPurpose",
             AuditQueryFilter.builder().performedBy(self)
                 .from(from.atStartOfDay(ZoneId.systemDefault()))
                 .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
-            tenant(), 0, 1000);
+            tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -57,8 +57,8 @@ public class ConsentPurposeAuditController implements ConsentPurposeAuditApi {
   public Response consentPurposeApiEntityAudit(final String uid) {
     String self = currentRequest.getActor().getName();
     List<AuditEvent> events =
-        reader.findByFilters("identity_consent_purpose_audit", "consentPurpose",
-            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
+        reader.findByFilters("_audit_identity_consent_purpose", "consentPurpose",
+            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 

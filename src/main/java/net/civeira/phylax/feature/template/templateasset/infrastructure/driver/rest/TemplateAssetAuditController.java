@@ -39,10 +39,12 @@ public class TemplateAssetAuditController implements TemplateAssetAuditApi {
   public Response templateAssetApiActorAudit(final String actor, final LocalDate from,
       final LocalDate to) {
     String self = currentRequest.getActor().getName();
-    List<AuditEvent> events = reader.findByFilters("template_template_asset_audit", "templateAsset",
-        AuditQueryFilter.builder().performedBy(self).from(from.atStartOfDay(ZoneId.systemDefault()))
-            .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
-        tenant(), 0, 1000);
+    List<AuditEvent> events =
+        reader.findByFilters("_audit_template_template_asset", "templateAsset",
+            AuditQueryFilter.builder().performedBy(self)
+                .from(from.atStartOfDay(ZoneId.systemDefault()))
+                .to(to.atStartOfDay(ZoneId.systemDefault())).build(),
+            tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
@@ -54,8 +56,9 @@ public class TemplateAssetAuditController implements TemplateAssetAuditApi {
   @Override
   public Response templateAssetApiEntityAudit(final String uid) {
     String self = currentRequest.getActor().getName();
-    List<AuditEvent> events = reader.findByFilters("template_template_asset_audit", "templateAsset",
-        AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 0, 1000);
+    List<AuditEvent> events =
+        reader.findByFilters("_audit_template_template_asset", "templateAsset",
+            AuditQueryFilter.builder().entityId(uid).performedBy(self).build(), tenant(), 1000, 0);
     return Response.ok(events.stream().map(this::map).toList()).build();
   }
 
