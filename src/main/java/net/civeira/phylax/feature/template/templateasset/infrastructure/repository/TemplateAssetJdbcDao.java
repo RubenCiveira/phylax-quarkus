@@ -585,8 +585,7 @@ public class TemplateAssetJdbcDao {
       sq.with(TYPE, SqlParameterValue.of(entity.getType()));
       sq.with(CONTENT, SqlParameterValue.of(entity.getContent()));
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

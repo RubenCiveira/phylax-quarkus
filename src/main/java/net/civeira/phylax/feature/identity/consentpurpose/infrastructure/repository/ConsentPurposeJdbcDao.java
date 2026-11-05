@@ -574,8 +574,7 @@ public class ConsentPurposeJdbcDao {
       sq.with(DESCRIPTION, SqlParameterValue.of(entity.getDescription()));
       sq.with(REQUIRED, SqlParameterValue.of(entity.isRequired()));
       sq.with(ACTIVATION_DATE, SqlParameterValue.of(entity.getActivationDate()));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

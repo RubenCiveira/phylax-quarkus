@@ -598,8 +598,7 @@ public class UserFederatedIdentityJdbcDao {
       sq.with(SUBJECT, SqlParameterValue.of(entity.getSubject()));
       sq.with(CREATED_AT, entity.getCreatedAt().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullOffsetDateTime));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

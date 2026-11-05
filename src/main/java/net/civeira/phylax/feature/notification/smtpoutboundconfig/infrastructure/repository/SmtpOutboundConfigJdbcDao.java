@@ -711,8 +711,7 @@ public class SmtpOutboundConfigJdbcDao {
       sq.with(MAX_RETRIES, SqlParameterValue.of(entity.getMaxRetries()));
       sq.with(RETRY_DELAY, SqlParameterValue.of(entity.getRetryDelay()));
       sq.with(RATE_LIMIT, SqlParameterValue.of(entity.getRateLimit()));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

@@ -566,8 +566,7 @@ public class TemplateJdbcDao {
           entity.getTheme().map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
       sq.with(CHANNEL, SqlParameterValue.of(entity.getChannel().toString()));
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

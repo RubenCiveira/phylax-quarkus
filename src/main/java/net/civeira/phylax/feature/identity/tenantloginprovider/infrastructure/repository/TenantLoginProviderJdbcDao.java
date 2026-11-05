@@ -877,8 +877,7 @@ public class TenantLoginProviderJdbcDao {
       sq.with(SAML_IDP_CERT, entity.getSamlIdpCert().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullString));
       sq.with(USERS_ENABLED_BY_DEFAULT, SqlParameterValue.of(entity.isUsersEnabledByDefault()));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

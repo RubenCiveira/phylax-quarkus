@@ -552,8 +552,7 @@ public class ThemeJdbcDao {
       sq.with(NAME, SqlParameterValue.of(entity.getName()));
       sq.with(IS_DEFAULT, SqlParameterValue.of(entity.isIsDefault()));
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

@@ -590,8 +590,7 @@ public class TenantJdbcDao {
       sq.with(MARK_FOR_DELETE, SqlParameterValue.of(entity.isMarkForDelete()));
       sq.with(MARK_FOR_DELETE_TIME, entity.getMarkForDeleteTime().map(SqlParameterValue::of)
           .orElseGet(SqlParameterValue::ofNullOffsetDateTime));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

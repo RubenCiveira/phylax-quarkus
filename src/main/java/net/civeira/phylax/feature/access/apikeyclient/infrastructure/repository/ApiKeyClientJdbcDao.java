@@ -531,8 +531,7 @@ public class ApiKeyClientJdbcDao {
       sq.with(ENABLED, SqlParameterValue.of(entity.isEnabled()));
       sq.with(SCOPES,
           entity.getScopes().map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");

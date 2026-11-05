@@ -1084,8 +1084,7 @@ public class TenantConfigJdbcDao {
       sq.with(PASSWORD_RECOVERY_ENABLED, SqlParameterValue.of(entity.isPasswordRecoveryEnabled()));
       sq.with(RECOVER_PASS_EMAIL_TEMPLATE, entity.getRecoverPassEmailTemplate()
           .map(SqlParameterValue::of).orElseGet(SqlParameterValue::ofNullString));
-      sq.with(VERSION, entity.getVersion().map(SqlParameterValue::of)
-          .orElseGet(SqlParameterValue::ofNullInteger));
+      sq.with(VERSION, SqlParameterValue.of(entity.getVersion().orElse(0)));
       int num = sq.execute();
       if (0 == num) {
         throw new IllegalArgumentException("No insert into");
