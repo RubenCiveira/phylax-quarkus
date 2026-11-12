@@ -294,6 +294,17 @@ System_Boundary(c2, "Backend") {
     }
   Container(group_access, "access", "Java", "", $sprite="java")
   }
+  System_Boundary(group_observe, "observe") {
+    Container(backend_api_observe, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
+    Container(backend_adapter_observe, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
+    System_Boundary(backend_domain_observe, "Dominio") {
+      Container(entity_observed_dashboard, "observed dashboard", "Java", "Grid of panels of...")
+      Container(entity_observed_source, "observed source", "Java", "Origin allowed to...")
+      Container(entity_observability_config, "observability config", "Java", "Global configurat...")
+      Container(entity_observed_issue, "observed issue", "Java", "Group of identica...")
+      Container(entity_observed_embed, "observed embed", "Java", "Read only permiss...")
+    }
+  }
   System_Boundary(group_notification, "notification") {
     Container(backend_api_notification, "Rest api", "Java", "Procesamiento de los datos", $sprite="java")
     Container(backend_adapter_notification, "Adaptador", "Java", "Procesamiento de los datos", $sprite="java")
@@ -370,6 +381,15 @@ Rel(backend_adapter_identity, redis, "Cache for data", "jpa")
 Rel(backend_adapter_identity, backend_domain_identity, "Consumes", "port.api")
 Rel(backend_api_identity, backend_domain_identity, "Support", "port.spi")
 Rel(backend_adapter_identity, rabbitmq, "Eventos de mensajes", "Rest")
+Rel(entity_observed_issue, entity_observed_source, "origin", "include")
+Rel(entity_observed_embed, entity_observed_dashboard, "dashboard", "include")
+Rel(entity_observed_embed, entity_observed_source, "origin", "include")
+Rel(web_app, backend_api_observe, "Rest connection", "Rest")
+Rel(backend_adapter_observe, database, "Read/Write data", "jpa")
+Rel(backend_adapter_observe, redis, "Cache for data", "jpa")
+Rel(backend_adapter_observe, backend_domain_observe, "Consumes", "port.api")
+Rel(backend_api_observe, backend_domain_observe, "Support", "port.spi")
+Rel(backend_adapter_observe, rabbitmq, "Eventos de mensajes", "Rest")
 Rel_R(entity_message, group_identity, "uses", "include")
 Rel_R(entity_smtp_outbound_config, group_identity, "uses", "include")
 Rel(web_app, backend_api_notification, "Rest connection", "Rest")

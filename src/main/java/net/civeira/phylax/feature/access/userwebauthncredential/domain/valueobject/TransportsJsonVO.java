@@ -55,12 +55,12 @@ public class TransportsJsonVO {
    * @return An empty instance
    */
   public static TransportsJsonVO tryFrom(final Object transportsJson) {
-    ConstraintFailList list = new ConstraintFailList();
-    TransportsJsonVO result = tryFrom(transportsJson, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TransportsJsonVO.transports_json", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TransportsJsonVO voInstance = tryFrom(transportsJson, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TransportsJsonVO.transports_json", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

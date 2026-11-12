@@ -57,12 +57,12 @@ public class AcceptedAtVO {
    * @return An empty instance
    */
   public static AcceptedAtVO tryFrom(final Object acceptedAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    AcceptedAtVO result = tryFrom(acceptedAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for AcceptedAtVO.accepted-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    AcceptedAtVO voInstance = tryFrom(acceptedAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for AcceptedAtVO.accepted-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

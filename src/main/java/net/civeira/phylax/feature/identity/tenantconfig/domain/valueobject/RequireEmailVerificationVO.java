@@ -47,13 +47,13 @@ public class RequireEmailVerificationVO {
    * @return An empty instance
    */
   public static RequireEmailVerificationVO tryFrom(final Object requireEmailVerification) {
-    ConstraintFailList list = new ConstraintFailList();
-    RequireEmailVerificationVO result = tryFrom(requireEmailVerification, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RequireEmailVerificationVO voInstance = tryFrom(requireEmailVerification, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for RequireEmailVerificationVO.require-email-verification", list);
+          "Invalid value for RequireEmailVerificationVO.require-email-verification", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

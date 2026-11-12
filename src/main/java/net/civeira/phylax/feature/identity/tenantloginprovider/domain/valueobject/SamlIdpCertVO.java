@@ -66,12 +66,12 @@ public class SamlIdpCertVO {
    * @return An empty instance
    */
   public static SamlIdpCertVO tryFrom(final Object samlIdpCert) {
-    ConstraintFailList list = new ConstraintFailList();
-    SamlIdpCertVO result = tryFrom(samlIdpCert, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SamlIdpCertVO.saml-idp-cert", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SamlIdpCertVO voInstance = tryFrom(samlIdpCert, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SamlIdpCertVO.saml-idp-cert", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

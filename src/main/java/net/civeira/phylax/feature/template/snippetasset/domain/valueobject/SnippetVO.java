@@ -56,12 +56,12 @@ public class SnippetVO {
    * @return An empty instance
    */
   public static SnippetVO tryFrom(final Object snippet) {
-    ConstraintFailList list = new ConstraintFailList();
-    SnippetVO result = tryFrom(snippet, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SnippetVO.snippet", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SnippetVO voInstance = tryFrom(snippet, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SnippetVO.snippet", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

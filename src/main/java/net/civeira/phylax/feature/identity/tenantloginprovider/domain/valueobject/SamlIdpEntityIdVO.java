@@ -55,12 +55,13 @@ public class SamlIdpEntityIdVO {
    * @return An empty instance
    */
   public static SamlIdpEntityIdVO tryFrom(final Object samlIdpEntityId) {
-    ConstraintFailList list = new ConstraintFailList();
-    SamlIdpEntityIdVO result = tryFrom(samlIdpEntityId, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SamlIdpEntityIdVO.saml-idp-entity-id", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SamlIdpEntityIdVO voInstance = tryFrom(samlIdpEntityId, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SamlIdpEntityIdVO.saml-idp-entity-id",
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

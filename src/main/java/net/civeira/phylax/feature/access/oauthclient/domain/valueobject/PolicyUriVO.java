@@ -54,12 +54,12 @@ public class PolicyUriVO {
    * @return An empty instance
    */
   public static PolicyUriVO tryFrom(final Object policyUri) {
-    ConstraintFailList list = new ConstraintFailList();
-    PolicyUriVO result = tryFrom(policyUri, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PolicyUriVO.policy-uri", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PolicyUriVO voInstance = tryFrom(policyUri, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PolicyUriVO.policy-uri", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

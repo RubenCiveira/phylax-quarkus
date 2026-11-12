@@ -45,12 +45,12 @@ public class UsesVO {
    * @return An empty instance
    */
   public static UsesVO tryFrom(final Object uses) {
-    ConstraintFailList list = new ConstraintFailList();
-    UsesVO result = tryFrom(uses, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UsesVO.uses", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UsesVO voInstance = tryFrom(uses, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UsesVO.uses", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

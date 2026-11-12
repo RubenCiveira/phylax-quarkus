@@ -54,12 +54,12 @@ public class EnabledVO {
    * @return An empty instance
    */
   public static EnabledVO tryFrom(final Object enabled) {
-    ConstraintFailList list = new ConstraintFailList();
-    EnabledVO result = tryFrom(enabled, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for EnabledVO.enabled", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    EnabledVO voInstance = tryFrom(enabled, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for EnabledVO.enabled", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

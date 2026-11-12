@@ -69,12 +69,12 @@ public class ResourceServerVO {
    * @return An empty instance
    */
   public static ResourceServerVO tryFrom(final Object resourceServer) {
-    ConstraintFailList list = new ConstraintFailList();
-    ResourceServerVO result = tryFrom(resourceServer, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ResourceServerVO.resource-server", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ResourceServerVO voInstance = tryFrom(resourceServer, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ResourceServerVO.resource-server", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -56,13 +56,14 @@ public class TokenEndpointAuthSigningAlgVO {
    * @return An empty instance
    */
   public static TokenEndpointAuthSigningAlgVO tryFrom(final Object tokenEndpointAuthSigningAlg) {
-    ConstraintFailList list = new ConstraintFailList();
-    TokenEndpointAuthSigningAlgVO result = tryFrom(tokenEndpointAuthSigningAlg, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    TokenEndpointAuthSigningAlgVO voInstance = tryFrom(tokenEndpointAuthSigningAlg, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for TokenEndpointAuthSigningAlgVO.token-endpoint-auth-signing-alg", list);
+          "Invalid value for TokenEndpointAuthSigningAlgVO.token-endpoint-auth-signing-alg",
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

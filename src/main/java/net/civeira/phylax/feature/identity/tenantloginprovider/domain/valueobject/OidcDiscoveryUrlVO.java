@@ -58,13 +58,13 @@ public class OidcDiscoveryUrlVO {
    * @return An empty instance
    */
   public static OidcDiscoveryUrlVO tryFrom(final Object oidcDiscoveryUrl) {
-    ConstraintFailList list = new ConstraintFailList();
-    OidcDiscoveryUrlVO result = tryFrom(oidcDiscoveryUrl, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    OidcDiscoveryUrlVO voInstance = tryFrom(oidcDiscoveryUrl, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for OidcDiscoveryUrlVO.oidc-discovery-url",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

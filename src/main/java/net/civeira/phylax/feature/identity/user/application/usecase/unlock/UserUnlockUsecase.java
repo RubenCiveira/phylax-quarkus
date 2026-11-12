@@ -10,6 +10,7 @@ import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
 import net.civeira.phylax.common.batch.ExecutorPlan;
+import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.exception.NotAllowedException;
 import net.civeira.phylax.common.exception.NotFoundException;
 import net.civeira.phylax.common.security.OperationContext;
@@ -208,6 +209,11 @@ public class UserUnlockUsecase {
    * @return
    */
   User doUnlock(final OperationContext context, final User original) {
+    if (!original.isBlocked()) {
+      Trace.addEvent("Precondition is-blocked not met to unlock");
+      throw new ExecutionException("Precondition is-blocked not met", "precondition.is-blocked",
+          "Only a blocked user can be unlocked.");
+    }
     UserUnlockCheck proposal = new UserUnlockCheck(context, original);
     execProposalEmitter.fire(proposal);
     User result = original.unlock();

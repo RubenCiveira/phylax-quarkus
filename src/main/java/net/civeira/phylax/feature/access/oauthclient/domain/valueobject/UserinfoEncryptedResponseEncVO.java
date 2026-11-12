@@ -56,13 +56,14 @@ public class UserinfoEncryptedResponseEncVO {
    * @return An empty instance
    */
   public static UserinfoEncryptedResponseEncVO tryFrom(final Object userinfoEncryptedResponseEnc) {
-    ConstraintFailList list = new ConstraintFailList();
-    UserinfoEncryptedResponseEncVO result = tryFrom(userinfoEncryptedResponseEnc, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    UserinfoEncryptedResponseEncVO voInstance = tryFrom(userinfoEncryptedResponseEnc, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for UserinfoEncryptedResponseEncVO.userinfo-encrypted-response-enc", list);
+          "Invalid value for UserinfoEncryptedResponseEncVO.userinfo-encrypted-response-enc",
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -45,12 +45,12 @@ public class PurposeVO {
    * @return An empty instance
    */
   public static PurposeVO tryFrom(final Object purpose) {
-    ConstraintFailList list = new ConstraintFailList();
-    PurposeVO result = tryFrom(purpose, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PurposeVO.purpose", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PurposeVO voInstance = tryFrom(purpose, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PurposeVO.purpose", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

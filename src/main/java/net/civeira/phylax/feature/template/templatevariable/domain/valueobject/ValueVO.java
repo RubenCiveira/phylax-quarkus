@@ -55,12 +55,12 @@ public class ValueVO {
    * @return An empty instance
    */
   public static ValueVO tryFrom(final Object value) {
-    ConstraintFailList list = new ConstraintFailList();
-    ValueVO result = tryFrom(value, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ValueVO.value", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ValueVO voInstance = tryFrom(value, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ValueVO.value", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

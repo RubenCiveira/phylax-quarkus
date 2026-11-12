@@ -45,12 +45,12 @@ public class UseTlsVO {
    * @return An empty instance
    */
   public static UseTlsVO tryFrom(final Object useTls) {
-    ConstraintFailList list = new ConstraintFailList();
-    UseTlsVO result = tryFrom(useTls, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UseTlsVO.use-tls", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UseTlsVO voInstance = tryFrom(useTls, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UseTlsVO.use-tls", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -56,13 +56,13 @@ public class ClientCredentialsScopesVO {
    * @return An empty instance
    */
   public static ClientCredentialsScopesVO tryFrom(final Object clientCredentialsScopes) {
-    ConstraintFailList list = new ConstraintFailList();
-    ClientCredentialsScopesVO result = tryFrom(clientCredentialsScopes, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    ClientCredentialsScopesVO voInstance = tryFrom(clientCredentialsScopes, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for ClientCredentialsScopesVO.client-credentials-scopes", list);
+          "Invalid value for ClientCredentialsScopesVO.client-credentials-scopes", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

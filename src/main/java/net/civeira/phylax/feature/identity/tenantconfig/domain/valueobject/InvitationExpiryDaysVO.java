@@ -46,13 +46,13 @@ public class InvitationExpiryDaysVO {
    * @return An empty instance
    */
   public static InvitationExpiryDaysVO tryFrom(final Object invitationExpiryDays) {
-    ConstraintFailList list = new ConstraintFailList();
-    InvitationExpiryDaysVO result = tryFrom(invitationExpiryDays, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    InvitationExpiryDaysVO voInstance = tryFrom(invitationExpiryDays, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for InvitationExpiryDaysVO.invitation-expiry-days", list);
+          "Invalid value for InvitationExpiryDaysVO.invitation-expiry-days", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

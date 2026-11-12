@@ -57,12 +57,12 @@ public class AcceptDateVO {
    * @return An empty instance
    */
   public static AcceptDateVO tryFrom(final Object acceptDate) {
-    ConstraintFailList list = new ConstraintFailList();
-    AcceptDateVO result = tryFrom(acceptDate, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for AcceptDateVO.accept-date", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    AcceptDateVO voInstance = tryFrom(acceptDate, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for AcceptDateVO.accept-date", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

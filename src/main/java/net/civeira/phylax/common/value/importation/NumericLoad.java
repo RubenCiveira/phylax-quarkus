@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import net.civeira.phylax.common.value.validation.AbstractFailList;
 import net.civeira.phylax.common.value.validation.ConstraintFail;
-import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 public final class NumericLoad {
 
@@ -74,13 +73,13 @@ public final class NumericLoad {
     return Optional.of(f);
   }
 
-  public static Optional<BigDecimal> toBigDecimal(String field, String value,
-      ConstraintFailList fails) {
+  public static <T extends AbstractFailList> Optional<BigDecimal> toBigDecimal(String field,
+      String value, T fails) {
     return parseBigDecimal(field, value, fails, "INVALID_NUMERIC");
   }
 
-  public static Optional<BigInteger> toBigInteger(String field, String value,
-      ConstraintFailList fails) {
+  public static <T extends AbstractFailList> Optional<BigInteger> toBigInteger(String field,
+      String value, T fails) {
     Optional<BigDecimal> base = parseBigDecimal(field, value, fails, "INVALID_INTEGER");
     if (base.isEmpty()) {
       return Optional.empty();
@@ -89,7 +88,7 @@ public final class NumericLoad {
     try {
       return Optional.of(base.get().toBigIntegerExact());
     } catch (ArithmeticException e) {
-      fails.add("OUT_OF_RANGE_INTEGER", field, value);
+      fails.add(new ConstraintFail("OUT_OF_RANGE_INTEGER", field, value));
       return Optional.empty();
     }
   }

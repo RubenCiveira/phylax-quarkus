@@ -45,12 +45,12 @@ public class PublicKeyVO {
    * @return An empty instance
    */
   public static PublicKeyVO tryFrom(final Object publicKey) {
-    ConstraintFailList list = new ConstraintFailList();
-    PublicKeyVO result = tryFrom(publicKey, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PublicKeyVO.public-key", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PublicKeyVO voInstance = tryFrom(publicKey, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PublicKeyVO.public-key", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

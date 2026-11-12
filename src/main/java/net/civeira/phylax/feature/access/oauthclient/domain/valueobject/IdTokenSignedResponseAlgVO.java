@@ -59,13 +59,13 @@ public class IdTokenSignedResponseAlgVO {
    * @return An empty instance
    */
   public static IdTokenSignedResponseAlgVO tryFrom(final Object idTokenSignedResponseAlg) {
-    ConstraintFailList list = new ConstraintFailList();
-    IdTokenSignedResponseAlgVO result = tryFrom(idTokenSignedResponseAlg, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    IdTokenSignedResponseAlgVO voInstance = tryFrom(idTokenSignedResponseAlg, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for IdTokenSignedResponseAlgVO.id-token-signed-response-alg", list);
+          "Invalid value for IdTokenSignedResponseAlgVO.id-token-signed-response-alg", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

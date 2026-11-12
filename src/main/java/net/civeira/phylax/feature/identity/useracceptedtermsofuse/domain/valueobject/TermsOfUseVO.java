@@ -57,12 +57,12 @@ public class TermsOfUseVO {
    * @return An empty instance
    */
   public static TermsOfUseVO tryFrom(final Object termsOfUse) {
-    ConstraintFailList list = new ConstraintFailList();
-    TermsOfUseVO result = tryFrom(termsOfUse, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TermsOfUseVO.terms-of-use", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TermsOfUseVO voInstance = tryFrom(termsOfUse, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TermsOfUseVO.terms-of-use", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

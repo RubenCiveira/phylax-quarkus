@@ -54,12 +54,12 @@ public class PictureUrlVO {
    * @return An empty instance
    */
   public static PictureUrlVO tryFrom(final Object pictureUrl) {
-    ConstraintFailList list = new ConstraintFailList();
-    PictureUrlVO result = tryFrom(pictureUrl, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PictureUrlVO.picture-url", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PictureUrlVO voInstance = tryFrom(pictureUrl, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PictureUrlVO.picture-url", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

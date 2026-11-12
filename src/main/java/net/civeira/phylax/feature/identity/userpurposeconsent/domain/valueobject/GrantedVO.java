@@ -44,12 +44,12 @@ public class GrantedVO {
    * @return An empty instance
    */
   public static GrantedVO tryFrom(final Object granted) {
-    ConstraintFailList list = new ConstraintFailList();
-    GrantedVO result = tryFrom(granted, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for GrantedVO.granted", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    GrantedVO voInstance = tryFrom(granted, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for GrantedVO.granted", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

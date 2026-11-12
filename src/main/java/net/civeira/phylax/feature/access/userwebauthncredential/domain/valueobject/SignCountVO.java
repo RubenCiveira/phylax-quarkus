@@ -46,12 +46,12 @@ public class SignCountVO {
    * @return An empty instance
    */
   public static SignCountVO tryFrom(final Object signCount) {
-    ConstraintFailList list = new ConstraintFailList();
-    SignCountVO result = tryFrom(signCount, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SignCountVO.sign-count", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SignCountVO voInstance = tryFrom(signCount, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SignCountVO.sign-count", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

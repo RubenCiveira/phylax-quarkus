@@ -57,12 +57,12 @@ public class ApprovalStatusVO {
    * @return An empty instance
    */
   public static ApprovalStatusVO tryFrom(final Object approvalStatus) {
-    ConstraintFailList list = new ConstraintFailList();
-    ApprovalStatusVO result = tryFrom(approvalStatus, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ApprovalStatusVO.approval-status", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ApprovalStatusVO voInstance = tryFrom(approvalStatus, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ApprovalStatusVO.approval-status", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

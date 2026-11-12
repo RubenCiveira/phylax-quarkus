@@ -55,12 +55,12 @@ public class SamlIdpSsoUrlVO {
    * @return An empty instance
    */
   public static SamlIdpSsoUrlVO tryFrom(final Object samlIdpSsoUrl) {
-    ConstraintFailList list = new ConstraintFailList();
-    SamlIdpSsoUrlVO result = tryFrom(samlIdpSsoUrl, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SamlIdpSsoUrlVO.saml-idp-sso-url", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SamlIdpSsoUrlVO voInstance = tryFrom(samlIdpSsoUrl, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SamlIdpSsoUrlVO.saml-idp-sso-url", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

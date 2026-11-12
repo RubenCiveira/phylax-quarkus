@@ -55,12 +55,12 @@ public class JwksJsonVO {
    * @return An empty instance
    */
   public static JwksJsonVO tryFrom(final Object jwksJson) {
-    ConstraintFailList list = new ConstraintFailList();
-    JwksJsonVO result = tryFrom(jwksJson, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for JwksJsonVO.jwks-json", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    JwksJsonVO voInstance = tryFrom(jwksJson, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for JwksJsonVO.jwks-json", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

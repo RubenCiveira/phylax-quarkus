@@ -47,12 +47,12 @@ public class ProviderTypeVO {
    * @return An empty instance
    */
   public static ProviderTypeVO tryFrom(final Object providerType) {
-    ConstraintFailList list = new ConstraintFailList();
-    ProviderTypeVO result = tryFrom(providerType, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ProviderTypeVO.provider-type", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ProviderTypeVO voInstance = tryFrom(providerType, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ProviderTypeVO.provider-type", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

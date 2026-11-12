@@ -56,13 +56,13 @@ public class AcrValuesSupportedVO {
    * @return An empty instance
    */
   public static AcrValuesSupportedVO tryFrom(final Object acrValuesSupported) {
-    ConstraintFailList list = new ConstraintFailList();
-    AcrValuesSupportedVO result = tryFrom(acrValuesSupported, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AcrValuesSupportedVO voInstance = tryFrom(acrValuesSupported, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for AcrValuesSupportedVO.acr-values-supported",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

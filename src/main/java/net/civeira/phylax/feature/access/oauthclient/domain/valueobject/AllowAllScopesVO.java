@@ -55,12 +55,12 @@ public class AllowAllScopesVO {
    * @return An empty instance
    */
   public static AllowAllScopesVO tryFrom(final Object allowAllScopes) {
-    ConstraintFailList list = new ConstraintFailList();
-    AllowAllScopesVO result = tryFrom(allowAllScopes, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for AllowAllScopesVO.allow-all-scopes", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    AllowAllScopesVO voInstance = tryFrom(allowAllScopes, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for AllowAllScopesVO.allow-all-scopes", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

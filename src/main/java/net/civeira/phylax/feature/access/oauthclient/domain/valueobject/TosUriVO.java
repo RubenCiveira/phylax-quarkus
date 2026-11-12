@@ -54,12 +54,12 @@ public class TosUriVO {
    * @return An empty instance
    */
   public static TosUriVO tryFrom(final Object tosUri) {
-    ConstraintFailList list = new ConstraintFailList();
-    TosUriVO result = tryFrom(tosUri, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TosUriVO.tos-uri", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TosUriVO voInstance = tryFrom(tosUri, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TosUriVO.tos-uri", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -45,12 +45,12 @@ public class TimeoutVO {
    * @return An empty instance
    */
   public static TimeoutVO tryFrom(final Object timeout) {
-    ConstraintFailList list = new ConstraintFailList();
-    TimeoutVO result = tryFrom(timeout, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TimeoutVO.timeout", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TimeoutVO voInstance = tryFrom(timeout, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TimeoutVO.timeout", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

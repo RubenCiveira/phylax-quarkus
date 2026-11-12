@@ -57,13 +57,13 @@ public class FailedLoginAttemptsVO {
    * @return An empty instance
    */
   public static FailedLoginAttemptsVO tryFrom(final Object failedLoginAttempts) {
-    ConstraintFailList list = new ConstraintFailList();
-    FailedLoginAttemptsVO result = tryFrom(failedLoginAttempts, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    FailedLoginAttemptsVO voInstance = tryFrom(failedLoginAttempts, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for FailedLoginAttemptsVO.failed-login-attempts",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

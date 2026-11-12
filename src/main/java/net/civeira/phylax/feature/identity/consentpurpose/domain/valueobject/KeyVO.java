@@ -46,12 +46,12 @@ public class KeyVO {
    * @return An empty instance
    */
   public static KeyVO tryFrom(final Object key) {
-    ConstraintFailList list = new ConstraintFailList();
-    KeyVO result = tryFrom(key, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for KeyVO.key", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    KeyVO voInstance = tryFrom(key, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for KeyVO.key", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

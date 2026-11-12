@@ -46,13 +46,13 @@ public class DpopBoundAccessTokensVO {
    * @return An empty instance
    */
   public static DpopBoundAccessTokensVO tryFrom(final Object dpopBoundAccessTokens) {
-    ConstraintFailList list = new ConstraintFailList();
-    DpopBoundAccessTokensVO result = tryFrom(dpopBoundAccessTokens, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    DpopBoundAccessTokensVO voInstance = tryFrom(dpopBoundAccessTokens, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for DpopBoundAccessTokensVO.dpop-bound-access-tokens", list);
+          "Invalid value for DpopBoundAccessTokensVO.dpop-bound-access-tokens", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

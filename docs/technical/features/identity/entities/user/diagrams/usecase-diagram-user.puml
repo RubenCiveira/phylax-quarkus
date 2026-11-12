@@ -12,9 +12,6 @@ actor :Autorizado: as a0
 (Delete) as borrado
 (Register) as register
 (Other use cases) as p0
-(Verify) as verify
-(Accept) as accept
-(Reject) as reject
 (Disable) as disable
 (Enable) as enable
 (Unlock) as unlock
@@ -22,6 +19,10 @@ actor :Autorizado: as a0
 (Set mfa seed) as setMfaSeed
 (Change password) as changePassword
 (Verify email) as verifyEmail
+(Mark verified email) as markVerifiedEmail
+(Mark accepted email) as markAcceptedEmail
+(Accept) as accept
+(Reject) as reject
 
 a0 --> listado
 a0 --> consulta
@@ -29,9 +30,6 @@ a0 --> creacion
 a0 --> actualizacion
 a0 --> borrado
 p0 --> register
-p0 --> verify
-a0 --> accept
-a0 --> reject
 a0 --> disable
 a0 --> enable
 a0 --> unlock
@@ -39,6 +37,10 @@ p0 --> block
 p0 --> setMfaSeed
 p0 --> changePassword
 p0 --> verifyEmail
+p0 --> markVerifiedEmail
+p0 --> markAcceptedEmail
+a0 --> accept
+a0 --> reject
 
 footer Generado el %date("dd.MM.yyyy' a las 'HH:mm")
 @enduml

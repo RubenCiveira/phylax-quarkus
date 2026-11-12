@@ -44,12 +44,12 @@ public class AuthenticatorVO {
    * @return An empty instance
    */
   public static AuthenticatorVO tryFrom(final Object authenticator) {
-    ConstraintFailList list = new ConstraintFailList();
-    AuthenticatorVO result = tryFrom(authenticator, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for AuthenticatorVO.authenticator", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    AuthenticatorVO voInstance = tryFrom(authenticator, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for AuthenticatorVO.authenticator", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

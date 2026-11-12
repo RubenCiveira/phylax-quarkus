@@ -15,10 +15,10 @@ Metadata json (blob)::
 Additional data of the invitation, as JSON.
 Status (UserInvitationStatusOptions)::
 State of the invitation: pending, accepted, cancelled or expired.Los posibles valores que toma el campo son:
- * pending
- * accepted
- * cancelled
- * expired
+ * Pending
+ * Accepted
+ * Cancelled
+ * Expired
 
 Created at* (datetime)::
 When the invitation was sent.

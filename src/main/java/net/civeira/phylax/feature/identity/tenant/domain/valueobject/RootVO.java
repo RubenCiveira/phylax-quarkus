@@ -55,12 +55,12 @@ public class RootVO {
    * @return An empty instance
    */
   public static RootVO tryFrom(final Object root) {
-    ConstraintFailList list = new ConstraintFailList();
-    RootVO result = tryFrom(root, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RootVO.root", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RootVO voInstance = tryFrom(root, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RootVO.root", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

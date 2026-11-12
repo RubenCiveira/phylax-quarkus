@@ -56,13 +56,13 @@ public class MagicLinkEnabledVO {
    * @return An empty instance
    */
   public static MagicLinkEnabledVO tryFrom(final Object magicLinkEnabled) {
-    ConstraintFailList list = new ConstraintFailList();
-    MagicLinkEnabledVO result = tryFrom(magicLinkEnabled, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    MagicLinkEnabledVO voInstance = tryFrom(magicLinkEnabled, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for MagicLinkEnabledVO.magic-link-enabled",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

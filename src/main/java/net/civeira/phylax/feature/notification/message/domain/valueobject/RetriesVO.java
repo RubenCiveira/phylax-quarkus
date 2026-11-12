@@ -45,12 +45,12 @@ public class RetriesVO {
    * @return An empty instance
    */
   public static RetriesVO tryFrom(final Object retries) {
-    ConstraintFailList list = new ConstraintFailList();
-    RetriesVO result = tryFrom(retries, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RetriesVO.retries", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RetriesVO voInstance = tryFrom(retries, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RetriesVO.retries", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

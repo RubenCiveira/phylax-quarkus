@@ -55,12 +55,12 @@ public class LocaleVO {
    * @return An empty instance
    */
   public static LocaleVO tryFrom(final Object locale) {
-    ConstraintFailList list = new ConstraintFailList();
-    LocaleVO result = tryFrom(locale, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for LocaleVO.locale", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    LocaleVO voInstance = tryFrom(locale, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for LocaleVO.locale", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

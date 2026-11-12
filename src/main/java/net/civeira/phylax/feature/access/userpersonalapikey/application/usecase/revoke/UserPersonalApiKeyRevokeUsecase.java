@@ -10,6 +10,7 @@ import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
 import net.civeira.phylax.common.batch.ExecutorPlan;
+import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.exception.NotAllowedException;
 import net.civeira.phylax.common.exception.NotFoundException;
 import net.civeira.phylax.common.security.OperationContext;
@@ -216,6 +217,11 @@ public class UserPersonalApiKeyRevokeUsecase {
    * @return
    */
   UserPersonalApiKey doRevoke(final OperationContext context, final UserPersonalApiKey original) {
+    if (!original.isNotRevoked()) {
+      Trace.addEvent("Precondition not-revoked not met to revoke");
+      throw new ExecutionException("Precondition not-revoked not met", "precondition.not-revoked",
+          "The key is already revoked.");
+    }
     UserPersonalApiKeyRevokeCheck proposal = new UserPersonalApiKeyRevokeCheck(context, original);
     execProposalEmitter.fire(proposal);
     UserPersonalApiKey result = original.revoke();

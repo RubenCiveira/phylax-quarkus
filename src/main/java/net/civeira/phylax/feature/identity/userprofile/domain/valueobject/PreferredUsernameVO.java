@@ -56,13 +56,13 @@ public class PreferredUsernameVO {
    * @return An empty instance
    */
   public static PreferredUsernameVO tryFrom(final Object preferredUsername) {
-    ConstraintFailList list = new ConstraintFailList();
-    PreferredUsernameVO result = tryFrom(preferredUsername, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    PreferredUsernameVO voInstance = tryFrom(preferredUsername, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for PreferredUsernameVO.preferred-username",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

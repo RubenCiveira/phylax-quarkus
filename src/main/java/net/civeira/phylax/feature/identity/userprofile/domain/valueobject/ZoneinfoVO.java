@@ -55,12 +55,12 @@ public class ZoneinfoVO {
    * @return An empty instance
    */
   public static ZoneinfoVO tryFrom(final Object zoneinfo) {
-    ConstraintFailList list = new ConstraintFailList();
-    ZoneinfoVO result = tryFrom(zoneinfo, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ZoneinfoVO.zoneinfo", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ZoneinfoVO voInstance = tryFrom(zoneinfo, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ZoneinfoVO.zoneinfo", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

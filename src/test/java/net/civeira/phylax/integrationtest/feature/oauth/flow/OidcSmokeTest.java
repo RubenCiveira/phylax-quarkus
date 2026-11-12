@@ -3,8 +3,10 @@ package net.civeira.phylax.integrationtest.feature.oauth.flow;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.quarkus.test.junit.QuarkusTest;
+import net.civeira.phylax.integrationtest.RequiresDatabase;
 
 /**
  * Smoke test: verifica que el servidor Quarkus arranca correctamente con los beans
@@ -12,6 +14,7 @@ import io.quarkus.test.junit.QuarkusTest;
  * @Alternative del classpath de test. Sirve como punto de entrada mientras se construye la
  *              infraestructura de tests de integración OIDC.
  */
+@ExtendWith(RequiresDatabase.class)
 @Tag("oidc-flow")
 @QuarkusTest
 class OidcSmokeTest {

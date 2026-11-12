@@ -56,13 +56,13 @@ public class UserinfoSignedResponseAlgVO {
    * @return An empty instance
    */
   public static UserinfoSignedResponseAlgVO tryFrom(final Object userinfoSignedResponseAlg) {
-    ConstraintFailList list = new ConstraintFailList();
-    UserinfoSignedResponseAlgVO result = tryFrom(userinfoSignedResponseAlg, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    UserinfoSignedResponseAlgVO voInstance = tryFrom(userinfoSignedResponseAlg, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for UserinfoSignedResponseAlgVO.userinfo-signed-response-alg", list);
+          "Invalid value for UserinfoSignedResponseAlgVO.userinfo-signed-response-alg", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

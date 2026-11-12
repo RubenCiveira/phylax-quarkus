@@ -45,12 +45,12 @@ public class PortVO {
    * @return An empty instance
    */
   public static PortVO tryFrom(final Object port) {
-    ConstraintFailList list = new ConstraintFailList();
-    PortVO result = tryFrom(port, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PortVO.port", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PortVO voInstance = tryFrom(port, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PortVO.port", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

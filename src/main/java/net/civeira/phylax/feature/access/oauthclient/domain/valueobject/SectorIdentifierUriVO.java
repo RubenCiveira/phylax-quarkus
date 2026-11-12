@@ -56,13 +56,13 @@ public class SectorIdentifierUriVO {
    * @return An empty instance
    */
   public static SectorIdentifierUriVO tryFrom(final Object sectorIdentifierUri) {
-    ConstraintFailList list = new ConstraintFailList();
-    SectorIdentifierUriVO result = tryFrom(sectorIdentifierUri, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    SectorIdentifierUriVO voInstance = tryFrom(sectorIdentifierUri, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for SectorIdentifierUriVO.sector-identifier-uri",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

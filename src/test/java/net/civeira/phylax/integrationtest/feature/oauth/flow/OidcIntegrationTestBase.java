@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -15,6 +16,7 @@ import jakarta.inject.Inject;
 import net.civeira.phylax.feature.oauth.authentication.domain.ChallengesState;
 import net.civeira.phylax.feature.oauth.tokensecurity.application.JwtTokenBuilder;
 import net.civeira.phylax.feature.oauth.tokensecurity.domain.gateway.TokenSigner;
+import net.civeira.phylax.integrationtest.RequiresDatabase;
 import net.civeira.phylax.integrationtest.feature.oauth.alt.FixedClientStoreGateway;
 import net.civeira.phylax.integrationtest.feature.oauth.alt.FixedParRequestGateway;
 import net.civeira.phylax.integrationtest.feature.oauth.alt.FixedSessionStore;
@@ -34,6 +36,7 @@ import net.civeira.phylax.integrationtest.feature.oauth.scenario.ScenarioScopeCo
 import net.civeira.phylax.integrationtest.feature.oauth.scenario.ScenarioTermsOfUseConsentGateway;
 import net.civeira.phylax.integrationtest.feature.oauth.scenario.ScenarioUserRegistrationMailGateway;
 
+@ExtendWith(RequiresDatabase.class)
 @QuarkusTest
 @TestProfile(OAuthTestProfile.class)
 public abstract class OidcIntegrationTestBase {

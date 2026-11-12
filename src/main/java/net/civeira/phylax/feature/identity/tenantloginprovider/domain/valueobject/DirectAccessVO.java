@@ -55,12 +55,12 @@ public class DirectAccessVO {
    * @return An empty instance
    */
   public static DirectAccessVO tryFrom(final Object directAccess) {
-    ConstraintFailList list = new ConstraintFailList();
-    DirectAccessVO result = tryFrom(directAccess, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for DirectAccessVO.direct-access", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    DirectAccessVO voInstance = tryFrom(directAccess, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for DirectAccessVO.direct-access", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

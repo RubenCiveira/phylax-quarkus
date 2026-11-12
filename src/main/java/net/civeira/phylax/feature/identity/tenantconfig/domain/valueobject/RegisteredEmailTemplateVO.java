@@ -55,13 +55,13 @@ public class RegisteredEmailTemplateVO {
    * @return An empty instance
    */
   public static RegisteredEmailTemplateVO tryFrom(final Object registeredEmailTemplate) {
-    ConstraintFailList list = new ConstraintFailList();
-    RegisteredEmailTemplateVO result = tryFrom(registeredEmailTemplate, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RegisteredEmailTemplateVO voInstance = tryFrom(registeredEmailTemplate, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for RegisteredEmailTemplateVO.registered-email-template", list);
+          "Invalid value for RegisteredEmailTemplateVO.registered-email-template", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

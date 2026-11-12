@@ -56,13 +56,13 @@ public class TlsClientAuthSubjectDnVO {
    * @return An empty instance
    */
   public static TlsClientAuthSubjectDnVO tryFrom(final Object tlsClientAuthSubjectDn) {
-    ConstraintFailList list = new ConstraintFailList();
-    TlsClientAuthSubjectDnVO result = tryFrom(tlsClientAuthSubjectDn, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    TlsClientAuthSubjectDnVO voInstance = tryFrom(tlsClientAuthSubjectDn, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for TlsClientAuthSubjectDnVO.tls-client-auth-subject-dn", list);
+          "Invalid value for TlsClientAuthSubjectDnVO.tls-client-auth-subject-dn", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

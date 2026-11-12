@@ -48,14 +48,15 @@ public class ClientCredentialsTokenTtlSecondsVO {
    */
   public static ClientCredentialsTokenTtlSecondsVO tryFrom(
       final Object clientCredentialsTokenTtlSeconds) {
-    ConstraintFailList list = new ConstraintFailList();
-    ClientCredentialsTokenTtlSecondsVO result = tryFrom(clientCredentialsTokenTtlSeconds, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    ClientCredentialsTokenTtlSecondsVO voInstance =
+        tryFrom(clientCredentialsTokenTtlSeconds, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for ClientCredentialsTokenTtlSecondsVO.client-credentials-token-ttl-seconds",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

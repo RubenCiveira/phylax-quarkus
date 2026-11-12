@@ -26,6 +26,18 @@ include::partial/properties-user-invitation.adoc[]
 include::diagrams/usecase-diagram-user.puml[]
 ....
 
+.Validaciones
+
+Expires after creation (`precondition.expires-after-creation`)::
+Mensaje: An invitation expires after it is sent. +
+Se tiene que cumplir: _expires at_ es posterior a _created at_.
+
+Accepted has date (`precondition.accepted-has-date`)::
+Mensaje: An accepted invitation records when it was accepted. +
+Se tiene que cumplir: Si _status_ es «Accepted», _accepted at_ está informado.
+
+
+
 .Eventos
 include::partial/trigger-inherit-tenant-excluding-root.adoc[]
 

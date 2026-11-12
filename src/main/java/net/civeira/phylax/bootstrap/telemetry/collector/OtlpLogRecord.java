@@ -7,7 +7,8 @@ public record OtlpLogRecord(
     long timeUnixNano,
     int severityNumber,
     String severityText,
-    String body,
+    // OTLP/JSON sends the body as an AnyValue ({"stringValue": "..."})
+    OtlpAnyValue body,
     List<OtlpKeyValue> attributes,
     String traceId,
     String spanId

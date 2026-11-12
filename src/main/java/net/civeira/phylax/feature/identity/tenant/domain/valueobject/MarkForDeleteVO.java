@@ -46,12 +46,12 @@ public class MarkForDeleteVO {
    * @return An empty instance
    */
   public static MarkForDeleteVO tryFrom(final Object markForDelete) {
-    ConstraintFailList list = new ConstraintFailList();
-    MarkForDeleteVO result = tryFrom(markForDelete, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for MarkForDeleteVO.mark-for-delete", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    MarkForDeleteVO voInstance = tryFrom(markForDelete, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for MarkForDeleteVO.mark-for-delete", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

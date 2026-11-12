@@ -26,6 +26,14 @@ include::partial/properties-user-personal-api-key.adoc[]
 include::diagrams/usecase-diagram-user.puml[]
 ....
 
+.Validaciones
+
+Expires after creation (`precondition.expires-after-creation`)::
+Mensaje: A key that expires does it after it is created. +
+Se tiene que cumplir: Si _expires at_ está informado, _expires at_ es posterior a _created at_.
+
+
+
 .Eventos
 include::partial/trigger-inherit-user.adoc[]
 

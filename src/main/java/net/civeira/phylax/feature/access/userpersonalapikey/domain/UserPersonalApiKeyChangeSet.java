@@ -1,11 +1,13 @@
 package net.civeira.phylax.feature.access.userpersonalapikey.domain;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
 import net.civeira.phylax.common.value.Uuid;
+import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.userpersonalapikey.domain.valueholder.CreatedAtValueHolder;
 import net.civeira.phylax.feature.access.userpersonalapikey.domain.valueholder.EnabledValueHolder;
@@ -175,7 +177,20 @@ public class UserPersonalApiKeyChangeSet {
    */
   public void validate(final Optional<UserPersonalApiKey> original,
       final ConstraintFailList fails) {
-    // No preconditions for user personal api key
+    if (!((Objects
+        .equals((getExpiresAtValue().isPresent() ? getExpiresAt().orElse(null)
+            : original.map(current -> current.getExpiresAt().orElse(null)).orElse(null)), null)
+        || Optional
+            .ofNullable((getExpiresAtValue().isPresent() ? getExpiresAt().orElse(null)
+                : original.map(current -> current.getExpiresAt().orElse(null)).orElse(null)))
+            .flatMap(cmpLeft -> Optional
+                .ofNullable((getCreatedAtValue().isPresent() ? getCreatedAt().orElse(null)
+                    : original.map(current -> current.getCreatedAt()).orElse(null)))
+                .map(cmpRight -> cmpLeft.compareTo(cmpRight) > 0))
+            .orElse(false)))) {
+      fails.add(new ConstraintFail("precondition.expires-after-creation", "expiresAt", null,
+          "A key that expires does it after it is created."));
+    }
   }
 
   /**

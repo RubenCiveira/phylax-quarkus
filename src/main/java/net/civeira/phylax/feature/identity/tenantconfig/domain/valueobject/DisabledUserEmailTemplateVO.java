@@ -55,13 +55,13 @@ public class DisabledUserEmailTemplateVO {
    * @return An empty instance
    */
   public static DisabledUserEmailTemplateVO tryFrom(final Object disabledUserEmailTemplate) {
-    ConstraintFailList list = new ConstraintFailList();
-    DisabledUserEmailTemplateVO result = tryFrom(disabledUserEmailTemplate, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    DisabledUserEmailTemplateVO voInstance = tryFrom(disabledUserEmailTemplate, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for DisabledUserEmailTemplateVO.disabled-user-email-template", list);
+          "Invalid value for DisabledUserEmailTemplateVO.disabled-user-email-template", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

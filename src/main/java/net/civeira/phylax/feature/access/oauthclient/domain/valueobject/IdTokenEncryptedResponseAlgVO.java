@@ -56,13 +56,14 @@ public class IdTokenEncryptedResponseAlgVO {
    * @return An empty instance
    */
   public static IdTokenEncryptedResponseAlgVO tryFrom(final Object idTokenEncryptedResponseAlg) {
-    ConstraintFailList list = new ConstraintFailList();
-    IdTokenEncryptedResponseAlgVO result = tryFrom(idTokenEncryptedResponseAlg, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    IdTokenEncryptedResponseAlgVO voInstance = tryFrom(idTokenEncryptedResponseAlg, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for IdTokenEncryptedResponseAlgVO.id-token-encrypted-response-alg", list);
+          "Invalid value for IdTokenEncryptedResponseAlgVO.id-token-encrypted-response-alg",
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

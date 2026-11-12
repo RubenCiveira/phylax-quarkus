@@ -45,12 +45,12 @@ public class UrgentVO {
    * @return An empty instance
    */
   public static UrgentVO tryFrom(final Object urgent) {
-    ConstraintFailList list = new ConstraintFailList();
-    UrgentVO result = tryFrom(urgent, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UrgentVO.urgent", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UrgentVO voInstance = tryFrom(urgent, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UrgentVO.urgent", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

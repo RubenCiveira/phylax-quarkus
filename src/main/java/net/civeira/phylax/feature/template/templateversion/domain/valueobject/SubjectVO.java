@@ -55,12 +55,12 @@ public class SubjectVO {
    * @return An empty instance
    */
   public static SubjectVO tryFrom(final Object subject) {
-    ConstraintFailList list = new ConstraintFailList();
-    SubjectVO result = tryFrom(subject, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SubjectVO.subject", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SubjectVO voInstance = tryFrom(subject, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SubjectVO.subject", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

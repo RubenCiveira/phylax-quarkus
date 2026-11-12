@@ -54,12 +54,12 @@ public class MetadataJsonVO {
    * @return An empty instance
    */
   public static MetadataJsonVO tryFrom(final Object metadataJson) {
-    ConstraintFailList list = new ConstraintFailList();
-    MetadataJsonVO result = tryFrom(metadataJson, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for MetadataJsonVO.metadata-json", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    MetadataJsonVO voInstance = tryFrom(metadataJson, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for MetadataJsonVO.metadata-json", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

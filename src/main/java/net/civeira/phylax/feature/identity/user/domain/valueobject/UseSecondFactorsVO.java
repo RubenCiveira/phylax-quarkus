@@ -56,13 +56,13 @@ public class UseSecondFactorsVO {
    * @return An empty instance
    */
   public static UseSecondFactorsVO tryFrom(final Object useSecondFactors) {
-    ConstraintFailList list = new ConstraintFailList();
-    UseSecondFactorsVO result = tryFrom(useSecondFactors, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    UseSecondFactorsVO voInstance = tryFrom(useSecondFactors, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for UseSecondFactorsVO.use-second-factors",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

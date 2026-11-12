@@ -47,12 +47,12 @@ public class RequirePkceVO {
    * @return An empty instance
    */
   public static RequirePkceVO tryFrom(final Object requirePkce) {
-    ConstraintFailList list = new ConstraintFailList();
-    RequirePkceVO result = tryFrom(requirePkce, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RequirePkceVO.require-pkce", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RequirePkceVO voInstance = tryFrom(requirePkce, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RequirePkceVO.require-pkce", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

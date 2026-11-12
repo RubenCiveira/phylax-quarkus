@@ -43,12 +43,12 @@ public class TextVO {
    * @return An empty instance
    */
   public static TextVO tryFrom(final Object text) {
-    ConstraintFailList list = new ConstraintFailList();
-    TextVO result = tryFrom(text, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TextVO.text", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TextVO voInstance = tryFrom(text, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TextVO.text", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

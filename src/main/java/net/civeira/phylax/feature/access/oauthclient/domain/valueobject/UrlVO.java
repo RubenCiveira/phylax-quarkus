@@ -43,12 +43,12 @@ public class UrlVO {
    * @return An empty instance
    */
   public static UrlVO tryFrom(final Object url) {
-    ConstraintFailList list = new ConstraintFailList();
-    UrlVO result = tryFrom(url, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UrlVO.url", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UrlVO voInstance = tryFrom(url, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UrlVO.url", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

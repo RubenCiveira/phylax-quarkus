@@ -57,12 +57,12 @@ public class LastFailedAtVO {
    * @return An empty instance
    */
   public static LastFailedAtVO tryFrom(final Object lastFailedAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    LastFailedAtVO result = tryFrom(lastFailedAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for LastFailedAtVO.last-failed-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    LastFailedAtVO voInstance = tryFrom(lastFailedAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for LastFailedAtVO.last-failed-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

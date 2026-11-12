@@ -1,0 +1,10 @@
+# Values of phylax for the seed InstallAccess (they override the generated
+# src/main/resources/migration/seed/oidc-seed.yaml, which is rewritten on every generation).
+# Only the codes: the secrets stay in the environment (.env).
+oidc:
+  relying-party:
+    code: phylax-api
+  trusted-client:
+    code: phylax-ui
+    redirect: http://localhost:4200/*
+    logout-redirect: http://localhost:4200/*

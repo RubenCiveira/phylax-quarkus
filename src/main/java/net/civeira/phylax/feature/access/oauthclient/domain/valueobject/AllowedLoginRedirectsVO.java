@@ -47,13 +47,13 @@ public class AllowedLoginRedirectsVO {
    * @return An empty instance
    */
   public static AllowedLoginRedirectsVO tryFrom(final Object allowedLoginRedirects) {
-    ConstraintFailList list = new ConstraintFailList();
-    AllowedLoginRedirectsVO result = tryFrom(allowedLoginRedirects, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AllowedLoginRedirectsVO voInstance = tryFrom(allowedLoginRedirects, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for AllowedLoginRedirectsVO.allowed-login-redirects", list);
+          "Invalid value for AllowedLoginRedirectsVO.allowed-login-redirects", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

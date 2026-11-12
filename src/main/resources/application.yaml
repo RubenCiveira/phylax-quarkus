@@ -8,13 +8,14 @@ quarkus:
     path: banner.txt
   config:
     locations:
-      - config/cache.yaml
-      - config/database.yaml
-      - config/telemetry.yaml
-      - config/security.yaml
-      - config/oidc.yaml
-      - config/mail.yaml
-      - META-INF/native-image/config.yaml
+    - config/cache.yaml
+    - config/database.yaml
+    - config/telemetry.yaml
+    - config/security.yaml
+    - config/oidc.yaml
+    - config/mail.yaml
+    - META-INF/native-image/config.yaml
+    - config/observability.yaml
   http:
     host: ${APP_HOST:0.0.0.0}
     port: ${APP_PORT:8090}

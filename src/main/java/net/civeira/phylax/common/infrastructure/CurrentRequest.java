@@ -240,8 +240,10 @@ public class CurrentRequest {
         resolvedScopes = List.of();
       }
 
+      // An identity that is not anonymous is a signed caller: without this flag every policy that
+      // checks Actor.isAuthenticated() (or hasMfa) would treat it as anonymous.
       builder =
-          builder.uid(jwt.getSubject()).name(security.getPrincipal().getName()).roles(resolvedRoles)
+          builder.authenticated(true).uid(jwt.getSubject()).name(security.getPrincipal().getName()).roles(resolvedRoles)
               .groups(resolvedGroups).scopes(resolvedScopes).mfa(hasClaim("amr", "mfa"));
       Object authTime = jwt.getClaim("auth_time");
       if (authTime != null) {

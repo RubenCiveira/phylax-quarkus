@@ -56,13 +56,13 @@ public class PhoneNumberVerifiedVO {
    * @return An empty instance
    */
   public static PhoneNumberVerifiedVO tryFrom(final Object phoneNumberVerified) {
-    ConstraintFailList list = new ConstraintFailList();
-    PhoneNumberVerifiedVO result = tryFrom(phoneNumberVerified, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    PhoneNumberVerifiedVO voInstance = tryFrom(phoneNumberVerified, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for PhoneNumberVerifiedVO.phone-number-verified",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

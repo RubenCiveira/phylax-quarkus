@@ -56,12 +56,12 @@ public class UserVO {
    * @return An empty instance
    */
   public static UserVO tryFrom(final Object user) {
-    ConstraintFailList list = new ConstraintFailList();
-    UserVO result = tryFrom(user, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UserVO.user", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UserVO voInstance = tryFrom(user, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UserVO.user", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

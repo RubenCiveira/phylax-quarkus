@@ -57,12 +57,12 @@ public class KeyHashVO {
    * @return An empty instance
    */
   public static KeyHashVO tryFrom(final Object keyHash) {
-    ConstraintFailList list = new ConstraintFailList();
-    KeyHashVO result = tryFrom(keyHash, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for KeyHashVO.key-hash", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    KeyHashVO voInstance = tryFrom(keyHash, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for KeyHashVO.key-hash", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

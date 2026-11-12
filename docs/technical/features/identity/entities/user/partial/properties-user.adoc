@@ -17,10 +17,10 @@ Enabled (boolean)::
 A disabled user cannot sign in; on each attempt the user is told that the account is disabled.
 Approval status (UserApprovalStatusOptions)::
 Approval state of the account: email not verified yet, pending approval by an administrator, accepted or rejected.Los posibles valores que toma el campo son:
- * UNVERIFIED
- * PENDING
- * ACCEPTED
- * REJECTED
+ * Email not verified
+ * Pending approval
+ * Accepted
+ * Rejected
 
 Temporal password (boolean)::
 The password is temporary: the user must set a new one at the next sign-in.

@@ -68,12 +68,12 @@ public class CodeHashVO {
    * @return An empty instance
    */
   public static CodeHashVO tryFrom(final Object codeHash) {
-    ConstraintFailList list = new ConstraintFailList();
-    CodeHashVO result = tryFrom(codeHash, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for CodeHashVO.code-hash", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    CodeHashVO voInstance = tryFrom(codeHash, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for CodeHashVO.code-hash", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

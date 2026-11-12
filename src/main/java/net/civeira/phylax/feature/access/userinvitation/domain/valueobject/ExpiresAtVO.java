@@ -47,12 +47,12 @@ public class ExpiresAtVO {
    * @return An empty instance
    */
   public static ExpiresAtVO tryFrom(final Object expiresAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    ExpiresAtVO result = tryFrom(expiresAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ExpiresAtVO.expires-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ExpiresAtVO voInstance = tryFrom(expiresAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ExpiresAtVO.expires-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

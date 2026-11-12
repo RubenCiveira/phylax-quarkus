@@ -54,12 +54,12 @@ public class UpdatedAtVO {
    * @return An empty instance
    */
   public static UpdatedAtVO tryFrom(final Object updatedAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    UpdatedAtVO result = tryFrom(updatedAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UpdatedAtVO.updated_at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UpdatedAtVO voInstance = tryFrom(updatedAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UpdatedAtVO.updated_at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

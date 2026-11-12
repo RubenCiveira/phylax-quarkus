@@ -56,13 +56,13 @@ public class AllowedGrantTypesVO {
    * @return An empty instance
    */
   public static AllowedGrantTypesVO tryFrom(final Object allowedGrantTypes) {
-    ConstraintFailList list = new ConstraintFailList();
-    AllowedGrantTypesVO result = tryFrom(allowedGrantTypes, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AllowedGrantTypesVO voInstance = tryFrom(allowedGrantTypes, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for AllowedGrantTypesVO.allowed-grant-types",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -55,12 +55,12 @@ public class CertificateVO {
    * @return An empty instance
    */
   public static CertificateVO tryFrom(final Object certificate) {
-    ConstraintFailList list = new ConstraintFailList();
-    CertificateVO result = tryFrom(certificate, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for CertificateVO.certificate", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    CertificateVO voInstance = tryFrom(certificate, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for CertificateVO.certificate", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

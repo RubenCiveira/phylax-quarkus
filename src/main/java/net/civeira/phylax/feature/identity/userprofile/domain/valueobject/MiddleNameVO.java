@@ -54,12 +54,12 @@ public class MiddleNameVO {
    * @return An empty instance
    */
   public static MiddleNameVO tryFrom(final Object middleName) {
-    ConstraintFailList list = new ConstraintFailList();
-    MiddleNameVO result = tryFrom(middleName, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for MiddleNameVO.middle-name", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    MiddleNameVO voInstance = tryFrom(middleName, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for MiddleNameVO.middle-name", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

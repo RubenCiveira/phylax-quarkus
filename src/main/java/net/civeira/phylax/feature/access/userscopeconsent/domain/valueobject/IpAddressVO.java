@@ -55,12 +55,12 @@ public class IpAddressVO {
    * @return An empty instance
    */
   public static IpAddressVO tryFrom(final Object ipAddress) {
-    ConstraintFailList list = new ConstraintFailList();
-    IpAddressVO result = tryFrom(ipAddress, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for IpAddressVO.ip-address", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    IpAddressVO voInstance = tryFrom(ipAddress, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for IpAddressVO.ip-address", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

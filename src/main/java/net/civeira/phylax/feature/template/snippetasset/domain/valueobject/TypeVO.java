@@ -43,12 +43,12 @@ public class TypeVO {
    * @return An empty instance
    */
   public static TypeVO tryFrom(final Object type) {
-    ConstraintFailList list = new ConstraintFailList();
-    TypeVO result = tryFrom(type, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TypeVO.type", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TypeVO voInstance = tryFrom(type, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TypeVO.type", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

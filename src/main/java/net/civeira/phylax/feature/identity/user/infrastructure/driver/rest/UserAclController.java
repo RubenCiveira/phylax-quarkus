@@ -113,11 +113,11 @@ public class UserAclController implements UserAclApi {
     updateAllows(response, interaction);
     deleteAllows(response, interaction);
     retrieveAllows(response, interaction);
-    acceptAllows(response, interaction);
-    rejectAllows(response, interaction);
     disableAllows(response, interaction);
     enableAllows(response, interaction);
     unlockAllows(response, interaction);
+    acceptAllows(response, interaction);
+    rejectAllows(response, interaction);
     return Response.ok(response).build();
   }
 
@@ -141,11 +141,11 @@ public class UserAclController implements UserAclApi {
     updateAllows(response, interaction);
     deleteAllows(response, interaction);
     retrieveAllows(response, interaction);
-    acceptAllows(response, interaction);
-    rejectAllows(response, interaction);
     disableAllows(response, interaction);
     enableAllows(response, interaction);
     unlockAllows(response, interaction);
+    acceptAllows(response, interaction);
+    rejectAllows(response, interaction);
     return Response.ok(response).build();
   }
 

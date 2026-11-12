@@ -55,12 +55,13 @@ public class WebauthnEnabledVO {
    * @return An empty instance
    */
   public static WebauthnEnabledVO tryFrom(final Object webauthnEnabled) {
-    ConstraintFailList list = new ConstraintFailList();
-    WebauthnEnabledVO result = tryFrom(webauthnEnabled, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for WebauthnEnabledVO.webauthn-enabled", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    WebauthnEnabledVO voInstance = tryFrom(webauthnEnabled, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for WebauthnEnabledVO.webauthn-enabled",
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

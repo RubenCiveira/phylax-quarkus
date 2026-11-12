@@ -136,7 +136,7 @@ public class TenantDeleteController {
       Map<String, ErrorInfo> stepWarns = step.getWarns();
       if (null != stepWarns) {
         bsp.getWarns()
-            .addAll(stepErrors.entrySet().stream()
+            .addAll(stepWarns.entrySet().stream()
                 .map(entry -> new BatchResultErrorItem().item(entry.getKey())
                     .fails(entry.getValue().getFails().stream()
                         .map(fail -> new MultipleErrorCodes().code(fail.getCode())
@@ -150,7 +150,7 @@ public class TenantDeleteController {
       }
       return bsp;
     }).toList());
-    return Response.ok(task).build();
+    return Response.ok(response).build();
   }
 
   /**

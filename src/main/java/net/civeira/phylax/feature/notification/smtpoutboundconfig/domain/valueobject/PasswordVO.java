@@ -57,12 +57,12 @@ public class PasswordVO {
    * @return An empty instance
    */
   public static PasswordVO tryFrom(final Object password) {
-    ConstraintFailList list = new ConstraintFailList();
-    PasswordVO result = tryFrom(password, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PasswordVO.password", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PasswordVO voInstance = tryFrom(password, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PasswordVO.password", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

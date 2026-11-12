@@ -56,13 +56,13 @@ public class SamlIdpMetadataUrlVO {
    * @return An empty instance
    */
   public static SamlIdpMetadataUrlVO tryFrom(final Object samlIdpMetadataUrl) {
-    ConstraintFailList list = new ConstraintFailList();
-    SamlIdpMetadataUrlVO result = tryFrom(samlIdpMetadataUrl, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    SamlIdpMetadataUrlVO voInstance = tryFrom(samlIdpMetadataUrl, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for SamlIdpMetadataUrlVO.saml-idp-metadata-url",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

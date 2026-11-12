@@ -54,12 +54,12 @@ public class GrantTypesJsonVO {
    * @return An empty instance
    */
   public static GrantTypesJsonVO tryFrom(final Object grantTypesJson) {
-    ConstraintFailList list = new ConstraintFailList();
-    GrantTypesJsonVO result = tryFrom(grantTypesJson, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for GrantTypesJsonVO.grant-types-json", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    GrantTypesJsonVO voInstance = tryFrom(grantTypesJson, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for GrantTypesJsonVO.grant-types-json", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

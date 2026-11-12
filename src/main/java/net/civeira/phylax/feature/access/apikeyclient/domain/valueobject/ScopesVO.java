@@ -54,12 +54,12 @@ public class ScopesVO {
    * @return An empty instance
    */
   public static ScopesVO tryFrom(final Object scopes) {
-    ConstraintFailList list = new ConstraintFailList();
-    ScopesVO result = tryFrom(scopes, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ScopesVO.scopes", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ScopesVO voInstance = tryFrom(scopes, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ScopesVO.scopes", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

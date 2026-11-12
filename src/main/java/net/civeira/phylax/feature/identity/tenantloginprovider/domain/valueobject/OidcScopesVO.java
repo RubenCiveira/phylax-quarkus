@@ -55,12 +55,12 @@ public class OidcScopesVO {
    * @return An empty instance
    */
   public static OidcScopesVO tryFrom(final Object oidcScopes) {
-    ConstraintFailList list = new ConstraintFailList();
-    OidcScopesVO result = tryFrom(oidcScopes, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for OidcScopesVO.oidc-scopes", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    OidcScopesVO voInstance = tryFrom(oidcScopes, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for OidcScopesVO.oidc-scopes", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

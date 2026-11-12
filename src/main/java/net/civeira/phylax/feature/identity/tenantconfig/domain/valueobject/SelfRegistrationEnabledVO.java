@@ -56,13 +56,13 @@ public class SelfRegistrationEnabledVO {
    * @return An empty instance
    */
   public static SelfRegistrationEnabledVO tryFrom(final Object selfRegistrationEnabled) {
-    ConstraintFailList list = new ConstraintFailList();
-    SelfRegistrationEnabledVO result = tryFrom(selfRegistrationEnabled, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    SelfRegistrationEnabledVO voInstance = tryFrom(selfRegistrationEnabled, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for SelfRegistrationEnabledVO.self-registration-enabled", list);
+          "Invalid value for SelfRegistrationEnabledVO.self-registration-enabled", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

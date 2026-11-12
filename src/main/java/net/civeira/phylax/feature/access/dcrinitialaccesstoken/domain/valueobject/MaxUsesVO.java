@@ -45,12 +45,12 @@ public class MaxUsesVO {
    * @return An empty instance
    */
   public static MaxUsesVO tryFrom(final Object maxUses) {
-    ConstraintFailList list = new ConstraintFailList();
-    MaxUsesVO result = tryFrom(maxUses, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for MaxUsesVO.max-uses", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    MaxUsesVO voInstance = tryFrom(maxUses, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for MaxUsesVO.max-uses", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

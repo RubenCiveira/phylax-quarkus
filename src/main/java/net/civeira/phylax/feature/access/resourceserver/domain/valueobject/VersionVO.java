@@ -56,12 +56,12 @@ public class VersionVO {
    * @return An empty instance
    */
   public static VersionVO tryFrom(final Object version) {
-    ConstraintFailList list = new ConstraintFailList();
-    VersionVO result = tryFrom(version, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for VersionVO.version", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    VersionVO voInstance = tryFrom(version, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for VersionVO.version", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -43,12 +43,12 @@ public class DomainVO {
    * @return An empty instance
    */
   public static DomainVO tryFrom(final Object domain) {
-    ConstraintFailList list = new ConstraintFailList();
-    DomainVO result = tryFrom(domain, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for DomainVO.domain", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    DomainVO voInstance = tryFrom(domain, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for DomainVO.domain", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

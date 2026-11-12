@@ -172,6 +172,11 @@
       <artifactId>bcprov-jdk18on</artifactId>
       <version>1.78.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.mariadb.jdbc</groupId>
+      <artifactId>mariadb-java-client</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -404,7 +409,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.11</version>
+            <version>0.8.14</version>
             <executions>
               <execution>
                 <id>generate-coverage-report</id>
@@ -466,8 +471,8 @@
         </plugins>
       </build>
       <properties>
-        <jacoco.skip>true</jacoco.skip>
         <surefire.argLine></surefire.argLine>
+        <jacoco.skip>true</jacoco.skip>
       </properties>
     </profile>
   </profiles>

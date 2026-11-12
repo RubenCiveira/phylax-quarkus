@@ -1,11 +1,13 @@
 package net.civeira.phylax.feature.access.userinvitation.domain;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
 import net.civeira.phylax.common.value.Uuid;
+import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 import net.civeira.phylax.feature.access.userinvitation.domain.valueholder.AcceptedAtValueHolder;
 import net.civeira.phylax.feature.access.userinvitation.domain.valueholder.AcceptedByValueHolder;
@@ -203,7 +205,28 @@ public class UserInvitationChangeSet {
    * @param fails List to add the failed preconditions.
    */
   public void validate(final Optional<UserInvitation> original, final ConstraintFailList fails) {
-    // No preconditions for user invitation
+    if (!(Optional
+        .ofNullable((getExpiresAtValue().isPresent() ? getExpiresAt().orElse(null)
+            : original.map(current -> current.getExpiresAt()).orElse(null)))
+        .flatMap(cmpLeft -> Optional
+            .ofNullable((getCreatedAtValue().isPresent() ? getCreatedAt().orElse(null)
+                : original.map(current -> current.getCreatedAt()).orElse(null)))
+            .map(cmpRight -> cmpLeft.compareTo(cmpRight) > 0))
+        .orElse(false))) {
+      fails.add(new ConstraintFail("precondition.expires-after-creation", "expiresAt", null,
+          "An invitation expires after it is sent."));
+    }
+    if (!((!Objects.equals(
+        (getStatusValue().isPresent() ? getStatus().orElse(null)
+            : original.map(current -> current.getStatus().orElse(null)).orElse(null)),
+        UserInvitationStatusOptions.ACCEPTED)
+        || !Objects.equals(
+            (getAcceptedAtValue().isPresent() ? getAcceptedAt().orElse(null)
+                : original.map(current -> current.getAcceptedAt().orElse(null)).orElse(null)),
+            null)))) {
+      fails.add(new ConstraintFail("precondition.accepted-has-date", "status", null,
+          "An accepted invitation records when it was accepted."));
+    }
   }
 
   /**

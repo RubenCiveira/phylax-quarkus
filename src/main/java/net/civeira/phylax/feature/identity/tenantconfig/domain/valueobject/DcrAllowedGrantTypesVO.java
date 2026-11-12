@@ -56,13 +56,13 @@ public class DcrAllowedGrantTypesVO {
    * @return An empty instance
    */
   public static DcrAllowedGrantTypesVO tryFrom(final Object dcrAllowedGrantTypes) {
-    ConstraintFailList list = new ConstraintFailList();
-    DcrAllowedGrantTypesVO result = tryFrom(dcrAllowedGrantTypes, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    DcrAllowedGrantTypesVO voInstance = tryFrom(dcrAllowedGrantTypes, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for DcrAllowedGrantTypesVO.dcr-allowed-grant-types", list);
+          "Invalid value for DcrAllowedGrantTypesVO.dcr-allowed-grant-types", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

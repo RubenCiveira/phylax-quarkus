@@ -56,12 +56,12 @@ public class TemplateVO {
    * @return An empty instance
    */
   public static TemplateVO tryFrom(final Object template) {
-    ConstraintFailList list = new ConstraintFailList();
-    TemplateVO result = tryFrom(template, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TemplateVO.template", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TemplateVO voInstance = tryFrom(template, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TemplateVO.template", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

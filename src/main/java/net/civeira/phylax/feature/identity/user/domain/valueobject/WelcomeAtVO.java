@@ -57,12 +57,12 @@ public class WelcomeAtVO {
    * @return An empty instance
    */
   public static WelcomeAtVO tryFrom(final Object welcomeAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    WelcomeAtVO result = tryFrom(welcomeAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for WelcomeAtVO.welcome-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    WelcomeAtVO voInstance = tryFrom(welcomeAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for WelcomeAtVO.welcome-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

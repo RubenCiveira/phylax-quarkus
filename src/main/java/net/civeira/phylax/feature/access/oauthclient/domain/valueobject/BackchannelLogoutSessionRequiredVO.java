@@ -58,14 +58,15 @@ public class BackchannelLogoutSessionRequiredVO {
    */
   public static BackchannelLogoutSessionRequiredVO tryFrom(
       final Object backchannelLogoutSessionRequired) {
-    ConstraintFailList list = new ConstraintFailList();
-    BackchannelLogoutSessionRequiredVO result = tryFrom(backchannelLogoutSessionRequired, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    BackchannelLogoutSessionRequiredVO voInstance =
+        tryFrom(backchannelLogoutSessionRequired, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for BackchannelLogoutSessionRequiredVO.backchannel-logout-session-required",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

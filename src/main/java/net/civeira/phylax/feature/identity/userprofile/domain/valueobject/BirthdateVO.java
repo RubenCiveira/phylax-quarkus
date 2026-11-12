@@ -55,12 +55,12 @@ public class BirthdateVO {
    * @return An empty instance
    */
   public static BirthdateVO tryFrom(final Object birthdate) {
-    ConstraintFailList list = new ConstraintFailList();
-    BirthdateVO result = tryFrom(birthdate, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for BirthdateVO.birthdate", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    BirthdateVO voInstance = tryFrom(birthdate, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for BirthdateVO.birthdate", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

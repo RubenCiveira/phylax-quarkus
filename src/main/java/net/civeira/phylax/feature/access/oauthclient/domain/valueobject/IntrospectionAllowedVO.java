@@ -47,13 +47,13 @@ public class IntrospectionAllowedVO {
    * @return An empty instance
    */
   public static IntrospectionAllowedVO tryFrom(final Object introspectionAllowed) {
-    ConstraintFailList list = new ConstraintFailList();
-    IntrospectionAllowedVO result = tryFrom(introspectionAllowed, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    IntrospectionAllowedVO voInstance = tryFrom(introspectionAllowed, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for IntrospectionAllowedVO.introspection-allowed", list);
+          "Invalid value for IntrospectionAllowedVO.introspection-allowed", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

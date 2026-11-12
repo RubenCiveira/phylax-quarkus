@@ -56,13 +56,13 @@ public class AutoApproveRegisteredUsersVO {
    * @return An empty instance
    */
   public static AutoApproveRegisteredUsersVO tryFrom(final Object autoApproveRegisteredUsers) {
-    ConstraintFailList list = new ConstraintFailList();
-    AutoApproveRegisteredUsersVO result = tryFrom(autoApproveRegisteredUsers, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AutoApproveRegisteredUsersVO voInstance = tryFrom(autoApproveRegisteredUsers, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for AutoApproveRegisteredUsersVO.auto-approve-registered-users", list);
+          "Invalid value for AutoApproveRegisteredUsersVO.auto-approve-registered-users", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

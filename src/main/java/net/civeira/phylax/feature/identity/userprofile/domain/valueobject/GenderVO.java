@@ -54,12 +54,12 @@ public class GenderVO {
    * @return An empty instance
    */
   public static GenderVO tryFrom(final Object gender) {
-    ConstraintFailList list = new ConstraintFailList();
-    GenderVO result = tryFrom(gender, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for GenderVO.gender", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    GenderVO voInstance = tryFrom(gender, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for GenderVO.gender", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

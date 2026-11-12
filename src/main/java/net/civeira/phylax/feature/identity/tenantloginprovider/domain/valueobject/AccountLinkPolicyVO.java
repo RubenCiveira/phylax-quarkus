@@ -48,13 +48,13 @@ public class AccountLinkPolicyVO {
    * @return An empty instance
    */
   public static AccountLinkPolicyVO tryFrom(final Object accountLinkPolicy) {
-    ConstraintFailList list = new ConstraintFailList();
-    AccountLinkPolicyVO result = tryFrom(accountLinkPolicy, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AccountLinkPolicyVO voInstance = tryFrom(accountLinkPolicy, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for AccountLinkPolicyVO.account-link-policy",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

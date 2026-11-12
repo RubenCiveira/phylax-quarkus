@@ -58,15 +58,15 @@ public class BackchannelClientNotificationEndpointVO {
    */
   public static BackchannelClientNotificationEndpointVO tryFrom(
       final Object backchannelClientNotificationEndpoint) {
-    ConstraintFailList list = new ConstraintFailList();
-    BackchannelClientNotificationEndpointVO result =
-        tryFrom(backchannelClientNotificationEndpoint, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    BackchannelClientNotificationEndpointVO voInstance =
+        tryFrom(backchannelClientNotificationEndpoint, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for BackchannelClientNotificationEndpointVO.backchannel-client-notification-endpoint",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

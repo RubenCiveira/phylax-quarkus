@@ -54,12 +54,12 @@ public class EmailVO {
    * @return An empty instance
    */
   public static EmailVO tryFrom(final Object email) {
-    ConstraintFailList list = new ConstraintFailList();
-    EmailVO result = tryFrom(email, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for EmailVO.email", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    EmailVO voInstance = tryFrom(email, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for EmailVO.email", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

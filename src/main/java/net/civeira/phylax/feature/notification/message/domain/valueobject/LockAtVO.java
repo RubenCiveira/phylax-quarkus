@@ -58,12 +58,12 @@ public class LockAtVO {
    * @return An empty instance
    */
   public static LockAtVO tryFrom(final Object lockAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    LockAtVO result = tryFrom(lockAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for LockAtVO.lock-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    LockAtVO voInstance = tryFrom(lockAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for LockAtVO.lock-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

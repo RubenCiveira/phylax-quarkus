@@ -49,13 +49,13 @@ public class TokenEndpointAuthMethodVO {
    * @return An empty instance
    */
   public static TokenEndpointAuthMethodVO tryFrom(final Object tokenEndpointAuthMethod) {
-    ConstraintFailList list = new ConstraintFailList();
-    TokenEndpointAuthMethodVO result = tryFrom(tokenEndpointAuthMethod, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    TokenEndpointAuthMethodVO voInstance = tryFrom(tokenEndpointAuthMethod, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for TokenEndpointAuthMethodVO.token-endpoint-auth-method", list);
+          "Invalid value for TokenEndpointAuthMethodVO.token-endpoint-auth-method", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -47,13 +47,13 @@ public class RefreshTokenTtlSecondsVO {
    * @return An empty instance
    */
   public static RefreshTokenTtlSecondsVO tryFrom(final Object refreshTokenTtlSeconds) {
-    ConstraintFailList list = new ConstraintFailList();
-    RefreshTokenTtlSecondsVO result = tryFrom(refreshTokenTtlSeconds, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RefreshTokenTtlSecondsVO voInstance = tryFrom(refreshTokenTtlSeconds, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for RefreshTokenTtlSecondsVO.refresh-token-ttl-seconds", list);
+          "Invalid value for RefreshTokenTtlSecondsVO.refresh-token-ttl-seconds", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

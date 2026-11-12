@@ -58,13 +58,13 @@ public class MarkForDeleteTimeVO {
    * @return An empty instance
    */
   public static MarkForDeleteTimeVO tryFrom(final Object markForDeleteTime) {
-    ConstraintFailList list = new ConstraintFailList();
-    MarkForDeleteTimeVO result = tryFrom(markForDeleteTime, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    MarkForDeleteTimeVO voInstance = tryFrom(markForDeleteTime, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for MarkForDeleteTimeVO.mark-for-delete-time",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

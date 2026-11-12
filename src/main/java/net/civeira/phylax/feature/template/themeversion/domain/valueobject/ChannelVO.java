@@ -45,12 +45,12 @@ public class ChannelVO {
    * @return An empty instance
    */
   public static ChannelVO tryFrom(final Object channel) {
-    ConstraintFailList list = new ConstraintFailList();
-    ChannelVO result = tryFrom(channel, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ChannelVO.channel", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ChannelVO voInstance = tryFrom(channel, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ChannelVO.channel", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

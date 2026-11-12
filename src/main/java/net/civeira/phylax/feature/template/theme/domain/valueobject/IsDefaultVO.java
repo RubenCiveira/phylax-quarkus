@@ -54,12 +54,12 @@ public class IsDefaultVO {
    * @return An empty instance
    */
   public static IsDefaultVO tryFrom(final Object isDefault) {
-    ConstraintFailList list = new ConstraintFailList();
-    IsDefaultVO result = tryFrom(isDefault, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for IsDefaultVO.is-default", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    IsDefaultVO voInstance = tryFrom(isDefault, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for IsDefaultVO.is-default", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -48,14 +48,14 @@ public class RefreshTokenMaxLifetimeSecondsVO {
    */
   public static RefreshTokenMaxLifetimeSecondsVO tryFrom(
       final Object refreshTokenMaxLifetimeSeconds) {
-    ConstraintFailList list = new ConstraintFailList();
-    RefreshTokenMaxLifetimeSecondsVO result = tryFrom(refreshTokenMaxLifetimeSeconds, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RefreshTokenMaxLifetimeSecondsVO voInstance = tryFrom(refreshTokenMaxLifetimeSeconds, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for RefreshTokenMaxLifetimeSecondsVO.refresh-token-max-lifetime-seconds",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

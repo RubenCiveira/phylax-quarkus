@@ -56,13 +56,13 @@ public class DynamicallyRegisteredVO {
    * @return An empty instance
    */
   public static DynamicallyRegisteredVO tryFrom(final Object dynamicallyRegistered) {
-    ConstraintFailList list = new ConstraintFailList();
-    DynamicallyRegisteredVO result = tryFrom(dynamicallyRegistered, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    DynamicallyRegisteredVO voInstance = tryFrom(dynamicallyRegistered, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for DynamicallyRegisteredVO.dynamically-registered", list);
+          "Invalid value for DynamicallyRegisteredVO.dynamically-registered", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

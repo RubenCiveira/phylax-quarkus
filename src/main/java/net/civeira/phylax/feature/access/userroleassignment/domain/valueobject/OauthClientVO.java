@@ -67,12 +67,12 @@ public class OauthClientVO {
    * @return An empty instance
    */
   public static OauthClientVO tryFrom(final Object oauthClient) {
-    ConstraintFailList list = new ConstraintFailList();
-    OauthClientVO result = tryFrom(oauthClient, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for OauthClientVO.oauth-client", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    OauthClientVO voInstance = tryFrom(oauthClient, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for OauthClientVO.oauth-client", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

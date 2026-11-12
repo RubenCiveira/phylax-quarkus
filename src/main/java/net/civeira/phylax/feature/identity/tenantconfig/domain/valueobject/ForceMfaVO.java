@@ -46,12 +46,12 @@ public class ForceMfaVO {
    * @return An empty instance
    */
   public static ForceMfaVO tryFrom(final Object forceMfa) {
-    ConstraintFailList list = new ConstraintFailList();
-    ForceMfaVO result = tryFrom(forceMfa, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ForceMfaVO.force-mfa", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ForceMfaVO voInstance = tryFrom(forceMfa, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ForceMfaVO.force-mfa", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

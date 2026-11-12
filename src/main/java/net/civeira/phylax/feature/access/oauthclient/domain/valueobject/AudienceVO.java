@@ -44,12 +44,12 @@ public class AudienceVO {
    * @return An empty instance
    */
   public static AudienceVO tryFrom(final Object audience) {
-    ConstraintFailList list = new ConstraintFailList();
-    AudienceVO result = tryFrom(audience, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for AudienceVO.audience", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    AudienceVO voInstance = tryFrom(audience, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for AudienceVO.audience", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -68,12 +68,12 @@ public class PendingSeedVO {
    * @return An empty instance
    */
   public static PendingSeedVO tryFrom(final Object pendingSeed) {
-    ConstraintFailList list = new ConstraintFailList();
-    PendingSeedVO result = tryFrom(pendingSeed, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PendingSeedVO.pending-seed", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PendingSeedVO voInstance = tryFrom(pendingSeed, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PendingSeedVO.pending-seed", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

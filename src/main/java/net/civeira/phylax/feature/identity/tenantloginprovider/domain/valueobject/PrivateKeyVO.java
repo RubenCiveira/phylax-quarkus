@@ -55,12 +55,12 @@ public class PrivateKeyVO {
    * @return An empty instance
    */
   public static PrivateKeyVO tryFrom(final Object privateKey) {
-    ConstraintFailList list = new ConstraintFailList();
-    PrivateKeyVO result = tryFrom(privateKey, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PrivateKeyVO.private-key", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PrivateKeyVO voInstance = tryFrom(privateKey, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PrivateKeyVO.private-key", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

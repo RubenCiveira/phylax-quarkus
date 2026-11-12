@@ -46,13 +46,13 @@ public class AllowPasswordGrantVO {
    * @return An empty instance
    */
   public static AllowPasswordGrantVO tryFrom(final Object allowPasswordGrant) {
-    ConstraintFailList list = new ConstraintFailList();
-    AllowPasswordGrantVO result = tryFrom(allowPasswordGrant, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AllowPasswordGrantVO voInstance = tryFrom(allowPasswordGrant, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for AllowPasswordGrantVO.allow-password-grant",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

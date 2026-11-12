@@ -44,12 +44,12 @@ public class ApiKeyVO {
    * @return An empty instance
    */
   public static ApiKeyVO tryFrom(final Object apiKey) {
-    ConstraintFailList list = new ConstraintFailList();
-    ApiKeyVO result = tryFrom(apiKey, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ApiKeyVO.api-key", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ApiKeyVO voInstance = tryFrom(apiKey, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ApiKeyVO.api-key", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

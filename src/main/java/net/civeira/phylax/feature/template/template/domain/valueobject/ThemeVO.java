@@ -55,12 +55,12 @@ public class ThemeVO {
    * @return An empty instance
    */
   public static ThemeVO tryFrom(final Object theme) {
-    ConstraintFailList list = new ConstraintFailList();
-    ThemeVO result = tryFrom(theme, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ThemeVO.theme", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ThemeVO voInstance = tryFrom(theme, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ThemeVO.theme", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

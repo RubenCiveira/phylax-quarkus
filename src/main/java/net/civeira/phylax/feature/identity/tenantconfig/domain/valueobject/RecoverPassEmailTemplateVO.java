@@ -55,13 +55,13 @@ public class RecoverPassEmailTemplateVO {
    * @return An empty instance
    */
   public static RecoverPassEmailTemplateVO tryFrom(final Object recoverPassEmailTemplate) {
-    ConstraintFailList list = new ConstraintFailList();
-    RecoverPassEmailTemplateVO result = tryFrom(recoverPassEmailTemplate, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RecoverPassEmailTemplateVO voInstance = tryFrom(recoverPassEmailTemplate, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for RecoverPassEmailTemplateVO.recover-pass-email-template", list);
+          "Invalid value for RecoverPassEmailTemplateVO.recover-pass-email-template", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

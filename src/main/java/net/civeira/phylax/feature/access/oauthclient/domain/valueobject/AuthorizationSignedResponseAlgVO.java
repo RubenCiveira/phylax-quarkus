@@ -57,14 +57,14 @@ public class AuthorizationSignedResponseAlgVO {
    */
   public static AuthorizationSignedResponseAlgVO tryFrom(
       final Object authorizationSignedResponseAlg) {
-    ConstraintFailList list = new ConstraintFailList();
-    AuthorizationSignedResponseAlgVO result = tryFrom(authorizationSignedResponseAlg, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AuthorizationSignedResponseAlgVO voInstance = tryFrom(authorizationSignedResponseAlg, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for AuthorizationSignedResponseAlgVO.authorization-signed-response-alg",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

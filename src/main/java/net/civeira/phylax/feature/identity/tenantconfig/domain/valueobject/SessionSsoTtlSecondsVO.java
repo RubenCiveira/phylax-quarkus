@@ -47,13 +47,13 @@ public class SessionSsoTtlSecondsVO {
    * @return An empty instance
    */
   public static SessionSsoTtlSecondsVO tryFrom(final Object sessionSsoTtlSeconds) {
-    ConstraintFailList list = new ConstraintFailList();
-    SessionSsoTtlSecondsVO result = tryFrom(sessionSsoTtlSeconds, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    SessionSsoTtlSecondsVO voInstance = tryFrom(sessionSsoTtlSeconds, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for SessionSsoTtlSecondsVO.session-sso-ttl-seconds", list);
+          "Invalid value for SessionSsoTtlSecondsVO.session-sso-ttl-seconds", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

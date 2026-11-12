@@ -43,12 +43,12 @@ public class UidVO {
    * @return An empty instance
    */
   public static UidVO tryFrom(final Object uid) {
-    ConstraintFailList list = new ConstraintFailList();
-    UidVO result = tryFrom(uid, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UidVO.uid", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UidVO voInstance = tryFrom(uid, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UidVO.uid", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

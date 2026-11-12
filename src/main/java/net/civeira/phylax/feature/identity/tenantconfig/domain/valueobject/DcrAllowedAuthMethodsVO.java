@@ -56,13 +56,13 @@ public class DcrAllowedAuthMethodsVO {
    * @return An empty instance
    */
   public static DcrAllowedAuthMethodsVO tryFrom(final Object dcrAllowedAuthMethods) {
-    ConstraintFailList list = new ConstraintFailList();
-    DcrAllowedAuthMethodsVO result = tryFrom(dcrAllowedAuthMethods, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    DcrAllowedAuthMethodsVO voInstance = tryFrom(dcrAllowedAuthMethods, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for DcrAllowedAuthMethodsVO.dcr-allowed-auth-methods", list);
+          "Invalid value for DcrAllowedAuthMethodsVO.dcr-allowed-auth-methods", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

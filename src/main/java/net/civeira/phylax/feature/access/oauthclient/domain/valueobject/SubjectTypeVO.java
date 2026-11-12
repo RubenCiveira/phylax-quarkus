@@ -47,12 +47,12 @@ public class SubjectTypeVO {
    * @return An empty instance
    */
   public static SubjectTypeVO tryFrom(final Object subjectType) {
-    ConstraintFailList list = new ConstraintFailList();
-    SubjectTypeVO result = tryFrom(subjectType, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SubjectTypeVO.subject-type", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SubjectTypeVO voInstance = tryFrom(subjectType, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SubjectTypeVO.subject-type", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

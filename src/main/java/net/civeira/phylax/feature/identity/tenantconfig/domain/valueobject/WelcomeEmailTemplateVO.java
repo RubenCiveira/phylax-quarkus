@@ -56,13 +56,13 @@ public class WelcomeEmailTemplateVO {
    * @return An empty instance
    */
   public static WelcomeEmailTemplateVO tryFrom(final Object welcomeEmailTemplate) {
-    ConstraintFailList list = new ConstraintFailList();
-    WelcomeEmailTemplateVO result = tryFrom(welcomeEmailTemplate, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    WelcomeEmailTemplateVO voInstance = tryFrom(welcomeEmailTemplate, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for WelcomeEmailTemplateVO.welcome-email-template", list);
+          "Invalid value for WelcomeEmailTemplateVO.welcome-email-template", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

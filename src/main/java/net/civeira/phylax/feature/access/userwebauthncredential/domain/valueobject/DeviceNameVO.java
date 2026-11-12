@@ -55,12 +55,12 @@ public class DeviceNameVO {
    * @return An empty instance
    */
   public static DeviceNameVO tryFrom(final Object deviceName) {
-    ConstraintFailList list = new ConstraintFailList();
-    DeviceNameVO result = tryFrom(deviceName, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for DeviceNameVO.device_name", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    DeviceNameVO voInstance = tryFrom(deviceName, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for DeviceNameVO.device_name", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

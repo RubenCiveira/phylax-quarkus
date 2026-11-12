@@ -59,13 +59,13 @@ public class DynamicRegistrationPolicyVO {
    * @return An empty instance
    */
   public static DynamicRegistrationPolicyVO tryFrom(final Object dynamicRegistrationPolicy) {
-    ConstraintFailList list = new ConstraintFailList();
-    DynamicRegistrationPolicyVO result = tryFrom(dynamicRegistrationPolicy, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    DynamicRegistrationPolicyVO voInstance = tryFrom(dynamicRegistrationPolicy, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for DynamicRegistrationPolicyVO.dynamic-registration-policy", list);
+          "Invalid value for DynamicRegistrationPolicyVO.dynamic-registration-policy", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -46,12 +46,12 @@ public class RateLimitVO {
    * @return An empty instance
    */
   public static RateLimitVO tryFrom(final Object rateLimit) {
-    ConstraintFailList list = new ConstraintFailList();
-    RateLimitVO result = tryFrom(rateLimit, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RateLimitVO.rate-limit", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RateLimitVO voInstance = tryFrom(rateLimit, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RateLimitVO.rate-limit", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

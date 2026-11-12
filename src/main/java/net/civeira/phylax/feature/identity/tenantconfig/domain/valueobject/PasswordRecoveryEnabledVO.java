@@ -55,13 +55,13 @@ public class PasswordRecoveryEnabledVO {
    * @return An empty instance
    */
   public static PasswordRecoveryEnabledVO tryFrom(final Object passwordRecoveryEnabled) {
-    ConstraintFailList list = new ConstraintFailList();
-    PasswordRecoveryEnabledVO result = tryFrom(passwordRecoveryEnabled, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    PasswordRecoveryEnabledVO voInstance = tryFrom(passwordRecoveryEnabled, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for PasswordRecoveryEnabledVO.password-recovery-enabled", list);
+          "Invalid value for PasswordRecoveryEnabledVO.password-recovery-enabled", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

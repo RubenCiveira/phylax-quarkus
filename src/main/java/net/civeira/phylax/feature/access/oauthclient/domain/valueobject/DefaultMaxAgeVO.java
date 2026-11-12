@@ -56,12 +56,12 @@ public class DefaultMaxAgeVO {
    * @return An empty instance
    */
   public static DefaultMaxAgeVO tryFrom(final Object defaultMaxAge) {
-    ConstraintFailList list = new ConstraintFailList();
-    DefaultMaxAgeVO result = tryFrom(defaultMaxAge, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for DefaultMaxAgeVO.default-max-age", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    DefaultMaxAgeVO voInstance = tryFrom(defaultMaxAge, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for DefaultMaxAgeVO.default-max-age", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

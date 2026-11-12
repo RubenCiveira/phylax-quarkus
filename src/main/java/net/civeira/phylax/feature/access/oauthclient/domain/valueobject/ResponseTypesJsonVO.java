@@ -55,13 +55,13 @@ public class ResponseTypesJsonVO {
    * @return An empty instance
    */
   public static ResponseTypesJsonVO tryFrom(final Object responseTypesJson) {
-    ConstraintFailList list = new ConstraintFailList();
-    ResponseTypesJsonVO result = tryFrom(responseTypesJson, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    ResponseTypesJsonVO voInstance = tryFrom(responseTypesJson, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for ResponseTypesJsonVO.response-types-json",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

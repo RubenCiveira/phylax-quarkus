@@ -45,12 +45,12 @@ public class ContentHtmlVO {
    * @return An empty instance
    */
   public static ContentHtmlVO tryFrom(final Object contentHtml) {
-    ConstraintFailList list = new ConstraintFailList();
-    ContentHtmlVO result = tryFrom(contentHtml, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ContentHtmlVO.content-html", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ContentHtmlVO voInstance = tryFrom(contentHtml, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ContentHtmlVO.content-html", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

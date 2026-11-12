@@ -57,12 +57,12 @@ public class TokenHashVO {
    * @return An empty instance
    */
   public static TokenHashVO tryFrom(final Object tokenHash) {
-    ConstraintFailList list = new ConstraintFailList();
-    TokenHashVO result = tryFrom(tokenHash, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TokenHashVO.token_hash", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TokenHashVO voInstance = tryFrom(tokenHash, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TokenHashVO.token_hash", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

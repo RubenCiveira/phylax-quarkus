@@ -55,12 +55,12 @@ public class UserAgentVO {
    * @return An empty instance
    */
   public static UserAgentVO tryFrom(final Object userAgent) {
-    ConstraintFailList list = new ConstraintFailList();
-    UserAgentVO result = tryFrom(userAgent, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for UserAgentVO.user-agent", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    UserAgentVO voInstance = tryFrom(userAgent, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for UserAgentVO.user-agent", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

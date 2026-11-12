@@ -55,12 +55,13 @@ public class TemporalPasswordVO {
    * @return An empty instance
    */
   public static TemporalPasswordVO tryFrom(final Object temporalPassword) {
-    ConstraintFailList list = new ConstraintFailList();
-    TemporalPasswordVO result = tryFrom(temporalPassword, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TemporalPasswordVO.temporal-password", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TemporalPasswordVO voInstance = tryFrom(temporalPassword, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TemporalPasswordVO.temporal-password",
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

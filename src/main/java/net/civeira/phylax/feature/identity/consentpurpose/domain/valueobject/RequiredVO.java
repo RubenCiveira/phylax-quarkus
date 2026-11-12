@@ -45,12 +45,12 @@ public class RequiredVO {
    * @return An empty instance
    */
   public static RequiredVO tryFrom(final Object required) {
-    ConstraintFailList list = new ConstraintFailList();
-    RequiredVO result = tryFrom(required, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RequiredVO.required", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RequiredVO voInstance = tryFrom(required, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RequiredVO.required", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

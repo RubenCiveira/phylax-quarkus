@@ -58,12 +58,12 @@ public class SendAtVO {
    * @return An empty instance
    */
   public static SendAtVO tryFrom(final Object sendAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    SendAtVO result = tryFrom(sendAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SendAtVO.send-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SendAtVO voInstance = tryFrom(sendAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SendAtVO.send-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

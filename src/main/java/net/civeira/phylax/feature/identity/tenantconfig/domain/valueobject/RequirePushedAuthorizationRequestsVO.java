@@ -48,14 +48,15 @@ public class RequirePushedAuthorizationRequestsVO {
    */
   public static RequirePushedAuthorizationRequestsVO tryFrom(
       final Object requirePushedAuthorizationRequests) {
-    ConstraintFailList list = new ConstraintFailList();
-    RequirePushedAuthorizationRequestsVO result = tryFrom(requirePushedAuthorizationRequests, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RequirePushedAuthorizationRequestsVO voInstance =
+        tryFrom(requirePushedAuthorizationRequests, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for RequirePushedAuthorizationRequestsVO.require-pushed-authorization-requests",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

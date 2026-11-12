@@ -57,12 +57,12 @@ public class LoginProviderVO {
    * @return An empty instance
    */
   public static LoginProviderVO tryFrom(final Object loginProvider) {
-    ConstraintFailList list = new ConstraintFailList();
-    LoginProviderVO result = tryFrom(loginProvider, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for LoginProviderVO.login-provider", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    LoginProviderVO voInstance = tryFrom(loginProvider, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for LoginProviderVO.login-provider", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

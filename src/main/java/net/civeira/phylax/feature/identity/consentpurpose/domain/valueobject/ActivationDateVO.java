@@ -47,12 +47,12 @@ public class ActivationDateVO {
    * @return An empty instance
    */
   public static ActivationDateVO tryFrom(final Object activationDate) {
-    ConstraintFailList list = new ConstraintFailList();
-    ActivationDateVO result = tryFrom(activationDate, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ActivationDateVO.activation-date", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ActivationDateVO voInstance = tryFrom(activationDate, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ActivationDateVO.activation-date", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

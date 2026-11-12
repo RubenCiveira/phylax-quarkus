@@ -54,12 +54,12 @@ public class WebsiteUrlVO {
    * @return An empty instance
    */
   public static WebsiteUrlVO tryFrom(final Object websiteUrl) {
-    ConstraintFailList list = new ConstraintFailList();
-    WebsiteUrlVO result = tryFrom(websiteUrl, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for WebsiteUrlVO.website-url", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    WebsiteUrlVO voInstance = tryFrom(websiteUrl, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for WebsiteUrlVO.website-url", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -56,12 +56,12 @@ public class RoleVO {
    * @return An empty instance
    */
   public static RoleVO tryFrom(final Object role) {
-    ConstraintFailList list = new ConstraintFailList();
-    RoleVO result = tryFrom(role, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RoleVO.role", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RoleVO voInstance = tryFrom(role, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RoleVO.role", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

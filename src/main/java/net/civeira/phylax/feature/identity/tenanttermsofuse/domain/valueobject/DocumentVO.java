@@ -65,12 +65,12 @@ public class DocumentVO {
    * @return An empty instance
    */
   public static DocumentVO tryFrom(final Object document) {
-    ConstraintFailList list = new ConstraintFailList();
-    DocumentVO result = tryFrom(document, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for DocumentVO.document", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    DocumentVO voInstance = tryFrom(document, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for DocumentVO.document", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

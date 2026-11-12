@@ -56,13 +56,13 @@ public class FederatedProviderVO {
    * @return An empty instance
    */
   public static FederatedProviderVO tryFrom(final Object federatedProvider) {
-    ConstraintFailList list = new ConstraintFailList();
-    FederatedProviderVO result = tryFrom(federatedProvider, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    FederatedProviderVO voInstance = tryFrom(federatedProvider, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for FederatedProviderVO.federated-provider",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

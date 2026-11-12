@@ -56,13 +56,13 @@ public class BackchannelLogoutUriVO {
    * @return An empty instance
    */
   public static BackchannelLogoutUriVO tryFrom(final Object backchannelLogoutUri) {
-    ConstraintFailList list = new ConstraintFailList();
-    BackchannelLogoutUriVO result = tryFrom(backchannelLogoutUri, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    BackchannelLogoutUriVO voInstance = tryFrom(backchannelLogoutUri, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for BackchannelLogoutUriVO.backchannel-logout-uri", list);
+          "Invalid value for BackchannelLogoutUriVO.backchannel-logout-uri", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

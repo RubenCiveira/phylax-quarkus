@@ -57,12 +57,12 @@ public class DecisionAtVO {
    * @return An empty instance
    */
   public static DecisionAtVO tryFrom(final Object decisionAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    DecisionAtVO result = tryFrom(decisionAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for DecisionAtVO.decision-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    DecisionAtVO voInstance = tryFrom(decisionAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for DecisionAtVO.decision-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

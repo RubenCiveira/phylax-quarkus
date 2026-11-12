@@ -44,12 +44,12 @@ public class TargetVO {
    * @return An empty instance
    */
   public static TargetVO tryFrom(final Object target) {
-    ConstraintFailList list = new ConstraintFailList();
-    TargetVO result = tryFrom(target, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TargetVO.target", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TargetVO voInstance = tryFrom(target, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TargetVO.target", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

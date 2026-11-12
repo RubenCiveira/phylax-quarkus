@@ -46,13 +46,13 @@ public class UsersEnabledByDefaultVO {
    * @return An empty instance
    */
   public static UsersEnabledByDefaultVO tryFrom(final Object usersEnabledByDefault) {
-    ConstraintFailList list = new ConstraintFailList();
-    UsersEnabledByDefaultVO result = tryFrom(usersEnabledByDefault, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    UsersEnabledByDefaultVO voInstance = tryFrom(usersEnabledByDefault, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for UsersEnabledByDefaultVO.users-enabled-by-default", list);
+          "Invalid value for UsersEnabledByDefaultVO.users-enabled-by-default", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

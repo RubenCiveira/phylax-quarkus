@@ -143,7 +143,7 @@ public class SnippetVersionDeleteController {
       Map<String, ErrorInfo> stepWarns = step.getWarns();
       if (null != stepWarns) {
         bsp.getWarns()
-            .addAll(stepErrors.entrySet().stream()
+            .addAll(stepWarns.entrySet().stream()
                 .map(entry -> new BatchResultErrorItem().item(entry.getKey())
                     .fails(entry.getValue().getFails().stream()
                         .map(fail -> new MultipleErrorCodes().code(fail.getCode())
@@ -157,7 +157,7 @@ public class SnippetVersionDeleteController {
       }
       return bsp;
     }).toList());
-    return Response.ok(task).build();
+    return Response.ok(response).build();
   }
 
   /**

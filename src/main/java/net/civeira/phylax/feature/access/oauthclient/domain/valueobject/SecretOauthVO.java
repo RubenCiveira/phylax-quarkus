@@ -67,12 +67,12 @@ public class SecretOauthVO {
    * @return An empty instance
    */
   public static SecretOauthVO tryFrom(final Object secretOauth) {
-    ConstraintFailList list = new ConstraintFailList();
-    SecretOauthVO result = tryFrom(secretOauth, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SecretOauthVO.secret-oauth", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SecretOauthVO voInstance = tryFrom(secretOauth, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SecretOauthVO.secret-oauth", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -1,0 +1,23 @@
+{
+  "meta" : {
+    "title" : "phylax-api"
+  },
+  "api" : {
+    "url" : "/observe/api"
+  },
+  "theme" : {
+    "mode" : "auto"
+  },
+  "identity" : {
+    "main" : {
+      "type" : "oidc",
+      "issuer" : "http://localhost:8090/oauth/openid/main",
+      "url" : "http://localhost:8090/oauth/openid/main/.well-known/openid-configuration",
+      "client-id" : "observe-viewer",
+      "scope" : "openid profile offline_access",
+      "audience" : [ "phylax-api" ],
+      "redirect" : "http://localhost:8090/observe/callback",
+      "logout-redirect" : "http://localhost:8090/observe/"
+    }
+  }
+}

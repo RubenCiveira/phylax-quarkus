@@ -43,12 +43,12 @@ public class HostVO {
    * @return An empty instance
    */
   public static HostVO tryFrom(final Object host) {
-    ConstraintFailList list = new ConstraintFailList();
-    HostVO result = tryFrom(host, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for HostVO.host", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    HostVO voInstance = tryFrom(host, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for HostVO.host", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -55,12 +55,12 @@ public class ClientNameVO {
    * @return An empty instance
    */
   public static ClientNameVO tryFrom(final Object clientName) {
-    ConstraintFailList list = new ConstraintFailList();
-    ClientNameVO result = tryFrom(clientName, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ClientNameVO.client-name", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ClientNameVO voInstance = tryFrom(clientName, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ClientNameVO.client-name", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

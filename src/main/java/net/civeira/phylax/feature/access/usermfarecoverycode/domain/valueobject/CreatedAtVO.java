@@ -48,12 +48,12 @@ public class CreatedAtVO {
    * @return An empty instance
    */
   public static CreatedAtVO tryFrom(final Object createdAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    CreatedAtVO result = tryFrom(createdAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for CreatedAtVO.created-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    CreatedAtVO voInstance = tryFrom(createdAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for CreatedAtVO.created-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

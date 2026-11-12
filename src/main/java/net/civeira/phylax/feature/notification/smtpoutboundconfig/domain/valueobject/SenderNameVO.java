@@ -54,12 +54,12 @@ public class SenderNameVO {
    * @return An empty instance
    */
   public static SenderNameVO tryFrom(final Object senderName) {
-    ConstraintFailList list = new ConstraintFailList();
-    SenderNameVO result = tryFrom(senderName, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for SenderNameVO.sender-name", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    SenderNameVO voInstance = tryFrom(senderName, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for SenderNameVO.sender-name", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

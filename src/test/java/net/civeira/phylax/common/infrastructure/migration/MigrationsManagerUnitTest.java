@@ -34,10 +34,32 @@ import net.civeira.phylax.common.infrastructure.sql.UncheckedSqlException;
 @DisplayName("MigrationsManager")
 class MigrationsManagerUnitTest {
 
+  /**
+   * El tipo de base de datos, su driver y una URL de ejemplo, del primer driver que tenga el
+   * proyecto: el test no depende de la base de datos elegida (MariaDB, PostgreSQL o MySQL).
+   */
+  private static final String[] DB = availableDb();
+
+  private static String[] availableDb() {
+    String[][] candidates = {{"mariadb", "org.mariadb.jdbc.Driver", "jdbc:mariadb://db:3306/app"},
+        {"postgresql", "org.postgresql.Driver", "jdbc:postgresql://db:5432/app"},
+        {"mysql", "com.mysql.cj.jdbc.Driver", "jdbc:mysql://db:3306/app"}};
+    for (String[] candidate : candidates) {
+      try {
+        Class.forName(candidate[1]);
+        return candidate;
+      } catch (ClassNotFoundException ex) {
+        // No está en el classpath: el siguiente
+      }
+    }
+    return candidates[0];
+  }
+
+
   private static MigrationsConfig config(Optional<JdbcConfig> jdbc) {
     MigrationsConfig config = mock(MigrationsConfig.class);
     when(config.jdbc()).thenReturn(jdbc);
-    when(config.dbKind()).thenReturn(Optional.of("mariadb"));
+    when(config.dbKind()).thenReturn(Optional.of(DB[0]));
     when(config.username()).thenReturn(Optional.of("user"));
     when(config.password()).thenReturn(Optional.of("secret"));
     when(config.location()).thenReturn(Optional.of("migrations-unit/changelog.txt"));
@@ -86,7 +108,7 @@ class MigrationsManagerUnitTest {
   void shouldUseDedicatedPool() throws SQLException {
     FakeDb db = new FakeDb();
     JdbcConfig jdbc = mock(JdbcConfig.class);
-    when(jdbc.url()).thenReturn(Optional.of("jdbc:mariadb://db:3306/app"));
+    when(jdbc.url()).thenReturn(Optional.of(DB[2]));
     when(jdbc.maxSize()).thenReturn(Optional.of(2));
     when(jdbc.minSize()).thenReturn(Optional.empty());
     Connection connection = db.connection("MariaDB Connector/J");
@@ -104,8 +126,7 @@ class MigrationsManagerUnitTest {
       var pooling = configuration.getValue().connectionPoolConfiguration();
       assertEquals(2, pooling.maxSize());
       assertEquals(1, pooling.minSize());
-      assertEquals("jdbc:mariadb://db:3306/app",
-          pooling.connectionFactoryConfiguration().jdbcUrl());
+      assertEquals(DB[2], pooling.connectionFactoryConfiguration().jdbcUrl());
     }
     assertTrue(db.executed.contains("CREATE TABLE sample (id INT)"));
   }
@@ -114,7 +135,7 @@ class MigrationsManagerUnitTest {
   @DisplayName("Should report a pool that cannot be built")
   void shouldReportPoolErrors() {
     JdbcConfig jdbc = mock(JdbcConfig.class);
-    when(jdbc.url()).thenReturn(Optional.of("jdbc:mariadb://db:3306/app"));
+    when(jdbc.url()).thenReturn(Optional.of(DB[2]));
     when(jdbc.maxSize()).thenReturn(Optional.empty());
     when(jdbc.minSize()).thenReturn(Optional.empty());
 

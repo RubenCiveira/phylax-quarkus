@@ -58,14 +58,15 @@ public class FrontchannelLogoutSessionRequiredVO {
    */
   public static FrontchannelLogoutSessionRequiredVO tryFrom(
       final Object frontchannelLogoutSessionRequired) {
-    ConstraintFailList list = new ConstraintFailList();
-    FrontchannelLogoutSessionRequiredVO result = tryFrom(frontchannelLogoutSessionRequired, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    FrontchannelLogoutSessionRequiredVO voInstance =
+        tryFrom(frontchannelLogoutSessionRequired, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for FrontchannelLogoutSessionRequiredVO.frontchannel-logout-session-required",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

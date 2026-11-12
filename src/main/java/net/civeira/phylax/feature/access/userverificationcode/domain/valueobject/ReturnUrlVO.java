@@ -55,12 +55,12 @@ public class ReturnUrlVO {
    * @return An empty instance
    */
   public static ReturnUrlVO tryFrom(final Object returnUrl) {
-    ConstraintFailList list = new ConstraintFailList();
-    ReturnUrlVO result = tryFrom(returnUrl, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ReturnUrlVO.return-url", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ReturnUrlVO voInstance = tryFrom(returnUrl, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ReturnUrlVO.return-url", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -54,12 +54,12 @@ public class GroupsVO {
    * @return An empty instance
    */
   public static GroupsVO tryFrom(final Object groups) {
-    ConstraintFailList list = new ConstraintFailList();
-    GroupsVO result = tryFrom(groups, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for GroupsVO.groups", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    GroupsVO voInstance = tryFrom(groups, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for GroupsVO.groups", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

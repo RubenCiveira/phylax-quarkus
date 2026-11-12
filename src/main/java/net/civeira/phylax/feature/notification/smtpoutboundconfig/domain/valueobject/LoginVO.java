@@ -44,12 +44,12 @@ public class LoginVO {
    * @return An empty instance
    */
   public static LoginVO tryFrom(final Object login) {
-    ConstraintFailList list = new ConstraintFailList();
-    LoginVO result = tryFrom(login, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for LoginVO.login", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    LoginVO voInstance = tryFrom(login, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for LoginVO.login", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

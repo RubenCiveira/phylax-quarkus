@@ -67,12 +67,12 @@ public class AcceptedByVO {
    * @return An empty instance
    */
   public static AcceptedByVO tryFrom(final Object acceptedBy) {
-    ConstraintFailList list = new ConstraintFailList();
-    AcceptedByVO result = tryFrom(acceptedBy, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for AcceptedByVO.accepted-by", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    AcceptedByVO voInstance = tryFrom(acceptedBy, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for AcceptedByVO.accepted-by", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -43,12 +43,12 @@ public class TitleVO {
    * @return An empty instance
    */
   public static TitleVO tryFrom(final Object title) {
-    ConstraintFailList list = new ConstraintFailList();
-    TitleVO result = tryFrom(title, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TitleVO.title", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TitleVO voInstance = tryFrom(title, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TitleVO.title", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

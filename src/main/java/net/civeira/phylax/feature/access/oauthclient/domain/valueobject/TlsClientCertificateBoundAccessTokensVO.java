@@ -48,15 +48,15 @@ public class TlsClientCertificateBoundAccessTokensVO {
    */
   public static TlsClientCertificateBoundAccessTokensVO tryFrom(
       final Object tlsClientCertificateBoundAccessTokens) {
-    ConstraintFailList list = new ConstraintFailList();
-    TlsClientCertificateBoundAccessTokensVO result =
-        tryFrom(tlsClientCertificateBoundAccessTokens, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    TlsClientCertificateBoundAccessTokensVO voInstance =
+        tryFrom(tlsClientCertificateBoundAccessTokens, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
           "Invalid value for TlsClientCertificateBoundAccessTokensVO.tls-client-certificate-bound-access-tokens",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

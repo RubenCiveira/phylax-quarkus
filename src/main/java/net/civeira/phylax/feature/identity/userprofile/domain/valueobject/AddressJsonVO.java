@@ -54,12 +54,12 @@ public class AddressJsonVO {
    * @return An empty instance
    */
   public static AddressJsonVO tryFrom(final Object addressJson) {
-    ConstraintFailList list = new ConstraintFailList();
-    AddressJsonVO result = tryFrom(addressJson, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for AddressJsonVO.address-json", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    AddressJsonVO voInstance = tryFrom(addressJson, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for AddressJsonVO.address-json", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

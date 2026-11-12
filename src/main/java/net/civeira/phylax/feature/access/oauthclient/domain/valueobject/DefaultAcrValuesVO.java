@@ -56,13 +56,13 @@ public class DefaultAcrValuesVO {
    * @return An empty instance
    */
   public static DefaultAcrValuesVO tryFrom(final Object defaultAcrValues) {
-    ConstraintFailList list = new ConstraintFailList();
-    DefaultAcrValuesVO result = tryFrom(defaultAcrValues, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    DefaultAcrValuesVO voInstance = tryFrom(defaultAcrValues, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for DefaultAcrValuesVO.default-acr-values",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

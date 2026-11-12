@@ -68,13 +68,13 @@ public class RegistrationAccessTokenVO {
    * @return An empty instance
    */
   public static RegistrationAccessTokenVO tryFrom(final Object registrationAccessToken) {
-    ConstraintFailList list = new ConstraintFailList();
-    RegistrationAccessTokenVO result = tryFrom(registrationAccessToken, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RegistrationAccessTokenVO voInstance = tryFrom(registrationAccessToken, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for RegistrationAccessTokenVO.registration-access-token", list);
+          "Invalid value for RegistrationAccessTokenVO.registration-access-token", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -54,12 +54,12 @@ public class LogoUriVO {
    * @return An empty instance
    */
   public static LogoUriVO tryFrom(final Object logoUri) {
-    ConstraintFailList list = new ConstraintFailList();
-    LogoUriVO result = tryFrom(logoUri, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for LogoUriVO.logo-uri", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    LogoUriVO voInstance = tryFrom(logoUri, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for LogoUriVO.logo-uri", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

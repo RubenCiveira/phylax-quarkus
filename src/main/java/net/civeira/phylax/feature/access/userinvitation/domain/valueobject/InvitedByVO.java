@@ -57,12 +57,12 @@ public class InvitedByVO {
    * @return An empty instance
    */
   public static InvitedByVO tryFrom(final Object invitedBy) {
-    ConstraintFailList list = new ConstraintFailList();
-    InvitedByVO result = tryFrom(invitedBy, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for InvitedByVO.invited-by", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    InvitedByVO voInstance = tryFrom(invitedBy, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for InvitedByVO.invited-by", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

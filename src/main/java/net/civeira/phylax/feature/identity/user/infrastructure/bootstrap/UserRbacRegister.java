@@ -47,12 +47,6 @@ public class UserRbacRegister {
         .description("list").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
         .name("register").description("").required(List.of()).build());
-    rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("verify")
-        .description("").required(List.of()).build());
-    rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("accept")
-        .description("").required(List.of()).build());
-    rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("reject")
-        .description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
         .name("disable").description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("enable")
@@ -69,6 +63,19 @@ public class UserRbacRegister {
         ScopeDescription.builder().kind(Kind.WRITE).name("verify-email").description(
             "Marks the user's email address as verified. Called by the email verification endpoint after validating the register-code token from user-credential-state.")
             .required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("mark-verified-email")
+            .description(
+                "The email is verified and the tenant requires the approval of an administrator.")
+            .required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("mark-accepted-email")
+            .description("The email is verified and the tenant does not require approval.")
+            .required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("accept")
+        .description("Approves the account so the user can sign in.").required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("reject")
+        .description("Rejects the account the user cannot sign in.").required(List.of()).build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("uid")
         .description("Unique identifier of the user.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenant")

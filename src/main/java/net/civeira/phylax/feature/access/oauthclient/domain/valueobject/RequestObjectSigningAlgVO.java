@@ -55,13 +55,13 @@ public class RequestObjectSigningAlgVO {
    * @return An empty instance
    */
   public static RequestObjectSigningAlgVO tryFrom(final Object requestObjectSigningAlg) {
-    ConstraintFailList list = new ConstraintFailList();
-    RequestObjectSigningAlgVO result = tryFrom(requestObjectSigningAlg, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    RequestObjectSigningAlgVO voInstance = tryFrom(requestObjectSigningAlg, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for RequestObjectSigningAlgVO.request-object-signing-alg", list);
+          "Invalid value for RequestObjectSigningAlgVO.request-object-signing-alg", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

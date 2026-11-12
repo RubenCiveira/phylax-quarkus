@@ -58,12 +58,12 @@ public class RevokedAtVO {
    * @return An empty instance
    */
   public static RevokedAtVO tryFrom(final Object revokedAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    RevokedAtVO result = tryFrom(revokedAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RevokedAtVO.revoked-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RevokedAtVO voInstance = tryFrom(revokedAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RevokedAtVO.revoked-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

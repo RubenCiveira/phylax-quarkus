@@ -55,12 +55,12 @@ public class PhoneNumberVO {
    * @return An empty instance
    */
   public static PhoneNumberVO tryFrom(final Object phoneNumber) {
-    ConstraintFailList list = new ConstraintFailList();
-    PhoneNumberVO result = tryFrom(phoneNumber, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for PhoneNumberVO.phone-number", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    PhoneNumberVO voInstance = tryFrom(phoneNumber, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for PhoneNumberVO.phone-number", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

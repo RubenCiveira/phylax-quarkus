@@ -46,13 +46,13 @@ public class MagicLinkExpiryMinutesVO {
    * @return An empty instance
    */
   public static MagicLinkExpiryMinutesVO tryFrom(final Object magicLinkExpiryMinutes) {
-    ConstraintFailList list = new ConstraintFailList();
-    MagicLinkExpiryMinutesVO result = tryFrom(magicLinkExpiryMinutes, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    MagicLinkExpiryMinutesVO voInstance = tryFrom(magicLinkExpiryMinutes, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for MagicLinkExpiryMinutesVO.magic-link-expiry-minutes", list);
+          "Invalid value for MagicLinkExpiryMinutesVO.magic-link-expiry-minutes", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

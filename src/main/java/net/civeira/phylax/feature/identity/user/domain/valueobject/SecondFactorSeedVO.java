@@ -68,13 +68,13 @@ public class SecondFactorSeedVO {
    * @return An empty instance
    */
   public static SecondFactorSeedVO tryFrom(final Object secondFactorSeed) {
-    ConstraintFailList list = new ConstraintFailList();
-    SecondFactorSeedVO result = tryFrom(secondFactorSeed, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    SecondFactorSeedVO voInstance = tryFrom(secondFactorSeed, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for SecondFactorSeedVO.second-factor-seed",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

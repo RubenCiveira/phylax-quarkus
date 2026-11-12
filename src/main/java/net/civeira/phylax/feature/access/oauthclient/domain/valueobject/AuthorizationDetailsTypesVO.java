@@ -56,13 +56,13 @@ public class AuthorizationDetailsTypesVO {
    * @return An empty instance
    */
   public static AuthorizationDetailsTypesVO tryFrom(final Object authorizationDetailsTypes) {
-    ConstraintFailList list = new ConstraintFailList();
-    AuthorizationDetailsTypesVO result = tryFrom(authorizationDetailsTypes, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    AuthorizationDetailsTypesVO voInstance = tryFrom(authorizationDetailsTypes, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for AuthorizationDetailsTypesVO.authorization-details-types", list);
+          "Invalid value for AuthorizationDetailsTypesVO.authorization-details-types", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

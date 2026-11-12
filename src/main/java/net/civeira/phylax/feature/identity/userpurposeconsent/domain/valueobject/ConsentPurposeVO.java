@@ -57,12 +57,12 @@ public class ConsentPurposeVO {
    * @return An empty instance
    */
   public static ConsentPurposeVO tryFrom(final Object consentPurpose) {
-    ConstraintFailList list = new ConstraintFailList();
-    ConsentPurposeVO result = tryFrom(consentPurpose, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ConsentPurposeVO.consent-purpose", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ConsentPurposeVO voInstance = tryFrom(consentPurpose, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ConsentPurposeVO.consent-purpose", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

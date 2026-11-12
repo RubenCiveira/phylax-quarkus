@@ -56,12 +56,12 @@ public class TenantVO {
    * @return An empty instance
    */
   public static TenantVO tryFrom(final Object tenant) {
-    ConstraintFailList list = new ConstraintFailList();
-    TenantVO result = tryFrom(tenant, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for TenantVO.tenant", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    TenantVO voInstance = tryFrom(tenant, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for TenantVO.tenant", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -57,12 +57,12 @@ public class RegisteredAtVO {
    * @return An empty instance
    */
   public static RegisteredAtVO tryFrom(final Object registeredAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    RegisteredAtVO result = tryFrom(registeredAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RegisteredAtVO.registered-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RegisteredAtVO voInstance = tryFrom(registeredAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RegisteredAtVO.registered-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

@@ -46,12 +46,12 @@ public class RetryDelayVO {
    * @return An empty instance
    */
   public static RetryDelayVO tryFrom(final Object retryDelay) {
-    ConstraintFailList list = new ConstraintFailList();
-    RetryDelayVO result = tryFrom(retryDelay, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for RetryDelayVO.retry-delay", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    RetryDelayVO voInstance = tryFrom(retryDelay, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for RetryDelayVO.retry-delay", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

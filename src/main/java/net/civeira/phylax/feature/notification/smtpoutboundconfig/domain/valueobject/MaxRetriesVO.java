@@ -45,12 +45,12 @@ public class MaxRetriesVO {
    * @return An empty instance
    */
   public static MaxRetriesVO tryFrom(final Object maxRetries) {
-    ConstraintFailList list = new ConstraintFailList();
-    MaxRetriesVO result = tryFrom(maxRetries, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for MaxRetriesVO.max-retries", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    MaxRetriesVO voInstance = tryFrom(maxRetries, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for MaxRetriesVO.max-retries", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

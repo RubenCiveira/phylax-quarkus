@@ -55,12 +55,12 @@ public class JwksUriVO {
    * @return An empty instance
    */
   public static JwksUriVO tryFrom(final Object jwksUri) {
-    ConstraintFailList list = new ConstraintFailList();
-    JwksUriVO result = tryFrom(jwksUri, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for JwksUriVO.jwks-uri", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    JwksUriVO voInstance = tryFrom(jwksUri, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for JwksUriVO.jwks-uri", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

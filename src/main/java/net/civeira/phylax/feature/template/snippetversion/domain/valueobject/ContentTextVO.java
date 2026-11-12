@@ -54,12 +54,12 @@ public class ContentTextVO {
    * @return An empty instance
    */
   public static ContentTextVO tryFrom(final Object contentText) {
-    ConstraintFailList list = new ConstraintFailList();
-    ContentTextVO result = tryFrom(contentText, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for ContentTextVO.content-text", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    ContentTextVO voInstance = tryFrom(contentText, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for ContentTextVO.content-text", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

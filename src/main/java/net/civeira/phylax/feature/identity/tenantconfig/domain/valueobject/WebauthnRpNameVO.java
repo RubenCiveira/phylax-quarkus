@@ -55,12 +55,12 @@ public class WebauthnRpNameVO {
    * @return An empty instance
    */
   public static WebauthnRpNameVO tryFrom(final Object webauthnRpName) {
-    ConstraintFailList list = new ConstraintFailList();
-    WebauthnRpNameVO result = tryFrom(webauthnRpName, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for WebauthnRpNameVO.webauthn-rp-name", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    WebauthnRpNameVO voInstance = tryFrom(webauthnRpName, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for WebauthnRpNameVO.webauthn-rp-name", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

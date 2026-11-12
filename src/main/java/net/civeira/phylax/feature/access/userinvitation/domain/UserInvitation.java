@@ -56,6 +56,8 @@ public class UserInvitation implements UserInvitationRef {
    */
   public static UserInvitation create(final UserInvitationChangeSet change)
       throws ConstraintException {
+    change.status(UserInvitationStatusOptions.PENDING);
+    change.checkValidate(Optional.empty());
     UserInvitation instance = new UserInvitation(change, Optional.empty());
     instance.addEvent(UserInvitationCreateEvent.builder().payload(instance).build());
     return instance;
@@ -257,6 +259,8 @@ public class UserInvitation implements UserInvitationRef {
    * @return A modified instance of user invitation
    */
   public UserInvitation update(final UserInvitationChangeSet change) throws ConstraintException {
+    change.unsetStatus();
+    change.checkValidate(Optional.of(this));
     UserInvitation instance = new UserInvitation(change, Optional.of(this));
     instance.addEvent(UserInvitationUpdateEvent.builder().payload(instance).build());
     return instance;

@@ -58,12 +58,12 @@ public class LastUsedAtVO {
    * @return An empty instance
    */
   public static LastUsedAtVO tryFrom(final Object lastUsedAt) {
-    ConstraintFailList list = new ConstraintFailList();
-    LastUsedAtVO result = tryFrom(lastUsedAt, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for LastUsedAtVO.last-used-at", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    LastUsedAtVO voInstance = tryFrom(lastUsedAt, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for LastUsedAtVO.last-used-at", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

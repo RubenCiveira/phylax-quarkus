@@ -151,6 +151,14 @@ tags:
     description: Audit operations for changes on user federated identity
   - name: user-federated-identity-acl
     description: Access control for user federated identity
+  - name: observed-dashboard
+    description: Grid of panels of the viewer, each one a chart with its query. A template dashboard (source-variable) is applied to the origin chosen in the viewer. The builtin dashboards are seeded by the install of the trait they are not edited, they are duplicated.
+  - name: observed-dashboard-batch
+    description: Massive operations for observed dashboard
+  - name: observed-dashboard-audit
+    description: Audit operations for changes on observed dashboard
+  - name: observed-dashboard-acl
+    description: Access control for observed dashboard
   - name: message
     description: Outbox entry for an outgoing notification (currently an email) the rendered content waits here until the dispatcher sends it, retrying on failure.
   - name: message-batch
@@ -159,6 +167,14 @@ tags:
     description: Audit operations for changes on message
   - name: message-acl
     description: Access control for message
+  - name: observed-source
+    description: Origin allowed to send telemetry (logs and traces) the application itself, a client application or an api. It is the only table the ingestion checks. The rows of the referenced entities (oauth clients, resource servers) are created and updated by the synchronization of the trait; the others are created by hand. It is not tenant data only the managers of the platform see it.
+  - name: observed-source-batch
+    description: Massive operations for observed source
+  - name: observed-source-audit
+    description: Audit operations for changes on observed source
+  - name: observed-source-acl
+    description: Access control for observed source
   - name: theme-asset
     description: File (image, stylesheet, font) of a theme, served under {{theme_assets_path}}.
   - name: theme-asset-batch
@@ -191,6 +207,22 @@ tags:
     description: Audit operations for changes on consent purpose
   - name: consent-purpose-acl
     description: Access control for consent purpose
+  - name: observability-config
+    description: Global configuration of the observability retention of each kind of data, disk limit and the masking of the events. It has a single row (code default), created by the install of the trait; the values of config/observability.yaml are used while it does not exist.
+  - name: observability-config-batch
+    description: Massive operations for observability config
+  - name: observability-config-audit
+    description: Audit operations for changes on observability config
+  - name: observability-config-acl
+    description: Access control for observability config
+  - name: observed-issue
+    description: Group of identical error events reported by an observed source. Events are grouped automatically by their fingerprint (exception type and first in-app stack frames), so operators triage one issue with its count and first/last occurrence instead of every single event. It is not an alert it is never configured and never notifies. Resolving an issue closes it until the same fingerprint is seen again, which reopens it as a regression.
+  - name: observed-issue-batch
+    description: Massive operations for observed issue
+  - name: observed-issue-audit
+    description: Audit operations for changes on observed issue
+  - name: observed-issue-acl
+    description: Access control for observed issue
   - name: smtp-outbound-config
     description: SMTP server used to send notifications. A tenant can have its own configuration; otherwise the global one (without tenant) is used.
   - name: smtp-outbound-config-batch
@@ -231,6 +263,14 @@ tags:
     description: Audit operations for changes on dcr initial access token
   - name: dcr-initial-access-token-acl
     description: Access control for dcr initial access token
+  - name: observed-embed
+    description: Read only permission to embed a dashboard or a panel outside the viewer (a wall screen, an internal wiki). It never gives access to the viewer it serves only what it points to, from the allowed origins, until it expires or is disabled.
+  - name: observed-embed-batch
+    description: Massive operations for observed embed
+  - name: observed-embed-audit
+    description: Audit operations for changes on observed embed
+  - name: observed-embed-acl
+    description: Access control for observed embed
   - name: user
     description: Person who signs in to a tenant, with a password, a federated identity provider, passkeys or a second factor.
   - name: user-batch
@@ -7531,6 +7571,328 @@ paths:
                 $ref: '#/components/schemas/UserFederatedIdentitySpecificAcl'
         '404':
           description: The item dont exists
+  /api/observe/dashboards:
+    get:
+      tags:
+        - observed-dashboard
+      summary: List of observed dashboard
+      operationId: observed-dashboard-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: source-kind
+          in: query
+          description: source kind
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-name
+          in: query
+          description: Order by name asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedDashboardApiDtoList'
+    post:
+      tags:
+        - observed-dashboard
+      summary: Create a new observed dashboard
+      operationId: observed-dashboard-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedDashboardApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedDashboardApiDto'
+    delete:
+      tags:
+        - observed-dashboard-batch
+      summary: Delete a collection of observed dashboard by filter
+      operationId: observed-dashboard-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: source-kind
+          in: query
+          description: source kind
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/dashboards/{uid}:
+    get:
+      tags:
+        - observed-dashboard
+      summary: Retrieve on  observed dashboard by their uid
+      operationId: observed-dashboard-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedDashboardApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - observed-dashboard
+      summary: Update a observed dashboard by their uid
+      operationId: observed-dashboard-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedDashboardApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedDashboardApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - observed-dashboard
+      summary: Delete a  observed dashboard by their uid
+      operationId: observed-dashboard-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/observe/dashboards/~/delete-status/{uid}:
+    get:
+      tags:
+        - observed-dashboard-batch
+      summary: Query the result of an massive delete
+      operationId: observed-dashboard-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/dashboards/-/audit/entity/{uid}:
+    get:
+      tags:
+        - observed-dashboard-audit
+      summary: Update a observed dashboard by their uid
+      operationId: observed-dashboard-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/dashboards/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - observed-dashboard-audit
+      summary: Update a observed dashboard by their uid
+      operationId: observed-dashboard-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/observe/dashboards:
+    get:
+      tags:
+        - observed-dashboard-acl
+      summary: Check for allow permissions for the current user on observed dashboard
+      operationId: observed-dashboard-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedDashboardGenericAcl'
+  /api/me/acl/observe/dashboards/{uid}:
+    get:
+      tags:
+        - observed-dashboard-acl
+      summary: Check for allow permissions for the current user on observed dashboard by their uid
+      operationId: observed-dashboard-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedDashboardSpecificAcl'
+        '404':
+          description: The item dont exists
   /api/template/template:
     get:
       tags:
@@ -7835,6 +8197,560 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/observe/sources:
+    get:
+      tags:
+        - observed-source
+      summary: List of observed source
+      operationId: observed-source-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: ingest-key
+          in: query
+          description: ingest key
+          required: false
+          schema:
+            type: string
+        - name: origin-ref
+          in: query
+          description: origin ref
+          required: false
+          schema:
+            type: string
+        - name: origin-type
+          in: query
+          description: origin type
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: kind
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceApiDtoList'
+    post:
+      tags:
+        - observed-source
+      summary: Create a new observed source
+      operationId: observed-source-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedSourceApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceApiDto'
+    delete:
+      tags:
+        - observed-source-batch
+      summary: Delete a collection of observed source by filter
+      operationId: observed-source-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: ingest-key
+          in: query
+          description: ingest key
+          required: false
+          schema:
+            type: string
+        - name: origin-ref
+          in: query
+          description: origin ref
+          required: false
+          schema:
+            type: string
+        - name: origin-type
+          in: query
+          description: origin type
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: kind
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/sources/{uid}:
+    get:
+      tags:
+        - observed-source
+      summary: Retrieve on  observed source by their uid
+      operationId: observed-source-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - observed-source
+      summary: Update a observed source by their uid
+      operationId: observed-source-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedSourceApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - observed-source
+      summary: Delete a  observed source by their uid
+      operationId: observed-source-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/observe/sources/~/delete-status/{uid}:
+    get:
+      tags:
+        - observed-source-batch
+      summary: Query the result of an massive delete
+      operationId: observed-source-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/sources/-/audit/entity/{uid}:
+    get:
+      tags:
+        - observed-source-audit
+      summary: Update a observed source by their uid
+      operationId: observed-source-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/sources/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - observed-source-audit
+      summary: Update a observed source by their uid
+      operationId: observed-source-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/sources/{uid}/enable:
+    patch:
+      tags:
+        - observed-source
+      summary: Update a observed source by their uid
+      operationId: observed-source-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceApiDto'
+        '404':
+          description: The item dont exists
+  /api/observe/sources/{uid}/disable:
+    patch:
+      tags:
+        - observed-source
+      summary: Update a observed source by their uid
+      operationId: observed-source-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/observe/sources:
+    get:
+      tags:
+        - observed-source-acl
+      summary: Check for allow permissions for the current user on observed source
+      operationId: observed-source-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceGenericAcl'
+  /api/me/acl/observe/sources/{uid}:
+    get:
+      tags:
+        - observed-source-acl
+      summary: Check for allow permissions for the current user on observed source by their uid
+      operationId: observed-source-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedSourceSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/observe/sources/~/enable:
+    patch:
+      tags:
+        - observed-source-batch
+      summary: enable a collection of observed source by filter
+      operationId: observed-source-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: ingest-key
+          in: query
+          description: ingest key
+          required: false
+          schema:
+            type: string
+        - name: origin-ref
+          in: query
+          description: origin ref
+          required: false
+          schema:
+            type: string
+        - name: origin-type
+          in: query
+          description: origin type
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: kind
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/sources/~/enable-status/{uid}:
+    get:
+      tags:
+        - observed-source-batch
+      summary: Query the result of an massive delete
+      operationId: observed-source-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/sources/~/disable:
+    patch:
+      tags:
+        - observed-source-batch
+      summary: disable a collection of observed source by filter
+      operationId: observed-source-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: ingest-key
+          in: query
+          description: ingest key
+          required: false
+          schema:
+            type: string
+        - name: origin-ref
+          in: query
+          description: origin ref
+          required: false
+          schema:
+            type: string
+        - name: origin-type
+          in: query
+          description: origin type
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: kind
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/sources/~/disable-status/{uid}:
+    get:
+      tags:
+        - observed-source-batch
+      summary: Query the result of an massive delete
+      operationId: observed-source-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
   /api/document/theme-asset:
@@ -9425,6 +10341,962 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsentPurposeSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/observe/config:
+    get:
+      tags:
+        - observability-config
+      summary: List of observability config
+      operationId: observability-config-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-code
+          in: query
+          description: Order by code asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservabilityConfigApiDtoList'
+    post:
+      tags:
+        - observability-config
+      summary: Create a new observability config
+      operationId: observability-config-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservabilityConfigApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservabilityConfigApiDto'
+    delete:
+      tags:
+        - observability-config-batch
+      summary: Delete a collection of observability config by filter
+      operationId: observability-config-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/config/{uid}:
+    get:
+      tags:
+        - observability-config
+      summary: Retrieve on  observability config by their uid
+      operationId: observability-config-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservabilityConfigApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - observability-config
+      summary: Update a observability config by their uid
+      operationId: observability-config-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservabilityConfigApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservabilityConfigApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - observability-config
+      summary: Delete a  observability config by their uid
+      operationId: observability-config-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/observe/config/~/delete-status/{uid}:
+    get:
+      tags:
+        - observability-config-batch
+      summary: Query the result of an massive delete
+      operationId: observability-config-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/config/-/audit/entity/{uid}:
+    get:
+      tags:
+        - observability-config-audit
+      summary: Update a observability config by their uid
+      operationId: observability-config-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/config/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - observability-config-audit
+      summary: Update a observability config by their uid
+      operationId: observability-config-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/observe/config:
+    get:
+      tags:
+        - observability-config-acl
+      summary: Check for allow permissions for the current user on observability config
+      operationId: observability-config-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservabilityConfigGenericAcl'
+  /api/me/acl/observe/config/{uid}:
+    get:
+      tags:
+        - observability-config-acl
+      summary: Check for allow permissions for the current user on observability config by their uid
+      operationId: observability-config-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservabilityConfigSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/observe/issues:
+    get:
+      tags:
+        - observed-issue
+      summary: List of observed issue
+      operationId: observed-issue-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: status
+          required: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: level
+          required: false
+          schema:
+            type: string
+        - name: fingerprint
+          in: query
+          description: fingerprint
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: title
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-title
+          in: query
+          description: Order by title asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueApiDtoList'
+    post:
+      tags:
+        - observed-issue
+      summary: Create a new observed issue
+      operationId: observed-issue-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedIssueApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueApiDto'
+    delete:
+      tags:
+        - observed-issue-batch
+      summary: Delete a collection of observed issue by filter
+      operationId: observed-issue-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: status
+          required: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: level
+          required: false
+          schema:
+            type: string
+        - name: fingerprint
+          in: query
+          description: fingerprint
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: title
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/issues/{uid}:
+    get:
+      tags:
+        - observed-issue
+      summary: Retrieve on  observed issue by their uid
+      operationId: observed-issue-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - observed-issue
+      summary: Update a observed issue by their uid
+      operationId: observed-issue-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedIssueApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - observed-issue
+      summary: Delete a  observed issue by their uid
+      operationId: observed-issue-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/observe/issues/~/delete-status/{uid}:
+    get:
+      tags:
+        - observed-issue-batch
+      summary: Query the result of an massive delete
+      operationId: observed-issue-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/-/audit/entity/{uid}:
+    get:
+      tags:
+        - observed-issue-audit
+      summary: Update a observed issue by their uid
+      operationId: observed-issue-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - observed-issue-audit
+      summary: Update a observed issue by their uid
+      operationId: observed-issue-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/{uid}/resolve:
+    patch:
+      tags:
+        - observed-issue
+      summary: Update a observed issue by their uid
+      operationId: observed-issue-api-resolve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueApiDto'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/{uid}/ignore:
+    patch:
+      tags:
+        - observed-issue
+      summary: Update a observed issue by their uid
+      operationId: observed-issue-api-ignore
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueApiDto'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/{uid}/reopen:
+    patch:
+      tags:
+        - observed-issue
+      summary: Update a observed issue by their uid
+      operationId: observed-issue-api-reopen
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/observe/issues:
+    get:
+      tags:
+        - observed-issue-acl
+      summary: Check for allow permissions for the current user on observed issue
+      operationId: observed-issue-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueGenericAcl'
+  /api/me/acl/observe/issues/{uid}:
+    get:
+      tags:
+        - observed-issue-acl
+      summary: Check for allow permissions for the current user on observed issue by their uid
+      operationId: observed-issue-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedIssueSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/~/resolve:
+    patch:
+      tags:
+        - observed-issue-batch
+      summary: resolve a collection of observed issue by filter
+      operationId: observed-issue-api-batch-resolve
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: status
+          required: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: level
+          required: false
+          schema:
+            type: string
+        - name: fingerprint
+          in: query
+          description: fingerprint
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: title
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/issues/~/resolve-status/{uid}:
+    get:
+      tags:
+        - observed-issue-batch
+      summary: Query the result of an massive delete
+      operationId: observed-issue-api-batch-resolve-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/~/ignore:
+    patch:
+      tags:
+        - observed-issue-batch
+      summary: ignore a collection of observed issue by filter
+      operationId: observed-issue-api-batch-ignore
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: status
+          required: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: level
+          required: false
+          schema:
+            type: string
+        - name: fingerprint
+          in: query
+          description: fingerprint
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: title
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/issues/~/ignore-status/{uid}:
+    get:
+      tags:
+        - observed-issue-batch
+      summary: Query the result of an massive delete
+      operationId: observed-issue-api-batch-ignore-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/issues/~/reopen:
+    patch:
+      tags:
+        - observed-issue-batch
+      summary: reopen a collection of observed issue by filter
+      operationId: observed-issue-api-batch-reopen
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: status
+          required: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: level
+          required: false
+          schema:
+            type: string
+        - name: fingerprint
+          in: query
+          description: fingerprint
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: title
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/issues/~/reopen-status/{uid}:
+    get:
+      tags:
+        - observed-issue-batch
+      summary: Query the result of an massive delete
+      operationId: observed-issue-api-batch-reopen-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
   /api/template/smtp-outbound-config:
@@ -11851,6 +13723,616 @@ paths:
                 $ref: '#/components/schemas/DcrInitialAccessTokenSpecificAcl'
         '404':
           description: The item dont exists
+  /api/observe/embeds:
+    get:
+      tags:
+        - observed-embed
+      summary: List of observed embed
+      operationId: observed-embed-api-list
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: token-hash
+          in: query
+          description: token hash
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: dashboard
+          in: query
+          description: dashboard
+          required: false
+          schema:
+            type: string
+        - name: dashboards
+          in: query
+          description: dashboards
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: origins
+          in: query
+          description: origins
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: limit
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: integer
+        - name: since-uid
+          in: query
+          description: The maximum number of results
+          required: false
+          schema:
+            type: string
+        - name: since-name
+          in: query
+          description: Order by name asc
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: The result order information
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedApiDtoList'
+    post:
+      tags:
+        - observed-embed
+      summary: Create a new observed embed
+      operationId: observed-embed-api-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedEmbedApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedApiDto'
+    delete:
+      tags:
+        - observed-embed-batch
+      summary: Delete a collection of observed embed by filter
+      operationId: observed-embed-api-batch-delete
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: token-hash
+          in: query
+          description: token hash
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: dashboard
+          in: query
+          description: dashboard
+          required: false
+          schema:
+            type: string
+        - name: dashboards
+          in: query
+          description: dashboards
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: origins
+          in: query
+          description: origins
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/embeds/{uid}:
+    get:
+      tags:
+        - observed-embed
+      summary: Retrieve on  observed embed by their uid
+      operationId: observed-embed-api-retrieve
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedApiDto'
+        '404':
+          description: The item dont exists
+    put:
+      tags:
+        - observed-embed
+      summary: Update a observed embed by their uid
+      operationId: observed-embed-api-update
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservedEmbedApiDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedApiDto'
+        '404':
+          description: The item dont exists
+    delete:
+      tags:
+        - observed-embed
+      summary: Delete a  observed embed by their uid
+      operationId: observed-embed-api-delete
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: The item dont exists
+  /api/observe/embeds/~/delete-status/{uid}:
+    get:
+      tags:
+        - observed-embed-batch
+      summary: Query the result of an massive delete
+      operationId: observed-embed-api-batch-delete-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/embeds/-/audit/entity/{uid}:
+    get:
+      tags:
+        - observed-embed-audit
+      summary: Update a observed embed by their uid
+      operationId: observed-embed-api-entity-audit
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/embeds/-/audit/actor/{actor}/{from}/{to}:
+    get:
+      tags:
+        - observed-embed-audit
+      summary: Update a observed embed by their uid
+      operationId: observed-embed-api-actor-audit
+      parameters:
+        - name: actor
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEventDto'
+        '404':
+          description: The item dont exists
+  /api/observe/embeds/{uid}/enable:
+    patch:
+      tags:
+        - observed-embed
+      summary: Update a observed embed by their uid
+      operationId: observed-embed-api-enable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedApiDto'
+        '404':
+          description: The item dont exists
+  /api/observe/embeds/{uid}/disable:
+    patch:
+      tags:
+        - observed-embed
+      summary: Update a observed embed by their uid
+      operationId: observed-embed-api-disable
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedApiDto'
+        '404':
+          description: The item dont exists
+  /api/me/acl/observe/embeds:
+    get:
+      tags:
+        - observed-embed-acl
+      summary: Check for allow permissions for the current user on observed embed
+      operationId: observed-embed-api-generic-acl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedGenericAcl'
+  /api/me/acl/observe/embeds/{uid}:
+    get:
+      tags:
+        - observed-embed-acl
+      summary: Check for allow permissions for the current user on observed embed by their uid
+      operationId: observed-embed-api-contextual-acl
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservedEmbedSpecificAcl'
+        '404':
+          description: The item dont exists
+  /api/observe/embeds/~/enable:
+    patch:
+      tags:
+        - observed-embed-batch
+      summary: enable a collection of observed embed by filter
+      operationId: observed-embed-api-batch-enable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: token-hash
+          in: query
+          description: token hash
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: dashboard
+          in: query
+          description: dashboard
+          required: false
+          schema:
+            type: string
+        - name: dashboards
+          in: query
+          description: dashboards
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: origins
+          in: query
+          description: origins
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/embeds/~/enable-status/{uid}:
+    get:
+      tags:
+        - observed-embed-batch
+      summary: Query the result of an massive delete
+      operationId: observed-embed-api-batch-enable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/observe/embeds/~/disable:
+    patch:
+      tags:
+        - observed-embed-batch
+      summary: disable a collection of observed embed by filter
+      operationId: observed-embed-api-batch-disable
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: token-hash
+          in: query
+          description: token hash
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: dashboard
+          in: query
+          description: dashboard
+          required: false
+          schema:
+            type: string
+        - name: dashboards
+          in: query
+          description: dashboards
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+        - name: origin
+          in: query
+          description: origin
+          required: false
+          schema:
+            type: string
+        - name: origins
+          in: query
+          description: origins
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/observe/embeds/~/disable-status/{uid}:
+    get:
+      tags:
+        - observed-embed-batch
+      summary: Query the result of an massive delete
+      operationId: observed-embed-api-batch-disable-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
   /api/identity/users:
     get:
       tags:
@@ -12146,50 +14628,6 @@ paths:
                   $ref: '#/components/schemas/AuditEventDto'
         '404':
           description: The item dont exists
-  /api/identity/users/{uid}/accept:
-    patch:
-      tags:
-        - user
-      summary: Update a user by their uid
-      operationId: user-api-accept
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserApiDto'
-        '404':
-          description: The item dont exists
-  /api/identity/users/{uid}/reject:
-    patch:
-      tags:
-        - user
-      summary: Update a user by their uid
-      operationId: user-api-reject
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserApiDto'
-        '404':
-          description: The item dont exists
   /api/identity/users/{uid}/disable:
     patch:
       tags:
@@ -12256,6 +14694,50 @@ paths:
                 $ref: '#/components/schemas/UserApiDto'
         '404':
           description: The item dont exists
+  /api/identity/users/{uid}/accept:
+    patch:
+      tags:
+        - user
+      summary: Update a user by their uid
+      operationId: user-api-accept
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiDto'
+        '404':
+          description: The item dont exists
+  /api/identity/users/{uid}/reject:
+    patch:
+      tags:
+        - user
+      summary: Update a user by their uid
+      operationId: user-api-reject
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiDto'
+        '404':
+          description: The item dont exists
   /api/me/acl/identity/users:
     get:
       tags:
@@ -12289,154 +14771,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserSpecificAcl'
-        '404':
-          description: The item dont exists
-  /api/identity/users/~/accept:
-    patch:
-      tags:
-        - user-batch
-      summary: accept a collection of user by filter
-      operationId: user-api-batch-accept
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: name
-          in: query
-          description: name
-          required: false
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          description: tenant
-          required: false
-          schema:
-            type: string
-        - name: tenants
-          in: query
-          description: tenants
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/identity/users/~/accept-status/{uid}:
-    get:
-      tags:
-        - user-batch
-      summary: Query the result of an massive delete
-      operationId: user-api-batch-accept-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
-        '404':
-          description: The item dont exists
-  /api/identity/users/~/reject:
-    patch:
-      tags:
-        - user-batch
-      summary: reject a collection of user by filter
-      operationId: user-api-batch-reject
-      parameters:
-        - name: uids
-          in: query
-          description: Filter by a list of ids
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: false
-        - name: search
-          in: query
-          description: Textual search
-          required: false
-          schema:
-            type: string
-        - name: name
-          in: query
-          description: name
-          required: false
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          description: tenant
-          required: false
-          schema:
-            type: string
-        - name: tenants
-          in: query
-          description: tenants
-          required: false
-          schema:
-            type: array
-            items: 
-              type: string
-          style: form
-          explode: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskLocator'
-  /api/identity/users/~/reject-status/{uid}:
-    get:
-      tags:
-        - user-batch
-      summary: Query the result of an massive delete
-      operationId: user-api-batch-reject-query
-      parameters:
-        - name: uid
-          in: path
-          description: The iten identification
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchTaskDetail'
         '404':
           description: The item dont exists
   /api/identity/users/~/disable:
@@ -12645,6 +14979,154 @@ paths:
         - user-batch
       summary: Query the result of an massive delete
       operationId: user-api-batch-unlock-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/identity/users/~/accept:
+    patch:
+      tags:
+        - user-batch
+      summary: accept a collection of user by filter
+      operationId: user-api-batch-accept
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/identity/users/~/accept-status/{uid}:
+    get:
+      tags:
+        - user-batch
+      summary: Query the result of an massive delete
+      operationId: user-api-batch-accept-query
+      parameters:
+        - name: uid
+          in: path
+          description: The iten identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskDetail'
+        '404':
+          description: The item dont exists
+  /api/identity/users/~/reject:
+    patch:
+      tags:
+        - user-batch
+      summary: reject a collection of user by filter
+      operationId: user-api-batch-reject
+      parameters:
+        - name: uids
+          in: query
+          description: Filter by a list of ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: search
+          in: query
+          description: Textual search
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: name
+          required: false
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: tenant
+          required: false
+          schema:
+            type: string
+        - name: tenants
+          in: query
+          description: tenants
+          required: false
+          schema:
+            type: array
+            items: 
+              type: string
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTaskLocator'
+  /api/identity/users/~/reject-status/{uid}:
+    get:
+      tags:
+        - user-batch
+      summary: Query the result of an massive delete
+      operationId: user-api-batch-reject-query
       parameters:
         - name: uid
           in: path
@@ -14812,6 +17294,164 @@ components:
           type: array
           items:
             type: string
+    PanelsApiDto:
+      type: object
+      description: Chart of a dashboard its type, its query and its place in the grid of twelve columns.
+      properties:
+        uid:
+          description: Unique identifier of the panel.
+          type: string
+        title:
+          description: Title of the panel.
+          type: string
+        description:
+          description: Help text of the panel.
+          type: string
+        chartType:
+          description: Kind of chart, from the catalog of the viewer timeseries, bars, stat, gauge, table, heatmap, scatter, logs, issues, status or text. Free text checked by the viewer the generator does not build option enums for the child entities.
+          type: string
+        query:
+          description: Query of the panel, as JSON with the query model of the viewer.
+          type: string
+        options:
+          description: Display options of the panel, as JSON unit, thresholds, stacking, legend, scale, decimals and colors per series.
+          type: string
+        x:
+          description: Column of the grid where the panel starts (0-11).
+          type: integer
+          format: int32
+        y:
+          description: Row of the grid where the panel starts.
+          type: integer
+          format: int32
+        w:
+          description: Width of the panel, in columns (1-12).
+          type: integer
+          format: int32
+        h:
+          description: Height of the panel, in rows.
+          type: integer
+          format: int32
+        version:
+          description: Campo con el número de version de observed panel para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ObservedDashboardApiDto:
+      type: object
+      description: Grid of panels of the viewer, each one a chart with its query. A template dashboard (source-variable) is applied to the origin chosen in the viewer. The builtin dashboards are seeded by the install of the trait they are not edited, they are duplicated.
+      properties:
+        uid:
+          description: Unique identifier of the dashboard.
+          type: string
+        code:
+          description: Code of the dashboard, used in the links of the viewer.
+          type: string
+        name:
+          description: Name shown in the viewer.
+          type: string
+        description:
+          description: What the dashboard shows.
+          type: string
+        builtin:
+          description: Seeded by the install of the trait it is not edited nor deleted, only duplicated.
+          type: boolean
+        sourceVariable:
+          description: The dashboard is a template applied to an origin chosen in the viewer ($source).
+          type: boolean
+        sourceKind:
+          description: For a template, the kind of origin it is the default dashboard of.
+          type: string
+          enum: [backend,frontend,worker,mobile]
+        defaultRange:
+          description: Time range shown when the dashboard is opened.
+          type: string
+          enum: [hour,six-hours,day,week,month]
+        refresh:
+          description: Automatic refresh interval of the dashboard; manual to refresh only on demand.
+          type: string
+          enum: [manual,ten-seconds,thirty-seconds,minute,five-minutes]
+        panels:
+          description: Panels of the dashboard.
+          type: array
+          items:
+            $ref: '#/components/schemas/PanelsApiDto'
+        version:
+          description: Campo con el número de version de observed dashboard para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ObservedDashboardApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservedDashboardApiDto'
+    ObservedDashboardGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedDashboardAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedDashboardAclFields'
+    ObservedDashboardSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedDashboardAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedDashboardAclFields'
+    ObservedDashboardAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    ObservedDashboardAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    ObservedDashboardAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
     MessageApiDto:
       type: object
       description: Outbox entry for an outgoing notification (currently an email) the rendered content waits here until the dispatcher sends it, retrying on failure.
@@ -14913,6 +17553,187 @@ components:
         - update
         - delete
     MessageAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    ObservedSourceApiDto:
+      type: object
+      description: Origin allowed to send telemetry (logs and traces) the application itself, a client application or an api. It is the only table the ingestion checks. The rows of the referenced entities (oauth clients, resource servers) are created and updated by the synchronization of the trait; the others are created by hand. It is not tenant data only the managers of the platform see it.
+      properties:
+        uid:
+          description: Unique identifier of the origin.
+          type: string
+        originType:
+          description: Where the origin comes from app (a client application), api (a resource server), self (this application) or own (created by hand).
+          type: string
+        originRef:
+          description: Identifier of the row of the referenced entity (oauth client or resource server). Not a foreign key, so the referenced row can be deleted the origin is then marked as detached.
+          type: string
+        managed:
+          description: The origin is kept in sync from a referenced entity its code, name and origin-enabled are overwritten by the synchronization.
+          type: boolean
+        code:
+          description: Code of the origin, sent with every event as its source (service name).
+          type: string
+        name:
+          description: Name shown in the viewer.
+          type: string
+        kind:
+          description: What the origin is it chooses its predefined dashboard and the suggested SDK.
+          type: string
+          enum: [backend,frontend,worker,mobile]
+        originEnabled:
+          description: Copy of the enabled flag of the referenced entity a disabled client or api cannot send telemetry.
+          type: boolean
+        detached:
+          description: The referenced row was deleted. The origin and its data are kept, but it cannot send telemetry.
+          type: boolean
+        environment:
+          description: Deployment environment of the origin (dev, pre, pro...), shown in the viewer.
+          type: string
+        ingestKey:
+          description: Key the origin sends in the X-Observe-Key header. Generated at random when the origin is created; only the administrators of the observability see it.
+          type: string
+        allowedOrigins:
+          description: Comma-separated web origins (scheme://host:port) a browser can send from with this key. Empty to accept only server to server calls.
+          type: string
+        minLevel:
+          description: Minimum level of the logs that are stored TRACE, DEBUG, INFO, WARN, ERROR or FATAL.
+          type: string
+        traceSampleRate:
+          description: Percentage (0-100) of the traces that are stored; the traces with errors are always stored.
+          type: integer
+          format: int32
+        errorSampleRate:
+          description: Percentage (0-100) of the error events that are stored.
+          type: integer
+          format: int32
+        rateLimit:
+          description: Events per minute accepted from the origin; the excess is discarded and counted in dropped-count.
+          type: integer
+          format: int32
+        metricsMode:
+          description: How the metrics of the origin arrive push (OTLP or the SDK), scrape (the collector reads scrape-url) or disabled.
+          type: string
+          enum: [push,scrape,disabled]
+        scrapeUrl:
+          description: Prometheus endpoint the collector reads when metrics-mode is scrape (e.g. http://billing:8080/q/metrics).
+          type: string
+        scrapeInterval:
+          description: Seconds between two reads of scrape-url.
+          type: integer
+          format: int32
+        maxSeries:
+          description: Maximum number of metric series of the origin; the new ones above it are added to an __overflow__ series.
+          type: integer
+          format: int32
+        deriveMetrics:
+          description: Computes RED metrics from the spans and counts from the logs and errors of the origin.
+          type: boolean
+        retentionDays:
+          description: Days the data of the origin are kept. Empty to use the global retention of the configuration.
+          type: integer
+          format: int32
+        scrubFields:
+          description: Comma-separated extra keys masked in the events of the origin, besides the global ones of the configuration.
+          type: string
+        lastSeenAt:
+          description: When the last event of the origin arrived (updated at most once a minute).
+          type: string
+          format: date-time
+        droppedCount:
+          description: Events of the origin discarded by the rate limit or because the queue was full.
+          type: integer
+          format: int32
+        enabled:
+          description: A disabled origin is rejected by the ingestion, without deleting it or its data.
+          type: boolean
+        version:
+          description: Campo con el número de version de observed source para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ObservedSourceApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservedSourceApiDto'
+    ObservedSourceGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedSourceAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedSourceAclFields'
+    ObservedSourceSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedSourceAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedSourceAclFields'
+    ObservedSourceAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    ObservedSourceAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    ObservedSourceAclFields:
       type: object
       properties:
         noEditables:
@@ -15420,6 +18241,281 @@ components:
         - update
         - delete
     ConsentPurposeAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    ObservabilityConfigApiDto:
+      type: object
+      description: Global configuration of the observability retention of each kind of data, disk limit and the masking of the events. It has a single row (code default), created by the install of the trait; the values of config/observability.yaml are used while it does not exist.
+      properties:
+        uid:
+          description: Unique identifier of the configuration.
+          type: string
+        code:
+          description: Code of the configuration; there is only one, named default.
+          type: string
+        retentionDaysLogs:
+          description: Days the logs are kept.
+          type: integer
+          format: int32
+        retentionDaysTraces:
+          description: Days the spans are kept.
+          type: integer
+          format: int32
+        retentionDaysErrors:
+          description: Days the raw error events are kept; the issues do not expire.
+          type: integer
+          format: int32
+        retentionDaysMetrics:
+          description: Days the metric points of one minute resolution are kept.
+          type: integer
+          format: int32
+        retentionDaysMetricsRollup:
+          description: Days the metric points of one hour resolution are kept, to compare with the previous year.
+          type: integer
+          format: int32
+        maxDiskMb:
+          description: Hard limit of the store, in megabytes above it the purge deletes the oldest days even inside their retention.
+          type: integer
+          format: int32
+        scrubFields:
+          description: Comma-separated keys whose values are masked in every event before it is stored.
+          type: string
+        labelDenylist:
+          description: Comma-separated metric labels discarded on arrival, to keep the number of series bounded.
+          type: string
+        captureRequestBody:
+          description: Stores the body of the requests in the spans of the application (masked with scrub-fields).
+          type: boolean
+        version:
+          description: Campo con el número de version de observability config para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ObservabilityConfigApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservabilityConfigApiDto'
+    ObservabilityConfigGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservabilityConfigAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ObservabilityConfigAclFields'
+    ObservabilityConfigSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservabilityConfigAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ObservabilityConfigAclFields'
+    ObservabilityConfigAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - list
+    ObservabilityConfigAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+    ObservabilityConfigAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
+    ObservedSourceApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/observe/sources"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - origin
+    ObservedIssueApiDto:
+      type: object
+      description: Group of identical error events reported by an observed source. Events are grouped automatically by their fingerprint (exception type and first in-app stack frames), so operators triage one issue with its count and first/last occurrence instead of every single event. It is not an alert it is never configured and never notifies. Resolving an issue closes it until the same fingerprint is seen again, which reopens it as a regression.
+      properties:
+        uid:
+          description: Unique identifier of the issue.
+          type: string
+        origin:
+          $ref: '#/components/schemas/ObservedSourceApiRef'
+        fingerprint:
+          description: Hash of the exception type and the first in-app frames without line numbers (or of the normalized message); unique per source.
+          type: string
+        title:
+          description: Exception type and normalized message.
+          type: string
+        culprit:
+          description: Function or file of the first in-app frame.
+          type: string
+        level:
+          description: Level of the grouped events.
+          type: string
+          enum: [warning,error,fatal]
+        status:
+          description: Triage state UNRESOLVED, RESOLVED (closed until it is seen again, then it reopens as a regression) or IGNORED.
+          type: string
+          enum: [unresolved,resolved,ignored]
+        firstSeenAt:
+          description: When the first event of the issue arrived.
+          type: string
+          format: date-time
+        lastSeenAt:
+          description: When the last event of the issue arrived.
+          type: string
+          format: date-time
+        count:
+          description: Number of events grouped in the issue.
+          type: integer
+          format: int32
+        lastEventId:
+          description: Identifier of the last raw event in the store, to open it.
+          type: string
+        lastTraceId:
+          description: Trace of the last event, to open it in the viewer.
+          type: string
+        release:
+          description: Last version of the origin where the issue was seen.
+          type: string
+        version:
+          description: Campo con el número de version de observed issue para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ObservedIssueApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservedIssueApiDto'
+    ObservedIssueGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedIssueAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedIssueAclFields'
+    ObservedIssueSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedIssueAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedIssueAclFields'
+    ObservedIssueAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        resolve:
+          $ref: '#/components/schemas/CommonAllow'
+        ignore:
+          $ref: '#/components/schemas/CommonAllow'
+        reopen:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - resolve
+        - ignore
+        - reopen
+        - list
+    ObservedIssueAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        resolve:
+          $ref: '#/components/schemas/CommonAllow'
+        ignore:
+          $ref: '#/components/schemas/CommonAllow'
+        reopen:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - resolve
+        - ignore
+        - reopen
+    ObservedIssueAclFields:
       type: object
       properties:
         noEditables:
@@ -16043,6 +19139,154 @@ components:
           type: array
           items:
             type: string
+    ObservedDashboardApiRef:
+      type: object
+      properties:
+        $ref:
+          type: string
+          x-relationship:
+            url: "/api/observe/dashboards"
+            method: "GET"
+            reference: "uid"
+            batch-query-param: "uids"
+      required:
+        - uid
+        - name
+        - dashboard
+    ObservedEmbedApiDto:
+      type: object
+      description: Read only permission to embed a dashboard or a panel outside the viewer (a wall screen, an internal wiki). It never gives access to the viewer it serves only what it points to, from the allowed origins, until it expires or is disabled.
+      properties:
+        uid:
+          description: Unique identifier of the embed.
+          type: string
+        name:
+          description: What the embed is for (operations screen, internal wiki...).
+          type: string
+        dashboard:
+          $ref: '#/components/schemas/ObservedDashboardApiRef'
+        panelUid:
+          description: Identifier of one panel of the dashboard to embed only that panel; empty to embed the whole dashboard.
+          type: string
+        origin:
+          $ref: '#/components/schemas/ObservedSourceApiRef'
+        tokenHash:
+          description: Digest of the token of the embed; the raw value is shown only when it is created or rotated.
+          type: string
+        allowedOrigins:
+          description: Comma-separated web origins (scheme://host:port) that can embed it (frame-ancestors and CORS).
+          type: string
+        maxRange:
+          description: Largest time range that can be queried through the embed.
+          type: string
+          enum: [hour,six-hours,day,week,month]
+        minRefresh:
+          description: Seconds the server caches the answers of the embed, so many viewers do not load the store.
+          type: integer
+          format: int32
+        allowRaw:
+          description: False only aggregates (metrics, counts) are served. True also the panels of logs, traces and issues.
+          type: boolean
+        expiresAt:
+          description: When the embed stops working; empty for no expiration.
+          type: string
+          format: date-time
+        lastUsedAt:
+          description: When the embed was last served.
+          type: string
+          format: date-time
+        enabled:
+          description: A disabled embed is rejected, without deleting it.
+          type: boolean
+        version:
+          description: Campo con el número de version de observed embed para controlar bloqueos optimistas
+          type: integer
+          format: int32
+    ObservedEmbedApiDtoList:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservedEmbedApiDto'
+    ObservedEmbedGenericAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedEmbedAclGenericAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedEmbedAclFields'
+    ObservedEmbedSpecificAcl:
+      type: object
+      properties:
+        allows:
+          $ref: '#/components/schemas/ObservedEmbedAclSpecificAllows'
+        fields:
+          $ref: '#/components/schemas/ObservedEmbedAclFields'
+    ObservedEmbedAclGenericAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+        list:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+        - list
+    ObservedEmbedAclSpecificAllows:
+      type: object
+      properties:
+        retrieve:
+          $ref: '#/components/schemas/CommonAllow'
+        create:
+          $ref: '#/components/schemas/CommonAllow'
+        update:
+          $ref: '#/components/schemas/CommonAllow'
+        delete:
+          $ref: '#/components/schemas/CommonAllow'
+        enable:
+          $ref: '#/components/schemas/CommonAllow'
+        disable:
+          $ref: '#/components/schemas/CommonAllow'
+      required:
+        - retrieve
+        - create
+        - update
+        - delete
+        - enable
+        - disable
+    ObservedEmbedAclFields:
+      type: object
+      properties:
+        noEditables:
+          type: array
+          items:
+            type: string
+        noVisibles:
+          type: array
+          items:
+            type: string
     UserApiDto:
       type: object
       description: Person who signs in to a tenant, with a password, a federated identity provider, passkeys or a second factor.
@@ -16133,15 +19377,15 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         delete:
           $ref: '#/components/schemas/CommonAllow'
-        accept:
-          $ref: '#/components/schemas/CommonAllow'
-        reject:
-          $ref: '#/components/schemas/CommonAllow'
         disable:
           $ref: '#/components/schemas/CommonAllow'
         enable:
           $ref: '#/components/schemas/CommonAllow'
         unlock:
+          $ref: '#/components/schemas/CommonAllow'
+        accept:
+          $ref: '#/components/schemas/CommonAllow'
+        reject:
           $ref: '#/components/schemas/CommonAllow'
         list:
           $ref: '#/components/schemas/CommonAllow'
@@ -16150,11 +19394,11 @@ components:
         - create
         - update
         - delete
-        - accept
-        - reject
         - disable
         - enable
         - unlock
+        - accept
+        - reject
         - list
     UserAclSpecificAllows:
       type: object
@@ -16167,26 +19411,26 @@ components:
           $ref: '#/components/schemas/CommonAllow'
         delete:
           $ref: '#/components/schemas/CommonAllow'
-        accept:
-          $ref: '#/components/schemas/CommonAllow'
-        reject:
-          $ref: '#/components/schemas/CommonAllow'
         disable:
           $ref: '#/components/schemas/CommonAllow'
         enable:
           $ref: '#/components/schemas/CommonAllow'
         unlock:
           $ref: '#/components/schemas/CommonAllow'
+        accept:
+          $ref: '#/components/schemas/CommonAllow'
+        reject:
+          $ref: '#/components/schemas/CommonAllow'
       required:
         - retrieve
         - create
         - update
         - delete
-        - accept
-        - reject
         - disable
         - enable
         - unlock
+        - accept
+        - reject
     UserAclFields:
       type: object
       properties:

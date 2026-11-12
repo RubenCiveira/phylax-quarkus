@@ -58,12 +58,12 @@ public class BlockedUntilVO {
    * @return An empty instance
    */
   public static BlockedUntilVO tryFrom(final Object blockedUntil) {
-    ConstraintFailList list = new ConstraintFailList();
-    BlockedUntilVO result = tryFrom(blockedUntil, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for BlockedUntilVO.blocked-until", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    BlockedUntilVO voInstance = tryFrom(blockedUntil, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for BlockedUntilVO.blocked-until", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

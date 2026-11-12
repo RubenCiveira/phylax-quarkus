@@ -56,13 +56,13 @@ public class FrontchannelLogoutUriVO {
    * @return An empty instance
    */
   public static FrontchannelLogoutUriVO tryFrom(final Object frontchannelLogoutUri) {
-    ConstraintFailList list = new ConstraintFailList();
-    FrontchannelLogoutUriVO result = tryFrom(frontchannelLogoutUri, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    FrontchannelLogoutUriVO voInstance = tryFrom(frontchannelLogoutUri, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for FrontchannelLogoutUriVO.frontchannel-logout-uri", list);
+          "Invalid value for FrontchannelLogoutUriVO.frontchannel-logout-uri", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

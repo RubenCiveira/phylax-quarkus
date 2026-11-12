@@ -31,8 +31,7 @@ public class LogsMapper {
             .setVersion(sl.scope().version()).build();
 
         for (var log : sl.logRecords()) {
-          result.add(OtlpLogRecordData.builder()
-              // .body(log.body())
+          result.add(OtlpLogRecordData.builder().body(toBody(log.body()))
               .severity(toSeverity(log.severityNumber())).severityText(log.severityText())
               .timestampEpochNanos(log.timeUnixNano())
               .spanContext(toSpanContext(log.traceId(), log.spanId()))
@@ -42,6 +41,18 @@ public class LogsMapper {
       }
     }
     return result;
+  }
+
+  @SuppressWarnings("deprecation")
+  private io.opentelemetry.sdk.logs.data.Body toBody(OtlpAnyValue value) {
+    if (value == null) {
+      return io.opentelemetry.sdk.logs.data.Body.empty();
+    }
+    Object scalar = value.stringValue() != null ? value.stringValue()
+        : value.intValue() != null ? value.intValue()
+            : value.doubleValue() != null ? value.doubleValue() : value.boolValue();
+    return scalar == null ? io.opentelemetry.sdk.logs.data.Body.empty()
+        : io.opentelemetry.sdk.logs.data.Body.string(String.valueOf(scalar));
   }
 
   private Severity toSeverity(int n) {

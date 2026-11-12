@@ -57,12 +57,12 @@ public class StatusVO {
    * @return An empty instance
    */
   public static StatusVO tryFrom(final Object status) {
-    ConstraintFailList list = new ConstraintFailList();
-    StatusVO result = tryFrom(status, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for StatusVO.status", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    StatusVO voInstance = tryFrom(status, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for StatusVO.status", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

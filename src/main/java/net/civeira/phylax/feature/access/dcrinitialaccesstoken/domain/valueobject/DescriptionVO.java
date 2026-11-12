@@ -55,12 +55,12 @@ public class DescriptionVO {
    * @return An empty instance
    */
   public static DescriptionVO tryFrom(final Object description) {
-    ConstraintFailList list = new ConstraintFailList();
-    DescriptionVO result = tryFrom(description, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for DescriptionVO.description", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    DescriptionVO voInstance = tryFrom(description, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for DescriptionVO.description", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

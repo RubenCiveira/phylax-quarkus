@@ -10,6 +10,7 @@ import net.civeira.phylax.common.batch.BatchProgress;
 import net.civeira.phylax.common.batch.BatchService;
 import net.civeira.phylax.common.batch.ExecutorByDeferSteps;
 import net.civeira.phylax.common.batch.ExecutorPlan;
+import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.exception.NotAllowedException;
 import net.civeira.phylax.common.exception.NotFoundException;
 import net.civeira.phylax.common.security.OperationContext;
@@ -208,6 +209,11 @@ public class UserRejectUsecase {
    * @return
    */
   User doReject(final OperationContext context, final User original) {
+    if (!original.isReadyToReject()) {
+      Trace.addEvent("Precondition ready-to-reject not met to reject");
+      throw new ExecutionException("Precondition ready-to-reject not met",
+          "precondition.ready-to-reject", "Only when the approval status is PENDING or ACCEPTED.");
+    }
     UserRejectCheck proposal = new UserRejectCheck(context, original);
     execProposalEmitter.fire(proposal);
     User result = original.reject();

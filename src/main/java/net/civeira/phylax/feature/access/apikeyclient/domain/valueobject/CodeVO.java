@@ -43,12 +43,12 @@ public class CodeVO {
    * @return An empty instance
    */
   public static CodeVO tryFrom(final Object code) {
-    ConstraintFailList list = new ConstraintFailList();
-    CodeVO result = tryFrom(code, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for CodeVO.code", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    CodeVO voInstance = tryFrom(code, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for CodeVO.code", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

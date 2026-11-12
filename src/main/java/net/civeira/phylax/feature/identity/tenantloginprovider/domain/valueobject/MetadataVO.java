@@ -66,12 +66,12 @@ public class MetadataVO {
    * @return An empty instance
    */
   public static MetadataVO tryFrom(final Object metadata) {
-    ConstraintFailList list = new ConstraintFailList();
-    MetadataVO result = tryFrom(metadata, list);
-    if (list.hasErrors()) {
-      throw new ConstraintException("Invalid value for MetadataVO.metadata", list);
+    ConstraintFailList voFails = new ConstraintFailList();
+    MetadataVO voInstance = tryFrom(metadata, voFails);
+    if (voFails.hasErrors()) {
+      throw new ConstraintException("Invalid value for MetadataVO.metadata", voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

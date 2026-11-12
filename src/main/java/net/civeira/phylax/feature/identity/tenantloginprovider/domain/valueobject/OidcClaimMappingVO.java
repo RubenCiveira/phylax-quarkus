@@ -56,13 +56,13 @@ public class OidcClaimMappingVO {
    * @return An empty instance
    */
   public static OidcClaimMappingVO tryFrom(final Object oidcClaimMapping) {
-    ConstraintFailList list = new ConstraintFailList();
-    OidcClaimMappingVO result = tryFrom(oidcClaimMapping, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    OidcClaimMappingVO voInstance = tryFrom(oidcClaimMapping, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException("Invalid value for OidcClaimMappingVO.oidc-claim-mapping",
-          list);
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**

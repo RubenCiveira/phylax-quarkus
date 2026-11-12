@@ -59,13 +59,14 @@ public class BackchannelTokenDeliveryModeVO {
    * @return An empty instance
    */
   public static BackchannelTokenDeliveryModeVO tryFrom(final Object backchannelTokenDeliveryMode) {
-    ConstraintFailList list = new ConstraintFailList();
-    BackchannelTokenDeliveryModeVO result = tryFrom(backchannelTokenDeliveryMode, list);
-    if (list.hasErrors()) {
+    ConstraintFailList voFails = new ConstraintFailList();
+    BackchannelTokenDeliveryModeVO voInstance = tryFrom(backchannelTokenDeliveryMode, voFails);
+    if (voFails.hasErrors()) {
       throw new ConstraintException(
-          "Invalid value for BackchannelTokenDeliveryModeVO.backchannel-token-delivery-mode", list);
+          "Invalid value for BackchannelTokenDeliveryModeVO.backchannel-token-delivery-mode",
+          voFails);
     }
-    return result;
+    return voInstance;
   }
 
   /**
