@@ -9,6 +9,11 @@ Title* (string)::
 Exception type and normalized message.
 Culprit (string)::
 Function or file of the first in-app frame.
+Kind* (ObservedIssueKindOptions)::
+ERROR: errors grouped by fingerprint. PERFORMANCE: performance problems detected in the traces (N+1 queries, slow operations).Los posibles valores que toma el campo son:
+ * ERROR
+ * PERFORMANCE
+
 Level* (ObservedIssueLevelOptions)::
 Level of the grouped events.Los posibles valores que toma el campo son:
  * warning
@@ -16,11 +21,24 @@ Level of the grouped events.Los posibles valores que toma el campo son:
  * fatal
 
 Status* (ObservedIssueStatusOptions)::
-Triage state: UNRESOLVED, RESOLVED (closed until it is seen again, then it reopens as a regression) or IGNORED.Los posibles valores que toma el campo son:
+Triage state: UNRESOLVED, RESOLVED (closed until it is seen again, then it reopens as a regression), IGNORED or MERGED (its events count in merged-into).Los posibles valores que toma el campo son:
  * UNRESOLVED
  * RESOLVED
  * IGNORED
+ * MERGED
 
+Merged into (string)::
+Uid of the issue this one was merged into; its fingerprint is an alias of that issue.
+Assignee (string)::
+Who takes care of the issue (the user of the viewer that assigned it).
+Assignee name (string)::
+Name of the assignee, as the viewer shows it.
+Ignore until (datetime)::
+An IGNORED issue reopens after this moment (empty: ignored for ever, or by count).
+Ignore until count (integer)::
+An IGNORED issue reopens when its count reaches this value (empty: ignored for ever, or by date).
+Tracker url (string)::
+Task of the issue in the issue tracker (Redmine, Jira...).
 First seen at (datetime)::
 When the first event of the issue arrived.
 Last seen at (datetime)::
@@ -31,7 +49,17 @@ Last event id (string)::
 Identifier of the last raw event in the store, to open it.
 Last trace id (string)::
 Trace of the last event, to open it in the viewer.
+Users* (integer)::
+Approximate number of distinct users (or browser sessions, when the event has no user) that suffered the issue.
+Tenants* (integer)::
+Approximate number of distinct tenants where the issue was seen.
+Users sketch (blob)::
+HyperLogLog sketch of the pseudonymized users, to keep counting without storing them (base64; not reversible).
+Tenants sketch (blob)::
+HyperLogLog sketch of the pseudonymized tenants (base64; not reversible).
+First release (string)::
+Version of the origin where the issue was seen for the first time.
 Release (string)::
-Last version of the origin where the issue was seen.
+Last version of the origin where the issue was seen. A RESOLVED issue reopens only when it is seen again in a later version (resolved in the next release).
 Version (integer)::
 Campo con el número de version de observed issue para controlar bloqueos optimistas

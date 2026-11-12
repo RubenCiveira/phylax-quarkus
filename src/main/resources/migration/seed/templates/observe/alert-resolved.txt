@@ -1,0 +1,9 @@
+RESOLVED: {{rule.name}}
+
+{{alert.summary}}
+
+The condition ended at {{alert.resolved_at}}.
+
+Open in the viewer: {{alert.link}}
+
+{{app.title}} · trigger {{rule.trigger}}

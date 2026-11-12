@@ -36,6 +36,13 @@ import net.civeira.phylax.feature.observe.store.ObsSpan;
 public class TelemetryMapper {
 
   private static final AttributeKey<String> SERVICE = AttributeKey.stringKey("service.name");
+  private static final AttributeKey<String> VERSION = AttributeKey.stringKey("service.version");
+  private static final AttributeKey<String> ENV =
+      AttributeKey.stringKey("deployment.environment.name");
+  /** Name of the semantic conventions before 1.27. */
+  private static final AttributeKey<String> ENV_OLD =
+      AttributeKey.stringKey("deployment.environment");
+  private static final AttributeKey<String> SESSION = AttributeKey.stringKey("session.id");
 
   /** Value stored instead of a masked attribute. */
   public static final String MASKED = "[masked]";
@@ -46,6 +53,10 @@ public class TelemetryMapper {
       defaultValue = "true") boolean observeSelf;
   private final @ConfigProperty(name = "app.observe.self-source",
       defaultValue = "phylax-api") String selfSource;
+  private final @ConfigProperty(name = "app.observe.sampling.target-per-minute",
+      defaultValue = "0") int targetPerMinute;
+  private final @ConfigProperty(name = "app.observe.self-release") Optional<String> selfRelease;
+  private final @ConfigProperty(name = "app.observe.self-env") Optional<String> selfEnv;
 
   /**
    * Source of an event.
@@ -67,15 +78,20 @@ public class TelemetryMapper {
 
   public Optional<ObsSpan> span(final Source source, final SpanData span) {
     boolean error = span.getStatus().getStatusCode() == StatusCode.ERROR;
-    if (!error && !sampled(span.getTraceId(), source.sampleRate())) {
+    if (!error && !sampled(span.getTraceId(), effectiveRate(source))) {
       return Optional.empty();
     }
     String parent = parentId(span);
     long start = TimeUnit.NANOSECONDS.toMillis(span.getStartEpochNanos());
     double duration = (span.getEndEpochNanos() - span.getStartEpochNanos()) / 1_000_000.0;
+    Attributes resource = null == span.getResource() ? null : span.getResource().getAttributes();
+    String release = release(source, resource);
+    Map<String, Object> attrs = withSession(attributes(span.getAttributes()), resource);
+    registry.seenRelease(source.code(), release);
     return Optional.of(new ObsSpan(start, source.code(), span.getTraceId(), span.getSpanId(),
         parent, span.getName(), span.getKind().name(), duration,
-        span.getStatus().getStatusCode().name(), scrub(source, attributes(span.getAttributes()))));
+        span.getStatus().getStatusCode().name(), scrub(source, attrs), release,
+        env(source, resource)));
   }
 
   @SuppressWarnings("deprecation")
@@ -100,20 +116,37 @@ public class TelemetryMapper {
     Object error = attrs.remove("exception.stacktrace");
     String scope = null == record.getInstrumentationScopeInfo() ? null
         : record.getInstrumentationScopeInfo().getName();
+    Attributes resource =
+        null == record.getResource() ? null : record.getResource().getAttributes();
+    String release = release(source, resource);
+    withSession(attrs, resource);
+    registry.seenRelease(source.code(), release);
     return Optional.of(new ObsLog(ts, source.code(), level, scope, message, traceId, spanId,
-        null == error ? null : String.valueOf(error), scrub(source, attrs)));
+        null == error ? null : String.valueOf(error), scrub(source, attrs), release,
+        env(source, resource)));
   }
 
-  /** Log of this process (the JUL / logback handler). */
+  /**
+   * Log of this process (the JUL / logback handler). From the MDC of the request only the actor
+   * uid, the tenant and the request id are kept (never the ip or the name).
+   */
   public Optional<ObsLog> ownLog(final long ts, final String level, final String logger,
-      final String message, final Throwable thrown, final String traceId, final String spanId) {
+      final String message, final Throwable thrown, final String traceId, final String spanId,
+      final Map<String, String> mdc) {
+    Map<String, Object> context = new LinkedHashMap<>();
+    if (null != mdc) {
+      putIfPresent(context, "enduser.id", mdc.get("uid"));
+      putIfPresent(context, "app.tenant", mdc.get("tenant"));
+      putIfPresent(context, "request.id", mdc.get("requestId"));
+    }
     if (!observeSelf) {
       return Optional.empty();
     }
     return registry.byCode(selfSource).filter(Source::accepting)
         .filter(source -> Levels.atLeast(level, source.minLevel()))
         .map(source -> new ObsLog(ts, source.code(), Levels.normalize(level), logger, message,
-            traceId, spanId, null == thrown ? null : stack(thrown), Map.of()));
+            traceId, spanId, null == thrown ? null : stack(thrown), context, blank(selfRelease),
+            blank(selfEnv)));
   }
 
   public String selfSource() {
@@ -137,6 +170,37 @@ public class TelemetryMapper {
     return null == id || id.isEmpty() || id.chars().allMatch(c -> c == '0') ? "" : id;
   }
 
+  private final RateLimiter limiter = new RateLimiter();
+
+  /**
+   * True if the source can store one more event now (its rate-limit per minute). The application
+   * itself is never limited.
+   */
+  public boolean allow(final Source source) {
+    if (observeSelf && selfSource.equals(source.code())) {
+      return true;
+    }
+    if (limiter.allow(source.code(), source.rateLimit(), System.currentTimeMillis())) {
+      return true;
+    }
+    registry.drop(source.code());
+    return false;
+  }
+
+  /**
+   * The sampling rate of a source: its trace-sample-rate, lowered when the source sends more than
+   * {@code app.observe.sampling.target-per-minute} events (0: fixed rate). Errors are always kept.
+   */
+  int effectiveRate(final Source source) {
+    int rate = source.sampleRate();
+    if (targetPerMinute <= 0) {
+      return rate;
+    }
+    double perMinute = registry.eventsPerMinute(source.code());
+    return perMinute <= targetPerMinute ? rate
+        : Math.max(1, Math.min(rate, (int) Math.floor(100.0 * targetPerMinute / perMinute)));
+  }
+
   /** Deterministic by trace: the whole trace is kept or dropped in every source. */
   static boolean sampled(final String traceId, final int rate) {
     if (rate >= 100) {
@@ -146,6 +210,51 @@ public class TelemetryMapper {
       return false;
     }
     return Math.floorMod(traceId.hashCode(), 100) < rate;
+  }
+
+  /**
+   * Version of the resource ({@code service.version}); only for the own process, the configured one
+   * when its SDK does not set it (another source without version stays without version).
+   */
+  String release(final Source source, final Attributes resource) {
+    String value = null == resource ? null : resource.get(VERSION);
+    if (null != value && !value.isBlank()) {
+      return value;
+    }
+    return selfSource.equals(source.code()) ? blank(selfRelease) : null;
+  }
+
+  /** Deployment environment of the resource, with the attribute of the older conventions. */
+  String env(final Source source, final Attributes resource) {
+    String value = null == resource ? null : resource.get(ENV);
+    if (null == value || value.isBlank()) {
+      value = null == resource ? null : resource.get(ENV_OLD);
+    }
+    if (null != value && !value.isBlank()) {
+      return value;
+    }
+    return selfSource.equals(source.code()) ? blank(selfEnv) : null;
+  }
+
+  /** The browser session of the front is in its resource: it is copied to the event. */
+  private static Map<String, Object> withSession(final Map<String, Object> attrs,
+      final Attributes resource) {
+    String session = null == resource ? null : resource.get(SESSION);
+    if (null != session && !session.isBlank() && !attrs.containsKey("session.id")) {
+      attrs.put("session.id", session);
+    }
+    return attrs;
+  }
+
+  private static void putIfPresent(final Map<String, Object> target, final String key,
+      final String value) {
+    if (null != value && !value.isBlank()) {
+      target.put(key, value);
+    }
+  }
+
+  private static String blank(final Optional<String> value) {
+    return null == value ? null : value.map(String::trim).filter(v -> !v.isEmpty()).orElse(null);
   }
 
   /**

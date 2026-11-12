@@ -28,6 +28,7 @@ retentionDays:integer
 scrubFields:string
 lastSeenAt:datetime
 droppedCount:integer
+expectedEveryMinutes:integer
 enabled:boolean
 version:integer
 list()
@@ -35,6 +36,7 @@ retrieve()
 create()
 update()
 delete()
+recordActivity()
 enable()
 disable()
 }

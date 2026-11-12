@@ -57,7 +57,9 @@ Comma-separated extra keys masked in the events of the origin, besides the globa
 Last seen at (datetime)::
 When the last event of the origin arrived (updated at most once a minute).
 Dropped count (integer)::
-Events of the origin discarded by the rate limit or because the queue was full.
+Events of the origin discarded by the rate limit or because the queue was full (saved every minute by the collector).
+Expected every minutes (integer)::
+The origin is expected to send something at least every these minutes; the source-silent alert rules use it instead of their window. Empty: the window of the rule.
 Enabled* (boolean)::
 A disabled origin is rejected by the ingestion, without deleting it or its data.
 Version (integer)::

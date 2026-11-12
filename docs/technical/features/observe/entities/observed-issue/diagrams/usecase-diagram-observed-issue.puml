@@ -10,7 +10,13 @@ actor :Autorizado: as a0
 (Create) as creacion
 (Delete) as actualizacion
 (Delete) as borrado
-(Resolve) as resolve
+(Merge into) as mergeInto
+(Other use cases) as p0
+(Assign) as assign
+(Snooze) as snooze
+(Link ticket) as linkTicket
+(Record occurrence) as recordOccurrence
+(Mark resolved) as markResolved
 (Ignore) as ignore
 (Reopen) as reopen
 
@@ -19,7 +25,12 @@ a0 --> consulta
 a0 --> creacion
 a0 --> actualizacion
 a0 --> borrado
-a0 --> resolve
+p0 --> mergeInto
+p0 --> assign
+p0 --> snooze
+p0 --> linkTicket
+p0 --> recordOccurrence
+a0 --> markResolved
 a0 --> ignore
 a0 --> reopen
 

@@ -31,7 +31,7 @@ class JsonlTelemetryStorePurgeUnitTest {
     Path recent = day(1, 10);
     Path middle = day(10, 10);
     Path old = day(30, 10);
-    new JsonlTelemetryStore(root.toString()).purge(new RetentionPolicy(14, 7, 0));
+    new JsonlTelemetryStore(root.toString()).purge(new RetentionPolicy(14, 7, 0, 15, 400));
     Assertions.assertTrue(Files.exists(recent.resolve("spans.jsonl")));
     Assertions.assertTrue(Files.exists(middle.resolve("logs.jsonl")));
     Assertions.assertFalse(Files.exists(middle.resolve("spans.jsonl")));
@@ -44,9 +44,23 @@ class JsonlTelemetryStorePurgeUnitTest {
     Path today = day(0, 400_000);
     Path yesterday = day(1, 400_000);
     Path before = day(2, 400_000);
-    new JsonlTelemetryStore(root.toString()).purge(new RetentionPolicy(90, 90, 1));
+    new JsonlTelemetryStore(root.toString()).purge(new RetentionPolicy(90, 90, 1, 90, 400));
     Assertions.assertFalse(Files.exists(before));
     Assertions.assertFalse(Files.exists(yesterday));
     Assertions.assertTrue(Files.exists(today));
+  }
+
+  @Test
+  @DisplayName("A source with a shorter retention loses its old lines; the others keep them")
+  void retentionBySource() throws IOException {
+    Path dir = root.resolve(LocalDate.now(ZoneOffset.UTC).minusDays(5).toString());
+    Files.createDirectories(dir);
+    Files.writeString(dir.resolve("logs.jsonl"),
+        "{\"ts\":1,\"src\":\"noisy\"}\n{\"ts\":2,\"src\":\"api\"}\n");
+    new JsonlTelemetryStore(root.toString())
+        .purge(new RetentionPolicy(14, 14, 0, 15, 400).withSources(java.util.Map.of("noisy", 3)));
+    String left = Files.readString(dir.resolve("logs.jsonl"));
+    Assertions.assertFalse(left.contains("noisy"));
+    Assertions.assertTrue(left.contains("api"));
   }
 }

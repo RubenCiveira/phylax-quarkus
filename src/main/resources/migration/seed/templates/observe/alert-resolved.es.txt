@@ -1,0 +1,9 @@
+RESUELTA: {{rule.name}}
+
+{{alert.summary}}
+
+La condición terminó el {{alert.resolved_at}}.
+
+Ver en el visor: {{alert.link}}
+
+{{app.title}} · disparador {{rule.trigger}}

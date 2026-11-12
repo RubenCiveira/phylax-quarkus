@@ -4,9 +4,15 @@ package net.civeira.phylax.feature.observe.config;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import lombok.RequiredArgsConstructor;
+import net.civeira.phylax.feature.observe.alert.AlertRules;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.event.ObservabilityConfigCreateEvent;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.event.ObservabilityConfigDeleteEvent;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.event.ObservabilityConfigUpdateEvent;
+import net.civeira.phylax.feature.observe.observedalertrule.domain.event.ObservedAlertRuleCreateEvent;
+import net.civeira.phylax.feature.observe.observedalertrule.domain.event.ObservedAlertRuleDeleteEvent;
+import net.civeira.phylax.feature.observe.observedalertrule.domain.event.ObservedAlertRuleDisableEvent;
+import net.civeira.phylax.feature.observe.observedalertrule.domain.event.ObservedAlertRuleEnableEvent;
+import net.civeira.phylax.feature.observe.observedalertrule.domain.event.ObservedAlertRuleUpdateEvent;
 import net.civeira.phylax.feature.observe.observedsource.domain.event.ObservedSourceCreateEvent;
 import net.civeira.phylax.feature.observe.observedsource.domain.event.ObservedSourceDeleteEvent;
 import net.civeira.phylax.feature.observe.observedsource.domain.event.ObservedSourceDisableEvent;
@@ -24,6 +30,7 @@ public class ObserveChangeListener {
 
   private final ObservabilitySettings settings;
   private final SourceRegistry registry;
+  private final AlertRules alertRules;
 
   void onConfigCreate(@Observes final ObservabilityConfigCreateEvent event) {
     settings.invalidate();
@@ -55,5 +62,25 @@ public class ObserveChangeListener {
 
   void onSourceDelete(@Observes final ObservedSourceDeleteEvent event) {
     registry.invalidate();
+  }
+
+  void onRuleCreate(@Observes final ObservedAlertRuleCreateEvent event) {
+    alertRules.invalidate();
+  }
+
+  void onRuleUpdate(@Observes final ObservedAlertRuleUpdateEvent event) {
+    alertRules.invalidate();
+  }
+
+  void onRuleEnable(@Observes final ObservedAlertRuleEnableEvent event) {
+    alertRules.invalidate();
+  }
+
+  void onRuleDisable(@Observes final ObservedAlertRuleDisableEvent event) {
+    alertRules.invalidate();
+  }
+
+  void onRuleDelete(@Observes final ObservedAlertRuleDeleteEvent event) {
+    alertRules.invalidate();
   }
 }

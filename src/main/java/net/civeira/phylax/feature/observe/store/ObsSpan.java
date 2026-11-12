@@ -16,9 +16,12 @@ import java.util.Map;
  * @param durMs duration in milliseconds
  * @param status OK, ERROR or UNSET
  * @param attrs attributes
+ * @param release version of the source ({@code service.version}), if known
+ * @param env deployment environment ({@code deployment.environment.name}), if known
  */
 public record ObsSpan(long ts, String src, String traceId, String spanId, String parentId,
-    String name, String kind, double durMs, String status, Map<String, Object> attrs) {
+    String name, String kind, double durMs, String status, Map<String, Object> attrs,
+    String release, String env) {
 
   public boolean isRoot() {
     return null == parentId || parentId.isEmpty();

@@ -158,6 +158,7 @@ public class ObservedSourceCreateController {
     observedSourceApiDto.setScrubFields(dto.getScrubFields());
     observedSourceApiDto.setLastSeenAt(dto.getLastSeenAt());
     observedSourceApiDto.setDroppedCount(dto.getDroppedCount());
+    observedSourceApiDto.setExpectedEveryMinutes(dto.getExpectedEveryMinutes());
     observedSourceApiDto.setEnabled(dto.getEnabled());
     observedSourceApiDto.setVersion(dto.getVersion());
     return observedSourceApiDto;
@@ -244,6 +245,9 @@ public class ObservedSourceCreateController {
     }
     if (null != observedSourceApiDto.getDroppedCount()) {
       dto.setDroppedCount(observedSourceApiDto.getDroppedCount());
+    }
+    if (null != observedSourceApiDto.getExpectedEveryMinutes()) {
+      dto.setExpectedEveryMinutes(observedSourceApiDto.getExpectedEveryMinutes());
     }
     if (null != observedSourceApiDto.getEnabled()) {
       dto.setEnabled(observedSourceApiDto.getEnabled());

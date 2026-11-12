@@ -12,40 +12,74 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
+import net.civeira.phylax.feature.observe.alert.AlertEngine;
+import net.civeira.phylax.feature.observe.issue.IssueAggregator;
 import net.civeira.phylax.feature.observe.store.ObsLog;
 import net.civeira.phylax.feature.observe.store.ObsSpan;
 import net.civeira.phylax.feature.observe.store.TelemetryStore;
 
 /**
  * Bounded queue between the ingestion and the store, so a slow disk never blocks the requests or
- * the application: when the queue is full the event is dropped and counted.
+ * the application: when the queue is full the event is dropped and counted. After storing each
+ * batch, its error events are grouped in issues ({@link IssueAggregator}), in this same thread.
  */
 @ApplicationScoped
 @Slf4j
 public class ObservePipeline {
 
   private final TelemetryStore store;
+  private final IssueAggregator issues;
+  private final AlertEngine alerts;
+  private final net.civeira.phylax.feature.observe.anomaly.ObserveInsights insights;
   private final BlockingQueue<Object> queue;
   private final long flushMillis;
   private final AtomicLong dropped = new AtomicLong();
+  private final AtomicLong accepted = new AtomicLong();
+  private final AtomicLong writeErrors = new AtomicLong();
+  private final int capacity;
+  private volatile int lastBatchSize;
+  private volatile long lastBatchMillis;
+  private volatile long lastBatchAt;
+
+  /**
+   * State of the queue and the writer, for the health of the collector.
+   *
+   * @param lastBatchAt epoch millis of the last batch written (0 if none)
+   */
+  public record Stats(boolean running, int queueSize, int capacity, long accepted, long dropped,
+      long writeErrors, int lastBatchSize, long lastBatchMillis, long lastBatchAt) {}
+
+  public Stats stats() {
+    return new Stats(running, queue.size(), capacity, accepted.get(), dropped.get(),
+        writeErrors.get(), lastBatchSize, lastBatchMillis, lastBatchAt);
+  }
+
   private volatile Thread writer;
   private volatile boolean running;
 
-  public ObservePipeline(final TelemetryStore store,
+  public ObservePipeline(final TelemetryStore store, final IssueAggregator issues,
+      final AlertEngine alerts,
+      final net.civeira.phylax.feature.observe.anomaly.ObserveInsights insights,
       final @ConfigProperty(name = "app.observe.queue-size", defaultValue = "10000") int queueSize,
       final @ConfigProperty(name = "app.observe.flush-interval-ms",
           defaultValue = "1000") long flushMillis) {
     this.store = store;
+    this.issues = issues;
+    this.alerts = alerts;
+    this.insights = insights;
     this.queue = new ArrayBlockingQueue<>(queueSize);
+    this.capacity = queueSize;
     this.flushMillis = flushMillis;
   }
 
   public boolean offer(final Object event) {
-    boolean accepted = running && queue.offer(event);
-    if (!accepted) {
+    boolean ok = running && queue.offer(event);
+    if (ok) {
+      accepted.incrementAndGet();
+    } else {
       dropped.incrementAndGet();
     }
-    return accepted;
+    return ok;
   }
 
   public long dropped() {
@@ -84,6 +118,7 @@ public class ObservePipeline {
         Thread.currentThread().interrupt();
         return;
       } catch (RuntimeException ex) {
+        writeErrors.incrementAndGet();
         log.warn("Unable to store {} telemetry events: {}", batch.size(), ex.getMessage());
         batch.clear();
       }
@@ -104,8 +139,34 @@ public class ObservePipeline {
         spans.add(item);
       }
     }
+    try {
+      logs = issues.tag(logs);
+    } catch (RuntimeException ex) {
+      log.warn("Unable to tag {} logs with their issue: {}", logs.size(), ex.getMessage());
+    }
+    long started = System.currentTimeMillis();
     store.appendLogs(logs);
     store.appendSpans(spans);
+    lastBatchSize = logs.size() + spans.size();
+    lastBatchMillis = System.currentTimeMillis() - started;
+    lastBatchAt = System.currentTimeMillis();
     batch.clear();
+    List<net.civeira.phylax.feature.observe.alert.IssueChange> changes = List.of();
+    try {
+      changes = issues.record(logs, spans);
+    } catch (RuntimeException ex) {
+      // Without stack trace and below ERROR: this log must not become an issue itself
+      log.warn("Unable to group {} logs in issues: {}", logs.size(), ex.getMessage());
+    }
+    try {
+      insights.observe(logs);
+    } catch (RuntimeException ex) {
+      log.warn("Unable to observe the log patterns: {}", ex.getMessage());
+    }
+    try {
+      alerts.onBatch(logs, changes);
+    } catch (RuntimeException ex) {
+      log.warn("Unable to evaluate the alerts of {} logs: {}", logs.size(), ex.getMessage());
+    }
   }
 }

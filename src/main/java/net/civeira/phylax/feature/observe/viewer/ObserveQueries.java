@@ -30,9 +30,14 @@ public class ObserveQueries {
   private static final long HOUR = 3_600_000L;
   private static final int MAX_LIMIT = 1_000;
 
-  /** Summary of a trace for the list. */
+  /**
+   * Summary of a trace for the list, always computed from the whole trace (its real root, duration
+   * and spans), not only from the spans that match the filter.
+   *
+   * @param matches spans of the trace that match the filter (all of them without filter)
+   */
   public record TraceSummary(String traceId, String name, String src, long ts, double durMs,
-      int spans, boolean error, Set<String> sources) {}
+      int spans, int matches, boolean error, Set<String> sources) {}
 
   private final TelemetryStore store;
   private final SourceRegistry registry;
@@ -50,6 +55,7 @@ public class ObserveQueries {
       row.put("minLevel", source.minLevel());
       row.put("sampleRate", source.sampleRate());
       row.put("lastSeen", registry.lastSeen(source.code()).orElse(null));
+      row.put("release", registry.lastRelease(source.code()).orElse(null));
       row.put("dropped", registry.dropped(source.code()));
       if (withKeys) {
         row.put("ingestKey", source.ingestKey());
@@ -61,27 +67,49 @@ public class ObserveQueries {
   }
 
   public List<ObsLog> logs(final Set<String> sources, final String level, final String text,
-      final String traceId, final Long from, final Long to, final Integer limit) {
-    return store.logs(query(sources, from, to, limit).minLevel(blank(level)).text(blank(text))
-        .traceId(blank(traceId)).build());
+      final String traceId, final Long from, final Long to, final Integer limit,
+      final String release, final String env) {
+    return store.logs(query(sources, from, to, limit).release(blank(release)).env(blank(env))
+        .minLevel(blank(level)).text(blank(text)).traceId(blank(traceId)).build());
   }
 
+  /**
+   * Traces with at least one span matching the filter, newest first. The matching spans only select
+   * the traces: each summary is built with every span of its trace (read in one pass, with an hour
+   * of margin before the range for the roots that started earlier).
+   */
   public List<TraceSummary> traces(final Set<String> sources, final String text,
-      final boolean errors, final Long from, final Long to, final Integer limit) {
+      final boolean errors, final Long from, final Long to, final Integer limit,
+      final String release, final String env) {
     int max = limit(limit);
-    List<ObsSpan> spans = store
-        .spans(query(sources, from, to, MAX_LIMIT * 5).text(blank(text)).errors(errors).build());
-    Map<String, List<ObsSpan>> byTrace = spans.stream()
+    TelemetryQuery query = query(sources, from, to, MAX_LIMIT * 5).release(blank(release))
+        .env(blank(env)).text(blank(text)).errors(errors).build();
+    Map<String, Integer> matches = new LinkedHashMap<>();
+    for (ObsSpan span : store.spans(query)) {
+      if (matches.size() >= max && !matches.containsKey(span.traceId())) {
+        continue;
+      }
+      matches.merge(span.traceId(), 1, Integer::sum);
+    }
+    Map<String, List<ObsSpan>> byTrace = store
+        .traces(matches.keySet(), query.getFrom() - HOUR, query.getTo() + HOUR).stream()
         .collect(Collectors.groupingBy(ObsSpan::traceId, LinkedHashMap::new, Collectors.toList()));
     List<TraceSummary> result = new ArrayList<>();
-    for (List<ObsSpan> trace : byTrace.values()) {
-      result.add(summary(trace));
-      if (result.size() >= max) {
-        break;
+    matches.forEach((traceId, count) -> {
+      List<ObsSpan> trace = byTrace.get(traceId);
+      if (null != trace && !trace.isEmpty()) {
+        result.add(summary(trace, count));
       }
-    }
+    });
     result.sort(Comparator.comparingLong(TraceSummary::ts).reversed());
     return result;
+  }
+
+  /** The spans that match the filter, one after the other, newest first. */
+  public List<ObsSpan> spans(final Set<String> sources, final String text, final boolean errors,
+      final Long from, final Long to, final Integer limit, final String release, final String env) {
+    return store.spans(query(sources, from, to, limit).release(blank(release)).env(blank(env))
+        .text(blank(text)).errors(errors).build());
   }
 
   public Map<String, Object> trace(final String traceId, final Long from, final Long to) {
@@ -98,7 +126,7 @@ public class ObserveQueries {
     return result;
   }
 
-  private TraceSummary summary(final List<ObsSpan> trace) {
+  private TraceSummary summary(final List<ObsSpan> trace, final int matches) {
     ObsSpan root = trace.stream().filter(ObsSpan::isRoot).min(Comparator.comparingLong(ObsSpan::ts))
         .orElseGet(() -> trace.stream().min(Comparator.comparingLong(ObsSpan::ts)).get());
     long start = trace.stream().mapToLong(ObsSpan::ts).min().orElse(root.ts());
@@ -107,7 +135,7 @@ public class ObserveQueries {
     Set<String> sources =
         trace.stream().map(ObsSpan::src).collect(Collectors.toCollection(TreeSet::new));
     return new TraceSummary(root.traceId(), root.name(), root.src(), start, end - start,
-        trace.size(), trace.stream().anyMatch(ObsSpan::isError), sources);
+        trace.size(), matches, trace.stream().anyMatch(ObsSpan::isError), sources);
   }
 
   private TelemetryQuery.TelemetryQueryBuilder query(final Set<String> sources, final Long from,

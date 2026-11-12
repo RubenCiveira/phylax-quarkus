@@ -44,19 +44,34 @@
 .obs-app button { cursor: pointer; }
 .obs-app button.primary { background: var(--obs-accent); color: var(--obs-on-accent); border-color: transparent; }
 .obs-app :focus-visible { outline: 2px solid var(--obs-accent); outline-offset: 1px; }
-.obs-bar {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 16px;
-  background: var(--obs-surface); border-bottom: 1px solid var(--obs-border);
+/*
+ * Inside a theme layout the page CSS may style every button or field (full width, big margins):
+ * the viewer resets them with a stronger selector, so its controls keep their own size.
+ */
+.obs-app.obs-app button, .obs-app.obs-app select, .obs-app.obs-app input, .obs-app.obs-app textarea {
+  width: auto; min-width: 0; max-width: 100%; height: auto; min-height: 0; margin: 0;
+  display: inline-block; vertical-align: middle; line-height: 1.4; box-shadow: none;
 }
+.obs-app.obs-app textarea { display: block; width: 100%; }
+.obs-head { background: var(--obs-surface); border-bottom: 1px solid var(--obs-border); }
+.obs-bar {
+  display: flex; align-items: center; gap: 8px; padding: 6px 16px 0; min-width: 0;
+}
+.obs-toolbar {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 16px 8px;
+}
+.obs-toolbar select { max-width: 14em; }
+.obs-app.obs-app .obs-icon { width: 2.2em; padding: 4px 0; text-align: center; }
 .obs-brand { font-weight: 600; margin-right: 8px; }
 .obs-app[data-brand="hide"] .obs-brand { display: none; }
-.obs-tabs { display: flex; gap: 2px; }
+.obs-tabs { display: flex; gap: 2px; flex-wrap: nowrap; overflow-x: auto; min-width: 0; scrollbar-width: none; }
+.obs-tabs::-webkit-scrollbar { display: none; }
 .obs-tabs a {
-  padding: 6px 10px; border-radius: var(--obs-radius); color: var(--obs-text-muted); text-decoration: none;
+  white-space: nowrap; padding: 6px 10px; border-radius: var(--obs-radius); color: var(--obs-text-muted); text-decoration: none;
 }
 .obs-tabs a[aria-current="page"] { background: var(--obs-accent); color: var(--obs-on-accent); }
 .obs-spacer { flex: 1; }
-.obs-user { color: var(--obs-text-muted); font-size: 12px; }
+.obs-user { color: var(--obs-text-muted); font-size: 12px; white-space: nowrap; }
 .obs-chip {
   display: inline-block; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 600;
   border: 1px solid currentColor; line-height: 18px;
@@ -101,3 +116,70 @@
   .obs-table .obs-hide-sm { display: none; }
   .obs-waterfall { grid-template-columns: 40% 1fr; }
 }
+
+/* Views of the traces (grouped / in sequence) and the spans that match the filter */
+.obs-subtabs { display: flex; gap: 4px; margin: 0 0 8px; }
+.obs-subtabs button { border-radius: 999px; }
+.obs-subtabs button[aria-selected="true"] { background: var(--obs-accent); color: var(--obs-on-accent); border-color: var(--obs-accent); }
+.obs-wf-match { background: color-mix(in srgb, var(--obs-accent) 14%, transparent); }
+.obs-wf-name.obs-wf-match { box-shadow: inset 3px 0 0 var(--obs-accent); }
+
+/* Release and environment filters of the bar */
+.obs-small { width: 9em; }
+
+/* Context of an event: label / value grid */
+.obs-context { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 0 0 8px; white-space: normal; }
+.obs-context dt { color: var(--obs-text-muted); }
+.obs-context dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Issue detail */
+.obs-issue-title { font-size: 18px; margin: 4px 0; }
+.obs-histogram { width: 100%; height: 80px; display: block; background: var(--obs-surface); border-radius: var(--obs-radius); }
+.obs-histogram rect { fill: var(--obs-error, #dc2626); }
+.obs-stack { background: var(--obs-surface); border-radius: var(--obs-radius); padding: 8px; font-size: 12px; white-space: pre-wrap; overflow-x: auto; }
+.obs-stack-own { font-weight: 600; color: var(--obs-text); }
+.obs-stack-lib summary { color: var(--obs-text-muted); cursor: pointer; }
+.obs-stack-lib div { color: var(--obs-text-muted); }
+.obs-distribution { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.obs-distribution h3 { font-size: 13px; margin: 0 0 4px; color: var(--obs-text-muted); }
+.obs-distribution ul { list-style: none; margin: 0; padding: 0; }
+
+/* Collector health */
+.obs-collector { margin: 0 0 12px; padding: 12px; }
+.obs-meter { display: inline-block; width: 160px; height: 8px; background: var(--obs-surface-2); border-radius: 4px; vertical-align: middle; margin-right: 8px; overflow: hidden; }
+.obs-meter-bar { height: 100%; background: var(--obs-accent); }
+.obs-meter-bar.high { background: var(--obs-error); }
+
+/* Metric charts */
+.obs-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 0 0 12px; }
+.obs-chart { margin: 0; background: var(--obs-surface); border-radius: var(--obs-radius); padding: 8px; }
+.obs-chart figcaption { font-size: 12px; margin: 0 0 4px; display: flex; gap: 8px; flex-wrap: wrap; }
+.obs-line { width: 100%; height: 120px; display: block; }
+.obs-line path { fill: none; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.obs-line-0 { stroke: var(--obs-accent); }
+.obs-line-1 { stroke: #d97706; }
+.obs-line-2 { stroke: var(--obs-error); }
+.obs-legend-0 { color: var(--obs-accent); }
+.obs-legend-1 { color: #d97706; }
+.obs-legend-2 { color: var(--obs-error); }
+
+/* Service map */
+.obs-map-wrap { overflow-x: auto; background: var(--obs-surface); border-radius: var(--obs-radius); }
+.obs-map { width: 100%; min-width: 640px; display: block; }
+.obs-map-edge { stroke: var(--obs-text-muted); opacity: .7; }
+.obs-map-edge.error { stroke: var(--obs-error); }
+.obs-map-label { font-size: 10px; fill: var(--obs-text-muted); }
+.obs-map-node { fill: var(--obs-surface-2); stroke: var(--obs-border); }
+.obs-map-node.layer-0 { stroke: var(--obs-accent); }
+.obs-map-node.layer-2 { stroke-dasharray: 4 3; }
+.obs-map-name { font-size: 12px; fill: var(--obs-text); }
+
+/* Pinned range */
+.obs-active { background: var(--obs-accent); color: var(--obs-on-accent); }
+
+/* Comments of an issue */
+.obs-comments { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.obs-comments li { background: var(--obs-surface); border-radius: var(--obs-radius); padding: 8px; }
+.obs-comment-text { white-space: pre-wrap; }
+.obs-comment-form { display: grid; gap: 6px; max-width: 720px; }
+.obs-comment-form textarea { width: 100%; font: inherit; }

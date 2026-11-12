@@ -2,6 +2,49 @@
 @startuml Paquete de observe
 title Paquete de observe
 left to right direction
+class observe.ObservedAlertRule{
+uid:string
+name:string
+trigger:ObservedAlertRuleTriggerOptions
+minLevel:ObservedAlertRuleMinLevelOptions
+threshold:integer
+windowMinutes:integer
+channel:ObservedAlertRuleChannelOptions
+target:string
+cooldownMinutes:integer
+mutedUntil:datetime
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+observe.ObservedSource "1"  o--  "N*" observe.ObservedAlertRule: origin 
+
+class observe.ObservedAlert{
+uid:string
+problemKey:string
+status:ObservedAlertStatusOptions
+summary:string
+link:string
+firedAt:datetime
+resolvedAt:datetime
+lastNotifiedAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+closeAlert()
+markNotified()
+}
+observe.ObservedAlertRule "1"  o--  "N*" observe.ObservedAlert: rule 
+
 class observe.ObservedDashboard{
 uid:string
 code:string
@@ -19,6 +62,165 @@ create()
 update()
 delete()
 }
+
+class observe.ObservedIssueComment{
+uid:string
+author:string
+authorName:string
+text:blob
+createdAt:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+observe.ObservedIssue "1"  o--  "N*" observe.ObservedIssueComment: issue 
+
+class observe.ObservabilityConfig{
+uid:string
+code:string
+retentionDaysLogs:integer
+retentionDaysTraces:integer
+retentionDaysErrors:integer
+retentionDaysMetrics:integer
+retentionDaysMetricsRollup:integer
+maxDiskMb:integer
+scrubFields:string
+labelDenylist:string
+captureRequestBody:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+
+class observe.ObservedIssue{
+uid:string
+fingerprint:string
+title:string
+culprit:string
+kind:ObservedIssueKindOptions
+level:ObservedIssueLevelOptions
+status:ObservedIssueStatusOptions
+mergedInto:string
+assignee:string
+assigneeName:string
+ignoreUntil:datetime
+ignoreUntilCount:integer
+trackerUrl:string
+firstSeenAt:datetime
+lastSeenAt:datetime
+count:integer
+lastEventId:string
+lastTraceId:string
+users:integer
+tenants:integer
+usersSketch:blob
+tenantsSketch:blob
+firstRelease:string
+release:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+mergeInto()
+assign()
+snooze()
+linkTicket()
+recordOccurrence()
+markResolved()
+ignore()
+reopen()
+}
+observe.ObservedSource "1"  o--  "N*" observe.ObservedIssue: origin 
+
+class observe.ObservedSlo{
+uid:string
+name:string
+route:string
+kind:ObservedSloKindOptions
+objective:integer
+latencyMs:integer
+windowDays:integer
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+observe.ObservedSource "1"  o--  "N*" observe.ObservedSlo: origin 
+
+class observe.ObservedIssueAlias{
+uid:string
+fingerprint:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+observe.ObservedSource "1"  o--  "N*" observe.ObservedIssueAlias: origin 
+observe.ObservedIssue "1"  o--  "N*" observe.ObservedIssueAlias: issue 
+
+class observe.ObservedFingerprintRule{
+uid:string
+name:string
+field:ObservedFingerprintRuleFieldOptions
+pattern:string
+effect:ObservedFingerprintRuleEffectOptions
+groupKey:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+observe.ObservedSource "1"  o--  "N*" observe.ObservedFingerprintRule: origin 
+
+class observe.ObservedProbe{
+uid:string
+name:string
+url:string
+method:ObservedProbeMethodOptions
+expectedStatus:integer
+expectedText:string
+timeoutMs:integer
+intervalSeconds:integer
+failuresToAlert:integer
+tlsWarnDays:integer
+lastStatus:ObservedProbeLastStatusOptions
+lastCheckedAt:datetime
+lastLatencyMs:integer
+consecutiveFailures:integer
+lastError:string
+tlsExpiresAt:datetime
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+recordCheck()
+}
+observe.ObservedSource "1"  o--  "N*" observe.ObservedProbe: origin 
 
 class observe.ObservedSource{
 uid:string
@@ -46,6 +248,7 @@ retentionDays:integer
 scrubFields:string
 lastSeenAt:datetime
 droppedCount:integer
+expectedEveryMinutes:integer
 enabled:boolean
 version:integer
 list()
@@ -53,54 +256,10 @@ retrieve()
 create()
 update()
 delete()
+recordActivity()
 enable()
 disable()
 }
-
-class observe.ObservabilityConfig{
-uid:string
-code:string
-retentionDaysLogs:integer
-retentionDaysTraces:integer
-retentionDaysErrors:integer
-retentionDaysMetrics:integer
-retentionDaysMetricsRollup:integer
-maxDiskMb:integer
-scrubFields:string
-labelDenylist:string
-captureRequestBody:boolean
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-
-class observe.ObservedIssue{
-uid:string
-fingerprint:string
-title:string
-culprit:string
-level:ObservedIssueLevelOptions
-status:ObservedIssueStatusOptions
-firstSeenAt:datetime
-lastSeenAt:datetime
-count:integer
-lastEventId:string
-lastTraceId:string
-release:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-resolve()
-ignore()
-reopen()
-}
-observe.ObservedSource "1"  o--  "N*" observe.ObservedIssue: origin 
 
 class observe.ObservedEmbed{
 uid:string
@@ -126,8 +285,16 @@ disable()
 observe.ObservedDashboard "1"  o--  "N*" observe.ObservedEmbed: dashboard 
 observe.ObservedSource "1"  o--  "N*" observe.ObservedEmbed: origin 
 
+observe.ObservedSource "1"  o--  "N*" observe.ObservedAlertRule: origin  
+observe.ObservedAlertRule "1"  o--  "N*" observe.ObservedAlert: rule  
 observe.ObservedPanel "N*"  o--  "N*" observe.ObservedDashboard: panels  
+observe.ObservedIssue "1"  o--  "N*" observe.ObservedIssueComment: issue  
 observe.ObservedSource "1"  o--  "N*" observe.ObservedIssue: origin  
+observe.ObservedSource "1"  o--  "N*" observe.ObservedSlo: origin  
+observe.ObservedSource "1"  o--  "N*" observe.ObservedIssueAlias: origin  
+observe.ObservedIssue "1"  o--  "N*" observe.ObservedIssueAlias: issue  
+observe.ObservedSource "1"  o--  "N*" observe.ObservedFingerprintRule: origin  
+observe.ObservedSource "1"  o--  "N*" observe.ObservedProbe: origin  
 observe.ObservedDashboard "1"  o--  "N*" observe.ObservedEmbed: dashboard  
 observe.ObservedSource "1"  o--  "N*" observe.ObservedEmbed: origin  
 

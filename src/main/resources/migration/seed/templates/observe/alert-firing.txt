@@ -1,0 +1,14 @@
+ALERT FIRING: {{rule.name}}
+
+{{alert.summary}}
+
+Source: {{origin.code}}
+Issue: {{issue.title}}
+Events / users: {{issue.count}} / {{issue.users}}
+Release: {{issue.release}}
+Value / threshold: {{metric.value}} / {{metric.threshold}}
+Fired at: {{alert.fired_at}}
+
+Open in the viewer: {{alert.link}}
+
+{{app.title}} · trigger {{rule.trigger}}

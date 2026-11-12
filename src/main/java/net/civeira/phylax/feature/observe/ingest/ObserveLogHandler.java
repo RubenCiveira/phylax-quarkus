@@ -46,8 +46,11 @@ public class ObserveLogHandler extends Handler {
     SpanContext span = Span.current().getSpanContext();
     String traceId = span.isValid() ? span.getTraceId() : null;
     String spanId = span.isValid() ? span.getSpanId() : null;
+    java.util.Map<String, String> mdc =
+        record instanceof org.jboss.logmanager.ExtLogRecord ext ? ext.getMdcCopy()
+            : java.util.Map.of();
     mapper.ownLog(record.getMillis(), record.getLevel().getName(), logger, message,
-        record.getThrown(), traceId, spanId).ifPresent(pipeline::offer);
+        record.getThrown(), traceId, spanId, mdc).ifPresent(pipeline::offer);
   }
 
   @Override

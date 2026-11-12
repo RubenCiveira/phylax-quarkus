@@ -13,6 +13,7 @@ include::usecases/usecase-create-observed-source.adoc[]
 include::usecases/usecase-retrieve-observed-source.adoc[]
 include::usecases/usecase-update-observed-source.adoc[]
 include::usecases/usecase-delete-observed-source.adoc[]
+include::usecases/usecase-record-activity-observed-source.adoc[]
 include::usecases/usecase-enable-observed-source.adoc[]
 include::usecases/usecase-disable-observed-source.adoc[]
 :leveloffset: -1

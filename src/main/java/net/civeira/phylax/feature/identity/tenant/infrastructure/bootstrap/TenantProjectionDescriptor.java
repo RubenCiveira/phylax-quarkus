@@ -848,10 +848,6 @@ public class TenantProjectionDescriptor implements ProjectionDescriptor {
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
     Map<String, RelationshipDefinition> relations = new HashMap<>();
-    relations.put("template",
-        RelationshipDefinition.builder().list(true).id("/api/document/template")
-            .url(baseServer + "/api/document/template").method("GET").batchParam("tenants")
-            .referenceField("tenant").build());
     relations.put("snippet",
         RelationshipDefinition.builder().list(true).id("/api/document/snippet")
             .url(baseServer + "/api/document/snippet").method("GET").batchParam("tenants")
@@ -859,6 +855,22 @@ public class TenantProjectionDescriptor implements ProjectionDescriptor {
     relations.put("oauthClient",
         RelationshipDefinition.builder().list(true).id("/api/access/oauth-clients")
             .url(baseServer + "/api/access/oauth-clients").method("GET").batchParam("tenants")
+            .referenceField("tenant").build());
+    relations.put("consentPurpose",
+        RelationshipDefinition.builder().list(true).id("/api/identity/consent-purposes")
+            .url(baseServer + "/api/identity/consent-purposes").method("GET").batchParam("tenants")
+            .referenceField("tenant").build());
+    relations.put("smtpOutboundConfig",
+        RelationshipDefinition.builder().list(true).id("/api/template/smtp-outbound-config")
+            .url(baseServer + "/api/template/smtp-outbound-config").method("GET")
+            .batchParam("tenants").referenceField("tenant").build());
+    relations.put("dcrInitialAccessToken",
+        RelationshipDefinition.builder().list(true).id("/api/access/dcr-initial-access-tokens")
+            .url(baseServer + "/api/access/dcr-initial-access-tokens").method("GET")
+            .batchParam("tenants").referenceField("tenant").build());
+    relations.put("template",
+        RelationshipDefinition.builder().list(true).id("/api/document/template")
+            .url(baseServer + "/api/document/template").method("GET").batchParam("tenants")
             .referenceField("tenant").build());
     relations.put("templateVariable",
         RelationshipDefinition.builder().list(true).id("/api/document/template-variable")
@@ -880,14 +892,6 @@ public class TenantProjectionDescriptor implements ProjectionDescriptor {
         RelationshipDefinition.builder().list(true).id("/api/identity/tenants-config")
             .url(baseServer + "/api/identity/tenants-config").method("GET").batchParam("tenants")
             .referenceField("tenant").build());
-    relations.put("consentPurpose",
-        RelationshipDefinition.builder().list(true).id("/api/identity/consent-purposes")
-            .url(baseServer + "/api/identity/consent-purposes").method("GET").batchParam("tenants")
-            .referenceField("tenant").build());
-    relations.put("smtpOutboundConfig",
-        RelationshipDefinition.builder().list(true).id("/api/template/smtp-outbound-config")
-            .url(baseServer + "/api/template/smtp-outbound-config").method("GET")
-            .batchParam("tenants").referenceField("tenant").build());
     relations.put("tenantLoginProvider",
         RelationshipDefinition.builder().list(true).id("/api/identity/login-providers")
             .url(baseServer + "/api/identity/login-providers").method("GET").batchParam("tenants")
@@ -895,10 +899,6 @@ public class TenantProjectionDescriptor implements ProjectionDescriptor {
     relations.put("tenantTermsOfUse",
         RelationshipDefinition.builder().list(true).id("/api/identity/tenants-terms-of-use")
             .url(baseServer + "/api/identity/tenants-terms-of-use").method("GET")
-            .batchParam("tenants").referenceField("tenant").build());
-    relations.put("dcrInitialAccessToken",
-        RelationshipDefinition.builder().list(true).id("/api/access/dcr-initial-access-tokens")
-            .url(baseServer + "/api/access/dcr-initial-access-tokens").method("GET")
             .batchParam("tenants").referenceField("tenant").build());
     relations.put("user",
         RelationshipDefinition.builder().list(true).id("/api/identity/users")

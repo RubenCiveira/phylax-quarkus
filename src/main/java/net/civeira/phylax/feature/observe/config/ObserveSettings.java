@@ -22,7 +22,8 @@ public record ObserveSettings(int retentionDaysLogs, int retentionDaysTraces,
     boolean captureRequestBody) {
 
   public RetentionPolicy retention() {
-    return new RetentionPolicy(retentionDaysLogs, retentionDaysTraces, maxDiskMb);
+    return new RetentionPolicy(retentionDaysLogs, retentionDaysTraces, maxDiskMb,
+        retentionDaysMetrics, retentionDaysMetricsRollup);
   }
 
   /** Comma separated keys, normalized as the masking compares them. */

@@ -46,6 +46,10 @@ public class ObservedSourceRbacRegister {
         .description("list").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("delete")
         .description("list").required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("record-activity").description(
+            "Last contact and discarded events seen by the collector (saved every minute; only the collector calls it).")
+            .required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("enable")
         .description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
@@ -132,9 +136,12 @@ public class ObservedSourceRbacRegister {
                 "When the last event of the origin arrived (updated at most once a minute).")
             .build());
     rbac.registerResourceField(RESOURCE,
-        FieldDescription.builder().name("droppedCount")
-            .description(
-                "Events of the origin discarded by the rate limit or because the queue was full.")
+        FieldDescription.builder().name("droppedCount").description(
+            "Events of the origin discarded by the rate limit or because the queue was full (saved every minute by the collector).")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("expectedEveryMinutes").description(
+            "The origin is expected to send something at least every these minutes; the source-silent alert rules use it instead of their window. Empty the window of the rule.")
             .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("enabled")

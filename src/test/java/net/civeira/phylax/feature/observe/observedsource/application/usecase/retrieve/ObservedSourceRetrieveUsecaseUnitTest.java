@@ -29,6 +29,7 @@ import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.Drop
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.EnabledVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.EnvironmentVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.ErrorSampleRateVO;
+import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.ExpectedEveryMinutesVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.IngestKeyVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.KindVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.LastSeenAtVO;
@@ -102,8 +103,9 @@ class ObservedSourceRetrieveUsecaseUnitTest {
         .retentionDaysValue(RetentionDaysVO.from(1)).scrubFieldsValue(ScrubFieldsVO.from("one"))
         .lastSeenAtValue(LastSeenAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
-        .droppedCountValue(DroppedCountVO.from(1)).enabledValue(EnabledVO.from(true))
-        .versionValue(VersionVO.from(1)).build();
+        .droppedCountValue(DroppedCountVO.from(1))
+        .expectedEveryMinutesValue(ExpectedEveryMinutesVO.from(1))
+        .enabledValue(EnabledVO.from(true)).versionValue(VersionVO.from(1)).build();
     Mockito.when(visibility.retrieveCachedVisible(context, "one")).thenReturn(
         ObservedSourceCached.builder().since(OffsetDateTime.now()).value(List.of(one)).build());
     Mockito.when(visibility.copyWithHidden(context, one))

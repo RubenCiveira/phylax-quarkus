@@ -303,7 +303,8 @@ class CurrentRequestUnitTest {
       // Act — resolve the actor
       Actor actor = request().getActor();
 
-      // Assert — every claim is mapped
+      // Assert — every claim is mapped, and a signed caller is authenticated
+      assertTrue(actor.isAuthenticated());
       assertEquals("u-1", actor.getUid());
       assertEquals("Ana", actor.getName());
       assertEquals(List.of("admin", "viewer"), actor.getRoles());

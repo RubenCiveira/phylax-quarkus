@@ -73,17 +73,16 @@ class ObservedSourceCreateUsecaseUnitTest {
     OperationContext context = Mockito.mock(OperationContext.class);
     ObservedSourceCreateUsecase usecase = new ObservedSourceCreateUsecase(audit, cache,
         createAllowEmitter, createCheckEmitter, createEnrichEmitter, gateway, visibility);
-    ObservedSourceCreateInput input =
-        ObservedSourceCreateInput.fromChangeSet(
-            new ObservedSourceChangeSet().uid("one").originType("one").originRef("one")
-                .managed(true).code("one").name("one").kind(ObservedSourceKindOptions.BACKEND)
-                .originEnabled(true).detached(true).environment("one").ingestKey("one")
-                .allowedOrigins("one").minLevel("one").traceSampleRate(1).errorSampleRate(1)
-                .rateLimit(1).metricsMode(ObservedSourceMetricsModeOptions.PUSH).scrapeUrl("one")
-                .scrapeInterval(1).maxSeries(1).deriveMetrics(true).retentionDays(1)
-                .scrubFields("one").lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0)
-                    .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-                .droppedCount(1).enabled(true).version(1));
+    ObservedSourceCreateInput input = ObservedSourceCreateInput
+        .fromChangeSet(new ObservedSourceChangeSet().uid("one").originType("one").originRef("one")
+            .managed(true).code("one").name("one").kind(ObservedSourceKindOptions.BACKEND)
+            .originEnabled(true).detached(true).environment("one").ingestKey("one")
+            .allowedOrigins("one").minLevel("one").traceSampleRate(1).errorSampleRate(1)
+            .rateLimit(1).metricsMode(ObservedSourceMetricsModeOptions.PUSH).scrapeUrl("one")
+            .scrapeInterval(1).maxSeries(1).deriveMetrics(true).retentionDays(1).scrubFields("one")
+            .lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .droppedCount(1).expectedEveryMinutes(1).enabled(true).version(1));
     Mockito
         .when(visibility.copyWithFixed(Mockito.eq(context),
             Mockito.any(ObservedSourceChangeSet.class)))
@@ -135,17 +134,16 @@ class ObservedSourceCreateUsecaseUnitTest {
       ((ObservedSourceCreateAuthorizationDecision) invocation.getArgument(0)).deny("not allowed");
       return null;
     }).when(createAllowEmitter).fire(Mockito.any());
-    ObservedSourceCreateInput input =
-        ObservedSourceCreateInput.fromChangeSet(
-            new ObservedSourceChangeSet().uid("one").originType("one").originRef("one")
-                .managed(true).code("one").name("one").kind(ObservedSourceKindOptions.BACKEND)
-                .originEnabled(true).detached(true).environment("one").ingestKey("one")
-                .allowedOrigins("one").minLevel("one").traceSampleRate(1).errorSampleRate(1)
-                .rateLimit(1).metricsMode(ObservedSourceMetricsModeOptions.PUSH).scrapeUrl("one")
-                .scrapeInterval(1).maxSeries(1).deriveMetrics(true).retentionDays(1)
-                .scrubFields("one").lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0)
-                    .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-                .droppedCount(1).enabled(true).version(1));
+    ObservedSourceCreateInput input = ObservedSourceCreateInput
+        .fromChangeSet(new ObservedSourceChangeSet().uid("one").originType("one").originRef("one")
+            .managed(true).code("one").name("one").kind(ObservedSourceKindOptions.BACKEND)
+            .originEnabled(true).detached(true).environment("one").ingestKey("one")
+            .allowedOrigins("one").minLevel("one").traceSampleRate(1).errorSampleRate(1)
+            .rateLimit(1).metricsMode(ObservedSourceMetricsModeOptions.PUSH).scrapeUrl("one")
+            .scrapeInterval(1).maxSeries(1).deriveMetrics(true).retentionDays(1).scrubFields("one")
+            .lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .droppedCount(1).expectedEveryMinutes(1).enabled(true).version(1));
     Assertions.assertThrows(NotAllowedException.class, () -> usecase.create(context, input));
     Mockito.verifyNoInteractions(visibility, gateway, cache, audit);
   }

@@ -2,6 +2,21 @@
 @startuml Paquete de template
 title Paquete de template
 left to right direction
+class template.Snippet{
+uid:string
+code:string
+enabled:boolean
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+enable()
+disable()
+}
+identity.Tenant "1"  o--  "N*" template.Snippet: tenant 
+
 class template.Template{
 uid:string
 code:string
@@ -18,21 +33,6 @@ enable()
 disable()
 }
 identity.Tenant "1"  o--  "N*" template.Template: tenant 
-
-class template.Snippet{
-uid:string
-code:string
-enabled:boolean
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-enable()
-disable()
-}
-identity.Tenant "1"  o--  "N*" template.Snippet: tenant 
 
 class template.ThemeVersion{
 uid:string
@@ -164,8 +164,8 @@ disable()
 }
 template.Theme "1"  o--  "N*" template.ThemeAsset: theme 
 
-identity.Tenant "1"  o--  "N*" template.Template: tenant  
 identity.Tenant "1"  o--  "N*" template.Snippet: tenant  
+identity.Tenant "1"  o--  "N*" template.Template: tenant  
 template.Theme "1"  o--  "N*" template.ThemeVersion: theme  
 template.Snippet "1"  o--  "N*" template.SnippetVersion: snippet  
 template.Template "1"  o--  "N*" template.TemplateVersion: template  

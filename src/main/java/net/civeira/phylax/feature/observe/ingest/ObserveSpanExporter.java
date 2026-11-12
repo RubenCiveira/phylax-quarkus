@@ -23,6 +23,7 @@ public class ObserveSpanExporter implements SpanExporter {
   private final IngestContext context;
   private final ObservePipeline pipeline;
   private final SourceRegistry registry;
+  private final net.civeira.phylax.feature.observe.metric.ObserveMetrics metrics;
 
   @Override
   public CompletableResultCode export(final Collection<SpanData> spans) {
@@ -36,7 +37,11 @@ public class ObserveSpanExporter implements SpanExporter {
         continue;
       }
       registry.seen(source.get().code());
-      mapper.span(source.get(), span).ifPresent(pipeline::offer);
+      // Before the sampling of the mapper: the metrics count every span
+      metrics.record(source.get().code(), span);
+      if (mapper.allow(source.get())) {
+        mapper.span(source.get(), span).ifPresent(pipeline::offer);
+      }
     }
     return CompletableResultCode.ofSuccess();
   }

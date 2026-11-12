@@ -10,6 +10,8 @@ actor :Autorizado: as a0
 (Create) as creacion
 (Delete) as actualizacion
 (Delete) as borrado
+(Record activity) as recordActivity
+(Other use cases) as p0
 (Enable) as enable
 (Disable) as disable
 
@@ -18,6 +20,7 @@ a0 --> consulta
 a0 --> creacion
 a0 --> actualizacion
 a0 --> borrado
+p0 --> recordActivity
 a0 --> enable
 a0 --> disable
 

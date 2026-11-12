@@ -2,21 +2,6 @@
 @startuml Paquete de identity
 title Paquete de identity
 left to right direction
-class identity.UserAcceptedTermsOfUse{
-uid:string
-acceptDate:datetime
-ipAddress:string
-userAgent:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-identity.User "1"  o--  "N*" identity.UserAcceptedTermsOfUse: user 
-identity.TenantTermsOfUse "1"  o--  "N*" identity.UserAcceptedTermsOfUse: termsOfUse 
-
 class identity.Tenant{
 uid:string
 name:string
@@ -34,22 +19,6 @@ delete()
 enable()
 disable()
 }
-
-class identity.UserPurposeConsent{
-uid:string
-granted:boolean
-decisionAt:datetime
-ipAddress:string
-userAgent:string
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-identity.User "1"  o--  "N*" identity.UserPurposeConsent: user 
-identity.ConsentPurpose "1"  o--  "N*" identity.UserPurposeConsent: consentPurpose 
 
 class identity.UserProfile{
 uid:string
@@ -91,6 +60,53 @@ delete()
 identity.User "1"  o--  "N*" identity.UserFederatedIdentity: user 
 identity.TenantLoginProvider "1"  o--  "N*" identity.UserFederatedIdentity: loginProvider 
 
+class identity.ConsentPurpose{
+uid:string
+key:ConsentPurposeKeyOptions
+title:string
+description:blob
+required:boolean
+activationDate:datetime
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+identity.Tenant "1"  o--  "N*" identity.ConsentPurpose: tenant 
+
+class identity.UserAcceptedTermsOfUse{
+uid:string
+acceptDate:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+identity.User "1"  o--  "N*" identity.UserAcceptedTermsOfUse: user 
+identity.TenantTermsOfUse "1"  o--  "N*" identity.UserAcceptedTermsOfUse: termsOfUse 
+
+class identity.UserPurposeConsent{
+uid:string
+granted:boolean
+decisionAt:datetime
+ipAddress:string
+userAgent:string
+version:integer
+list()
+retrieve()
+create()
+update()
+delete()
+}
+identity.User "1"  o--  "N*" identity.UserPurposeConsent: user 
+identity.ConsentPurpose "1"  o--  "N*" identity.UserPurposeConsent: consentPurpose 
+
 class identity.TenantConfig{
 uid:string
 displayName:string
@@ -127,22 +143,6 @@ update()
 delete()
 }
 identity.Tenant "1"  o--  "N*" identity.TenantConfig: tenant 
-
-class identity.ConsentPurpose{
-uid:string
-key:ConsentPurposeKeyOptions
-title:string
-description:blob
-required:boolean
-activationDate:datetime
-version:integer
-list()
-retrieve()
-create()
-update()
-delete()
-}
-identity.Tenant "1"  o--  "N*" identity.ConsentPurpose: tenant 
 
 class identity.TenantLoginProvider{
 uid:string
@@ -227,15 +227,15 @@ reject()
 }
 identity.Tenant "1"  o--  "N*" identity.User: tenant 
 
+identity.User "1"  o--  "N*" identity.UserProfile: user  
+identity.User "1"  o--  "N*" identity.UserFederatedIdentity: user  
+identity.TenantLoginProvider "1"  o--  "N*" identity.UserFederatedIdentity: loginProvider  
+identity.Tenant "1"  o--  "N*" identity.ConsentPurpose: tenant  
 identity.User "1"  o--  "N*" identity.UserAcceptedTermsOfUse: user  
 identity.TenantTermsOfUse "1"  o--  "N*" identity.UserAcceptedTermsOfUse: termsOfUse  
 identity.User "1"  o--  "N*" identity.UserPurposeConsent: user  
 identity.ConsentPurpose "1"  o--  "N*" identity.UserPurposeConsent: consentPurpose  
-identity.User "1"  o--  "N*" identity.UserProfile: user  
-identity.User "1"  o--  "N*" identity.UserFederatedIdentity: user  
-identity.TenantLoginProvider "1"  o--  "N*" identity.UserFederatedIdentity: loginProvider  
 identity.Tenant "1"  o--  "N*" identity.TenantConfig: tenant  
-identity.Tenant "1"  o--  "N*" identity.ConsentPurpose: tenant  
 identity.Tenant "1"  o--  "N*" identity.TenantLoginProvider: tenant  
 identity.Tenant "1"  o--  "N*" identity.TenantTermsOfUse: tenant  
 access.ResourceServer "1"  o--  "N*" identity.TenantTermsOfUse: resourceServer  

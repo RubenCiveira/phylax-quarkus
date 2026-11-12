@@ -16,6 +16,7 @@ import net.civeira.phylax.feature.observe.observedissue.application.visibility.O
 import net.civeira.phylax.feature.observe.observedissue.application.visibility.ObservedIssuesVisibility;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssue;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueChangeSet;
+import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueKindOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueLevelOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueStatusOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.gateway.ObservedIssueAuditGateway;
@@ -76,13 +77,18 @@ class ObservedIssueCreateUsecaseUnitTest {
         createAllowEmitter, createCheckEmitter, createEnrichEmitter, gateway, visibility);
     ObservedIssueCreateInput input = ObservedIssueCreateInput.fromChangeSet(
         new ObservedIssueChangeSet().uid("one").origin(ObservedSourceReference.of("one"))
-            .fingerprint("one").title("one").culprit("one").level(ObservedIssueLevelOptions.WARNING)
-            .status(ObservedIssueStatusOptions.UNRESOLVED)
+            .fingerprint("one").title("one").culprit("one").kind(ObservedIssueKindOptions.ERROR)
+            .level(ObservedIssueLevelOptions.WARNING).status(ObservedIssueStatusOptions.UNRESOLVED)
+            .mergedInto("one").assignee("one").assigneeName("one")
+            .ignoreUntil(LocalDateTime
+                .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+            .ignoreUntilCount(1).trackerUrl("one")
             .firstSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
             .lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
-            .count(1).lastEventId("one").lastTraceId("one").release("one").version(1));
+            .count(1).lastEventId("one").lastTraceId("one").users(1).tenants(1).usersSketch("one")
+            .tenantsSketch("one").firstRelease("one").release("one").version(1));
     Mockito
         .when(visibility.copyWithFixed(Mockito.eq(context),
             Mockito.any(ObservedIssueChangeSet.class)))
@@ -136,13 +142,18 @@ class ObservedIssueCreateUsecaseUnitTest {
     }).when(createAllowEmitter).fire(Mockito.any());
     ObservedIssueCreateInput input = ObservedIssueCreateInput.fromChangeSet(
         new ObservedIssueChangeSet().uid("one").origin(ObservedSourceReference.of("one"))
-            .fingerprint("one").title("one").culprit("one").level(ObservedIssueLevelOptions.WARNING)
-            .status(ObservedIssueStatusOptions.UNRESOLVED)
+            .fingerprint("one").title("one").culprit("one").kind(ObservedIssueKindOptions.ERROR)
+            .level(ObservedIssueLevelOptions.WARNING).status(ObservedIssueStatusOptions.UNRESOLVED)
+            .mergedInto("one").assignee("one").assigneeName("one")
+            .ignoreUntil(LocalDateTime
+                .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+            .ignoreUntilCount(1).trackerUrl("one")
             .firstSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
             .lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
-            .count(1).lastEventId("one").lastTraceId("one").release("one").version(1));
+            .count(1).lastEventId("one").lastTraceId("one").users(1).tenants(1).usersSketch("one")
+            .tenantsSketch("one").firstRelease("one").release("one").version(1));
     Assertions.assertThrows(NotAllowedException.class, () -> usecase.create(context, input));
     Mockito.verifyNoInteractions(visibility, gateway, cache, audit);
   }

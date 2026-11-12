@@ -11,7 +11,9 @@ import net.civeira.phylax.common.value.validation.ConstraintFail;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
- * Value Object representing last version of the origin where the issue was seen. of observedIssue.
+ * Value Object representing last version of the origin where the issue was seen. A RESOLVED issue
+ * reopens only when it is seen again in a later version (resolved in the next release). of
+ * observedIssue.
  * <p>
  * This class ensures that the release is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

@@ -350,14 +350,14 @@ public class ResourceServerProjectionDescriptor implements ProjectionDescriptor 
    */
   private Map<String, RelationshipDefinition> relations(final String baseServer) {
     Map<String, RelationshipDefinition> relations = new HashMap<>();
-    relations.put("role",
-        RelationshipDefinition.builder().list(true).id("/api/access/roles")
-            .url(baseServer + "/api/access/roles").method("GET").batchParam("resource-servers")
-            .referenceField("resource-server").build());
     relations.put("userGroupMembership",
         RelationshipDefinition.builder().list(true).id("/api/access/user-group-membership")
             .url(baseServer + "/api/access/user-group-membership").method("GET")
             .batchParam("resource-servers").referenceField("resource-server").build());
+    relations.put("role",
+        RelationshipDefinition.builder().list(true).id("/api/access/roles")
+            .url(baseServer + "/api/access/roles").method("GET").batchParam("resource-servers")
+            .referenceField("resource-server").build());
     relations.put("userRoleAssignment",
         RelationshipDefinition.builder().list(true).id("/api/access/user-role-assignment")
             .url(baseServer + "/api/access/user-role-assignment").method("GET")

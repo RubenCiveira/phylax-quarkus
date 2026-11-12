@@ -1,5 +1,6 @@
 package net.civeira.phylax.feature.observe.observedissue.domain;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,26 +20,43 @@ import lombok.experimental.Delegate;
 import net.civeira.phylax.common.exception.ConstraintException;
 import net.civeira.phylax.common.exception.ExecutionException;
 import net.civeira.phylax.common.value.validation.ConstraintFailList;
+import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueAssignEvent;
 import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueCreateEvent;
 import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueDeleteEvent;
 import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueEvent;
 import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueIgnoreEvent;
+import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueLinkTicketEvent;
+import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueMarkResolvedEvent;
+import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueMergeIntoEvent;
+import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueRecordOccurrenceEvent;
 import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueReopenEvent;
-import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueResolveEvent;
+import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueSnoozeEvent;
 import net.civeira.phylax.feature.observe.observedissue.domain.event.ObservedIssueUpdateEvent;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.AssigneeNameVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.AssigneeVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.CountVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.CulpritVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FingerprintVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FirstReleaseVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FirstSeenAtVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.IgnoreUntilCountVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.IgnoreUntilVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.KindVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastEventIdVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastSeenAtVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastTraceIdVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LevelVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.MergedIntoVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.OriginVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.ReleaseVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.StatusVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TenantsSketchVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TenantsVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TitleVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TrackerUrlVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UidVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UsersSketchVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UsersVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.VersionVO;
 
 /**
@@ -67,16 +85,45 @@ public class ObservedIssue implements ObservedIssueRef {
   public static ObservedIssue create(final ObservedIssueChangeSet change)
       throws ConstraintException {
     change.status(ObservedIssueStatusOptions.UNRESOLVED);
+    change.mergedIntoNull();
+    change.assigneeNull();
+    change.assigneeNameNull();
+    change.ignoreUntilNull();
+    change.ignoreUntilCountNull();
+    change.trackerUrlNull();
     change.firstSeenAtNull();
     change.lastSeenAtNull();
     change.count(0);
     change.lastEventIdNull();
     change.lastTraceIdNull();
+    change.users(0);
+    change.tenants(0);
+    change.usersSketchNull();
+    change.tenantsSketchNull();
+    change.firstReleaseNull();
     change.releaseNull();
     ObservedIssue instance = new ObservedIssue(change, Optional.empty());
     instance.addEvent(ObservedIssueCreateEvent.builder().payload(instance).build());
     return instance;
   }
+
+  /**
+   * Name of the assignee, as the viewer shows it.
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private AssigneeNameVO assigneeNameValue = AssigneeNameVO.nullValue();
+
+  /**
+   * Who takes care of the issue (the user of the viewer that assigned it).
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private AssigneeVO assigneeValue = AssigneeVO.nullValue();
 
   /**
    * Number of events grouped in the issue.
@@ -107,6 +154,15 @@ public class ObservedIssue implements ObservedIssueRef {
   private FingerprintVO fingerprintValue;
 
   /**
+   * Version of the origin where the issue was seen for the first time.
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private FirstReleaseVO firstReleaseValue = FirstReleaseVO.nullValue();
+
+  /**
    * When the first event of the issue arrived.
    *
    * @autogenerated EntityGenerator
@@ -114,6 +170,35 @@ public class ObservedIssue implements ObservedIssueRef {
   @Delegate
   @Builder.Default
   private FirstSeenAtVO firstSeenAtValue = FirstSeenAtVO.nullValue();
+
+  /**
+   * An IGNORED issue reopens when its count reaches this value (empty: ignored for ever, or by
+   * date).
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private IgnoreUntilCountVO ignoreUntilCountValue = IgnoreUntilCountVO.nullValue();
+
+  /**
+   * An IGNORED issue reopens after this moment (empty: ignored for ever, or by count).
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private IgnoreUntilVO ignoreUntilValue = IgnoreUntilVO.nullValue();
+
+  /**
+   * ERROR: errors grouped by fingerprint. PERFORMANCE: performance problems detected in the traces
+   * (N+1 queries, slow operations).
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private KindVO kindValue;
 
   /**
    * Identifier of the last raw event in the store, to open it.
@@ -152,6 +237,15 @@ public class ObservedIssue implements ObservedIssueRef {
   private LevelVO levelValue;
 
   /**
+   * Uid of the issue this one was merged into; its fingerprint is an alias of that issue.
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private MergedIntoVO mergedIntoValue = MergedIntoVO.nullValue();
+
+  /**
    * Origin whose errors are grouped in the issue.
    *
    * @autogenerated EntityGenerator
@@ -169,7 +263,8 @@ public class ObservedIssue implements ObservedIssueRef {
   private List<ObservedIssueEvent> recordedEvents = List.of();
 
   /**
-   * Last version of the origin where the issue was seen.
+   * Last version of the origin where the issue was seen. A RESOLVED issue reopens only when it is
+   * seen again in a later version (resolved in the next release).
    *
    * @autogenerated EntityGenerator
    */
@@ -179,13 +274,31 @@ public class ObservedIssue implements ObservedIssueRef {
 
   /**
    * Triage state: UNRESOLVED, RESOLVED (closed until it is seen again, then it reopens as a
-   * regression) or IGNORED.
+   * regression), IGNORED or MERGED (its events count in merged-into).
    *
    * @autogenerated EntityGenerator
    */
   @Delegate
   @NonNull
   private StatusVO statusValue;
+
+  /**
+   * HyperLogLog sketch of the pseudonymized tenants (base64; not reversible).
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private TenantsSketchVO tenantsSketchValue = TenantsSketchVO.nullValue();
+
+  /**
+   * Approximate number of distinct tenants where the issue was seen.
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private TenantsVO tenantsValue;
 
   /**
    * Exception type and normalized message.
@@ -197,6 +310,15 @@ public class ObservedIssue implements ObservedIssueRef {
   private TitleVO titleValue;
 
   /**
+   * Task of the issue in the issue tracker (Redmine, Jira...).
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private TrackerUrlVO trackerUrlValue = TrackerUrlVO.nullValue();
+
+  /**
    * Unique identifier of the issue.
    *
    * @autogenerated EntityGenerator
@@ -205,6 +327,26 @@ public class ObservedIssue implements ObservedIssueRef {
   @EqualsAndHashCode.Include
   @NonNull
   private UidVO uidValue;
+
+  /**
+   * HyperLogLog sketch of the pseudonymized users, to keep counting without storing them (base64;
+   * not reversible).
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @Builder.Default
+  private UsersSketchVO usersSketchValue = UsersSketchVO.nullValue();
+
+  /**
+   * Approximate number of distinct users (or browser sessions, when the event has no user) that
+   * suffered the issue.
+   *
+   * @autogenerated EntityGenerator
+   */
+  @Delegate
+  @NonNull
+  private UsersVO usersValue;
 
   /**
    * Campo con el número de version de observed issue para controlar bloqueos optimistas
@@ -228,19 +370,48 @@ public class ObservedIssue implements ObservedIssueRef {
     this.fingerprintValue = attribute.readFingerprint(previous, list);
     this.titleValue = attribute.readTitle(previous, list);
     this.culpritValue = attribute.readCulprit(previous, list);
+    this.kindValue = attribute.readKind(previous, list);
     this.levelValue = attribute.readLevel(previous, list);
     this.statusValue = attribute.readStatus(previous, list);
+    this.mergedIntoValue = attribute.readMergedInto(previous, list);
+    this.assigneeValue = attribute.readAssignee(previous, list);
+    this.assigneeNameValue = attribute.readAssigneeName(previous, list);
+    this.ignoreUntilValue = attribute.readIgnoreUntil(previous, list);
+    this.ignoreUntilCountValue = attribute.readIgnoreUntilCount(previous, list);
+    this.trackerUrlValue = attribute.readTrackerUrl(previous, list);
     this.firstSeenAtValue = attribute.readFirstSeenAt(previous, list);
     this.lastSeenAtValue = attribute.readLastSeenAt(previous, list);
     this.countValue = attribute.readCount(previous, list);
     this.lastEventIdValue = attribute.readLastEventId(previous, list);
     this.lastTraceIdValue = attribute.readLastTraceId(previous, list);
+    this.usersValue = attribute.readUsers(previous, list);
+    this.tenantsValue = attribute.readTenants(previous, list);
+    this.usersSketchValue = attribute.readUsersSketch(previous, list);
+    this.tenantsSketchValue = attribute.readTenantsSketch(previous, list);
+    this.firstReleaseValue = attribute.readFirstRelease(previous, list);
     this.releaseValue = attribute.readRelease(previous, list);
     this.versionValue = attribute.readVersion(previous, list);
     if (list.hasErrors()) {
       throw new ConstraintException("Invalid values on ObservedIssue", list);
     }
     this.recordedEvents = previous.map(ObservedIssue::getRecordedEvents).orElseGet(List::of);
+  }
+
+  /**
+   * Apply assign on observed issue. Assigns the issue (empty values unassign it).
+   *
+   * @autogenerated EntityGenerator
+   * @param assignee
+   * @param assigneeName
+   * @return A modified instance of observed issue
+   */
+  public ObservedIssue assign(final String assignee, final String assigneeName) {
+    ObservedIssueChangeSet attr = new ObservedIssueChangeSet();
+    attr.assignee(assignee);
+    attr.assigneeName(assigneeName);
+    ObservedIssue instance = new ObservedIssue(attr, Optional.of(this));
+    instance.addEvent(ObservedIssueAssignEvent.builder().payload(instance).build());
+    return instance;
   }
 
   /**
@@ -305,6 +476,99 @@ public class ObservedIssue implements ObservedIssueRef {
   }
 
   /**
+   * Apply link ticket on observed issue. Task of the issue in the issue tracker.
+   *
+   * @autogenerated EntityGenerator
+   * @param trackerUrl
+   * @return A modified instance of observed issue
+   */
+  public ObservedIssue linkTicket(final String trackerUrl) {
+    ObservedIssueChangeSet attr = new ObservedIssueChangeSet();
+    attr.trackerUrl(trackerUrl);
+    ObservedIssue instance = new ObservedIssue(attr, Optional.of(this));
+    instance.addEvent(ObservedIssueLinkTicketEvent.builder().payload(instance).build());
+    return instance;
+  }
+
+  /**
+   * Apply mark resolved on observed issue.
+   *
+   * @autogenerated EntityGenerator
+   * @throws ExecutionException If some precondition of the action is not met.
+   * @return A modified instance of observed issue
+   */
+  public ObservedIssue markResolved() throws ExecutionException {
+    if (!isNotResolved()) {
+      throw new ExecutionException("Precondition not-resolved not met", "precondition.not-resolved",
+          "Only an open or ignored issue can be resolved.");
+    }
+    ObservedIssueChangeSet attr = new ObservedIssueChangeSet();
+    attr.status(ObservedIssueStatusOptions.RESOLVED);
+    ObservedIssue instance = new ObservedIssue(attr, Optional.of(this));
+    instance.addEvent(ObservedIssueMarkResolvedEvent.builder().payload(instance).build());
+    return instance;
+  }
+
+  /**
+   * Apply merge into on observed issue. The issue is merged into another one (only the viewer calls
+   * it).
+   *
+   * @autogenerated EntityGenerator
+   * @param mergedInto
+   * @return A modified instance of observed issue
+   */
+  public ObservedIssue mergeInto(final String mergedInto) {
+    ObservedIssueChangeSet attr = new ObservedIssueChangeSet();
+    attr.mergedInto(mergedInto);
+    attr.status(ObservedIssueStatusOptions.MERGED);
+    ObservedIssue instance = new ObservedIssue(attr, Optional.of(this));
+    instance.addEvent(ObservedIssueMergeIntoEvent.builder().payload(instance).build());
+    return instance;
+  }
+
+  /**
+   * Apply record occurrence on observed issue. New occurrences seen by the collector (only the
+   * collector calls it).
+   *
+   * @autogenerated EntityGenerator
+   * @param count
+   * @param firstSeenAt
+   * @param lastSeenAt
+   * @param status
+   * @param lastEventId
+   * @param lastTraceId
+   * @param firstRelease
+   * @param release
+   * @param users
+   * @param tenants
+   * @param usersSketch
+   * @param tenantsSketch
+   * @return A modified instance of observed issue
+   */
+  public ObservedIssue recordOccurrence(final Integer count, final OffsetDateTime firstSeenAt,
+      final OffsetDateTime lastSeenAt, final ObservedIssueStatusOptions status,
+      final String lastEventId, final String lastTraceId, final String firstRelease,
+      final String release, final Integer users, final Integer tenants, final String usersSketch,
+      final String tenantsSketch) {
+    ObservedIssueChangeSet attr = new ObservedIssueChangeSet();
+    attr.count(count);
+    attr.firstSeenAt(firstSeenAt);
+    attr.lastSeenAt(lastSeenAt);
+    attr.status(status);
+    attr.lastEventId(lastEventId);
+    attr.lastTraceId(lastTraceId);
+    attr.firstRelease(firstRelease);
+    attr.release(release);
+    attr.users(users);
+    attr.tenants(tenants);
+    attr.usersSketch(usersSketch);
+    attr.tenantsSketch(tenantsSketch);
+    ObservedIssue instance = new ObservedIssue(attr, Optional.of(this));
+    instance.addEvent(ObservedIssueRecordOccurrenceEvent.builder().payload(instance).build());
+    return instance;
+  }
+
+  /**
    * Apply reopen on observed issue.
    *
    * @autogenerated EntityGenerator
@@ -324,21 +588,20 @@ public class ObservedIssue implements ObservedIssueRef {
   }
 
   /**
-   * Apply resolve on observed issue.
+   * Apply snooze on observed issue. Ignores the issue until a moment or a count (it reopens then).
    *
    * @autogenerated EntityGenerator
-   * @throws ExecutionException If some precondition of the action is not met.
+   * @param ignoreUntil
+   * @param ignoreUntilCount
    * @return A modified instance of observed issue
    */
-  public ObservedIssue resolve() throws ExecutionException {
-    if (!isNotResolved()) {
-      throw new ExecutionException("Precondition not-resolved not met", "precondition.not-resolved",
-          "Only an open or ignored issue can be resolved.");
-    }
+  public ObservedIssue snooze(final OffsetDateTime ignoreUntil, final Integer ignoreUntilCount) {
     ObservedIssueChangeSet attr = new ObservedIssueChangeSet();
-    attr.status(ObservedIssueStatusOptions.RESOLVED);
+    attr.ignoreUntil(ignoreUntil);
+    attr.ignoreUntilCount(ignoreUntilCount);
+    attr.status(ObservedIssueStatusOptions.IGNORED);
     ObservedIssue instance = new ObservedIssue(attr, Optional.of(this));
-    instance.addEvent(ObservedIssueResolveEvent.builder().payload(instance).build());
+    instance.addEvent(ObservedIssueSnoozeEvent.builder().payload(instance).build());
     return instance;
   }
 
@@ -347,19 +610,31 @@ public class ObservedIssue implements ObservedIssueRef {
    * @return
    */
   public Map<String, String> toMap() {
-    Map<String, String> map = new HashMap<>(14);
+    Map<String, String> map = new HashMap<>(26);
     uidToMap(map);
     originToMap(map);
     fingerprintToMap(map);
     titleToMap(map);
     culpritToMap(map);
+    kindToMap(map);
     levelToMap(map);
     statusToMap(map);
+    mergedIntoToMap(map);
+    assigneeToMap(map);
+    assigneeNameToMap(map);
+    ignoreUntilToMap(map);
+    ignoreUntilCountToMap(map);
+    trackerUrlToMap(map);
     firstSeenAtToMap(map);
     lastSeenAtToMap(map);
     countToMap(map);
     lastEventIdToMap(map);
     lastTraceIdToMap(map);
+    usersToMap(map);
+    tenantsToMap(map);
+    usersSketchToMap(map);
+    tenantsSketchToMap(map);
+    firstReleaseToMap(map);
     releaseToMap(map);
     versionToMap(map);
     return map;
@@ -375,11 +650,22 @@ public class ObservedIssue implements ObservedIssueRef {
    */
   public ObservedIssue update(final ObservedIssueChangeSet change) throws ConstraintException {
     change.unsetStatus();
+    change.unsetMergedInto();
+    change.unsetAssignee();
+    change.unsetAssigneeName();
+    change.unsetIgnoreUntil();
+    change.unsetIgnoreUntilCount();
+    change.unsetTrackerUrl();
     change.unsetFirstSeenAt();
     change.unsetLastSeenAt();
     change.unsetCount();
     change.unsetLastEventId();
     change.unsetLastTraceId();
+    change.unsetUsers();
+    change.unsetTenants();
+    change.unsetUsersSketch();
+    change.unsetTenantsSketch();
+    change.unsetFirstRelease();
     change.unsetRelease();
     ObservedIssue instance = new ObservedIssue(change, Optional.of(this));
     instance.addEvent(ObservedIssueUpdateEvent.builder().payload(instance).build());

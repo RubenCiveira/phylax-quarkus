@@ -1,0 +1,14 @@
+ALERTA ACTIVA: {{rule.name}}
+
+{{alert.summary}}
+
+Origen: {{origin.code}}
+Incidencia: {{issue.title}}
+Eventos / usuarios: {{issue.count}} / {{issue.users}}
+Versión: {{issue.release}}
+Valor / umbral: {{metric.value}} / {{metric.threshold}}
+Disparada: {{alert.fired_at}}
+
+Ver en el visor: {{alert.link}}
+
+{{app.title}} · disparador {{rule.trigger}}

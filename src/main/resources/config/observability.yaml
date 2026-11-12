@@ -4,6 +4,9 @@
 # its api (/observe/api) is behind the security of the application and asks the roles below.
 app:
   observe:
+    # Store of logs, spans and metric points: jsonl (files per day) or sql (tables obs_* in the
+    # database of the application). In Quarkus it is chosen when building.
+    storage: ${OBSERVE_STORAGE:jsonl}
     # Root directory of the JSONL files (one directory per day)
     path: ${OBSERVE_PATH:data/observability}
     # Initial values of observability-config: the install creates its row "default" with them, and
@@ -24,11 +27,39 @@ app:
     # The application observes itself as the source self-source (created at startup)
     self: true
     self-source: phylax-api
+    # Version and environment of the own logs (the own spans take them from the OpenTelemetry
+    # resource; these values are used when it does not have them)
+    self-release: ${OBSERVE_SELF_RELEASE:${quarkus.application.version:}}
+    self-env: ${OBSERVE_SELF_ENV:}
     # The sources created by the synchronization with oauth-client / resource-server are enabled
     auto-enable: true
+    issues:
+      # Groups the error logs with an exception in observed-issue (one issue per fingerprint)
+      enabled: ${OBSERVE_ISSUES_ENABLED:true}
+      # Prefixes of the own Java frames used in the fingerprint, comma separated
+      # in-app: com.acme.        (default: the base package of the application)
+      # Counts the distinct users and tenants of each issue, pseudonymized (HMAC with this salt;
+      # change the salt and the counts start again). false: they are not counted
+      track-users: ${OBSERVE_ISSUES_TRACK_USERS:true}
+      user-salt: ${OBSERVE_USER_SALT:phylax-api}
+    metrics:
+      # RED metrics series per source (route + method); the new ones above go to __overflow__
+      max-series: 2000
+    probes:
+      # false in all the replicas but one, so each probe is checked once per interval
+      enabled: ${OBSERVE_PROBES_ENABLED:true}
+      # Hosts the probes may call, comma separated. Empty: the host of public-url and the hosts of
+      # the allowed-origins of the sources. Local and link-local addresses are never called.
+      allowed-hosts: ${OBSERVE_PROBES_ALLOWED_HOSTS:}
+    sampling:
+      # Events per minute a source keeps at most: above it its trace-sample-rate is lowered (the
+      # traces with errors are always kept). 0: the rate of each source, fixed
+      target-per-minute: ${OBSERVE_SAMPLING_TARGET:0}
     ingest:
       # true: the OTLP endpoints (/v1/traces, /v1/logs) reject the requests without X-Observe-Key
       require-key: ${OBSERVE_REQUIRE_KEY:false}
+    # Public URL of the application (scheme://host[:port]), for the links of the alert notices
+    public-url: ${OBSERVE_PUBLIC_URL:}
     viewer:
       title: phylax-api
       # show | hide | auto: logo and name of the viewer bar (hide inside a theme layout)

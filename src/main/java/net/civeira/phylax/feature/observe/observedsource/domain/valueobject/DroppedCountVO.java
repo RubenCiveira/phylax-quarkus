@@ -13,7 +13,7 @@ import net.civeira.phylax.common.value.validation.ConstraintFailList;
 
 /**
  * Value Object representing events of the origin discarded by the rate limit or because the queue
- * was full. of observedSource.
+ * was full (saved every minute by the collector). of observedSource.
  * <p>
  * This class ensures that the dropped count is a {@code String} and encapsulates its validation and
  * formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

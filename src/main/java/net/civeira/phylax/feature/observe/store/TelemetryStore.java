@@ -2,6 +2,9 @@
 package net.civeira.phylax.feature.observe.store;
 
 import java.util.List;
+import java.util.Set;
+
+import net.civeira.phylax.feature.observe.metric.MetricPoint;
 
 /**
  * Where the logs and spans are kept. The configuration, the origins and the rest of the entities
@@ -21,6 +24,23 @@ public interface TelemetryStore {
 
   /** Every span of a trace, in start order. */
   List<ObsSpan> trace(String traceId, long from, long to);
+
+  /** Every span of the given traces (one read of the range), in start order. */
+  List<ObsSpan> traces(Set<String> traceIds, long from, long to);
+
+  /** Metric points of one minute or one hour ({@link MetricPoint#step}). */
+  void appendPoints(List<MetricPoint> points);
+
+  /**
+   * Metric points of the range, oldest first.
+   *
+   * @param step 60 000 (minutes) or 3 600 000 (hours)
+   * @param sources codes of the sources; empty for all
+   */
+  List<MetricPoint> points(long from, long to, long step, Set<String> sources);
+
+  /** Bytes the store takes on disk (it may be a few minutes old). */
+  long sizeBytes();
 
   /** Deletes the data older than the retention and, above the disk limit, the oldest days. */
   void purge(RetentionPolicy policy);

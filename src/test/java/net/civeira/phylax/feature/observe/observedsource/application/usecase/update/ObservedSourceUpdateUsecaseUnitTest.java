@@ -32,6 +32,7 @@ import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.Drop
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.EnabledVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.EnvironmentVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.ErrorSampleRateVO;
+import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.ExpectedEveryMinutesVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.IngestKeyVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.KindVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.valueobject.LastSeenAtVO;
@@ -122,19 +123,19 @@ class ObservedSourceUpdateUsecaseUnitTest {
         .retentionDaysValue(RetentionDaysVO.from(1)).scrubFieldsValue(ScrubFieldsVO.from("one"))
         .lastSeenAtValue(LastSeenAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
-        .droppedCountValue(DroppedCountVO.from(1)).enabledValue(EnabledVO.from(true))
-        .versionValue(VersionVO.from(1)).build();
-    ObservedSourceUpdateInput input =
-        ObservedSourceUpdateInput.fromChangeSet(
-            new ObservedSourceChangeSet().uid("two").originType("two").originRef("two")
-                .managed(false).code("two").name("two").kind(ObservedSourceKindOptions.FRONTEND)
-                .originEnabled(false).detached(false).environment("two").ingestKey("two")
-                .allowedOrigins("two").minLevel("two").traceSampleRate(2).errorSampleRate(2)
-                .rateLimit(2).metricsMode(ObservedSourceMetricsModeOptions.SCRAPE).scrapeUrl("two")
-                .scrapeInterval(2).maxSeries(2).deriveMetrics(false).retentionDays(2)
-                .scrubFields("two").lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0)
-                    .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-                .droppedCount(2).enabled(false).version(2));
+        .droppedCountValue(DroppedCountVO.from(1))
+        .expectedEveryMinutesValue(ExpectedEveryMinutesVO.from(1))
+        .enabledValue(EnabledVO.from(true)).versionValue(VersionVO.from(1)).build();
+    ObservedSourceUpdateInput input = ObservedSourceUpdateInput
+        .fromChangeSet(new ObservedSourceChangeSet().uid("two").originType("two").originRef("two")
+            .managed(false).code("two").name("two").kind(ObservedSourceKindOptions.FRONTEND)
+            .originEnabled(false).detached(false).environment("two").ingestKey("two")
+            .allowedOrigins("two").minLevel("two").traceSampleRate(2).errorSampleRate(2)
+            .rateLimit(2).metricsMode(ObservedSourceMetricsModeOptions.SCRAPE).scrapeUrl("two")
+            .scrapeInterval(2).maxSeries(2).deriveMetrics(false).retentionDays(2).scrubFields("two")
+            .lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .droppedCount(2).expectedEveryMinutes(2).enabled(false).version(2));
     Mockito.when(visibility.retrieveVisibleForUpdate(context, "one")).thenReturn(Optional.of(one));
     Mockito
         .when(visibility.copyWithFixed(Mockito.eq(context),
@@ -182,17 +183,16 @@ class ObservedSourceUpdateUsecaseUnitTest {
       ((ObservedSourceUpdateAuthorizationDecision) invocation.getArgument(0)).deny("not allowed");
       return null;
     }).when(updateAllowEmitter).fire(Mockito.any());
-    ObservedSourceUpdateInput input =
-        ObservedSourceUpdateInput.fromChangeSet(
-            new ObservedSourceChangeSet().uid("two").originType("two").originRef("two")
-                .managed(false).code("two").name("two").kind(ObservedSourceKindOptions.FRONTEND)
-                .originEnabled(false).detached(false).environment("two").ingestKey("two")
-                .allowedOrigins("two").minLevel("two").traceSampleRate(2).errorSampleRate(2)
-                .rateLimit(2).metricsMode(ObservedSourceMetricsModeOptions.SCRAPE).scrapeUrl("two")
-                .scrapeInterval(2).maxSeries(2).deriveMetrics(false).retentionDays(2)
-                .scrubFields("two").lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0)
-                    .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-                .droppedCount(2).enabled(false).version(2));
+    ObservedSourceUpdateInput input = ObservedSourceUpdateInput
+        .fromChangeSet(new ObservedSourceChangeSet().uid("two").originType("two").originRef("two")
+            .managed(false).code("two").name("two").kind(ObservedSourceKindOptions.FRONTEND)
+            .originEnabled(false).detached(false).environment("two").ingestKey("two")
+            .allowedOrigins("two").minLevel("two").traceSampleRate(2).errorSampleRate(2)
+            .rateLimit(2).metricsMode(ObservedSourceMetricsModeOptions.SCRAPE).scrapeUrl("two")
+            .scrapeInterval(2).maxSeries(2).deriveMetrics(false).retentionDays(2).scrubFields("two")
+            .lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .droppedCount(2).expectedEveryMinutes(2).enabled(false).version(2));
     Assertions.assertThrows(NotAllowedException.class,
         () -> usecase.update(context, ObservedSourceReference.of("one"), input));
     Mockito.verifyNoInteractions(visibility, gateway, cache, audit);
@@ -218,17 +218,16 @@ class ObservedSourceUpdateUsecaseUnitTest {
     OperationContext context = Mockito.mock(OperationContext.class);
     ObservedSourceUpdateUsecase usecase = new ObservedSourceUpdateUsecase(audit, cache, gateway,
         updateAllowEmitter, updateCheckEmitter, updateEnrichEmitter, visibility);
-    ObservedSourceUpdateInput input =
-        ObservedSourceUpdateInput.fromChangeSet(
-            new ObservedSourceChangeSet().uid("two").originType("two").originRef("two")
-                .managed(false).code("two").name("two").kind(ObservedSourceKindOptions.FRONTEND)
-                .originEnabled(false).detached(false).environment("two").ingestKey("two")
-                .allowedOrigins("two").minLevel("two").traceSampleRate(2).errorSampleRate(2)
-                .rateLimit(2).metricsMode(ObservedSourceMetricsModeOptions.SCRAPE).scrapeUrl("two")
-                .scrapeInterval(2).maxSeries(2).deriveMetrics(false).retentionDays(2)
-                .scrubFields("two").lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0)
-                    .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
-                .droppedCount(2).enabled(false).version(2));
+    ObservedSourceUpdateInput input = ObservedSourceUpdateInput
+        .fromChangeSet(new ObservedSourceChangeSet().uid("two").originType("two").originRef("two")
+            .managed(false).code("two").name("two").kind(ObservedSourceKindOptions.FRONTEND)
+            .originEnabled(false).detached(false).environment("two").ingestKey("two")
+            .allowedOrigins("two").minLevel("two").traceSampleRate(2).errorSampleRate(2)
+            .rateLimit(2).metricsMode(ObservedSourceMetricsModeOptions.SCRAPE).scrapeUrl("two")
+            .scrapeInterval(2).maxSeries(2).deriveMetrics(false).retentionDays(2).scrubFields("two")
+            .lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .droppedCount(2).expectedEveryMinutes(2).enabled(false).version(2));
     Mockito.when(visibility.retrieveVisibleForUpdate(context, "one")).thenReturn(Optional.empty());
     Assertions.assertThrows(NotFoundException.class,
         () -> usecase.update(context, ObservedSourceReference.of("one"), input));

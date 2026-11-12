@@ -67,7 +67,7 @@ public class ObservedIssueListUsecase {
             .uids(filter.getUids().stream().toList()).search(filter.getSearch().orElse(null))
             .origin(filter.getOrigin().orElse(null)).status(filter.getStatus().orElse(null))
             .level(filter.getLevel().orElse(null)).fingerprint(filter.getFingerprint().orElse(null))
-            .title(filter.getTitle().orElse(null)).build();
+            .kind(filter.getKind().orElse(null)).title(filter.getTitle().orElse(null)).build();
     ObservedIssueCursor gatewayCursor = ObservedIssueCursor.builder()
         .limit(cursor.getLimit().orElse(null)).sinceUid(cursor.getSinceUid().orElse(null))
         .order(cursor.getOrder().stream().map(Object::toString).map(ObservedIssueOrder::valueOf)

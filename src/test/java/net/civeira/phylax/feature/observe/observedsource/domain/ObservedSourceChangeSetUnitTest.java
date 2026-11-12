@@ -24,7 +24,7 @@ class ObservedSourceChangeSetUnitTest {
             .maxSeries(1).deriveMetrics(true).retentionDays(1).scrubFields("one")
             .lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
-            .droppedCount(1).enabled(true).version(1).newUid();
+            .droppedCount(1).expectedEveryMinutes(1).enabled(true).version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -210,6 +210,14 @@ class ObservedSourceChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("droppedCount");
     Assertions.assertFalse(one.getDroppedCount().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getExpectedEveryMinutes().get(),
+        "Value must equals to the intial value");
+    one.expectedEveryMinutes(2);
+    Assertions.assertEquals(2, one.getExpectedEveryMinutes().get(),
+        "Value must equals to the assigned value");
+    one.unset("expectedEveryMinutes");
+    Assertions.assertFalse(one.getExpectedEveryMinutes().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(true, one.getEnabled().get(), "Value must equals to the intial value");
     one.enabled(false);

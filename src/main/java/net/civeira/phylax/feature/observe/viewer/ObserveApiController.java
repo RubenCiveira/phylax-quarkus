@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -33,6 +34,15 @@ public class ObserveApiController {
 
   private final ObserveAccess access;
   private final ObserveQueries queries;
+  private final ObserveIssues issues;
+  private final ObserveIssueWorkflow workflow;
+  private final ObserveAlerts alerts;
+  private final net.civeira.phylax.feature.observe.metric.ObserveMetrics metrics;
+  private final net.civeira.phylax.feature.observe.slo.SloEvaluator slos;
+  private final net.civeira.phylax.feature.observe.probe.ProbeRunner probes;
+  private final net.civeira.phylax.feature.observe.sourcemap.SourceMaps sourceMaps;
+  private final net.civeira.phylax.feature.observe.anomaly.ObserveInsights insights;
+  private final net.civeira.phylax.feature.observe.health.ObserveHealth health;
   private final CurrentRequest current;
 
   @GET
@@ -53,9 +63,10 @@ public class ObserveApiController {
   public Response logs(@QueryParam("src") final List<String> src,
       @QueryParam("level") final String level, @QueryParam("q") final String text,
       @QueryParam("traceId") final String traceId, @QueryParam("from") final Long from,
-      @QueryParam("to") final Long to, @QueryParam("limit") final Integer limit) {
+      @QueryParam("to") final Long to, @QueryParam("limit") final Integer limit,
+      @QueryParam("release") final String release, @QueryParam("env") final String env) {
     return with(ObserveLevel.READ,
-        grant -> queries.logs(sources(src), level, text, traceId, from, to, limit));
+        grant -> queries.logs(sources(src), level, text, traceId, from, to, limit, release, env));
   }
 
   @GET
@@ -63,9 +74,207 @@ public class ObserveApiController {
   public Response traces(@QueryParam("src") final List<String> src,
       @QueryParam("q") final String text, @QueryParam("errors") final boolean errors,
       @QueryParam("from") final Long from, @QueryParam("to") final Long to,
-      @QueryParam("limit") final Integer limit) {
+      @QueryParam("limit") final Integer limit, @QueryParam("release") final String release,
+      @QueryParam("env") final String env) {
     return with(ObserveLevel.READ,
-        grant -> queries.traces(sources(src), text, errors, from, to, limit));
+        grant -> queries.traces(sources(src), text, errors, from, to, limit, release, env));
+  }
+
+  @GET
+  @Path("spans")
+  public Response spans(@QueryParam("src") final List<String> src,
+      @QueryParam("q") final String text, @QueryParam("errors") final boolean errors,
+      @QueryParam("from") final Long from, @QueryParam("to") final Long to,
+      @QueryParam("limit") final Integer limit, @QueryParam("release") final String release,
+      @QueryParam("env") final String env) {
+    return with(ObserveLevel.READ,
+        grant -> queries.spans(sources(src), text, errors, from, to, limit, release, env));
+  }
+
+  /** RED metrics: series (rate, error rate, latency) and totals by route of the range. */
+  @GET
+  @Path("metrics")
+  public Response metrics(@QueryParam("src") final List<String> src,
+      @QueryParam("route") final String route, @QueryParam("from") final Long from,
+      @QueryParam("to") final Long to) {
+    long end = null == to ? System.currentTimeMillis() + 60_000 : to;
+    long start = null == from ? end - 3_600_000 : from;
+    return with(ObserveLevel.READ, grant -> metrics.query(sources(src), route, start, end));
+  }
+
+  /**
+   * Upload of a source map by the build of a front (ADMIN level):
+   * {@code curl -X POST --data-binary @dist/main.4f2a.js.map -H "Authorization: Bearer ..." \
+   * "https://host/observe/api/sourcemaps?src=my-ui&release=1.4.2&file=main.4f2a.js.map"}.
+   */
+  @jakarta.ws.rs.POST
+  @Path("sourcemaps")
+  @jakarta.ws.rs.Consumes(MediaType.WILDCARD)
+  public Response uploadSourceMap(@QueryParam("src") final String src,
+      @QueryParam("release") final String release, @QueryParam("file") final String file,
+      final String body) {
+    return with(ObserveLevel.ADMIN, grant -> {
+      try {
+        sourceMaps.store(src, release, file, body);
+      } catch (java.io.IOException | IllegalArgumentException ex) {
+        throw new net.civeira.phylax.common.exception.NotAllowedException(
+            "Source map not stored: " + ex.getMessage());
+      }
+      return Map.of("stored", file);
+    });
+  }
+
+  /** Current anomalies and the log patterns first seen in the range. */
+  @GET
+  @Path("insights")
+  public Response insights(@QueryParam("from") final Long from) {
+    long since = null == from ? System.currentTimeMillis() - 24 * 3_600_000L : from;
+    return with(ObserveLevel.READ, grant -> insights.view(since));
+  }
+
+  /** Web Vitals of the fronts by page: p75 and share of poor values. */
+  @GET
+  @Path("vitals")
+  public Response vitals(@QueryParam("src") final List<String> src,
+      @QueryParam("from") final Long from, @QueryParam("to") final Long to) {
+    long end = null == to ? System.currentTimeMillis() + 60_000 : to;
+    long start = null == from ? end - 24 * 3_600_000L : from;
+    return with(ObserveLevel.READ, grant -> metrics.vitals(sources(src), start, end));
+  }
+
+  /** Service map: edges between the sources and to their dependencies, with their RED metrics. */
+  @GET
+  @Path("map")
+  public Response map(@QueryParam("src") final List<String> src,
+      @QueryParam("from") final Long from, @QueryParam("to") final Long to) {
+    long end = null == to ? System.currentTimeMillis() + 60_000 : to;
+    long start = null == from ? end - 3_600_000 : from;
+    return with(ObserveLevel.READ, grant -> metrics.map(sources(src), start, end));
+  }
+
+  /** Objectives with their compliance, budget and burn rates (evaluated every minute). */
+  @GET
+  @Path("slos")
+  public Response slos() {
+    return with(ObserveLevel.READ, grant -> slos.current());
+  }
+
+  /** Probes with their last check and availability. */
+  @GET
+  @Path("probes")
+  public Response probes() {
+    return with(ObserveLevel.READ, grant -> probes.view());
+  }
+
+  /** Health of the collector (ADMIN level) and activity of the sources. */
+  @GET
+  @Path("health")
+  public Response health() {
+    return with(ObserveLevel.READ, grant -> healthOf(grant));
+  }
+
+  private Map<String, Object> healthOf(final ObserveGrant grant) {
+    Map<String, Object> result = new java.util.LinkedHashMap<>();
+    result.put("status", health.status().name());
+    result.put("sources", health.sources());
+    if (grant.has(ObserveLevel.ADMIN)) {
+      result.put("collector", health.collector());
+    }
+    return result;
+  }
+
+  @GET
+  @Path("alerts")
+  public Response alerts(@QueryParam("status") final String status) {
+    return with(ObserveLevel.READ, grant -> alerts.list(status));
+  }
+
+  @GET
+  @Path("issues")
+  public Response issues(@QueryParam("src") final List<String> src,
+      @QueryParam("status") final String status, @QueryParam("kind") final String kind) {
+    return with(ObserveLevel.READ, grant -> issues.list(sources(src), status, kind));
+  }
+
+  /** Detail of an issue: row, latest events with their stack, histogram and distribution. */
+  @GET
+  @Path("issues/{uid}")
+  public Response issue(@PathParam("uid") final String uid,
+      @QueryParam("before") final Long before) {
+    return with(ObserveLevel.READ, grant -> issues.detail(uid, before).orElseThrow(
+        () -> new net.civeira.phylax.common.exception.NotFoundException("Issue " + uid)));
+  }
+
+  /** Merges the issue into another one ({@code ?into=uid}). */
+  @POST
+  @Path("issues/{uid}/merge")
+  public Response merge(@PathParam("uid") final String uid, @QueryParam("into") final String into) {
+    return with(ObserveLevel.WRITE, grant -> checked(() -> workflow.merge(uid, into)));
+  }
+
+  /** Assigns the issue to the user of the viewer ({@code ?me=0} unassigns it). */
+  @POST
+  @Path("issues/{uid}/assign")
+  public Response assign(@PathParam("uid") final String uid, @QueryParam("me") final String me) {
+    return with(ObserveLevel.WRITE,
+        grant -> checked(() -> workflow.assign(uid, "0".equals(me) ? null : grant.user())));
+  }
+
+  /** Ignores the issue for some hours and/or until some more events. */
+  @POST
+  @Path("issues/{uid}/snooze")
+  public Response snooze(@PathParam("uid") final String uid,
+      @QueryParam("hours") final Integer hours, @QueryParam("events") final Integer events) {
+    return with(ObserveLevel.WRITE, grant -> checked(() -> workflow.snooze(uid, hours, events)));
+  }
+
+  @GET
+  @Path("issues/{uid}/comments")
+  public Response comments(@PathParam("uid") final String uid) {
+    return with(ObserveLevel.READ, grant -> workflow.comments(uid));
+  }
+
+  @POST
+  @Path("issues/{uid}/comments")
+  @jakarta.ws.rs.Consumes(MediaType.WILDCARD)
+  public Response comment(@PathParam("uid") final String uid, final String text) {
+    return with(ObserveLevel.WRITE,
+        grant -> checked(() -> workflow.comment(uid, grant.user(), text)));
+  }
+
+  /** Creates the task of the issue in the issue tracker (once). */
+  @POST
+  @Path("issues/{uid}/ticket")
+  public Response ticket(@PathParam("uid") final String uid) {
+    return with(ObserveLevel.WRITE, grant -> checked(
+        () -> workflow.ticket(uid, current.getPublicHost() + "/observe/#/issues/" + uid)));
+  }
+
+  /** Splits the issue: a group-as rule for the messages that match {@code ?pattern=}. */
+  @POST
+  @Path("issues/{uid}/split")
+  public Response split(@PathParam("uid") final String uid,
+      @QueryParam("pattern") final String pattern, @QueryParam("name") final String name) {
+    return with(ObserveLevel.WRITE, grant -> checked(() -> workflow.split(uid, pattern, name)));
+  }
+
+  /** A validation error of the workflow is answered with its reason. */
+  private static Object checked(final java.util.function.Supplier<Object> work) {
+    try {
+      return work.get();
+    } catch (IllegalArgumentException | IllegalStateException ex) {
+      throw new net.civeira.phylax.common.exception.NotAllowedException(ex.getMessage());
+    }
+  }
+
+  /**
+   * Triage of an issue (mark-resolved, ignore, reopen): WRITE level and the policies of the model.
+   */
+  @POST
+  @Path("issues/{uid}/{action}")
+  public Response issueAction(@PathParam("uid") final String uid,
+      @PathParam("action") final String action) {
+    return with(ObserveLevel.WRITE, grant -> issues.act(current.interaction(), uid, action));
   }
 
   @GET

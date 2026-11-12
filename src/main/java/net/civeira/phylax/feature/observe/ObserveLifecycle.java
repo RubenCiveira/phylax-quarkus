@@ -14,12 +14,16 @@ import jakarta.enterprise.inject.Instance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.civeira.phylax.common.infrastructure.migration.Migrations;
+import net.civeira.phylax.feature.observe.alert.AlertEngine;
+import net.civeira.phylax.feature.observe.alert.AlertRules;
 import net.civeira.phylax.feature.observe.config.ObservabilitySettings;
+import net.civeira.phylax.feature.observe.health.ObserveHealth;
 import net.civeira.phylax.feature.observe.ingest.ObserveLogHandler;
 import net.civeira.phylax.feature.observe.ingest.ObservePipeline;
 import net.civeira.phylax.feature.observe.ingest.TelemetryMapper;
 import net.civeira.phylax.feature.observe.source.ObservedOriginReader;
 import net.civeira.phylax.feature.observe.source.ObservedSourceSyncService;
+import net.civeira.phylax.feature.observe.source.SourceActivityRecorder;
 import net.civeira.phylax.feature.observe.source.SourceRegistry;
 import net.civeira.phylax.feature.observe.store.TelemetryStore;
 
@@ -41,6 +45,16 @@ public class ObserveLifecycle {
   private final TelemetryStore store;
   private final SourceRegistry registry;
   private final ObservabilitySettings settings;
+  private final AlertRules alertRules;
+  private final AlertEngine alerts;
+  private final ObserveHealth health;
+  private final SourceActivityRecorder activity;
+  private final net.civeira.phylax.feature.observe.metric.ObserveMetrics metrics;
+  private final net.civeira.phylax.feature.observe.slo.SloEvaluator slos;
+  private final net.civeira.phylax.feature.observe.probe.ProbeRunner probes;
+  private final net.civeira.phylax.feature.observe.issue.FingerprintRules fingerprintRules;
+  private final net.civeira.phylax.feature.observe.issue.IssueAliases issueAliases;
+  private final net.civeira.phylax.feature.observe.anomaly.ObserveInsights insights;
 
   private ScheduledExecutorService scheduler;
   private ObserveLogHandler handler;
@@ -53,6 +67,12 @@ public class ObserveLifecycle {
     sync.reconcile(readers.stream().toList());
     settings.start();
     registry.start();
+    alertRules.start();
+    fingerprintRules.reload();
+    issueAliases.reload();
+    health.start();
+    insights.start();
+    probes.start();
     pipeline.start();
     handler = new ObserveLogHandler(mapper, pipeline);
     java.util.logging.Logger.getLogger("").addHandler(handler);
@@ -62,6 +82,7 @@ public class ObserveLifecycle {
       return thread;
     });
     scheduler.scheduleAtFixedRate(this::purge, 1, 24 * 60, TimeUnit.MINUTES);
+    scheduler.scheduleAtFixedRate(this::evaluateAlerts, 1, 1, TimeUnit.MINUTES);
   }
 
   void onStop(@Observes final ShutdownEvent event) {
@@ -72,13 +93,51 @@ public class ObserveLifecycle {
       scheduler.shutdownNow();
     }
     registry.stop();
+    alertRules.stop();
+    probes.stop();
     settings.stop();
     pipeline.stop();
   }
 
+  /** Every minute: health counters, alerts and the activity of the sources. */
+  private void evaluateAlerts() {
+    health.tick();
+    fingerprintRules.reload();
+    issueAliases.reload();
+    try {
+      metrics.flush();
+    } catch (RuntimeException ex) {
+      log.warn("Unable to store the metrics: {}", ex.getMessage());
+    }
+    try {
+      insights.minute();
+    } catch (RuntimeException ex) {
+      log.warn("Unable to detect the anomalies: {}", ex.getMessage());
+    }
+    try {
+      slos.evaluate();
+    } catch (RuntimeException ex) {
+      log.warn("Unable to evaluate the objectives: {}", ex.getMessage());
+    }
+    try {
+      alerts.tick(pipeline.dropped());
+    } catch (RuntimeException ex) {
+      log.warn("Unable to evaluate the alerts: {}", ex.getMessage());
+    }
+    try {
+      activity.record();
+    } catch (RuntimeException ex) {
+      log.warn("Unable to save the activity of the sources: {}", ex.getMessage());
+    }
+  }
+
   private void purge() {
     try {
-      store.purge(settings.current().retention());
+      java.util.Map<String, Integer> sourceDays = new java.util.HashMap<>();
+      registry.all().forEach(source -> source.retentionDays().filter(days -> days > 0)
+          .ifPresent(days -> sourceDays.put(source.code(), days)));
+      store.purge(settings.current().retention().withSources(sourceDays));
+      health.purged(java.time.Instant.now());
     } catch (RuntimeException ex) {
       log.warn("Unable to purge the observability store: {}", ex.getMessage());
     }

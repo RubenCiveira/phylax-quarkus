@@ -15,7 +15,9 @@ import java.util.Map;
  * @param spanId span of the event, if any
  * @param error exception (class, message and stack), if any
  * @param attrs other attributes
+ * @param release version of the source ({@code service.version}), if known
+ * @param env deployment environment ({@code deployment.environment.name}), if known
  */
 public record ObsLog(long ts, String src, String level, String logger, String msg, String traceId,
-    String spanId, String error, Map<String, Object> attrs) {
+    String spanId, String error, Map<String, Object> attrs, String release, String env) {
 }

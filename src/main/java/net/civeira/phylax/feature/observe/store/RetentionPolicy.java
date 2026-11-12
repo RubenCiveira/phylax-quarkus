@@ -8,6 +8,21 @@ package net.civeira.phylax.feature.observe.store;
  * @param tracesDays days of spans
  * @param maxDiskMb hard limit of the store: above it the oldest days are deleted even inside
  *        their retention (the current day is never deleted)
+ * @param metricsDays days of the metric points of one minute
+ * @param rollupDays days of the metric points of one hour
+ * @param sourceDays retention of the sources that have their own (retention-days), code → days
  */
-public record RetentionPolicy(int logsDays, int tracesDays, long maxDiskMb) {
+public record RetentionPolicy(int logsDays, int tracesDays, long maxDiskMb, int metricsDays,
+    int rollupDays, java.util.Map<String, Integer> sourceDays) {
+
+  public RetentionPolicy(final int logsDays, final int tracesDays, final long maxDiskMb,
+      final int metricsDays, final int rollupDays) {
+    this(logsDays, tracesDays, maxDiskMb, metricsDays, rollupDays, java.util.Map.of());
+  }
+
+  /** The same policy with the retention of each source. */
+  public RetentionPolicy withSources(final java.util.Map<String, Integer> days) {
+    return new RetentionPolicy(logsDays, tracesDays, maxDiskMb, metricsDays, rollupDays,
+        null == days ? java.util.Map.of() : java.util.Map.copyOf(days));
+  }
 }

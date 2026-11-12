@@ -10,9 +10,16 @@ include::diagrams/package-observe.puml[]
 :leveloffset: +2
 
 include::entities/observability-config/entity-observability-config.asciidoc[]
+include::entities/observed-alert/entity-observed-alert.asciidoc[]
+include::entities/observed-alert-rule/entity-observed-alert-rule.asciidoc[]
 include::entities/observed-dashboard/entity-observed-dashboard.asciidoc[]
 include::entities/observed-embed/entity-observed-embed.asciidoc[]
+include::entities/observed-fingerprint-rule/entity-observed-fingerprint-rule.asciidoc[]
 include::entities/observed-issue/entity-observed-issue.asciidoc[]
+include::entities/observed-issue-alias/entity-observed-issue-alias.asciidoc[]
+include::entities/observed-issue-comment/entity-observed-issue-comment.asciidoc[]
+include::entities/observed-probe/entity-observed-probe.asciidoc[]
+include::entities/observed-slo/entity-observed-slo.asciidoc[]
 include::entities/observed-source/entity-observed-source.asciidoc[]
 
 :leveloffset: -2

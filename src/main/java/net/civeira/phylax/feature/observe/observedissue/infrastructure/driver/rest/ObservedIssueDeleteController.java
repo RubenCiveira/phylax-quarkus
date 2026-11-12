@@ -23,6 +23,7 @@ import net.civeira.phylax.common.telemetry.Trace;
 import net.civeira.phylax.feature.observe.observedissue.application.usecase.delete.ObservedIssueCheckBatchDeleteStatus;
 import net.civeira.phylax.feature.observe.observedissue.application.usecase.delete.ObservedIssueDeleteFilter;
 import net.civeira.phylax.feature.observe.observedissue.application.usecase.delete.ObservedIssueDeleteUsecase;
+import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueKindOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueLevelOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueReference;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueStatusOptions;
@@ -58,13 +59,14 @@ public class ObservedIssueDeleteController {
    * @param status
    * @param level
    * @param fingerprint
+   * @param kind
    * @param title
    * @return
    */
   @ApiObserved("Api to delete on massive entity of observed issue")
   public Response observedIssueApiBatchDelete(final List<String> uids, final String search,
       final String origin, final String status, final String level, final String fingerprint,
-      final String title) {
+      final String kind, final String title) {
     ObservedIssueDeleteFilter.ObservedIssueDeleteFilterBuilder filterBuilder =
         ObservedIssueDeleteFilter.builder();
     filterBuilder =
@@ -79,6 +81,7 @@ public class ObservedIssueDeleteController {
     filterBuilder = filterBuilder.status(ObservedIssueStatusOptions.fromValue(status));
     filterBuilder = filterBuilder.level(ObservedIssueLevelOptions.fromValue(level));
     filterBuilder = filterBuilder.fingerprint(fingerprint);
+    filterBuilder = filterBuilder.kind(ObservedIssueKindOptions.fromValue(kind));
     filterBuilder = filterBuilder.title(title);
     ObservedIssueDeleteFilter filter = filterBuilder.build();
     BatchIdentifier task = delete.batchDelete(currentRequest.interaction(), filter);

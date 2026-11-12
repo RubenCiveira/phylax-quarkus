@@ -28,6 +28,15 @@ public class TelemetryQuery {
   Optional<String> text = Optional.empty();
   @Builder.Default
   Optional<String> traceId = Optional.empty();
+  /** Version of the source ({@code service.version}). */
+  @Builder.Default
+  Optional<String> release = Optional.empty();
+  /** Deployment environment. */
+  @Builder.Default
+  Optional<String> env = Optional.empty();
+  /** Fingerprint of the issue of the error logs (attribute {@code issue.fingerprint}). */
+  @Builder.Default
+  Optional<String> fingerprint = Optional.empty();
   /** Only traces or logs with errors. */
   boolean errors;
   @Builder.Default

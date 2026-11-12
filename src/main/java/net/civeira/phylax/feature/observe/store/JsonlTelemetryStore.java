@@ -32,11 +32,15 @@ import lombok.extern.slf4j.Slf4j;
  * deletes whole days. Queries read the days of the range, newest first, until the limit.
  */
 @ApplicationScoped
+@io.quarkus.arc.properties.UnlessBuildProperty(name = "app.observe.storage", stringValue = "sql",
+    enableIfMissing = true)
 @Slf4j
 public class JsonlTelemetryStore implements TelemetryStore {
 
   private static final String LOGS = "logs.jsonl";
   private static final String SPANS = "spans.jsonl";
+  private static final String METRICS = "metrics.jsonl";
+  private static final String ROLLUP = "metrics-1h.jsonl";
 
   private final Path root;
   private final ObjectMapper mapper =
@@ -64,6 +68,12 @@ public class JsonlTelemetryStore implements TelemetryStore {
         && query.getMinLevel().map(min -> Levels.atLeast(log.level(), min)).orElse(true)
         && (!query.isErrors() || Levels.atLeast(log.level(), "ERROR"))
         && query.getTraceId().map(id -> id.equals(log.traceId())).orElse(true)
+        && query.getRelease().map(release -> release.equals(log.release())).orElse(true)
+        && query.getEnv().map(env -> env.equals(log.env())).orElse(true)
+        && query.getFingerprint()
+            .map(fp -> null != log.attrs()
+                && fp.equals(String.valueOf(log.attrs().get("issue.fingerprint"))))
+            .orElse(true)
         && query.getText().map(text -> contains(text, log.msg(), log.logger(), log.error(),
             String.valueOf(log.attrs()))).orElse(true);
     return read(LOGS, ObsLog.class, query, filter, Comparator.comparingLong(ObsLog::ts).reversed());
@@ -74,8 +84,12 @@ public class JsonlTelemetryStore implements TelemetryStore {
     Predicate<ObsSpan> filter = span -> inRange(span.ts(), query)
         && (query.getSources().isEmpty() || query.getSources().contains(span.src()))
         && (!query.isErrors() || span.isError())
-        && query.getTraceId().map(id -> id.equals(span.traceId())).orElse(true) && query.getText()
-            .map(text -> contains(text, span.name(), String.valueOf(span.attrs()))).orElse(true);
+        && query.getTraceId().map(id -> id.equals(span.traceId())).orElse(true)
+        && query.getRelease().map(release -> release.equals(span.release())).orElse(true)
+        && query.getEnv().map(env -> env.equals(span.env())).orElse(true)
+        && query.getText()
+            .map(text -> contains(text, span.name(), span.src(), String.valueOf(span.attrs())))
+            .orElse(true);
     return read(SPANS, ObsSpan.class, query, filter,
         Comparator.comparingLong(ObsSpan::ts).reversed());
   }
@@ -95,13 +109,64 @@ public class JsonlTelemetryStore implements TelemetryStore {
    * retention of each source is not applied here: the files of a day hold every source.
    */
   @Override
+  public synchronized void appendPoints(
+      final List<net.civeira.phylax.feature.observe.metric.MetricPoint> points) {
+    List<net.civeira.phylax.feature.observe.metric.MetricPoint> minutes = new ArrayList<>();
+    List<net.civeira.phylax.feature.observe.metric.MetricPoint> hours = new ArrayList<>();
+    for (var point : points) {
+      (point.step() >= 3_600_000 ? hours : minutes).add(point);
+    }
+    append(METRICS, minutes, net.civeira.phylax.feature.observe.metric.MetricPoint::ts);
+    append(ROLLUP, hours, net.civeira.phylax.feature.observe.metric.MetricPoint::ts);
+  }
+
+  @Override
+  public List<net.civeira.phylax.feature.observe.metric.MetricPoint> points(final long from,
+      final long to, final long step, final java.util.Set<String> sources) {
+    TelemetryQuery query = TelemetryQuery.builder().from(from).to(to).limit(500_000).build();
+    return read(step >= 3_600_000 ? ROLLUP : METRICS,
+        net.civeira.phylax.feature.observe.metric.MetricPoint.class, query,
+        point -> inRange(point.ts(), query) && (sources.isEmpty() || sources.contains(point.src())),
+        Comparator.comparingLong(net.civeira.phylax.feature.observe.metric.MetricPoint::ts));
+  }
+
+  private static final long SIZE_TTL_MILLIS = 10 * 60_000L;
+  private volatile long cachedSize = -1;
+  private volatile long cachedSizeAt;
+
+  @Override
+  public long sizeBytes() {
+    long now = System.currentTimeMillis();
+    if (cachedSize < 0 || now - cachedSizeAt > SIZE_TTL_MILLIS) {
+      cachedSize =
+          Files.isDirectory(root) ? days().stream().mapToLong(JsonlTelemetryStore::size).sum() : 0;
+      cachedSizeAt = now;
+    }
+    return cachedSize;
+  }
+
+  @Override
+  public List<ObsSpan> traces(final java.util.Set<String> traceIds, final long from,
+      final long to) {
+    if (traceIds.isEmpty()) {
+      return List.of();
+    }
+    TelemetryQuery query = TelemetryQuery.builder().from(from).to(to).limit(50_000).build();
+    return read(SPANS, ObsSpan.class, query, span -> traceIds.contains(span.traceId()),
+        Comparator.comparingLong(ObsSpan::ts));
+  }
+
+  @Override
   public synchronized void purge(final RetentionPolicy policy) {
+    cachedSize = -1;
     if (!Files.isDirectory(root)) {
       return;
     }
     LocalDate today = LocalDate.now(ZoneOffset.UTC);
     LocalDate logsLimit = today.minusDays(policy.logsDays());
     LocalDate spansLimit = today.minusDays(policy.tracesDays());
+    LocalDate metricsLimit = today.minusDays(Math.max(1, policy.metricsDays()));
+    LocalDate rollupLimit = today.minusDays(Math.max(1, policy.rollupDays()));
     for (Path dir : days()) {
       LocalDate day = dayOf(dir);
       if (day.isBefore(logsLimit)) {
@@ -110,10 +175,17 @@ public class JsonlTelemetryStore implements TelemetryStore {
       if (day.isBefore(spansLimit)) {
         deleteFile(dir.resolve(SPANS));
       }
+      if (day.isBefore(metricsLimit)) {
+        deleteFile(dir.resolve(METRICS));
+      }
+      if (day.isBefore(rollupLimit)) {
+        deleteFile(dir.resolve(ROLLUP));
+      }
       if (isEmpty(dir)) {
         delete(dir);
       }
     }
+    purgeBySource(policy, today);
     long limit = policy.maxDiskMb() * 1024 * 1024;
     if (limit <= 0) {
       return;
@@ -129,6 +201,53 @@ public class JsonlTelemetryStore implements TelemetryStore {
           dir.getFileName());
       delete(dir);
       size -= freed;
+    }
+  }
+
+  /**
+   * Sources with a retention of their own: the days older than it are rewritten without their lines
+   * (a file of a day holds every source). Only the files that lose lines are written.
+   */
+  private void purgeBySource(final RetentionPolicy policy, final LocalDate today) {
+    if (null == policy.sourceDays() || policy.sourceDays().isEmpty()) {
+      return;
+    }
+    int shortest = policy.sourceDays().values().stream().mapToInt(Integer::intValue).min()
+        .orElse(Integer.MAX_VALUE);
+    for (Path dir : days()) {
+      long age = java.time.temporal.ChronoUnit.DAYS.between(dayOf(dir), today);
+      if (age < shortest) {
+        continue;
+      }
+      for (String file : new String[] {LOGS, SPANS}) {
+        rewrite(dir.resolve(file), age, policy.sourceDays());
+      }
+    }
+  }
+
+  private void rewrite(final Path file, final long age,
+      final java.util.Map<String, Integer> sourceDays) {
+    if (!Files.isRegularFile(file)) {
+      return;
+    }
+    try {
+      List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+      List<String> kept = new ArrayList<>(lines.size());
+      for (String line : lines) {
+        String src = line.isBlank() ? null : mapper.readTree(line).path("src").asText(null);
+        Integer days = null == src ? null : sourceDays.get(src);
+        if (null == days || age < days) {
+          kept.add(line);
+        }
+      }
+      if (kept.size() < lines.size()) {
+        Path tmp = file.resolveSibling(file.getFileName() + ".tmp");
+        Files.write(tmp, kept, StandardCharsets.UTF_8);
+        Files.move(tmp, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+            java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+      }
+    } catch (IOException | RuntimeException ex) {
+      log.warn("Unable to apply the retention of the sources to {}: {}", file, ex.getMessage());
     }
   }
 

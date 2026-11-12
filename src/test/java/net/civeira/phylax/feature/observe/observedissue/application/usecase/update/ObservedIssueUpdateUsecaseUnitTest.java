@@ -17,6 +17,7 @@ import net.civeira.phylax.feature.observe.observedissue.application.visibility.O
 import net.civeira.phylax.feature.observe.observedissue.application.visibility.ObservedIssuesVisibility;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssue;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueChangeSet;
+import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueKindOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueLevelOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueRef;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueReference;
@@ -24,19 +25,31 @@ import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueStat
 import net.civeira.phylax.feature.observe.observedissue.domain.gateway.ObservedIssueAuditGateway;
 import net.civeira.phylax.feature.observe.observedissue.domain.gateway.ObservedIssueCacheGateway;
 import net.civeira.phylax.feature.observe.observedissue.domain.gateway.ObservedIssueCommandRepositoryGateway;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.AssigneeNameVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.AssigneeVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.CountVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.CulpritVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FingerprintVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FirstReleaseVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FirstSeenAtVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.IgnoreUntilCountVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.IgnoreUntilVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.KindVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastEventIdVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastSeenAtVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastTraceIdVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LevelVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.MergedIntoVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.OriginVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.ReleaseVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.StatusVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TenantsSketchVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TenantsVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TitleVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TrackerUrlVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UidVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UsersSketchVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UsersVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.VersionVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.ObservedSourceReference;
 
@@ -98,25 +111,39 @@ class ObservedIssueUpdateUsecaseUnitTest {
     ObservedIssue one = ObservedIssue.builder().uidValue(UidVO.from("one"))
         .originValue(OriginVO.from(ObservedSourceReference.of("one")))
         .fingerprintValue(FingerprintVO.from("one")).titleValue(TitleVO.from("one"))
-        .culpritValue(CulpritVO.from("one"))
+        .culpritValue(CulpritVO.from("one")).kindValue(KindVO.from(ObservedIssueKindOptions.ERROR))
         .levelValue(LevelVO.from(ObservedIssueLevelOptions.WARNING))
         .statusValue(StatusVO.from(ObservedIssueStatusOptions.UNRESOLVED))
+        .mergedIntoValue(MergedIntoVO.from("one")).assigneeValue(AssigneeVO.from("one"))
+        .assigneeNameValue(AssigneeNameVO.from("one"))
+        .ignoreUntilValue(IgnoreUntilVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
+            .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
+        .ignoreUntilCountValue(IgnoreUntilCountVO.from(1)).trackerUrlValue(TrackerUrlVO.from("one"))
         .firstSeenAtValue(FirstSeenAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .lastSeenAtValue(LastSeenAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .countValue(CountVO.from(1)).lastEventIdValue(LastEventIdVO.from("one"))
-        .lastTraceIdValue(LastTraceIdVO.from("one")).releaseValue(ReleaseVO.from("one"))
+        .lastTraceIdValue(LastTraceIdVO.from("one")).usersValue(UsersVO.from(1))
+        .tenantsValue(TenantsVO.from(1)).usersSketchValue(UsersSketchVO.from("one"))
+        .tenantsSketchValue(TenantsSketchVO.from("one"))
+        .firstReleaseValue(FirstReleaseVO.from("one")).releaseValue(ReleaseVO.from("one"))
         .versionValue(VersionVO.from(1)).build();
-    ObservedIssueUpdateInput input = ObservedIssueUpdateInput.fromChangeSet(
-        new ObservedIssueChangeSet().uid("two").origin(ObservedSourceReference.of("two"))
-            .fingerprint("two").title("two").culprit("two").level(ObservedIssueLevelOptions.ERROR)
-            .status(ObservedIssueStatusOptions.RESOLVED)
+    ObservedIssueUpdateInput input =
+        ObservedIssueUpdateInput.fromChangeSet(new ObservedIssueChangeSet().uid("two")
+            .origin(ObservedSourceReference.of("two")).fingerprint("two").title("two")
+            .culprit("two").kind(ObservedIssueKindOptions.PERFORMANCE)
+            .level(ObservedIssueLevelOptions.ERROR).status(ObservedIssueStatusOptions.RESOLVED)
+            .mergedInto("two").assignee("two").assigneeName("two")
+            .ignoreUntil(LocalDateTime
+                .of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+            .ignoreUntilCount(2).trackerUrl("two")
             .firstSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
             .lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
-            .count(2).lastEventId("two").lastTraceId("two").release("two").version(2));
+            .count(2).lastEventId("two").lastTraceId("two").users(2).tenants(2).usersSketch("two")
+            .tenantsSketch("two").firstRelease("two").release("two").version(2));
     Mockito.when(visibility.retrieveVisibleForUpdate(context, "one")).thenReturn(Optional.of(one));
     Mockito
         .when(visibility.copyWithFixed(Mockito.eq(context),
@@ -163,15 +190,21 @@ class ObservedIssueUpdateUsecaseUnitTest {
       ((ObservedIssueUpdateAuthorizationDecision) invocation.getArgument(0)).deny("not allowed");
       return null;
     }).when(updateAllowEmitter).fire(Mockito.any());
-    ObservedIssueUpdateInput input = ObservedIssueUpdateInput.fromChangeSet(
-        new ObservedIssueChangeSet().uid("two").origin(ObservedSourceReference.of("two"))
-            .fingerprint("two").title("two").culprit("two").level(ObservedIssueLevelOptions.ERROR)
-            .status(ObservedIssueStatusOptions.RESOLVED)
+    ObservedIssueUpdateInput input =
+        ObservedIssueUpdateInput.fromChangeSet(new ObservedIssueChangeSet().uid("two")
+            .origin(ObservedSourceReference.of("two")).fingerprint("two").title("two")
+            .culprit("two").kind(ObservedIssueKindOptions.PERFORMANCE)
+            .level(ObservedIssueLevelOptions.ERROR).status(ObservedIssueStatusOptions.RESOLVED)
+            .mergedInto("two").assignee("two").assigneeName("two")
+            .ignoreUntil(LocalDateTime
+                .of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+            .ignoreUntilCount(2).trackerUrl("two")
             .firstSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
             .lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
-            .count(2).lastEventId("two").lastTraceId("two").release("two").version(2));
+            .count(2).lastEventId("two").lastTraceId("two").users(2).tenants(2).usersSketch("two")
+            .tenantsSketch("two").firstRelease("two").release("two").version(2));
     Assertions.assertThrows(NotAllowedException.class,
         () -> usecase.update(context, ObservedIssueReference.of("one"), input));
     Mockito.verifyNoInteractions(visibility, gateway, cache, audit);
@@ -197,15 +230,21 @@ class ObservedIssueUpdateUsecaseUnitTest {
     OperationContext context = Mockito.mock(OperationContext.class);
     ObservedIssueUpdateUsecase usecase = new ObservedIssueUpdateUsecase(audit, cache, gateway,
         updateAllowEmitter, updateCheckEmitter, updateEnrichEmitter, visibility);
-    ObservedIssueUpdateInput input = ObservedIssueUpdateInput.fromChangeSet(
-        new ObservedIssueChangeSet().uid("two").origin(ObservedSourceReference.of("two"))
-            .fingerprint("two").title("two").culprit("two").level(ObservedIssueLevelOptions.ERROR)
-            .status(ObservedIssueStatusOptions.RESOLVED)
+    ObservedIssueUpdateInput input =
+        ObservedIssueUpdateInput.fromChangeSet(new ObservedIssueChangeSet().uid("two")
+            .origin(ObservedSourceReference.of("two")).fingerprint("two").title("two")
+            .culprit("two").kind(ObservedIssueKindOptions.PERFORMANCE)
+            .level(ObservedIssueLevelOptions.ERROR).status(ObservedIssueStatusOptions.RESOLVED)
+            .mergedInto("two").assignee("two").assigneeName("two")
+            .ignoreUntil(LocalDateTime
+                .of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+            .ignoreUntilCount(2).trackerUrl("two")
             .firstSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
             .lastSeenAt(LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
                 .toOffsetDateTime())
-            .count(2).lastEventId("two").lastTraceId("two").release("two").version(2));
+            .count(2).lastEventId("two").lastTraceId("two").users(2).tenants(2).usersSketch("two")
+            .tenantsSketch("two").firstRelease("two").release("two").version(2));
     Mockito.when(visibility.retrieveVisibleForUpdate(context, "one")).thenReturn(Optional.empty());
     Assertions.assertThrows(NotFoundException.class,
         () -> usecase.update(context, ObservedIssueReference.of("one"), input));

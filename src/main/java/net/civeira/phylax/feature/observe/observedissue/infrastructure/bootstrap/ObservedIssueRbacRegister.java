@@ -46,8 +46,25 @@ public class ObservedIssueRbacRegister {
         .description("list").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("delete")
         .description("list").required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("merge-into")
+            .description("The issue is merged into another one (only the viewer calls it).")
+            .required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("assign")
+        .description("Assigns the issue (empty values unassign it).").required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("snooze")
+            .description("Ignores the issue until a moment or a count (it reopens then).")
+            .required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("link-ticket")
+            .description("Task of the issue in the issue tracker.").required(List.of()).build());
+    rbac.registerResourceAction(RESOURCE,
+        ScopeDescription.builder().kind(Kind.WRITE).name("record-occurrence")
+            .description("New occurrences seen by the collector (only the collector calls it).")
+            .required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE)
-        .name("resolve").description("").required(List.of()).build());
+        .name("mark-resolved").description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("ignore")
         .description("").required(List.of()).build());
     rbac.registerResourceAction(RESOURCE, ScopeDescription.builder().kind(Kind.WRITE).name("reopen")
@@ -63,11 +80,35 @@ public class ObservedIssueRbacRegister {
         .description("Exception type and normalized message.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("culprit")
         .description("Function or file of the first in-app frame.").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("kind").description(
+        "ERROR errors grouped by fingerprint. PERFORMANCE performance problems detected in the traces (N+1 queries, slow operations).")
+        .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("level")
         .description("Level of the grouped events.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("status").description(
-        "Triage state UNRESOLVED, RESOLVED (closed until it is seen again, then it reopens as a regression) or IGNORED.")
+        "Triage state UNRESOLVED, RESOLVED (closed until it is seen again, then it reopens as a regression), IGNORED or MERGED (its events count in merged-into).")
         .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("mergedInto").description(
+            "Uid of the issue this one was merged into; its fingerprint is an alias of that issue.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("assignee")
+            .description("Who takes care of the issue (the user of the viewer that assigned it).")
+            .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("assigneeName")
+        .description("Name of the assignee, as the viewer shows it.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("ignoreUntil")
+            .description(
+                "An IGNORED issue reopens after this moment (empty ignored for ever, or by count).")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("ignoreUntilCount").description(
+            "An IGNORED issue reopens when its count reaches this value (empty ignored for ever, or by date).")
+            .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("trackerUrl")
+        .description("Task of the issue in the issue tracker (Redmine, Jira...).").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("firstSeenAt")
         .description("When the first event of the issue arrived.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("lastSeenAt")
@@ -78,8 +119,24 @@ public class ObservedIssueRbacRegister {
         .description("Identifier of the last raw event in the store, to open it.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("lastTraceId")
         .description("Trace of the last event, to open it in the viewer.").build());
-    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("release")
-        .description("Last version of the origin where the issue was seen.").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("users").description(
+        "Approximate number of distinct users (or browser sessions, when the event has no user) that suffered the issue.")
+        .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("tenants")
+        .description("Approximate number of distinct tenants where the issue was seen.").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("usersSketch").description(
+        "HyperLogLog sketch of the pseudonymized users, to keep counting without storing them (base64; not reversible).")
+        .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("tenantsSketch")
+            .description(
+                "HyperLogLog sketch of the pseudonymized tenants (base64; not reversible).")
+            .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("firstRelease")
+        .description("Version of the origin where the issue was seen for the first time.").build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("release").description(
+        "Last version of the origin where the issue was seen. A RESOLVED issue reopens only when it is seen again in a later version (resolved in the next release).")
+        .build());
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("version").description(
             "Campo con el número de version de observed issue para controlar bloqueos optimistas")

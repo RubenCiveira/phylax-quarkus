@@ -13,7 +13,8 @@ import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueStat
 
 /**
  * Value Object representing triage state: UNRESOLVED, RESOLVED (closed until it is seen again, then
- * it reopens as a regression) or IGNORED. of observedIssue.
+ * it reopens as a regression), IGNORED or MERGED (its events count in merged-into). of
+ * observedIssue.
  * <p>
  * This class ensures that the status is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

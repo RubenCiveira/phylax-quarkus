@@ -115,6 +115,7 @@ public class ObservedSourceRetrieveController {
     observedSourceApiDto.setScrubFields(dto.getScrubFields());
     observedSourceApiDto.setLastSeenAt(dto.getLastSeenAt());
     observedSourceApiDto.setDroppedCount(dto.getDroppedCount());
+    observedSourceApiDto.setExpectedEveryMinutes(dto.getExpectedEveryMinutes());
     observedSourceApiDto.setEnabled(dto.getEnabled());
     observedSourceApiDto.setVersion(dto.getVersion());
     return observedSourceApiDto;

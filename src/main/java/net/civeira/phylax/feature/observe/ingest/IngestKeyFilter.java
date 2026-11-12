@@ -27,8 +27,12 @@ public class IngestKeyFilter implements ContainerRequestFilter {
     if (!IngestGuard.isIngestPath(request.getUriInfo().getPath())) {
       return;
     }
-    Decision decision = guard.check(request.getHeaderString(IngestGuard.KEY_HEADER),
-        request.getHeaderString("Origin"));
+    // The beacon of the front cannot send headers: the key may come in ?key=
+    String key = request.getHeaderString(IngestGuard.KEY_HEADER);
+    if (null == key || key.isBlank()) {
+      key = request.getUriInfo().getQueryParameters().getFirst("key");
+    }
+    Decision decision = guard.check(key, request.getHeaderString("Origin"));
     if (!decision.accepted()) {
       request.abortWith(Response.status(decision.status()).build());
       return;

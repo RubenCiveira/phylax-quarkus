@@ -50,6 +50,10 @@ class ObservedIssueFilterUnitTest {
     filter.setFingerprint("one");
     Assertions.assertEquals("one", filter.getFingerprint().get(),
         "Fingerprint must be the same as the assigned");
+    Assertions.assertFalse(filter.getKind().isPresent(),
+        "Kind must be empty if filter is build without it");
+    filter.setKind(null);
+    Assertions.assertFalse(filter.getKind().isPresent(), "Kind must be the same as the assigned");
     Assertions.assertFalse(filter.getTitle().isPresent(),
         "Title must be empty if filter is build without it");
     filter.setTitle("one");

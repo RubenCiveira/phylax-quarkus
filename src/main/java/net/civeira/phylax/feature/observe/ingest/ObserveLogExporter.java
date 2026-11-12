@@ -22,6 +22,7 @@ public class ObserveLogExporter implements LogRecordExporter {
   private final IngestContext context;
   private final ObservePipeline pipeline;
   private final SourceRegistry registry;
+  private final net.civeira.phylax.feature.observe.metric.ObserveMetrics metrics;
 
   @Override
   public CompletableResultCode export(final Collection<LogRecordData> logs) {
@@ -37,7 +38,13 @@ public class ObserveLogExporter implements LogRecordExporter {
         continue;
       }
       registry.seen(source.get().code());
-      mapper.log(source.get(), log).ifPresent(pipeline::offer);
+      if (!mapper.allow(source.get())) {
+        continue;
+      }
+      mapper.log(source.get(), log).ifPresent(event -> {
+        metrics.recordVital(event);
+        pipeline.offer(event);
+      });
     }
     return CompletableResultCode.ofSuccess();
   }

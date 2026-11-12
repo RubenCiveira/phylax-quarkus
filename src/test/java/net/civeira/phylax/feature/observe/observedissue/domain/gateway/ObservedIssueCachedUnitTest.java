@@ -10,21 +10,34 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssue;
+import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueKindOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueLevelOptions;
 import net.civeira.phylax.feature.observe.observedissue.domain.ObservedIssueStatusOptions;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.AssigneeNameVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.AssigneeVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.CountVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.CulpritVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FingerprintVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FirstReleaseVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.FirstSeenAtVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.IgnoreUntilCountVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.IgnoreUntilVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.KindVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastEventIdVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastSeenAtVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LastTraceIdVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.LevelVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.MergedIntoVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.OriginVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.ReleaseVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.StatusVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TenantsSketchVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TenantsVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TitleVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.TrackerUrlVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UidVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UsersSketchVO;
+import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.UsersVO;
 import net.civeira.phylax.feature.observe.observedissue.domain.valueobject.VersionVO;
 import net.civeira.phylax.feature.observe.observedsource.domain.ObservedSourceReference;
 
@@ -39,15 +52,23 @@ class ObservedIssueCachedUnitTest {
     ObservedIssue one = ObservedIssue.builder().uidValue(UidVO.from("one"))
         .originValue(OriginVO.from(ObservedSourceReference.of("one")))
         .fingerprintValue(FingerprintVO.from("one")).titleValue(TitleVO.from("one"))
-        .culpritValue(CulpritVO.from("one"))
+        .culpritValue(CulpritVO.from("one")).kindValue(KindVO.from(ObservedIssueKindOptions.ERROR))
         .levelValue(LevelVO.from(ObservedIssueLevelOptions.WARNING))
         .statusValue(StatusVO.from(ObservedIssueStatusOptions.UNRESOLVED))
+        .mergedIntoValue(MergedIntoVO.from("one")).assigneeValue(AssigneeVO.from("one"))
+        .assigneeNameValue(AssigneeNameVO.from("one"))
+        .ignoreUntilValue(IgnoreUntilVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
+            .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
+        .ignoreUntilCountValue(IgnoreUntilCountVO.from(1)).trackerUrlValue(TrackerUrlVO.from("one"))
         .firstSeenAtValue(FirstSeenAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .lastSeenAtValue(LastSeenAtVO.from(LocalDateTime.of(1980, 8, 20, 0, 0)
             .atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime()))
         .countValue(CountVO.from(1)).lastEventIdValue(LastEventIdVO.from("one"))
-        .lastTraceIdValue(LastTraceIdVO.from("one")).releaseValue(ReleaseVO.from("one"))
+        .lastTraceIdValue(LastTraceIdVO.from("one")).usersValue(UsersVO.from(1))
+        .tenantsValue(TenantsVO.from(1)).usersSketchValue(UsersSketchVO.from("one"))
+        .tenantsSketchValue(TenantsSketchVO.from("one"))
+        .firstReleaseValue(FirstReleaseVO.from("one")).releaseValue(ReleaseVO.from("one"))
         .versionValue(VersionVO.from(1)).build();
     OffsetDateTime now = OffsetDateTime.now();
     List<ObservedIssue> empty = List.of();

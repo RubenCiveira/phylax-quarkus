@@ -17,14 +17,20 @@ class ObservedIssueChangeSetUnitTest {
   @Test
   @DisplayName("Test a entity reference contruction")
   void test_observed_issue_change_set_builder() {
-    ObservedIssueChangeSet one = new ObservedIssueChangeSet().uid("one")
-        .origin(ObservedSourceReference.of("one")).fingerprint("one").title("one").culprit("one")
-        .level(ObservedIssueLevelOptions.WARNING).status(ObservedIssueStatusOptions.UNRESOLVED)
-        .firstSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
-            .toOffsetDateTime())
-        .lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
-            .toOffsetDateTime())
-        .count(1).lastEventId("one").lastTraceId("one").release("one").version(1).newUid();
+    ObservedIssueChangeSet one =
+        new ObservedIssueChangeSet().uid("one").origin(ObservedSourceReference.of("one"))
+            .fingerprint("one").title("one").culprit("one").kind(ObservedIssueKindOptions.ERROR)
+            .level(ObservedIssueLevelOptions.WARNING).status(ObservedIssueStatusOptions.UNRESOLVED)
+            .mergedInto("one").assignee("one").assigneeName("one")
+            .ignoreUntil(LocalDateTime
+                .of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime())
+            .ignoreUntilCount(1).trackerUrl("one")
+            .firstSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .lastSeenAt(LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid"))
+                .toOffsetDateTime())
+            .count(1).lastEventId("one").lastTraceId("one").users(1).tenants(1).usersSketch("one")
+            .tenantsSketch("one").firstRelease("one").release("one").version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -57,6 +63,13 @@ class ObservedIssueChangeSetUnitTest {
     one.unset("culprit");
     Assertions.assertFalse(one.getCulprit().isPresent(),
         "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(ObservedIssueKindOptions.ERROR, one.getKind().get(),
+        "Value must equals to the intial value");
+    one.kind(ObservedIssueKindOptions.PERFORMANCE);
+    Assertions.assertEquals(ObservedIssueKindOptions.PERFORMANCE, one.getKind().get(),
+        "Value must equals to the assigned value");
+    one.unset("kind");
+    Assertions.assertFalse(one.getKind().isPresent(), "After unset, the valeue must be dissapear");
     Assertions.assertEquals(ObservedIssueLevelOptions.WARNING, one.getLevel().get(),
         "Value must equals to the intial value");
     one.level(ObservedIssueLevelOptions.ERROR);
@@ -71,6 +84,57 @@ class ObservedIssueChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("status");
     Assertions.assertFalse(one.getStatus().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getMergedInto().get(),
+        "Value must equals to the intial value");
+    one.mergedInto("two");
+    Assertions.assertEquals("two", one.getMergedInto().get(),
+        "Value must equals to the assigned value");
+    one.unset("mergedInto");
+    Assertions.assertFalse(one.getMergedInto().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getAssignee().get(),
+        "Value must equals to the intial value");
+    one.assignee("two");
+    Assertions.assertEquals("two", one.getAssignee().get(),
+        "Value must equals to the assigned value");
+    one.unset("assignee");
+    Assertions.assertFalse(one.getAssignee().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getAssigneeName().get(),
+        "Value must equals to the intial value");
+    one.assigneeName("two");
+    Assertions.assertEquals("two", one.getAssigneeName().get(),
+        "Value must equals to the assigned value");
+    one.unset("assigneeName");
+    Assertions.assertFalse(one.getAssigneeName().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(
+        LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
+        one.getIgnoreUntil().get(), "Value must equals to the intial value");
+    one.ignoreUntil(
+        LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime());
+    Assertions.assertEquals(
+        LocalDateTime.of(1981, 9, 6, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
+        one.getIgnoreUntil().get(), "Value must equals to the assigned value");
+    one.unset("ignoreUntil");
+    Assertions.assertFalse(one.getIgnoreUntil().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getIgnoreUntilCount().get(),
+        "Value must equals to the intial value");
+    one.ignoreUntilCount(2);
+    Assertions.assertEquals(2, one.getIgnoreUntilCount().get(),
+        "Value must equals to the assigned value");
+    one.unset("ignoreUntilCount");
+    Assertions.assertFalse(one.getIgnoreUntilCount().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getTrackerUrl().get(),
+        "Value must equals to the intial value");
+    one.trackerUrl("two");
+    Assertions.assertEquals("two", one.getTrackerUrl().get(),
+        "Value must equals to the assigned value");
+    one.unset("trackerUrl");
+    Assertions.assertFalse(one.getTrackerUrl().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(
         LocalDateTime.of(1980, 8, 20, 0, 0).atZone(ZoneId.of("Europe/Madrid")).toOffsetDateTime(),
@@ -114,6 +178,41 @@ class ObservedIssueChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("lastTraceId");
     Assertions.assertFalse(one.getLastTraceId().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getUsers().get(), "Value must equals to the intial value");
+    one.users(2);
+    Assertions.assertEquals(2, one.getUsers().get(), "Value must equals to the assigned value");
+    one.unset("users");
+    Assertions.assertFalse(one.getUsers().isPresent(), "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getTenants().get(), "Value must equals to the intial value");
+    one.tenants(2);
+    Assertions.assertEquals(2, one.getTenants().get(), "Value must equals to the assigned value");
+    one.unset("tenants");
+    Assertions.assertFalse(one.getTenants().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getUsersSketch().get(),
+        "Value must equals to the intial value");
+    one.usersSketch("two");
+    Assertions.assertEquals("two", one.getUsersSketch().get(),
+        "Value must equals to the assigned value");
+    one.unset("usersSketch");
+    Assertions.assertFalse(one.getUsersSketch().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getTenantsSketch().get(),
+        "Value must equals to the intial value");
+    one.tenantsSketch("two");
+    Assertions.assertEquals("two", one.getTenantsSketch().get(),
+        "Value must equals to the assigned value");
+    one.unset("tenantsSketch");
+    Assertions.assertFalse(one.getTenantsSketch().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals("one", one.getFirstRelease().get(),
+        "Value must equals to the intial value");
+    one.firstRelease("two");
+    Assertions.assertEquals("two", one.getFirstRelease().get(),
+        "Value must equals to the assigned value");
+    one.unset("firstRelease");
+    Assertions.assertFalse(one.getFirstRelease().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals("one", one.getRelease().get(), "Value must equals to the intial value");
     one.release("two");

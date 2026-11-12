@@ -47,7 +47,8 @@ public class SourceRegistry {
    */
   public record Source(String uid, String code, String name, String originType, String ingestKey,
       boolean accepting, String minLevel, int sampleRate, List<String> allowedOrigins,
-      Optional<Integer> retentionDays, Set<String> scrubFields) {}
+      Optional<Integer> retentionDays, Set<String> scrubFields, int expectedEveryMinutes,
+      int rateLimit) {}
 
   private final ObservedSourceQueryRepositoryGateway sources;
 
@@ -63,6 +64,10 @@ public class SourceRegistry {
       });
   private final Map<String, AtomicLong> lastSeen = new ConcurrentHashMap<>();
   private final Map<String, AtomicLong> dropped = new ConcurrentHashMap<>();
+  private final Map<String, String> releases = new ConcurrentHashMap<>();
+  /** Events per source and minute (the same window as the error rate of the alerts). */
+  private final net.civeira.phylax.feature.observe.alert.ErrorRateWindow events =
+      new net.civeira.phylax.feature.observe.alert.ErrorRateWindow();
 
   public Optional<Source> byCode(final String code) {
     return null == code ? Optional.empty() : Optional.ofNullable(byCode.get(code));
@@ -105,11 +110,29 @@ public class SourceRegistry {
   }
 
   public void seen(final String code) {
-    lastSeen.computeIfAbsent(code, k -> new AtomicLong()).set(System.currentTimeMillis());
+    long now = System.currentTimeMillis();
+    lastSeen.computeIfAbsent(code, k -> new AtomicLong()).set(now);
+    events.add(code, now);
+  }
+
+  /** Average events per minute of a source in the last 5 complete minutes. */
+  public double eventsPerMinute(final String code) {
+    return events.perMinute(code, 5, System.currentTimeMillis());
   }
 
   public void drop(final String code) {
     dropped.computeIfAbsent(null == code ? "-" : code, k -> new AtomicLong()).incrementAndGet();
+  }
+
+  /** Remembers the last version seen of a source (only in memory). */
+  public void seenRelease(final String code, final String release) {
+    if (null != code && null != release && !release.isBlank()) {
+      releases.put(code, release);
+    }
+  }
+
+  public Optional<String> lastRelease(final String code) {
+    return Optional.ofNullable(releases.get(code));
   }
 
   public Optional<Long> lastSeen(final String code) {
@@ -122,10 +145,15 @@ public class SourceRegistry {
 
   /** Reads the whole table; only from the startup or the background thread. */
   public synchronized void reload() {
-    List<Source> loaded =
-        sources.list(ObservedSourceFilter.builder().build()).stream().map(this::toSource).toList();
+    List<ObservedSource> rows = sources.list(ObservedSourceFilter.builder().build());
+    List<Source> loaded = rows.stream().map(this::toSource).toList();
     byCode =
         loaded.stream().collect(Collectors.toMap(Source::code, Function.identity(), (a, b) -> a));
+    // After a restart the last contact comes from the database (saved every minute)
+    for (ObservedSource source : rows) {
+      source.getLastSeenAt().ifPresent(at -> lastSeen.computeIfAbsent(source.getCode(),
+          code -> new AtomicLong(at.toInstant().toEpochMilli())));
+    }
     byKey = loaded.stream().filter(s -> null != s.ingestKey())
         .collect(Collectors.toMap(Source::ingestKey, Function.identity(), (a, b) -> a));
   }
@@ -147,6 +175,7 @@ public class SourceRegistry {
     return new Source(source.getUid(), source.getCode(), source.getName().orElse(source.getCode()),
         source.getOriginType(), source.getIngestKey().orElse(null), accepting,
         source.getMinLevel().orElse("INFO"), source.getTraceSampleRate().orElse(100), origins,
-        source.getRetentionDays(), ObserveSettings.keys(source.getScrubFields().orElse(null)));
+        source.getRetentionDays(), ObserveSettings.keys(source.getScrubFields().orElse(null)),
+        source.getExpectedEveryMinutes().orElse(0), source.getRateLimit().orElse(0));
   }
 }
