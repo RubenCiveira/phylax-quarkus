@@ -64,7 +64,8 @@ public class OidcResponseBuilder {
   private final SessionStateService sessionStates;
   private final TokenSigner tokenSigner;
   private final UserClaimsGateway userClaims;
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
 
   /**
    * Builds a redirect response after successful authentication.
@@ -294,7 +295,7 @@ public class OidcResponseBuilder {
       }
     }
     byte[] random = new byte[24];
-    RANDOM.nextBytes(random);
+    RANDOM.get().nextBytes(random);
     String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     StringBuilder html =
         new StringBuilder("<!doctype html><html><head><meta charset=\"utf-8\"></head>"

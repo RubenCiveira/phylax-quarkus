@@ -25,14 +25,15 @@ import net.civeira.phylax.feature.oauth.session.application.SessionStateService;
 @RequestScoped
 @RequiredArgsConstructor
 public class SessionManagementController {
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
   private final SessionStateService states;
 
   @GET
   @Path("oauth/openid/{tenant}/login-status-iframe")
   public Response iframe(@PathParam("tenant") String tenant) {
     byte[] random = new byte[24];
-    RANDOM.nextBytes(random);
+    RANDOM.get().nextBytes(random);
     String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     String path =
         "/oauth/openid/" + URLEncoder.encode(tenant, StandardCharsets.UTF_8) + "/session-check";

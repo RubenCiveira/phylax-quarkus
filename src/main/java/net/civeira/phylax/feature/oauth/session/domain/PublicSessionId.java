@@ -13,7 +13,8 @@ import java.util.Base64;
  */
 public final class PublicSessionId {
 
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
 
   private PublicSessionId() {}
 
@@ -24,7 +25,7 @@ public final class PublicSessionId {
    */
   public static String random() {
     byte[] bytes = new byte[32];
-    RANDOM.nextBytes(bytes);
+    RANDOM.get().nextBytes(bytes);
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
   }
 }

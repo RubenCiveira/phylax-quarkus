@@ -56,10 +56,10 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
    */
   private static final String USERINFO = "https://openidconnect.googleapis.com/v1/userinfo";
   /**
-   * Shared HTTP client.
+   * Shared HTTP client, created on first use: a static instance built in the class initializer
+   * would end up in the native image heap, which GraalVM forbids.
    */
-  private static final HttpClient CLIENT =
-      HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+  private static volatile HttpClient client;
   /**
    * JSON reader.
    */
@@ -121,7 +121,7 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
       form.put("client_secret", googleSecretId);
       form.put("code_verifier", detail.getCodeVerifier());
       HttpResponse<String> tokenResponse =
-          CLIENT.send(HttpRequest.newBuilder(URI.create(TOKEN)).timeout(Duration.ofSeconds(10))
+          client().send(HttpRequest.newBuilder(URI.create(TOKEN)).timeout(Duration.ofSeconds(10))
               .header("Content-Type", "application/x-www-form-urlencoded")
               .POST(BodyPublishers.ofString(encode(form))).build(), BodyHandlers.ofString());
       if (tokenResponse.statusCode() != 200) {
@@ -133,7 +133,7 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
       if (accessToken.isEmpty()) {
         return Optional.empty();
       }
-      HttpResponse<String> userInfo = CLIENT.send(
+      HttpResponse<String> userInfo = client().send(
           HttpRequest.newBuilder(URI.create(USERINFO)).timeout(Duration.ofSeconds(10))
               .header("Authorization", "Bearer " + accessToken).GET().build(),
           BodyHandlers.ofString());
@@ -189,5 +189,19 @@ public class GoogleDelegatedAccessProvider implements DelegatedAccessExternalPro
         .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "="
             + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
         .collect(Collectors.joining("&"));
+  }
+
+  private static HttpClient client() {
+    HttpClient current = client;
+    if (current == null) {
+      synchronized (GoogleDelegatedAccessProvider.class) {
+        current = client;
+        if (current == null) {
+          current = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+          client = current;
+        }
+      }
+    }
+    return current;
   }
 }

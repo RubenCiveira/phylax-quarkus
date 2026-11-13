@@ -21,7 +21,8 @@ import net.civeira.phylax.feature.oauth.mfa.domain.gateway.RecoveryCodeConsumpti
 public class MfaRecoveryService {
 
   private static final String ALPHABET = "BCDFGHJKLMNPQRSTVWXZ";
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
 
   private final UserMfaRecoveryCodeQueryRepositoryGateway readGateway;
   private final UserMfaRecoveryCodeCommandRepositoryGateway writeGateway;
@@ -64,7 +65,7 @@ public class MfaRecoveryService {
   private String generateRawCode() {
     char[] buf = new char[8];
     for (int i = 0; i < 8; i++) {
-      buf[i] = ALPHABET.charAt(RANDOM.nextInt(ALPHABET.length()));
+      buf[i] = ALPHABET.charAt(RANDOM.get().nextInt(ALPHABET.length()));
     }
     return new String(buf, 0, 4) + "-" + new String(buf, 4, 4);
   }

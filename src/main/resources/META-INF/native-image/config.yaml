@@ -5,4 +5,4 @@ quarkus:
     resources:
       includes: 
         - migration/**
-    native-image-xmx: 5500m
+    native-image-xmx: 6g

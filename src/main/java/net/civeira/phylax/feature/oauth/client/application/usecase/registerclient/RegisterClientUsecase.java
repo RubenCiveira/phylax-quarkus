@@ -41,7 +41,8 @@ import net.civeira.phylax.feature.oauth.client.domain.gateway.DynamicClientGatew
 @RequiredArgsConstructor
 public class RegisterClientUsecase {
 
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
 
   private final DynamicClientGateway gateway;
   private final DcrInitialAccessTokenGateway initialAccessTokens;
@@ -96,7 +97,7 @@ public class RegisterClientUsecase {
 
   private static String randomToken() {
     byte[] bytes = new byte[32];
-    RANDOM.nextBytes(bytes);
+    RANDOM.get().nextBytes(bytes);
     return HexFormat.of().formatHex(bytes);
   }
 }

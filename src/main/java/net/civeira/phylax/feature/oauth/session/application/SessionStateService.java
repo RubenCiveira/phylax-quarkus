@@ -20,14 +20,15 @@ import net.civeira.phylax.feature.oauth.session.domain.gateway.SessionStoreGatew
 @ApplicationScoped
 @RequiredArgsConstructor
 public class SessionStateService {
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
   private final SessionStoreGateway sessions;
   private final ClientStoreGateway clients;
   private final TenantQueryRepositoryGateway tenants;
 
   public String create(String clientId, String redirect, String sid) {
     byte[] salt = new byte[16];
-    RANDOM.nextBytes(salt);
+    RANDOM.get().nextBytes(salt);
     String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
     return digest(clientId, origin(redirect), sid, encoded) + "." + encoded;
   }

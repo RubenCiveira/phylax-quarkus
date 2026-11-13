@@ -181,24 +181,6 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-toolchains-plugin</artifactId>
-        <version>${toolchains-plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>toolchain</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <toolchains>
-            <jdk>
-              <version>${java.version}</version>
-            </jdk>
-          </toolchains>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
         <configuration>
@@ -471,9 +453,40 @@
         </plugins>
       </build>
       <properties>
-        <surefire.argLine></surefire.argLine>
         <jacoco.skip>true</jacoco.skip>
+        <surefire.argLine></surefire.argLine>
       </properties>
+    </profile>
+    <profile>
+      <!-- Only where toolchains are defined (dev machines); builder images (Mandrel) already run on the right JDK. -->
+      <id>toolchains</id>
+      <activation>
+        <file>
+          <exists>${user.home}/.m2/toolchains.xml</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-toolchains-plugin</artifactId>
+            <version>${toolchains-plugin.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>toolchain</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <toolchains>
+                <jdk>
+                  <version>${java.version}</version>
+                </jdk>
+              </toolchains>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>

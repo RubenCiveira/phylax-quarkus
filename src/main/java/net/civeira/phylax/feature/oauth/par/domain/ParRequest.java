@@ -22,7 +22,8 @@ import lombok.Getter;
 public final class ParRequest {
 
   private static final int EXPIRES_IN_SECONDS = 60;
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
 
   private final String requestUri;
   private final String tenant;
@@ -44,7 +45,7 @@ public final class ParRequest {
   public static ParRequest create(String tenant, String clientId, Map<String, String> params) {
     // 256 random bits in base64url: the URN (77 characters) fits _oauth_par_request.request_uri.
     byte[] random = new byte[32];
-    RANDOM.nextBytes(random);
+    RANDOM.get().nextBytes(random);
     String token = Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     String requestUri = "urn:ietf:params:oauth:request_uri:" + token;
     OffsetDateTime expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(EXPIRES_IN_SECONDS);

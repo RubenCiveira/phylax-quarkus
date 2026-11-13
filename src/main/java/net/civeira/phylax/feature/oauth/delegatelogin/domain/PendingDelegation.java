@@ -35,9 +35,11 @@ public class PendingDelegation {
    */
   private static final int SECRET_BYTES = 32;
   /**
-   * Shared random source.
+   * Per-thread random source, created on first use at runtime: a static {@link SecureRandom} would
+   * be stored in the native image heap, which GraalVM forbids.
    */
-  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
 
   /**
    * Tenant name that started the login.
@@ -83,7 +85,7 @@ public class PendingDelegation {
    */
   public static String newSecret() {
     byte[] bytes = new byte[SECRET_BYTES];
-    RANDOM.nextBytes(bytes);
+    RANDOM.get().nextBytes(bytes);
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
   }
 

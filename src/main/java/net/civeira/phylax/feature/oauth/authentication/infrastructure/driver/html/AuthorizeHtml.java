@@ -163,7 +163,8 @@ public class AuthorizeHtml {
    */
   private final BackChannelLogoutDispatcher backChannelLogoutDispatcher;
   private final FrontChannelLogoutUseCase frontChannelLogout;
-  private static final SecureRandom FRONT_CHANNEL_RANDOM = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> FRONT_CHANNEL_RANDOM =
+      ThreadLocal.withInitial(SecureRandom::new);
   /**
    * Revokes tokens on logout.
    */
@@ -535,7 +536,7 @@ public class AuthorizeHtml {
 
   private Response frontChannelPage(List<String> urls, String redirect, NewCookie cleared) {
     byte[] random = new byte[24];
-    FRONT_CHANNEL_RANDOM.nextBytes(random);
+    FRONT_CHANNEL_RANDOM.get().nextBytes(random);
     String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     StringBuilder html = new StringBuilder("<!doctype html><html><head><meta charset=\"utf-8\">"
         + "<title>Signed out</title></head><body><h1>Signed out</h1>");
