@@ -16,8 +16,9 @@ import net.civeira.phylax.feature.observe.observedalertrule.domain.ObservedAlert
  * minute above threshold during window-minutes), source-silent (no event during window-minutes),
  * collector-dropping (the queue discards events), slo-burn (an objective spends its error budget
  * too fast), probe-down (a probe fails its checks), tls-expiring (the certificate of a probe
- * expires soon) or anomaly (traffic, errors or latency of an origin out of what is usual for that
- * hour). of observedAlertRule.
+ * expires soon), anomaly (traffic, errors or latency of an origin out of what is usual for that
+ * hour) or disk-high (the store uses at least threshold % of max-disk-mb; 80 without threshold). of
+ * observedAlertRule.
  * <p>
  * This class ensures that the trigger is a non-null {@code String} and encapsulates its validation
  * and formatting logic. It is immutable and compliant with DDD (Domain-Driven Design) principles.

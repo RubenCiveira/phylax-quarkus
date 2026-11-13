@@ -1290,7 +1290,9 @@ function collectorCard(collector) {
       h('dt', {}, 'Last batch'), h('dd', { class: 'obs-mono' }, collector.lastBatchAt ? `${collector.lastBatchSize} events in ${collector.lastBatchMillis} ms, ${ago(collector.lastBatchAt)}` : '—'),
       h('dt', {}, 'Disk'), h('dd', {}, h('div', { class: 'obs-meter', role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(ratio * 100) },
         h('div', { class: `obs-meter-bar${ratio > 0.9 ? ' high' : ''}`, style: `width:${Math.round(ratio * 100)}%` })),
-        h('span', { class: 'obs-mono obs-muted' }, `${bytes(collector.diskBytes)} of ${collector.maxDiskMb} MB`)),
+        h('span', { class: 'obs-mono obs-muted' }, `${bytes(collector.diskBytes)} of ${collector.maxDiskMb} MB`),
+        collector.storeFull ? h('span', { class: 'obs-err' }, ` — full, rejecting events (${collector.rejected || 0} rejected)`)
+          : collector.rejected ? h('span', { class: 'obs-muted' }, ` (${collector.rejected} rejected since the start)`) : null),
       h('dt', {}, 'Last purge'), h('dd', { class: 'obs-mono' }, ago(collector.lastPurge))));
 }
 

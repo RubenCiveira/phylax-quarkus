@@ -45,6 +45,7 @@ public class SqlTelemetryStore implements TelemetryStore {
   private final ObjectMapper mapper =
       new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   private volatile boolean ready;
+  private final TraceLevels levels = new TraceLevels();
 
   public SqlTelemetryStore(final DataSource dataSource) {
     this.dataSource = dataSource;
@@ -64,15 +65,23 @@ public class SqlTelemetryStore implements TelemetryStore {
       statement.execute(
           "CREATE TABLE IF NOT EXISTS obs_log (ts BIGINT NOT NULL, src VARCHAR(200) NOT NULL, "
               + "lvl VARCHAR(10), trace_id VARCHAR(64), fingerprint VARCHAR(64), rel VARCHAR(100), env VARCHAR(50), "
-              + "payload " + text + " NOT NULL)");
+              + "tsev SMALLINT, payload " + text + " NOT NULL)");
       statement.execute(
           "CREATE TABLE IF NOT EXISTS obs_span (ts BIGINT NOT NULL, src VARCHAR(200) NOT NULL, "
               + "trace_id VARCHAR(64), span_id VARCHAR(32), kind VARCHAR(20), status VARCHAR(10), rel VARCHAR(100), "
-              + "env VARCHAR(50), payload " + text + " NOT NULL)");
+              + "env VARCHAR(50), tsev SMALLINT, payload " + text + " NOT NULL)");
       statement.execute(
           "CREATE TABLE IF NOT EXISTS obs_point (ts BIGINT NOT NULL, step BIGINT NOT NULL, "
               + "src VARCHAR(200) NOT NULL, method VARCHAR(20), route VARCHAR(400), payload " + text
               + " NOT NULL)");
+      for (String column : new String[] {"ALTER TABLE obs_log ADD tsev SMALLINT",
+          "ALTER TABLE obs_span ADD tsev SMALLINT"}) {
+        try (Statement alter = connection.createStatement()) {
+          alter.execute(column);
+        } catch (SQLException ex) {
+          // Tables created with the column
+        }
+      }
       for (String index : new String[] {"CREATE INDEX obs_log_ts ON obs_log (ts)",
           "CREATE INDEX obs_log_src_ts ON obs_log (src, ts)",
           "CREATE INDEX obs_log_trace ON obs_log (trace_id)",
@@ -106,10 +115,15 @@ public class SqlTelemetryStore implements TelemetryStore {
     return "CLOB";
   }
 
+  /**
+   * Each row keeps the level of its trace in {@code tsev} ({@link TraceLevels}); when a batch
+   * raises the level of a trace, the rows it already has are marked with the new one.
+   */
   @Override
   public void appendLogs(final List<ObsLog> logs) {
+    Map<String, Integer> raised = levels.raise(logs, List.of());
     insert(
-        "INSERT INTO obs_log (ts, src, lvl, trace_id, fingerprint, rel, env, payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO obs_log (ts, src, lvl, trace_id, fingerprint, rel, env, payload, tsev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         logs, (statement, log) -> {
           statement.setLong(1, log.ts());
           statement.setString(2, log.src());
@@ -120,13 +134,17 @@ public class SqlTelemetryStore implements TelemetryStore {
           statement.setString(6, cut(log.release(), 100));
           statement.setString(7, cut(log.env(), 50));
           statement.setString(8, json(log));
+          statement.setInt(9,
+              TraceLevels.effective(TraceLevels.of(log), levels.level(log.traceId())));
         });
+    mark(raised);
   }
 
   @Override
   public void appendSpans(final List<ObsSpan> spans) {
+    Map<String, Integer> raised = levels.raise(List.of(), spans);
     insert(
-        "INSERT INTO obs_span (ts, src, trace_id, span_id, kind, status, rel, env, payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO obs_span (ts, src, trace_id, span_id, kind, status, rel, env, payload, tsev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         spans, (statement, span) -> {
           statement.setLong(1, span.ts());
           statement.setString(2, span.src());
@@ -137,7 +155,34 @@ public class SqlTelemetryStore implements TelemetryStore {
           statement.setString(7, cut(span.release(), 100));
           statement.setString(8, cut(span.env(), 50));
           statement.setString(9, json(span));
+          statement.setInt(10,
+              TraceLevels.effective(TraceLevels.of(span), levels.level(span.traceId())));
         });
+    mark(raised);
+  }
+
+  /** The rows already stored of the traces whose level rose take the new one. */
+  private void mark(final Map<String, Integer> raised) {
+    if (raised.isEmpty()) {
+      return;
+    }
+    schema();
+    try (Connection connection = dataSource.getConnection()) {
+      for (String table : new String[] {"obs_log", "obs_span"}) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE " + table
+            + " SET tsev = ? WHERE trace_id = ? AND (tsev IS NULL OR tsev < ?)")) {
+          for (Map.Entry<String, Integer> trace : raised.entrySet()) {
+            statement.setInt(1, trace.getValue());
+            statement.setString(2, trace.getKey());
+            statement.setInt(3, trace.getValue());
+            statement.addBatch();
+          }
+          statement.executeBatch();
+        }
+      }
+    } catch (SQLException ex) {
+      log.warn("Unable to mark the level of {} traces: {}", raised.size(), ex.getMessage());
+    }
   }
 
   @Override
@@ -232,6 +277,30 @@ public class SqlTelemetryStore implements TelemetryStore {
         long limit = now - source.getValue() * day;
         delete("DELETE FROM obs_log WHERE src = ? AND ts < ?", source.getKey(), limit);
         delete("DELETE FROM obs_span WHERE src = ? AND ts < ?", source.getKey(), limit);
+      }
+    }
+  }
+
+  /**
+   * Rows of each level of trace older than its hours; the rows stored before the column count as
+   * INFO.
+   */
+  @Override
+  public void purgeLevels(final RetentionPolicy policy) {
+    RetentionPolicy.LevelRetention retention = policy.levels();
+    if (null == retention || !retention.enabled()) {
+      return;
+    }
+    long now = System.currentTimeMillis();
+    for (int level = TraceLevels.DEBUG; level <= TraceLevels.ERROR; level++) {
+      int hours = retention.hours(level);
+      if (hours <= 0) {
+        continue;
+      }
+      String which = TraceLevels.INFO == level ? "(tsev = ? OR tsev IS NULL)" : "tsev = ?";
+      for (String table : new String[] {"obs_log", "obs_span"}) {
+        delete("DELETE FROM " + table + " WHERE ts < ? AND " + which, now - hours * 3_600_000L,
+            level);
       }
     }
   }

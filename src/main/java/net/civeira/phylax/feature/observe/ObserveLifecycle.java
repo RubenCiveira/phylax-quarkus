@@ -71,6 +71,11 @@ public class ObserveLifecycle {
     fingerprintRules.reload();
     issueAliases.reload();
     health.start();
+    try {
+      metrics.recover();
+    } catch (RuntimeException ex) {
+      log.warn("Unable to recover the metric aggregates: {}", ex.getMessage());
+    }
     insights.start();
     probes.start();
     pipeline.start();
@@ -83,6 +88,7 @@ public class ObserveLifecycle {
     });
     scheduler.scheduleAtFixedRate(this::purge, 1, 24 * 60, TimeUnit.MINUTES);
     scheduler.scheduleAtFixedRate(this::evaluateAlerts, 1, 1, TimeUnit.MINUTES);
+    scheduler.scheduleAtFixedRate(this::purgeLevels, 5, 15, TimeUnit.MINUTES);
   }
 
   void onStop(@Observes final ShutdownEvent event) {
@@ -95,12 +101,22 @@ public class ObserveLifecycle {
     registry.stop();
     alertRules.stop();
     probes.stop();
+    try {
+      metrics.persistOpen();
+    } catch (RuntimeException ex) {
+      log.warn("Unable to store the open metric aggregates: {}", ex.getMessage());
+    }
     settings.stop();
     pipeline.stop();
   }
 
   /** Every minute: health counters, alerts and the activity of the sources. */
   private void evaluateAlerts() {
+    try {
+      store.enforce(settings.current().retention());
+    } catch (RuntimeException ex) {
+      log.warn("Unable to apply the disk limit of the observability store: {}", ex.getMessage());
+    }
     health.tick();
     fingerprintRules.reload();
     issueAliases.reload();
@@ -120,7 +136,7 @@ public class ObserveLifecycle {
       log.warn("Unable to evaluate the objectives: {}", ex.getMessage());
     }
     try {
-      alerts.tick(pipeline.dropped());
+      alerts.tick(pipeline.dropped(), health.diskRatio());
     } catch (RuntimeException ex) {
       log.warn("Unable to evaluate the alerts: {}", ex.getMessage());
     }
@@ -128,6 +144,16 @@ public class ObserveLifecycle {
       activity.record();
     } catch (RuntimeException ex) {
       log.warn("Unable to save the activity of the sources: {}", ex.getMessage());
+    }
+  }
+
+  /** Every 15 minutes: the retention by the level of the trace (its hours are short). */
+  private void purgeLevels() {
+    try {
+      store.purgeLevels(settings.current().retention());
+    } catch (RuntimeException ex) {
+      log.warn("Unable to apply the retention by level to the observability store: {}",
+          ex.getMessage());
     }
   }
 

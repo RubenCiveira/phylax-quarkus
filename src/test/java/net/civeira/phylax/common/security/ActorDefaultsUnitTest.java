@@ -118,5 +118,19 @@ class ActorDefaultsUnitTest {
       assertFalse(ACTOR.hasAnyRole("guest", "other:*"));
       assertFalse(ACTOR.hasAnyRole());
     }
+
+    @Test
+    @DisplayName("Should match roles ignoring case, as the providers issue them in different cases")
+    void shouldMatchRolesIgnoringCase() {
+      Actor actor = ActorImpl.builder().uid("u-2").authenticated(true)
+          .roles(List.of("observability_admin", "Tenant:Reader")).build();
+      assertTrue(actor.hasRole("OBSERVABILITY_ADMIN"));
+      assertTrue(actor.hasAnyRole("OBSERVABILITY_READER", "OBSERVABILITY_ADMIN"));
+      assertTrue(actor.hasRole("tenant:*"));
+      assertTrue(ACTOR.hasRole("ADMIN"));
+      assertFalse(actor.hasRole("OBSERVABILITY_READER"));
+      assertFalse(actor.hasRole("observability"));
+      assertFalse(actor.hasRole(null));
+    }
   }
 }

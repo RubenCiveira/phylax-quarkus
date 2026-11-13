@@ -20,7 +20,9 @@ import lombok.extern.slf4j.Slf4j;
  * Source maps of the fronts, uploaded by their build ({@code POST /observe/api/sourcemaps}) and
  * kept per source and release in {@code <app.observe.path>/sourcemaps/}. The stacks of the errors
  * of a front are translated when they are shown (never when they arrive: the ingestion stays
- * light), with the maps of the release of the event.
+ * light), with the maps of the release of the event. Only the last
+ * {@code app.observe.sourcemaps.keep-releases} releases of each source are kept (the oldest uploads
+ * are deleted).
  */
 @ApplicationScoped
 @Slf4j
@@ -36,6 +38,9 @@ public class SourceMaps {
       "^(\\s*)(?:at\\s+(?:(.+?)\\s+\\()?|(.*?)@)(\\S+?/([^/?#]+\\.js))(?:[?#][^:]*)?:(\\d+):(\\d+)\\)?\\s*$");
 
   private final Path root;
+  /** Releases of each source whose maps are kept (0: all). */
+  @ConfigProperty(name = "app.observe.sourcemaps.keep-releases", defaultValue = "10")
+  int keepReleases = 10;
   private final Map<String, Optional<SourceMap>> cache = new LinkedHashMap<>(16, 0.75f, true) {
     @Override
     protected boolean removeEldestEntry(final Map.Entry<String, Optional<SourceMap>> eldest) {
@@ -58,8 +63,45 @@ public class SourceMaps {
     Path target = path(source, release, file);
     Files.createDirectories(target.getParent());
     Files.writeString(target, content, StandardCharsets.UTF_8);
+    // The release is the newest one even when its maps are replaced
+    Files.setLastModifiedTime(target.getParent(),
+        java.nio.file.attribute.FileTime.fromMillis(System.currentTimeMillis()));
     synchronized (cache) {
       cache.remove(target.toString());
+    }
+    prune(target.getParent().getParent(), target.getParent());
+  }
+
+  /** Deletes the oldest releases of a source beyond keep-releases (never the one just uploaded). */
+  private void prune(final Path sourceDir, final Path current) {
+    if (keepReleases <= 0) {
+      return;
+    }
+    try (java.util.stream.Stream<Path> releases = Files.list(sourceDir)) {
+      java.util.List<Path> old =
+          releases.filter(Files::isDirectory).filter(dir -> !dir.equals(current))
+              .sorted(java.util.Comparator.comparingLong(SourceMaps::modified).reversed())
+              .skip(Math.max(0, keepReleases - 1)).toList();
+      for (Path dir : old) {
+        try (java.util.stream.Stream<Path> files = Files.walk(dir)) {
+          files.sorted(java.util.Comparator.reverseOrder()).forEach(path -> path.toFile().delete());
+        }
+        synchronized (cache) {
+          cache.keySet().removeIf(key -> key.startsWith(dir.toString()));
+        }
+        log.info("Deleted the source maps of {}/{} (more than {} releases)",
+            sourceDir.getFileName(), dir.getFileName(), keepReleases);
+      }
+    } catch (IOException ex) {
+      log.warn("Unable to delete the old source maps of {}: {}", sourceDir, ex.getMessage());
+    }
+  }
+
+  private static long modified(final Path dir) {
+    try {
+      return Files.getLastModifiedTime(dir).toMillis();
+    } catch (IOException ex) {
+      return 0;
     }
   }
 

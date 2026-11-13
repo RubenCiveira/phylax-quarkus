@@ -120,14 +120,22 @@ public interface Actor {
     return false;
   }
 
+  /**
+   * Whether the actor holds the role, ignoring case: the identity providers do not agree on it (the
+   * own IAM issues the names in lower case, others keep them as they were created), and the model
+   * may write them either way. A name ending in {@code :*} matches every role with that prefix.
+   */
   default boolean hasRole(String role) {
+    if (role == null) {
+      return false;
+    }
     if (role.endsWith(":*")) {
       String prefix = role.substring(0, role.length() - 1);
-      return getRoles().stream().anyMatch(has -> has.startsWith(prefix));
+      return getRoles().stream().filter(java.util.Objects::nonNull)
+          .anyMatch(has -> has.regionMatches(true, 0, prefix, 0, prefix.length()));
     } else {
-      return getRoles().contains(role);
+      return getRoles().stream().anyMatch(role::equalsIgnoreCase);
     }
-
   }
 
   default boolean hasAnyRole(String... roles) {

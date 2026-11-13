@@ -54,6 +54,27 @@ class SourceMapsUnitTest {
   }
 
   @Test
+  @DisplayName("Only the newest keep-releases releases of a source keep their maps")
+  void keepReleases() throws Exception {
+    SourceMaps maps = new SourceMaps(dir.toString());
+    maps.keepReleases = 2;
+    long now = System.currentTimeMillis();
+    maps.store("ui", "1.0.0", "main.js.map", MAP);
+    java.nio.file.Files.setLastModifiedTime(dir.resolve("sourcemaps/ui/1.0.0"),
+        java.nio.file.attribute.FileTime.fromMillis(now - 20_000));
+    maps.store("ui", "1.1.0", "main.js.map", MAP);
+    java.nio.file.Files.setLastModifiedTime(dir.resolve("sourcemaps/ui/1.1.0"),
+        java.nio.file.attribute.FileTime.fromMillis(now - 10_000));
+    maps.store("other", "0.1.0", "main.js.map", MAP);
+    maps.store("ui", "1.2.0", "main.js.map", MAP);
+    Assertions.assertFalse(java.nio.file.Files.exists(dir.resolve("sourcemaps/ui/1.0.0")));
+    Assertions.assertTrue(java.nio.file.Files.exists(dir.resolve("sourcemaps/ui/1.1.0")));
+    Assertions
+        .assertTrue(java.nio.file.Files.exists(dir.resolve("sourcemaps/ui/1.2.0/main.js.map")));
+    Assertions.assertTrue(java.nio.file.Files.exists(dir.resolve("sourcemaps/other/0.1.0")));
+  }
+
+  @Test
   @DisplayName("The names of an upload cannot leave their folder")
   void safeNames() {
     Assertions.assertEquals("passwd", SourceMaps.safe("../../etc/passwd"));

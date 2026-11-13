@@ -50,8 +50,11 @@ public class InstallObservabilityConfig implements MigrationSeed {
         .retentionDaysErrors(defaults.getRetentionDaysErrors())
         .retentionDaysMetrics(defaults.getRetentionDaysMetrics())
         .retentionDaysMetricsRollup(defaults.getRetentionDaysMetricsRollup())
-        .maxDiskMb(defaults.getMaxDiskMb()).scrubFields(defaults.getScrubFields())
-        .labelDenylist(defaults.getLabelDenylist())
+        .maxDiskMb(defaults.getMaxDiskMb()).retentionHoursDebug(defaults.getRetentionHoursDebug())
+        .retentionHoursInfo(defaults.getRetentionHoursInfo())
+        .retentionHoursWarn(defaults.getRetentionHoursWarn())
+        .retentionHoursError(defaults.getRetentionHoursError())
+        .scrubFields(defaults.getScrubFields()).labelDenylist(defaults.getLabelDenylist())
         .captureRequestBody(defaults.isCaptureRequestBody());
     configs.create(ObservabilityConfig.create(change));
     log.info("Created the observability configuration '{}'", ObservabilitySettings.CODE);

@@ -14,8 +14,9 @@ class ObservabilityConfigChangeSetUnitTest {
   void test_observability_config_change_set_builder() {
     ObservabilityConfigChangeSet one = new ObservabilityConfigChangeSet().uid("one").code("one")
         .retentionDaysLogs(1).retentionDaysTraces(1).retentionDaysErrors(1).retentionDaysMetrics(1)
-        .retentionDaysMetricsRollup(1).maxDiskMb(1).scrubFields("one").labelDenylist("one")
-        .captureRequestBody(true).version(1).newUid();
+        .retentionDaysMetricsRollup(1).retentionHoursDebug(1).retentionHoursInfo(1)
+        .retentionHoursWarn(1).retentionHoursError(1).maxDiskMb(1).scrubFields("one")
+        .labelDenylist("one").captureRequestBody(true).version(1).newUid();
     one.uid("two");
     Assertions.assertEquals("two", one.getUid().get(), "Value must equals to the assigned value");
     one.unset("uid");
@@ -64,6 +65,38 @@ class ObservabilityConfigChangeSetUnitTest {
         "Value must equals to the assigned value");
     one.unset("retentionDaysMetricsRollup");
     Assertions.assertFalse(one.getRetentionDaysMetricsRollup().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getRetentionHoursDebug().get(),
+        "Value must equals to the intial value");
+    one.retentionHoursDebug(2);
+    Assertions.assertEquals(2, one.getRetentionHoursDebug().get(),
+        "Value must equals to the assigned value");
+    one.unset("retentionHoursDebug");
+    Assertions.assertFalse(one.getRetentionHoursDebug().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getRetentionHoursInfo().get(),
+        "Value must equals to the intial value");
+    one.retentionHoursInfo(2);
+    Assertions.assertEquals(2, one.getRetentionHoursInfo().get(),
+        "Value must equals to the assigned value");
+    one.unset("retentionHoursInfo");
+    Assertions.assertFalse(one.getRetentionHoursInfo().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getRetentionHoursWarn().get(),
+        "Value must equals to the intial value");
+    one.retentionHoursWarn(2);
+    Assertions.assertEquals(2, one.getRetentionHoursWarn().get(),
+        "Value must equals to the assigned value");
+    one.unset("retentionHoursWarn");
+    Assertions.assertFalse(one.getRetentionHoursWarn().isPresent(),
+        "After unset, the valeue must be dissapear");
+    Assertions.assertEquals(1, one.getRetentionHoursError().get(),
+        "Value must equals to the intial value");
+    one.retentionHoursError(2);
+    Assertions.assertEquals(2, one.getRetentionHoursError().get(),
+        "Value must equals to the assigned value");
+    one.unset("retentionHoursError");
+    Assertions.assertFalse(one.getRetentionHoursError().isPresent(),
         "After unset, the valeue must be dissapear");
     Assertions.assertEquals(1, one.getMaxDiskMb().get(), "Value must equals to the intial value");
     one.maxDiskMb(2);

@@ -31,6 +31,7 @@ public class ObservePipeline {
   private final IssueAggregator issues;
   private final AlertEngine alerts;
   private final net.civeira.phylax.feature.observe.anomaly.ObserveInsights insights;
+  private final net.civeira.phylax.feature.observe.metric.ObserveMetrics metrics;
   private final BlockingQueue<Object> queue;
   private final long flushMillis;
   private final AtomicLong dropped = new AtomicLong();
@@ -47,11 +48,12 @@ public class ObservePipeline {
    * @param lastBatchAt epoch millis of the last batch written (0 if none)
    */
   public record Stats(boolean running, int queueSize, int capacity, long accepted, long dropped,
-      long writeErrors, int lastBatchSize, long lastBatchMillis, long lastBatchAt) {}
+      long writeErrors, int lastBatchSize, long lastBatchMillis, long lastBatchAt, long rejected,
+      boolean storeFull) {}
 
   public Stats stats() {
-    return new Stats(running, queue.size(), capacity, accepted.get(), dropped.get(),
-        writeErrors.get(), lastBatchSize, lastBatchMillis, lastBatchAt);
+    return new Stats(running, queue.size(), capacity, accepted.get(), dropped(), writeErrors.get(),
+        lastBatchSize, lastBatchMillis, lastBatchAt, store.rejected(), store.full());
   }
 
   private volatile Thread writer;
@@ -60,6 +62,7 @@ public class ObservePipeline {
   public ObservePipeline(final TelemetryStore store, final IssueAggregator issues,
       final AlertEngine alerts,
       final net.civeira.phylax.feature.observe.anomaly.ObserveInsights insights,
+      final net.civeira.phylax.feature.observe.metric.ObserveMetrics metrics,
       final @ConfigProperty(name = "app.observe.queue-size", defaultValue = "10000") int queueSize,
       final @ConfigProperty(name = "app.observe.flush-interval-ms",
           defaultValue = "1000") long flushMillis) {
@@ -67,6 +70,7 @@ public class ObservePipeline {
     this.issues = issues;
     this.alerts = alerts;
     this.insights = insights;
+    this.metrics = metrics;
     this.queue = new ArrayBlockingQueue<>(queueSize);
     this.capacity = queueSize;
     this.flushMillis = flushMillis;
@@ -82,8 +86,9 @@ public class ObservePipeline {
     return ok;
   }
 
+  /** Events lost: discarded by the full queue or rejected by the store at its disk limit. */
   public long dropped() {
-    return dropped.get();
+    return dropped.get() + store.rejected();
   }
 
   public synchronized void start() {
@@ -147,6 +152,9 @@ public class ObservePipeline {
     long started = System.currentTimeMillis();
     store.appendLogs(logs);
     store.appendSpans(spans);
+    for (ObsLog item : logs) {
+      metrics.recordIssue(item);
+    }
     lastBatchSize = logs.size() + spans.size();
     lastBatchMillis = System.currentTimeMillis() - started;
     lastBatchAt = System.currentTimeMillis();

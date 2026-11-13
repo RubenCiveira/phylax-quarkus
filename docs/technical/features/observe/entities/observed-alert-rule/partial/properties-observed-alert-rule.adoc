@@ -4,7 +4,7 @@ Unique identifier of the rule.
 Name* (string)::
 Name shown in the notices.
 Trigger* (ObservedAlertRuleTriggerOptions)::
-What fires the rule: new-issue, regression, error-rate (errors per minute above threshold during window-minutes), source-silent (no event during window-minutes), collector-dropping (the queue discards events), slo-burn (an objective spends its error budget too fast), probe-down (a probe fails its checks), tls-expiring (the certificate of a probe expires soon) or anomaly (traffic, errors or latency of an origin out of what is usual for that hour).Los posibles valores que toma el campo son:
+What fires the rule: new-issue, regression, error-rate (errors per minute above threshold during window-minutes), source-silent (no event during window-minutes), collector-dropping (the queue discards events), slo-burn (an objective spends its error budget too fast), probe-down (a probe fails its checks), tls-expiring (the certificate of a probe expires soon), anomaly (traffic, errors or latency of an origin out of what is usual for that hour) or disk-high (the store uses at least threshold % of max-disk-mb; 80 without threshold).Los posibles valores que toma el campo son:
  * new-issue
  * regression
  * error-rate
@@ -14,6 +14,7 @@ What fires the rule: new-issue, regression, error-rate (errors per minute above 
  * probe-down
  * tls-expiring
  * anomaly
+ * disk-high
 
 Origin (xref:#entidad-observed-source[ObservedSource])::
 Origin the rule watches; empty for every origin.

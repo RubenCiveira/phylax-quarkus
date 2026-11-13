@@ -5,6 +5,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Getter;
+import net.civeira.phylax.feature.observe.store.RetentionPolicy;
 
 /**
  * Defaults of config/observability.yaml ({@code app.observe.defaults.*}): the values of the row
@@ -21,6 +22,10 @@ public class ObserveDefaults {
   private final int retentionDaysMetrics;
   private final int retentionDaysMetricsRollup;
   private final int maxDiskMb;
+  private final int retentionHoursDebug;
+  private final int retentionHoursInfo;
+  private final int retentionHoursWarn;
+  private final int retentionHoursError;
   private final String scrubFields;
   private final String labelDenylist;
   private final boolean captureRequestBody;
@@ -38,6 +43,14 @@ public class ObserveDefaults {
           defaultValue = "400") int retentionDaysMetricsRollup,
       final @ConfigProperty(name = "app.observe.defaults.max-disk-mb",
           defaultValue = "2048") int maxDiskMb,
+      final @ConfigProperty(name = "app.observe.defaults.retention-hours-debug",
+          defaultValue = "2") int retentionHoursDebug,
+      final @ConfigProperty(name = "app.observe.defaults.retention-hours-info",
+          defaultValue = "12") int retentionHoursInfo,
+      final @ConfigProperty(name = "app.observe.defaults.retention-hours-warn",
+          defaultValue = "24") int retentionHoursWarn,
+      final @ConfigProperty(name = "app.observe.defaults.retention-hours-error",
+          defaultValue = "168") int retentionHoursError,
       final @ConfigProperty(name = "app.observe.defaults.scrub-fields",
           defaultValue = "password,secret,token,authorization,cookie,set-cookie,api-key") String scrubFields,
       final @ConfigProperty(name = "app.observe.defaults.label-denylist",
@@ -50,6 +63,10 @@ public class ObserveDefaults {
     this.retentionDaysMetrics = retentionDaysMetrics;
     this.retentionDaysMetricsRollup = retentionDaysMetricsRollup;
     this.maxDiskMb = maxDiskMb;
+    this.retentionHoursDebug = retentionHoursDebug;
+    this.retentionHoursInfo = retentionHoursInfo;
+    this.retentionHoursWarn = retentionHoursWarn;
+    this.retentionHoursError = retentionHoursError;
     this.scrubFields = scrubFields;
     this.labelDenylist = labelDenylist;
     this.captureRequestBody = captureRequestBody;
@@ -58,6 +75,8 @@ public class ObserveDefaults {
   public ObserveSettings settings() {
     return new ObserveSettings(retentionDaysLogs, retentionDaysTraces, retentionDaysErrors,
         retentionDaysMetrics, retentionDaysMetricsRollup, maxDiskMb,
-        ObserveSettings.keys(scrubFields), ObserveSettings.keys(labelDenylist), captureRequestBody);
+        ObserveSettings.keys(scrubFields), ObserveSettings.keys(labelDenylist), captureRequestBody,
+        new RetentionPolicy.LevelRetention(retentionHoursDebug, retentionHoursInfo,
+            retentionHoursWarn, retentionHoursError));
   }
 }

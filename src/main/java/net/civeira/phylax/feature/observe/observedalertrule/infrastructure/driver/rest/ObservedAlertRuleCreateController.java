@@ -220,6 +220,8 @@ public class ObservedAlertRuleCreateController {
       result = TriggerEnum.TLS_EXPIRING;
     } else if (domainEnum == ObservedAlertRuleTriggerOptions.ANOMALY) {
       result = TriggerEnum.ANOMALY;
+    } else if (domainEnum == ObservedAlertRuleTriggerOptions.DISK_HIGH) {
+      result = TriggerEnum.DISK_HIGH;
     } else {
       result = null;
     }
@@ -251,6 +253,8 @@ public class ObservedAlertRuleCreateController {
       result = ObservedAlertRuleTriggerOptions.TLS_EXPIRING;
     } else if (apiEnum == TriggerEnum.ANOMALY) {
       result = ObservedAlertRuleTriggerOptions.ANOMALY;
+    } else if (apiEnum == TriggerEnum.DISK_HIGH) {
+      result = ObservedAlertRuleTriggerOptions.DISK_HIGH;
     } else if (null == apiEnum) {
       result = null;
     } else {

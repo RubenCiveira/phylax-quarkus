@@ -15,15 +15,16 @@ import net.civeira.phylax.feature.observe.store.RetentionPolicy;
  *
  * @param scrubFields keys masked in the events, lower case, with {@code _} as {@code -}
  * @param labelDenylist metric labels discarded on arrival, lower case
+ * @param levels hours the logs and spans are kept by the level of their trace
  */
 public record ObserveSettings(int retentionDaysLogs, int retentionDaysTraces,
     int retentionDaysErrors, int retentionDaysMetrics, int retentionDaysMetricsRollup,
     long maxDiskMb, Set<String> scrubFields, Set<String> labelDenylist,
-    boolean captureRequestBody) {
+    boolean captureRequestBody, RetentionPolicy.LevelRetention levels) {
 
   public RetentionPolicy retention() {
     return new RetentionPolicy(retentionDaysLogs, retentionDaysTraces, maxDiskMb,
-        retentionDaysMetrics, retentionDaysMetricsRollup);
+        retentionDaysMetrics, retentionDaysMetricsRollup).withLevels(levels);
   }
 
   /** Comma separated keys, normalized as the masking compares them. */

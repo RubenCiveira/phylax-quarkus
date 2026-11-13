@@ -62,6 +62,20 @@ public class ObservabilityConfigRbacRegister {
         FieldDescription.builder().name("retentionDaysMetricsRollup").description(
             "Days the metric points of one hour resolution are kept, to compare with the previous year.")
             .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("retentionHoursDebug").description(
+            "Hours the logs and spans of a trace whose most severe log is DEBUG or TRACE are kept.")
+            .build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("retentionHoursInfo").description(
+            "Hours the logs and spans of a trace whose most severe log is INFO (or without logs) are kept.")
+            .build());
+    rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("retentionHoursWarn")
+        .description("Hours the logs and spans of a trace with some WARN log are kept.").build());
+    rbac.registerResourceField(RESOURCE,
+        FieldDescription.builder().name("retentionHoursError").description(
+            "Hours the logs and spans of a trace with some ERROR or FATAL log, or a failed span, are kept. The issues are not deleted.")
+            .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("maxDiskMb").description(
         "Hard limit of the store, in megabytes above it the purge deletes the oldest days even inside their retention.")
         .build());

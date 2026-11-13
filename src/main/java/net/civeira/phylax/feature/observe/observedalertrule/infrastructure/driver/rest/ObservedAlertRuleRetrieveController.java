@@ -130,6 +130,8 @@ public class ObservedAlertRuleRetrieveController {
       result = TriggerEnum.TLS_EXPIRING;
     } else if (domainEnum == ObservedAlertRuleTriggerOptions.ANOMALY) {
       result = TriggerEnum.ANOMALY;
+    } else if (domainEnum == ObservedAlertRuleTriggerOptions.DISK_HIGH) {
+      result = TriggerEnum.DISK_HIGH;
     } else {
       result = null;
     }

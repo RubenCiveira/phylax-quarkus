@@ -44,4 +44,26 @@ public interface TelemetryStore {
 
   /** Deletes the data older than the retention and, above the disk limit, the oldest days. */
   void purge(RetentionPolicy policy);
+
+  /**
+   * Applies the disk limit of the policy now (called every few minutes, the purge is daily): above
+   * it the oldest data is deleted and, if nothing else can go, the store rejects new events.
+   */
+  default void enforce(final RetentionPolicy policy) {}
+
+  /**
+   * Every few minutes: deletes the logs and spans older than the hours of the level of their trace
+   * ({@link RetentionPolicy#levels}). Nothing if the policy has no retention by level.
+   */
+  default void purgeLevels(final RetentionPolicy policy) {}
+
+  /** Whether the store is at its disk limit and rejects new events. */
+  default boolean full() {
+    return false;
+  }
+
+  /** Events rejected because the store was full, since the start. */
+  default long rejected() {
+    return 0;
+  }
 }

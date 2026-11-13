@@ -13,6 +13,14 @@ Retention days metrics* (integer)::
 Days the metric points of one minute resolution are kept.
 Retention days metrics rollup* (integer)::
 Days the metric points of one hour resolution are kept, to compare with the previous year.
+Retention hours debug* (integer)::
+Hours the logs and spans of a trace whose most severe log is DEBUG or TRACE are kept.
+Retention hours info* (integer)::
+Hours the logs and spans of a trace whose most severe log is INFO (or without logs) are kept.
+Retention hours warn* (integer)::
+Hours the logs and spans of a trace with some WARN log are kept.
+Retention hours error* (integer)::
+Hours the logs and spans of a trace with some ERROR or FATAL log, or a failed span, are kept. The issues are not deleted.
 Max disk mb* (integer)::
 Hard limit of the store, in megabytes: above it the purge deletes the oldest days even inside their retention.
 Scrub fields (string)::

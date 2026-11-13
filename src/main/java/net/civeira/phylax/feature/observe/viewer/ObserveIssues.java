@@ -54,6 +54,7 @@ public class ObserveIssues {
   private final TelemetryStore store;
   private final IssueAggregator aggregator;
   private final net.civeira.phylax.feature.observe.sourcemap.SourceMaps sourceMaps;
+  private final net.civeira.phylax.feature.observe.metric.ObserveMetrics metrics;
 
   private static final long HOUR = 3_600_000L;
   private static final int DAYS = 7;
@@ -84,7 +85,12 @@ public class ObserveIssues {
           detail.put("issue", row);
           detail.put("events", events.stream().filter(log -> log.ts() < to).limit(EVENTS)
               .map(log -> new IssueEvent(log, symbolicated(log))).toList());
-          detail.put("histogram", histogram(events, now));
+          List<net.civeira.phylax.feature.observe.metric.MetricPoint> points = metrics.issuePoints(
+              row.source(), issue.getFingerprint(), now - DAYS * 24 * HOUR - HOUR, now);
+          // The metric points outlive the logs (retention by level); the logs, before the points
+          // existed
+          detail.put("histogram",
+              points.isEmpty() ? histogram(events, now) : histogramOf(points, now));
           detail.put("distribution", distribution(events));
           detail.put("sampled", events.size());
           return detail;
@@ -116,6 +122,22 @@ public class ObserveIssues {
       int index = (int) ((log.ts() - start) / HOUR);
       if (index >= 0 && index < buckets) {
         counts[index]++;
+      }
+    }
+    return Map.of("from", start, "bucketMs", HOUR, "counts", counts);
+  }
+
+  /** Occurrences per hour of the last days from the metric points of the issue. */
+  static Map<String, Object> histogramOf(
+      final List<net.civeira.phylax.feature.observe.metric.MetricPoint> points, final long now) {
+    int buckets = DAYS * 24;
+    long end = (now / HOUR + 1) * HOUR;
+    long start = end - buckets * HOUR;
+    long[] counts = new long[buckets];
+    for (var point : points) {
+      int index = (int) ((point.ts() - start) / HOUR);
+      if (index >= 0 && index < buckets) {
+        counts[index] += point.count();
       }
     }
     return Map.of("from", start, "bucketMs", HOUR, "counts", counts);

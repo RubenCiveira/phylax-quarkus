@@ -75,8 +75,9 @@ class ObservabilityConfigCreateUsecaseUnitTest {
     ObservabilityConfigCreateInput input =
         ObservabilityConfigCreateInput.fromChangeSet(new ObservabilityConfigChangeSet().uid("one")
             .code("one").retentionDaysLogs(1).retentionDaysTraces(1).retentionDaysErrors(1)
-            .retentionDaysMetrics(1).retentionDaysMetricsRollup(1).maxDiskMb(1).scrubFields("one")
-            .labelDenylist("one").captureRequestBody(true).version(1));
+            .retentionDaysMetrics(1).retentionDaysMetricsRollup(1).retentionHoursDebug(1)
+            .retentionHoursInfo(1).retentionHoursWarn(1).retentionHoursError(1).maxDiskMb(1)
+            .scrubFields("one").labelDenylist("one").captureRequestBody(true).version(1));
     Mockito
         .when(visibility.copyWithFixed(Mockito.eq(context),
             Mockito.any(ObservabilityConfigChangeSet.class)))
@@ -135,8 +136,9 @@ class ObservabilityConfigCreateUsecaseUnitTest {
     ObservabilityConfigCreateInput input =
         ObservabilityConfigCreateInput.fromChangeSet(new ObservabilityConfigChangeSet().uid("one")
             .code("one").retentionDaysLogs(1).retentionDaysTraces(1).retentionDaysErrors(1)
-            .retentionDaysMetrics(1).retentionDaysMetricsRollup(1).maxDiskMb(1).scrubFields("one")
-            .labelDenylist("one").captureRequestBody(true).version(1));
+            .retentionDaysMetrics(1).retentionDaysMetricsRollup(1).retentionHoursDebug(1)
+            .retentionHoursInfo(1).retentionHoursWarn(1).retentionHoursError(1).maxDiskMb(1)
+            .scrubFields("one").labelDenylist("one").captureRequestBody(true).version(1));
     Assertions.assertThrows(NotAllowedException.class, () -> usecase.create(context, input));
     Mockito.verifyNoInteractions(visibility, gateway, cache, audit);
   }

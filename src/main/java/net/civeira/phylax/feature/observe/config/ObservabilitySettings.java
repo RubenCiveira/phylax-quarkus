@@ -100,7 +100,12 @@ public class ObservabilitySettings {
         positive(row.getMaxDiskMb(), defaults.getMaxDiskMb()),
         ObserveSettings.keys(row.getScrubFields().orElse(defaults.getScrubFields())),
         ObserveSettings.keys(row.getLabelDenylist().orElse(defaults.getLabelDenylist())),
-        Boolean.TRUE.equals(row.isCaptureRequestBody()));
+        Boolean.TRUE.equals(row.isCaptureRequestBody()),
+        new net.civeira.phylax.feature.observe.store.RetentionPolicy.LevelRetention(
+            positive(row.getRetentionHoursDebug(), defaults.getRetentionHoursDebug()),
+            positive(row.getRetentionHoursInfo(), defaults.getRetentionHoursInfo()),
+            positive(row.getRetentionHoursWarn(), defaults.getRetentionHoursWarn()),
+            positive(row.getRetentionHoursError(), defaults.getRetentionHoursError())));
   }
 
   /** The generated DAOs read a NULL integer as 0: a value not set is the default. */

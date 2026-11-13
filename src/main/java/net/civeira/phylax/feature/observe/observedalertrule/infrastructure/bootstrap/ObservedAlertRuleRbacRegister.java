@@ -55,7 +55,7 @@ public class ObservedAlertRuleRbacRegister {
     rbac.registerResourceField(RESOURCE,
         FieldDescription.builder().name("name").description("Name shown in the notices.").build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("trigger").description(
-        "What fires the rule new-issue, regression, error-rate (errors per minute above threshold during window-minutes), source-silent (no event during window-minutes), collector-dropping (the queue discards events), slo-burn (an objective spends its error budget too fast), probe-down (a probe fails its checks), tls-expiring (the certificate of a probe expires soon) or anomaly (traffic, errors or latency of an origin out of what is usual for that hour).")
+        "What fires the rule new-issue, regression, error-rate (errors per minute above threshold during window-minutes), source-silent (no event during window-minutes), collector-dropping (the queue discards events), slo-burn (an objective spends its error budget too fast), probe-down (a probe fails its checks), tls-expiring (the certificate of a probe expires soon), anomaly (traffic, errors or latency of an origin out of what is usual for that hour) or disk-high (the store uses at least threshold % of max-disk-mb; 80 without threshold).")
         .build());
     rbac.registerResourceField(RESOURCE, FieldDescription.builder().name("origin")
         .description("Origin the rule watches; empty for every origin.").build());

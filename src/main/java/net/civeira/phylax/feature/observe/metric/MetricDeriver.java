@@ -29,9 +29,14 @@ public class MetricDeriver {
    */
   /** Method of the Web Vitals of the fronts (route "<vital> <page>"). */
   public static final String VITAL = "VITAL";
+  /**
+   * Method of the occurrences of the issues (route: the fingerprint), so they outlive their logs.
+   */
+  public static final String ISSUE = "ISSUE";
 
   public static boolean special(final String method) {
-    return PROBE.equals(method) || CLIENT.equals(method) || VITAL.equals(method);
+    return PROBE.equals(method) || CLIENT.equals(method) || VITAL.equals(method)
+        || ISSUE.equals(method);
   }
 
   /** Own traffic of the viewer and the ingestion: it is not the application. */
@@ -111,6 +116,65 @@ public class MetricDeriver {
     final String method0 = safeMethod;
     minutes.computeIfAbsent(startMillis / MINUTE * MINUTE, m -> new ConcurrentHashMap<>())
         .computeIfAbsent(key, k -> new Agg(src, route0, method0)).add(durationMillis, error);
+  }
+
+  /**
+   * Counts an occurrence of an issue (route: its fingerprint). Out of max-series: there is a point
+   * only for the minutes and hours in which the issue happens.
+   */
+  public void recordIssue(final String src, final String fingerprint, final long ts) {
+    if (null == src || null == fingerprint || fingerprint.isBlank()) {
+      return;
+    }
+    String key = src + "\n" + ISSUE + "\n" + fingerprint;
+    minutes.computeIfAbsent(ts / MINUTE * MINUTE, m -> new ConcurrentHashMap<>())
+        .computeIfAbsent(key, k -> new Agg(src, fingerprint, ISSUE)).add(0, false);
+  }
+
+  /**
+   * Adds the minute points already stored of an hour not closed yet (before a restart), so its
+   * rollup is complete when it closes.
+   */
+  public void seed(final List<MetricPoint> stored) {
+    for (MetricPoint point : stored) {
+      hours.computeIfAbsent(point.ts() / HOUR * HOUR, h -> new ConcurrentHashMap<>())
+          .computeIfAbsent(key(point), k -> new Agg(point.src(), point.route(), point.method()))
+          .add(point);
+    }
+  }
+
+  /**
+   * Every minute held in memory, open ones too (on shutdown). The points are additive: the rest of
+   * an open minute, after the restart, is another point of the same minute.
+   */
+  public List<MetricPoint> drainAll() {
+    List<MetricPoint> result = new ArrayList<>();
+    for (Long minute : new ArrayList<>(minutes.keySet())) {
+      Map<String, Agg> series = minutes.remove(minute);
+      if (null != series) {
+        series.values().forEach(agg -> result.add(agg.point(minute, MINUTE)));
+      }
+    }
+    return result;
+  }
+
+  /** The hour points of a list of minute points: one per series and hour. */
+  public static List<MetricPoint> rollup(final List<MetricPoint> minutePoints) {
+    Map<Long, Map<String, Agg>> byHour = new java.util.TreeMap<>();
+    for (MetricPoint point : minutePoints) {
+      byHour.computeIfAbsent(point.ts() / HOUR * HOUR, h -> new java.util.LinkedHashMap<>())
+          .computeIfAbsent(key(point), k -> new Agg(point.src(), point.route(), point.method()))
+          .add(point);
+    }
+    List<MetricPoint> result = new ArrayList<>();
+    byHour.forEach(
+        (hour, series) -> series.values().forEach(agg -> result.add(agg.point(hour, HOUR))));
+    return result;
+  }
+
+  private static String key(final MetricPoint point) {
+    return point.src() + "\n" + (null == point.method() ? "" : point.method()) + "\n"
+        + point.route();
   }
 
   /** The closed intervals, ready to store: minutes and complete hours. */

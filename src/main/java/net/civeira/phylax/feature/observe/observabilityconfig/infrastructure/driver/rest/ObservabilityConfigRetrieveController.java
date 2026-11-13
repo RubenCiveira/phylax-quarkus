@@ -53,6 +53,10 @@ public class ObservabilityConfigRetrieveController {
     observabilityConfigApiDto.setRetentionDaysErrors(dto.getRetentionDaysErrors());
     observabilityConfigApiDto.setRetentionDaysMetrics(dto.getRetentionDaysMetrics());
     observabilityConfigApiDto.setRetentionDaysMetricsRollup(dto.getRetentionDaysMetricsRollup());
+    observabilityConfigApiDto.setRetentionHoursDebug(dto.getRetentionHoursDebug());
+    observabilityConfigApiDto.setRetentionHoursInfo(dto.getRetentionHoursInfo());
+    observabilityConfigApiDto.setRetentionHoursWarn(dto.getRetentionHoursWarn());
+    observabilityConfigApiDto.setRetentionHoursError(dto.getRetentionHoursError());
     observabilityConfigApiDto.setMaxDiskMb(dto.getMaxDiskMb());
     observabilityConfigApiDto.setScrubFields(dto.getScrubFields());
     observabilityConfigApiDto.setLabelDenylist(dto.getLabelDenylist());

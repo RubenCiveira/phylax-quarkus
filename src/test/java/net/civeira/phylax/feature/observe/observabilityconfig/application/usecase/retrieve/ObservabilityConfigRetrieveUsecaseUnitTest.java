@@ -26,6 +26,10 @@ import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.RetentionDaysMetricsRollupVO;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.RetentionDaysMetricsVO;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.RetentionDaysTracesVO;
+import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.RetentionHoursDebugVO;
+import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.RetentionHoursErrorVO;
+import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.RetentionHoursInfoVO;
+import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.RetentionHoursWarnVO;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.ScrubFieldsVO;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.UidVO;
 import net.civeira.phylax.feature.observe.observabilityconfig.domain.valueobject.VersionVO;
@@ -79,8 +83,11 @@ class ObservabilityConfigRetrieveUsecaseUnitTest {
         .retentionDaysErrorsValue(RetentionDaysErrorsVO.from(1))
         .retentionDaysMetricsValue(RetentionDaysMetricsVO.from(1))
         .retentionDaysMetricsRollupValue(RetentionDaysMetricsRollupVO.from(1))
-        .maxDiskMbValue(MaxDiskMbVO.from(1)).scrubFieldsValue(ScrubFieldsVO.from("one"))
-        .labelDenylistValue(LabelDenylistVO.from("one"))
+        .retentionHoursDebugValue(RetentionHoursDebugVO.from(1))
+        .retentionHoursInfoValue(RetentionHoursInfoVO.from(1))
+        .retentionHoursWarnValue(RetentionHoursWarnVO.from(1))
+        .retentionHoursErrorValue(RetentionHoursErrorVO.from(1)).maxDiskMbValue(MaxDiskMbVO.from(1))
+        .scrubFieldsValue(ScrubFieldsVO.from("one")).labelDenylistValue(LabelDenylistVO.from("one"))
         .captureRequestBodyValue(CaptureRequestBodyVO.from(true)).versionValue(VersionVO.from(1))
         .build();
     Mockito.when(visibility.retrieveCachedVisible(context, "one"))

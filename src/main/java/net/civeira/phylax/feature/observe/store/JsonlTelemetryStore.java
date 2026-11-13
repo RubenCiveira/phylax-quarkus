@@ -30,6 +30,13 @@ import lombok.extern.slf4j.Slf4j;
  * Store in JSON Lines files, the simplest format for small on premise micros: one directory per day
  * (UTC) with {@code logs.jsonl} and {@code spans.jsonl}. Writing is append only; the retention
  * deletes whole days. Queries read the days of the range, newest first, until the limit.
+ *
+ * <p>
+ * Each file of a day is cut in segments of {@code app.observe.segment-mb} ({@code logs.jsonl},
+ * {@code logs.1.jsonl}, {@code logs.2.jsonl}...), so the disk limit ({@code max-disk-mb}) can free
+ * space inside the current day too. The size is tracked as it is written: above the limit the
+ * oldest days and then the oldest segments of today are deleted down to 90 % of it, and if nothing
+ * else can be deleted the new events are rejected (and counted) instead of filling the disk.
  */
 @ApplicationScoped
 @io.quarkus.arc.properties.UnlessBuildProperty(name = "app.observe.storage", stringValue = "sql",
@@ -37,12 +44,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JsonlTelemetryStore implements TelemetryStore {
 
-  private static final String LOGS = "logs.jsonl";
-  private static final String SPANS = "spans.jsonl";
-  private static final String METRICS = "metrics.jsonl";
-  private static final String ROLLUP = "metrics-1h.jsonl";
+  private static final String LOGS = "logs";
+  private static final String SPANS = "spans";
+  private static final String METRICS = "metrics";
+  private static final String ROLLUP = "metrics-1h";
+  private static final String[] KINDS = {LOGS, SPANS, METRICS, ROLLUP};
+  /** Fraction of the limit the reclaim frees down to, so it does not run on every write. */
+  private static final double LOW_WATERMARK = 0.9;
+  /** While the store is full, how often a write tries to reclaim space again. */
+  private static final long RECLAIM_EVERY_MILLIS = 30_000;
 
   private final Path root;
+  /** Size of a segment of a day before the next one starts. */
+  @ConfigProperty(name = "app.observe.segment-mb", defaultValue = "64")
+  long segmentMb = 64;
+  /** Current segment of each file of a day (key: day/kind) and its bytes. */
+  private final java.util.Map<String, long[]> segments = new java.util.HashMap<>();
+  private volatile long limitBytes;
+  private volatile boolean full;
+  private volatile long lastReclaim;
+  private final java.util.concurrent.atomic.AtomicLong rejected =
+      new java.util.concurrent.atomic.AtomicLong();
   private final ObjectMapper mapper =
       new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -103,11 +125,6 @@ public class JsonlTelemetryStore implements TelemetryStore {
         Comparator.comparingLong(ObsSpan::ts));
   }
 
-  /**
-   * Deletes the logs and the spans of the days out of their retention (each kind has its own), the
-   * days left empty and then, while the store is above {@code maxDiskMb}, the oldest days. The
-   * retention of each source is not applied here: the files of a day hold every source.
-   */
   @Override
   public synchronized void appendPoints(
       final List<net.civeira.phylax.feature.observe.metric.MetricPoint> points) {
@@ -134,15 +151,43 @@ public class JsonlTelemetryStore implements TelemetryStore {
   private volatile long cachedSize = -1;
   private volatile long cachedSizeAt;
 
+  /**
+   * Bytes of the whole storage path (days, source maps and patterns): measured every 10 minutes and
+   * increased with each write in between.
+   */
   @Override
   public long sizeBytes() {
     long now = System.currentTimeMillis();
     if (cachedSize < 0 || now - cachedSizeAt > SIZE_TTL_MILLIS) {
-      cachedSize =
-          Files.isDirectory(root) ? days().stream().mapToLong(JsonlTelemetryStore::size).sum() : 0;
+      cachedSize = Files.isDirectory(root) ? size(root) : 0;
       cachedSizeAt = now;
     }
     return cachedSize;
+  }
+
+  @Override
+  public long rejected() {
+    return rejected.get();
+  }
+
+  @Override
+  public boolean full() {
+    return full;
+  }
+
+  /** Every few minutes: takes the limit of the policy and, above it, frees space. */
+  @Override
+  public synchronized void enforce(final RetentionPolicy policy) {
+    limitBytes = Math.max(0, policy.maxDiskMb()) * 1024 * 1024;
+    if (limitBytes <= 0) {
+      full = false;
+      return;
+    }
+    if (sizeBytes() > limitBytes) {
+      reclaim();
+    } else {
+      full = false;
+    }
   }
 
   @Override
@@ -156,6 +201,11 @@ public class JsonlTelemetryStore implements TelemetryStore {
         Comparator.comparingLong(ObsSpan::ts));
   }
 
+  /**
+   * Once a day: deletes the files of the days out of their retention (each kind has its own), the
+   * days left empty, the lines of the sources with a shorter retention and then applies the disk
+   * limit ({@link #enforce}).
+   */
   @Override
   public synchronized void purge(final RetentionPolicy policy) {
     cachedSize = -1;
@@ -170,37 +220,204 @@ public class JsonlTelemetryStore implements TelemetryStore {
     for (Path dir : days()) {
       LocalDate day = dayOf(dir);
       if (day.isBefore(logsLimit)) {
-        deleteFile(dir.resolve(LOGS));
+        segmentsOf(dir, LOGS).forEach(this::deleteFile);
       }
       if (day.isBefore(spansLimit)) {
-        deleteFile(dir.resolve(SPANS));
+        segmentsOf(dir, SPANS).forEach(this::deleteFile);
       }
       if (day.isBefore(metricsLimit)) {
-        deleteFile(dir.resolve(METRICS));
+        segmentsOf(dir, METRICS).forEach(this::deleteFile);
       }
       if (day.isBefore(rollupLimit)) {
-        deleteFile(dir.resolve(ROLLUP));
+        segmentsOf(dir, ROLLUP).forEach(this::deleteFile);
       }
       if (isEmpty(dir)) {
         delete(dir);
       }
     }
     purgeBySource(policy, today);
-    long limit = policy.maxDiskMb() * 1024 * 1024;
-    if (limit <= 0) {
-      return;
-    }
-    List<Path> days = days();
-    long size = days.stream().mapToLong(JsonlTelemetryStore::size).sum();
-    for (Path dir : days) {
-      if (size <= limit || !dayOf(dir).isBefore(today)) {
+    segments.clear();
+    cachedSize = -1;
+    enforce(policy);
+  }
+
+  /**
+   * Down to the low watermark: the logs and spans of the oldest days, the oldest segments of today
+   * (never the one each kind is writing) and, as a last resort, the minute metric points of the
+   * oldest days. The hourly rollup is never deleted by the limit, only by its retention. If it is
+   * still above the limit the store is full.
+   */
+  private void reclaim() {
+    lastReclaim = System.currentTimeMillis();
+    long target = (long) (limitBytes * LOW_WATERMARK);
+    cachedSize = -1;
+    long size = sizeBytes();
+    LocalDate today = LocalDate.now(ZoneOffset.UTC);
+    // The aggregates go last: the logs and spans of the oldest days, then the closed segments of
+    // today, then the minute points of the oldest days; the hourly rollup is never deleted here
+    for (Path dir : days()) {
+      if (size <= target || !dayOf(dir).isBefore(today)) {
         break;
       }
-      long freed = size(dir);
-      log.warn("The observability store is above {} MB: deleting the day {}", policy.maxDiskMb(),
-          dir.getFileName());
-      delete(dir);
+      long freed = 0;
+      for (String kind : new String[] {LOGS, SPANS}) {
+        for (Path file : segmentsOf(dir, kind)) {
+          freed += fileSize(file);
+          deleteFile(file);
+        }
+      }
+      if (freed > 0) {
+        log.warn("The observability store is above {} MB: deleted the logs and spans of {}",
+            limitBytes / 1024 / 1024, dir.getFileName());
+      }
       size -= freed;
+      if (isEmpty(dir)) {
+        delete(dir);
+      }
+    }
+    if (size > target) {
+      List<Path> closed = new ArrayList<>();
+      for (Path dir : days()) {
+        for (String kind : KINDS) {
+          List<Path> files = segmentsOf(dir, kind);
+          if (files.size() > 1) {
+            closed.addAll(files.subList(0, files.size() - 1));
+          }
+        }
+      }
+      closed.sort(Comparator.comparingLong(JsonlTelemetryStore::modified));
+      for (Path file : closed) {
+        if (size <= target) {
+          break;
+        }
+        long freed = fileSize(file);
+        log.warn("The observability store is above {} MB: deleting the segment {}",
+            limitBytes / 1024 / 1024, root.relativize(file));
+        deleteFile(file);
+        size -= freed;
+      }
+    }
+    for (Path dir : days()) {
+      if (size <= target || !dayOf(dir).isBefore(today)) {
+        break;
+      }
+      long freed = 0;
+      for (Path file : segmentsOf(dir, METRICS)) {
+        freed += fileSize(file);
+        deleteFile(file);
+      }
+      if (freed > 0) {
+        log.warn(
+            "The observability store is above {} MB: deleted the minute metrics of {} (its hourly "
+                + "rollup is kept)",
+            limitBytes / 1024 / 1024, dir.getFileName());
+      }
+      size -= freed;
+      if (isEmpty(dir)) {
+        delete(dir);
+      }
+    }
+    cachedSize = size;
+    cachedSizeAt = System.currentTimeMillis();
+    boolean wasFull = full;
+    full = size > limitBytes;
+    if (full && !wasFull) {
+      log.warn(
+          "The observability store is full ({} MB) and nothing else can be deleted: new events "
+              + "are rejected until there is room",
+          limitBytes / 1024 / 1024);
+    }
+  }
+
+  /**
+   * Every few minutes: deletes the logs and spans older than the hours of the level of their trace.
+   * The lines are never changed when written (a trace may get its error later), so the level is
+   * worked out here: a first read takes the level of each trace of the days within the longest
+   * retention, and a second one rewrites the segments that lose lines. The days older than every
+   * level lose their logs and spans entirely.
+   */
+  @Override
+  public synchronized void purgeLevels(final RetentionPolicy policy) {
+    RetentionPolicy.LevelRetention retention = policy.levels();
+    if (null == retention || !retention.enabled() || !Files.isDirectory(root)) {
+      return;
+    }
+    long now = System.currentTimeMillis();
+    int longest = 0;
+    boolean unlimited = false;
+    for (int level = TraceLevels.DEBUG; level <= TraceLevels.ERROR; level++) {
+      longest = Math.max(longest, retention.hours(level));
+      unlimited |= retention.hours(level) <= 0;
+    }
+    LocalDate firstKept = day(now - longest * 3_600_000L);
+    List<Path> window = new ArrayList<>();
+    for (Path dir : days()) {
+      if (!unlimited && dayOf(dir).isBefore(firstKept)) {
+        for (String kind : new String[] {LOGS, SPANS}) {
+          segmentsOf(dir, kind).forEach(this::deleteFile);
+        }
+        if (isEmpty(dir)) {
+          delete(dir);
+        }
+      } else {
+        window.add(dir);
+      }
+    }
+    java.util.Map<String, Integer> traces = new java.util.HashMap<>();
+    for (Path dir : window) {
+      for (String kind : new String[] {LOGS, SPANS}) {
+        for (Path file : segmentsOf(dir, kind)) {
+          scan(file, (traceId, own) -> {
+            if (null != traceId && own > TraceLevels.NONE) {
+              traces.merge(traceId, own, Math::max);
+            }
+          }, LOGS.equals(kind));
+        }
+      }
+    }
+    for (Path dir : window) {
+      for (String kind : new String[] {LOGS, SPANS}) {
+        boolean logs = LOGS.equals(kind);
+        for (Path file : segmentsOf(dir, kind)) {
+          rewrite(file, node -> {
+            String traceId = node.path("traceId").asText(null);
+            int own = own(node, logs);
+            int level = TraceLevels.effective(own, null == traceId ? TraceLevels.NONE
+                : traces.getOrDefault(traceId, TraceLevels.NONE));
+            int hours = retention.hours(level);
+            return hours <= 0 || node.path("ts").asLong(now) >= now - hours * 3_600_000L;
+          });
+        }
+      }
+    }
+    segments.clear();
+    cachedSize = -1;
+  }
+
+  /** Own level of a line: the one of the log, or ERROR for a failed span. */
+  private static int own(final com.fasterxml.jackson.databind.JsonNode node, final boolean log) {
+    if (log) {
+      return TraceLevels.of(node.path("level").asText(null));
+    }
+    return "ERROR".equals(node.path("status").asText(null)) ? TraceLevels.ERROR : TraceLevels.NONE;
+  }
+
+  private void scan(final Path file, final java.util.function.ObjIntConsumer<String> consumer,
+      final boolean logs) {
+    try (Stream<String> lines = Files.lines(file, StandardCharsets.UTF_8)) {
+      lines.forEach(line -> {
+        if (line.isBlank()) {
+          return;
+        }
+        try {
+          var node = mapper.readTree(line);
+          consumer.accept(node.path("traceId").asText(null), own(node, logs));
+        } catch (IOException ex) {
+          // A line cut by a crash
+        }
+      });
+    } catch (IOException | UncheckedIOException ex) {
+      log.warn("Unable to read {}: {}", file, ex.getMessage());
     }
   }
 
@@ -219,14 +436,26 @@ public class JsonlTelemetryStore implements TelemetryStore {
       if (age < shortest) {
         continue;
       }
-      for (String file : new String[] {LOGS, SPANS}) {
-        rewrite(dir.resolve(file), age, policy.sourceDays());
+      for (String kind : new String[] {LOGS, SPANS}) {
+        for (Path file : segmentsOf(dir, kind)) {
+          rewrite(file, age, policy.sourceDays());
+        }
       }
     }
   }
 
   private void rewrite(final Path file, final long age,
       final java.util.Map<String, Integer> sourceDays) {
+    rewrite(file, node -> {
+      String src = node.path("src").asText(null);
+      Integer days = null == src ? null : sourceDays.get(src);
+      return null == days || age < days;
+    });
+  }
+
+  /** Rewrites a file with the lines {@code keep} accepts, only if it loses some. */
+  private void rewrite(final Path file,
+      final Predicate<com.fasterxml.jackson.databind.JsonNode> keep) {
     if (!Files.isRegularFile(file)) {
       return;
     }
@@ -234,20 +463,29 @@ public class JsonlTelemetryStore implements TelemetryStore {
       List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
       List<String> kept = new ArrayList<>(lines.size());
       for (String line : lines) {
-        String src = line.isBlank() ? null : mapper.readTree(line).path("src").asText(null);
-        Integer days = null == src ? null : sourceDays.get(src);
-        if (null == days || age < days) {
+        if (line.isBlank()) {
+          continue;
+        }
+        com.fasterxml.jackson.databind.JsonNode node;
+        try {
+          node = mapper.readTree(line);
+        } catch (IOException ex) {
+          continue; // A line cut by a crash
+        }
+        if (keep.test(node)) {
           kept.add(line);
         }
       }
-      if (kept.size() < lines.size()) {
+      if (kept.isEmpty()) {
+        Files.deleteIfExists(file);
+      } else if (kept.size() < lines.size()) {
         Path tmp = file.resolveSibling(file.getFileName() + ".tmp");
         Files.write(tmp, kept, StandardCharsets.UTF_8);
         Files.move(tmp, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING,
             java.nio.file.StandardCopyOption.ATOMIC_MOVE);
       }
     } catch (IOException | RuntimeException ex) {
-      log.warn("Unable to apply the retention of the sources to {}: {}", file, ex.getMessage());
+      log.warn("Unable to apply the retention to {}: {}", file, ex.getMessage());
     }
   }
 
@@ -284,6 +522,56 @@ public class JsonlTelemetryStore implements TelemetryStore {
     }
   }
 
+  private static long fileSize(final Path file) {
+    try {
+      return Files.size(file);
+    } catch (IOException ex) {
+      return 0;
+    }
+  }
+
+  private static long modified(final Path file) {
+    try {
+      return Files.getLastModifiedTime(file).toMillis();
+    } catch (IOException ex) {
+      return 0;
+    }
+  }
+
+  /** The segment {@code n} of a kind: {@code logs.jsonl}, {@code logs.1.jsonl}... */
+  static String segmentName(final String kind, final int n) {
+    return 0 == n ? kind + ".jsonl" : kind + "." + n + ".jsonl";
+  }
+
+  private static int segmentIndex(final String kind, final String name) {
+    if (name.equals(kind + ".jsonl")) {
+      return 0;
+    }
+    String prefix = kind + ".";
+    if (name.startsWith(prefix) && name.endsWith(".jsonl")) {
+      String number = name.substring(prefix.length(), name.length() - ".jsonl".length());
+      if (!number.isEmpty() && number.chars().allMatch(Character::isDigit) && number.length() < 9) {
+        return Integer.parseInt(number);
+      }
+    }
+    return -1;
+  }
+
+  /** The segments of a kind in a day, in write order. */
+  private static List<Path> segmentsOf(final Path dir, final String kind) {
+    if (!Files.isDirectory(dir)) {
+      return List.of();
+    }
+    try (Stream<Path> files = Files.list(dir)) {
+      return files.filter(file -> segmentIndex(kind, file.getFileName().toString()) >= 0)
+          .sorted(
+              Comparator.comparingInt(file -> segmentIndex(kind, file.getFileName().toString())))
+          .toList();
+    } catch (IOException ex) {
+      return List.of();
+    }
+  }
+
   private static boolean isEmpty(final Path dir) {
     try (Stream<Path> files = Files.list(dir)) {
       return files.findAny().isEmpty();
@@ -300,19 +588,60 @@ public class JsonlTelemetryStore implements TelemetryStore {
     }
   }
 
-  private <T> void append(final String file, final List<T> items,
+  private <T> void append(final String kind, final List<T> items,
       final java.util.function.ToLongFunction<T> ts) {
     if (items.isEmpty()) {
       return;
     }
+    if (full || (limitBytes > 0 && sizeBytes() > limitBytes)) {
+      if (System.currentTimeMillis() - lastReclaim > RECLAIM_EVERY_MILLIS) {
+        reclaim();
+      } else {
+        full = true;
+      }
+      if (full) {
+        rejected.addAndGet(items.size());
+        return;
+      }
+    }
+    long segmentBytes = Math.max(1, segmentMb) * 1024 * 1024;
+    java.util.Map<LocalDate, List<T>> byDay = new java.util.LinkedHashMap<>();
+    for (T item : items) {
+      byDay.computeIfAbsent(day(ts.applyAsLong(item)), key -> new ArrayList<>()).add(item);
+    }
     try {
-      for (T item : items) {
-        Path dir = root.resolve(day(ts.applyAsLong(item)).toString());
+      for (var entry : byDay.entrySet()) {
+        Path dir = root.resolve(entry.getKey().toString());
         Files.createDirectories(dir);
-        try (BufferedWriter writer = Files.newBufferedWriter(dir.resolve(file),
-            StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-          writer.write(mapper.writeValueAsString(item));
-          writer.newLine();
+        long[] segment =
+            segments.computeIfAbsent(entry.getKey() + "/" + kind, key -> current(dir, kind));
+        BufferedWriter writer = null;
+        try {
+          for (T item : entry.getValue()) {
+            if (null == writer || segment[1] >= segmentBytes) {
+              if (null != writer) {
+                writer.close();
+              }
+              if (segment[1] >= segmentBytes) {
+                segment[0]++;
+                segment[1] = 0;
+              }
+              writer = Files.newBufferedWriter(dir.resolve(segmentName(kind, (int) segment[0])),
+                  StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            }
+            String line = mapper.writeValueAsString(item);
+            writer.write(line);
+            writer.newLine();
+            long bytes = line.getBytes(StandardCharsets.UTF_8).length + 1L;
+            segment[1] += bytes;
+            if (cachedSize >= 0) {
+              cachedSize += bytes;
+            }
+          }
+        } finally {
+          if (null != writer) {
+            writer.close();
+          }
         }
       }
     } catch (IOException ex) {
@@ -320,20 +649,42 @@ public class JsonlTelemetryStore implements TelemetryStore {
     }
   }
 
+  /** The last segment of a kind in a day and its bytes (index 0 and 0 bytes if there is none). */
+  private static long[] current(final Path dir, final String kind) {
+    List<Path> files = segmentsOf(dir, kind);
+    if (files.isEmpty()) {
+      return new long[] {0, 0};
+    }
+    Path last = files.get(files.size() - 1);
+    return new long[] {segmentIndex(kind, last.getFileName().toString()), fileSize(last)};
+  }
+
   private <T> List<T> read(final String file, final Class<T> type, final TelemetryQuery query,
       final Predicate<T> filter, final Comparator<T> order) {
     List<T> result = new ArrayList<>();
     LocalDate first = day(query.getFrom());
-    for (LocalDate day = day(query.getTo()); !day.isBefore(first); day = day.minusDays(1)) {
-      Path path = root.resolve(day.toString()).resolve(file);
-      if (!Files.exists(path)) {
+    LocalDate last = day(query.getTo());
+    // Only the day directories that exist, newest first: an open range (to far in the future, from
+    // 0) must not walk every calendar day
+    List<Path> dirs = new ArrayList<>(days());
+    java.util.Collections.reverse(dirs);
+    for (Path dir : dirs) {
+      LocalDate day = dayOf(dir);
+      if (day.isAfter(last) || day.isBefore(first)) {
+        continue;
+      }
+      List<Path> paths = segmentsOf(dir, file);
+      if (paths.isEmpty()) {
         continue;
       }
       List<T> ofDay = new ArrayList<>();
-      try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
-        lines.forEach(line -> parse(line, type).filter(filter).ifPresent(ofDay::add));
-      } catch (IOException | UncheckedIOException ex) {
-        log.warn("Unable to read {}: {}", path, ex.getMessage());
+      for (Path path : paths) {
+        try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
+          lines.forEach(line -> parse(line, type).filter(filter).ifPresent(ofDay::add));
+        } catch (IOException | UncheckedIOException ex) {
+          // A segment deleted by the disk limit while it was read
+          log.warn("Unable to read {}: {}", path, ex.getMessage());
+        }
       }
       ofDay.sort(order);
       result.addAll(ofDay);

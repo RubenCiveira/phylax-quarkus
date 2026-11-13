@@ -26,8 +26,8 @@ import net.civeira.phylax.feature.observe.store.TelemetryStore;
 public class ObserveHealth {
 
   /**
-   * DOWN: the writer is stuck with the queue full. DEGRADED: it drops events or the disk is nearly
-   * full.
+   * DOWN: the writer is stuck with the queue full. DEGRADED: it drops events, the disk is nearly
+   * full or the store is at its limit and rejects events.
    */
   public enum Status {
     UP, DEGRADED, DOWN
@@ -66,6 +66,7 @@ public class ObserveHealth {
     Gauge.builder("observe.dropped", pipeline, p -> p.stats().dropped()).register(meter);
     Gauge.builder("observe.write.errors", pipeline, p -> p.stats().writeErrors()).register(meter);
     Gauge.builder("observe.disk.bytes", store, TelemetryStore::sizeBytes).register(meter);
+    Gauge.builder("observe.rejected", store, TelemetryStore::rejected).register(meter);
   }
 
   /** Every minute: the events dropped since the previous call. */
@@ -88,7 +89,7 @@ public class ObserveHealth {
     if (!stats.running() || stuck) {
       return Status.DOWN;
     }
-    if (droppedLastMinute > 0 || diskRatio() > 0.9) {
+    if (droppedLastMinute > 0 || store.full() || diskRatio() > 0.9) {
       return Status.DEGRADED;
     }
     return Status.UP;
@@ -117,6 +118,9 @@ public class ObserveHealth {
     result.put("lastBatchAt", 0 == stats.lastBatchAt() ? null : stats.lastBatchAt());
     result.put("diskBytes", store.sizeBytes());
     result.put("maxDiskMb", settings.current().maxDiskMb());
+    result.put("diskRatio", Math.round(diskRatio() * 1000) / 1000.0);
+    result.put("storeFull", stats.storeFull());
+    result.put("rejected", stats.rejected());
     result.put("lastPurge", null == lastPurge ? null : lastPurge.toEpochMilli());
     return result;
   }

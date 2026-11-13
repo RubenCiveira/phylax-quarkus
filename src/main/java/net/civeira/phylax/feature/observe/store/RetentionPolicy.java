@@ -6,23 +6,58 @@ package net.civeira.phylax.feature.observe.store;
  *
  * @param logsDays days of logs
  * @param tracesDays days of spans
- * @param maxDiskMb hard limit of the store: above it the oldest days are deleted even inside
- *        their retention (the current day is never deleted)
+ * @param maxDiskMb hard limit of the storage path: above it the oldest days and then the oldest
+ *        segments of today are deleted even inside their retention; if still above, new events
+ *        are rejected (0: no limit)
  * @param metricsDays days of the metric points of one minute
  * @param rollupDays days of the metric points of one hour
  * @param sourceDays retention of the sources that have their own (retention-days), code → days
+ * @param levels hours the logs and spans are kept by the level of their trace ({@link TraceLevels});
+ *        it applies on top of the days of each kind (the shortest wins)
  */
 public record RetentionPolicy(int logsDays, int tracesDays, long maxDiskMb, int metricsDays,
-    int rollupDays, java.util.Map<String, Integer> sourceDays) {
+    int rollupDays, java.util.Map<String, Integer> sourceDays, LevelRetention levels) {
+
+  /**
+   * Hours a row is kept by the level of its trace; 0 for a level means it has no limit of its own.
+   */
+  public record LevelRetention(int debugHours, int infoHours, int warnHours, int errorHours) {
+
+    public static final LevelRetention NONE = new LevelRetention(0, 0, 0, 0);
+
+    /** Hours of a level of {@link TraceLevels} (0: without limit). */
+    public int hours(final int level) {
+      switch (level) {
+        case TraceLevels.DEBUG:
+          return debugHours;
+        case TraceLevels.WARN:
+          return warnHours;
+        case TraceLevels.ERROR:
+          return errorHours;
+        default:
+          return infoHours;
+      }
+    }
+
+    public boolean enabled() {
+      return debugHours > 0 || infoHours > 0 || warnHours > 0 || errorHours > 0;
+    }
+  }
 
   public RetentionPolicy(final int logsDays, final int tracesDays, final long maxDiskMb,
       final int metricsDays, final int rollupDays) {
-    this(logsDays, tracesDays, maxDiskMb, metricsDays, rollupDays, java.util.Map.of());
+    this(logsDays, tracesDays, maxDiskMb, metricsDays, rollupDays, java.util.Map.of(), LevelRetention.NONE);
   }
 
   /** The same policy with the retention of each source. */
   public RetentionPolicy withSources(final java.util.Map<String, Integer> days) {
     return new RetentionPolicy(logsDays, tracesDays, maxDiskMb, metricsDays, rollupDays,
-        null == days ? java.util.Map.of() : java.util.Map.copyOf(days));
+        null == days ? java.util.Map.of() : java.util.Map.copyOf(days), levels);
+  }
+
+  /** The same policy with the retention by the level of the trace. */
+  public RetentionPolicy withLevels(final LevelRetention retention) {
+    return new RetentionPolicy(logsDays, tracesDays, maxDiskMb, metricsDays, rollupDays, sourceDays,
+        null == retention ? LevelRetention.NONE : retention);
   }
 }

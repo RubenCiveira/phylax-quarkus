@@ -8,7 +8,14 @@ app:
     # database of the application). In Quarkus it is chosen when building.
     storage: ${OBSERVE_STORAGE:jsonl}
     # Root directory of the JSONL files (one directory per day)
-    path: ${OBSERVE_PATH:data/observability}
+    path: ${OBSERVE_PATH:logs/data/observability}
+    # Each file of a day is cut in segments of this size, so the disk limit (max-disk-mb) can free
+    # space inside the current day too: above it the oldest days go first, then the oldest segments
+    # of today, and if nothing else can go the new events are rejected (counted as dropped).
+    segment-mb: ${OBSERVE_SEGMENT_MB:64}
+    sourcemaps:
+      # Releases of each front whose source maps are kept (0: all)
+      keep-releases: 10
     # Initial values of observability-config: the install creates its row "default" with them, and
     # they are used while that row does not exist. Once it exists, the row counts (it is changed
     # from the admin, without restarting).
@@ -18,7 +25,16 @@ app:
       retention-days-errors: 90
       retention-days-metrics: 15
       retention-days-metrics-rollup: 400
+      # Limit of the whole storage path (days, source maps, patterns); 0 without limit
       max-disk-mb: ${OBSERVE_MAX_DISK_MB:2048}
+      # Hours the logs and spans are kept by the level of their trace (the most severe of its logs,
+      # or error if a span failed): every row of a trace with an error lives as long as the error.
+      # Applied every 15 minutes on top of the days above (the shortest wins); the issues are
+      # entities and are never deleted by it.
+      retention-hours-debug: 2
+      retention-hours-info: 12
+      retention-hours-warn: 24
+      retention-hours-error: 168
       scrub-fields: password,secret,token,authorization,cookie,set-cookie,api-key
       label-denylist: user,user_id,session,session_id,trace_id,span_id,request_id,email,tenant
       capture-request-body: false

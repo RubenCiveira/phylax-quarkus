@@ -34,7 +34,7 @@ import net.civeira.phylax.feature.observe.store.ObsLog;
  *
  * <ul>
  * <li>new-issue / regression: with the changes of each batch of the writer.</li>
- * <li>error-rate, source-silent, collector-dropping: every minute ({@link #tick}).</li>
+ * <li>error-rate, source-silent, collector-dropping, disk-high: every minute ({@link #tick}).</li>
  * </ul>
  * The alert is stored in a short transaction and the notice is delivered after it, outside it: a
  * slow webhook never holds a connection. A notice that fails, or that a muted rule holds, stays
@@ -47,6 +47,9 @@ public class AlertEngine {
 
   private static final String OWN_PACKAGE = "net.civeira.phylax.feature.observe";
   private static final String COLLECTOR_KEY = "collector";
+  private static final String DISK_KEY = "disk";
+  /** Percentage of max-disk-mb of a disk-high rule without threshold. */
+  private static final int DISK_HIGH_DEFAULT = 80;
 
   private final AlertRules rules;
   private final AlertDispatcher dispatcher;
@@ -104,7 +107,27 @@ public class AlertEngine {
 
   /** Every minute: rules that depend on time, and the pending notices. */
   public void tick(final long droppedTotal) {
+    tick(droppedTotal, 0);
+  }
+
+  /**
+   * @param droppedTotal events lost since the start
+   * @param diskRatio used fraction of max-disk-mb (0 without limit)
+   */
+  public void tick(final long droppedTotal, final double diskRatio) {
     long now = System.currentTimeMillis();
+    for (AlertRules.Rule rule : rules.of("disk-high")) {
+      int percent = rule.threshold() > 0 ? rule.threshold() : DISK_HIGH_DEFAULT;
+      long used = Math.round(diskRatio * 100);
+      if (used >= percent) {
+        fire(rule, DISK_KEY,
+            "The observability store uses " + used + " % of its disk limit (threshold " + percent
+                + " %)",
+            "#/sources", Map.of("metric", Map.of("value", used, "threshold", percent)));
+      } else {
+        resolve(rule, DISK_KEY);
+      }
+    }
     for (AlertRules.Rule rule : rules.of("error-rate")) {
       String code = codeOf(rule.originUid());
       double rate = errors.perMinute(code, rule.windowMinutes(), now);

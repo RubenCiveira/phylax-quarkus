@@ -43,6 +43,9 @@ public class ObserveMetrics {
   private static final long SIX_HOURS = 6 * MetricDeriver.HOUR;
   private static final long DAY = 24 * MetricDeriver.HOUR;
 
+  /** Hours back that the start checks for a missing rollup (the minutes are kept for days). */
+  private static final int RECOVER_HOURS = 48;
+
   private final TelemetryStore store;
   private final MetricDeriver deriver;
   private final EdgeDeriver edges;
@@ -232,6 +235,61 @@ public class ObserveMetrics {
     if (!points.isEmpty()) {
       store.appendPoints(points);
     }
+  }
+
+  /** An error log tagged with its issue: one occurrence of the issue in the metric points. */
+  public void recordIssue(final net.civeira.phylax.feature.observe.store.ObsLog log) {
+    Object fingerprint = null == log.attrs() ? null : log.attrs().get("issue.fingerprint");
+    if (null != fingerprint) {
+      deriver.recordIssue(log.src(), String.valueOf(fingerprint), log.ts());
+    }
+  }
+
+  /**
+   * On start: the aggregates live in memory until their minute or hour closes, so a restart would
+   * lose them. The minutes stored of the current hour go back to its rollup, and the closed hours
+   * of the last {@code RECOVER_HOURS} without rollup (the application was down when they closed)
+   * get it from their minute points.
+   */
+  public void recover() {
+    long now = System.currentTimeMillis();
+    long currentHour = now / MetricDeriver.HOUR * MetricDeriver.HOUR;
+    deriver.seed(store.points(currentHour, currentHour + MetricDeriver.HOUR, MetricDeriver.MINUTE,
+        Set.of()));
+    long from = currentHour - RECOVER_HOURS * MetricDeriver.HOUR;
+    Set<Long> rolled = new java.util.HashSet<>();
+    store.points(from, currentHour, MetricDeriver.HOUR, Set.of())
+        .forEach(point -> rolled.add(point.ts()));
+    List<MetricPoint> missing =
+        store.points(from, currentHour, MetricDeriver.MINUTE, Set.of()).stream()
+            .filter(point -> !rolled.contains(point.ts() / MetricDeriver.HOUR * MetricDeriver.HOUR))
+            .toList();
+    List<MetricPoint> hours = MetricDeriver.rollup(missing);
+    if (!hours.isEmpty()) {
+      store.appendPoints(hours);
+      log.info("Rebuilt {} hourly metric points from their minutes", hours.size());
+    }
+  }
+
+  /**
+   * On shutdown: the minutes still in memory are stored (the hour is rebuilt on the next start).
+   */
+  public void persistOpen() {
+    edges.sweep(Long.MAX_VALUE);
+    List<MetricPoint> points = deriver.drainAll();
+    if (!points.isEmpty()) {
+      store.appendPoints(points);
+    }
+  }
+
+  /**
+   * Occurrences of an issue per hour in the range, from its metric points (they outlive the logs).
+   */
+  public List<MetricPoint> issuePoints(final String source, final String fingerprint,
+      final long from, final long to) {
+    return raw(Set.of(source), from, to, true).stream().filter(
+        point -> MetricDeriver.ISSUE.equals(point.method()) && fingerprint.equals(point.route()))
+        .toList();
   }
 
   /**

@@ -19076,9 +19076,9 @@ components:
           description: Name shown in the notices.
           type: string
         trigger:
-          description: What fires the rule new-issue, regression, error-rate (errors per minute above threshold during window-minutes), source-silent (no event during window-minutes), collector-dropping (the queue discards events), slo-burn (an objective spends its error budget too fast), probe-down (a probe fails its checks), tls-expiring (the certificate of a probe expires soon) or anomaly (traffic, errors or latency of an origin out of what is usual for that hour).
+          description: What fires the rule new-issue, regression, error-rate (errors per minute above threshold during window-minutes), source-silent (no event during window-minutes), collector-dropping (the queue discards events), slo-burn (an objective spends its error budget too fast), probe-down (a probe fails its checks), tls-expiring (the certificate of a probe expires soon), anomaly (traffic, errors or latency of an origin out of what is usual for that hour) or disk-high (the store uses at least threshold % of max-disk-mb; 80 without threshold).
           type: string
-          enum: [new-issue,regression,error-rate,source-silent,collector-dropping,slo-burn,probe-down,tls-expiring,anomaly]
+          enum: [new-issue,regression,error-rate,source-silent,collector-dropping,slo-burn,probe-down,tls-expiring,anomaly,disk-high]
         origin:
           $ref: '#/components/schemas/ObservedSourceApiRef'
         minLevel:
@@ -20173,6 +20173,22 @@ components:
           format: int32
         retentionDaysMetricsRollup:
           description: Days the metric points of one hour resolution are kept, to compare with the previous year.
+          type: integer
+          format: int32
+        retentionHoursDebug:
+          description: Hours the logs and spans of a trace whose most severe log is DEBUG or TRACE are kept.
+          type: integer
+          format: int32
+        retentionHoursInfo:
+          description: Hours the logs and spans of a trace whose most severe log is INFO (or without logs) are kept.
+          type: integer
+          format: int32
+        retentionHoursWarn:
+          description: Hours the logs and spans of a trace with some WARN log are kept.
+          type: integer
+          format: int32
+        retentionHoursError:
+          description: Hours the logs and spans of a trace with some ERROR or FATAL log, or a failed span, are kept. The issues are not deleted.
           type: integer
           format: int32
         maxDiskMb:

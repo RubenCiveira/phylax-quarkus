@@ -86,6 +86,10 @@ retentionDaysTraces:integer
 retentionDaysErrors:integer
 retentionDaysMetrics:integer
 retentionDaysMetricsRollup:integer
+retentionHoursDebug:integer
+retentionHoursInfo:integer
+retentionHoursWarn:integer
+retentionHoursError:integer
 maxDiskMb:integer
 scrubFields:string
 labelDenylist:string

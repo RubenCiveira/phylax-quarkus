@@ -52,6 +52,10 @@ public class ObservabilityConfigCreateController {
     observabilityConfigApiDto.setRetentionDaysErrors(dto.getRetentionDaysErrors());
     observabilityConfigApiDto.setRetentionDaysMetrics(dto.getRetentionDaysMetrics());
     observabilityConfigApiDto.setRetentionDaysMetricsRollup(dto.getRetentionDaysMetricsRollup());
+    observabilityConfigApiDto.setRetentionHoursDebug(dto.getRetentionHoursDebug());
+    observabilityConfigApiDto.setRetentionHoursInfo(dto.getRetentionHoursInfo());
+    observabilityConfigApiDto.setRetentionHoursWarn(dto.getRetentionHoursWarn());
+    observabilityConfigApiDto.setRetentionHoursError(dto.getRetentionHoursError());
     observabilityConfigApiDto.setMaxDiskMb(dto.getMaxDiskMb());
     observabilityConfigApiDto.setScrubFields(dto.getScrubFields());
     observabilityConfigApiDto.setLabelDenylist(dto.getLabelDenylist());
@@ -88,6 +92,18 @@ public class ObservabilityConfigCreateController {
     }
     if (null != observabilityConfigApiDto.getRetentionDaysMetricsRollup()) {
       dto.setRetentionDaysMetricsRollup(observabilityConfigApiDto.getRetentionDaysMetricsRollup());
+    }
+    if (null != observabilityConfigApiDto.getRetentionHoursDebug()) {
+      dto.setRetentionHoursDebug(observabilityConfigApiDto.getRetentionHoursDebug());
+    }
+    if (null != observabilityConfigApiDto.getRetentionHoursInfo()) {
+      dto.setRetentionHoursInfo(observabilityConfigApiDto.getRetentionHoursInfo());
+    }
+    if (null != observabilityConfigApiDto.getRetentionHoursWarn()) {
+      dto.setRetentionHoursWarn(observabilityConfigApiDto.getRetentionHoursWarn());
+    }
+    if (null != observabilityConfigApiDto.getRetentionHoursError()) {
+      dto.setRetentionHoursError(observabilityConfigApiDto.getRetentionHoursError());
     }
     if (null != observabilityConfigApiDto.getMaxDiskMb()) {
       dto.setMaxDiskMb(observabilityConfigApiDto.getMaxDiskMb());
