@@ -53,7 +53,8 @@ public class RoleUpdateController {
     RoleApiDto roleApiDto = new RoleApiDto();
     roleApiDto.setUid(dto.getUid());
     roleApiDto.setName(dto.getName());
-    roleApiDto.setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
+    roleApiDto.setResourceServer(null == dto.getResourceServerReference() ? null
+        : new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     roleApiDto.setVersion(dto.getVersion());
     return roleApiDto;
   }

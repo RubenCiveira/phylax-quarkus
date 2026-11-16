@@ -131,7 +131,8 @@ public class TenantConfigListController {
   private TenantConfigApiDto toApiModel(TenantConfigListProjection dto) {
     TenantConfigApiDto tenantConfigApiDto = new TenantConfigApiDto();
     tenantConfigApiDto.setUid(dto.getUid());
-    tenantConfigApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    tenantConfigApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     tenantConfigApiDto.setDisplayName(dto.getDisplayName());
     tenantConfigApiDto.setForceMfa(dto.getForceMfa());
     tenantConfigApiDto.setDynamicRegistrationPolicy(

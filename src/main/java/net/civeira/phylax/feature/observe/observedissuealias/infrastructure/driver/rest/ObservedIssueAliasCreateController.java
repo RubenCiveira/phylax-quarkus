@@ -50,9 +50,11 @@ public class ObservedIssueAliasCreateController {
   private ObservedIssueAliasApiDto toApiModel(ObservedIssueAliasCreateProjection dto) {
     ObservedIssueAliasApiDto observedIssueAliasApiDto = new ObservedIssueAliasApiDto();
     observedIssueAliasApiDto.setUid(dto.getUid());
-    observedIssueAliasApiDto.setOrigin(new ObservedSourceApiRef().$ref(dto.getOriginReference()));
+    observedIssueAliasApiDto.setOrigin(null == dto.getOriginReference() ? null
+        : new ObservedSourceApiRef().$ref(dto.getOriginReference()));
     observedIssueAliasApiDto.setFingerprint(dto.getFingerprint());
-    observedIssueAliasApiDto.setIssue(new ObservedIssueApiRef().$ref(dto.getIssueReference()));
+    observedIssueAliasApiDto.setIssue(null == dto.getIssueReference() ? null
+        : new ObservedIssueApiRef().$ref(dto.getIssueReference()));
     observedIssueAliasApiDto.setVersion(dto.getVersion());
     return observedIssueAliasApiDto;
   }

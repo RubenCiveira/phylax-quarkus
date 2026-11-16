@@ -164,9 +164,10 @@ public class UserFederatedIdentityListController {
   private UserFederatedIdentityApiDto toApiModel(UserFederatedIdentityListProjection dto) {
     UserFederatedIdentityApiDto userFederatedIdentityApiDto = new UserFederatedIdentityApiDto();
     userFederatedIdentityApiDto.setUid(dto.getUid());
-    userFederatedIdentityApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
-    userFederatedIdentityApiDto
-        .setLoginProvider(new TenantLoginProviderApiRef().$ref(dto.getLoginProviderReference()));
+    userFederatedIdentityApiDto.setUser(
+        null == dto.getUserReference() ? null : new UserApiRef().$ref(dto.getUserReference()));
+    userFederatedIdentityApiDto.setLoginProvider(null == dto.getLoginProviderReference() ? null
+        : new TenantLoginProviderApiRef().$ref(dto.getLoginProviderReference()));
     userFederatedIdentityApiDto.setSubject(dto.getSubject());
     userFederatedIdentityApiDto.setCreatedAt(dto.getCreatedAt());
     userFederatedIdentityApiDto.setVersion(dto.getVersion());

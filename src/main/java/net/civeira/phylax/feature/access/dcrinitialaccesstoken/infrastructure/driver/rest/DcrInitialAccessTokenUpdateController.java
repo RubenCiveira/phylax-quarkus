@@ -53,7 +53,8 @@ public class DcrInitialAccessTokenUpdateController {
   private DcrInitialAccessTokenApiDto toApiModel(DcrInitialAccessTokenUpdateProjection dto) {
     DcrInitialAccessTokenApiDto dcrInitialAccessTokenApiDto = new DcrInitialAccessTokenApiDto();
     dcrInitialAccessTokenApiDto.setUid(dto.getUid());
-    dcrInitialAccessTokenApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    dcrInitialAccessTokenApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     dcrInitialAccessTokenApiDto.setDescription(dto.getDescription());
     dcrInitialAccessTokenApiDto.setTokenHash("*****");
     dcrInitialAccessTokenApiDto.setExpiresAt(dto.getExpiresAt());

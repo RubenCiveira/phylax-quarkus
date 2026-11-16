@@ -75,10 +75,11 @@ public class ObservedEmbedRetrieveController {
     ObservedEmbedApiDto observedEmbedApiDto = new ObservedEmbedApiDto();
     observedEmbedApiDto.setUid(dto.getUid());
     observedEmbedApiDto.setName(dto.getName());
-    observedEmbedApiDto
-        .setDashboard(new ObservedDashboardApiRef().$ref(dto.getDashboardReference()));
+    observedEmbedApiDto.setDashboard(null == dto.getDashboardReference() ? null
+        : new ObservedDashboardApiRef().$ref(dto.getDashboardReference()));
     observedEmbedApiDto.setPanelUid(dto.getPanelUid());
-    observedEmbedApiDto.setOrigin(new ObservedSourceApiRef().$ref(dto.getOriginReference()));
+    observedEmbedApiDto.setOrigin(null == dto.getOriginReference() ? null
+        : new ObservedSourceApiRef().$ref(dto.getOriginReference()));
     observedEmbedApiDto.setTokenHash("*****");
     observedEmbedApiDto.setAllowedOrigins(dto.getAllowedOrigins());
     observedEmbedApiDto.setMaxRange(maxRangeEnumToApi(dto.getMaxRange()));

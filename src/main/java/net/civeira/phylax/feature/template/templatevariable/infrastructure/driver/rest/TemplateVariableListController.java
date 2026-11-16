@@ -145,7 +145,8 @@ public class TemplateVariableListController {
     TemplateVariableApiDto templateVariableApiDto = new TemplateVariableApiDto();
     templateVariableApiDto.setUid(dto.getUid());
     templateVariableApiDto.setCode(dto.getCode());
-    templateVariableApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    templateVariableApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     templateVariableApiDto.setType(dto.getType());
     templateVariableApiDto.setValue(dto.getValue());
     templateVariableApiDto.setEnabled(dto.getEnabled());

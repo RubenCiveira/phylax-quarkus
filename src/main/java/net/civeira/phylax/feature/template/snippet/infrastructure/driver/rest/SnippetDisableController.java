@@ -186,7 +186,8 @@ public class SnippetDisableController {
     SnippetApiDto snippetApiDto = new SnippetApiDto();
     snippetApiDto.setUid(dto.getUid());
     snippetApiDto.setCode(dto.getCode());
-    snippetApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    snippetApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     snippetApiDto.setEnabled(dto.getEnabled());
     snippetApiDto.setVersion(dto.getVersion());
     return snippetApiDto;

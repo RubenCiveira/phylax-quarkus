@@ -104,7 +104,8 @@ public class TenantLoginProviderRetrieveController {
   private TenantLoginProviderApiDto toApiModel(TenantLoginProviderRetrieveProjection dto) {
     TenantLoginProviderApiDto tenantLoginProviderApiDto = new TenantLoginProviderApiDto();
     tenantLoginProviderApiDto.setUid(dto.getUid());
-    tenantLoginProviderApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    tenantLoginProviderApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     tenantLoginProviderApiDto.setName(dto.getName());
     tenantLoginProviderApiDto.setProviderType(providerTypeEnumToApi(dto.getProviderType()));
     tenantLoginProviderApiDto.setEnabled(dto.getEnabled());

@@ -136,7 +136,8 @@ public class ObservedIssueCommentListController {
   private ObservedIssueCommentApiDto toApiModel(ObservedIssueCommentListProjection dto) {
     ObservedIssueCommentApiDto observedIssueCommentApiDto = new ObservedIssueCommentApiDto();
     observedIssueCommentApiDto.setUid(dto.getUid());
-    observedIssueCommentApiDto.setIssue(new ObservedIssueApiRef().$ref(dto.getIssueReference()));
+    observedIssueCommentApiDto.setIssue(null == dto.getIssueReference() ? null
+        : new ObservedIssueApiRef().$ref(dto.getIssueReference()));
     observedIssueCommentApiDto.setAuthor(dto.getAuthor());
     observedIssueCommentApiDto.setAuthorName(dto.getAuthorName());
     observedIssueCommentApiDto.setText(dto.getText());

@@ -53,7 +53,8 @@ public class MessageUpdateController {
     MessageApiDto messageApiDto = new MessageApiDto();
     messageApiDto.setUid(dto.getUid());
     messageApiDto.setTarget(dto.getTarget());
-    messageApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    messageApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     messageApiDto.setUrgent(dto.getUrgent());
     messageApiDto.setContent(dto.getContent());
     messageApiDto.setRetries(dto.getRetries());

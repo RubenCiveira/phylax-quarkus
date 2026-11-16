@@ -89,7 +89,8 @@ public class ObservedProbeRetrieveController {
     ObservedProbeApiDto observedProbeApiDto = new ObservedProbeApiDto();
     observedProbeApiDto.setUid(dto.getUid());
     observedProbeApiDto.setName(dto.getName());
-    observedProbeApiDto.setOrigin(new ObservedSourceApiRef().$ref(dto.getOriginReference()));
+    observedProbeApiDto.setOrigin(null == dto.getOriginReference() ? null
+        : new ObservedSourceApiRef().$ref(dto.getOriginReference()));
     observedProbeApiDto.setUrl(dto.getUrl());
     observedProbeApiDto.setMethod(methodEnumToApi(dto.getMethod()));
     observedProbeApiDto.setExpectedStatus(dto.getExpectedStatus());

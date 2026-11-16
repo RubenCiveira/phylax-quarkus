@@ -86,7 +86,8 @@ public class ObservedAlertCreateController {
   private ObservedAlertApiDto toApiModel(ObservedAlertCreateProjection dto) {
     ObservedAlertApiDto observedAlertApiDto = new ObservedAlertApiDto();
     observedAlertApiDto.setUid(dto.getUid());
-    observedAlertApiDto.setRule(new ObservedAlertRuleApiRef().$ref(dto.getRuleReference()));
+    observedAlertApiDto.setRule(null == dto.getRuleReference() ? null
+        : new ObservedAlertRuleApiRef().$ref(dto.getRuleReference()));
     observedAlertApiDto.setProblemKey(dto.getProblemKey());
     observedAlertApiDto.setStatus(statusEnumToApi(dto.getStatus()));
     observedAlertApiDto.setSummary(dto.getSummary());

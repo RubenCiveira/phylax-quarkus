@@ -53,7 +53,8 @@ public class TemplateVersionUpdateController {
   private TemplateVersionApiDto toApiModel(TemplateVersionUpdateProjection dto) {
     TemplateVersionApiDto templateVersionApiDto = new TemplateVersionApiDto();
     templateVersionApiDto.setUid(dto.getUid());
-    templateVersionApiDto.setTemplate(new TemplateApiRef().$ref(dto.getTemplateReference()));
+    templateVersionApiDto.setTemplate(null == dto.getTemplateReference() ? null
+        : new TemplateApiRef().$ref(dto.getTemplateReference()));
     templateVersionApiDto.setLocale(dto.getLocale());
     templateVersionApiDto.setSubject(dto.getSubject());
     templateVersionApiDto.setContentHtml(dto.getContentHtml());

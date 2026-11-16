@@ -174,7 +174,8 @@ public class ObservedIssueCreateController {
   private ObservedIssueApiDto toApiModel(ObservedIssueCreateProjection dto) {
     ObservedIssueApiDto observedIssueApiDto = new ObservedIssueApiDto();
     observedIssueApiDto.setUid(dto.getUid());
-    observedIssueApiDto.setOrigin(new ObservedSourceApiRef().$ref(dto.getOriginReference()));
+    observedIssueApiDto.setOrigin(null == dto.getOriginReference() ? null
+        : new ObservedSourceApiRef().$ref(dto.getOriginReference()));
     observedIssueApiDto.setFingerprint(dto.getFingerprint());
     observedIssueApiDto.setTitle(dto.getTitle());
     observedIssueApiDto.setCulprit(dto.getCulprit());

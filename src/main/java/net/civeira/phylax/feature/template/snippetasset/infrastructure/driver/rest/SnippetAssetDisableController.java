@@ -190,7 +190,8 @@ public class SnippetAssetDisableController {
   private SnippetAssetApiDto toApiModel(SnippetAssetDisableProjection dto) {
     SnippetAssetApiDto snippetAssetApiDto = new SnippetAssetApiDto();
     snippetAssetApiDto.setUid(dto.getUid());
-    snippetAssetApiDto.setSnippet(new SnippetApiRef().$ref(dto.getSnippetReference()));
+    snippetAssetApiDto.setSnippet(null == dto.getSnippetReference() ? null
+        : new SnippetApiRef().$ref(dto.getSnippetReference()));
     snippetAssetApiDto.setCode(dto.getCode());
     snippetAssetApiDto.setType(dto.getType());
     String content = dto.getContent();

@@ -118,7 +118,8 @@ public class OauthClientRetrieveController {
     OauthClientApiDto oauthClientApiDto = new OauthClientApiDto();
     oauthClientApiDto.setUid(dto.getUid());
     oauthClientApiDto.setCode(dto.getCode());
-    oauthClientApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    oauthClientApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     oauthClientApiDto.setAllowAllScopes(dto.getAllowAllScopes());
     oauthClientApiDto.setTokenEndpointAuthMethod(
         tokenEndpointAuthMethodEnumToApi(dto.getTokenEndpointAuthMethod()));

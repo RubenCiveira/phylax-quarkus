@@ -183,7 +183,8 @@ public class UserPersonalApiKeyRevokeController {
   private UserPersonalApiKeyApiDto toApiModel(UserPersonalApiKeyRevokeProjection dto) {
     UserPersonalApiKeyApiDto userPersonalApiKeyApiDto = new UserPersonalApiKeyApiDto();
     userPersonalApiKeyApiDto.setUid(dto.getUid());
-    userPersonalApiKeyApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
+    userPersonalApiKeyApiDto.setUser(
+        null == dto.getUserReference() ? null : new UserApiRef().$ref(dto.getUserReference()));
     userPersonalApiKeyApiDto.setName(dto.getName());
     userPersonalApiKeyApiDto.setKeyHash("*****");
     userPersonalApiKeyApiDto.setScopes(dto.getScopes());

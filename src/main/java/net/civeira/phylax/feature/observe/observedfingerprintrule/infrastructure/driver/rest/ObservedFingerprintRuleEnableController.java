@@ -228,8 +228,8 @@ public class ObservedFingerprintRuleEnableController {
         new ObservedFingerprintRuleApiDto();
     observedFingerprintRuleApiDto.setUid(dto.getUid());
     observedFingerprintRuleApiDto.setName(dto.getName());
-    observedFingerprintRuleApiDto
-        .setOrigin(new ObservedSourceApiRef().$ref(dto.getOriginReference()));
+    observedFingerprintRuleApiDto.setOrigin(null == dto.getOriginReference() ? null
+        : new ObservedSourceApiRef().$ref(dto.getOriginReference()));
     observedFingerprintRuleApiDto.setField(fieldEnumToApi(dto.getField()));
     observedFingerprintRuleApiDto.setPattern(dto.getPattern());
     observedFingerprintRuleApiDto.setEffect(effectEnumToApi(dto.getEffect()));

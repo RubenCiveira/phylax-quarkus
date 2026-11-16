@@ -63,8 +63,10 @@ public class TemplateAssetUpdateController {
   private TemplateAssetApiDto toApiModel(TemplateAssetUpdateProjection dto) {
     TemplateAssetApiDto templateAssetApiDto = new TemplateAssetApiDto();
     templateAssetApiDto.setUid(dto.getUid());
-    templateAssetApiDto.setTemplate(new TemplateApiRef().$ref(dto.getTemplateReference()));
-    templateAssetApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    templateAssetApiDto.setTemplate(null == dto.getTemplateReference() ? null
+        : new TemplateApiRef().$ref(dto.getTemplateReference()));
+    templateAssetApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     templateAssetApiDto.setCode(dto.getCode());
     templateAssetApiDto.setType(dto.getType());
     String content = dto.getContent();

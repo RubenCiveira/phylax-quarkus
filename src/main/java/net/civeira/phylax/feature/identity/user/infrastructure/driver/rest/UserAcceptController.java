@@ -206,7 +206,8 @@ public class UserAcceptController {
   private UserApiDto toApiModel(UserAcceptProjection dto) {
     UserApiDto userApiDto = new UserApiDto();
     userApiDto.setUid(dto.getUid());
-    userApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    userApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     userApiDto.setName(dto.getName());
     userApiDto.setPassword("*****");
     userApiDto.setEmail(dto.getEmail());

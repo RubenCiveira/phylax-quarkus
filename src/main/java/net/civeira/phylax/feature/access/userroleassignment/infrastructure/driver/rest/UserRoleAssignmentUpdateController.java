@@ -62,11 +62,12 @@ public class UserRoleAssignmentUpdateController {
   private UserRoleAssignmentApiDto toApiModel(UserRoleAssignmentUpdateProjection dto) {
     UserRoleAssignmentApiDto userRoleAssignmentApiDto = new UserRoleAssignmentApiDto();
     userRoleAssignmentApiDto.setUid(dto.getUid());
-    userRoleAssignmentApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
-    userRoleAssignmentApiDto
-        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
-    userRoleAssignmentApiDto
-        .setOauthClient(new OauthClientApiRef().$ref(dto.getOauthClientReference()));
+    userRoleAssignmentApiDto.setUser(
+        null == dto.getUserReference() ? null : new UserApiRef().$ref(dto.getUserReference()));
+    userRoleAssignmentApiDto.setResourceServer(null == dto.getResourceServerReference() ? null
+        : new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
+    userRoleAssignmentApiDto.setOauthClient(null == dto.getOauthClientReference() ? null
+        : new OauthClientApiRef().$ref(dto.getOauthClientReference()));
     userRoleAssignmentApiDto.setRoles(dto.getRoles().stream().map(this::toApiModelRoles).toList());
     userRoleAssignmentApiDto.setVersion(dto.getVersion());
     return userRoleAssignmentApiDto;
@@ -80,7 +81,7 @@ public class UserRoleAssignmentUpdateController {
   private RolesApiDto toApiModelRoles(Roles dto) {
     RolesApiDto rolesApiDto = new RolesApiDto();
     rolesApiDto.setUid(dto.getUid());
-    rolesApiDto.setRole(new RoleApiRef().$ref(dto.getRoleUid()));
+    rolesApiDto.setRole(null == dto.getRoleUid() ? null : new RoleApiRef().$ref(dto.getRoleUid()));
     rolesApiDto.setVersion(dto.getVersion().orElse(null));
     return rolesApiDto;
   }

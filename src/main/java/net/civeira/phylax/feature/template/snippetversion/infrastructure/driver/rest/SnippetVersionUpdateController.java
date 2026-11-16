@@ -53,7 +53,8 @@ public class SnippetVersionUpdateController {
   private SnippetVersionApiDto toApiModel(SnippetVersionUpdateProjection dto) {
     SnippetVersionApiDto snippetVersionApiDto = new SnippetVersionApiDto();
     snippetVersionApiDto.setUid(dto.getUid());
-    snippetVersionApiDto.setSnippet(new SnippetApiRef().$ref(dto.getSnippetReference()));
+    snippetVersionApiDto.setSnippet(null == dto.getSnippetReference() ? null
+        : new SnippetApiRef().$ref(dto.getSnippetReference()));
     snippetVersionApiDto.setLocale(dto.getLocale());
     snippetVersionApiDto.setSubject(dto.getSubject());
     snippetVersionApiDto.setContentHtml(dto.getContentHtml());

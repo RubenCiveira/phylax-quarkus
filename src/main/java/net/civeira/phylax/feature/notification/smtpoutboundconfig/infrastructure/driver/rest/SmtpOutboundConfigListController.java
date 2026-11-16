@@ -117,7 +117,8 @@ public class SmtpOutboundConfigListController {
   private SmtpOutboundConfigApiDto toApiModel(SmtpOutboundConfigListProjection dto) {
     SmtpOutboundConfigApiDto smtpOutboundConfigApiDto = new SmtpOutboundConfigApiDto();
     smtpOutboundConfigApiDto.setUid(dto.getUid());
-    smtpOutboundConfigApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    smtpOutboundConfigApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     smtpOutboundConfigApiDto.setHost(dto.getHost());
     smtpOutboundConfigApiDto.setPort(dto.getPort());
     smtpOutboundConfigApiDto.setLogin(dto.getLogin());

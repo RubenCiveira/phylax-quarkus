@@ -204,7 +204,8 @@ public class ObservedSloDisableController {
     ObservedSloApiDto observedSloApiDto = new ObservedSloApiDto();
     observedSloApiDto.setUid(dto.getUid());
     observedSloApiDto.setName(dto.getName());
-    observedSloApiDto.setOrigin(new ObservedSourceApiRef().$ref(dto.getOriginReference()));
+    observedSloApiDto.setOrigin(null == dto.getOriginReference() ? null
+        : new ObservedSourceApiRef().$ref(dto.getOriginReference()));
     observedSloApiDto.setRoute(dto.getRoute());
     observedSloApiDto.setKind(kindEnumToApi(dto.getKind()));
     observedSloApiDto.setObjective(dto.getObjective());

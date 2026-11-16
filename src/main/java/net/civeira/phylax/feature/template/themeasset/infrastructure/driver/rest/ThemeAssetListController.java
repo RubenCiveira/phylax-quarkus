@@ -147,7 +147,8 @@ public class ThemeAssetListController {
   private ThemeAssetApiDto toApiModel(ThemeAssetListProjection dto) {
     ThemeAssetApiDto themeAssetApiDto = new ThemeAssetApiDto();
     themeAssetApiDto.setUid(dto.getUid());
-    themeAssetApiDto.setTheme(new ThemeApiRef().$ref(dto.getThemeReference()));
+    themeAssetApiDto.setTheme(
+        null == dto.getThemeReference() ? null : new ThemeApiRef().$ref(dto.getThemeReference()));
     themeAssetApiDto.setCode(dto.getCode());
     themeAssetApiDto.setType(dto.getType());
     String content = dto.getContent();

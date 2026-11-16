@@ -99,7 +99,8 @@ public class ConsentPurposeUpdateController {
   private ConsentPurposeApiDto toApiModel(ConsentPurposeUpdateProjection dto) {
     ConsentPurposeApiDto consentPurposeApiDto = new ConsentPurposeApiDto();
     consentPurposeApiDto.setUid(dto.getUid());
-    consentPurposeApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    consentPurposeApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     consentPurposeApiDto.setKey(keyEnumToApi(dto.getKey()));
     consentPurposeApiDto.setTitle(dto.getTitle());
     consentPurposeApiDto.setDescription(dto.getDescription());

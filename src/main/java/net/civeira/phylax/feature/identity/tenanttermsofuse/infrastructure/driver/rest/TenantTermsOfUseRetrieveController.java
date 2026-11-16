@@ -55,9 +55,10 @@ public class TenantTermsOfUseRetrieveController {
   private TenantTermsOfUseApiDto toApiModel(TenantTermsOfUseRetrieveProjection dto) {
     TenantTermsOfUseApiDto tenantTermsOfUseApiDto = new TenantTermsOfUseApiDto();
     tenantTermsOfUseApiDto.setUid(dto.getUid());
-    tenantTermsOfUseApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
-    tenantTermsOfUseApiDto
-        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
+    tenantTermsOfUseApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
+    tenantTermsOfUseApiDto.setResourceServer(null == dto.getResourceServerReference() ? null
+        : new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
     tenantTermsOfUseApiDto.setText(dto.getText());
     tenantTermsOfUseApiDto.setEnabled(dto.getEnabled());
     String document = dto.getDocument();

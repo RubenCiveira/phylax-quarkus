@@ -48,7 +48,8 @@ public class ThemeRetrieveController {
   private ThemeApiDto toApiModel(ThemeRetrieveProjection dto) {
     ThemeApiDto themeApiDto = new ThemeApiDto();
     themeApiDto.setUid(dto.getUid());
-    themeApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    themeApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     themeApiDto.setName(dto.getName());
     themeApiDto.setIsDefault(dto.getIsDefault());
     themeApiDto.setEnabled(dto.getEnabled());

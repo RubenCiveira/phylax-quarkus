@@ -95,7 +95,8 @@ public class TemplateUpdateController {
     TemplateApiDto templateApiDto = new TemplateApiDto();
     templateApiDto.setUid(dto.getUid());
     templateApiDto.setCode(dto.getCode());
-    templateApiDto.setTenant(new TenantApiRef().$ref(dto.getTenantReference()));
+    templateApiDto.setTenant(null == dto.getTenantReference() ? null
+        : new TenantApiRef().$ref(dto.getTenantReference()));
     templateApiDto.setTheme(dto.getTheme());
     templateApiDto.setChannel(channelEnumToApi(dto.getChannel()));
     templateApiDto.setEnabled(dto.getEnabled());

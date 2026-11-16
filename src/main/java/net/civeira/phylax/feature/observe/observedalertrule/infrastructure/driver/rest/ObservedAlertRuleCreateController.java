@@ -132,7 +132,8 @@ public class ObservedAlertRuleCreateController {
     observedAlertRuleApiDto.setUid(dto.getUid());
     observedAlertRuleApiDto.setName(dto.getName());
     observedAlertRuleApiDto.setTrigger(triggerEnumToApi(dto.getTrigger()));
-    observedAlertRuleApiDto.setOrigin(new ObservedSourceApiRef().$ref(dto.getOriginReference()));
+    observedAlertRuleApiDto.setOrigin(null == dto.getOriginReference() ? null
+        : new ObservedSourceApiRef().$ref(dto.getOriginReference()));
     observedAlertRuleApiDto.setMinLevel(minLevelEnumToApi(dto.getMinLevel()));
     observedAlertRuleApiDto.setThreshold(dto.getThreshold());
     observedAlertRuleApiDto.setWindowMinutes(dto.getWindowMinutes());

@@ -50,11 +50,12 @@ public class UserGroupMembershipRetrieveController {
   private UserGroupMembershipApiDto toApiModel(UserGroupMembershipRetrieveProjection dto) {
     UserGroupMembershipApiDto userGroupMembershipApiDto = new UserGroupMembershipApiDto();
     userGroupMembershipApiDto.setUid(dto.getUid());
-    userGroupMembershipApiDto.setUser(new UserApiRef().$ref(dto.getUserReference()));
-    userGroupMembershipApiDto
-        .setResourceServer(new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
-    userGroupMembershipApiDto
-        .setOauthClient(new OauthClientApiRef().$ref(dto.getOauthClientReference()));
+    userGroupMembershipApiDto.setUser(
+        null == dto.getUserReference() ? null : new UserApiRef().$ref(dto.getUserReference()));
+    userGroupMembershipApiDto.setResourceServer(null == dto.getResourceServerReference() ? null
+        : new ResourceServerApiRef().$ref(dto.getResourceServerReference()));
+    userGroupMembershipApiDto.setOauthClient(null == dto.getOauthClientReference() ? null
+        : new OauthClientApiRef().$ref(dto.getOauthClientReference()));
     userGroupMembershipApiDto.setGroups(dto.getGroups());
     userGroupMembershipApiDto.setVersion(dto.getVersion());
     return userGroupMembershipApiDto;

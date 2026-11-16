@@ -128,7 +128,8 @@ public class ThemeVersionListController {
   private ThemeVersionApiDto toApiModel(ThemeVersionListProjection dto) {
     ThemeVersionApiDto themeVersionApiDto = new ThemeVersionApiDto();
     themeVersionApiDto.setUid(dto.getUid());
-    themeVersionApiDto.setTheme(new ThemeApiRef().$ref(dto.getThemeReference()));
+    themeVersionApiDto.setTheme(
+        null == dto.getThemeReference() ? null : new ThemeApiRef().$ref(dto.getThemeReference()));
     themeVersionApiDto.setChannel(channelEnumToApi(dto.getChannel()));
     themeVersionApiDto.setLocale(dto.getLocale());
     themeVersionApiDto.setContentHtml(dto.getContentHtml());
