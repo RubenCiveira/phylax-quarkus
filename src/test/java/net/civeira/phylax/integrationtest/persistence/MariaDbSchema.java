@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -25,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import net.civeira.phylax.common.infrastructure.migration.Migrations;
+import net.civeira.phylax.testing.sql.H2Database;
 
 /**
  * Persistence harness of V.1: a throwaway MariaDB schema per test class, built with the project
@@ -92,7 +92,7 @@ public class MariaDbSchema implements BeforeAllCallback, AfterAllCallback, Param
 
   private Server server;
   private String schema;
-  private MariaDbDataSource dataSource;
+  private DataSource dataSource;
 
   private static Optional<String> setting(String name) {
     return Optional.ofNullable(System.getProperty(name))
@@ -111,13 +111,19 @@ public class MariaDbSchema implements BeforeAllCallback, AfterAllCallback, Param
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
     Optional<Server> configured = Server.configured();
-    Assumptions.assumeTrue(configured.isPresent(),
-        "V1_MARIADB_URL not set: MariaDB harness skipped");
+    if (configured.isEmpty()) {
+      // Without a MariaDB server the same sentences run on an H2 database on memory.
+      org.junit.jupiter.api.Assumptions.assumeTrue(H2Database.available(),
+          "Neither V1_MARIADB_URL nor mysql migrations: database harness skipped");
+      dataSource = new H2Database().dataSource();
+      return;
+    }
     server = configured.get();
     schema = server.createSchema();
-    dataSource = new MariaDbDataSource(server.url(schema));
-    dataSource.setUser(server.user());
-    dataSource.setPassword(server.password());
+    MariaDbDataSource mariadb = new MariaDbDataSource(server.url(schema));
+    mariadb.setUser(server.user());
+    mariadb.setPassword(server.password());
+    dataSource = mariadb;
     try (Connection connection = dataSource.getConnection();
         Migrations migrations = new Migrations(connection, MIGRATIONS, "mysql")) {
       Map<String, Object> result = migrations.runMigrations();

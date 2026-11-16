@@ -259,7 +259,7 @@ public class ThemeJdbcDao {
   public Optional<Theme> findForUpdate(ThemeFilter filter) {
     ThemeCursor cursor = ThemeCursor.builder().build();
     return new ThemeSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -318,7 +318,7 @@ public class ThemeJdbcDao {
   public List<Theme> listForUpdate(ThemeFilter filter) {
     ThemeCursor cursor = ThemeCursor.builder().build();
     return new ThemeSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -415,7 +415,7 @@ public class ThemeJdbcDao {
    */
   public Slider<Theme> slideForUpdate(ThemeFilter filter, ThemeCursor cursor) {
     return new ThemeSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

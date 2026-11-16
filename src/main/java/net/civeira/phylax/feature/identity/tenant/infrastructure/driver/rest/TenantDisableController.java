@@ -60,9 +60,6 @@ public class TenantDisableController {
   public Response tenantApiBatchDisable(final List<String> uids, final String search,
       final String name) {
     TenantDisableFilter.TenantDisableFilterBuilder filterBuilder = TenantDisableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

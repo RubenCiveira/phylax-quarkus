@@ -75,9 +75,6 @@ public class ObservedIssueReopenController {
       final String kind, final String title) {
     ObservedIssueReopenFilter.ObservedIssueReopenFilterBuilder filterBuilder =
         ObservedIssueReopenFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

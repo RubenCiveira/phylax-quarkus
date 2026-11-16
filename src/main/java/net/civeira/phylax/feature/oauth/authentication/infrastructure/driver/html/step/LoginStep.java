@@ -90,6 +90,43 @@ public class LoginStep implements OidcStep {
   }
 
   /**
+   * Translation of a key, or the fallback when the messages of the tenant do not have it yet.
+   *
+   * @param locale locale of the page
+   * @param key message key
+   * @param fallback text used when the key is missing
+   * @return the text
+   */
+  public static String text(Locale locale, String key, String fallback) {
+    String value = AuthorizeHtml.i18n(locale, key);
+    return value == null || value.equals(key) ? fallback : value;
+  }
+
+  /**
+   * Sign-in with a passkey: hidden until {@code webauthn.js} sees that the browser supports it,
+   * then posted with the assertion as {@code step=webauthn-login}.
+   */
+  private String passkeyForm(AuthRequest request) {
+    Locale locale = request.getLocale();
+    String begin = "/oauth/openid/" + request.getTenant() + "/webauthn/authenticate/begin";
+    return "<form method=\"POST\" class=\"passkey-login\" data-webauthn-login"
+        + " style=\"display:none\" data-begin=\"" + StringEscapeUtils.escapeHtml4(begin)
+        + "\" data-error=\""
+        + StringEscapeUtils
+            .escapeHtml4(text(locale, "login.passkey-failed", "The passkey could not be verified"))
+        + "\">" + "<input type=\"hidden\" name=\"step\" value=\"" + WebAuthnLoginStep.STEP + "\" />"
+        + "<input type=\"hidden\" name=\"csid\" />"
+        + "<input type=\"hidden\" name=\"challengeId\" />"
+        + "<input type=\"hidden\" name=\"credential\" />"
+        + "<p><button type=\"button\" class=\"secondary-button passkey-button\""
+        + " data-webauthn-login-button>"
+        + StringEscapeUtils
+            .escapeHtml4(text(locale, "login.passkey-label", "Sign in with a passkey"))
+        + "</button></p>" + "<p class=\"error\" data-webauthn-error style=\"display:none\"></p>"
+        + "</form>" + "<script src=\"/oauth/assets/webauthn.js\"></script>";
+  }
+
+  /**
    * Renders the login form, optionally showing an error message.
    *
    * @param request current auth request (used for locale, tenant, client label)
@@ -149,12 +186,13 @@ public class LoginStep implements OidcStep {
             + (null == error ? "" : "<p class=\"error\">" + errorMsg + "</p>")
             + "<form id=\"login\" method=\"POST\">"
             + "<input type=\"hidden\" name=\"csid\" id=\"sign\" />" + "<label>" + usernameLabel
-            + " <input type=\"text\" id=\"username\" name=\"username\" value=\""
+            + " <input type=\"text\" id=\"username\" name=\"username\""
+            + " autocomplete=\"username webauthn\" value=\""
             + StringEscapeUtils.escapeHtml4(request.getLoginHint().orElse("")) + "\" /></label>"
             + "<label>" + passwordLabel + " <input type=\"password\" id=\"type_password\" value=\""
             + "\" /></label>" + "<input type=\"hidden\" id=\"password\" name=\"password\" value=\""
             + "\" />" + "<input class=\"primary-button action-button\" type=\"submit\" value=\""
-            + enter + "\" />" + "</form>" + delegatedLogins + execAuto
+            + enter + "\" />" + "</form>" + passkeyForm(request) + delegatedLogins + execAuto
             + (recoverStep.allowRecover(request.getTenant()) ? "<form method=\"POST\">"
                 + "<input type=\"hidden\" name=\"step\" value=\"show-recover\" />" + "<p>"
                 + recoverText + "</p></form>" : "")

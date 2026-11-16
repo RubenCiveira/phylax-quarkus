@@ -26,7 +26,7 @@ public class RecoveryCodeConsumptionSqlAdapter implements RecoveryCodeConsumptio
   @Override
   public boolean consume(String codeUid, String userUid) {
     String sql = "UPDATE access_user_mfa_recovery_code SET used_at = ?, version = version + 1"
-        + " WHERE uid = ? AND user = ? AND used_at IS NULL";
+        + " WHERE uid = ? AND `user` = ? AND used_at IS NULL";
     try (Connection conn = source.getConnection();
         PreparedStatement stat = conn.prepareStatement(sql)) {
       stat.setTimestamp(1, Timestamp.from(Instant.now()));

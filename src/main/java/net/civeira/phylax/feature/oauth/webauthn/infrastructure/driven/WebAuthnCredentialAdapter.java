@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -51,7 +52,8 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
     UserWebauthnCredentialChangeSet cs = new UserWebauthnCredentialChangeSet().newUid();
     cs.user(UserReference.of(credential.getUserUid()));
     cs.authenticator(credential.getCredentialId());
-    cs.name(credential.getDeviceName().orElse(credential.getCredentialId()));
+    cs.name(uniqueName(credential.getUserUid(),
+        credential.getDeviceName().orElse(credential.getCredentialId()), null));
     cs.publicKey(credential.getPublicKey());
     cs.signCount(credential.getSignCount());
     credential.getAaguid().ifPresent(cs::aaguid);
@@ -94,7 +96,7 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
   public void rename(String credentialId, String userUid, String tenantId, String newName) {
     UserWebauthnCredential entity = findForUpdateByUserAndCredentialId(credentialId, userUid);
     UserWebauthnCredentialChangeSet cs = new UserWebauthnCredentialChangeSet();
-    cs.name(newName);
+    cs.name(uniqueName(userUid, newName, credentialId));
     writer.update(entity, entity.update(cs));
   }
 
@@ -102,6 +104,24 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
   public void delete(String credentialId, String userUid, String tenantId) {
     UserWebauthnCredential entity = findForUpdateByUserAndCredentialId(credentialId, userUid);
     writer.delete(entity.delete());
+  }
+
+  /**
+   * The name of a passkey: the given one (the device name on register), with a " (n)" suffix when
+   * the user already has a passkey with that name (the name is unique by user, and two keys of the
+   * same model report the same device name). The passkey being renamed ({@code except}) does not
+   * collide with itself.
+   */
+  private String uniqueName(String userUid, String base, String except) {
+    Set<String> taken =
+        reader.list(UserWebauthnCredentialFilter.builder().user(UserReference.of(userUid)).build())
+            .stream().filter(e -> !e.getAuthenticator().equals(except))
+            .map(UserWebauthnCredential::getName).collect(Collectors.toSet());
+    String name = base;
+    for (int index = 2; taken.contains(name); index++) {
+      name = base + " (" + index + ")";
+    }
+    return name;
   }
 
   private UserWebauthnCredential findForUpdateByCredentialId(String credentialId, String tenantId) {

@@ -67,9 +67,6 @@ public class ObservedEmbedDeleteController {
       final List<String> dashboards, final String origin, final List<String> origins) {
     ObservedEmbedDeleteFilter.ObservedEmbedDeleteFilterBuilder filterBuilder =
         ObservedEmbedDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

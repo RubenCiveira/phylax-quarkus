@@ -314,7 +314,7 @@ public class UserPurposeConsentJdbcDao {
   public Optional<UserPurposeConsent> findForUpdate(UserPurposeConsentFilter filter) {
     UserPurposeConsentCursor cursor = UserPurposeConsentCursor.builder().build();
     return new UserPurposeConsentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -374,7 +374,7 @@ public class UserPurposeConsentJdbcDao {
   public List<UserPurposeConsent> listForUpdate(UserPurposeConsentFilter filter) {
     UserPurposeConsentCursor cursor = UserPurposeConsentCursor.builder().build();
     return new UserPurposeConsentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -476,7 +476,7 @@ public class UserPurposeConsentJdbcDao {
   public Slider<UserPurposeConsent> slideForUpdate(UserPurposeConsentFilter filter,
       UserPurposeConsentCursor cursor) {
     return new UserPurposeConsentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

@@ -133,7 +133,9 @@ class DynamicClientRegistrationMariaDbTest {
             c.prepareStatement("SELECT " + column + " FROM " + table + " WHERE uid = ?")) {
       ps.setString(1, uid);
       try (ResultSet rs = ps.executeQuery()) {
-        return rs.next() ? rs.getString(1) : null;
+        String value = rs.next() ? rs.getString(1) : null;
+        // MariaDB reads the booleans as "true"/"false", H2 as "TRUE"/"FALSE".
+        return "TRUE".equals(value) || "FALSE".equals(value) ? value.toLowerCase() : value;
       }
     }
   }

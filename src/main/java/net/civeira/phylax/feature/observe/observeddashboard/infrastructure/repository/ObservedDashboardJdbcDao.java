@@ -384,7 +384,7 @@ public class ObservedDashboardJdbcDao {
   public Optional<ObservedDashboard> findForUpdate(ObservedDashboardFilter filter) {
     ObservedDashboardCursor cursor = ObservedDashboardCursor.builder().build();
     return new ObservedDashboardSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -445,7 +445,7 @@ public class ObservedDashboardJdbcDao {
   public List<ObservedDashboard> listForUpdate(ObservedDashboardFilter filter) {
     ObservedDashboardCursor cursor = ObservedDashboardCursor.builder().build();
     return new ObservedDashboardSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -547,7 +547,7 @@ public class ObservedDashboardJdbcDao {
   public Slider<ObservedDashboard> slideForUpdate(ObservedDashboardFilter filter,
       ObservedDashboardCursor cursor) {
     return new ObservedDashboardSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

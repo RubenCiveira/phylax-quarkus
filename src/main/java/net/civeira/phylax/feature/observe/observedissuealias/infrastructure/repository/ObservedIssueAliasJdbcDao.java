@@ -250,7 +250,7 @@ public class ObservedIssueAliasJdbcDao {
   public Optional<ObservedIssueAlias> findForUpdate(ObservedIssueAliasFilter filter) {
     ObservedIssueAliasCursor cursor = ObservedIssueAliasCursor.builder().build();
     return new ObservedIssueAliasSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -310,7 +310,7 @@ public class ObservedIssueAliasJdbcDao {
   public List<ObservedIssueAlias> listForUpdate(ObservedIssueAliasFilter filter) {
     ObservedIssueAliasCursor cursor = ObservedIssueAliasCursor.builder().build();
     return new ObservedIssueAliasSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -412,7 +412,7 @@ public class ObservedIssueAliasJdbcDao {
   public Slider<ObservedIssueAlias> slideForUpdate(ObservedIssueAliasFilter filter,
       ObservedIssueAliasCursor cursor) {
     return new ObservedIssueAliasSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

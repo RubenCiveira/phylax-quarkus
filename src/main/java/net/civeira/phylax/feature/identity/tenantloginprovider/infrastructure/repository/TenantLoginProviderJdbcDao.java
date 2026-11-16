@@ -497,7 +497,7 @@ public class TenantLoginProviderJdbcDao {
   public Optional<TenantLoginProvider> findForUpdate(TenantLoginProviderFilter filter) {
     TenantLoginProviderCursor cursor = TenantLoginProviderCursor.builder().build();
     return new TenantLoginProviderSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -557,7 +557,7 @@ public class TenantLoginProviderJdbcDao {
   public List<TenantLoginProvider> listForUpdate(TenantLoginProviderFilter filter) {
     TenantLoginProviderCursor cursor = TenantLoginProviderCursor.builder().build();
     return new TenantLoginProviderSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -659,7 +659,7 @@ public class TenantLoginProviderJdbcDao {
   public Slider<TenantLoginProvider> slideForUpdate(TenantLoginProviderFilter filter,
       TenantLoginProviderCursor cursor) {
     return new TenantLoginProviderSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

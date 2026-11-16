@@ -24,6 +24,7 @@ import jakarta.ws.rs.core.NewCookie.SameSite;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.common.value.YamlLocaleMessages;
+import net.civeira.phylax.feature.identity.tenant.domain.TenantReference;
 import net.civeira.phylax.feature.identity.tenanttermsofuse.domain.TenantTermsOfUse;
 import net.civeira.phylax.feature.identity.tenanttermsofuse.domain.gateway.TenantTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.feature.identity.user.domain.User;
@@ -103,7 +104,7 @@ public class ProfileHtmlController {
     String candidate = resolveBackCandidate(backParam, headers);
     String effectiveBackUrl = candidate != null ? candidate : storedBackUrl;
     NewCookie backCookie = candidate != null ? buildBackCookie(candidate, tenant) : null;
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(effectiveBackUrl, t) + "<div class=\"section-card\">"
@@ -123,7 +124,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
@@ -137,7 +138,7 @@ public class ProfileHtmlController {
   public Response saveEdit(@PathParam("tenant") String tenant,
       @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie,
       MultivaluedMap<String, String> form) {
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       OidcProfileData data = OidcProfileData.builder().givenName(first(form, "givenName"))
           .familyName(first(form, "familyName")).middleName(first(form, "middleName"))
           .nickname(first(form, "nickname")).preferredUsername(first(form, "preferredUsername"))
@@ -158,7 +159,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(_ -> {
+    return sessionManager.loadSession(cookie, tenant).map(_ -> {
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
           + changePasswordPanel.render(base + "/password", base, null, false, t) + "</div>";
@@ -174,7 +175,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl, MultivaluedMap<String, String> form) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String base = "/oauth/openid/" + tenant + "/me";
       String newPass = first(form, "newPassword");
       String confirmPass = first(form, "confirmPassword");
@@ -205,7 +206,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       boolean enabled = profileService.isMfaEnabled(resolveUserUid(session), tenant);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
@@ -225,7 +226,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl, MultivaluedMap<String, String> form) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String base = "/oauth/openid/" + tenant + "/me";
       String action = first(form, "action");
       if ("disable".equals(action)) {
@@ -252,7 +253,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(storedBackUrl, t) + sessionsPanel.render(
           profileService.listSessions(resolveUserUid(session),
@@ -267,8 +268,12 @@ public class ProfileHtmlController {
   public Response revokeSession(@PathParam("tenant") String tenant,
       @PathParam("sessionId") String sessionId,
       @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie) {
-    return sessionManager.loadSession(cookie).map(_ -> {
-      if (sessionId != null && !sessionId.isBlank() && !sessionId.equals(cookie)) {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
+      // Only a session of the same user: never one of another account.
+      if (sessionId != null && !sessionId.isBlank() && !sessionId.equals(cookie)
+          && profileService
+              .listSessions(resolveUserUid(session), session.getValidationData().getUsername())
+              .stream().anyMatch(active -> sessionId.equals(active.getSessionId()))) {
         profileService.revokeSession(sessionId);
       }
       return Response.status(302).header("Location", "/oauth/openid/" + tenant + "/me/sessions")
@@ -284,7 +289,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String base = "/oauth/openid/" + tenant + "/me";
       long unusedCount = mfaRecoveryService.countUnused(resolveUserUid(session));
       String html =
@@ -302,7 +307,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String base = "/oauth/openid/" + tenant + "/me";
       String userUid = resolveUserUid(session);
       List<String> codes = mfaRecoveryService.generateCodes(userUid, 8);
@@ -322,7 +327,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String userUid = resolveUserUid(session);
       String username = session.getValidationData().getUsername();
       String base = "/oauth/openid/" + tenant + "/me";
@@ -356,7 +361,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String userUid = resolveUserUid(session);
       String username = session.getValidationData().getUsername();
       String base = "/oauth/openid/" + tenant + "/me";
@@ -386,7 +391,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl, MultivaluedMap<String, String> form) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String userUid = resolveUserUid(session);
       String username = session.getValidationData().getUsername();
       String base = "/oauth/openid/" + tenant + "/me";
@@ -416,11 +421,12 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String userUid = resolveUserUid(session);
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
-          + passkeysPanel.render(profileService.listPasskeys(userUid, tenant), base + "/passkeys",
+          + passkeysPanel.render(profileService.listPasskeys(userUid, tenant),
+              "/oauth/openid/" + tenant + "/webauthn/register", base + "/passkeys",
               base + "/passkeys", base, null, t)
           + "</div>";
       return page(tenant, t.get("profile.passkeys.title"), html, locale, null);
@@ -433,7 +439,7 @@ public class ProfileHtmlController {
       @PathParam("credentialId") String credentialId,
       @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie,
       MultivaluedMap<String, String> form) {
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String newName = first(form, "name");
       if (credentialId != null && !credentialId.isBlank() && !newName.isBlank()) {
         profileService.renamePasskey(credentialId, resolveUserUid(session), tenant, newName);
@@ -448,7 +454,7 @@ public class ProfileHtmlController {
   public Response deletePasskey(@PathParam("tenant") String tenant,
       @PathParam("credentialId") String credentialId,
       @CookieParam(OidcCookieManager.AUTH_SESSION_ID) String cookie) {
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       if (credentialId != null && !credentialId.isBlank()) {
         profileService.deletePasskey(credentialId, resolveUserUid(session), tenant);
       }
@@ -465,7 +471,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(_ -> {
+    return sessionManager.loadSession(cookie, tenant).map(_ -> {
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
           + dataExportPanel.render(base + "/data-export", base, false, t) + "</div>";
@@ -481,7 +487,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String userUid = resolveUserUid(session);
       String username = session.getValidationData().getUsername();
       User user = users.find(UserFilter.builder().uid(userUid).build()).orElse(null);
@@ -504,7 +510,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(_ -> {
+    return sessionManager.loadSession(cookie, tenant).map(_ -> {
       String base = "/oauth/openid/" + tenant + "/me";
       String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
           + accountDeletionPanel.renderRequest(base + "/delete-account", base, null, t) + "</div>";
@@ -520,7 +526,7 @@ public class ProfileHtmlController {
       @CookieParam(BACK_URL_COOKIE) String storedBackUrl) {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
-    return sessionManager.loadSession(cookie).map(session -> {
+    return sessionManager.loadSession(cookie, tenant).map(session -> {
       String userUid = resolveUserUid(session);
       String username = session.getValidationData().getUsername();
       User user = users.find(UserFilter.builder().uid(userUid).build()).orElse(null);
@@ -542,6 +548,30 @@ public class ProfileHtmlController {
   public Response confirmDeleteAccount(@PathParam("tenant") String tenant,
       @QueryParam("uid") String uid, @QueryParam("code") String code,
       @Context HttpHeaders headers) {
+    Locale locale = resolveLocale(headers);
+    YamlLocaleMessages t = messages(locale);
+    String base = "/oauth/openid/" + tenant + "/me";
+    if (uid == null || uid.isBlank() || code == null || code.isBlank()) {
+      String html = "<div class=\"section-card\">" + accountDeletionPanel.renderTokenError(base, t)
+          + "</div>";
+      return Response.status(400).entity(decorator.getFullPage(tenant,
+          t.get("profile.delete-account.title"), html, locale, "full")).type(TEXT_HTML).build();
+    }
+    // A GET never deletes: mail scanners open the links of the messages they analyse.
+    String html = "<div class=\"section-card\">" + accountDeletionPanel
+        .renderConfirmRequest(base + "/delete-account/confirm", uid, code, base, t) + "</div>";
+    return Response.ok(
+        decorator.getFullPage(tenant, t.get("profile.delete-account.title"), html, locale, "full"))
+        .type(TEXT_HTML).build();
+  }
+
+  @POST
+  @Path("oauth/openid/{tenant}/me/delete-account/confirm")
+  @Produces(TEXT_HTML)
+  public Response executeDeleteAccount(@PathParam("tenant") String tenant,
+      MultivaluedMap<String, String> form, @Context HttpHeaders headers) {
+    String uid = first(form, "uid");
+    String code = first(form, "code");
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
     String base = "/oauth/openid/" + tenant + "/me";
@@ -621,9 +651,19 @@ public class ProfileHtmlController {
   }
 
   private String resolveUserUid(SessionInfo session) {
+    if (session.getUserId() != null && !session.getUserId().isBlank()) {
+      return session.getUserId();
+    }
+    // Without the uid, look for the name only in the tenant of the user: a namesake of another
+    // tenant is a different person.
+    String tenantUid = session.getValidationData().getTenant();
+    if (tenantUid == null || tenantUid.isBlank()) {
+      return null;
+    }
     String username = session.getValidationData().getUsername();
-    return users.find(UserFilter.builder().nameOrEmail(username).build()).map(u -> u.getUid())
-        .orElse(session.getUserId());
+    return users.find(
+        UserFilter.builder().nameOrEmail(username).tenant(TenantReference.of(tenantUid)).build())
+        .map(u -> u.getUid()).orElse(null);
   }
 
   private Response page(String tenant, String title, String html, Locale locale, NewCookie cookie) {

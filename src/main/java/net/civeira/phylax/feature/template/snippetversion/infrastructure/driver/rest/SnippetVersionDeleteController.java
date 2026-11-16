@@ -61,9 +61,6 @@ public class SnippetVersionDeleteController {
       final String snippet, final List<String> snippets) {
     SnippetVersionDeleteFilter.SnippetVersionDeleteFilterBuilder filterBuilder =
         SnippetVersionDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

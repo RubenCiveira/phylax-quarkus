@@ -40,6 +40,6 @@ public class BeginAuthenticationUsecase {
         .expiresAt(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5)).verified(false).build());
 
     return Map.of("challengeId", challengeId, "challenge", challenge, "timeout", 60000, "rpId",
-        rpId, "userVerification", "preferred", "allowCredentials", List.of());
+        rpId, "userVerification", "required", "allowCredentials", List.of());
   }
 }

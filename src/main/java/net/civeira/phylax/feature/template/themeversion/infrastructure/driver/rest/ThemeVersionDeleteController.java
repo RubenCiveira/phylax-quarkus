@@ -61,9 +61,6 @@ public class ThemeVersionDeleteController {
       final String theme, final List<String> themes) {
     ThemeVersionDeleteFilter.ThemeVersionDeleteFilterBuilder filterBuilder =
         ThemeVersionDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

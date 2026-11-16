@@ -286,7 +286,7 @@ public class TemplateVersionJdbcDao {
   public Optional<TemplateVersion> findForUpdate(TemplateVersionFilter filter) {
     TemplateVersionCursor cursor = TemplateVersionCursor.builder().build();
     return new TemplateVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -345,7 +345,7 @@ public class TemplateVersionJdbcDao {
   public List<TemplateVersion> listForUpdate(TemplateVersionFilter filter) {
     TemplateVersionCursor cursor = TemplateVersionCursor.builder().build();
     return new TemplateVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -445,7 +445,7 @@ public class TemplateVersionJdbcDao {
   public Slider<TemplateVersion> slideForUpdate(TemplateVersionFilter filter,
       TemplateVersionCursor cursor) {
     return new TemplateVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

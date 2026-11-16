@@ -151,7 +151,7 @@ class ObservedDashboardDeleteInBatchExecutor implements
       if (!permission.isAllowed()) {
         span.addEvent("The policies for observed dashboard dont allow to delete: "
             + permission.getDescription());
-        throw new ExecutionException("not-allowed", null);
+        throw new ExecutionException("not-allowed", "not-allowed", permission.getDescription());
       }
       return item;
     } catch (RuntimeException ex) {

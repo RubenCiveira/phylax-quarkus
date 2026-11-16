@@ -270,7 +270,7 @@ public class TemplateVariableJdbcDao {
   public Optional<TemplateVariable> findForUpdate(TemplateVariableFilter filter) {
     TemplateVariableCursor cursor = TemplateVariableCursor.builder().build();
     return new TemplateVariableSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -330,7 +330,7 @@ public class TemplateVariableJdbcDao {
   public List<TemplateVariable> listForUpdate(TemplateVariableFilter filter) {
     TemplateVariableCursor cursor = TemplateVariableCursor.builder().build();
     return new TemplateVariableSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -431,7 +431,7 @@ public class TemplateVariableJdbcDao {
   public Slider<TemplateVariable> slideForUpdate(TemplateVariableFilter filter,
       TemplateVariableCursor cursor) {
     return new TemplateVariableSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

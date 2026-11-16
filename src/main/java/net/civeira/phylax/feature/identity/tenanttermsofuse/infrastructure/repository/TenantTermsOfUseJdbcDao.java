@@ -296,7 +296,7 @@ public class TenantTermsOfUseJdbcDao {
   public Optional<TenantTermsOfUse> findForUpdate(TenantTermsOfUseFilter filter) {
     TenantTermsOfUseCursor cursor = TenantTermsOfUseCursor.builder().build();
     return new TenantTermsOfUseSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -356,7 +356,7 @@ public class TenantTermsOfUseJdbcDao {
   public List<TenantTermsOfUse> listForUpdate(TenantTermsOfUseFilter filter) {
     TenantTermsOfUseCursor cursor = TenantTermsOfUseCursor.builder().build();
     return new TenantTermsOfUseSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -457,7 +457,7 @@ public class TenantTermsOfUseJdbcDao {
   public Slider<TenantTermsOfUse> slideForUpdate(TenantTermsOfUseFilter filter,
       TenantTermsOfUseCursor cursor) {
     return new TenantTermsOfUseSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

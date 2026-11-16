@@ -61,9 +61,6 @@ public class ObservedIssueCommentDeleteController {
       final String issue, final String authorName) {
     ObservedIssueCommentDeleteFilter.ObservedIssueCommentDeleteFilterBuilder filterBuilder =
         ObservedIssueCommentDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

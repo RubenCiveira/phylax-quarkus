@@ -90,7 +90,7 @@ public class UserDataExportAdapter implements UserDataExportGateway {
     sb.append("    \"name\": \"").append(escapeJson(u.getName())).append("\",\n");
     sb.append("    \"email\": \"").append(escapeJson(u.getEmail().orElse(""))).append("\",\n");
     sb.append("    \"emailVerified\": ").append(u.isEmailVerified()).append(",\n");
-    sb.append("    \"enabled\": ").append(u.isEnabled()).append("\"\n");
+    sb.append("    \"enabled\": ").append(u.isEnabled()).append("\n");
     sb.append("  }");
   }
 
@@ -158,7 +158,7 @@ public class UserDataExportAdapter implements UserDataExportGateway {
     sb.append("[");
     try (Connection conn = dataSource.getConnection();
         PreparedStatement stmt = conn.prepareStatement(
-            "SELECT terms_uid, accepted_at, ip_address FROM identity_user_accepted_terms_of_use WHERE user_uid = ?")) {
+            "SELECT terms_of_use, accept_date, ip_address FROM identity_user_accepted_terms_of_use WHERE `user` = ?")) {
       stmt.setString(1, userUid);
       try (ResultSet rs = stmt.executeQuery()) {
         boolean first = true;
@@ -168,9 +168,9 @@ public class UserDataExportAdapter implements UserDataExportGateway {
           }
           first = false;
           sb.append("{\n");
-          sb.append("    \"termsUid\": \"").append(escapeJson(rs.getString("terms_uid")))
+          sb.append("    \"termsUid\": \"").append(escapeJson(rs.getString("terms_of_use")))
               .append("\",\n");
-          sb.append("    \"acceptedAt\": \"").append(ts(rs.getTimestamp("accepted_at")))
+          sb.append("    \"acceptedAt\": \"").append(ts(rs.getTimestamp("accept_date")))
               .append("\",\n");
           sb.append("    \"ipAddress\": \"").append(escapeJson(rs.getString("ip_address")))
               .append("\"\n");

@@ -348,7 +348,7 @@ public class DcrInitialAccessTokenJdbcDao {
   public Optional<DcrInitialAccessToken> findForUpdate(DcrInitialAccessTokenFilter filter) {
     DcrInitialAccessTokenCursor cursor = DcrInitialAccessTokenCursor.builder().build();
     return new DcrInitialAccessTokenSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -408,7 +408,7 @@ public class DcrInitialAccessTokenJdbcDao {
   public List<DcrInitialAccessToken> listForUpdate(DcrInitialAccessTokenFilter filter) {
     DcrInitialAccessTokenCursor cursor = DcrInitialAccessTokenCursor.builder().build();
     return new DcrInitialAccessTokenSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -510,7 +510,7 @@ public class DcrInitialAccessTokenJdbcDao {
   public Slider<DcrInitialAccessToken> slideForUpdate(DcrInitialAccessTokenFilter filter,
       DcrInitialAccessTokenCursor cursor) {
     return new DcrInitialAccessTokenSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

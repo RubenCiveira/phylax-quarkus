@@ -80,9 +80,6 @@ public class UserAcceptController {
   public Response userApiBatchAccept(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     UserAcceptFilter.UserAcceptFilterBuilder filterBuilder = UserAcceptFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

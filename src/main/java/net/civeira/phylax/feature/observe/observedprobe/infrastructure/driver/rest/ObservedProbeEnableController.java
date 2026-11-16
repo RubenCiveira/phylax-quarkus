@@ -69,9 +69,6 @@ public class ObservedProbeEnableController {
       final String name, final String origin, final List<String> origins) {
     ObservedProbeEnableFilter.ObservedProbeEnableFilterBuilder filterBuilder =
         ObservedProbeEnableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

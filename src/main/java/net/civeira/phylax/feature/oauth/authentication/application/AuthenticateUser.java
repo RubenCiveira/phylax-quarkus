@@ -64,8 +64,9 @@ public class AuthenticateUser {
    */
   public AuthenticationResult preAuthenticate(AuthRequest request,
       List<AuthenticationChallenge> challenges, String username, ClientDetails client) {
-    AuthenticationMode mode =
-        challenges.contains(AuthenticationChallenge.MFA) ? AuthenticationMode.MFA
+    // A verified passkey is multi-factor by itself, like a password followed by an OTP.
+    AuthenticationMode mode = challenges.contains(AuthenticationChallenge.MFA)
+        || challenges.contains(AuthenticationChallenge.WEBAUTHN) ? AuthenticationMode.MFA
             : AuthenticationMode.SESSION;
     return loginUsecase.fillPreAuthenticated(request, username, client, challenges, mode);
   }

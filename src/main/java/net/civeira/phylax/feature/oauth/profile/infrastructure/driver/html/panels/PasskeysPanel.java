@@ -26,8 +26,21 @@ public class PasskeysPanel {
           + "<path d=\"M2 17.5a14.5 14.5 0 0 0 4.28 5.5\"/>"
           + "<path d=\"M6 10a6 6 0 0 1 11.29-2.97\"/>" + "</svg>";
 
-  public String render(List<WebAuthnCredentialSummary> credentials, String renameBaseUrl,
-      String deleteBaseUrl, String cancelUrl, String error, YamlLocaleMessages t) {
+  /**
+   * Renders the passkeys of the account and the block that adds a new one.
+   *
+   * @param credentials passkeys of the user
+   * @param registerBaseUrl base of the registration endpoints ({@code /begin}, {@code /finish})
+   * @param renameBaseUrl base of the rename forms
+   * @param deleteBaseUrl base of the delete forms
+   * @param cancelUrl back link
+   * @param error optional error message
+   * @param t messages
+   * @return html of the panel
+   */
+  public String render(List<WebAuthnCredentialSummary> credentials, String registerBaseUrl,
+      String renameBaseUrl, String deleteBaseUrl, String cancelUrl, String error,
+      YamlLocaleMessages t) {
 
     String title = "<h1>" + t.get("profile.passkeys.title") + "</h1>";
     String help = "<p>" + t.get("profile.passkeys.help") + "</p>";
@@ -75,6 +88,33 @@ public class PasskeysPanel {
     String backLink = "<div class=\"profile-actions\"><a class=\"secondary-button\" href=\""
         + esc(cancelUrl) + "\">" + t.get("profile.passkeys.backToProfile") + "</a></div>";
 
-    return title + help + errorHtml + cards + backLink;
+    return title + help + errorHtml + cards + registerBlock(registerBaseUrl, t) + backLink;
+  }
+
+  /**
+   * Adds a passkey: {@code webauthn.js} shows the block when the browser supports WebAuthn and, on
+   * click, runs begin, {@code navigator.credentials.create()} and finish, then reloads the page.
+   */
+  private String registerBlock(String registerBaseUrl, YamlLocaleMessages t) {
+    return "<div class=\"passkey-register\" data-webauthn-register style=\"display:none\""
+        + " data-begin=\"" + esc(registerBaseUrl + "/begin") + "\" data-finish=\""
+        + esc(registerBaseUrl + "/finish") + "\" data-error=\""
+        + esc(text(t, "profile.passkeys.addError", "The passkey could not be added"))
+        + "\" data-default-name=\"" + esc(text(t, "profile.passkeys.defaultName", "Passkey"))
+        + "\">" + "<h2>" + esc(text(t, "profile.passkeys.addTitle", "Add a passkey")) + "</h2>"
+        + "<p>"
+        + esc(text(t, "profile.passkeys.addHelp",
+            "Sign in with your fingerprint, face or device PIN instead of your password."))
+        + "</p>" + "<label>" + esc(t.get("profile.passkeys.name"))
+        + " <input type=\"text\" maxlength=\"100\" data-webauthn-device-name placeholder=\""
+        + esc(text(t, "profile.passkeys.defaultName", "Passkey")) + "\" /></label>"
+        + "<button type=\"button\" class=\"primary-button\" data-webauthn-register-button>"
+        + esc(text(t, "profile.passkeys.add", "Add a passkey")) + "</button>"
+        + "<p class=\"error\" data-webauthn-error style=\"display:none\"></p>" + "</div>"
+        + "<script src=\"/oauth/assets/webauthn.js\"></script>";
+  }
+
+  private static String text(YamlLocaleMessages t, String key, String fallback) {
+    return t.contains(key) ? t.get(key) : fallback;
   }
 }

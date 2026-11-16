@@ -396,7 +396,7 @@ public class SmtpOutboundConfigJdbcDao {
   public Optional<SmtpOutboundConfig> findForUpdate(SmtpOutboundConfigFilter filter) {
     SmtpOutboundConfigCursor cursor = SmtpOutboundConfigCursor.builder().build();
     return new SmtpOutboundConfigSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -456,7 +456,7 @@ public class SmtpOutboundConfigJdbcDao {
   public List<SmtpOutboundConfig> listForUpdate(SmtpOutboundConfigFilter filter) {
     SmtpOutboundConfigCursor cursor = SmtpOutboundConfigCursor.builder().build();
     return new SmtpOutboundConfigSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -558,7 +558,7 @@ public class SmtpOutboundConfigJdbcDao {
   public Slider<SmtpOutboundConfig> slideForUpdate(SmtpOutboundConfigFilter filter,
       SmtpOutboundConfigCursor cursor) {
     return new SmtpOutboundConfigSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

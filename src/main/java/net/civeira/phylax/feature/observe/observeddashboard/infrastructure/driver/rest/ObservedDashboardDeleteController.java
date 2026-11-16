@@ -62,9 +62,6 @@ public class ObservedDashboardDeleteController {
       final String code, final String sourceKind, final String name) {
     ObservedDashboardDeleteFilter.ObservedDashboardDeleteFilterBuilder filterBuilder =
         ObservedDashboardDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

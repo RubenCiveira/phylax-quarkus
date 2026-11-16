@@ -293,7 +293,7 @@ public class UserMfaRecoveryCodeJdbcDao {
   public Optional<UserMfaRecoveryCode> findForUpdate(UserMfaRecoveryCodeFilter filter) {
     UserMfaRecoveryCodeCursor cursor = UserMfaRecoveryCodeCursor.builder().build();
     return new UserMfaRecoveryCodeSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -353,7 +353,7 @@ public class UserMfaRecoveryCodeJdbcDao {
   public List<UserMfaRecoveryCode> listForUpdate(UserMfaRecoveryCodeFilter filter) {
     UserMfaRecoveryCodeCursor cursor = UserMfaRecoveryCodeCursor.builder().build();
     return new UserMfaRecoveryCodeSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -455,7 +455,7 @@ public class UserMfaRecoveryCodeJdbcDao {
   public Slider<UserMfaRecoveryCode> slideForUpdate(UserMfaRecoveryCodeFilter filter,
       UserMfaRecoveryCodeCursor cursor) {
     return new UserMfaRecoveryCodeSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

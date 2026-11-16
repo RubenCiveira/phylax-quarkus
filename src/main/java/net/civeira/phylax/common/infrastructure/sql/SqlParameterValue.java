@@ -337,7 +337,7 @@ public interface SqlParameterValue {
    */
   static SqlParameterValue of(OffsetDateTime value) {
     return new StaticSqlParameterValue(value,
-        (index, ps) -> ps.setTimestamp(index, Timestamp.valueOf(value.toLocalDateTime())));
+        (index, ps) -> ps.setTimestamp(index, Timestamp.from(value.toInstant())));
   }
 
   /**

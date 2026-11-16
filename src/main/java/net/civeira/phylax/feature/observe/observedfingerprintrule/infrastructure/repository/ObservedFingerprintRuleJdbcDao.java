@@ -305,7 +305,7 @@ public class ObservedFingerprintRuleJdbcDao {
   public Optional<ObservedFingerprintRule> findForUpdate(ObservedFingerprintRuleFilter filter) {
     ObservedFingerprintRuleCursor cursor = ObservedFingerprintRuleCursor.builder().build();
     return new ObservedFingerprintRuleSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -365,7 +365,7 @@ public class ObservedFingerprintRuleJdbcDao {
   public List<ObservedFingerprintRule> listForUpdate(ObservedFingerprintRuleFilter filter) {
     ObservedFingerprintRuleCursor cursor = ObservedFingerprintRuleCursor.builder().build();
     return new ObservedFingerprintRuleSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -469,7 +469,7 @@ public class ObservedFingerprintRuleJdbcDao {
   public Slider<ObservedFingerprintRule> slideForUpdate(ObservedFingerprintRuleFilter filter,
       ObservedFingerprintRuleCursor cursor) {
     return new ObservedFingerprintRuleSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

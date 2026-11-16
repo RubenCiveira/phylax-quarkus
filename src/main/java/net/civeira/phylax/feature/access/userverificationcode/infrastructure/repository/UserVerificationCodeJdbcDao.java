@@ -305,7 +305,7 @@ public class UserVerificationCodeJdbcDao {
   public Optional<UserVerificationCode> findForUpdate(UserVerificationCodeFilter filter) {
     UserVerificationCodeCursor cursor = UserVerificationCodeCursor.builder().build();
     return new UserVerificationCodeSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -365,7 +365,7 @@ public class UserVerificationCodeJdbcDao {
   public List<UserVerificationCode> listForUpdate(UserVerificationCodeFilter filter) {
     UserVerificationCodeCursor cursor = UserVerificationCodeCursor.builder().build();
     return new UserVerificationCodeSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -467,7 +467,7 @@ public class UserVerificationCodeJdbcDao {
   public Slider<UserVerificationCode> slideForUpdate(UserVerificationCodeFilter filter,
       UserVerificationCodeCursor cursor) {
     return new UserVerificationCodeSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

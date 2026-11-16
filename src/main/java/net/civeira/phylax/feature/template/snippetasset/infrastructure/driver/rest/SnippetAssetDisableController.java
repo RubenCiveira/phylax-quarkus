@@ -71,9 +71,6 @@ public class SnippetAssetDisableController {
       final String code, final String snippet, final List<String> snippets) {
     SnippetAssetDisableFilter.SnippetAssetDisableFilterBuilder filterBuilder =
         SnippetAssetDisableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

@@ -272,7 +272,8 @@ class SqlParameterValueUnitTest {
     OffsetDateTime offsetDateTime = OffsetDateTime.parse("2023-12-25T10:15:30+01:00");
     SqlParameterValue param = SqlParameterValue.of(offsetDateTime);
     param.accept(1, ps);
-    verify(ps).setTimestamp(1, Timestamp.valueOf(offsetDateTime.toLocalDateTime()));
+    // The instant is kept whatever the offset of the value and the zone of the jvm
+    verify(ps).setTimestamp(1, Timestamp.from(offsetDateTime.toInstant()));
   }
 
   @Test

@@ -289,7 +289,7 @@ public class ObservedIssueCommentJdbcDao {
   public Optional<ObservedIssueComment> findForUpdate(ObservedIssueCommentFilter filter) {
     ObservedIssueCommentCursor cursor = ObservedIssueCommentCursor.builder().build();
     return new ObservedIssueCommentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -349,7 +349,7 @@ public class ObservedIssueCommentJdbcDao {
   public List<ObservedIssueComment> listForUpdate(ObservedIssueCommentFilter filter) {
     ObservedIssueCommentCursor cursor = ObservedIssueCommentCursor.builder().build();
     return new ObservedIssueCommentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -451,7 +451,7 @@ public class ObservedIssueCommentJdbcDao {
   public Slider<ObservedIssueComment> slideForUpdate(ObservedIssueCommentFilter filter,
       ObservedIssueCommentCursor cursor) {
     return new ObservedIssueCommentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

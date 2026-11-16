@@ -62,9 +62,6 @@ public class UserPersonalApiKeyDeleteController {
       final String keyHash, final String user, final String name) {
     UserPersonalApiKeyDeleteFilter.UserPersonalApiKeyDeleteFilterBuilder filterBuilder =
         UserPersonalApiKeyDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

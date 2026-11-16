@@ -28,8 +28,19 @@ public class FinishRegistrationUsecase {
   private final WebAuthnCredentialGateway credentialGateway;
   private final WebAuthnVerifierGateway verifier;
 
-  public void finish(String challengeId, String tenantName, Map<String, Object> clientCredential,
-      String origin, String rpId, String deviceName) {
+  /**
+   * Verifies the browser answer to a registration challenge and stores the new passkey.
+   *
+   * @param challengeId challenge handed out by the begin step
+   * @param tenantName tenant name of the endpoint
+   * @param sessionUserUid user of the session that asks: the challenge must belong to that user
+   * @param clientCredential the {@code PublicKeyCredential} serialized by the browser
+   * @param origin expected browser origin
+   * @param rpId relying party id
+   * @param deviceName name the user gives to the passkey
+   */
+  public void finish(String challengeId, String tenantName, String sessionUserUid,
+      Map<String, Object> clientCredential, String origin, String rpId, String deviceName) {
     var tenant =
         tenants.find(TenantFilter.builder().name(tenantName).build()).filter(t -> t.isEnabled())
             .orElseThrow(() -> new IllegalArgumentException("tenant " + tenantName));
@@ -45,15 +56,23 @@ public class FinishRegistrationUsecase {
     if (!"register".equals(challenge.getType())) {
       throw WebAuthnException.verificationFailed("wrong challenge type");
     }
+    if (challenge.isVerified()) {
+      throw WebAuthnException.challengeUsed();
+    }
 
     String userUid = challenge.getUserUid()
         .orElseThrow(() -> WebAuthnException.verificationFailed("no user in challenge"));
+    if (!userUid.equals(sessionUserUid)) {
+      throw WebAuthnException.verificationFailed("challenge of another user");
+    }
 
     var user = users.find(UserFilter.builder().tenant(tenant).uid(userUid).build())
         .orElseThrow(() -> new IllegalArgumentException("user " + userUid));
 
     Map<String, Object> result =
         verifier.verifyRegistration(clientCredential, challenge.getChallenge(), origin, rpId);
+
+    challengeGateway.markVerified(challenge.markVerified(userUid, user.getName()));
 
     String loginName = user.getEmail().orElseGet(() -> user.getName());
 

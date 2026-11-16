@@ -1029,7 +1029,7 @@ public class OauthClientJdbcDao {
   public Optional<OauthClient> findForUpdate(OauthClientFilter filter) {
     OauthClientCursor cursor = OauthClientCursor.builder().build();
     return new OauthClientSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -1089,7 +1089,7 @@ public class OauthClientJdbcDao {
   public List<OauthClient> listForUpdate(OauthClientFilter filter) {
     OauthClientCursor cursor = OauthClientCursor.builder().build();
     return new OauthClientSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -1187,7 +1187,7 @@ public class OauthClientJdbcDao {
    */
   public Slider<OauthClient> slideForUpdate(OauthClientFilter filter, OauthClientCursor cursor) {
     return new OauthClientSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

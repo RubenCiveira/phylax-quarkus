@@ -12,5 +12,10 @@ package net.civeira.phylax.feature.oauth.authentication.domain;
  */
 public enum AuthenticationChallenge {
 
-  PASSWORD, MFA, FRESH_PASSWORD, USE_CONSENT, CLIENT_CONSENT;
+  PASSWORD, MFA, FRESH_PASSWORD, USE_CONSENT, CLIENT_CONSENT,
+  /**
+   * A passkey answered a login challenge with user verification: possession plus PIN or biometrics,
+   * so it stands for the password and the second factor together.
+   */
+  WEBAUTHN;
 }

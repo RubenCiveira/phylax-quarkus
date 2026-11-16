@@ -60,9 +60,6 @@ public class MessageDeleteController {
   public Response messageApiBatchDelete(final List<String> uids, final String search,
       final String tenant, final List<String> tenants) {
     MessageDeleteFilter.MessageDeleteFilterBuilder filterBuilder = MessageDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

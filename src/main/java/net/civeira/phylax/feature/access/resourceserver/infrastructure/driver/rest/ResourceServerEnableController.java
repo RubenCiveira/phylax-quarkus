@@ -62,9 +62,6 @@ public class ResourceServerEnableController {
       final String apiKey, final String code) {
     ResourceServerEnableFilter.ResourceServerEnableFilterBuilder filterBuilder =
         ResourceServerEnableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

@@ -75,9 +75,6 @@ public class ObservedIssueMarkResolvedController {
       final String kind, final String title) {
     ObservedIssueMarkResolvedFilter.ObservedIssueMarkResolvedFilterBuilder filterBuilder =
         ObservedIssueMarkResolvedFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

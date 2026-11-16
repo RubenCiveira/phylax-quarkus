@@ -37,6 +37,11 @@ import net.civeira.phylax.feature.oauth.webauthn.domain.gateway.WebAuthnVerifier
  * validation — suitable for passkey flows where attestation trust anchors are not required. Switch
  * to a strict manager with a real trust-anchor store if attestation is mandated.
  * </p>
+ *
+ * <p>
+ * Both ceremonies require user presence and user verification (PIN or biometrics on the
+ * authenticator): a passkey is then possession plus a second factor, enough to sign in alone.
+ * </p>
  */
 @ApplicationScoped
 public class WebAuthnVerifierAdapter implements WebAuthnVerifierGateway {
@@ -70,7 +75,7 @@ public class WebAuthnVerifierAdapter implements WebAuthnVerifierGateway {
           .challenge(new DefaultChallenge(decode(challenge))).build();
 
       var data = webAuthnManager.verify(request,
-          new RegistrationParameters(serverProperty, PUB_KEY_CRED_PARAMS, false, false));
+          new RegistrationParameters(serverProperty, PUB_KEY_CRED_PARAMS, true, true));
 
       var authenticatorData = data.getAttestationObject().getAuthenticatorData();
       var attestedCredential = authenticatorData.getAttestedCredentialData();
@@ -137,7 +142,7 @@ public class WebAuthnVerifierAdapter implements WebAuthnVerifierGateway {
           .challenge(new DefaultChallenge(decode(challenge))).build();
 
       var data = webAuthnManager.verify(request,
-          new AuthenticationParameters(serverProperty, credentialRecord, null, false, false));
+          new AuthenticationParameters(serverProperty, credentialRecord, null, true, true));
 
       int newSignCount = (int) data.getAuthenticatorData().getSignCount();
       if (storedSignCount > 0 && newSignCount <= storedSignCount) {

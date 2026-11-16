@@ -347,7 +347,7 @@ public class UserPersonalApiKeyJdbcDao {
   public Optional<UserPersonalApiKey> findForUpdate(UserPersonalApiKeyFilter filter) {
     UserPersonalApiKeyCursor cursor = UserPersonalApiKeyCursor.builder().build();
     return new UserPersonalApiKeySlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -407,7 +407,7 @@ public class UserPersonalApiKeyJdbcDao {
   public List<UserPersonalApiKey> listForUpdate(UserPersonalApiKeyFilter filter) {
     UserPersonalApiKeyCursor cursor = UserPersonalApiKeyCursor.builder().build();
     return new UserPersonalApiKeySlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -509,7 +509,7 @@ public class UserPersonalApiKeyJdbcDao {
   public Slider<UserPersonalApiKey> slideForUpdate(UserPersonalApiKeyFilter filter,
       UserPersonalApiKeyCursor cursor) {
     return new UserPersonalApiKeySlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

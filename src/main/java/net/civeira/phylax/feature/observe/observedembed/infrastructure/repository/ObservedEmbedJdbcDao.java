@@ -400,7 +400,7 @@ public class ObservedEmbedJdbcDao {
   public Optional<ObservedEmbed> findForUpdate(ObservedEmbedFilter filter) {
     ObservedEmbedCursor cursor = ObservedEmbedCursor.builder().build();
     return new ObservedEmbedSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -459,7 +459,7 @@ public class ObservedEmbedJdbcDao {
   public List<ObservedEmbed> listForUpdate(ObservedEmbedFilter filter) {
     ObservedEmbedCursor cursor = ObservedEmbedCursor.builder().build();
     return new ObservedEmbedSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -559,7 +559,7 @@ public class ObservedEmbedJdbcDao {
   public Slider<ObservedEmbed> slideForUpdate(ObservedEmbedFilter filter,
       ObservedEmbedCursor cursor) {
     return new ObservedEmbedSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

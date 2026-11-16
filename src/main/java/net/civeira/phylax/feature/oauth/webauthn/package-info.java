@@ -58,9 +58,13 @@
  * attestation statement parsing, and COSE signature verification.</li>
  * <li>{@code WebAuthnChallengeAdapter} / {@code WebAuthnCredentialAdapter} — driven SQL adapters
  * for challenge and credential persistence respectively.</li>
- * <li>{@code WebAuthnController} — REST driver exposing four endpoints: begin-registration,
- * finish-registration, begin-authentication, and finish-authentication, consumed by the
- * browser-side WebAuthn JavaScript API.</li>
+ * <li>{@code WebAuthnController} — REST driver for the browser script ({@code /oauth/assets/
+ * webauthn.js}): begin-registration and finish-registration, bound to the user of the session open
+ * in the tenant (never to a user named in the body), and begin-authentication. The signed login
+ * answer is not posted here but to the authorize form, where {@code WebAuthnLoginStep} checks it
+ * and opens the session.</li>
+ * <li>{@code WebAuthnRelyingParty} — resolves rp id, rp name and the expected origin of a tenant
+ * from the public host of the server, not from the {@code Origin} header of the caller.</li>
  * </ul>
  *
  * <p>
@@ -79,13 +83,15 @@
  * │   └── finishauthentication/FinishAuthenticationUsecase.java / FinishAuthenticationResult.java
  * └── infrastructure/
  *     ├── driven/    — WebAuthnVerifierAdapter, WebAuthnChallengeAdapter, WebAuthnCredentialAdapter
- *     └── driver/rest/WebAuthnController.java
+ *     └── driver/    — WebAuthnRelyingParty, rest/WebAuthnController
  * </pre>
  *
  * <p>
- * <b>Dependencies:</b> Invoked by the Authentication context from the WEBAUTHN challenge step.
- * Requires access to the user identifier from the active session. The Profile context may link to
- * registration ceremonies for credential management in the self-service portal.
+ * <b>Dependencies:</b> Invoked by the Authentication context from the WEBAUTHN challenge step
+ * ({@code WebAuthnLoginStep}, the "sign in with a passkey" button and the username autofill of the
+ * login page). Both ceremonies require user verification, so a passkey sign-in counts as two
+ * factors. The Profile context ({@code /me/passkeys}) starts the registration ceremony and lists,
+ * renames and removes the passkeys of the account.
  *
  * <p>
  * <b>Stability:</b> evolving; the W3C WebAuthn spec is stable but platform authenticator support

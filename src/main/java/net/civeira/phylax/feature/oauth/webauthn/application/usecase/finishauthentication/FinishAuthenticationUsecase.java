@@ -9,6 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import net.civeira.phylax.feature.identity.tenant.domain.gateway.TenantFilter;
 import net.civeira.phylax.feature.identity.tenant.domain.gateway.TenantQueryRepositoryGateway;
+import net.civeira.phylax.feature.identity.user.domain.gateway.UserFilter;
+import net.civeira.phylax.feature.identity.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.feature.oauth.webauthn.domain.exception.WebAuthnException;
 import net.civeira.phylax.feature.oauth.webauthn.domain.gateway.WebAuthnChallengeGateway;
 import net.civeira.phylax.feature.oauth.webauthn.domain.gateway.WebAuthnCredentialGateway;
@@ -19,6 +21,7 @@ import net.civeira.phylax.feature.oauth.webauthn.domain.gateway.WebAuthnVerifier
 public class FinishAuthenticationUsecase {
 
   private final TenantQueryRepositoryGateway tenants;
+  private final UserQueryRepositoryGateway users;
   private final WebAuthnChallengeGateway challengeGateway;
   private final WebAuthnCredentialGateway credentialGateway;
   private final WebAuthnVerifierGateway verifier;
@@ -40,8 +43,14 @@ public class FinishAuthenticationUsecase {
     if (!"authenticate".equals(challenge.getType())) {
       throw WebAuthnException.verificationFailed("wrong challenge type");
     }
+    if (challenge.isVerified()) {
+      // Single use: a captured answer can not be posted again (passkeys often keep signCount 0).
+      throw WebAuthnException.challengeUsed();
+    }
 
-    String credentialId = (String) clientCredential.get("id");
+    if (!(clientCredential.get("id") instanceof String credentialId) || credentialId.isBlank()) {
+      throw WebAuthnException.credentialNotFound();
+    }
     var storedCredential = credentialGateway.findByCredentialId(credentialId, tenantId)
         .orElseThrow(WebAuthnException::credentialNotFound);
 
@@ -55,11 +64,14 @@ public class FinishAuthenticationUsecase {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     credentialGateway.updateSignCount(credentialId, tenantId, newSignCount, now);
 
-    var verified =
-        challenge.markVerified(storedCredential.getUserUid(), storedCredential.getUsername());
+    // The login name of today: the stored one may be an email or a name since renamed.
+    var user =
+        users.find(UserFilter.builder().tenant(tenant).uid(storedCredential.getUserUid()).build())
+            .orElseThrow(WebAuthnException::credentialNotFound);
+
+    var verified = challenge.markVerified(user.getUid(), user.getName());
     challengeGateway.markVerified(verified);
 
-    return new FinishAuthenticationResult(storedCredential.getUserUid(),
-        storedCredential.getUsername());
+    return new FinishAuthenticationResult(user.getUid(), user.getName());
   }
 }

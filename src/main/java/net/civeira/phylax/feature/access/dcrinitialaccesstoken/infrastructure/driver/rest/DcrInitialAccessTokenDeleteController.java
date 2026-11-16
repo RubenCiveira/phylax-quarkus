@@ -62,9 +62,6 @@ public class DcrInitialAccessTokenDeleteController {
       final String description, final String tenant, final List<String> tenants) {
     DcrInitialAccessTokenDeleteFilter.DcrInitialAccessTokenDeleteFilterBuilder filterBuilder =
         DcrInitialAccessTokenDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

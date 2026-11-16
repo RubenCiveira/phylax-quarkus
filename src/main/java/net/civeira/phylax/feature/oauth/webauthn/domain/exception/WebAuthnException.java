@@ -16,6 +16,10 @@ public final class WebAuthnException extends RuntimeException {
     return new WebAuthnException("WebAuthn challenge not found");
   }
 
+  public static WebAuthnException challengeUsed() {
+    return new WebAuthnException("WebAuthn challenge was already used");
+  }
+
   public static WebAuthnException credentialNotFound() {
     return new WebAuthnException("WebAuthn credential not found");
   }

@@ -30,6 +30,24 @@ public class AccountDeletionPanel {
         + "</div>";
   }
 
+  /**
+   * The page of the mail link: the deletion runs only when the user posts this form, so a link
+   * opened by a mail scanner deletes nothing.
+   */
+  public String renderConfirmRequest(String confirmUrl, String uid, String code, String cancelUrl,
+      YamlLocaleMessages t) {
+    return "<h1>" + t.get("profile.delete-account.title") + "</h1>" + "<p class=\"warning-text\">"
+        + esc(text(t, "profile.delete-account.confirmHelp",
+            "Your account and its personal data will be deleted. This cannot be undone."))
+        + "</p>" + "<form method=\"POST\" action=\"" + esc(confirmUrl)
+        + "\" class=\"profile-actions\">" + "<input type=\"hidden\" name=\"uid\" value=\""
+        + esc(uid) + "\" />" + "<input type=\"hidden\" name=\"code\" value=\"" + esc(code) + "\" />"
+        + "<input type=\"submit\" class=\"danger-button\" value=\""
+        + esc(text(t, "profile.delete-account.confirm", "Delete my account")) + "\" />"
+        + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
+        + t.get("profile.delete-account.backToProfile") + "</a>" + "</form>";
+  }
+
   public String renderConfirmed(YamlLocaleMessages t) {
     return "<h1>" + t.get("profile.delete-account.confirmedTitle") + "</h1>"
         + "<p class=\"change-password-success\">" + t.get("profile.delete-account.confirmedHelp")
@@ -41,5 +59,9 @@ public class AccountDeletionPanel {
         + t.get("profile.delete-account.errorToken") + "</p>" + "<div class=\"profile-actions\">"
         + "<a class=\"secondary-button\" href=\"" + esc(cancelUrl) + "\">"
         + t.get("profile.delete-account.backToProfile") + "</a>" + "</div>";
+  }
+
+  private static String text(YamlLocaleMessages t, String key, String fallback) {
+    return t.contains(key) ? t.get(key) : fallback;
   }
 }

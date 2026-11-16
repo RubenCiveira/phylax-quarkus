@@ -273,7 +273,7 @@ public class UserMfaEnrollmentJdbcDao {
   public Optional<UserMfaEnrollment> findForUpdate(UserMfaEnrollmentFilter filter) {
     UserMfaEnrollmentCursor cursor = UserMfaEnrollmentCursor.builder().build();
     return new UserMfaEnrollmentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -333,7 +333,7 @@ public class UserMfaEnrollmentJdbcDao {
   public List<UserMfaEnrollment> listForUpdate(UserMfaEnrollmentFilter filter) {
     UserMfaEnrollmentCursor cursor = UserMfaEnrollmentCursor.builder().build();
     return new UserMfaEnrollmentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -435,7 +435,7 @@ public class UserMfaEnrollmentJdbcDao {
   public Slider<UserMfaEnrollment> slideForUpdate(UserMfaEnrollmentFilter filter,
       UserMfaEnrollmentCursor cursor) {
     return new UserMfaEnrollmentSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

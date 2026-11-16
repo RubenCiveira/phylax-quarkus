@@ -250,7 +250,7 @@ public class ResourceServerJdbcDao {
   public Optional<ResourceServer> findForUpdate(ResourceServerFilter filter) {
     ResourceServerCursor cursor = ResourceServerCursor.builder().build();
     return new ResourceServerSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -309,7 +309,7 @@ public class ResourceServerJdbcDao {
   public List<ResourceServer> listForUpdate(ResourceServerFilter filter) {
     ResourceServerCursor cursor = ResourceServerCursor.builder().build();
     return new ResourceServerSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -409,7 +409,7 @@ public class ResourceServerJdbcDao {
   public Slider<ResourceServer> slideForUpdate(ResourceServerFilter filter,
       ResourceServerCursor cursor) {
     return new ResourceServerSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

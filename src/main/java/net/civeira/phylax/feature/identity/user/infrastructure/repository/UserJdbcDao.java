@@ -414,7 +414,7 @@ public class UserJdbcDao {
   public Optional<User> findForUpdate(UserFilter filter) {
     UserCursor cursor = UserCursor.builder().build();
     return new UserSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -473,7 +473,7 @@ public class UserJdbcDao {
   public List<User> listForUpdate(UserFilter filter) {
     UserCursor cursor = UserCursor.builder().build();
     return new UserSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -570,7 +570,7 @@ public class UserJdbcDao {
    */
   public Slider<User> slideForUpdate(UserFilter filter, UserCursor cursor) {
     return new UserSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

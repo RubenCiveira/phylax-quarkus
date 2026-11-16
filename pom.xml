@@ -177,6 +177,12 @@
       <artifactId>mariadb-java-client</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>2.3.232</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -407,7 +413,12 @@
                 </goals>
               </execution>
             </executions>
-            <configuration />
+            <configuration>
+              <inclNoLocationClasses>true</inclNoLocationClasses>
+              <excludes>
+                <exclude>net/civeira/phylax/generated/**</exclude>
+              </excludes>
+            </configuration>
           </plugin>
         </plugins>
       </build>
@@ -458,7 +469,6 @@
       </properties>
     </profile>
     <profile>
-      <!-- Only where toolchains are defined (dev machines); builder images (Mandrel) already run on the right JDK. -->
       <id>toolchains</id>
       <activation>
         <file>

@@ -387,7 +387,7 @@ public class UserInvitationJdbcDao {
   public Optional<UserInvitation> findForUpdate(UserInvitationFilter filter) {
     UserInvitationCursor cursor = UserInvitationCursor.builder().build();
     return new UserInvitationSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -446,7 +446,7 @@ public class UserInvitationJdbcDao {
   public List<UserInvitation> listForUpdate(UserInvitationFilter filter) {
     UserInvitationCursor cursor = UserInvitationCursor.builder().build();
     return new UserInvitationSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -546,7 +546,7 @@ public class UserInvitationJdbcDao {
   public Slider<UserInvitation> slideForUpdate(UserInvitationFilter filter,
       UserInvitationCursor cursor) {
     return new UserInvitationSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

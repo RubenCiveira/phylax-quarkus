@@ -283,7 +283,7 @@ public class UserFederatedIdentityJdbcDao {
   public Optional<UserFederatedIdentity> findForUpdate(UserFederatedIdentityFilter filter) {
     UserFederatedIdentityCursor cursor = UserFederatedIdentityCursor.builder().build();
     return new UserFederatedIdentitySlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -343,7 +343,7 @@ public class UserFederatedIdentityJdbcDao {
   public List<UserFederatedIdentity> listForUpdate(UserFederatedIdentityFilter filter) {
     UserFederatedIdentityCursor cursor = UserFederatedIdentityCursor.builder().build();
     return new UserFederatedIdentitySlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -445,7 +445,7 @@ public class UserFederatedIdentityJdbcDao {
   public Slider<UserFederatedIdentity> slideForUpdate(UserFederatedIdentityFilter filter,
       UserFederatedIdentityCursor cursor) {
     return new UserFederatedIdentitySlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

@@ -283,7 +283,7 @@ public class SnippetVersionJdbcDao {
   public Optional<SnippetVersion> findForUpdate(SnippetVersionFilter filter) {
     SnippetVersionCursor cursor = SnippetVersionCursor.builder().build();
     return new SnippetVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -342,7 +342,7 @@ public class SnippetVersionJdbcDao {
   public List<SnippetVersion> listForUpdate(SnippetVersionFilter filter) {
     SnippetVersionCursor cursor = SnippetVersionCursor.builder().build();
     return new SnippetVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -442,7 +442,7 @@ public class SnippetVersionJdbcDao {
   public Slider<SnippetVersion> slideForUpdate(SnippetVersionFilter filter,
       SnippetVersionCursor cursor) {
     return new SnippetVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

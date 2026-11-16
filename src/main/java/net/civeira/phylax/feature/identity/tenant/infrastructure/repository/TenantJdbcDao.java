@@ -290,7 +290,7 @@ public class TenantJdbcDao {
   public Optional<Tenant> findForUpdate(TenantFilter filter) {
     TenantCursor cursor = TenantCursor.builder().build();
     return new TenantSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -349,7 +349,7 @@ public class TenantJdbcDao {
   public List<Tenant> listForUpdate(TenantFilter filter) {
     TenantCursor cursor = TenantCursor.builder().build();
     return new TenantSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -446,7 +446,7 @@ public class TenantJdbcDao {
    */
   public Slider<Tenant> slideForUpdate(TenantFilter filter, TenantCursor cursor) {
     return new TenantSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

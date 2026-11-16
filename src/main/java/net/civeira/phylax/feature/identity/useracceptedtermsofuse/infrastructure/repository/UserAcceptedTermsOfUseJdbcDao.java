@@ -303,7 +303,7 @@ public class UserAcceptedTermsOfUseJdbcDao {
   public Optional<UserAcceptedTermsOfUse> findForUpdate(UserAcceptedTermsOfUseFilter filter) {
     UserAcceptedTermsOfUseCursor cursor = UserAcceptedTermsOfUseCursor.builder().build();
     return new UserAcceptedTermsOfUseSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -363,7 +363,7 @@ public class UserAcceptedTermsOfUseJdbcDao {
   public List<UserAcceptedTermsOfUse> listForUpdate(UserAcceptedTermsOfUseFilter filter) {
     UserAcceptedTermsOfUseCursor cursor = UserAcceptedTermsOfUseCursor.builder().build();
     return new UserAcceptedTermsOfUseSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -467,7 +467,7 @@ public class UserAcceptedTermsOfUseJdbcDao {
   public Slider<UserAcceptedTermsOfUse> slideForUpdate(UserAcceptedTermsOfUseFilter filter,
       UserAcceptedTermsOfUseCursor cursor) {
     return new UserAcceptedTermsOfUseSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

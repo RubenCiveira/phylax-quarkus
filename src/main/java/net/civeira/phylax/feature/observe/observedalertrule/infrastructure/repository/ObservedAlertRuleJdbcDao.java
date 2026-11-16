@@ -367,7 +367,7 @@ public class ObservedAlertRuleJdbcDao {
   public Optional<ObservedAlertRule> findForUpdate(ObservedAlertRuleFilter filter) {
     ObservedAlertRuleCursor cursor = ObservedAlertRuleCursor.builder().build();
     return new ObservedAlertRuleSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -427,7 +427,7 @@ public class ObservedAlertRuleJdbcDao {
   public List<ObservedAlertRule> listForUpdate(ObservedAlertRuleFilter filter) {
     ObservedAlertRuleCursor cursor = ObservedAlertRuleCursor.builder().build();
     return new ObservedAlertRuleSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -529,7 +529,7 @@ public class ObservedAlertRuleJdbcDao {
   public Slider<ObservedAlertRule> slideForUpdate(ObservedAlertRuleFilter filter,
       ObservedAlertRuleCursor cursor) {
     return new ObservedAlertRuleSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

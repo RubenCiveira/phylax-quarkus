@@ -61,9 +61,6 @@ public class TemplateVersionDeleteController {
       final String template, final List<String> templates) {
     TemplateVersionDeleteFilter.TemplateVersionDeleteFilterBuilder filterBuilder =
         TemplateVersionDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

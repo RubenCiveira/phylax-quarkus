@@ -278,7 +278,7 @@ public class TemplateAssetJdbcDao {
   public Optional<TemplateAsset> findForUpdate(TemplateAssetFilter filter) {
     TemplateAssetCursor cursor = TemplateAssetCursor.builder().build();
     return new TemplateAssetSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -337,7 +337,7 @@ public class TemplateAssetJdbcDao {
   public List<TemplateAsset> listForUpdate(TemplateAssetFilter filter) {
     TemplateAssetCursor cursor = TemplateAssetCursor.builder().build();
     return new TemplateAssetSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -437,7 +437,7 @@ public class TemplateAssetJdbcDao {
   public Slider<TemplateAsset> slideForUpdate(TemplateAssetFilter filter,
       TemplateAssetCursor cursor) {
     return new TemplateAssetSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

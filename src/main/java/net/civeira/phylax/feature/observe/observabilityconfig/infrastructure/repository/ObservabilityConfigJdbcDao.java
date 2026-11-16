@@ -447,7 +447,7 @@ public class ObservabilityConfigJdbcDao {
   public Optional<ObservabilityConfig> findForUpdate(ObservabilityConfigFilter filter) {
     ObservabilityConfigCursor cursor = ObservabilityConfigCursor.builder().build();
     return new ObservabilityConfigSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -507,7 +507,7 @@ public class ObservabilityConfigJdbcDao {
   public List<ObservabilityConfig> listForUpdate(ObservabilityConfigFilter filter) {
     ObservabilityConfigCursor cursor = ObservabilityConfigCursor.builder().build();
     return new ObservabilityConfigSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -609,7 +609,7 @@ public class ObservabilityConfigJdbcDao {
   public Slider<ObservabilityConfig> slideForUpdate(ObservabilityConfigFilter filter,
       ObservabilityConfigCursor cursor) {
     return new ObservabilityConfigSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

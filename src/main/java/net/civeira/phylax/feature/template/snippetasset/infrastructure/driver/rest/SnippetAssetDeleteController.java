@@ -62,9 +62,6 @@ public class SnippetAssetDeleteController {
       final String code, final String snippet, final List<String> snippets) {
     SnippetAssetDeleteFilter.SnippetAssetDeleteFilterBuilder filterBuilder =
         SnippetAssetDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

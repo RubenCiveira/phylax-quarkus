@@ -66,9 +66,6 @@ public class UserFederatedIdentityDeleteController {
       final List<String> loginProviders) {
     UserFederatedIdentityDeleteFilter.UserFederatedIdentityDeleteFilterBuilder filterBuilder =
         UserFederatedIdentityDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

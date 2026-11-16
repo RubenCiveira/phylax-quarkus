@@ -236,7 +236,7 @@ public class RoleJdbcDao {
   public Optional<Role> findForUpdate(RoleFilter filter) {
     RoleCursor cursor = RoleCursor.builder().build();
     return new RoleSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -295,7 +295,7 @@ public class RoleJdbcDao {
   public List<Role> listForUpdate(RoleFilter filter) {
     RoleCursor cursor = RoleCursor.builder().build();
     return new RoleSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -392,7 +392,7 @@ public class RoleJdbcDao {
    */
   public Slider<Role> slideForUpdate(RoleFilter filter, RoleCursor cursor) {
     return new RoleSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

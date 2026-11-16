@@ -61,7 +61,10 @@ public class BeginRegistrationUsecase {
         "pubKeyCredParams",
         List.of(Map.of("alg", -7, "type", "public-key"), Map.of("alg", -257, "type", "public-key")),
         "authenticatorSelection",
-        Map.of("residentKey", "preferred", "userVerification", "preferred"), "excludeCredentials",
+        // Discoverable and verified: the passkey alone signs in (no username, two factors).
+        Map.of(
+            "residentKey", "required", "requireResidentKey", true, "userVerification", "required"),
+        "excludeCredentials",
         existingCredentials.stream()
             .map(c -> Map.<String, Object>of("id", c.getCredentialId(), "type", "public-key"))
             .toList(),

@@ -65,9 +65,6 @@ public class TenantTermsOfUseDeleteController {
       final List<String> resourceServers) {
     TenantTermsOfUseDeleteFilter.TenantTermsOfUseDeleteFilterBuilder filterBuilder =
         TenantTermsOfUseDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

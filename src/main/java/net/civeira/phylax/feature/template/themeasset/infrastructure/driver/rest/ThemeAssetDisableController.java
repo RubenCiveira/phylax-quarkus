@@ -71,9 +71,6 @@ public class ThemeAssetDisableController {
       final String code, final String theme, final List<String> themes) {
     ThemeAssetDisableFilter.ThemeAssetDisableFilterBuilder filterBuilder =
         ThemeAssetDisableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

@@ -309,7 +309,7 @@ public class ObservedSloJdbcDao {
   public Optional<ObservedSlo> findForUpdate(ObservedSloFilter filter) {
     ObservedSloCursor cursor = ObservedSloCursor.builder().build();
     return new ObservedSloSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -368,7 +368,7 @@ public class ObservedSloJdbcDao {
   public List<ObservedSlo> listForUpdate(ObservedSloFilter filter) {
     ObservedSloCursor cursor = ObservedSloCursor.builder().build();
     return new ObservedSloSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -466,7 +466,7 @@ public class ObservedSloJdbcDao {
    */
   public Slider<ObservedSlo> slideForUpdate(ObservedSloFilter filter, ObservedSloCursor cursor) {
     return new ObservedSloSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

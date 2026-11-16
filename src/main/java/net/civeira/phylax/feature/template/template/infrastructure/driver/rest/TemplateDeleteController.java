@@ -62,9 +62,6 @@ public class TemplateDeleteController {
   public Response templateApiBatchDelete(final List<String> uids, final String search,
       final Boolean global, final String code, final String tenant, final List<String> tenants) {
     TemplateDeleteFilter.TemplateDeleteFilterBuilder filterBuilder = TemplateDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

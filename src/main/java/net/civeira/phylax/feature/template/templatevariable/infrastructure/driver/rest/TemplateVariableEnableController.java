@@ -65,9 +65,6 @@ public class TemplateVariableEnableController {
       final String code, final String tenant, final List<String> tenants) {
     TemplateVariableEnableFilter.TemplateVariableEnableFilterBuilder filterBuilder =
         TemplateVariableEnableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

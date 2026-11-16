@@ -276,7 +276,7 @@ public class UserGroupMembershipJdbcDao {
   public Optional<UserGroupMembership> findForUpdate(UserGroupMembershipFilter filter) {
     UserGroupMembershipCursor cursor = UserGroupMembershipCursor.builder().build();
     return new UserGroupMembershipSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -336,7 +336,7 @@ public class UserGroupMembershipJdbcDao {
   public List<UserGroupMembership> listForUpdate(UserGroupMembershipFilter filter) {
     UserGroupMembershipCursor cursor = UserGroupMembershipCursor.builder().build();
     return new UserGroupMembershipSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -438,7 +438,7 @@ public class UserGroupMembershipJdbcDao {
   public Slider<UserGroupMembership> slideForUpdate(UserGroupMembershipFilter filter,
       UserGroupMembershipCursor cursor) {
     return new UserGroupMembershipSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

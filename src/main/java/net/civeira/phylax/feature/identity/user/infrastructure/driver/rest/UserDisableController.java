@@ -66,9 +66,6 @@ public class UserDisableController {
   public Response userApiBatchDisable(final List<String> uids, final String search,
       final String name, final String tenant, final List<String> tenants) {
     UserDisableFilter.UserDisableFilterBuilder filterBuilder = UserDisableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

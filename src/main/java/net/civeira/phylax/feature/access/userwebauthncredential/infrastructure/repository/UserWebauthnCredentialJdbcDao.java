@@ -385,7 +385,7 @@ public class UserWebauthnCredentialJdbcDao {
   public Optional<UserWebauthnCredential> findForUpdate(UserWebauthnCredentialFilter filter) {
     UserWebauthnCredentialCursor cursor = UserWebauthnCredentialCursor.builder().build();
     return new UserWebauthnCredentialSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).one();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -445,7 +445,7 @@ public class UserWebauthnCredentialJdbcDao {
   public List<UserWebauthnCredential> listForUpdate(UserWebauthnCredentialFilter filter) {
     UserWebauthnCredentialCursor cursor = UserWebauthnCredentialCursor.builder().build();
     return new UserWebauthnCredentialSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor).all();
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -549,7 +549,7 @@ public class UserWebauthnCredentialJdbcDao {
   public Slider<UserWebauthnCredential> slideForUpdate(UserWebauthnCredentialFilter filter,
       UserWebauthnCredentialCursor cursor) {
     return new UserWebauthnCredentialSlider(runListForUpdate(filter, cursor),
-        cursor.getLimit().orElse(0), this::runList, filter, cursor);
+        cursor.getLimit().orElse(0), this::runListForUpdate, filter, cursor);
   }
 
   /**

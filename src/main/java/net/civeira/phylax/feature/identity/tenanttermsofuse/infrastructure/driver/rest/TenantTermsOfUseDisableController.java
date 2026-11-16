@@ -75,9 +75,6 @@ public class TenantTermsOfUseDisableController {
       final List<String> resourceServers) {
     TenantTermsOfUseDisableFilter.TenantTermsOfUseDisableFilterBuilder filterBuilder =
         TenantTermsOfUseDisableFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

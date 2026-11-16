@@ -618,7 +618,7 @@ public class ObservedSourceJdbcDao {
   public Optional<ObservedSource> findForUpdate(ObservedSourceFilter filter) {
     ObservedSourceCursor cursor = ObservedSourceCursor.builder().build();
     return new ObservedSourceSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -677,7 +677,7 @@ public class ObservedSourceJdbcDao {
   public List<ObservedSource> listForUpdate(ObservedSourceFilter filter) {
     ObservedSourceCursor cursor = ObservedSourceCursor.builder().build();
     return new ObservedSourceSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -777,7 +777,7 @@ public class ObservedSourceJdbcDao {
   public Slider<ObservedSource> slideForUpdate(ObservedSourceFilter filter,
       ObservedSourceCursor cursor) {
     return new ObservedSourceSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

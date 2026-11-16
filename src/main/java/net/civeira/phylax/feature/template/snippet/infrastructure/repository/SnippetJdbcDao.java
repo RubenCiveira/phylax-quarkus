@@ -243,7 +243,7 @@ public class SnippetJdbcDao {
   public Optional<Snippet> findForUpdate(SnippetFilter filter) {
     SnippetCursor cursor = SnippetCursor.builder().build();
     return new SnippetSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -302,7 +302,7 @@ public class SnippetJdbcDao {
   public List<Snippet> listForUpdate(SnippetFilter filter) {
     SnippetCursor cursor = SnippetCursor.builder().build();
     return new SnippetSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -400,7 +400,7 @@ public class SnippetJdbcDao {
    */
   public Slider<Snippet> slideForUpdate(SnippetFilter filter, SnippetCursor cursor) {
     return new SnippetSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

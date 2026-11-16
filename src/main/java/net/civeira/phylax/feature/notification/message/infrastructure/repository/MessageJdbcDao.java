@@ -314,7 +314,7 @@ public class MessageJdbcDao {
   public Optional<Message> findForUpdate(MessageFilter filter) {
     MessageCursor cursor = MessageCursor.builder().build();
     return new MessageSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -373,7 +373,7 @@ public class MessageJdbcDao {
   public List<Message> listForUpdate(MessageFilter filter) {
     MessageCursor cursor = MessageCursor.builder().build();
     return new MessageSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -471,7 +471,7 @@ public class MessageJdbcDao {
    */
   public Slider<Message> slideForUpdate(MessageFilter filter, MessageCursor cursor) {
     return new MessageSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

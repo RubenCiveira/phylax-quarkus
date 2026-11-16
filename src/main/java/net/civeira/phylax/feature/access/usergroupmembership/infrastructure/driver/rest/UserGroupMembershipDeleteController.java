@@ -69,9 +69,6 @@ public class UserGroupMembershipDeleteController {
       final List<String> oauthClients) {
     UserGroupMembershipDeleteFilter.UserGroupMembershipDeleteFilterBuilder filterBuilder =
         UserGroupMembershipDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

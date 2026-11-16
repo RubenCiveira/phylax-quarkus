@@ -64,9 +64,6 @@ public class ObservedAlertRuleDeleteController {
       final String trigger, final String name, final String origin, final List<String> origins) {
     ObservedAlertRuleDeleteFilter.ObservedAlertRuleDeleteFilterBuilder filterBuilder =
         ObservedAlertRuleDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

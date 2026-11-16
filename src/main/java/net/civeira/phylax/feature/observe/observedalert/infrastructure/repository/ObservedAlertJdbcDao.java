@@ -326,7 +326,7 @@ public class ObservedAlertJdbcDao {
   public Optional<ObservedAlert> findForUpdate(ObservedAlertFilter filter) {
     ObservedAlertCursor cursor = ObservedAlertCursor.builder().build();
     return new ObservedAlertSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -385,7 +385,7 @@ public class ObservedAlertJdbcDao {
   public List<ObservedAlert> listForUpdate(ObservedAlertFilter filter) {
     ObservedAlertCursor cursor = ObservedAlertCursor.builder().build();
     return new ObservedAlertSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -485,7 +485,7 @@ public class ObservedAlertJdbcDao {
   public Slider<ObservedAlert> slideForUpdate(ObservedAlertFilter filter,
       ObservedAlertCursor cursor) {
     return new ObservedAlertSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

@@ -283,7 +283,7 @@ public class ThemeVersionJdbcDao {
   public Optional<ThemeVersion> findForUpdate(ThemeVersionFilter filter) {
     ThemeVersionCursor cursor = ThemeVersionCursor.builder().build();
     return new ThemeVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).one();
+        this::runListForUpdate, filter, cursor).one();
   }
 
   /**
@@ -342,7 +342,7 @@ public class ThemeVersionJdbcDao {
   public List<ThemeVersion> listForUpdate(ThemeVersionFilter filter) {
     ThemeVersionCursor cursor = ThemeVersionCursor.builder().build();
     return new ThemeVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor).all();
+        this::runListForUpdate, filter, cursor).all();
   }
 
   /**
@@ -440,7 +440,7 @@ public class ThemeVersionJdbcDao {
    */
   public Slider<ThemeVersion> slideForUpdate(ThemeVersionFilter filter, ThemeVersionCursor cursor) {
     return new ThemeVersionSlider(runListForUpdate(filter, cursor), cursor.getLimit().orElse(0),
-        this::runList, filter, cursor);
+        this::runListForUpdate, filter, cursor);
   }
 
   /**

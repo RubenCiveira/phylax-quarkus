@@ -62,9 +62,6 @@ public class ThemeAssetDeleteController {
       final String code, final String theme, final List<String> themes) {
     ThemeAssetDeleteFilter.ThemeAssetDeleteFilterBuilder filterBuilder =
         ThemeAssetDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);

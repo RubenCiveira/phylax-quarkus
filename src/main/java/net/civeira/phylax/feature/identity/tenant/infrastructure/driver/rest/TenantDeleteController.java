@@ -58,9 +58,6 @@ public class TenantDeleteController {
   public Response tenantApiBatchDelete(final List<String> uids, final String search,
       final String name) {
     TenantDeleteFilter.TenantDeleteFilterBuilder filterBuilder = TenantDeleteFilter.builder();
-    filterBuilder =
-        filterBuilder.uids(uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
-    filterBuilder = filterBuilder.search(search);
     filterBuilder = filterBuilder.uids(
         null == uids ? null : uids.stream().flatMap(part -> Stream.of(part.split(","))).toList());
     filterBuilder = filterBuilder.search(search);
