@@ -34,7 +34,7 @@ class ProfileWebAuthnAdapterUnitTest {
 
     Assertions.assertEquals(2, summaries.size());
     WebAuthnCredentialSummary first = summaries.get(0);
-    Assertions.assertEquals("k1", first.getId());
+    Assertions.assertEquals("cred-1", first.getId());
     Assertions.assertEquals("Laptop", first.getName().orElseThrow());
     Assertions.assertEquals("aaguid-1", first.getAaguid().orElseThrow());
     Assertions.assertEquals(created, first.getCreatedAt());
