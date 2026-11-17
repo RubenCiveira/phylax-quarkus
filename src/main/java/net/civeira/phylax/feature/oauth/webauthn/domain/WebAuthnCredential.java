@@ -17,6 +17,7 @@ public final class WebAuthnCredential {
   private final String userUid;
   private final String username;
   private final String credentialId;
+  private final String name;
   private final String publicKey;
   private final int signCount;
   private final String aaguid;
@@ -28,6 +29,10 @@ public final class WebAuthnCredential {
 
   public Optional<String> getAaguid() {
     return Optional.ofNullable(aaguid);
+  }
+
+  public Optional<String> getName() {
+    return Optional.ofNullable(name);
   }
 
   public Optional<String> getDeviceName() {
@@ -44,9 +49,9 @@ public final class WebAuthnCredential {
 
   public WebAuthnCredential withUpdatedSignCount(int newSignCount, OffsetDateTime newLastUsedAt) {
     return WebAuthnCredential.builder().uid(this.uid).tenantId(this.tenantId).userUid(this.userUid)
-        .username(this.username).credentialId(this.credentialId).publicKey(this.publicKey)
-        .signCount(newSignCount).aaguid(this.aaguid).deviceName(this.deviceName)
-        .transports(this.transports).createdAt(this.createdAt).lastUsedAt(newLastUsedAt)
-        .enabled(this.enabled).build();
+        .username(this.username).credentialId(this.credentialId).name(this.name)
+        .publicKey(this.publicKey).signCount(newSignCount).aaguid(this.aaguid)
+        .deviceName(this.deviceName).transports(this.transports).createdAt(this.createdAt)
+        .lastUsedAt(newLastUsedAt).enabled(this.enabled).build();
   }
 }

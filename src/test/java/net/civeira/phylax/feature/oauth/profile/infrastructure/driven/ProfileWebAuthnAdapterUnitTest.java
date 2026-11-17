@@ -44,6 +44,17 @@ class ProfileWebAuthnAdapterUnitTest {
   }
 
   @Test
+  @DisplayName("The name given by the user wins over the device name")
+  void name_wins_over_device_name() {
+    Mockito.when(credentials.findByUser("user-1", "acme")).thenReturn(List.of(WebAuthnCredential
+        .builder().uid("k1").credentialId("cred-1").name("Phone").deviceName("Laptop").build()));
+
+    List<WebAuthnCredentialSummary> summaries = adapter.listCredentials("user-1", "acme");
+
+    Assertions.assertEquals("Phone", summaries.get(0).getName().orElseThrow());
+  }
+
+  @Test
   @DisplayName("Rename and delete go to the credentials of the user")
   void rename_and_delete() {
     adapter.renameCredential("cred-1", "user-1", "acme", "Phone");

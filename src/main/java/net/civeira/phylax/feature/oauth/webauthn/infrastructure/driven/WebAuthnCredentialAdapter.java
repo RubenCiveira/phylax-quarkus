@@ -150,7 +150,7 @@ public class WebAuthnCredentialAdapter implements WebAuthnCredentialGateway {
     UserRef userRef = e.getUser();
     return WebAuthnCredential.builder().uid(e.getUid())
         .userUid(userRef != null ? userRef.getUid() : null).username(username)
-        .credentialId(e.getAuthenticator()).publicKey(e.getPublicKey())
+        .credentialId(e.getAuthenticator()).name(e.getName()).publicKey(e.getPublicKey())
         .signCount(Optional.ofNullable(e.getSignCount()).orElse(0))
         .aaguid(e.getAaguid().orElse(null)).deviceName(e.getDeviceName().orElse(null))
         .transports(e.getTransportsJson().map(this::fromJson).orElse(null))

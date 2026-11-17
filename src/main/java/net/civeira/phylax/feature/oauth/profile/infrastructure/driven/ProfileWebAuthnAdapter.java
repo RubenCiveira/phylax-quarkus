@@ -19,7 +19,7 @@ public class ProfileWebAuthnAdapter implements ProfileWebAuthnGateway {
   public List<WebAuthnCredentialSummary> listCredentials(String userUid, String tenantId) {
     return credentialGateway.findByUser(userUid, tenantId).stream()
         .map(c -> WebAuthnCredentialSummary.builder().id(c.getCredentialId())
-            .name(c.getDeviceName().orElse(null)).aaguid(c.getAaguid().orElse(null))
+            .name(c.getName().or(c::getDeviceName).orElse(null)).aaguid(c.getAaguid().orElse(null))
             .createdAt(c.getCreatedAt()).lastUsedAt(c.getLastUsedAt().orElse(null)).build())
         .toList();
   }
