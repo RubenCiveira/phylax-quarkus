@@ -17,11 +17,14 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import net.civeira.phylax.common.infrastructure.CurrentRequest;
 import net.civeira.phylax.feature.identity.tenanttermsofuse.domain.gateway.TenantTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.feature.identity.user.domain.gateway.UserQueryRepositoryGateway;
 import net.civeira.phylax.feature.identity.useracceptedtermsofuse.domain.gateway.UserAcceptedTermsOfUseQueryRepositoryGateway;
 import net.civeira.phylax.feature.oauth.authentication.application.SessionManager;
 import net.civeira.phylax.feature.oauth.authentication.domain.AuthenticationData;
+import net.civeira.phylax.feature.oauth.client.domain.ClientDetails;
+import net.civeira.phylax.feature.oauth.client.domain.gateway.ClientStoreGateway;
 import net.civeira.phylax.feature.oauth.consent.domain.gateway.ScopesConsentGateway;
 import net.civeira.phylax.feature.oauth.gdpr.application.GdprService;
 import net.civeira.phylax.feature.oauth.mfa.application.MfaRecoveryService;
@@ -38,6 +41,7 @@ import net.civeira.phylax.feature.oauth.profile.infrastructure.driver.html.panel
 import net.civeira.phylax.feature.oauth.profile.infrastructure.driver.html.panels.RecoveryCodesPanel;
 import net.civeira.phylax.feature.oauth.profile.infrastructure.driver.html.panels.SessionsPanel;
 import net.civeira.phylax.feature.oauth.session.domain.SessionInfo;
+import net.civeira.phylax.feature.oauth.session.domain.gateway.SessionStoreGateway;
 import net.civeira.phylax.feature.oauth.theme.domain.gateway.DecoratePageGateway;
 
 /** The profile pages act only on the account of the session open in the tenant. */
@@ -58,6 +62,15 @@ class ProfileHtmlControllerUnitTest {
     decorator = Mockito.mock(DecoratePageGateway.class);
     gdpr = Mockito.mock(GdprService.class);
     headers = Mockito.mock(HttpHeaders.class);
+    SessionStoreGateway store = Mockito.mock(SessionStoreGateway.class);
+    ClientStoreGateway clients = Mockito.mock(ClientStoreGateway.class);
+    CurrentRequest current = Mockito.mock(CurrentRequest.class);
+    Mockito.when(current.getPublicHost()).thenReturn("https://idp.example");
+    Mockito.when(store.participatingClients("cookie")).thenReturn(java.util.Set.of("spa"));
+    Mockito.when(clients.loadPreautorized("acme", "spa"))
+        .thenReturn(Optional.of(ClientDetails.builder().clientId("spa")
+            .allowedScopes(List.of("openid")).allowedGrants(List.of("authorization_code"))
+            .allowedRedirectUris(List.of("https://app.example/callback")).build()));
     controller = new ProfileHtmlController(sessions, profile, users, decorator,
         Mockito.mock(ProfileViewPanel.class), Mockito.mock(ProfileEditPanel.class),
         Mockito.mock(ChangePasswordPanel.class), Mockito.mock(MfaPanel.class),
@@ -67,7 +80,7 @@ class ProfileHtmlControllerUnitTest {
         Mockito.mock(UserAcceptedTermsOfUseQueryRepositoryGateway.class),
         Mockito.mock(TenantTermsOfUseQueryRepositoryGateway.class),
         Mockito.mock(PasskeysPanel.class), gdpr, Mockito.mock(DataExportPanel.class),
-        new AccountDeletionPanel());
+        new AccountDeletionPanel(), new ProfileBackLink(store, clients, current));
     AuthenticationData auth = new AuthenticationData();
     auth.setUsername("alice");
     auth.setTenant("acme-uid");
@@ -155,5 +168,24 @@ class ProfileHtmlControllerUnitTest {
     Assertions.assertEquals(400,
         controller.executeDeleteAccount("acme", form("uid", "alice-uid"), headers).getStatus());
     Mockito.verify(gdpr).confirmAccountDeletion("alice-uid", "the-code", "acme");
+  }
+
+  @Test
+  @DisplayName("The way back leads to an application of the session and carries the issuer")
+  void back_link_to_an_application_of_the_session() {
+    Assertions.assertEquals(200, controller
+        .me("acme", "cookie", headers, "https://app.example/orders?page=2", null).getStatus());
+
+    String html = renderedHtml();
+    Assertions.assertTrue(html.contains("href=\"https://app.example/orders?page=2&amp;iss="), html);
+    Assertions.assertTrue(html.contains("idp.example"), html);
+  }
+
+  @Test
+  @DisplayName("A return URL outside the applications of the session shows no way back")
+  void no_back_link_to_another_site() {
+    controller.me("acme", "cookie", headers, "https://evil.example/phish", null);
+
+    Assertions.assertFalse(renderedHtml().contains("profile-back-origin"));
   }
 }

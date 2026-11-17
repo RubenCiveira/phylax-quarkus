@@ -83,6 +83,7 @@ public class ProfileHtmlController {
   private final GdprService gdprService;
   private final DataExportPanel dataExportPanel;
   private final AccountDeletionPanel accountDeletionPanel;
+  private final ProfileBackLink backLink;
 
   @GET
   @Path("oauth/openid/{tenant}/profile")
@@ -102,12 +103,14 @@ public class ProfileHtmlController {
     Locale locale = resolveLocale(headers);
     YamlLocaleMessages t = messages(locale);
     String candidate = resolveBackCandidate(backParam, headers);
-    String effectiveBackUrl = candidate != null ? candidate : storedBackUrl;
-    NewCookie backCookie = candidate != null ? buildBackCookie(candidate, tenant) : null;
     return sessionManager.loadSession(cookie, tenant).map(session -> {
+      // Only a URL of an application of this session becomes the way back.
+      String accepted = backLink.accept(tenant, cookie, session, candidate).orElse(null);
+      String effectiveBackUrl = accepted != null ? accepted : storedBackUrl;
+      NewCookie backCookie = accepted != null ? buildBackCookie(accepted, tenant) : null;
       OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(effectiveBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(effectiveBackUrl, tenant, t) + "<div class=\"section-card\">"
           + viewPanel.render(profile, base + "/edit", base + "/password", base + "/mfa",
               base + "/sessions", base + "/recovery-codes", base + "/consents", base + "/passkeys",
               base + "/data-export", base + "/delete-account", t)
@@ -127,7 +130,7 @@ public class ProfileHtmlController {
     return sessionManager.loadSession(cookie, tenant).map(session -> {
       OidcProfile profile = profileService.getProfile(resolveUserUid(session)).orElse(null);
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + editPanel.render(profile, base + "/edit", base, null, t) + "</div>";
       return page(tenant, t.get("profile.edit.title"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -161,7 +164,7 @@ public class ProfileHtmlController {
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie, tenant).map(_ -> {
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + changePasswordPanel.render(base + "/password", base, null, false, t) + "</div>";
       return page(tenant, t.get("profile.password.title"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -180,7 +183,7 @@ public class ProfileHtmlController {
       String newPass = first(form, "newPassword");
       String confirmPass = first(form, "confirmPassword");
       if (!newPass.equals(confirmPass)) {
-        String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+        String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
             + changePasswordPanel.render(base + "/password", base,
                 t.get("profile.password.errorMismatch"), false, t)
             + "</div>";
@@ -190,7 +193,7 @@ public class ProfileHtmlController {
       }
       boolean ok = profileService.changePassword(resolveUserUid(session), tenant,
           first(form, "currentPassword"), newPass);
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + changePasswordPanel.render(base + "/password", base,
               ok ? null : t.get("profile.password.errorGeneric"), ok, t)
           + "</div>";
@@ -209,7 +212,7 @@ public class ProfileHtmlController {
     return sessionManager.loadSession(cookie, tenant).map(session -> {
       boolean enabled = profileService.isMfaEnabled(resolveUserUid(session), tenant);
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + mfaPanel.render(enabled, base + "/mfa", base,
               enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null,
               false, t)
@@ -236,7 +239,7 @@ public class ProfileHtmlController {
             first(form, "otp"));
       }
       boolean enabled = profileService.isMfaEnabled(resolveUserUid(session), tenant);
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + mfaPanel.render(enabled, base + "/mfa", base,
               enabled ? null : profileService.buildMfaSetup(resolveUserUid(session), tenant), null,
               true, t)
@@ -255,7 +258,7 @@ public class ProfileHtmlController {
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie, tenant).map(session -> {
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + sessionsPanel.render(
+      String html = backButton(storedBackUrl, tenant, t) + sessionsPanel.render(
           profileService.listSessions(resolveUserUid(session),
               session.getValidationData().getUsername()),
           base + "/sessions/revoke", base, cookie, t);
@@ -293,7 +296,7 @@ public class ProfileHtmlController {
       String base = "/oauth/openid/" + tenant + "/me";
       long unusedCount = mfaRecoveryService.countUnused(resolveUserUid(session));
       String html =
-          backButton(storedBackUrl, t) + "<div class=\"section-card\">" + recoveryCodesPanel
+          backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">" + recoveryCodesPanel
               .render(unusedCount, base + "/recovery-codes/regenerate", base, null, t) + "</div>";
       return page(tenant, t.get("profile.recovery-codes.title"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -313,7 +316,7 @@ public class ProfileHtmlController {
       List<String> codes = mfaRecoveryService.generateCodes(userUid, 8);
       long unusedCount = mfaRecoveryService.countUnused(userUid);
       String html =
-          backButton(storedBackUrl, t) + "<div class=\"section-card\">" + recoveryCodesPanel
+          backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">" + recoveryCodesPanel
               .render(unusedCount, base + "/recovery-codes/regenerate", base, codes, t) + "</div>";
       return page(tenant, t.get("profile.recovery-codes.title"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -333,9 +336,10 @@ public class ProfileHtmlController {
       String base = "/oauth/openid/" + tenant + "/me";
       List<ClientConsentSummary> granted = scopesConsentGateway.listGrantedByUser(tenant, username);
       List<AcceptedTermsSummary> acceptedTerms = loadAcceptedTerms(userUid);
-      String html =
-          backButton(storedBackUrl, t) + "<div class=\"section-card\">" + consentedScopesPanel
-              .render(acceptedTerms, granted, base + "/consents/revoke", base, null, t) + "</div>";
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
+          + consentedScopesPanel.render(acceptedTerms, granted, base + "/consents/revoke", base,
+              null, t)
+          + "</div>";
       return page(tenant, t.get("profile.consents.title"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
   }
@@ -375,9 +379,10 @@ public class ProfileHtmlController {
       String msg = t.get("profile.consents.revokedClient", clientName);
       List<ClientConsentSummary> granted = scopesConsentGateway.listGrantedByUser(tenant, username);
       List<AcceptedTermsSummary> acceptedTerms = loadAcceptedTerms(userUid);
-      String html =
-          backButton(storedBackUrl, t) + "<div class=\"section-card\">" + consentedScopesPanel
-              .render(acceptedTerms, granted, base + "/consents/revoke", base, msg, t) + "</div>";
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
+          + consentedScopesPanel.render(acceptedTerms, granted, base + "/consents/revoke", base,
+              msg, t)
+          + "</div>";
       return page(tenant, t.get("profile.consents.title"), html, locale, null);
     }).orElseGet(() -> Response.status(401).build());
   }
@@ -406,9 +411,10 @@ public class ProfileHtmlController {
       String msg = t.get("profile.consents.revokedScope", scope, clientName);
       List<ClientConsentSummary> granted = scopesConsentGateway.listGrantedByUser(tenant, username);
       List<AcceptedTermsSummary> acceptedTerms = loadAcceptedTerms(userUid);
-      String html =
-          backButton(storedBackUrl, t) + "<div class=\"section-card\">" + consentedScopesPanel
-              .render(acceptedTerms, granted, base + "/consents/revoke", base, msg, t) + "</div>";
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
+          + consentedScopesPanel.render(acceptedTerms, granted, base + "/consents/revoke", base,
+              msg, t)
+          + "</div>";
       return page(tenant, t.get("profile.consents.title"), html, locale, null);
     }).orElseGet(() -> Response.status(401).build());
   }
@@ -424,7 +430,7 @@ public class ProfileHtmlController {
     return sessionManager.loadSession(cookie, tenant).map(session -> {
       String userUid = resolveUserUid(session);
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + passkeysPanel.render(profileService.listPasskeys(userUid, tenant),
               "/oauth/openid/" + tenant + "/webauthn/register", base + "/passkeys",
               base + "/passkeys", base, null, t)
@@ -473,7 +479,7 @@ public class ProfileHtmlController {
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie, tenant).map(_ -> {
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + dataExportPanel.render(base + "/data-export", base, false, t) + "</div>";
       return page(tenant, t.get("profile.data-export.title"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -496,7 +502,7 @@ public class ProfileHtmlController {
         gdprService.requestDataExport(userUid, username, email, tenant);
       }
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + dataExportPanel.render(base + "/data-export", base, true, t) + "</div>";
       return page(tenant, t.get("profile.data-export.sentTitle"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -512,7 +518,7 @@ public class ProfileHtmlController {
     YamlLocaleMessages t = messages(locale);
     return sessionManager.loadSession(cookie, tenant).map(_ -> {
       String base = "/oauth/openid/" + tenant + "/me";
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + accountDeletionPanel.renderRequest(base + "/delete-account", base, null, t) + "</div>";
       return page(tenant, t.get("profile.delete-account.title"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -536,7 +542,7 @@ public class ProfileHtmlController {
         String confirmUrl = "/oauth/openid/" + tenant + "/me/delete-account/confirm";
         gdprService.requestAccountDeletion(userUid, username, email, tenant, confirmUrl);
       }
-      String html = backButton(storedBackUrl, t) + "<div class=\"section-card\">"
+      String html = backButton(storedBackUrl, tenant, t) + "<div class=\"section-card\">"
           + accountDeletionPanel.renderSent(base, t) + "</div>";
       return page(tenant, t.get("profile.delete-account.sentTitle"), html, locale, null);
     }).orElseGet(() -> unauthenticated(tenant, headers, locale, t));
@@ -642,12 +648,13 @@ public class ProfileHtmlController {
         .maxAge(3600).httpOnly(true).sameSite(SameSite.LAX).build();
   }
 
-  private String backButton(String backUrl, YamlLocaleMessages t) {
+  /** Link back to the application, with iss so that it resumes the session silently. */
+  private String backButton(String backUrl, String tenant, YamlLocaleMessages t) {
     if (backUrl == null || backUrl.isBlank())
       return "";
     return "<div class=\"profile-back-origin\"><a class=\"secondary-button\" href=\""
-        + StringEscapeUtils.escapeHtml4(backUrl) + "\">" + t.get("profile.backToOrigin")
-        + "</a></div>";
+        + StringEscapeUtils.escapeHtml4(backLink.withIssuer(tenant, backUrl)) + "\">"
+        + t.get("profile.backToOrigin") + "</a></div>";
   }
 
   private String resolveUserUid(SessionInfo session) {
